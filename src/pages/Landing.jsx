@@ -101,6 +101,18 @@ export default function Landing() {
         >
           Enter Oracle <ArrowRight className="w-4 h-4" />
         </button>
+
+        <div className="mt-8 flex justify-center">
+          <svg className="w-24 h-8" viewBox="0 0 100 20" preserveAspectRatio="none">
+            <line x1="0" y1="10" x2="100" y2="10" stroke="currentColor" strokeWidth="1.5" strokeDasharray="4,6" className="text-accent opacity-60" style={{animation: 'dashMove 20s linear infinite'}} />
+          </svg>
+          <style>{`
+            @keyframes dashMove {
+              0% { stroke-dashoffset: 0; }
+              100% { stroke-dashoffset: 10; }
+            }
+          `}</style>
+        </div>
       </motion.section>
 
       {/* How It Works */}
