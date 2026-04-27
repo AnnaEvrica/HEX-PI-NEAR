@@ -26,31 +26,7 @@ export default function SettingsModal({
 
         {/* Content */}
         <div className="px-6 py-4 space-y-6">
-          {/* Model Selection */}
-          <div className="space-y-3">
-            <label className="text-sm font-medium">AI Model</label>
-            <div className="space-y-2">
-              {[
-                { value: 'gpt-4o-mini', label: 'GPT-4o Mini (Fast, Cost-Effective)' },
-                { value: 'gpt-4', label: 'GPT-4 (Advanced Analysis)' },
-              ].map((option) => (
-                <label key={option.value} className="flex items-center gap-3 p-3 border border-border rounded-sm hover:bg-muted cursor-pointer transition-colors">
-                  <input
-                    type="radio"
-                    name="model"
-                    value={option.value}
-                    checked={modelChoice === option.value}
-                    onChange={(e) => onModelChange(e.target.value)}
-                    className="w-4 h-4"
-                  />
-                  <span className="text-sm">{option.label}</span>
-                </label>
-              ))}
-            </div>
-            <p className="text-xs text-secondary">
-              Choose between a faster, cost-effective model or a more advanced one for complex analysis.
-            </p>
-          </div>
+  
 
           {/* Trader Toggle */}
           <div className="space-y-3">

@@ -52,28 +52,22 @@ When discussing strategies:
       }))
       .slice(-8); // Last 8 messages for context
 
-    // Call LLM integration
+    // Determine model based on question complexity
+    const questionLength = message.length;
+    const hasComplexKeywords = /backtest|strategy|allocation|rebalance|analysis|optimize|correlation|sharpe|drawdown|risk|research/i.test(message);
+    const conversationDepth = conversationHistory?.length || 0;
+
+    // Use Gemini 3.1 Pro (most advanced) for complex questions, Flash for simple ones
+    const useAdvancedModel = hasComplexKeywords || conversationDepth > 4 || questionLength > 150;
+    const selectedModel = useAdvancedModel ? 'gemini_3_1_pro' : 'gemini_3_flash';
+
+    // Call LLM integration with system prompt and context
     const llmResponse = await base44.integrations.Core.InvokeLLM({
-      prompt: message,
-      model: 'gpt_5',
-      file_urls: [],
+     prompt: message,
+     model: selectedModel,
+     add_context_from_internet: hasComplexKeywords, // Research capability for complex questions
     });
 
-    // Construct a more sophisticated response
-    const systemPromptMessages = [
-      {
-        role: 'system',
-        content: systemPrompt,
-      },
-      ...(conversationContext || []),
-      {
-        role: 'user',
-        content: message,
-      },
-    ];
-
-    // For now, use the LLM response directly
-    // In production, you'd want to structure this more carefully
     const response = llmResponse || 'I need a moment to analyze that.';
 
     // Log this interaction for model improvement (if user consented)

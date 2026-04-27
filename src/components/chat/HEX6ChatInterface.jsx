@@ -23,7 +23,6 @@ export default function HEX6ChatInterface() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [legalOpen, setLegalOpen] = useState(false);
   const [listening, setListening] = useState(false);
-  const [modelChoice, setModelChoice] = useState('gpt-4o-mini');
   const [traderEnabled, setTraderEnabled] = useState(false);
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
@@ -88,7 +87,6 @@ export default function HEX6ChatInterface() {
       const response = await base44.functions.invoke('hex6Chat', {
         message: input,
         conversationHistory: messages,
-        model: modelChoice,
       });
 
       if (response.data?.error) throw new Error(response.data.error);
@@ -219,16 +217,11 @@ export default function HEX6ChatInterface() {
           <h2 className="text-center flex-1 font-medium text-sm text-secondary">
             HEX6 Oracle
           </h2>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-secondary px-2 py-1 rounded bg-muted">
-              {modelChoice === 'gpt-4o-mini' ? 'GPT-4o Mini' : 'Claude'}
+          {traderEnabled && (
+            <span className="text-xs text-accent px-2 py-1 rounded bg-accent/10">
+              Trader: Coming Soon
             </span>
-            {traderEnabled && (
-              <span className="text-xs text-accent px-2 py-1 rounded bg-accent/10">
-                Trader: Coming Soon
-              </span>
-            )}
-          </div>
+          )}
         </div>
 
         {/* Messages */}
@@ -321,8 +314,6 @@ export default function HEX6ChatInterface() {
       <SettingsModal
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
-        modelChoice={modelChoice}
-        onModelChange={setModelChoice}
         traderEnabled={traderEnabled}
         onTraderToggle={setTraderEnabled}
       />
