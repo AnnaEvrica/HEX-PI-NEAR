@@ -6,6 +6,8 @@ const NAV = [
   { path: '/', label: 'Dashboard', icon: BarChart3 },
   { path: '/portfolio', label: 'Portfolio', icon: Activity },
   { path: '/backtest', label: 'Backtest', icon: FlaskConical },
+  { path: '/thesis', label: 'Thesis', icon: BookOpen },
+  { path: '/trading', label: 'Trading', icon: Users },
   { path: '/managers', label: 'Managers', icon: Users },
   { path: '/governance', label: 'Governance', icon: Shield },
   { path: '/legal', label: 'Legal', icon: BookOpen },

@@ -13,6 +13,8 @@ import Governance from '@/pages/Governance';
 import Legal from '@/pages/Legal';
 import Backtest from '@/pages/Backtest';
 import Managers from '@/pages/Managers';
+import Thesis from '@/pages/Thesis';
+import Trading from '@/pages/Trading';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -44,6 +46,8 @@ const AuthenticatedApp = () => {
         <Route path="/legal" element={<Legal />} />
         <Route path="/backtest" element={<Backtest />} />
         <Route path="/managers" element={<Managers />} />
+        <Route path="/thesis" element={<Thesis />} />
+        <Route path="/trading" element={<Trading />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
