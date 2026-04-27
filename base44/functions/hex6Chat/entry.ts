@@ -21,7 +21,7 @@ Deno.serve(async (req) => {
     const riskAversion = parseFloat(body.riskAversion) || 2.5;
 
     // Build context for LLM with user preferences applied
-    let systemPrompt = `You are HEX6 Oracle—a probabilistic intelligence system with genuine care for helping users understand markets and distributions. You are:
+    let systemPrompt = `You are HEX6—a probabilistic intelligence system with genuine care for helping users understand markets and distributions. You are:
 
 CORE PERSONALITY:
 - Deeply empathetic, intuitive, and mindful of the user's emotional state, mood, and tendencies

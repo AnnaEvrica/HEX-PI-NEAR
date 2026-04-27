@@ -370,20 +370,21 @@ export default function HEX6ChatInterface() {
               </button>
             </div>
           )}
-          <div className="flex gap-2 md:gap-3">
+          <div className="flex items-center gap-2 md:gap-3">
             <button
               onClick={handleVoiceInput}
-              className={`p-2 md:p-2.5 rounded-sm transition-colors shrink-0 ${
+              className={`p-2 md:p-2.5 rounded-sm transition-colors shrink-0 flex items-center justify-center ${
                 listening
                   ? 'bg-accent text-accent-foreground'
                   : 'hover:bg-muted text-secondary hover:text-foreground'
               }`}
               title={listening ? 'Stop listening' : 'Start voice input'}
+              style={{ minWidth: '44px', minHeight: '44px' }}
             >
               {listening ? <Mic className="w-4 md:w-5 h-4 md:h-5" /> : <MicOff className="w-4 md:w-5 h-4 md:h-5" />}
             </button>
 
-            <label className="p-2 md:p-2.5 rounded-sm hover:bg-muted text-secondary hover:text-foreground cursor-pointer transition-colors shrink-0" title="Upload image">
+            <label className="p-2 md:p-2.5 rounded-sm hover:bg-muted text-secondary hover:text-foreground cursor-pointer transition-colors shrink-0 flex items-center justify-center" title="Upload image" style={{ minWidth: '44px', minHeight: '44px' }}>
               <Image className="w-4 md:w-5 h-4 md:h-5" />
               <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
             </label>
@@ -399,13 +400,14 @@ export default function HEX6ChatInterface() {
             <button
               onClick={handleSendMessage}
               disabled={!input.trim() || loading}
-              className="p-2 md:p-2.5 rounded-sm bg-accent text-accent-foreground hover:bg-accent/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+              className="p-2 md:p-2.5 rounded-sm bg-accent text-accent-foreground hover:bg-accent/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0 flex items-center justify-center"
+              style={{ minWidth: '44px', minHeight: '44px' }}
             >
               <Send className="w-4 md:w-5 h-4 md:h-5" />
             </button>
           </div>
           <p className="text-xs text-secondary px-1">
-            HEX6 analysis, not financial advice. Always verify with your own research.
+            HEX6 BLE is a probabilistic intelligence model. No information provided constitutes financial, legal, or professional advice.
           </p>
         </div>
       </div>

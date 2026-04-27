@@ -54,34 +54,7 @@ export default function MobileLayout({ children, showHeader = true, showNav = tr
         {children}
       </motion.main>
 
-      {/* Bottom Navigation with safe-area padding */}
-      {showNav && (
-        <nav 
-          className="grid grid-cols-5 gap-1 border-t border-border bg-card shrink-0"
-          style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
-        >
-          {NAV_ITEMS.map((item) => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.path;
-            return (
-              <button
-                key={item.path}
-                onClick={() => navigate(item.path)}
-                className={`flex flex-col items-center justify-center py-2 transition-colors select-none active:bg-muted rounded-sm ${
-                  isActive
-                    ? 'text-accent'
-                    : 'text-secondary hover:text-foreground'
-                }`}
-                style={{ minHeight: '44px' }}
-                title={item.label}
-              >
-                <Icon className="w-5 h-5" />
-                <span className="text-xs mt-0.5">{item.label}</span>
-              </button>
-            );
-          })}
-        </nav>
-      )}
+
     </div>
   );
 }

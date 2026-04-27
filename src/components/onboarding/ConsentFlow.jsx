@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { ChevronRight } from 'lucide-react';
-import PricingModal from '@/components/PricingModal';
 
 const STEPS = [
   {
@@ -305,7 +304,7 @@ export default function ConsentFlow({ onComplete }) {
     if (currentStep === STEPS.length - 1) {
       // Store consent timestamp when user completes onboarding
       localStorage.setItem('hex6_consent_timestamp', new Date().toISOString());
-      setShowPricing(true);
+      onComplete();
     } else {
       setCurrentStep((prev) => prev + 1);
     }
@@ -350,14 +349,7 @@ export default function ConsentFlow({ onComplete }) {
         </div>
       </div>
 
-      {/* Pricing Modal */}
-      <PricingModal
-        open={showPricing}
-        onClose={() => {
-          setShowPricing(false);
-          onComplete();
-        }}
-      />
+
     </div>
   );
 }
