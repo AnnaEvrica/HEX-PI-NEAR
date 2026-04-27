@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { ArrowLeft, Activity, TrendingUp, AlertTriangle, Zap } from 'lucide-react';
-import EGTSBadge from '@/components/egts/EGTSBadge';
+import { ArrowLeft, TrendingUp, AlertTriangle, Zap, Sparkles } from 'lucide-react';
 import EGTSAuditTrail from '@/components/egts/EGTSAuditTrail';
 import EGTSLegalPanel from '@/components/egts/EGTSLegalPanel';
+import AssetAI from '@/components/asset/AssetAI';
 import { onRebalance, onSilenceMode } from '@/services/hex6Engine';
 import { cn } from '@/lib/utils';
 
 const TABS = [
   { id: 'overview', label: 'Overview' },
+  { id: 'ai', label: 'AI Assistant' },
   { id: 'contracts', label: 'Contracts' },
   { id: 'legal', label: 'Legal' },
 ];
@@ -154,6 +155,15 @@ export default function AssetDetail() {
               </div>
             )}
           </div>
+        )}
+
+        {activeTab === 'ai' && (
+          <AssetAI
+            asset={asset}
+            triggering={triggering}
+            onRebalance={triggerRebalance}
+            onSilence={triggerSilence}
+          />
         )}
 
         {activeTab === 'contracts' && (
