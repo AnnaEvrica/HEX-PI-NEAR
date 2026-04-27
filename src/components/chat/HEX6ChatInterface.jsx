@@ -29,15 +29,31 @@ export default function HEX6ChatInterface() {
   const recognitionRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // Load conversations on mount
+  // Load conversations on mount or initialize default
   useEffect(() => {
     const saved = localStorage.getItem('hex6_conversations');
     if (saved) {
       try {
-        setConversations(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        setConversations(parsed);
+        if (parsed.length > 0) {
+          setCurrentConversationId(parsed[0].id);
+        }
       } catch (err) {
         console.log('Could not load saved conversations');
       }
+    } else {
+      // Create default conversation if none exist
+      const defaultConv = {
+        id: Date.now().toString(),
+        title: 'Chat',
+        messages: [welcomeMessage],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      setConversations([defaultConv]);
+      setCurrentConversationId(defaultConv.id);
+      setMessages([welcomeMessage]);
     }
   }, []);
 
@@ -163,28 +179,14 @@ export default function HEX6ChatInterface() {
       setMessages(updatedMessages);
       setUploadedImage(null);
 
-      // Auto-save to conversation
-      if (currentConversationId) {
+      // Update current conversation
       setConversations((prev) =>
-      prev.map((c) =>
-      c.id === currentConversationId
-      ? { ...c, messages: updatedMessages, updated_at: new Date().toISOString() }
-      : c
-      )
+        prev.map((c) =>
+          c.id === currentConversationId
+            ? { ...c, messages: updatedMessages, updated_at: new Date().toISOString() }
+            : c
+        )
       );
-      } else {
-      // Create new conversation if none selected
-      const title = input.substring(0, 30) + (input.length > 30 ? '...' : '');
-      const newConv = {
-      id: Date.now().toString(),
-      title,
-      messages: updatedMessages,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      };
-      setConversations((prev) => [newConv, ...prev]);
-      setCurrentConversationId(newConv.id);
-      }
       } catch (err) {
       console.error(err);
       const errorMsg = {
