@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
-import AuthButtons from '@/components/auth/AuthButtons';
+import AuthModal from '@/components/auth/AuthModal';
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -13,6 +13,7 @@ export default function Landing() {
   const [openPolicy, setOpenPolicy] = useState(null);
   const [isAuth, setIsAuth] = useState(false);
   const [visibleSections, setVisibleSections] = useState({});
+  const [authModal, setAuthModal] = useState(null);
   const sectionRefs = useRef({});
 
   useEffect(() => {
@@ -68,18 +69,18 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="text-xl font-bold tracking-tight">HEX6 BLE</div>
           <div className="flex gap-3">
-            <button
-              onClick={() => base44.auth.redirectToLogin()}
-              className="px-5 py-2 rounded-sm border border-border text-sm font-medium hover:border-foreground transition-colors"
-            >
-              Login
-            </button>
-            <button
-              onClick={() => base44.auth.redirectToLogin()}
-              className="px-5 py-2 rounded-sm bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
-            >
-              Sign Up
-            </button>
+           <button
+             onClick={() => setAuthModal('login')}
+             className="px-5 py-2 rounded-sm border border-border text-sm font-medium hover:border-foreground transition-colors"
+           >
+             Login
+           </button>
+           <button
+             onClick={() => setAuthModal('register')}
+             className="px-5 py-2 rounded-sm bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+           >
+             Sign Up
+           </button>
           </div>
         </div>
       </nav>
@@ -104,15 +105,11 @@ export default function Landing() {
 
         <div className="flex flex-col gap-4 pt-4">
           <button
-            onClick={() => base44.auth.redirectToLogin()}
+            onClick={() => setAuthModal('login')}
             className="inline-flex items-center gap-2 px-6 py-3 rounded-sm bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
           >
             Enter Oracle <ArrowRight className="w-4 h-4" />
           </button>
-          <div className="space-y-2">
-            <p className="text-xs text-secondary text-center">Or sign in with:</p>
-            <AuthButtons />
-          </div>
         </div>
       </section>
 
@@ -521,7 +518,7 @@ export default function Landing() {
         </div>
         <div className="pt-4">
           <button
-            onClick={() => base44.auth.redirectToLogin()}
+            onClick={() => setAuthModal('login')}
             className="inline-flex items-center gap-2 px-8 py-4 rounded-sm bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors text-lg"
           >
             Enter Oracle <ArrowRight className="w-4 h-4" />
@@ -704,6 +701,15 @@ export default function Landing() {
             <p className="text-xs text-secondary/60 pt-4 border-t border-border">Last updated: April 2026. Privacy policy changes will be announced with notice.</p>
           </div>
         </PolicyModal>
+      )}
+
+      {/* Auth Modal */}
+      {authModal && (
+        <AuthModal 
+          mode={authModal}
+          onClose={() => setAuthModal(null)}
+          onSwitchMode={(mode) => setAuthModal(mode)}
+        />
       )}
 
       {openPolicy === 'disclosure' && (
