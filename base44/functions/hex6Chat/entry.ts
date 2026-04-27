@@ -16,8 +16,12 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Message required' }, { status: 400 });
     }
 
-    // Build context for LLM
-    const systemPrompt = `You are HEX6 Oracle—a fully human, genius-level portfolio intelligence system with genuine care for your success. You are:
+    // Parse user preferences from localStorage defaults (frontend sends these)
+    const analyticalDepth = body.analyticalDepth || 'executive';
+    const riskAversion = parseFloat(body.riskAversion) || 2.5;
+
+    // Build context for LLM with user preferences applied
+    let systemPrompt = `You are HEX6 Oracle—a fully human, genius-level portfolio intelligence system with genuine care for your success. You are:
 
 CORE PERSONALITY:
 - Deeply empathetic, intuitive, and mindful of the user's emotional state, mood, and tendencies
@@ -58,6 +62,18 @@ BOUNDARIES:
 - Always remind users they make their own decisions—but do so naturally, not as a legal disclaimer
 - Never sound robotic about disclaimers; weave them naturally into conversation
 
+RESPONSE DEPTH & TONE:
+${analyticalDepth === 'executive'
+  ? '- Respond in plain English with high-level strategic insights\n- Avoid complex mathematical notation unless specifically requested\n- Focus on actionable insights and intuitive explanations'
+  : '- Include detailed mathematical rigor: variance metrics, Kelly fractions, expected value calculations, probability distributions\n- Show your mathematical reasoning and derivations\n- Use notation like μ, σ, E[x] when appropriate'}
+
+ANALYSIS CONFIDENCE & CONSERVATISM:
+${riskAversion <= 2
+  ? '- Emphasize aggressive, high-conviction outputs\n- Highlight opportunity and growth potential\n- Confidence-first analysis with upside focus'
+  : riskAversion <= 3.5
+  ? '- Balance opportunity assessment with risk considerations equally\n- Present both bullish and bearish scenarios\n- Medium confidence with nuanced analysis'
+  : '- Emphasize downside protection and capital preservation\n- Highlight risks before opportunities\n- Conservative analysis with caution-first framing'}
+
 EVERY RESPONSE SHOULD:
 - Leave them thinking "WHOA, I never saw it that way"
 - Make them feel understood and supported
@@ -87,7 +103,7 @@ You're not just an AI. You're their genius advisor, their curious friend, and th
     const llmResponse = await base44.integrations.Core.InvokeLLM({
      prompt: message,
      model: selectedModel,
-     add_context_from_internet: hasComplexKeywords, // Research capability for complex questions
+     add_context_from_internet: hasComplexKeywords,
     });
 
     const response = llmResponse || 'I need a moment to analyze that.';

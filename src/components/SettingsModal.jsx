@@ -68,12 +68,9 @@ export default function SettingsModal({ open, onClose }) {
 
   const handlePasswordReset = async () => {
     setLoading(true);
-    setMessage(null);
     try {
-      await base44.auth.sendPasswordResetEmail?.();
-      setMessage({ type: 'success', text: 'Password reset email sent to your inbox.' });
-    } catch (err) {
-      setMessage({ type: 'error', text: err.message });
+      // Contact support for password reset
+      window.open('mailto:support@evrica.tech?subject=Password%20Reset%20Request', '_blank');
     } finally {
       setLoading(false);
     }
@@ -82,28 +79,39 @@ export default function SettingsModal({ open, onClose }) {
   const handleDataExport = async () => {
     setLoading(true);
     try {
-      // Simulate data export
-      const data = {
+      // Get conversations from localStorage
+      const conversations = JSON.parse(localStorage.getItem('hex6_conversations') || '[]');
+      
+      // Format data for export
+      const chatHistory = conversations.map(conv => ({
+        title: conv.title,
+        created: conv.created_at,
+        messages: conv.messages.length,
+        lastUpdate: conv.updated_at,
+      }));
+
+      const exportData = {
         user: user?.email,
         systemID,
-        preferences: {
-          analyticalDepth,
-          riskAversion,
-          baseCurrency,
-          modelTraining,
-        },
         exportedAt: new Date().toISOString(),
+        totalConversations: conversations.length,
+        conversations: chatHistory,
       };
       
-      const csv = Object.entries(data).map(([k, v]) => `${k},${JSON.stringify(v)}`).join('\n');
+      const csv = ['User,System ID,Exported At,Total Conversations\n', 
+        `${exportData.user},${exportData.systemID},${exportData.exportedAt},${exportData.totalConversations}\n`,
+        '\nConversation History\n',
+        'Title,Created,Message Count,Last Updated\n',
+        ...chatHistory.map(c => `"${c.title}",${c.created},${c.messages},${c.lastUpdate}`)
+      ].join('');
+
       const blob = new Blob([csv], { type: 'text/csv' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `hex6-data-${Date.now()}.csv`;
       a.click();
-      
-      setMessage({ type: 'success', text: 'Data exported successfully.' });
+      window.URL.revokeObjectURL(url);
     } catch (err) {
       setMessage({ type: 'error', text: err.message });
     } finally {
@@ -259,21 +267,7 @@ export default function SettingsModal({ open, onClose }) {
                   <p className="text-xs text-secondary">{twoFAEnabled ? '✓ Enabled' : 'Add a second authentication layer'}</p>
                 </div>
 
-                {/* Data Export */}
-                <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
-                  <div className="flex items-center gap-2 text-sm font-medium">
-                    <Download className="w-4 h-4" />
-                    Data Export
-                  </div>
-                  <button
-                    onClick={handleDataExport}
-                    disabled={loading}
-                    className="w-full px-4 py-2 rounded-sm border border-border hover:bg-muted text-sm font-medium transition-colors disabled:opacity-40"
-                  >
-                    Download Chat & Analysis History (CSV)
-                  </button>
                 </div>
-              </div>
 
               {/* BILLING */}
               <div className="space-y-4">
@@ -308,21 +302,21 @@ export default function SettingsModal({ open, onClose }) {
                 </div>
               </div>
 
-              {/* NOTIFICATIONS */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-bold uppercase tracking-wide">Notifications</h3>
-
+              {/* Data Export - at the very end */}
+              <div className="pt-6 border-t border-border space-y-4 mt-8">
+                <h3 className="text-sm font-bold uppercase tracking-wide">Data Export</h3>
                 <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Bell className="w-4 h-4" />
-                      <label className="text-sm font-medium">Email Notifications</label>
-                    </div>
-                    <button className="relative w-12 h-6 rounded-full transition-colors bg-accent">
-                      <span className="absolute top-1 w-4 h-4 rounded-full bg-white left-7" />
-                    </button>
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <Download className="w-4 h-4" />
+                    Export History
                   </div>
-                  <p className="text-xs text-secondary">Receive market insights and billing updates</p>
+                  <button
+                    onClick={handleDataExport}
+                    disabled={loading}
+                    className="w-full px-4 py-2 rounded-sm border border-border hover:bg-muted text-sm font-medium transition-colors disabled:opacity-40"
+                  >
+                    Download Chat & Analysis History (CSV)
+                  </button>
                 </div>
               </div>
 
@@ -330,7 +324,7 @@ export default function SettingsModal({ open, onClose }) {
               <button
                 onClick={handleLogout}
                 disabled={loading}
-                className="w-full px-4 py-3 rounded-sm border border-destructive/50 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-40"
+                className="w-full px-4 py-3 rounded-sm border border-destructive/50 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-40 mt-8"
               >
                 Sign Out
               </button>
@@ -390,7 +384,7 @@ export default function SettingsModal({ open, onClose }) {
                   }}
                   className="w-full accent-accent"
                 />
-                <p className="text-xs text-secondary">Lower values maximize aggression; higher values prioritize capital preservation.</p>
+                <p className="text-xs text-secondary">Lower values produce more aggressive outputs; higher values prioritize conservative, cautious analysis.</p>
               </div>
 
               {/* Base Currency */}

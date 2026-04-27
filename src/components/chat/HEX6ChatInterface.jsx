@@ -126,9 +126,14 @@ export default function HEX6ChatInterface() {
     setLoading(true);
 
     try {
+      // Get user preferences from localStorage
+      const prefs = JSON.parse(localStorage.getItem('hex6_user_prefs') || '{}');
+      
       const response = await base44.functions.invoke('hex6Chat', {
         message: input,
         conversationHistory: newMessages,
+        analyticalDepth: prefs.analyticalDepth || 'executive',
+        riskAversion: prefs.riskAversion || 2.5,
       });
 
       if (response.data?.error) throw new Error(response.data.error);
