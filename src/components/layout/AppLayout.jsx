@@ -1,5 +1,5 @@
 import { Link, useLocation, Outlet } from 'react-router-dom';
-import { BarChart3, Shield, BookOpen, Settings, Activity } from 'lucide-react';
+import { BarChart3, Shield, BookOpen, Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const NAV = [
