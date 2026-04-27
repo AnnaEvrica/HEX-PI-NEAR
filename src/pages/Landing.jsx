@@ -15,18 +15,7 @@ export default function Landing() {
   const sectionRefs = useRef({});
 
   useEffect(() => {
-    const checkAuthAndLoadMetrics = async () => {
-      try {
-        const authed = await base44.auth.isAuthenticated();
-        if (authed) {
-          setIsAuth(true);
-          navigate('/app');
-          return;
-        }
-      } catch (err) {
-        console.log('Auth check failed');
-      }
-
+    const loadMetrics = async () => {
       try {
         const res = await base44.functions.invoke('generateLandingMetrics', {});
         setMetrics(res.data);
@@ -36,8 +25,8 @@ export default function Landing() {
         setLoading(false);
       }
     };
-    checkAuthAndLoadMetrics();
-  }, [navigate]);
+    loadMetrics();
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -64,15 +53,23 @@ export default function Landing() {
     <div className="min-h-screen bg-background text-foreground">
       {/* Nav */}
       <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="text-xl font-bold tracking-tight">HEX6 BLE</div>
-          <button
-            onClick={() => base44.auth.redirectToLogin()}
-            className="px-5 py-2 rounded-sm bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+         <div className="text-xl font-bold tracking-tight">HEX6 BLE</div>
+         <div className="flex items-center gap-3">
+           <button
+             onClick={() => base44.auth.redirectToLogin()}
+             className="px-5 py-2 rounded-sm border border-border text-sm font-medium hover:bg-muted transition-colors"
+           >
+             Log In
+           </button>
+           <button
+             onClick={() => base44.auth.redirectToLogin()}
+             className="px-5 py-2 rounded-sm bg-accent text-accent-foreground text-sm font-medium hover:bg-accent/90 transition-colors"
            >
              Get Started
            </button>
-        </div>
+         </div>
+       </div>
       </nav>
 
       {/* Hero */}
@@ -100,7 +97,7 @@ export default function Landing() {
 
         <button
           onClick={() => base44.auth.redirectToLogin()}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-sm bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-sm bg-accent text-accent-foreground font-medium hover:bg-accent/90 transition-colors"
         >
           Enter Oracle <ArrowRight className="w-4 h-4" />
         </button>
@@ -513,7 +510,7 @@ export default function Landing() {
         </div>
         <button
           onClick={() => base44.auth.redirectToLogin()}
-          className="inline-flex items-center gap-2 px-8 py-4 rounded-sm bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors text-lg"
+          className="inline-flex items-center gap-2 px-8 py-4 rounded-sm bg-accent text-accent-foreground font-medium hover:bg-accent/90 transition-colors text-lg"
         >
           Enter Oracle <ArrowRight className="w-4 h-4" />
         </button>

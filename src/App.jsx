@@ -32,24 +32,7 @@ const AuthenticatedApp = () => {
 
   return (
     <Routes>
-      <Route path="/" element={<Landing />} />
-      <Route 
-        path="/app" 
-        element={
-          !user ? (
-            <UserNotRegisteredError />
-          ) : !consentCompleted ? (
-            <ConsentFlow
-              onComplete={() => {
-                base44.auth.updateMe({ hex6_consent_completed: true });
-                setConsentCompleted(true);
-              }}
-            />
-          ) : (
-            <HEX6ChatInterface />
-          )
-        } 
-      />
+      <Route path="/" element={user ? (consentCompleted ? <HEX6ChatInterface /> : <ConsentFlow onComplete={() => { base44.auth.updateMe({ hex6_consent_completed: true }); setConsentCompleted(true); }} />) : <Landing />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

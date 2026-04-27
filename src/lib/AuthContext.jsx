@@ -13,22 +13,33 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const currentUser = await base44.auth.me();
-      setUser(currentUser);
+      const isAuth = await base44.auth.isAuthenticated();
+      if (isAuth) {
+        const currentUser = await base44.auth.me();
+        setUser(currentUser);
+      } else {
+        setUser(null);
+      }
     } catch (err) {
+      console.error('Auth check error:', err);
       setUser(null);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    base44.auth.logout('/');
+  const logout = async () => {
+    try {
+      await base44.auth.logout('/');
+    } catch (err) {
+      console.error('Logout error:', err);
+      setUser(null);
+      window.location.href = '/';
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, logout, checkAuth }}>
       {children}
     </AuthContext.Provider>
   );
