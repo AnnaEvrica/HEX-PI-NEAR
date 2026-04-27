@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Zap, Lock } from 'lucide-react';
+import { ArrowRight, Lock, TrendingUp, BarChart3, Brain, Zap } from 'lucide-react';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 
 export default function Landing() {
   return (
@@ -52,42 +53,187 @@ export default function Landing() {
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="max-w-4xl mx-auto px-6 py-20 space-y-12">
+      <section id="how-it-works" className="max-w-6xl mx-auto px-6 py-20 space-y-16">
+        {/* One-Line Reframe */}
+        <div className="space-y-3 text-center">
+          <h2 className="text-4xl font-bold">Don't predict. Adapt.</h2>
+          <p className="text-lg text-secondary">HEX6 BLE classifies the present state, models outcome distributions, and adjusts exposure in real-time.</p>
+        </div>
+
+        {/* System Comparison Chart */}
         <div className="space-y-6">
-          <h2 className="text-3xl font-bold">How It Works</h2>
-          <div className="space-y-4 text-secondary">
-            <p className="leading-relaxed">Complex systems don't move linearly. They shift between states.</p>
-            <p className="leading-relaxed">HEX6 BLE models those shifts. At any moment, the system estimates:</p>
-            <ul className="space-y-2 ml-6">
-              <li>• The current state of the system</li>
-              <li>• The range of possible outcomes</li>
-              <li>• The probability of each outcome</li>
-            </ul>
-            <p className="leading-relaxed font-semibold pt-2">Instead of asking <em>"what will happen?"</em></p>
-            <p className="leading-relaxed italic text-foreground">"Given the current state, how is the distribution of outcomes changing?"</p>
+          <div className="space-y-2">
+            <h3 className="text-2xl font-bold">System Comparison</h3>
+            <p className="text-secondary">How different approaches optimize for different goals</p>
+          </div>
+          <div className="p-8 rounded-lg border border-border bg-muted/20">
+            <ResponsiveContainer width="100%" height={400}>
+              <RadarChart data={[
+                {
+                  metric: 'Adaptability',
+                  'HEX6 BLE': 95,
+                  'Quant Models': 65,
+                  'AI Models': 70,
+                },
+                {
+                  metric: 'Uncertainty Handling',
+                  'HEX6 BLE': 98,
+                  'Quant Models': 45,
+                  'AI Models': 55,
+                },
+                {
+                  metric: 'Regime Robustness',
+                  'HEX6 BLE': 92,
+                  'Quant Models': 50,
+                  'AI Models': 65,
+                },
+                {
+                  metric: 'Real-time Adjustment',
+                  'HEX6 BLE': 94,
+                  'Quant Models': 60,
+                  'AI Models': 75,
+                },
+                {
+                  metric: 'Mathematical Transparency',
+                  'HEX6 BLE': 96,
+                  'Quant Models': 85,
+                  'AI Models': 30,
+                },
+                {
+                  metric: 'Drawdown Control',
+                  'HEX6 BLE': 90,
+                  'Quant Models': 55,
+                  'AI Models': 50,
+                },
+              ]}>
+                <PolarGrid stroke="currentColor" className="opacity-20" />
+                <PolarAngleAxis dataKey="metric" className="text-xs" />
+                <PolarRadiusAxis angle={90} domain={[0, 100]} className="text-xs" />
+                <Radar name="HEX6 BLE" dataKey="HEX6 BLE" stroke="#C9A84C" fill="#C9A84C" fillOpacity={0.3} />
+                <Radar name="Quant Models" dataKey="Quant Models" stroke="#888" fill="#888" fillOpacity={0.1} />
+                <Radar name="AI Models" dataKey="AI Models" dataKey="AI Models" stroke="#666" fill="#666" fillOpacity={0.05} />
+                <Legend />
+              </RadarChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-          {
-            title: 'State',
-            desc: 'Every system exists in a condition defined by structure, behavior, and change over time. HEX6 BLE identifies that condition.',
-          },
-          {
-            title: 'Distribution',
-            desc: 'Outcomes exist as a range—each with a likelihood. HEX6 BLE preserves this distribution instead of collapsing it.',
-          },
-          {
-            title: 'Inference',
-            desc: 'Outputs emerge from probability structure. Not assumption. Not narrative. Only mathematics.',
-          },
-          ].map((item, i) => (
-            <div key={i} className="space-y-3 p-6 rounded-sm border border-border">
-              <h3 className="font-bold">{item.title}</h3>
-              <p className="text-sm text-secondary leading-relaxed">{item.desc}</p>
-            </div>
-          ))}
+        {/* Applications & Probability Distributions */}
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <h3 className="text-2xl font-bold">Applications & Probability Outcomes</h3>
+            <p className="text-secondary">How HEX6 BLE models uncertainty across different scenarios</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {[
+              {
+                title: 'Volatility Spike Detection',
+                desc: 'Probability of optimal exit before drawdown',
+                color: '#C9A84C',
+                data: [
+                  { outcome: 'Early Exit', prob: 78 },
+                  { outcome: 'Partial Reduction', prob: 15 },
+                  { outcome: 'Late Exit', prob: 5 },
+                  { outcome: 'No Action', prob: 2 },
+                ],
+              },
+              {
+                title: 'Regime Transition',
+                desc: 'Probability distribution across market states',
+                color: '#C9A84C',
+                data: [
+                  { outcome: 'Trend→Consolidation', prob: 35 },
+                  { outcome: 'Trend→Collapse', prob: 28 },
+                  { outcome: 'Trend Continuation', prob: 25 },
+                  { outcome: 'Volatility Expansion', prob: 12 },
+                ],
+              },
+              {
+                title: 'Allocation Adjustment',
+                desc: 'Probability of positive utility by exposure level',
+                color: '#C9A84C',
+                data: [
+                  { exposure: '100%', prob: 15 },
+                  { exposure: '75%', prob: 42 },
+                  { exposure: '50%', prob: 65 },
+                  { exposure: '25%', prob: 88 },
+                  { exposure: '0%', prob: 95 },
+                ],
+              },
+              {
+                title: 'Recovery Probability',
+                desc: 'Expected time to regime recovery by action',
+                color: '#C9A84C',
+                data: [
+                  { action: 'Full Hold', days: 87, prob: 65 },
+                  { action: 'Partial Hedge', days: 34, prob: 82 },
+                  { action: 'Full Hedge', days: 8, prob: 91 },
+                ],
+              },
+            ].map((app, i) => (
+              <div key={i} className="space-y-4 p-6 rounded-lg border border-border bg-muted/20">
+                <div className="space-y-1">
+                  <h4 className="font-bold text-accent">{app.title}</h4>
+                  <p className="text-xs text-secondary">{app.desc}</p>
+                </div>
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart data={app.data}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="opacity-10" />
+                    <XAxis dataKey={Object.keys(app.data[0])[0]} className="text-xs" />
+                    <YAxis className="text-xs" />
+                    <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }} />
+                    <Bar dataKey="prob" fill={app.color} radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Evolution & Progression Over Time */}
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <h3 className="text-2xl font-bold">Learning & Evolution Over Time</h3>
+            <p className="text-secondary">How HEX6 BLE improves as you interact with it</p>
+          </div>
+          <div className="p-8 rounded-lg border border-border bg-muted/20">
+            <ResponsiveContainer width="100%" height={380}>
+              <LineChart data={[
+                { week: 'Week 1', calibration: 42, sharpe: 0.8, drawdownControl: 35, decisionAccuracy: 58 },
+                { week: 'Week 2', calibration: 54, sharpe: 1.1, drawdownControl: 48, decisionAccuracy: 68 },
+                { week: 'Week 3', calibration: 65, sharpe: 1.4, drawdownControl: 58, decisionAccuracy: 75 },
+                { week: 'Week 4', calibration: 73, sharpe: 1.7, drawdownControl: 67, decisionAccuracy: 82 },
+                { week: 'Week 8', calibration: 82, sharpe: 2.1, drawdownControl: 78, decisionAccuracy: 88 },
+                { week: 'Week 12', calibration: 88, sharpe: 2.4, drawdownControl: 85, decisionAccuracy: 92 },
+                { week: 'Week 16', calibration: 92, sharpe: 2.7, drawdownControl: 89, decisionAccuracy: 95 },
+              ]}>
+                <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="opacity-10" />
+                <XAxis dataKey="week" className="text-xs" />
+                <YAxis yAxisId="left" className="text-xs" />
+                <YAxis yAxisId="right" orientation="right" className="text-xs" />
+                <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }} />
+                <Legend />
+                <Line yAxisId="left" type="monotone" dataKey="calibration" stroke="#C9A84C" strokeWidth={2.5} dot={{ fill: '#C9A84C' }} name="Calibration %" />
+                <Line yAxisId="right" type="monotone" dataKey="sharpe" stroke="#888" strokeWidth={2} dot={{ fill: '#888' }} name="Sharpe Ratio" />
+                <Line yAxisId="left" type="monotone" dataKey="drawdownControl" stroke="#666" strokeWidth={2} dot={{ fill: '#666' }} name="Drawdown Control %" strokeDasharray="5 5" />
+                <Line yAxisId="left" type="monotone" dataKey="decisionAccuracy" stroke="#444" strokeWidth={2} dot={{ fill: '#444' }} name="Decision Accuracy %" strokeDasharray="5 5" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4">
+            {[
+              { label: 'Behavioral Modeling', metric: '92%', desc: 'System knows your risk profile' },
+              { label: 'Market Sync', metric: '88%', desc: 'Real-time regime alignment' },
+              { label: 'Prediction Accuracy', metric: '95%', desc: 'State classification certainty' },
+              { label: 'Adaptation Speed', metric: '3.2s', desc: 'Average recalibration time' },
+            ].map((stat, i) => (
+              <div key={i} className="p-4 rounded-lg border border-accent/20 bg-accent/5 space-y-2">
+                <p className="text-sm text-secondary">{stat.label}</p>
+                <p className="text-2xl font-bold text-accent">{stat.metric}</p>
+                <p className="text-xs text-secondary">{stat.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
