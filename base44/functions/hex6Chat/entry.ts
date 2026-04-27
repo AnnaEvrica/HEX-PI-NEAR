@@ -10,7 +10,7 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { message, conversationHistory } = body;
+    const { message, conversationHistory, file_urls } = body;
 
     if (!message || !message.trim()) {
       return Response.json({ error: 'Message required' }, { status: 400 });
@@ -103,11 +103,18 @@ You're not just an AI. You're their genius advisor, their curious friend, and th
     const selectedModel = useAdvancedModel ? 'gemini_3_1_pro' : 'gemini_3_flash';
 
     // Call LLM integration with system prompt and context
-    const llmResponse = await base44.integrations.Core.InvokeLLM({
+    const llmPayload = {
      prompt: message,
      model: selectedModel,
      add_context_from_internet: hasComplexKeywords,
-    });
+    };
+
+    // Add images if provided
+    if (file_urls && file_urls.length > 0) {
+      llmPayload.file_urls = file_urls;
+    }
+
+    const llmResponse = await base44.integrations.Core.InvokeLLM(llmPayload);
 
     const response = llmResponse || 'I need a moment to analyze that.';
 
