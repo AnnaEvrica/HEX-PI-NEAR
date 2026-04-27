@@ -339,24 +339,38 @@ export default function HEX6ChatInterface() {
                 message.role === 'user' ? 'justify-end' : 'justify-start'
               }`}
             >
-              <div
-                className={`w-full sm:max-w-lg ${
-                  message.role === 'user'
-                    ? 'bg-primary text-primary-foreground rounded-lg rounded-tr-sm mr-2'
-                    : 'bg-muted text-foreground rounded-lg rounded-tl-sm ml-2'
-                } px-3 md:px-4 py-2 md:py-3 text-sm md:text-base`}
-              >
-                <ReactMarkdown 
-                  className="prose prose-sm dark:prose-invert max-w-none [&>*]:my-0 [&>p]:my-1 [&>ul]:my-1 [&>ol]:my-1 [&>li]:my-0"
-                  components={{
-                    p: ({ node, ...props }) => <p {...props} />,
-                    ul: ({ node, ...props }) => <ul className="list-disc list-inside" {...props} />,
-                    ol: ({ node, ...props }) => <ol className="list-decimal list-inside" {...props} />,
-                    li: ({ node, ...props }) => <li {...props} />,
-                  }}
+              <div className={`w-full sm:max-w-lg ${message.role === 'user' ? 'mr-2' : 'ml-2'}`}>
+                {message.file_urls && message.file_urls.length > 0 && (
+                  <div className="mb-2 flex flex-wrap gap-2">
+                    {message.file_urls.map((url, idx) => (
+                      <img
+                        key={idx}
+                        src={url}
+                        alt="uploaded"
+                        className="max-w-xs rounded-lg border border-border"
+                      />
+                    ))}
+                  </div>
+                )}
+                <div
+                  className={`${
+                    message.role === 'user'
+                      ? 'bg-primary text-primary-foreground rounded-lg rounded-tr-sm'
+                      : 'bg-muted text-foreground rounded-lg rounded-tl-sm'
+                  } px-3 md:px-4 py-2 md:py-3 text-sm md:text-base`}
                 >
-                  {message.content}
-                </ReactMarkdown>
+                  <ReactMarkdown 
+                    className="prose prose-sm dark:prose-invert max-w-none [&>*]:my-0 [&>p]:my-1 [&>ul]:my-1 [&>ol]:my-1 [&>li]:my-0"
+                    components={{
+                      p: ({ node, ...props }) => <p {...props} />,
+                      ul: ({ node, ...props }) => <ul className="list-disc list-inside" {...props} />,
+                      ol: ({ node, ...props }) => <ol className="list-decimal list-inside" {...props} />,
+                      li: ({ node, ...props }) => <li {...props} />,
+                    }}
+                  >
+                    {message.content}
+                  </ReactMarkdown>
+                </div>
               </div>
             </div>
           ))}
