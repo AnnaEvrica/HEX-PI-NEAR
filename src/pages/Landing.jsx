@@ -91,7 +91,7 @@ export default function Landing() {
           </h1>
 
           <p className="text-base sm:text-lg text-secondary max-w-2xl leading-relaxed">
-            HEX6 BLE is a probabilistic intelligence system. It identifies system states, preserves outcome distributions, and generates inference—not forecasts. No opinions. No collapse to a single answer. Only probability, continuously updated.
+            HEX6 BLE (Binaural Linguistic Engine) An autonomous intelligence architecture that treats volatility as a coherent language, abandoning binary assumptions for continuous mathematics. Developed by Evrica Technologies Inc.
           </p>
         </div>
 
