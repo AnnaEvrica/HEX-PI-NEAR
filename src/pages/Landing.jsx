@@ -517,10 +517,10 @@ export default function Landing() {
           <p className="text-base sm:text-lg md:text-xl text-secondary">No credit card required. No prediction. Only probability.</p>
         </div>
         
-        <div className="flex items-center gap-4 my-8 sm:my-12">
-          <div className="flex-1 h-px bg-gradient-to-r from-accent/0 via-accent to-accent/0 shadow-lg shadow-accent/50" />
-          <div className="w-3 h-3 rounded-full bg-accent animate-pulse shadow-lg shadow-accent/70" />
-          <div className="flex-1 h-px bg-gradient-to-r from-accent/0 via-accent to-accent/0 shadow-lg shadow-accent/50" />
+        <div className="my-8 sm:my-12 flex justify-center">
+          <div className="w-12 h-12 rounded-full border-2 border-accent/30 flex items-center justify-center">
+            <div className="w-3 h-3 rounded-full bg-accent animate-pulse" />
+          </div>
         </div>
 
         <button
