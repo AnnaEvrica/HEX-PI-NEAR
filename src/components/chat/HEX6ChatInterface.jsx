@@ -253,7 +253,15 @@ export default function HEX6ChatInterface() {
                     : 'bg-muted text-foreground rounded-lg rounded-tl-sm'
                 } px-4 py-3`}
               >
-                <ReactMarkdown className="prose prose-sm dark:prose-invert max-w-none">
+                <ReactMarkdown 
+                  className="prose prose-sm dark:prose-invert max-w-none [&>*]:my-0 [&>p]:my-1 [&>ul]:my-1 [&>ol]:my-1 [&>li]:my-0"
+                  components={{
+                    p: ({ node, ...props }) => <p {...props} />,
+                    ul: ({ node, ...props }) => <ul className="list-disc list-inside" {...props} />,
+                    ol: ({ node, ...props }) => <ol className="list-decimal list-inside" {...props} />,
+                    li: ({ node, ...props }) => <li {...props} />,
+                  }}
+                >
                   {message.content}
                 </ReactMarkdown>
               </div>
