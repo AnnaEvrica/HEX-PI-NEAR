@@ -35,12 +35,12 @@ export default function Landing() {
             >
               Login
             </button>
-            <Link
-              to="/app"
+            <button
+              onClick={() => base44.auth.redirectToLogin()}
               className="px-5 py-2 rounded-sm bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
             >
               Sign Up
-            </Link>
+            </button>
           </div>
         </div>
       </nav>
@@ -64,12 +64,12 @@ export default function Landing() {
         </div>
 
         <div className="flex flex-wrap gap-4 pt-4">
-          <Link
-            to="/app"
+          <button
+            onClick={() => base44.auth.redirectToLogin()}
             className="inline-flex items-center gap-2 px-6 py-3 rounded-sm bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
           >
             Enter Oracle <ArrowRight className="w-4 h-4" />
-          </Link>
+          </button>
         </div>
       </section>
 
@@ -452,12 +452,12 @@ export default function Landing() {
           <p className="text-xl text-secondary">No credit card required. No prediction. Only probability.</p>
         </div>
         <div className="pt-4">
-          <Link
-            to="/app"
+          <button
+            onClick={() => base44.auth.redirectToLogin()}
             className="inline-flex items-center gap-2 px-8 py-4 rounded-sm bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors text-lg"
           >
             Enter Oracle <ArrowRight className="w-4 h-4" />
-          </Link>
+          </button>
         </div>
       </section>
 
