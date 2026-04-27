@@ -191,7 +191,7 @@ export default function HEX6ChatInterface() {
   };
 
   const handleSignOut = async () => {
-    await base44.auth.logout('/');
+    await base44.auth.logout(window.location.origin + '/');
   };
 
   return (
