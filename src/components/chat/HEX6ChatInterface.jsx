@@ -102,12 +102,22 @@ export default function HEX6ChatInterface() {
 
   const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      console.log('No file selected');
+      return;
+    }
     try {
+      console.log('Uploading file:', file.name);
       const res = await base44.integrations.Core.UploadFile({ file });
-      setUploadedImage(res.file_url);
+      console.log('Upload response:', res);
+      if (res.data?.file_url) {
+        setUploadedImage(res.data.file_url);
+        console.log('Image uploaded successfully');
+      } else {
+        console.error('No file_url in response:', res);
+      }
     } catch (err) {
-      console.error('Image upload failed', err);
+      console.error('Image upload failed:', err.message || err);
     }
   };
 
