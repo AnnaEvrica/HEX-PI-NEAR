@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { TrendingUp, TrendingDown, RefreshCw, AlertTriangle, Activity, Zap, Settings, CheckCircle2, ScanSearch } from 'lucide-react';
+import { TrendingUp, TrendingDown, RefreshCw, AlertTriangle, Activity, Zap, Settings, CheckCircle2, ScanSearch, Download } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { jsPDF } from 'jspdf';
 
 export default function Trading() {
   const [assets, setAssets] = useState([]);
@@ -116,6 +117,84 @@ export default function Trading() {
 
   const fmt = (v) => parseFloat(v || 0).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
   const pct = (v) => `${parseFloat(v || 0).toFixed(2)}%`;
+
+  function generateTradeReport(result) {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    let yPos = 10;
+
+    // Header
+    doc.setFontSize(18);
+    doc.setTextColor(201, 168, 76); // Gold
+    doc.text('HEX6 Auto-Pilot Trade Report', pageWidth / 2, yPos, { align: 'center' });
+    yPos += 10;
+
+    // Metadata
+    doc.setFontSize(10);
+    doc.setTextColor(150, 150, 150);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, pageWidth / 2, yPos, { align: 'center' });
+    doc.text(`Pool: ${autoCategory.toUpperCase()} · Assets Scanned: ${result.scanned}`, pageWidth / 2, yPos + 5, { align: 'center' });
+    yPos += 12;
+
+    // Summary
+    doc.setFontSize(12);
+    doc.setTextColor(255, 255, 255);
+    doc.text('Scan Summary', 10, yPos);
+    yPos += 6;
+
+    doc.setFontSize(9);
+    doc.setTextColor(200, 200, 200);
+    const trades = result.trades?.filter(t => !t.skipped) || [];
+    doc.text(`• Scanned ${result.scanned} crypto assets in the ${autoCategory} category`, 15, yPos);
+    doc.text(`• Selected ${result.topPicks.length} top performers by momentum score`, 15, yPos + 5);
+    doc.text(`• Executed ${trades.length} trades based on statistical edge and Bayesian thresholds`, 15, yPos + 10);
+    yPos += 18;
+
+    // Top Picks
+    doc.setFontSize(11);
+    doc.setTextColor(255, 255, 255);
+    doc.text('Top Momentum Picks', 10, yPos);
+    yPos += 6;
+
+    doc.setFontSize(8);
+    doc.setTextColor(180, 180, 180);
+    result.topPicks.forEach((pick, idx) => {
+      const line = `${idx + 1}. ${pick.ticker} — State: ${pick.marketState}, Momentum: ${pick.momentumScore?.toFixed(3)}, Sharpe: ${pick.sharpe?.toFixed(2)}, Target: ${(pick.targetWeight * 100).toFixed(1)}%`;
+      doc.text(line, 15, yPos);
+      yPos += 4;
+    });
+    yPos += 4;
+
+    // Trades Executed
+    if (trades.length > 0) {
+      doc.setFontSize(11);
+      doc.setTextColor(255, 255, 255);
+      doc.text('Trades Executed', 10, yPos);
+      yPos += 6;
+
+      doc.setFontSize(8);
+      doc.setTextColor(180, 180, 180);
+      trades.forEach((trade, idx) => {
+        const action = trade.side.toUpperCase();
+        const line = `${idx + 1}. ${action} ${trade.qty} ${trade.ticker} @ $${trade.price?.toFixed(2)} · Sharpe: ${trade.sharpe?.toFixed(2)}`;
+        doc.text(line, 15, yPos);
+        yPos += 4;
+        if (yPos > pageHeight - 15) {
+          doc.addPage();
+          yPos = 10;
+        }
+      });
+    }
+
+    // Footer
+    yPos = pageHeight - 10;
+    doc.setFontSize(7);
+    doc.setTextColor(100, 100, 100);
+    doc.text('HEX6 BLE v5.0 · State-Conditioned Exposure Field Model · EGTS Verified', pageWidth / 2, yPos, { align: 'center' });
+
+    doc.save(`HEX6_TradeReport_${new Date().toISOString().slice(0, 10)}.pdf`);
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-12 space-y-10">
@@ -300,37 +379,96 @@ export default function Trading() {
                 </button>
 
                 {autoResult && (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {autoResult.error && <p className="text-sm text-red-400">{autoResult.error}</p>}
                     {autoResult.topPicks && (
                       <>
-                        <div className="text-xs text-white/30">
-                          Scanned {autoResult.scanned} assets · {autoResult.topPicks.length} selected · {autoResult.trades?.filter(t => !t.skipped).length || 0} trades executed
+                        {/* Summary */}
+                        <div className="text-xs text-white/50 p-3 bg-black/40 rounded-lg border border-white/10">
+                          <p className="font-mono">
+                            Scanned <span className="text-white font-bold">{autoResult.scanned}</span> crypto assets across {autoCategory} pool · 
+                            Selected <span className="text-[#C9A84C]">{autoResult.topPicks.length}</span> highest-momentum picks · 
+                            Executed <span className="text-[#C9A84C]">{autoResult.trades?.filter(t => !t.skipped).length || 0}</span> trades
+                          </p>
                         </div>
-                        <div className="space-y-2">
-                          {autoResult.topPicks.map((p, i) => (
-                            <div key={p.ticker} className="flex items-center gap-3 px-4 py-3 bg-black/40 border border-white/10 rounded-lg">
-                              <span className="text-xs font-mono text-white/30 w-5">#{i + 1}</span>
-                              <span className="text-sm font-mono font-bold text-white w-24">{p.ticker}</span>
-                              <span className={`text-xs px-2 py-0.5 rounded font-medium ${
-                                p.marketState === 'BULL' ? 'text-[#C9A84C]' :
-                                p.marketState === 'VOLATILE' ? 'text-amber-400' : 'text-white/40'
-                              }`}>{p.marketState}</span>
-                              <span className="text-xs text-white/40 flex-1">Score: <span className="text-white font-mono">{p.momentumScore?.toFixed(2)}</span></span>
-                              <span className="text-xs font-mono text-[#C9A84C]">{(p.targetWeight * 100).toFixed(1)}%</span>
-                            </div>
-                          ))}
-                        </div>
-                        {autoResult.trades?.filter(t => !t.skipped).length > 0 && (
-                          <div className="space-y-1">
-                            <p className="text-xs text-white/30 uppercase tracking-widest">Executed</p>
-                            {autoResult.trades.filter(t => !t.skipped).map(t => (
-                              <div key={t.ticker} className="flex items-center gap-2 text-xs text-white/60 px-3 py-2 bg-[#C9A84C]/5 border border-[#C9A84C]/20 rounded-lg">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-[#C9A84C]" />
-                                <span className={`font-bold ${t.side === 'buy' ? 'text-[#C9A84C]' : 'text-red-400'}`}>{t.side?.toUpperCase()}</span>
-                                <span>{t.qty} <span className="font-mono">{t.ticker}</span> @ ${t.price?.toFixed(2)}</span>
+
+                        {/* Full Scan Results (Expandable) */}
+                        <details className="group">
+                          <summary className="cursor-pointer text-xs text-white/40 hover:text-[#C9A84C] font-medium uppercase tracking-widest p-2">
+                            → View all {autoResult.scanned} scanned assets
+                          </summary>
+                          <div className="mt-2 space-y-1 max-h-48 overflow-y-auto">
+                            {autoResult.allScanned?.map((asset, idx) => (
+                              <div key={asset.ticker} className="text-xs px-3 py-1.5 bg-black/60 rounded border border-white/5 flex items-center justify-between">
+                                <span className="font-mono text-white/40">{idx + 1}. {asset.ticker}</span>
+                                <div className="flex items-center gap-2">
+                                  <span className={`text-xs px-1.5 py-0.5 rounded ${
+                                    asset.marketState === 'BULL' ? 'text-[#C9A84C]' :
+                                    asset.marketState === 'BEAR' ? 'text-red-400' : 'text-white/30'
+                                  }`}>{asset.marketState}</span>
+                                  <span className="text-white/20 font-mono">{asset.momentumScore?.toFixed(2)}</span>
+                                </div>
+                              </div>
+                            )) || (
+                              <p className="text-white/20 text-xs p-2">Full scan data not available</p>
+                            )}
+                          </div>
+                        </details>
+
+                        {/* Top Picks */}
+                        <div>
+                          <p className="text-xs text-white/30 uppercase tracking-widest mb-2">Top Picks (Highest Momentum)</p>
+                          <div className="space-y-2">
+                            {autoResult.topPicks.map((p, i) => (
+                              <div key={p.ticker} className="flex items-center gap-3 px-4 py-3 bg-black/40 border border-white/10 rounded-lg">
+                                <span className="text-xs font-mono text-[#C9A84C] w-5">#{i + 1}</span>
+                                <span className="text-sm font-mono font-bold text-white w-24">{p.ticker}</span>
+                                <span className={`text-xs px-2 py-0.5 rounded font-medium ${
+                                  p.marketState === 'BULL' ? 'text-[#C9A84C]' :
+                                  p.marketState === 'VOLATILE' ? 'text-amber-400' : 'text-white/40'
+                                }`}>{p.marketState}</span>
+                                <span className="text-xs text-white/40 flex-1">
+                                  Momentum: <span className="text-white font-mono">{p.momentumScore?.toFixed(2)}</span> · 
+                                  Sharpe: <span className="text-white/60 font-mono">{p.sharpe?.toFixed(2)}</span>
+                                </span>
+                                <span className="text-xs font-mono text-[#C9A84C]">{(p.targetWeight * 100).toFixed(1)}%</span>
                               </div>
                             ))}
+                          </div>
+                        </div>
+
+                        {/* Trade Report */}
+                        {autoResult.trades?.filter(t => !t.skipped).length > 0 && (
+                          <div className="bg-[#C9A84C]/5 border border-[#C9A84C]/20 rounded-lg p-4 space-y-3">
+                            <div className="flex items-center gap-2 text-[#C9A84C]">
+                              <CheckCircle2 className="w-4 h-4" />
+                              <p className="text-sm font-bold">Trades Executed</p>
+                            </div>
+                            <div className="space-y-2">
+                              {autoResult.trades.filter(t => !t.skipped).map(t => (
+                                <div key={t.ticker} className="text-xs space-y-1 p-3 bg-black/40 rounded border border-[#C9A84C]/10">
+                                  <p className="text-white/70">
+                                    <span className={`font-bold ${t.side === 'buy' ? 'text-[#C9A84C]' : 'text-red-400'}`}>
+                                      {t.side?.toUpperCase()}
+                                    </span>
+                                    {' '}{t.qty} {t.ticker} @ ${t.price?.toFixed(2)}
+                                  </p>
+                                  <p className="text-white/40">
+                                    State: {t.marketState} · Confidence: {t.momentumScore?.toFixed(3)} · Sharpe: {t.sharpe?.toFixed(2)}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                            <button onClick={() => generateTradeReport(autoResult)}
+                              className="w-full flex items-center justify-center gap-2 text-xs px-3 py-2 rounded-lg border border-[#C9A84C]/40 text-[#C9A84C] hover:bg-[#C9A84C]/10 transition-colors">
+                              📄 Generate PDF Report
+                            </button>
+                          </div>
+                        )}
+
+                        {autoResult.trades?.filter(t => t.skipped).length > 0 && (
+                          <div className="text-xs text-white/40 space-y-1">
+                            <p className="font-mono">Skipped {autoResult.trades.filter(t => t.skipped).length} ({autoResult.trades.filter(t => t.skipped).map(t => t.reason).join(', ')})</p>
                           </div>
                         )}
                       </>

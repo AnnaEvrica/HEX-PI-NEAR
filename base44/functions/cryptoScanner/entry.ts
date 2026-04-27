@@ -177,7 +177,7 @@ Deno.serve(async (req) => {
     const topPicks = ranked.slice(0, topN);
 
     if (scanOnly) {
-      return Response.json({ ranked, topPicks, scanned: scanResults.length });
+      return Response.json({ ranked, topPicks, allScanned: scanResults, scanned: scanResults.length });
     }
 
     // 3. Get account data
@@ -277,6 +277,7 @@ Deno.serve(async (req) => {
     return Response.json({
       success: true,
       scanned: scanResults.length,
+      allScanned: scanResults,
       topPicks,
       trades,
       errors,
