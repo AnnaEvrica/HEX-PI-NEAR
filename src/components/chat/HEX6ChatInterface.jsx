@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Send, Upload, Menu, Settings, LogOut, Plus, MessageCircle, Zap, Mic, MicOff, BookOpen, X } from 'lucide-react';
+import { Send, Upload, Menu, Settings, LogOut, Plus, MessageCircle, Zap, Mic, MicOff, BookOpen, X, Image } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import CalibrationPanel from '@/components/CalibrationPanel';
 import DecisionAlignment from '@/components/DecisionAlignment';
@@ -24,6 +24,7 @@ export default function HEX6ChatInterface() {
   const [legalOpen, setLegalOpen] = useState(false);
   const [listening, setListening] = useState(false);
   const [traderEnabled, setTraderEnabled] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState(null);
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
 
@@ -96,6 +97,17 @@ export default function HEX6ChatInterface() {
     } else {
       setListening(true);
       recognitionRef.current.start();
+    }
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const res = await base44.integrations.Core.UploadFile({ file });
+      setUploadedImage(res.file_url);
+    } catch (err) {
+      console.error('Image upload failed', err);
     }
   };
 
@@ -341,7 +353,18 @@ export default function HEX6ChatInterface() {
         </div>
 
         {/* Input */}
-        <div className="border-t border-border px-6 py-4">
+        <div className="border-t border-border px-6 py-4 space-y-3">
+          {uploadedImage && (
+            <div className="flex items-center justify-between px-3 py-2 rounded-sm bg-accent/10 border border-accent/30">
+              <span className="text-xs text-secondary">✓ Image uploaded and ready for analysis</span>
+              <button
+                onClick={() => setUploadedImage(null)}
+                className="text-xs text-accent hover:text-accent/70"
+              >
+                Clear
+              </button>
+            </div>
+          )}
           <div className="flex gap-3">
             <button
               onClick={handleVoiceInput}
@@ -354,12 +377,18 @@ export default function HEX6ChatInterface() {
             >
               {listening ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
             </button>
+
+            <label className="p-2.5 rounded-sm hover:bg-muted text-secondary hover:text-foreground cursor-pointer transition-colors" title="Upload image">
+              <Image className="w-5 h-5" />
+              <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+            </label>
+
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-              placeholder="Ask HEX6 about markets, strategies, assets..."
+              placeholder="Ask HEX6 about markets, strategies, assets... or upload an image to analyze"
               className="flex-1 px-4 py-2.5 rounded-sm border border-border bg-background text-foreground placeholder-secondary focus:outline-none focus:border-accent"
             />
             <button
@@ -370,7 +399,7 @@ export default function HEX6ChatInterface() {
               <Send className="w-5 h-5" />
             </button>
           </div>
-          <p className="text-xs text-secondary mt-2">
+          <p className="text-xs text-secondary">
             HEX6 generates probabilistic analysis, not financial advice. Always verify with your own research.
           </p>
         </div>
