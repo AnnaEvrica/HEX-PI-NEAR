@@ -361,10 +361,8 @@ export default function Landing() {
             </div>
           </div>
         </div>
-      </section>
 
-
-
+        </section>
 
 
         {/* What You Actually Get */}
@@ -441,10 +439,9 @@ export default function Landing() {
             </ul>
           </div>
         </div>
-        </section>
 
         {/* CTA Section */}
-      <section className="max-w-4xl mx-auto px-6 py-20 space-y-8">
+        <section className="max-w-4xl mx-auto px-6 py-20 space-y-8">
         <div className="space-y-4">
           <h2 className="text-3xl font-bold">Ready to observe how outcomes reorganize?</h2>
           <p className="text-lg text-secondary">No credit card required. No prediction. Only probability.</p>
