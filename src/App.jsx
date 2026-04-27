@@ -13,7 +13,7 @@ import HEX6ChatInterface from '@/components/chat/HEX6ChatInterface';
 import { useState, useEffect } from 'react';
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError, user } = useAuth();
   const [consentCompleted, setConsentCompleted] = useState(false);
 
   useEffect(() => {

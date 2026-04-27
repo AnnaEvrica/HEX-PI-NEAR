@@ -66,20 +66,12 @@ export default function Landing() {
       <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="text-xl font-bold tracking-tight">HEX6 BLE</div>
-          <div className="flex gap-3">
-           <button
-             onClick={() => base44.auth.redirectToLogin()}
-             className="px-5 py-2 rounded-sm border border-border text-sm font-medium hover:border-foreground transition-colors"
+          <button
+            onClick={() => base44.auth.redirectToLogin()}
+            className="px-5 py-2 rounded-sm bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
            >
-             Login
+             Get Started
            </button>
-           <button
-             onClick={() => base44.auth.redirectToLogin()}
-             className="px-5 py-2 rounded-sm bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
-           >
-             Sign Up
-           </button>
-          </div>
         </div>
       </nav>
 
@@ -106,14 +98,12 @@ export default function Landing() {
           </p>
         </div>
 
-        <div className="flex flex-col gap-4 pt-4">
-           <button
-             onClick={() => base44.auth.redirectToLogin()}
-             className="inline-flex items-center gap-2 px-6 py-3 rounded-sm bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors w-fit"
-           >
-             Enter Oracle <ArrowRight className="w-4 h-4" />
-           </button>
-         </div>
+        <button
+          onClick={() => base44.auth.redirectToLogin()}
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-sm bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+        >
+          Enter Oracle <ArrowRight className="w-4 h-4" />
+        </button>
       </motion.section>
 
       {/* How It Works */}
@@ -521,14 +511,12 @@ export default function Landing() {
           <h2 className="text-5xl font-bold">Ready to observe how outcomes reorganize?</h2>
           <p className="text-xl text-secondary">No credit card required. No prediction. Only probability.</p>
         </div>
-        <div className="pt-4">
-          <button
-            onClick={() => base44.auth.redirectToLogin()}
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-sm bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors text-lg"
-          >
-            Enter Oracle <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
+        <button
+          onClick={() => base44.auth.redirectToLogin()}
+          className="inline-flex items-center gap-2 px-8 py-4 rounded-sm bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors text-lg"
+        >
+          Enter Oracle <ArrowRight className="w-4 h-4" />
+        </button>
       </section>
 
       {/* Footer */}
