@@ -1,7 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Send, Upload, Menu, Settings, LogOut, Plus, MessageCircle } from 'lucide-react';
+import { Send, Upload, Menu, Settings, LogOut, Plus, MessageCircle, Zap, Mic, MicOff, BookOpen, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import CalibrationPanel from '@/components/CalibrationPanel';
+import DecisionAlignment from '@/components/DecisionAlignment';
+import SettingsModal from '@/components/SettingsModal';
+import LegalModal from '@/components/LegalModal';
 
 export default function HEX6ChatInterface() {
   const [messages, setMessages] = useState([
@@ -16,12 +20,56 @@ export default function HEX6ChatInterface() {
   const [conversations, setConversations] = useState([]);
   const [currentConversationId, setCurrentConversationId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [legalOpen, setLegalOpen] = useState(false);
+  const [listening, setListening] = useState(false);
+  const [modelChoice, setModelChoice] = useState('gpt-4o-mini');
+  const [traderEnabled, setTraderEnabled] = useState(false);
   const messagesEndRef = useRef(null);
+  const recognitionRef = useRef(null);
+
+  // Initialize Web Speech API
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = false;
+      recognitionRef.current.lang = 'en-US';
+
+      recognitionRef.current.onresult = (event) => {
+        const transcript = Array.from(event.results)
+          .map((result) => result[0].transcript)
+          .join('');
+        setInput((prev) => prev + (prev ? ' ' : '') + transcript);
+        setListening(false);
+      };
+
+      recognitionRef.current.onerror = () => {
+        setListening(false);
+      };
+
+      recognitionRef.current.onend = () => {
+        setListening(false);
+      };
+    }
+  }, []);
 
   // Auto-scroll to newest message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  const handleVoiceInput = () => {
+    if (!recognitionRef.current) return;
+    if (listening) {
+      recognitionRef.current.stop();
+      setListening(false);
+    } else {
+      setListening(true);
+      recognitionRef.current.start();
+    }
+  };
 
   const handleSendMessage = async () => {
     if (!input.trim()) return;
@@ -40,6 +88,7 @@ export default function HEX6ChatInterface() {
       const response = await base44.functions.invoke('hex6Chat', {
         message: input,
         conversationHistory: messages,
+        model: modelChoice,
       });
 
       if (response.data?.error) throw new Error(response.data.error);
@@ -76,6 +125,10 @@ export default function HEX6ChatInterface() {
       },
     ]);
     setCurrentConversationId(null);
+  };
+
+  const handleSignOut = async () => {
+    await base44.auth.logout('/');
   };
 
   return (
@@ -128,11 +181,24 @@ export default function HEX6ChatInterface() {
           </div>
 
           <div className="space-y-2 border-t border-border pt-4">
-            <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-secondary hover:text-foreground hover:bg-muted rounded-sm transition-colors">
+            <button
+              onClick={() => setSettingsOpen(true)}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-secondary hover:text-foreground hover:bg-muted rounded-sm transition-colors"
+            >
               <Settings className="w-4 h-4" />
               Settings
             </button>
-            <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-secondary hover:text-foreground hover:bg-muted rounded-sm transition-colors">
+            <button
+              onClick={() => setLegalOpen(true)}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-secondary hover:text-foreground hover:bg-muted rounded-sm transition-colors"
+            >
+              <BookOpen className="w-4 h-4" />
+              Legal
+            </button>
+            <button
+              onClick={handleSignOut}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-secondary hover:text-foreground hover:bg-muted rounded-sm transition-colors"
+            >
               <LogOut className="w-4 h-4" />
               Sign Out
             </button>
@@ -153,11 +219,26 @@ export default function HEX6ChatInterface() {
           <h2 className="text-center flex-1 font-medium text-sm text-secondary">
             HEX6 Oracle
           </h2>
-          <div className="w-8" />
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-secondary px-2 py-1 rounded bg-muted">
+              {modelChoice === 'gpt-4o-mini' ? 'GPT-4o Mini' : 'Claude'}
+            </span>
+            {traderEnabled && (
+              <span className="text-xs text-accent px-2 py-1 rounded bg-accent/10">
+                Trader: Coming Soon
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-6 py-8 space-y-6">
+          {/* Calibration & Alignment Panels */}
+          <div className="space-y-4 max-w-2xl">
+            <CalibrationPanel />
+            <DecisionAlignment />
+          </div>
+
           {messages.map((message) => (
             <div
               key={message.id}
@@ -195,8 +276,16 @@ export default function HEX6ChatInterface() {
         {/* Input */}
         <div className="border-t border-border px-6 py-4">
           <div className="flex gap-3">
-            <button className="p-2.5 rounded-sm hover:bg-muted transition-colors text-secondary hover:text-foreground">
-              <Upload className="w-5 h-5" />
+            <button
+              onClick={handleVoiceInput}
+              className={`p-2.5 rounded-sm transition-colors ${
+                listening
+                  ? 'bg-accent text-accent-foreground'
+                  : 'hover:bg-muted text-secondary hover:text-foreground'
+              }`}
+              title={listening ? 'Stop listening' : 'Start voice input'}
+            >
+              {listening ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
             </button>
             <input
               type="text"
@@ -219,6 +308,19 @@ export default function HEX6ChatInterface() {
           </p>
         </div>
       </div>
+
+      {/* Settings Modal */}
+      <SettingsModal
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        modelChoice={modelChoice}
+        onModelChange={setModelChoice}
+        traderEnabled={traderEnabled}
+        onTraderToggle={setTraderEnabled}
+      />
+
+      {/* Legal Modal */}
+      <LegalModal open={legalOpen} onClose={() => setLegalOpen(false)} />
     </div>
   );
 }
