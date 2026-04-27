@@ -14,7 +14,7 @@ import Legal from '@/pages/Legal';
 import Backtest from '@/pages/Backtest';
 import Managers from '@/pages/Managers';
 import Thesis from '@/pages/Thesis';
-import Trading from '@/pages/Trading';
+import Trading from '@/pages/Trading.jsx';
 import About from '@/pages/About';
 import Settings from '@/pages/Settings';
 
