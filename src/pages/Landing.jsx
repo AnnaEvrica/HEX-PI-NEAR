@@ -101,13 +101,6 @@ export default function Landing() {
         >
           Enter Oracle <ArrowRight className="w-4 h-4" />
         </button>
-
-        <div className="pt-4 sm:pt-6 space-y-2 sm:space-y-3">
-          <p className="text-lg sm:text-xl font-semibold text-accent">The odds are now in your favor</p>
-          <p className="text-base sm:text-lg text-secondary leading-relaxed max-w-2xl">
-            HEX6 BLE - a new category of intelligence thriving in uncertainty, seeing patterns in chaos
-          </p>
-        </div>
       </motion.section>
 
       {/* How It Works */}
