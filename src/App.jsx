@@ -16,6 +16,7 @@ import Managers from '@/pages/Managers';
 import Thesis from '@/pages/Thesis';
 import Trading from '@/pages/Trading';
 import About from '@/pages/About';
+import Settings from '@/pages/Settings';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -50,6 +51,7 @@ const AuthenticatedApp = () => {
         <Route path="/thesis" element={<Thesis />} />
         <Route path="/trading" element={<Trading />} />
         <Route path="/about" element={<About />} />
+        <Route path="/settings" element={<Settings />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

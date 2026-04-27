@@ -1,0 +1,55 @@
+{
+  "name": "HEX6Memory",
+  "type": "object",
+  "properties": {
+    "memory_type": {
+      "type": "string",
+      "enum": [
+        "backtest",
+        "trade",
+        "signal",
+        "feedback"
+      ],
+      "description": "Type of memory record"
+    },
+    "ticker": {
+      "type": "string",
+      "description": "Asset ticker this memory relates to"
+    },
+    "params": {
+      "type": "string",
+      "description": "JSON-encoded input parameters"
+    },
+    "metrics": {
+      "type": "string",
+      "description": "JSON-encoded output metrics"
+    },
+    "engine_params": {
+      "type": "string",
+      "description": "JSON-encoded HEX6 engine output"
+    },
+    "sharpe": {
+      "type": "number",
+      "description": "Sharpe ratio from this run"
+    },
+    "cagr": {
+      "type": "number",
+      "description": "CAGR from this run"
+    },
+    "max_drawdown": {
+      "type": "number",
+      "description": "Max drawdown from this run"
+    },
+    "recorded_by": {
+      "type": "string",
+      "description": "User email who triggered this"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Human-readable summary"
+    }
+  },
+  "required": [
+    "memory_type"
+  ]
+}

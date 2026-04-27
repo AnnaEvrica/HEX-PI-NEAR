@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 
 const EVENT_TYPES = ['ALL', 'REBALANCE', 'SILENCE', 'ALLOCATION', 'MANUAL'];
 
-export default function EGTSAuditTrail({ assetId = null }) {
+export default function EGTSAuditTrail({ assetId = null, onSelectReceipt = null, selectedId = null }) {
   const [receipts, setReceipts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('ALL');
@@ -121,7 +121,10 @@ export default function EGTSAuditTrail({ assetId = null }) {
       {!loading && filtered.length > 0 && (
         <div className="space-y-2">
           {filtered.map((receipt) => (
-            <EGTSReceiptCard key={receipt.id} receipt={receipt} />
+            <div key={receipt.id} onClick={() => onSelectReceipt?.(receipt)}
+              className={onSelectReceipt ? 'cursor-pointer' : ''}>
+              <EGTSReceiptCard receipt={receipt} highlight={selectedId === receipt.id} />
+            </div>
           ))}
         </div>
       )}

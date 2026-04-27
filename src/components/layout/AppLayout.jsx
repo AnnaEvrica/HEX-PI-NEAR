@@ -1,16 +1,18 @@
 import { Link, useLocation, Outlet } from 'react-router-dom';
-import { BarChart3, Shield, BookOpen, Activity, FlaskConical, Users, Info } from 'lucide-react';
+import { BarChart3, Shield, BookOpen, Activity, FlaskConical, Users, Info, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import HEX6Chat from '@/components/hex6/HEX6Chat';
 
 const NAV = [
   { path: '/', label: 'Dashboard', icon: BarChart3 },
   { path: '/portfolio', label: 'Portfolio', icon: Activity },
-  { path: '/backtest', label: 'Backtest', icon: FlaskConical },
+  { path: '/trading', label: 'Trade', icon: FlaskConical },
+  { path: '/backtest', label: 'Backtest', icon: BarChart3 },
   { path: '/thesis', label: 'Thesis', icon: BookOpen },
-  { path: '/trading', label: 'Trading', icon: Users },
   { path: '/managers', label: 'Managers', icon: Users },
-  { path: '/governance', label: 'Governance', icon: Shield },
+  { path: '/governance', label: 'Audit', icon: Shield },
   { path: '/legal', label: 'Legal', icon: BookOpen },
+  { path: '/settings', label: 'Settings', icon: Settings },
   { path: '/about', label: 'About', icon: Info },
 ];
 
@@ -57,6 +59,7 @@ export default function AppLayout() {
       <main className="flex-1 overflow-auto">
         <Outlet />
       </main>
+      <HEX6Chat />
 
       {/* Footer */}
       <footer className="border-t border-white/10 py-4 text-center">

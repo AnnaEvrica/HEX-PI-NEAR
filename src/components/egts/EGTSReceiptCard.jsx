@@ -12,7 +12,7 @@ const EVENT_COLORS = {
   MANUAL: 'text-slate-400 bg-slate-800/40 border-slate-600/30',
 };
 
-export default function EGTSReceiptCard({ receipt }) {
+export default function EGTSReceiptCard({ receipt, highlight = false }) {
   const [expanded, setExpanded] = useState(false);
   const [verifyResult, setVerifyResult] = useState(null);
   const [verifying, setVerifying] = useState(false);
@@ -33,7 +33,7 @@ export default function EGTSReceiptCard({ receipt }) {
   return (
     <motion.div
       layout
-      className="rounded-xl border border-white/8 bg-white/3 backdrop-blur-sm overflow-hidden hover:border-white/15 transition-colors"
+      className={cn("rounded-xl border bg-white/3 backdrop-blur-sm overflow-hidden hover:border-white/15 transition-colors", highlight ? "border-[#C9A84C]/40 bg-[#C9A84C]/5" : "border-white/8")}
     >
       {/* Header */}
       <button
