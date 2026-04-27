@@ -52,27 +52,26 @@ const AuthenticatedApp = () => {
     }
   }
 
-  // Show consent flow if user is authenticated but hasn't completed it
-  if (user && !consentCompleted) {
-    return (
-      <ConsentFlow
-        onComplete={() => {
-          // Save consent to user profile (backend)
-          base44.auth.updateMe({ hex6_consent_completed: true });
-          setConsentCompleted(true);
-        }}
-      />
-    );
-  }
-
-  // After consent, show main chat interface
-  if (user && consentCompleted) {
-    return <HEX6ChatInterface />;
-  }
-
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
+      <Route 
+        path="/app" 
+        element={
+          !user ? (
+            <UserNotRegisteredError />
+          ) : !consentCompleted ? (
+            <ConsentFlow
+              onComplete={() => {
+                base44.auth.updateMe({ hex6_consent_completed: true });
+                setConsentCompleted(true);
+              }}
+            />
+          ) : (
+            <HEX6ChatInterface />
+          )
+        } 
+      />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

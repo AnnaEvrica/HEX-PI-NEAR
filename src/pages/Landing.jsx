@@ -9,7 +9,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="text-xl font-bold tracking-tight">HEX6</div>
           <Link
-            to="/dashboard"
+            to="/app"
             className="px-5 py-2 rounded-sm bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
           >
             Enter
@@ -37,7 +37,7 @@ export default function Landing() {
 
         <div className="flex flex-wrap gap-4 pt-4">
           <Link
-            to="/dashboard"
+            to="/app"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-sm bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
           >
             Start Free Trial <ArrowRight className="w-4 h-4" />
@@ -146,7 +146,7 @@ export default function Landing() {
           <p className="text-lg text-secondary">No credit card required. 7-day free trial.</p>
         </div>
         <Link
-          to="/dashboard"
+          to="/app"
           className="inline-flex items-center gap-2 px-8 py-4 rounded-sm bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors text-lg"
         >
           Start Trial <ArrowRight className="w-4 h-4" />
