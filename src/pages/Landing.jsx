@@ -274,71 +274,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Empirical Behavior */}
-      <section className="max-w-4xl mx-auto px-6 py-20 space-y-12">
-        <div className="space-y-3">
-          <h2 className="text-3xl font-bold">Empirical Behavior</h2>
-          <p className="text-secondary">How structural alignment outperforms</p>
-        </div>
-
-        <div className="space-y-8">
-          {[
-            {
-              label: 'High Volatility Regimes',
-              desc: 'In a 6-month simulation with extreme asset divergence (+442% to −75%), traditional models remained continuously exposed.',
-              result: 'Naive allocation: −23% drawdown | HEX6 BLE: −6.5% drawdown',
-              insight: 'HEX6 BLE eliminated statistically negative exposure states.',
-            },
-            {
-              label: 'Trend + Chop Transitions',
-              desc: 'In mixed regimes (trend → sideways → volatility spikes), traditional quants overfitted to prior trends.',
-              result: 'Lower trade frequency, higher risk-adjusted returns, reduced volatility clustering',
-              insight: 'HEX6 BLE reduced exposure during low-confidence states, re-engaged only at probability stabilization.',
-            },
-            {
-              label: 'Macro / Event-Driven Systems',
-              desc: 'Under discontinuities (rate shocks, macro releases), prediction systems collapse to outdated assumptions.',
-              result: 'Avoidance of false certainty, faster adaptation to new regimes',
-              insight: 'HEX6 BLE reclassifies system state and expands uncertainty distribution.',
-            },
-          ].map((item, i) => (
-            <div key={i} className="space-y-3 p-6 rounded-sm border border-border bg-muted/30">
-              <h3 className="font-bold text-accent">{item.label}</h3>
-              <p className="text-sm text-secondary">{item.desc}</p>
-              <div className="py-3 px-3 bg-black/20 rounded text-sm text-foreground font-mono">
-                {item.result}
-              </div>
-              <p className="text-sm text-secondary"><strong>Insight:</strong> {item.insight}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="p-6 rounded-sm border border-accent/30 bg-accent/5 space-y-3">
-          <p className="font-medium">Why This Outperforms</p>
-          <p className="text-sm text-secondary leading-relaxed">
-            Most models fail because they are forced to act—even when no edge exists. HEX6 introduces a structural condition: <em>if expected utility is negative, exposure approaches zero.</em> No override. No bias. No narrative.
-          </p>
-        </div>
-      </section>
-
-      {/* Verification */}
-      <section className="max-w-4xl mx-auto px-6 py-20 space-y-12">
-        <div className="space-y-6 p-8 rounded-sm border border-accent/20 bg-accent/5">
-          <div className="flex items-start gap-3">
-            <Lock className="w-5 h-5 text-accent shrink-0 mt-1" />
-            <div className="space-y-3">
-              <h3 className="font-bold text-lg">Verification by Structure</h3>
-              <p className="text-secondary leading-relaxed">
-                Every output is recorded—not as a claim, but as a state. EGTS creates an immutable record of system conditions, probability structures, and resulting inference states. This is not for visibility. It is for verification.
-              </p>
-              <p className="text-secondary leading-relaxed text-sm pt-2">
-                HEX6 BLE introduces no execution layer. No mandates. No embedded action. A pure computational layer between data and decision.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Compare & Contrast */}
       <section className="max-w-5xl mx-auto px-6 py-20 space-y-12">
         <div className="space-y-3">
@@ -388,81 +323,49 @@ export default function Landing() {
           <h3 className="text-lg font-bold">Real Scenario: 6-Month High Volatility Period</h3>
           <p className="text-secondary text-sm">Assets ranged from +442% to −75%, with violent regime shifts</p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Quant Models */}
-            <div className="border border-border bg-background p-4 md:p-6 space-y-4">
-              <h4 className="font-bold text-sm md:text-base">Quant Models</h4>
-              <div className="space-y-2 text-sm">
-                <div>
-                  <p className="text-xs text-secondary">Peak Return</p>
-                  <p className="text-lg md:text-xl font-bold">{loading || !metrics ? '+18%' : metrics.scenario6Month.quant.peakReturn}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-secondary">Max Drawdown</p>
-                  <p className="text-lg md:text-xl font-bold text-red-400">{loading || !metrics ? '−23.7%' : metrics.scenario6Month.quant.maxDrawdown}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-secondary">Decision Accuracy</p>
-                  <p className="text-lg md:text-xl font-bold">{loading || !metrics ? '64%' : metrics.scenario6Month.quant.decisionAccuracy}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-secondary">Recovery Time</p>
-                  <p className="text-lg md:text-xl font-bold">{loading || !metrics ? '87 days' : metrics.scenario6Month.quant.recoveryTime}</p>
-                </div>
+          <div className="grid grid-cols-1 space-y-6">
+           {/* Empirical Behavior subsection */}
+           <div className="space-y-4">
+             <h4 className="text-base font-bold">How Structural Alignment Outperforms</h4>
+             <div className="space-y-6">
+          {[
+            {
+              label: 'High Volatility Regimes',
+              desc: 'In a 6-month simulation with extreme asset divergence (+442% to −75%), traditional models remained continuously exposed.',
+              result: 'Naive allocation: −23% drawdown | HEX6 BLE: −6.5% drawdown',
+              insight: 'HEX6 BLE eliminated statistically negative exposure states.',
+            },
+            {
+              label: 'Trend + Chop Transitions',
+              desc: 'In mixed regimes (trend → sideways → volatility spikes), traditional quants overfitted to prior trends.',
+              result: 'Lower trade frequency, higher risk-adjusted returns, reduced volatility clustering',
+              insight: 'HEX6 BLE reduced exposure during low-confidence states, re-engaged only at probability stabilization.',
+            },
+            {
+              label: 'Macro / Event-Driven Systems',
+              desc: 'Under discontinuities (rate shocks, macro releases), prediction systems collapse to outdated assumptions.',
+              result: 'Avoidance of false certainty, faster adaptation to new regimes',
+              insight: 'HEX6 BLE reclassifies system state and expands uncertainty distribution.',
+            },
+          ].map((item, i) => (
+            <div key={i} className="space-y-3 p-6 rounded-sm border border-border bg-muted/30">
+              <h3 className="font-bold text-accent">{item.label}</h3>
+              <p className="text-sm text-secondary">{item.desc}</p>
+              <div className="py-3 px-3 bg-black/20 rounded text-sm text-foreground font-mono">
+                {item.result}
               </div>
-              <p className="text-xs text-secondary border-t border-border pt-3">Reason: Trend-following overfits to prior regime, blindsided by discontinuities</p>
+              <p className="text-sm text-secondary"><strong>Insight:</strong> {item.insight}</p>
             </div>
-
-            {/* AI Models */}
-            <div className="border border-border bg-background p-4 md:p-6 space-y-4">
-              <h4 className="font-bold text-sm md:text-base">AI Models</h4>
-              <div className="space-y-2 text-sm">
-                <div>
-                  <p className="text-xs text-secondary">Peak Return</p>
-                  <p className="text-lg md:text-xl font-bold">{loading || !metrics ? '+14%' : metrics.scenario6Month.ai.peakReturn}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-secondary">Max Drawdown</p>
-                  <p className="text-lg md:text-xl font-bold text-red-400">{loading || !metrics ? '−18.2%' : metrics.scenario6Month.ai.maxDrawdown}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-secondary">Decision Accuracy</p>
-                  <p className="text-lg md:text-xl font-bold">{loading || !metrics ? '71%' : metrics.scenario6Month.ai.decisionAccuracy}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-secondary">Recovery Time</p>
-                  <p className="text-lg md:text-xl font-bold">{loading || !metrics ? '62 days' : metrics.scenario6Month.ai.recoveryTime}</p>
-                </div>
+          ))}
               </div>
-              <p className="text-xs text-secondary border-t border-border pt-3">Reason: General patterns help, but black-box reasoning unclear during crisis</p>
-            </div>
-
-            {/* HEX6 BLE */}
-            <div className="border border-accent/40 bg-background p-4 md:p-6 space-y-4">
-              <h4 className="font-bold text-sm md:text-base text-accent">HEX6 BLE</h4>
-              <div className="space-y-2 text-sm">
-                <div>
-                  <p className="text-xs text-secondary">Peak Return</p>
-                  <p className="text-lg md:text-xl font-bold">{loading || !metrics ? '+9%' : metrics.scenario6Month.hex6.peakReturn}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-secondary">Max Drawdown</p>
-                  <p className="text-lg md:text-xl font-bold text-accent">{loading || !metrics ? '−6.5%' : metrics.scenario6Month.hex6.maxDrawdown}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-secondary">Decision Accuracy</p>
-                  <p className="text-lg md:text-xl font-bold text-accent">{loading || !metrics ? '89%' : metrics.scenario6Month.hex6.decisionAccuracy}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-secondary">Recovery Time</p>
-                  <p className="text-lg md:text-xl font-bold">{loading || !metrics ? '8 days' : metrics.scenario6Month.hex6.recoveryTime}</p>
-                </div>
-              </div>
-              <p className="text-xs text-secondary border-t border-accent/40 pt-3">Lower return, but capital preserved. Recovered fastest.</p>
             </div>
           </div>
-          <p className="text-xs text-secondary/60 pt-4">* Scenario based on 6-month live market simulation (2023-2024) with identical starting capital and rebalancing constraints across all three systems. HEX6 BLE figures reflect state-conditioned exposure optimization. Peak returns not annualized; recovery time measured in business days.</p>
         </div>
+      </section>
+
+
+
+
 
         {/* What You Actually Get */}
         <div className="space-y-4 border border-border bg-background p-8">
@@ -538,9 +441,9 @@ export default function Landing() {
             </ul>
           </div>
         </div>
-      </section>
+        </section>
 
-      {/* CTA Section */}
+        {/* CTA Section */}
       <section className="max-w-4xl mx-auto px-6 py-20 space-y-8">
         <div className="space-y-4">
           <h2 className="text-3xl font-bold">Ready to observe how outcomes reorganize?</h2>
