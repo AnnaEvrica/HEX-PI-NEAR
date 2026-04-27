@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Zap } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
-export default function CalibrationPanel() {
+export default function CalibrationPanel({ messageCount = 0 }) {
   const [metrics, setMetrics] = useState({
     behavioral: 0,
     marketSync: 0,
@@ -10,36 +10,42 @@ export default function CalibrationPanel() {
   });
 
   useEffect(() => {
-    // Simulate calibration metrics based on user activity
     const loadMetrics = async () => {
       try {
-        // Get conversation history length as proxy for behavioral modeling
-        const user = await base44.auth.me();
-        if (!user) {
-          setMetrics({ behavioral: 0, marketSync: 0, loading: false });
-          return;
+        // Behavioral Modeling: based on conversation depth
+        // More messages = better understanding of user patterns
+        const conversationDepth = Math.min(100, messageCount * 5);
+
+        // Market Sync: based on HEX6Memory records showing system stability
+        let marketSyncScore = 50; // baseline
+        try {
+          const memories = await base44.entities.HEX6Memory?.list?.();
+          if (memories && memories.length > 0) {
+            // Calculate based on recent Sharpe ratios and accuracy
+            const recent = memories.slice(-10);
+            const avgSharpe = recent.reduce((s, m) => s + (parseFloat(m.sharpe) || 0), 0) / recent.length;
+            marketSyncScore = Math.min(95, Math.max(50, 50 + (avgSharpe * 10)));
+          }
+        } catch (err) {
+          // Entity may not exist yet, keep baseline
         }
 
-        // Simulate metrics: behavioral increases with activity, market sync increases over time
-        const behavioralScore = Math.min(95, Math.random() * 40 + 50);
-        const marketSyncScore = Math.min(95, Math.random() * 35 + 55);
-
         setMetrics({
-          behavioral: Math.round(behavioralScore),
+          behavioral: Math.round(conversationDepth),
           marketSync: Math.round(marketSyncScore),
           loading: false,
         });
       } catch (err) {
-        setMetrics({ behavioral: 0, marketSync: 0, loading: false });
+        setMetrics({ behavioral: 0, marketSync: 50, loading: false });
       }
     };
 
     loadMetrics();
     
-    // Refresh metrics every 30 seconds
+    // Refresh metrics whenever messageCount changes or every 30 seconds
     const interval = setInterval(loadMetrics, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [messageCount]);
 
   return (
     <div className="bg-muted/30 border border-border rounded-lg p-3 md:p-4 space-y-3">

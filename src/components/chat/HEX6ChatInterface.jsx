@@ -3,7 +3,6 @@ import { base44 } from '@/api/base44Client';
 import { Send, Upload, Menu, Settings, LogOut, Plus, MessageCircle, Zap, Mic, MicOff, BookOpen, X, Image } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import CalibrationPanel from '@/components/CalibrationPanel';
-import DecisionAlignment from '@/components/DecisionAlignment';
 import SettingsModal from '@/components/SettingsModal';
 import LegalModal from '@/components/LegalModal';
 
@@ -304,10 +303,9 @@ export default function HEX6ChatInterface() {
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-3 md:px-6 py-4 md:py-8 space-y-4 md:space-y-6">
-          {/* Calibration & Alignment Panels */}
-          <div className="space-y-3 md:space-y-4 w-full">
-            <CalibrationPanel />
-            <DecisionAlignment />
+          {/* Calibration Panel */}
+          <div className="w-full">
+            <CalibrationPanel messageCount={messages.length} />
           </div>
 
           {messages.map((message) => (
