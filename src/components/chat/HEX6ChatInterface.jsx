@@ -297,7 +297,7 @@ export default function HEX6ChatInterface() {
             <Menu className="w-5 h-5" />
           </button>
           <h2 className="text-center flex-1 font-medium text-sm text-secondary">
-            HEX6 Oracle
+            HEX6 BLE : ORACLE
           </h2>
           {traderEnabled && (
             <span className="text-xs text-accent px-2 py-1 rounded bg-accent/10">
