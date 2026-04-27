@@ -116,7 +116,7 @@ export default function HEX6ChatInterface() {
   };
 
   const handleSendMessage = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() && !uploadedImage) return;
 
     const userMessage = {
       id: Date.now().toString(),
@@ -124,10 +124,13 @@ export default function HEX6ChatInterface() {
       content: input,
     };
 
+    if (uploadedImage) {
+      userMessage.file_urls = [uploadedImage];
+    }
+
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     setInput('');
-    setUploadedImage(null);
     setLoading(true);
 
     try {
@@ -151,48 +154,50 @@ export default function HEX6ChatInterface() {
       if (response.data?.error) throw new Error(response.data.error);
 
       const assistantMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: response.data?.response || 'Unable to process your request.',
+      id: (Date.now() + 1).toString(),
+      role: 'assistant',
+      content: response.data?.response || 'Unable to process your request.',
       };
 
       const updatedMessages = [...newMessages, assistantMessage];
       setMessages(updatedMessages);
+      setUploadedImage(null);
 
       // Auto-save to conversation
       if (currentConversationId) {
-        setConversations((prev) =>
-          prev.map((c) =>
-            c.id === currentConversationId
-              ? { ...c, messages: updatedMessages, updated_at: new Date().toISOString() }
-              : c
-          )
-        );
+      setConversations((prev) =>
+      prev.map((c) =>
+      c.id === currentConversationId
+      ? { ...c, messages: updatedMessages, updated_at: new Date().toISOString() }
+      : c
+      )
+      );
       } else {
-        // Create new conversation if none selected
-        const title = input.substring(0, 30) + (input.length > 30 ? '...' : '');
-        const newConv = {
-          id: Date.now().toString(),
-          title,
-          messages: updatedMessages,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
-        setConversations((prev) => [newConv, ...prev]);
-        setCurrentConversationId(newConv.id);
+      // Create new conversation if none selected
+      const title = input.substring(0, 30) + (input.length > 30 ? '...' : '');
+      const newConv = {
+      id: Date.now().toString(),
+      title,
+      messages: updatedMessages,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      };
+      setConversations((prev) => [newConv, ...prev]);
+      setCurrentConversationId(newConv.id);
       }
-    } catch (err) {
+      } catch (err) {
       console.error(err);
       const errorMsg = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'Error processing your message. Please try again.',
+      id: (Date.now() + 1).toString(),
+      role: 'assistant',
+      content: 'Error processing your message. Please try again.',
       };
       const updatedMessages = [...newMessages, errorMsg];
       setMessages(updatedMessages);
-    } finally {
+      setUploadedImage(null);
+      } finally {
       setLoading(false);
-    }
+      }
   };
 
   const handleNewChat = () => {
