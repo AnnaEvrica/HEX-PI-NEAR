@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
       const { data, error } = await supabase
         .from('egts_receipts')
         .select('*')
-        .order('timestamp', { ascending: false });
+        .order('created_at', { ascending: false });
       if (error) throw new Error(`Fetch failed: ${error.message}`);
       return Response.json({ data: data || [] });
     }
@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
         .from('egts_receipts')
         .select('*')
         .eq('asset_id', payload.assetId)
-        .order('timestamp', { ascending: false });
+        .order('created_at', { ascending: false });
       if (error) throw new Error(`Fetch failed: ${error.message}`);
       return Response.json({ data: data || [] });
     }

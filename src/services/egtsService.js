@@ -47,7 +47,6 @@ export async function mintEgtsAssetFromPie({
     allocation_data: allocationData,
     triggered_by: triggeredBy,
     metadata,
-    timestamp,
     crypto_hash: cryptoHash,
     schema_version: '1.0.0',
     is_verified: true,
