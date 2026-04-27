@@ -95,7 +95,7 @@ export default function Dashboard() {
       {/* Quick actions */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
-          { to: '/trading', icon: FlaskConical, label: 'Trade', desc: 'Place a manual trade or let HEX6 auto-execute the optimal position size.', gold: true },
+          { to: '/trading', icon: FlaskConical, label: 'Trade', desc: 'Place a manual trade or let HEX6 scan 40+ cryptos and auto-execute the best opportunities.', gold: true },
           { to: '/backtest', icon: Activity, label: 'Backtest', desc: 'Simulate your strategy on historical data and see performance metrics.' },
           { to: '/thesis', icon: BookOpen, label: 'Research', desc: 'Generate an AI-powered investment thesis for any asset in your portfolio.' },
         ].map(({ to, icon: Icon, label, desc, gold }) => (

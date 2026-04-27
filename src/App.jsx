@@ -6,6 +6,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import AppLayout from '@/components/layout/AppLayout';
+import Landing from '@/pages/Landing.jsx';
 import Dashboard from '@/pages/Dashboard.jsx';
 import Portfolio from '@/pages/Portfolio';
 import AssetDetail from '@/pages/AssetDetail';
@@ -16,7 +17,7 @@ import Managers from '@/pages/Managers';
 import Thesis from '@/pages/Thesis';
 import Trading from '@/pages/Trading.jsx';
 import About from '@/pages/About';
-import Settings from '@/pages/Settings';
+import Settings from '@/pages/Settings.jsx';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -40,8 +41,9 @@ const AuthenticatedApp = () => {
 
   return (
     <Routes>
+      <Route path="/" element={<Landing />} />
       <Route element={<AppLayout />}>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/portfolio" element={<Portfolio />} />
         <Route path="/portfolio/:id" element={<AssetDetail />} />
         <Route path="/governance" element={<Governance />} />

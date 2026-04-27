@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import HEX6Chat from '@/components/hex6/HEX6Chat';
 
 const NAV = [
-  { path: '/', label: 'Dashboard', icon: BarChart3 },
+  { path: '/dashboard', label: 'Dashboard', icon: BarChart3 },
   { path: '/portfolio', label: 'Portfolio', icon: Activity },
   { path: '/trading', label: 'Trade', icon: FlaskConical },
   { path: '/backtest', label: 'Backtest', icon: BarChart3 },
@@ -37,7 +37,7 @@ export default function AppLayout() {
       {/* Nav */}
       <nav className="border-b border-white/10 px-6 flex items-center gap-8 shrink-0">
         {NAV.map(({ path, label }) => {
-          const active = location.pathname === path || (path !== '/' && location.pathname.startsWith(path));
+          const active = location.pathname === path || (path !== '/dashboard' && location.pathname.startsWith(path));
           return (
             <Link
               key={path}
