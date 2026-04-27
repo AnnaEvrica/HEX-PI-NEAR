@@ -26,12 +26,12 @@ export default function Landing() {
           </div>
 
           <h1 className="text-5xl sm:text-6xl font-bold leading-tight tracking-tight">
-            Portfolio allocation{' '}
-            <span className="text-accent">without bias.</span>
+            Probability.{' '}
+            <span className="text-accent">Not prediction.</span>
           </h1>
 
           <p className="text-lg text-secondary max-w-2xl leading-relaxed">
-            HEX6 BLE is a state-conditioned probabilistic engine that reads market behavior and calculates optimal asset exposure in real time. Pure mathematics. No opinions.
+            HEX6 is a probabilistic intelligence system. It identifies system states, preserves outcome distributions, and generates inference—not forecasts. No opinions. No collapse to a single answer. Only probability, continuously updated.
           </p>
         </div>
 
@@ -53,24 +53,34 @@ export default function Landing() {
 
       {/* How It Works */}
       <section id="how-it-works" className="max-w-4xl mx-auto px-6 py-20 space-y-12">
-        <div className="space-y-3">
-          <h2 className="text-3xl font-bold">The Engine</h2>
-          <p className="text-secondary">Three core principles</p>
+        <div className="space-y-6">
+          <h2 className="text-3xl font-bold">How It Works</h2>
+          <div className="space-y-4 text-secondary">
+            <p className="leading-relaxed">Complex systems don't move linearly. They shift between states.</p>
+            <p className="leading-relaxed">HEX6 models those shifts. At any moment, the system estimates:</p>
+            <ul className="space-y-2 ml-6">
+              <li>• The current state of the system</li>
+              <li>• The range of possible outcomes</li>
+              <li>• The probability of each outcome</li>
+            </ul>
+            <p className="leading-relaxed font-semibold pt-2">Instead of asking <em>"what will happen?"</em></p>
+            <p className="leading-relaxed italic text-foreground">"Given the current state, how is the distribution of outcomes changing?"</p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             {
-              title: 'Reads Market State',
-              desc: 'Analyzes historical price patterns and volatility to classify market conditions—bull, bear, lateral, or volatile.',
+              title: 'State',
+              desc: 'Every system exists in a condition defined by structure, behavior, and change over time. HEX6 identifies that condition.',
             },
             {
-              title: 'Calculates Exposure',
-              desc: 'Determines how much capital should flow to each asset using risk-adjusted mathematics rooted in probability theory.',
+              title: 'Distribution',
+              desc: 'Outcomes exist as a range—each with a likelihood. HEX6 preserves this distribution instead of collapsing it.',
             },
             {
-              title: 'Self-Learns',
-              desc: 'Logs every decision and its outcome, continuously refining its model for what works and what doesn\'t.',
+              title: 'Inference',
+              desc: 'Outputs emerge from probability structure. Not assumption. Not narrative. Only mathematics.',
             },
           ].map((item, i) => (
             <div key={i} className="space-y-3 p-6 rounded-sm border border-border">
@@ -81,58 +91,104 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Why HEX6 */}
+      {/* Structural Difference */}
       <section className="max-w-4xl mx-auto px-6 py-20 space-y-12">
         <div className="space-y-3">
-          <h2 className="text-3xl font-bold">Why HEX6 is Different</h2>
-          <p className="text-secondary">Not a black box. Not a recommendation engine. An oracle.</p>
+          <h2 className="text-3xl font-bold">Structural Difference</h2>
+          <p className="text-secondary">How uncertainty becomes advantage</p>
         </div>
 
         <div className="space-y-6">
           {[
             {
-              label: 'Traditional Quant Models',
-              hex6: 'Probabilistic allocation',
-              hex6Feature: 'Outputs are treated as statements of probability, not truth claims',
+              label: 'Prediction Systems',
+              feature: 'Reduce uncertainty to one answer',
+              hex6: 'Maintain uncertainty as structure',
             },
             {
-              label: 'Robo-Advisors',
-              hex6: 'Market-aware, not sentiment-driven',
-              hex6Feature: 'Reacts only to data. No trend-chasing. No behavioral biases.',
+              label: 'Advisory Systems',
+              feature: 'Provide direction',
+              hex6: 'Map evolving possibility',
             },
             {
-              label: 'AI Trading Systems',
-              hex6: 'Explainable by design',
-              hex6Feature: 'Every decision is logged, auditable, and verifiable through EGTS.',
+              label: 'Black-box Models',
+              feature: 'Obscure reasoning',
+              hex6: 'Produce traceable probabilistic states',
             },
           ].map((item, i) => (
             <div key={i} className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-6 border-b border-border last:border-0">
               <div>
                 <p className="text-sm text-secondary mb-2">{item.label}</p>
-                <p className="font-medium">Tries to predict. Often fails.</p>
+                <p className="font-medium">{item.feature}</p>
               </div>
               <div>
-                <p className="text-sm text-secondary mb-2">HEX6 BLE</p>
+                <p className="text-sm text-secondary mb-2">HEX6</p>
                 <p className="font-medium text-accent">{item.hex6}</p>
-                <p className="text-sm text-secondary mt-2">{item.hex6Feature}</p>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* EGTS Teaser */}
+      {/* Empirical Behavior */}
+      <section className="max-w-4xl mx-auto px-6 py-20 space-y-12">
+        <div className="space-y-3">
+          <h2 className="text-3xl font-bold">Empirical Behavior</h2>
+          <p className="text-secondary">How structural alignment outperforms</p>
+        </div>
+
+        <div className="space-y-8">
+          {[
+            {
+              label: 'High Volatility Regimes',
+              desc: 'In a 6-month simulation with extreme asset divergence (+442% to −75%), traditional models remained continuously exposed.',
+              result: 'Naive allocation: −23% drawdown | HEX6: −6.5% drawdown',
+              insight: 'HEX6 eliminated statistically negative exposure states.',
+            },
+            {
+              label: 'Trend + Chop Transitions',
+              desc: 'In mixed regimes (trend → sideways → volatility spikes), traditional quants overfitted to prior trends.',
+              result: 'Lower trade frequency, higher risk-adjusted returns, reduced volatility clustering',
+              insight: 'Reduced exposure during low-confidence states, re-engaged only at probability stabilization.',
+            },
+            {
+              label: 'Macro / Event-Driven Systems',
+              desc: 'Under discontinuities (rate shocks, macro releases), prediction systems collapse to outdated assumptions.',
+              result: 'Avoidance of false certainty, faster adaptation to new regimes',
+              insight: 'HEX6 reclassifies system state and expands uncertainty distribution.',
+            },
+          ].map((item, i) => (
+            <div key={i} className="space-y-3 p-6 rounded-sm border border-border bg-muted/30">
+              <h3 className="font-bold text-accent">{item.label}</h3>
+              <p className="text-sm text-secondary">{item.desc}</p>
+              <div className="py-3 px-3 bg-black/20 rounded text-sm text-foreground font-mono">
+                {item.result}
+              </div>
+              <p className="text-sm text-secondary"><strong>Insight:</strong> {item.insight}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="p-6 rounded-sm border border-accent/30 bg-accent/5 space-y-3">
+          <p className="font-medium">Why This Outperforms</p>
+          <p className="text-sm text-secondary leading-relaxed">
+            Most models fail because they are forced to act—even when no edge exists. HEX6 introduces a structural condition: <em>if expected utility is negative, exposure approaches zero.</em> No override. No bias. No narrative.
+          </p>
+        </div>
+      </section>
+
+      {/* Verification */}
       <section className="max-w-4xl mx-auto px-6 py-20 space-y-12">
         <div className="space-y-6 p-8 rounded-sm border border-accent/20 bg-accent/5">
           <div className="flex items-start gap-3">
             <Lock className="w-5 h-5 text-accent shrink-0 mt-1" />
-            <div className="space-y-2">
-              <h3 className="font-bold text-lg">Every decision is sealed.</h3>
+            <div className="space-y-3">
+              <h3 className="font-bold text-lg">Verification by Structure</h3>
               <p className="text-secondary leading-relaxed">
-                EGTS—the Evrica Global Token Standard—creates an immutable, cryptographically verified record of every HEX6 decision. Not for blockchain hype. For institutional transparency.
+                Every output is recorded—not as a claim, but as a state. EGTS creates an immutable record of system conditions, probability structures, and resulting inference states. This is not for visibility. It is for verification.
               </p>
-              <p className="text-sm text-secondary/60 pt-2">
-                Part of Trading Mode, launching soon.
+              <p className="text-secondary leading-relaxed text-sm pt-2">
+                HEX6 introduces no execution layer. No mandates. No embedded action. A pure computational layer between data and decision.
               </p>
             </div>
           </div>
