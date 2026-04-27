@@ -195,17 +195,127 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Compare & Contrast */}
+      <section className="max-w-4xl mx-auto px-6 py-20 space-y-12">
+        <div className="space-y-3">
+          <h2 className="text-3xl font-bold">Compare & Contrast</h2>
+          <p className="text-secondary">Not about being right. About not being wrong when it matters.</p>
+        </div>
+
+        <div className="space-y-8">
+          <div className="space-y-4">
+            <h3 className="text-xl font-bold">What Each System Optimizes For</h3>
+            <div className="space-y-3">
+              {[
+                {
+                  label: 'AI Models',
+                  sub: 'e.g., ChatGPT, Perplexity',
+                  goal: 'Correct answers',
+                },
+                {
+                  label: 'Quant Models',
+                  sub: 'e.g., RSI, momentum, ML predictors',
+                  goal: 'Prediction accuracy',
+                },
+                {
+                  label: 'HEX6',
+                  sub: 'Probabilistic intelligence',
+                  goal: 'Probability-weighted exposure under uncertainty',
+                  accent: true,
+                },
+              ].map((item, i) => (
+                <div key={i} className={`flex items-start gap-4 p-4 rounded-sm border ${item.accent ? 'border-accent/30 bg-accent/5' : 'border-border'}`}>
+                  <div className="flex-1">
+                    <p className="font-bold">{item.label}</p>
+                    <p className="text-xs text-secondary mb-2">{item.sub}</p>
+                    <p className={`text-sm ${item.accent ? 'text-accent font-semibold' : 'text-foreground'}`}>→ {item.goal}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-4 p-6 rounded-sm border border-border bg-muted/30">
+            <h3 className="text-lg font-bold">Real Condition: High Dispersion Market</h3>
+            <p className="text-sm text-secondary">6-month out-of-sample simulation</p>
+            <ul className="space-y-2 text-sm text-secondary">
+              <li>• Assets ranged from <strong>+442% to −75%</strong></li>
+              <li>• Regimes shifted violently (trend → chop → collapse)</li>
+            </ul>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="font-bold">Traditional Quant Behavior</h3>
+            <div className="space-y-3 text-sm">
+              <p className="text-secondary">Maintains continuous exposure. Follows trend signals or learned patterns. Overfits to prior regime.</p>
+              <div className="p-4 bg-red-950/20 border border-red-800/40 rounded text-sm space-y-2">
+                <p className="font-semibold text-red-300">Observed Outcome</p>
+                <ul className="space-y-1 text-red-200/80">
+                  <li>• Higher peak return</li>
+                  <li>• <strong>−23.7% drawdown</strong></li>
+                  <li>• Capital exposed to collapsing assets</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="font-bold">HEX6 Behavior</h3>
+            <div className="space-y-3 text-sm">
+              <p className="text-secondary">Classifies market state first. Models outcome distribution. Reduces exposure when expected utility turns negative.</p>
+              <div className="p-4 bg-accent/10 border border-accent/30 rounded text-sm space-y-2">
+                <p className="font-semibold text-accent">Observed Outcome</p>
+                <ul className="space-y-1 text-accent/90">
+                  <li>• Lower absolute return</li>
+                  <li>• <strong>−6.5% drawdown</strong></li>
+                  <li>• Capital preserved during regime breakdown</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3 p-4 rounded-sm border border-border">
+              <p className="font-bold text-sm">Quant Models Fail When</p>
+              <ul className="text-xs space-y-2 text-secondary">
+                <li>• Regime changes</li>
+                <li>• Signal degrades</li>
+                <li>• Noise is mistaken for pattern</li>
+              </ul>
+            </div>
+            <div className="space-y-3 p-4 rounded-sm border border-accent/30 bg-accent/5">
+              <p className="font-bold text-sm text-accent">HEX6 Adapts Because</p>
+              <ul className="text-xs space-y-2 text-secondary">
+                <li>• Does not require prediction</li>
+                <li>• Recalculates distribution per state</li>
+                <li>• Allows <em>exposure → 0</em> when no edge exists</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="space-y-4 p-6 rounded-sm border border-border bg-muted/30">
+            <h3 className="font-bold">Core Insight</h3>
+            <p className="text-sm leading-relaxed">
+              <span className="text-secondary">Traditional systems try to be </span><strong>right</strong><span className="text-secondary">.</span>
+            </p>
+            <p className="text-sm leading-relaxed text-accent font-semibold">
+              HEX6 is designed to <strong>not be wrong when it matters</strong>.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="max-w-4xl mx-auto px-6 py-20 space-y-8">
         <div className="space-y-4">
-          <h2 className="text-3xl font-bold">Ready to think differently about allocation?</h2>
-          <p className="text-lg text-secondary">No credit card required. 7-day free trial.</p>
+          <h2 className="text-3xl font-bold">Ready to observe how outcomes reorganize?</h2>
+          <p className="text-lg text-secondary">No credit card required. No prediction. Only probability.</p>
         </div>
         <Link
           to="/app"
           className="inline-flex items-center gap-2 px-8 py-4 rounded-sm bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors text-lg"
         >
-          Start Trial <ArrowRight className="w-4 h-4" />
+          Enter Oracle <ArrowRight className="w-4 h-4" />
         </Link>
       </section>
 
