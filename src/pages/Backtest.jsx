@@ -4,7 +4,6 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
 import { Play, BarChart2, TrendingUp, TrendingDown, Shield, AlertTriangle } from 'lucide-react';
-import EGTSBadge from '@/components/egts/EGTSBadge';
 
 const PRESET_PORTFOLIOS = [
   { label: 'Crypto Core', tickers: ['BTC-USD', 'ETH-USD', 'SOL-USD'] },
@@ -15,11 +14,11 @@ const PRESET_PORTFOLIOS = [
 
 function MetricCard({ label, value, sub, color = 'text-white', icon: Icon }) {
   return (
-    <div className="p-4 rounded-xl bg-white/3 border border-white/8">
-      {Icon && <Icon className={`w-4 h-4 mb-2 ${color}`} />}
-      <p className={`text-2xl font-bold font-mono ${color}`}>{value}</p>
-      <p className="text-xs text-slate-400 mt-0.5">{label}</p>
-      {sub && <p className="text-xs text-slate-600 mt-0.5">{sub}</p>}
+    <div className="p-5 bg-[#111111] border border-white/10 rounded-xl">
+      {Icon && <Icon className={`w-4 h-4 mb-3 ${color}`} />}
+      <p className={`text-3xl font-bold font-mono ${color}`}>{value}</p>
+      <p className="text-xs text-white/40 mt-1">{label}</p>
+      {sub && <p className="text-xs text-white/20 mt-0.5">{sub}</p>}
     </div>
   );
 }
@@ -115,31 +114,26 @@ export default function Backtest() {
   const fmt2 = (v) => v?.toFixed(2) ?? '—';
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-8">
+    <div className="max-w-4xl mx-auto px-6 py-12 space-y-10">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Backtest Engine</h1>
-          <p className="text-sm text-slate-400 mt-1">
-            HEX6 BLE v5.0 · Historical simulation with real market data · EGTS-audited
-          </p>
-        </div>
-        <EGTSBadge status="verified" size="lg" />
+      <div className="space-y-2">
+        <h1 className="text-4xl font-bold text-white">Backtest Engine</h1>
+        <p className="text-sm text-white/40">HEX6 BLE v5.0 · Historical simulation with real market data · EGTS-audited</p>
       </div>
 
       {/* Config Panel */}
-      <div className="p-5 rounded-2xl bg-white/3 border border-white/10 space-y-5">
-        <h2 className="text-sm font-semibold text-white">Configuration</h2>
+      <div className="bg-[#111111] border border-white/10 rounded-xl p-6 space-y-6">
+        <h2 className="text-xs font-bold text-white/40 uppercase tracking-widest">Configuration</h2>
 
         {/* Preset portfolios */}
         <div>
-          <p className="text-xs text-slate-500 mb-2">Preset Portfolios</p>
+          <p className="text-xs text-white/30 uppercase tracking-widest mb-2">Preset Portfolios</p>
           <div className="flex flex-wrap gap-2">
             {PRESET_PORTFOLIOS.map((p) => (
               <button
                 key={p.label}
                 onClick={() => setSelectedTickers(p.tickers)}
-                className="text-xs px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
+                className="text-xs px-3 py-2 rounded-lg border border-white/10 text-white/50 hover:border-[#C9A84C]/50 hover:text-[#C9A84C] transition-colors"
               >
                 {p.label}
               </button>
@@ -150,16 +144,16 @@ export default function Backtest() {
         {/* Asset selection from portfolio */}
         {assets.length > 0 && (
           <div>
-            <p className="text-xs text-slate-500 mb-2">Your Portfolio Assets</p>
+            <p className="text-xs text-white/30 uppercase tracking-widest mb-2">Your Portfolio Assets</p>
             <div className="flex flex-wrap gap-2">
               {assets.map((a) => (
                 <button
                   key={a.ticker}
                   onClick={() => toggleTicker(a.ticker)}
-                  className={`text-xs px-3 py-1.5 rounded-lg border font-mono transition-colors ${
+                  className={`text-xs px-3 py-2 rounded-lg border font-mono transition-colors ${
                     selectedTickers.includes(a.ticker)
-                      ? 'bg-blue-900/60 border-blue-600/50 text-blue-200'
-                      : 'bg-white/5 border-white/10 text-slate-400 hover:text-slate-200'
+                      ? 'border-[#C9A84C] text-[#C9A84C] bg-[#C9A84C]/10'
+                      : 'border-white/10 text-white/40 hover:text-white/70'
                   }`}
                 >
                   {a.ticker}
@@ -171,19 +165,17 @@ export default function Backtest() {
 
         {/* Custom ticker */}
         <div>
-          <p className="text-xs text-slate-500 mb-2">Add Ticker (Yahoo Finance symbol)</p>
+          <p className="text-xs text-white/30 uppercase tracking-widest mb-2">Add Ticker (Yahoo Finance symbol)</p>
           <div className="flex gap-2">
             <input
               value={customTicker}
               onChange={(e) => setCustomTicker(e.target.value.toUpperCase())}
               onKeyDown={(e) => e.key === 'Enter' && addCustom()}
               placeholder="e.g. TSLA, ETH-USD, GLD"
-              className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm font-mono text-white placeholder-slate-600 focus:outline-none focus:border-blue-500/50"
+              className="flex-1 bg-black border border-white/10 rounded-lg px-3 py-2.5 text-sm font-mono text-white placeholder-white/20 focus:outline-none focus:border-[#C9A84C]/50"
             />
-            <button
-              onClick={addCustom}
-              className="px-4 py-2 rounded-lg bg-blue-900/50 border border-blue-700/40 text-blue-300 text-sm hover:bg-blue-900/80 transition-colors"
-            >
+            <button onClick={addCustom}
+              className="px-5 py-2.5 rounded-lg border border-[#C9A84C]/50 text-[#C9A84C] text-sm hover:bg-[#C9A84C]/10 transition-colors">
               Add
             </button>
           </div>
@@ -193,58 +185,47 @@ export default function Backtest() {
         {selectedTickers.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {selectedTickers.map((t) => (
-              <span
-                key={t}
-                className="flex items-center gap-1 text-xs font-mono px-2.5 py-1 rounded-full bg-emerald-950/60 border border-emerald-700/40 text-emerald-300"
-              >
+              <span key={t} className="flex items-center gap-1 text-xs font-mono px-2.5 py-1.5 rounded-lg border border-[#C9A84C]/40 text-[#C9A84C]">
                 {t}
-                <button
-                  onClick={() => setSelectedTickers((prev) => prev.filter((x) => x !== t))}
-                  className="ml-1 text-emerald-600 hover:text-emerald-300"
-                >×</button>
+                <button onClick={() => setSelectedTickers((prev) => prev.filter((x) => x !== t))}
+                  className="ml-1 text-[#C9A84C]/40 hover:text-[#C9A84C]">×</button>
               </span>
             ))}
           </div>
         )}
 
         {/* Parameters */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div>
-            <label className="text-xs text-slate-500 block mb-1.5">
-              Lookback Period: <span className="text-slate-300">{lookback} days</span>
+            <label className="text-xs text-white/40 block mb-2 uppercase tracking-widest">
+              Lookback: <span className="text-white">{lookback} days</span>
             </label>
-            <input
-              type="range" min={180} max={1095} step={30} value={lookback}
+            <input type="range" min={180} max={1095} step={30} value={lookback}
               onChange={(e) => setLookback(Number(e.target.value))}
-              className="w-full accent-blue-500"
-            />
-            <div className="flex justify-between text-xs text-slate-700 mt-1">
+              className="w-full accent-[#C9A84C]" />
+            <div className="flex justify-between text-xs text-white/20 mt-1">
               <span>6mo</span><span>1yr</span><span>2yr</span><span>3yr</span>
             </div>
           </div>
           <div>
-            <label className="text-xs text-slate-500 block mb-1.5">
-              Risk Aversion: <span className="text-slate-300">{riskAversion}×</span>
+            <label className="text-xs text-white/40 block mb-2 uppercase tracking-widest">
+              Risk Aversion: <span className="text-white">{riskAversion}×</span>
             </label>
-            <input
-              type="range" min={0.5} max={5} step={0.5} value={riskAversion}
+            <input type="range" min={0.5} max={5} step={0.5} value={riskAversion}
               onChange={(e) => setRiskAversion(Number(e.target.value))}
-              className="w-full accent-violet-500"
-            />
-            <div className="flex justify-between text-xs text-slate-700 mt-1">
+              className="w-full accent-[#C9A84C]" />
+            <div className="flex justify-between text-xs text-white/20 mt-1">
               <span>Aggr</span><span>Mod</span><span>Cons</span>
             </div>
           </div>
           <div>
-            <label className="text-xs text-slate-500 block mb-1.5">
-              Friction: <span className="text-slate-300">{frictionBps} bps</span>
+            <label className="text-xs text-white/40 block mb-2 uppercase tracking-widest">
+              Friction: <span className="text-white">{frictionBps} bps</span>
             </label>
-            <input
-              type="range" min={0} max={100} step={5} value={frictionBps}
+            <input type="range" min={0} max={100} step={5} value={frictionBps}
               onChange={(e) => setFrictionBps(Number(e.target.value))}
-              className="w-full accent-amber-500"
-            />
-            <div className="flex justify-between text-xs text-slate-700 mt-1">
+              className="w-full accent-[#C9A84C]" />
+            <div className="flex justify-between text-xs text-white/20 mt-1">
               <span>0</span><span>50</span><span>100</span>
             </div>
           </div>
@@ -254,7 +235,7 @@ export default function Backtest() {
         <button
           onClick={runBacktest}
           disabled={running || selectedTickers.length === 0}
-          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-800/70 to-violet-800/70 border border-blue-600/40 text-white text-sm font-semibold hover:from-blue-700/70 hover:to-violet-700/70 transition-all disabled:opacity-40"
+          className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#C9A84C] text-black text-sm font-bold hover:bg-[#b8973d] transition-colors disabled:opacity-40"
         >
           <Play className="w-4 h-4" />
           {fetchingData ? 'Fetching market data…' : running ? 'Running HEX6 simulation…' : 'Run Backtest'}
@@ -263,7 +244,7 @@ export default function Backtest() {
 
       {/* Error */}
       {error && (
-        <div className="p-4 rounded-xl bg-red-950/30 border border-red-700/40 text-sm text-red-400">
+        <div className="p-4 rounded-xl bg-black border border-red-900/50 text-sm text-red-400">
           {error}
         </div>
       )}
@@ -296,10 +277,10 @@ export default function Backtest() {
           </div>
 
           {/* Equity Curve */}
-          <div className="p-5 rounded-2xl bg-white/3 border border-white/10">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-semibold text-white">Equity Curve</h2>
-              <EGTSBadge status="verified" size="sm" />
+          <div className="p-6 bg-[#111111] border border-white/10 rounded-xl">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-base font-bold text-white">Equity Curve</h2>
+              <span className="text-xs text-[#C9A84C] font-medium flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[#C9A84C]" />EGTS Verified</span>
             </div>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
@@ -318,16 +299,16 @@ export default function Backtest() {
           </div>
 
           {/* Market data quality */}
-          <div className="p-4 rounded-xl bg-white/3 border border-white/8">
-            <p className="text-xs font-semibold text-slate-400 mb-2">Data Sources</p>
-            <div className="flex flex-wrap gap-3">
+          <div className="p-4 bg-[#111111] border border-white/10 rounded-xl">
+            <p className="text-xs text-white/30 uppercase tracking-widest mb-3">Data Sources</p>
+            <div className="flex flex-wrap gap-4">
               {result.tickers.map((t) => {
                 const d = result.marketData?.[t];
                 return (
                   <div key={t} className="flex items-center gap-2 text-xs">
-                    <span className={`w-2 h-2 rounded-full ${d?.synthetic ? 'bg-amber-500' : 'bg-emerald-500'}`} />
-                    <span className="font-mono text-slate-300">{t}</span>
-                    <span className="text-slate-600">{d?.dataPoints || 0} pts {d?.synthetic ? '(synthetic)' : '(live)'}</span>
+                    <span className={`w-2 h-2 rounded-full ${d?.synthetic ? 'bg-amber-500' : 'bg-[#C9A84C]'}`} />
+                    <span className="font-mono text-white/60">{t}</span>
+                    <span className="text-white/20">{d?.dataPoints || 0} pts {d?.synthetic ? '(synthetic)' : '(live)'}</span>
                   </div>
                 );
               })}
@@ -335,8 +316,8 @@ export default function Backtest() {
           </div>
 
           {/* EGTS Receipt Note */}
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-emerald-950/20 border border-emerald-800/30 text-xs text-emerald-400">
-            <Shield className="w-4 h-4 shrink-0" />
+          <div className="flex items-center gap-3 p-4 rounded-xl border border-[#C9A84C]/20 text-xs text-[#C9A84C]/70">
+            <Shield className="w-4 h-4 shrink-0 text-[#C9A84C]" />
             This backtest run has been minted as an immutable EGTS receipt. View it in Governance → filter by MANUAL.
           </div>
         </div>
