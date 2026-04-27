@@ -123,18 +123,26 @@ export default function HEX6ChatInterface() {
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     setInput('');
+    setUploadedImage(null);
     setLoading(true);
 
     try {
       // Get user preferences from localStorage
       const prefs = JSON.parse(localStorage.getItem('hex6_user_prefs') || '{}');
       
-      const response = await base44.functions.invoke('hex6Chat', {
+      const payload = {
         message: input,
         conversationHistory: newMessages,
         analyticalDepth: prefs.analyticalDepth || 'executive',
         riskAversion: prefs.riskAversion || 2.5,
-      });
+      };
+
+      // Add image if uploaded
+      if (uploadedImage) {
+        payload.file_urls = [uploadedImage];
+      }
+
+      const response = await base44.functions.invoke('hex6Chat', payload);
 
       if (response.data?.error) throw new Error(response.data.error);
 
@@ -356,18 +364,7 @@ export default function HEX6ChatInterface() {
         </div>
 
         {/* Input */}
-        <div className="border-t border-border px-3 md:px-6 py-3 md:py-4 space-y-2 md:space-y-3 bg-background">
-          {uploadedImage && (
-            <div className="flex items-center justify-between px-2 md:px-3 py-1.5 md:py-2 rounded-sm bg-accent/10 border border-accent/30 text-xs md:text-sm">
-              <span className="text-secondary">✓ Image ready</span>
-              <button
-                onClick={() => setUploadedImage(null)}
-                className="text-accent hover:text-accent/70"
-              >
-                Clear
-              </button>
-            </div>
-          )}
+        <div className="border-t border-border px-3 md:px-6 py-3 md:py-4 bg-background">
           <div className="flex items-center gap-2 md:gap-3">
             <button
               onClick={handleVoiceInput}
