@@ -188,68 +188,47 @@ export default function SettingsModal({
 
           {activeTab === 'account' && (
             <div className="space-y-4">
-              {/* Profile Info */}
+              {/* Profile Card */}
               {user && (
-                <div className="p-4 border border-border rounded-sm space-y-2">
-                  <p className="text-xs text-secondary font-medium uppercase">Profile</p>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center text-accent font-bold">
+                <div className="p-6 border border-border rounded-sm space-y-6">
+                  {/* Avatar & Name */}
+                  <div className="flex items-start gap-4">
+                    <div className="w-16 h-16 rounded-full bg-accent/20 flex items-center justify-center text-accent font-bold text-lg">
                       {user.full_name?.[0] || user.email?.[0] || '?'}
                     </div>
                     <div>
-                      <p className="text-sm font-medium">{user.full_name || 'User'}</p>
-                      <p className="text-xs text-secondary">{user.email}</p>
+                      <p className="text-lg font-bold">{user.full_name || 'User'}</p>
+                      <p className="text-sm text-secondary">{user.email}</p>
+                      <p className="text-xs text-secondary/60 mt-1">Oracle Member</p>
+                    </div>
+                  </div>
+
+                  {/* Account Details */}
+                  <div className="space-y-3 pt-4 border-t border-border">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-secondary font-medium uppercase">Email</span>
+                      <span className="text-sm text-foreground">{user.email}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-secondary font-medium uppercase">Status</span>
+                      <span className="text-sm text-accent font-medium">Active</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-secondary font-medium uppercase">Role</span>
+                      <span className="text-sm text-foreground capitalize">{user.role || 'user'}</span>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Upload Image for HEX6 Analysis */}
-              <div className="p-4 border border-border rounded-sm space-y-3">
-                <div className="flex items-center gap-2 text-sm font-medium mb-2">
-                  <Upload className="w-4 h-4 text-accent" />
-                  Upload Image for Analysis
-                </div>
-                <label className="flex items-center justify-center w-full px-4 py-2 border border-dashed border-border rounded-sm hover:border-accent cursor-pointer transition-colors">
-                  <span className="text-xs text-secondary">Choose image or drag here</span>
-                  <input type="file" accept="image/*" onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) setUploadedImage(file.name);
-                  }} disabled={loading} className="hidden" />
-                </label>
-                {uploadedImage && (
-                  <p className="text-xs text-accent">✓ Image ready for HEX6 analysis</p>
-                )}
-                <p className="text-xs text-secondary">HEX6 can analyze charts, portfolios, and market data from images</p>
-              </div>
-
-              {/* Email */}
-              <div className="p-4 border border-border rounded-sm space-y-3">
-                <div className="flex items-center gap-2 text-sm font-medium mb-2">
-                  <Mail className="w-4 h-4" />
-                  Notification Email
-                </div>
-                <input
-                  type="email"
-                  value={notificationEmail}
-                  onChange={(e) => setNotificationEmail(e.target.value)}
-                  className="w-full px-3 py-2 rounded-sm border border-border bg-black/20 text-sm text-white placeholder-white/30"
-                  placeholder="your@email.com"
-                />
-                <p className="text-xs text-secondary">Where HEX6 will send market insights and alerts</p>
-              </div>
-
-              {/* Account Actions */}
-              <div className="p-4 border border-border rounded-sm space-y-3">
-                <p className="text-sm font-medium">Account Actions</p>
-                <button
-                  onClick={handleLogout}
-                  disabled={loading}
-                  className="w-full px-4 py-2 rounded-sm border border-border text-sm font-medium hover:bg-muted transition-colors disabled:opacity-40"
-                >
-                  Sign Out
-                </button>
-              </div>
+              {/* Sign Out */}
+              <button
+                onClick={handleLogout}
+                disabled={loading}
+                className="w-full px-4 py-2 rounded-sm border border-destructive/50 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-40"
+              >
+                Sign Out
+              </button>
             </div>
           )}
 
@@ -297,39 +276,32 @@ export default function SettingsModal({
 
           {activeTab === 'notifications' && (
             <div className="space-y-4">
-              {/* Trader Mode (Moved Here) */}
-              <div className="p-4 border border-accent/30 bg-accent/5 rounded-sm space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-accent" />
-                    <label className="text-sm font-medium">Trader Mode Notifications</label>
-                  </div>
-                  <button
-                    onClick={() => onTraderToggle(!traderEnabled)}
-                    className={`relative w-12 h-6 rounded-full transition-colors ${
-                      traderEnabled ? 'bg-accent' : 'bg-border'
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${
-                        traderEnabled ? 'left-7' : 'left-1'
-                      }`}
-                    />
-                  </button>
+              {/* Trader Mode Coming Soon */}
+              <div className="p-4 border border-border rounded-sm bg-muted/30 space-y-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <Zap className="w-4 h-4 text-accent" />
+                  <h3 className="text-sm font-medium">Trader Mode</h3>
+                  <span className="text-xs bg-accent/20 text-accent px-2 py-0.5 rounded">Coming Soon</span>
                 </div>
-                <p className="text-xs text-secondary">
-                  {traderEnabled
-                    ? 'Get real-time trade opportunities and execution alerts'
-                    : 'Enable for automated trading insights and signals'}
+                <p className="text-xs text-secondary leading-relaxed">
+                  Real-time trade execution signals and momentum alerts. Early access coming soon—register your interest to be notified.
                 </p>
+                <input
+                  type="email"
+                  placeholder="your@email.com"
+                  className="w-full px-3 py-2 rounded-sm border border-border bg-black/20 text-xs text-white placeholder-white/30"
+                />
+                <button className="w-full px-3 py-1.5 rounded-sm border border-accent text-accent text-xs font-medium hover:bg-accent/10 transition-colors">
+                  Notify Me
+                </button>
               </div>
 
-              {/* Enable/Disable Market Notifications */}
+              {/* Enable/Disable Market Insights */}
               <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Bell className="w-4 h-4" />
-                    <label className="text-sm font-medium">Market Insights</label>
+                    <label className="text-sm font-medium">HEX6 Market Insights</label>
                   </div>
                   <button
                     onClick={() => setNotificationsEnabled(!notificationsEnabled)}
@@ -346,16 +318,29 @@ export default function SettingsModal({
                 </div>
                 <p className="text-xs text-secondary">
                   {notificationsEnabled
-                    ? 'Tailored to your recent HEX6 chat discussions'
-                    : 'Enable to receive AI-generated market insights'}
+                    ? 'Get personalized insights based on your conversations'
+                    : 'Enable to receive HEX6\'s personalized market insights'}
                 </p>
               </div>
 
               {notificationsEnabled && (
                 <>
+                  {/* Notification Email */}
+                  <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
+                    <p className="text-sm font-medium">Notification Email</p>
+                    <input
+                      type="email"
+                      value={notificationEmail}
+                      onChange={(e) => setNotificationEmail(e.target.value)}
+                      className="w-full px-3 py-2 rounded-sm border border-border bg-black/20 text-sm text-white placeholder-white/30"
+                      placeholder="your@email.com"
+                    />
+                    <p className="text-xs text-secondary">Where HEX6 will send personalized insights</p>
+                  </div>
+
                   {/* Notification Times */}
                   <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
-                    <p className="text-sm font-medium">Notification Times</p>
+                    <p className="text-sm font-medium">Preferred Times</p>
                     <div className="space-y-2">
                       {[0, 1, 2].map((idx) => (
                         <input
@@ -376,8 +361,8 @@ export default function SettingsModal({
 
                   {/* Content Preferences */}
                   <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
-                    <p className="text-sm font-medium">Personalized Content</p>
-                    <p className="text-xs text-secondary/70">HEX6 learns from your chat history to tailor notifications</p>
+                    <p className="text-sm font-medium">What HEX6 Should Focus On</p>
+                    <p className="text-xs text-secondary/70">HEX6 learns from your chat history to tailor each insight</p>
                     <label className="flex items-center gap-3 text-sm text-secondary hover:text-foreground cursor-pointer">
                       <input
                         type="checkbox"
@@ -385,7 +370,7 @@ export default function SettingsModal({
                         onChange={(e) => setMarketTrends(e.target.checked)}
                         className="w-4 h-4 accent-accent"
                       />
-                      Market Trends (from your discussions)
+                      Market Trends & Analysis
                     </label>
                     <label className="flex items-center gap-3 text-sm text-secondary hover:text-foreground cursor-pointer">
                       <input
@@ -394,20 +379,20 @@ export default function SettingsModal({
                         onChange={(e) => setPredictions(e.target.checked)}
                         className="w-4 h-4 accent-accent"
                       />
-                      HEX6 BLE Allocations (relevant to assets you track)
+                      Allocations & Opportunities
                     </label>
                   </div>
 
                   {/* Watched Assets */}
                   <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
-                    <p className="text-sm font-medium">Watch Specific Assets (Optional)</p>
+                    <p className="text-sm font-medium">Track Specific Assets (Optional)</p>
                     <textarea
                       value={watchedAssets}
                       onChange={(e) => setWatchedAssets(e.target.value)}
                       placeholder="e.g., BTC, ETH, SPY (comma-separated)"
-                      className="w-full px-3 py-2 rounded-sm bg-black/20 border border-border text-xs text-white placeholder-white/30 h-16"
+                      className="w-full px-3 py-2 rounded-sm bg-black/20 border border-border text-xs text-white placeholder-white/30 h-14"
                     />
-                    <p className="text-xs text-secondary">Leave empty to get general market alerts</p>
+                    <p className="text-xs text-secondary">Leave empty for general market insights</p>
                   </div>
 
                   {/* Test Notification */}
@@ -415,27 +400,26 @@ export default function SettingsModal({
                     onClick={async () => {
                       setLoading(true);
                       try {
-                        const res = await base44.functions.invoke('marketNotifications', {
+                        const res = await base44.functions.invoke('generateHEX6Notification', {
                           action: 'sendTest',
-                          notificationPrefs: {
-                            enabled: true,
-                            times: notificationTimes,
+                          email: notificationEmail,
+                          preferences: {
                             marketTrends,
                             predictions,
                             assets: watchedAssets.split(',').map(a => a.trim()).filter(Boolean),
                           },
                         });
-                        setMessage({ type: 'success', text: res.data?.message || 'Test notification sent' });
+                        setMessage({ type: 'success', text: 'Notification sent—check your inbox!' });
                       } catch (err) {
                         setMessage({ type: 'error', text: err.message });
                       } finally {
                         setLoading(false);
                       }
                     }}
-                    disabled={loading}
-                    className="w-full px-4 py-2 rounded-sm border border-border text-sm font-medium hover:bg-muted transition-colors disabled:opacity-40"
+                    disabled={loading || !notificationEmail}
+                    className="w-full px-4 py-3 rounded-sm bg-accent text-accent-foreground text-sm font-medium hover:bg-accent/90 transition-colors disabled:opacity-40"
                   >
-                    Send Test Notification
+                    Send Test Insight
                   </button>
                 </>
               )}
