@@ -21,8 +21,8 @@ export default function Landing() {
       <section className="max-w-4xl mx-auto px-6 py-24 space-y-8">
         <div className="space-y-6">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm bg-accent/10 border border-accent/30">
-            <Zap className="w-4 h-4 text-accent" />
-            <span className="text-sm font-medium text-accent">Oracle Intelligence</span>
+            <span className="text-sm font-bold text-accent">HEX6</span>
+            <span className="text-sm font-medium text-accent">Probabilistic Intelligence</span>
           </div>
 
           <h1 className="text-5xl sm:text-6xl font-bold leading-tight tracking-tight">
