@@ -100,9 +100,9 @@ Violation of these terms may result in account suspension or termination.`,
         <div className="border-t border-border px-6 py-4 flex justify-end shrink-0">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-sm bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm font-medium"
+            className="px-4 py-2 rounded-sm border border-border hover:bg-muted transition-colors text-sm font-medium"
           >
-            I Acknowledge
+            Close
           </button>
         </div>
       </div>
