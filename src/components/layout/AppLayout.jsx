@@ -1,10 +1,12 @@
 import { Link, useLocation, Outlet } from 'react-router-dom';
-import { BarChart3, Shield, BookOpen, Activity } from 'lucide-react';
+import { BarChart3, Shield, BookOpen, Activity, FlaskConical, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const NAV = [
   { path: '/', label: 'Dashboard', icon: BarChart3 },
   { path: '/portfolio', label: 'Portfolio', icon: Activity },
+  { path: '/backtest', label: 'Backtest', icon: FlaskConical },
+  { path: '/managers', label: 'Managers', icon: Users },
   { path: '/governance', label: 'Governance', icon: Shield },
   { path: '/legal', label: 'Legal', icon: BookOpen },
 ];
@@ -54,7 +56,7 @@ export default function AppLayout() {
         {/* Footer */}
         <div className="p-4 border-t border-white/8">
           <p className="text-xs text-slate-600 font-mono">EGTS v1.0.0</p>
-          <p className="text-xs text-slate-700 font-mono">HEX6-BLE-STUB</p>
+          <p className="text-xs text-slate-700 font-mono">HEX6-BLE-v5.0</p>
         </div>
       </aside>
 

@@ -11,6 +11,8 @@ import Portfolio from '@/pages/Portfolio';
 import AssetDetail from '@/pages/AssetDetail';
 import Governance from '@/pages/Governance';
 import Legal from '@/pages/Legal';
+import Backtest from '@/pages/Backtest';
+import Managers from '@/pages/Managers';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -40,6 +42,8 @@ const AuthenticatedApp = () => {
         <Route path="/portfolio/:id" element={<AssetDetail />} />
         <Route path="/governance" element={<Governance />} />
         <Route path="/legal" element={<Legal />} />
+        <Route path="/backtest" element={<Backtest />} />
+        <Route path="/managers" element={<Managers />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

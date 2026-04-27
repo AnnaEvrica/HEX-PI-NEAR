@@ -1,0 +1,52 @@
+{
+  "name": "Manager",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Manager full name"
+    },
+    "firm": {
+      "type": "string",
+      "description": "Firm or institution name"
+    },
+    "aum": {
+      "type": "number",
+      "description": "Assets Under Management in USD"
+    },
+    "risk_profile": {
+      "type": "string",
+      "enum": [
+        "conservative",
+        "moderate",
+        "aggressive"
+      ],
+      "default": "moderate",
+      "description": "Risk tolerance profile"
+    },
+    "assigned_assets": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of asset tickers assigned to this manager"
+    },
+    "email": {
+      "type": "string",
+      "description": "Manager contact email"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "notes": {
+      "type": "string",
+      "description": "Internal notes"
+    }
+  },
+  "required": [
+    "name",
+    "firm",
+    "aum"
+  ]
+}

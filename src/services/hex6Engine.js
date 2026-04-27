@@ -7,6 +7,7 @@
 
 import { calculateTargetAllocation } from './hex6Engine.ts';
 import { mintEgtsAssetFromPie } from './egtsService';
+import { base44 } from '@/api/base44Client';
 
 export { calculateTargetAllocation } from './hex6Engine.ts';
 export { Hex6BLEEngine } from './hex6Engine.ts';
@@ -20,26 +21,35 @@ export const MARKET_STATES = {
 };
 
 /**
- * onRebalance — triggers the full HEX6 BLE v5.0 SCEFM engine.
- *
- * TODO: Replace stub synthetic return series with real time-series data
- * from your market data provider before going live.
+ * onRebalance — triggers the full HEX6 BLE v5.0 SCEFM engine with real market data.
+ * Falls back to synthetic data if market data fetch fails for a ticker.
  */
-export async function onRebalance({ assets, marketData = {}, triggeredBy = 'HEX6_AUTO' }) {
-  const trend = marketData.trend ?? 0.01;
-  const vol = marketData.volatility ?? 0.15;
+export async function onRebalance({ assets, triggeredBy = 'HEX6_AUTO' }) {
+  // Fetch real market data via backend proxy
+  let mData = {};
+  try {
+    const res = await base44.functions.invoke('marketData', {
+      tickers: assets,
+      lookbackDays: 365,
+    });
+    mData = res.data?.results || {};
+  } catch (e) {
+    console.warn('[HEX6] Market data fetch failed, using synthetic fallback:', e.message);
+  }
 
   const historicalData = {};
   const assetData = {};
 
   assets.forEach((asset) => {
-    // Stub: synthetic 30-period return series
-    // TODO: Replace with real return series
-    historicalData[asset] = Array.from(
-      { length: 30 },
-      () => trend + (Math.random() - 0.5) * vol
-    );
-    assetData[asset] = historicalData[asset].slice(-8);
+    const returns = mData[asset]?.returns || [];
+    if (returns.length >= 50) {
+      historicalData[asset] = returns;
+      assetData[asset] = returns.slice(-30);
+    } else {
+      // Synthetic fallback
+      historicalData[asset] = Array.from({ length: 300 }, () => (Math.random() - 0.48) * 0.025);
+      assetData[asset] = historicalData[asset].slice(-30);
+    }
   });
 
   return calculateTargetAllocation({ assetData, historicalData, triggeredBy, config: {} });

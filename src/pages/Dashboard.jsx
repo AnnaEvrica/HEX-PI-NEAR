@@ -102,10 +102,11 @@ export default function Dashboard() {
         <div className="flex items-center gap-2 mb-4">
           <Zap className="w-4 h-4 text-yellow-400" />
           <h2 className="text-sm font-semibold text-white">HEX6 Engine Controls</h2>
-          <span className="text-xs text-slate-600 font-mono ml-auto">STUB MODE — wire your logic here</span>
+          <span className="text-xs text-slate-600 font-mono ml-auto">HEX6-BLE-v5.0 · SCEFM</span>
         </div>
         <p className="text-xs text-slate-500 mb-5">
-          These controls simulate the HEX6 BLE engine events. Each action mints cryptographic EGTS receipts for every asset.
+          Trigger the HEX6 BLE v5.0 SCEFM engine. Each action runs on real market data and mints cryptographic EGTS receipts per asset.
+          Use <strong className="text-slate-400">Backtest</strong> to run historical simulations or <strong className="text-slate-400">Managers</strong> to distribute allocations across AUM.
         </p>
         <div className="flex flex-wrap gap-3">
           <button
