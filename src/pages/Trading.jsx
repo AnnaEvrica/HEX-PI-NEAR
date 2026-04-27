@@ -14,7 +14,8 @@ export default function Trading() {
   const [submitting, setSubmitting] = useState(false);
   const [orderMsg, setOrderMsg] = useState(null);
 
-  const [autoTicker, setAutoTicker] = useState('');
+  const [autoEnabled, setAutoEnabled] = useState(false);
+  const [autoCategory, setAutoCategory] = useState('all');
   const [autoRunning, setAutoRunning] = useState(false);
   const [autoResult, setAutoResult] = useState(null);
 
@@ -93,13 +94,15 @@ export default function Trading() {
   }
 
   async function runAutoTrade() {
-    if (!autoTicker.trim()) return;
     setAutoRunning(true);
     setAutoResult(null);
     try {
-      const res = await base44.functions.invoke('autoTrade', {
-        ticker: autoTicker.toUpperCase(),
-        riskAversion: 2.5,
+      const res = await base44.functions.invoke('cryptoScanner', {
+        topN: 3,
+        riskAversion: 2.0,
+        scanOnly: false,
+        maxPositionPct: 0.15,
+        category: autoCategory,
       });
       if (res.data?.error) throw new Error(res.data.error);
       setAutoResult(res.data);
@@ -244,65 +247,97 @@ export default function Trading() {
           </div>
 
           {/* AUTO-TRADE */}
-          <div className="bg-[#111111] border border-[#C9A84C]/30 rounded-xl p-6 space-y-5">
+          <div className={`rounded-xl border p-6 space-y-5 transition-all ${autoEnabled ? 'bg-[#0d0d0d] border-[#C9A84C]/60' : 'bg-[#111111] border-white/10'}`}>
+            {/* Header + toggle */}
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-[#C9A84C] flex items-center justify-center">
-                <Zap className="w-4 h-4 text-black" />
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${autoEnabled ? 'bg-[#C9A84C]' : 'bg-white/10'}`}>
+                <Zap className={`w-4 h-4 ${autoEnabled ? 'text-black' : 'text-white/40'}`} />
               </div>
-              <div>
-                <p className="text-white font-bold">HEX6 Auto-Trade</p>
-                <p className="text-white/40 text-xs">Enter a ticker — HEX6 runs the engine, calculates the right size, and places the trade automatically.</p>
+              <div className="flex-1">
+                <p className="text-white font-bold">HEX6 Auto-Pilot</p>
+                <p className="text-white/40 text-xs">HEX6 scans the full crypto universe, picks the highest-profit opportunities across any category, and executes — no ticker needed.</p>
               </div>
-            </div>
-            <div className="flex gap-3">
-              <input
-                value={autoTicker}
-                onChange={e => setAutoTicker(e.target.value.toUpperCase())}
-                onKeyDown={e => e.key === 'Enter' && runAutoTrade()}
-                placeholder="Enter ticker (e.g. AAPL, BTC-USD)"
-                list="auto-asset-list"
-                className="flex-1 bg-black border border-white/10 rounded-lg px-4 py-3 text-sm font-mono text-white placeholder-white/20 focus:outline-none focus:border-[#C9A84C]/50"
-              />
-              <datalist id="auto-asset-list">
-                {assets.map(a => <option key={a.ticker} value={a.ticker} />)}
-              </datalist>
-              <button onClick={runAutoTrade} disabled={autoRunning || !autoTicker.trim()}
-                className="px-6 py-3 rounded-lg bg-[#C9A84C] text-black text-sm font-bold hover:bg-[#b8973d] transition-colors disabled:opacity-40 whitespace-nowrap">
-                {autoRunning ? 'Running HEX6…' : '⚡ Auto-Trade'}
+              {/* Toggle switch */}
+              <button onClick={() => { setAutoEnabled(v => !v); setAutoResult(null); }}
+                className={`relative w-12 h-6 rounded-full transition-colors ${autoEnabled ? 'bg-[#C9A84C]' : 'bg-white/10'}`}>
+                <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${autoEnabled ? 'left-7' : 'left-1'}`} />
               </button>
             </div>
 
-            {autoResult && (
-              <div className={`rounded-xl border p-5 space-y-3 ${autoResult.error ? 'border-red-800/40 bg-red-950/10' : autoResult.skipped ? 'border-white/10' : 'border-[#C9A84C]/20 bg-[#C9A84C]/5'}`}>
-                {autoResult.error && <p className="text-sm text-red-400">{autoResult.error}</p>}
-                {autoResult.skipped && (
-                  <div className="flex items-center gap-2 text-white/50 text-sm">
-                    <CheckCircle2 className="w-4 h-4 text-white/30" />
-                    No trade needed — {autoResult.reason}
+            {autoEnabled && (
+              <>
+                {/* Category pool selector */}
+                <div>
+                  <p className="text-xs text-white/30 uppercase tracking-widest mb-2">Scan Pool</p>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { id: 'all', label: '🌐 All Crypto' },
+                      { id: 'defi', label: '🏦 DeFi' },
+                      { id: 'layer1', label: '⛓ Layer 1' },
+                      { id: 'layer2', label: '⚡ Layer 2' },
+                      { id: 'dao', label: '🗳 DAO & Gov' },
+                      { id: 'staking', label: '🔒 Staking' },
+                      { id: 'altcoins', label: '🚀 Altcoins' },
+                      { id: 'meme', label: '🐸 Meme' },
+                    ].map(cat => (
+                      <button key={cat.id} onClick={() => setAutoCategory(cat.id)}
+                        className={`text-xs px-3 py-2 rounded-lg border transition-colors font-medium ${
+                          autoCategory === cat.id
+                            ? 'border-[#C9A84C] text-[#C9A84C] bg-[#C9A84C]/10'
+                            : 'border-white/10 text-white/40 hover:text-white/70 hover:border-white/20'
+                        }`}>
+                        {cat.label}
+                      </button>
+                    ))}
                   </div>
-                )}
-                {autoResult.success && (
+                </div>
+
+                <button onClick={runAutoTrade} disabled={autoRunning}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-[#C9A84C] text-black text-sm font-bold hover:bg-[#b8973d] transition-colors disabled:opacity-40">
+                  {autoRunning
+                    ? <><RefreshCw className="w-4 h-4 animate-spin" /> Scanning &amp; executing best opportunities…</>
+                    : <><Zap className="w-4 h-4" /> Run Auto-Pilot Now</>}
+                </button>
+
+                {autoResult && (
                   <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-[#C9A84C] text-sm font-medium">
-                      <CheckCircle2 className="w-4 h-4" />
-                      Trade executed by HEX6
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                      {[
-                        ['Direction', autoResult.trade?.side?.toUpperCase()],
-                        ['Quantity', autoResult.trade?.qty],
-                        ['Market State', autoResult.engine?.marketState],
-                        ['Target Weight', autoResult.engine?.targetWeight != null ? `${(autoResult.engine.targetWeight * 100).toFixed(1)}%` : '—'],
-                      ].map(([label, value]) => (
-                        <div key={label} className="bg-black/40 rounded-lg p-2.5">
-                          <p className="text-xs text-white/30 mb-0.5">{label}</p>
-                          <p className="text-sm font-mono font-bold text-white">{value}</p>
+                    {autoResult.error && <p className="text-sm text-red-400">{autoResult.error}</p>}
+                    {autoResult.topPicks && (
+                      <>
+                        <div className="text-xs text-white/30">
+                          Scanned {autoResult.scanned} assets · {autoResult.topPicks.length} selected · {autoResult.trades?.filter(t => !t.skipped).length || 0} trades executed
                         </div>
-                      ))}
-                    </div>
+                        <div className="space-y-2">
+                          {autoResult.topPicks.map((p, i) => (
+                            <div key={p.ticker} className="flex items-center gap-3 px-4 py-3 bg-black/40 border border-white/10 rounded-lg">
+                              <span className="text-xs font-mono text-white/30 w-5">#{i + 1}</span>
+                              <span className="text-sm font-mono font-bold text-white w-24">{p.ticker}</span>
+                              <span className={`text-xs px-2 py-0.5 rounded font-medium ${
+                                p.marketState === 'BULL' ? 'text-[#C9A84C]' :
+                                p.marketState === 'VOLATILE' ? 'text-amber-400' : 'text-white/40'
+                              }`}>{p.marketState}</span>
+                              <span className="text-xs text-white/40 flex-1">Score: <span className="text-white font-mono">{p.momentumScore?.toFixed(2)}</span></span>
+                              <span className="text-xs font-mono text-[#C9A84C]">{(p.targetWeight * 100).toFixed(1)}%</span>
+                            </div>
+                          ))}
+                        </div>
+                        {autoResult.trades?.filter(t => !t.skipped).length > 0 && (
+                          <div className="space-y-1">
+                            <p className="text-xs text-white/30 uppercase tracking-widest">Executed</p>
+                            {autoResult.trades.filter(t => !t.skipped).map(t => (
+                              <div key={t.ticker} className="flex items-center gap-2 text-xs text-white/60 px-3 py-2 bg-[#C9A84C]/5 border border-[#C9A84C]/20 rounded-lg">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-[#C9A84C]" />
+                                <span className={`font-bold ${t.side === 'buy' ? 'text-[#C9A84C]' : 'text-red-400'}`}>{t.side?.toUpperCase()}</span>
+                                <span>{t.qty} <span className="font-mono">{t.ticker}</span> @ ${t.price?.toFixed(2)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
                 )}
-              </div>
+              </>
             )}
           </div>
 

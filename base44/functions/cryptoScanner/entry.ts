@@ -8,16 +8,24 @@
  */
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
-const CRYPTO_UNIVERSE = [
-  'BTC-USD', 'ETH-USD', 'SOL-USD', 'BNB-USD', 'AVAX-USD',
-  'MATIC-USD', 'LINK-USD', 'DOT-USD', 'ADA-USD', 'DOGE-USD',
-  'SHIB-USD', 'LTC-USD', 'XRP-USD', 'UNI-USD', 'AAVE-USD',
-  'CRV-USD', 'MKR-USD', 'COMP-USD', 'SNX-USD', 'YFI-USD',
-  'SUSHI-USD', 'BAL-USD', '1INCH-USD', 'GRT-USD', 'FIL-USD',
-  'ATOM-USD', 'NEAR-USD', 'ICP-USD', 'APE-USD', 'OP-USD',
-  'ARB-USD', 'FTM-USD', 'RUNE-USD', 'KSM-USD', 'ALGO-USD',
-  'MANA-USD', 'SAND-USD', 'AXS-USD', 'IMX-USD', 'LDO-USD',
-];
+// Category-tagged universe
+const CRYPTO_CATEGORIES = {
+  layer1:   ['BTC-USD', 'ETH-USD', 'SOL-USD', 'ADA-USD', 'AVAX-USD', 'DOT-USD', 'ATOM-USD', 'NEAR-USD', 'ALGO-USD', 'FTM-USD', 'ICP-USD'],
+  layer2:   ['MATIC-USD', 'OP-USD', 'ARB-USD', 'IMX-USD', 'LRC-USD'],
+  defi:     ['UNI-USD', 'AAVE-USD', 'CRV-USD', 'MKR-USD', 'COMP-USD', 'SNX-USD', 'YFI-USD', 'SUSHI-USD', 'BAL-USD', '1INCH-USD', 'RUNE-USD', 'LDO-USD', 'GRT-USD'],
+  dao:      ['MKR-USD', 'UNI-USD', 'COMP-USD', 'YFI-USD', 'BAL-USD', 'CRV-USD', 'GRT-USD', 'ENJ-USD'],
+  staking:  ['LDO-USD', 'ATOM-USD', 'DOT-USD', 'SOL-USD', 'AVAX-USD', 'KSM-USD', 'FTM-USD', 'NEAR-USD'],
+  altcoins: ['LINK-USD', 'FIL-USD', 'RUNE-USD', 'KSM-USD', 'MANA-USD', 'SAND-USD', 'AXS-USD', 'APE-USD', 'IMX-USD', 'GRT-USD', 'ENJ-USD'],
+  meme:     ['DOGE-USD', 'SHIB-USD', 'XRP-USD', 'LTC-USD', 'APE-USD'],
+  all:      ['BTC-USD', 'ETH-USD', 'SOL-USD', 'BNB-USD', 'AVAX-USD',
+             'MATIC-USD', 'LINK-USD', 'DOT-USD', 'ADA-USD', 'DOGE-USD',
+             'SHIB-USD', 'LTC-USD', 'XRP-USD', 'UNI-USD', 'AAVE-USD',
+             'CRV-USD', 'MKR-USD', 'COMP-USD', 'SNX-USD', 'YFI-USD',
+             'SUSHI-USD', 'BAL-USD', '1INCH-USD', 'GRT-USD', 'FIL-USD',
+             'ATOM-USD', 'NEAR-USD', 'ICP-USD', 'APE-USD', 'OP-USD',
+             'ARB-USD', 'FTM-USD', 'RUNE-USD', 'KSM-USD', 'ALGO-USD',
+             'MANA-USD', 'SAND-USD', 'AXS-USD', 'IMX-USD', 'LDO-USD'],
+};
 
 // These are the ones Alpaca crypto supports (subset)
 const ALPACA_CRYPTO_SYMBOLS = [
@@ -133,10 +141,12 @@ Deno.serve(async (req) => {
       riskAversion = 2.0,
       scanOnly = false,
       maxPositionPct = 0.15,
+      category = 'all',
     } = body;
 
-    // 1. Scan universe in parallel (batches of 10 to avoid rate limits)
-    const universe = CRYPTO_UNIVERSE.filter(t => ALPACA_CRYPTO_SYMBOLS.includes(toAlpaca(t)));
+    // 1. Scan universe in parallel (batches of 8 to avoid rate limits)
+    const categoryPool = CRYPTO_CATEGORIES[category] || CRYPTO_CATEGORIES.all;
+    const universe = [...new Set(categoryPool)].filter(t => ALPACA_CRYPTO_SYMBOLS.includes(toAlpaca(t)));
     const scanResults = [];
 
     const batches = [];
