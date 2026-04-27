@@ -59,30 +59,24 @@ export default function Landing() {
             to="/app"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-sm bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
           >
-            Start Free Trial <ArrowRight className="w-4 h-4" />
+            Enter Oracle <ArrowRight className="w-4 h-4" />
           </Link>
-          <a
-            href="#how-it-works"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-sm border border-border hover:border-foreground transition-colors"
-          >
-            How it works
-          </a>
         </div>
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="max-w-6xl mx-auto px-6 py-20 space-y-16">
-        {/* One-Line Reframe */}
-        <div className="space-y-3 text-center">
-          <h2 className="text-4xl font-bold">Don't predict. Adapt.</h2>
-          <p className="text-lg text-secondary">HEX6 BLE classifies the present state, models outcome distributions, and adjusts exposure in real-time.</p>
+      <section id="how-it-works" className="max-w-6xl mx-auto px-6 py-32 space-y-20">
+        {/* Section Header */}
+        <div className="space-y-6 text-center">
+          <h2 className="text-5xl font-bold">Don't predict. Adapt.</h2>
+          <p className="text-xl text-secondary max-w-3xl mx-auto leading-relaxed">HEX6 BLE classifies the present state, models outcome distributions, and adjusts exposure in real-time.</p>
         </div>
 
         {/* System Comparison Chart */}
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <h3 className="text-2xl font-bold">System Comparison</h3>
-            <p className="text-secondary">How different approaches optimize for different goals</p>
+        <div className="space-y-8">
+          <div className="space-y-3">
+            <h3 className="text-3xl font-bold">System Comparison</h3>
+            <p className="text-lg text-secondary">How different approaches optimize for different goals</p>
           </div>
           <div className="p-8 rounded-lg border border-border bg-background space-y-4">
             <ResponsiveContainer width="100%" height={400}>
@@ -138,10 +132,10 @@ export default function Landing() {
         </div>
 
         {/* Applications & Real Outcomes */}
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <h3 className="text-2xl font-bold">Real Applications</h3>
-            <p className="text-secondary">What HEX6 BLE does in practice</p>
+        <div className="space-y-8">
+          <div className="space-y-3">
+            <h3 className="text-3xl font-bold">Real Applications</h3>
+            <p className="text-lg text-secondary">What HEX6 BLE does in practice</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {loading || !metrics ? [] : [
@@ -197,10 +191,10 @@ export default function Landing() {
         </div>
 
         {/* Evolution & Progression Over Time */}
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <h3 className="text-2xl font-bold">Learning & Evolution Over Time</h3>
-            <p className="text-secondary">How HEX6 BLE improves as you interact with it</p>
+        <div className="space-y-8">
+          <div className="space-y-3">
+            <h3 className="text-3xl font-bold">Learning & Evolution Over Time</h3>
+            <p className="text-lg text-secondary">How HEX6 BLE improves as you interact with it</p>
           </div>
           <div className="p-4 md:p-8 border border-border bg-background overflow-x-auto">
             <ResponsiveContainer width="100%" height={380}>
@@ -236,10 +230,10 @@ export default function Landing() {
       </section>
 
       {/* Structural Difference */}
-      <section className="max-w-4xl mx-auto px-6 py-20 space-y-12">
-        <div className="space-y-3">
-          <h2 className="text-3xl font-bold">Structural Difference</h2>
-          <p className="text-secondary">How uncertainty becomes advantage</p>
+      <section className="max-w-4xl mx-auto px-6 py-32 space-y-12">
+        <div className="space-y-4">
+          <h2 className="text-4xl font-bold">Structural Difference</h2>
+          <p className="text-lg text-secondary">How uncertainty becomes advantage</p>
         </div>
 
         <div className="space-y-6">
@@ -275,10 +269,10 @@ export default function Landing() {
       </section>
 
       {/* Compare & Contrast */}
-      <section className="max-w-5xl mx-auto px-6 py-20 space-y-12">
-        <div className="space-y-3">
-          <h2 className="text-3xl font-bold">Compare & Contrast</h2>
-          <p className="text-secondary">Side-by-side: what you get, how it evolves, realistic expectations.</p>
+      <section className="max-w-5xl mx-auto px-6 py-32 space-y-12">
+        <div className="space-y-4">
+          <h2 className="text-4xl font-bold">Compare & Contrast</h2>
+          <p className="text-lg text-secondary">Side-by-side: what you get, how it evolves, realistic expectations.</p>
         </div>
 
         {/* System Comparison Table */}
@@ -319,9 +313,11 @@ export default function Landing() {
         </div>
 
         {/* Real Scenario Comparison */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-bold">Real Scenario: 6-Month High Volatility Period</h3>
-          <p className="text-secondary text-sm">Assets ranged from +442% to −75%, with violent regime shifts</p>
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <h3 className="text-2xl font-bold">Real Scenario: 6-Month High Volatility Period</h3>
+            <p className="text-lg text-secondary">Assets ranged from +442% to −75%, with violent regime shifts</p>
+          </div>
 
           <div className="grid grid-cols-1 space-y-6">
            {/* Empirical Behavior subsection */}
@@ -441,21 +437,23 @@ export default function Landing() {
         </div>
 
         {/* CTA Section */}
-        <section className="max-w-4xl mx-auto px-6 py-20 space-y-8">
-        <div className="space-y-4">
-          <h2 className="text-3xl font-bold">Ready to observe how outcomes reorganize?</h2>
-          <p className="text-lg text-secondary">No credit card required. No prediction. Only probability.</p>
+        <section className="max-w-4xl mx-auto px-6 py-32 space-y-8">
+        <div className="space-y-6">
+          <h2 className="text-5xl font-bold">Ready to observe how outcomes reorganize?</h2>
+          <p className="text-xl text-secondary">No credit card required. No prediction. Only probability.</p>
         </div>
-        <Link
-          to="/app"
-          className="inline-flex items-center gap-2 px-8 py-4 rounded-sm bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors text-lg"
-        >
-          Enter Oracle <ArrowRight className="w-4 h-4" />
-        </Link>
+        <div className="pt-4">
+          <Link
+            to="/app"
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-sm bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors text-lg"
+          >
+            Enter Oracle <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border py-8">
+      <footer className="border-t border-border py-16">
         <div className="max-w-4xl mx-auto px-6 flex items-center justify-between text-sm text-secondary">
           <p>HEX6 BLE © 2026 · Developed by Evrica Technologies Inc.</p>
           <div className="flex gap-6">
