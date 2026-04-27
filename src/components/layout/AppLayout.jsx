@@ -26,7 +26,7 @@ export default function AppLayout() {
         <div className="flex items-center gap-3">
           <span className="text-sm font-bold tracking-tight text-white">HEX6 BLE</span>
           <span className="text-white/20">|</span>
-          <span className="text-sm text-white/50">by Evrica Technologies Inc.</span>
+          <span className="text-sm text-white/50">Developed by Evrica Technologies Inc.</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-[#C9A84C]" />
@@ -63,7 +63,7 @@ export default function AppLayout() {
 
       {/* Footer */}
       <footer className="border-t border-white/10 py-4 text-center">
-        <p className="text-xs text-white/30">HEX6 BLE v5.0 · EGTS v1.0 · © Evrica Technologies Inc.</p>
+        <p className="text-xs text-white/30">HEX6 BLE v5.0 · EGTS v1.0 · © 2026 Evrica Technologies Inc. All Rights Reserved.</p>
       </footer>
     </div>
   );

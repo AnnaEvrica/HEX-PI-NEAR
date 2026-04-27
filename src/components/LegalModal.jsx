@@ -6,11 +6,11 @@ export default function LegalModal({ open, onClose }) {
   const policies = [
     {
       title: 'Terms of Service',
-      content: `HEX6 Oracle is provided "as-is" for informational purposes only. By accessing this platform, you agree that:
+      content: `HEX6 BLE, developed by Evrica Technologies Inc., is provided "as-is" for informational purposes only. By accessing this platform, you agree that:
 
-• HEX6 does not provide investment advice, financial recommendations, or portfolio management services
+• HEX6 BLE does not provide investment advice, financial recommendations, or portfolio management services
 • You are solely responsible for all investment decisions and financial outcomes
-• HEX6 outputs are probabilistic models, not guarantees, and may be incorrect
+• HEX6 BLE outputs are probabilistic models, not guarantees, and may be incorrect
 • You will not hold Evrica Technologies Inc. liable for financial losses
 • Your use of the platform is governed by these terms and all applicable laws`,
     },
@@ -31,15 +31,15 @@ export default function LegalModal({ open, onClose }) {
 
 • Past performance does not guarantee future results
 • All investments carry the risk of total loss of capital
-• HEX6 models are based on historical data which may not repeat
-• Market conditions change rapidly; HEX6 recommendations may become outdated
+• HEX6 BLE models are based on historical data which may not repeat
+• Market conditions change rapidly; HEX6 BLE recommendations may become outdated
 • Voice inputs and model selections do not affect legal liability
 • You should consult with a licensed financial advisor before making investment decisions
 • Evrica Technologies Inc. is not registered as an investment advisor or broker`,
     },
     {
       title: 'Acceptable Use',
-      content: `By using HEX6, you agree not to:
+      content: `By using HEX6 BLE, developed by Evrica Technologies Inc., you agree not to:
 
 • Use the platform for illegal activities or to circumvent regulations
 • Attempt to reverse-engineer, hack, or interfere with our systems

@@ -322,7 +322,7 @@ export default function Landing() {
       {/* Footer */}
       <footer className="border-t border-border py-8">
         <div className="max-w-4xl mx-auto px-6 flex items-center justify-between text-sm text-secondary">
-          <p>HEX6 BLE Oracle © 2026</p>
+          <p>HEX6 BLE © 2026 · Developed by Evrica Technologies Inc.</p>
           <div className="flex gap-6">
             <a href="#" className="hover:text-foreground transition-colors">
               Terms

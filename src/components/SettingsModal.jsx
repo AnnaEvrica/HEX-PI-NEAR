@@ -220,7 +220,7 @@ export default function SettingsModal({
                 <p className="text-xs text-secondary">
                   {notificationsEnabled
                     ? 'You\'ll receive market trend alerts and predictions 3x daily'
-                    : 'Enable to get daily market updates from HEX6'}
+                    : 'Enable to get daily market updates from HEX6 BLE'}
                 </p>
               </div>
 
@@ -266,7 +266,7 @@ export default function SettingsModal({
                         onChange={(e) => setPredictions(e.target.checked)}
                         className="w-4 h-4 accent-accent"
                       />
-                      HEX6 Predictions & Allocations
+                      HEX6 BLE Predictions & Allocations
                     </label>
                   </div>
 
