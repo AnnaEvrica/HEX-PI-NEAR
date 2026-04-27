@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
-import AuthModal from '@/components/auth/AuthModal';
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -13,7 +12,6 @@ export default function Landing() {
   const [openPolicy, setOpenPolicy] = useState(null);
   const [isAuth, setIsAuth] = useState(false);
   const [visibleSections, setVisibleSections] = useState({});
-  const [authModal, setAuthModal] = useState(null);
   const sectionRefs = useRef({});
 
   useEffect(() => {
@@ -70,13 +68,13 @@ export default function Landing() {
           <div className="text-xl font-bold tracking-tight">HEX6 BLE</div>
           <div className="flex gap-3">
            <button
-             onClick={() => setAuthModal('login')}
+             onClick={() => base44.auth.redirectToLogin()}
              className="px-5 py-2 rounded-sm border border-border text-sm font-medium hover:border-foreground transition-colors"
            >
              Login
            </button>
            <button
-             onClick={() => setAuthModal('register')}
+             onClick={() => base44.auth.redirectToLogin()}
              className="px-5 py-2 rounded-sm bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
            >
              Sign Up
@@ -109,13 +107,13 @@ export default function Landing() {
         </div>
 
         <div className="flex flex-col gap-4 pt-4">
-          <button
-            onClick={() => setAuthModal('login')}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-sm bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors w-fit"
-          >
-            Enter Oracle <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
+           <button
+             onClick={() => base44.auth.redirectToLogin()}
+             className="inline-flex items-center gap-2 px-6 py-3 rounded-sm bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors w-fit"
+           >
+             Enter Oracle <ArrowRight className="w-4 h-4" />
+           </button>
+         </div>
       </motion.section>
 
       {/* How It Works */}
@@ -136,18 +134,20 @@ export default function Landing() {
         </motion.div>
 
         {/* System Comparison Chart */}
-        <div className="space-y-8">
-          <div className="space-y-3">
-            <h3 className="text-3xl font-bold">System Comparison</h3>
-            <p className="text-lg text-secondary">How different approaches optimize for different goals</p>
-          </div>
-          <motion.div 
-            className="p-8 rounded-lg border border-border bg-background space-y-4"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={visibleSections['how-it-works'] ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            <ResponsiveContainer width="100%" height={400}>
+         <motion.div 
+           className="space-y-8"
+           initial={{ opacity: 0, y: 20 }}
+           animate={visibleSections['how-it-works'] ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+           transition={{ duration: 0.6, delay: 0.1 }}
+         >
+           <div className="space-y-3">
+             <h3 className="text-3xl font-bold">System Comparison</h3>
+             <p className="text-lg text-secondary">How different approaches optimize for different goals</p>
+           </div>
+           <div 
+             className="p-4 md:p-8 rounded-lg border border-border bg-background space-y-4 overflow-hidden"
+           >
+             <ResponsiveContainer width="100%" height={300}>
               <RadarChart data={!metrics ? [] : [
                 {
                   metric: 'Adaptability',
@@ -196,8 +196,8 @@ export default function Landing() {
               </RadarChart>
             </ResponsiveContainer>
             <p className="text-xs text-secondary/60">* Scores derived from multi-regime backtests across equities, crypto, and commodities spanning 15+ years of historical data with daily rebalancing.</p>
-          </motion.div>
-        </div>
+            </div>
+            </motion.div>
 
         {/* Applications & Real Outcomes */}
         <div className="space-y-8">
@@ -523,7 +523,7 @@ export default function Landing() {
         </div>
         <div className="pt-4">
           <button
-            onClick={() => setAuthModal('login')}
+            onClick={() => base44.auth.redirectToLogin()}
             className="inline-flex items-center gap-2 px-8 py-4 rounded-sm bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors text-lg"
           >
             Enter Oracle <ArrowRight className="w-4 h-4" />
@@ -708,14 +708,7 @@ export default function Landing() {
         </PolicyModal>
       )}
 
-      {/* Auth Modal */}
-      {authModal && (
-        <AuthModal 
-          mode={authModal}
-          onClose={() => setAuthModal(null)}
-          onSwitchMode={(mode) => setAuthModal(mode)}
-        />
-      )}
+
 
       {openPolicy === 'disclosure' && (
         <PolicyModal title="Risk Disclosure & Compliance" onClose={() => setOpenPolicy(null)}>
