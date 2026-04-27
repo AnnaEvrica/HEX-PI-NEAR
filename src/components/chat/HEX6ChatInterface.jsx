@@ -303,9 +303,9 @@ export default function HEX6ChatInterface() {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-6 py-8 space-y-6">
+        <div className="flex-1 overflow-y-auto px-3 md:px-6 py-4 md:py-8 space-y-4 md:space-y-6">
           {/* Calibration & Alignment Panels */}
-          <div className="space-y-4 max-w-2xl">
+          <div className="space-y-3 md:space-y-4 w-full">
             <CalibrationPanel />
             <DecisionAlignment />
           </div>
@@ -318,11 +318,11 @@ export default function HEX6ChatInterface() {
               }`}
             >
               <div
-                className={`max-w-lg ${
+                className={`w-full sm:max-w-lg ${
                   message.role === 'user'
-                    ? 'bg-primary text-primary-foreground rounded-lg rounded-tr-sm'
-                    : 'bg-muted text-foreground rounded-lg rounded-tl-sm'
-                } px-4 py-3`}
+                    ? 'bg-primary text-primary-foreground rounded-lg rounded-tr-sm mr-2'
+                    : 'bg-muted text-foreground rounded-lg rounded-tl-sm ml-2'
+                } px-3 md:px-4 py-2 md:py-3 text-sm md:text-base`}
               >
                 <ReactMarkdown 
                   className="prose prose-sm dark:prose-invert max-w-none [&>*]:my-0 [&>p]:my-1 [&>ul]:my-1 [&>ol]:my-1 [&>li]:my-0"
@@ -353,33 +353,33 @@ export default function HEX6ChatInterface() {
         </div>
 
         {/* Input */}
-        <div className="border-t border-border px-6 py-4 space-y-3">
+        <div className="border-t border-border px-3 md:px-6 py-3 md:py-4 space-y-2 md:space-y-3 bg-background">
           {uploadedImage && (
-            <div className="flex items-center justify-between px-3 py-2 rounded-sm bg-accent/10 border border-accent/30">
-              <span className="text-xs text-secondary">✓ Image uploaded and ready for analysis</span>
+            <div className="flex items-center justify-between px-2 md:px-3 py-1.5 md:py-2 rounded-sm bg-accent/10 border border-accent/30 text-xs md:text-sm">
+              <span className="text-secondary">✓ Image ready</span>
               <button
                 onClick={() => setUploadedImage(null)}
-                className="text-xs text-accent hover:text-accent/70"
+                className="text-accent hover:text-accent/70"
               >
                 Clear
               </button>
             </div>
           )}
-          <div className="flex gap-3">
+          <div className="flex gap-2 md:gap-3">
             <button
               onClick={handleVoiceInput}
-              className={`p-2.5 rounded-sm transition-colors ${
+              className={`p-2 md:p-2.5 rounded-sm transition-colors shrink-0 ${
                 listening
                   ? 'bg-accent text-accent-foreground'
                   : 'hover:bg-muted text-secondary hover:text-foreground'
               }`}
               title={listening ? 'Stop listening' : 'Start voice input'}
             >
-              {listening ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
+              {listening ? <Mic className="w-4 md:w-5 h-4 md:h-5" /> : <MicOff className="w-4 md:w-5 h-4 md:h-5" />}
             </button>
 
-            <label className="p-2.5 rounded-sm hover:bg-muted text-secondary hover:text-foreground cursor-pointer transition-colors" title="Upload image">
-              <Image className="w-5 h-5" />
+            <label className="p-2 md:p-2.5 rounded-sm hover:bg-muted text-secondary hover:text-foreground cursor-pointer transition-colors shrink-0" title="Upload image">
+              <Image className="w-4 md:w-5 h-4 md:h-5" />
               <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
             </label>
 
@@ -388,19 +388,19 @@ export default function HEX6ChatInterface() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-              placeholder="Ask HEX6 about markets, strategies, assets... or upload an image to analyze"
-              className="flex-1 px-4 py-2.5 rounded-sm border border-border bg-background text-foreground placeholder-secondary focus:outline-none focus:border-accent"
+              placeholder="Ask HEX6..."
+              className="flex-1 px-2 md:px-4 py-2 rounded-sm border border-border bg-background text-foreground placeholder-secondary text-sm md:text-base focus:outline-none focus:border-accent"
             />
             <button
               onClick={handleSendMessage}
               disabled={!input.trim() || loading}
-              className="p-2.5 rounded-sm bg-accent text-accent-foreground hover:bg-accent/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="p-2 md:p-2.5 rounded-sm bg-accent text-accent-foreground hover:bg-accent/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
             >
-              <Send className="w-5 h-5" />
+              <Send className="w-4 md:w-5 h-4 md:h-5" />
             </button>
           </div>
-          <p className="text-xs text-secondary">
-            HEX6 generates probabilistic analysis, not financial advice. Always verify with your own research.
+          <p className="text-xs text-secondary px-1">
+            HEX6 analysis, not financial advice. Always verify with your own research.
           </p>
         </div>
       </div>
