@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, AlertTriangle, Mail, Lock, Trash2, Shield, Eye, Clock, LogOut as LogOutIcon } from 'lucide-react';
+import { X, AlertTriangle, Mail, Lock, Trash2, Shield, Eye, Clock, LogOut as LogOutIcon, Bell } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
 export default function SettingsModal({
@@ -16,6 +16,11 @@ export default function SettingsModal({
   const [chatEncryption, setChatEncryption] = useState(true);
   const [sessions, setSessions] = useState([]);
   const [activityLogs, setActivityLogs] = useState([]);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [notificationTimes, setNotificationTimes] = useState(['09:00', '14:00', '17:00']);
+  const [marketTrends, setMarketTrends] = useState(true);
+  const [predictions, setPredictions] = useState(true);
+  const [watchedAssets, setWatchedAssets] = useState('');
 
   useEffect(() => {
     // Load security settings
@@ -103,6 +108,7 @@ export default function SettingsModal({
           {[
             { id: 'account', label: 'Account' },
             { id: 'security', label: 'Security' },
+            { id: 'notifications', label: 'Notifications' },
             { id: 'privacy', label: 'Privacy' },
             { id: 'features', label: 'Features' },
           ].map((tab) => (
@@ -186,6 +192,125 @@ export default function SettingsModal({
                   This action is permanent and cannot be undone. All your data will be deleted.
                 </p>
               </div>
+            </div>
+          )}
+
+          {activeTab === 'notifications' && (
+            <div className="space-y-4">
+              {/* Enable/Disable */}
+              <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Bell className="w-4 h-4" />
+                    <label className="text-sm font-medium">Market Notifications</label>
+                  </div>
+                  <button
+                    onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+                    className={`relative w-12 h-6 rounded-full transition-colors ${
+                      notificationsEnabled ? 'bg-accent' : 'bg-border'
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${
+                        notificationsEnabled ? 'left-7' : 'left-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+                <p className="text-xs text-secondary">
+                  {notificationsEnabled
+                    ? 'You\'ll receive market trend alerts and predictions 3x daily'
+                    : 'Enable to get daily market updates from HEX6'}
+                </p>
+              </div>
+
+              {notificationsEnabled && (
+                <>
+                  {/* Notification Times */}
+                  <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
+                    <p className="text-sm font-medium">Notification Times</p>
+                    <div className="space-y-2">
+                      {[0, 1, 2].map((idx) => (
+                        <input
+                          key={idx}
+                          type="time"
+                          value={notificationTimes[idx]}
+                          onChange={(e) => {
+                            const updated = [...notificationTimes];
+                            updated[idx] = e.target.value;
+                            setNotificationTimes(updated);
+                          }}
+                          className="w-full px-3 py-2 rounded-sm bg-black/20 border border-border text-sm text-white"
+                        />
+                      ))}
+                    </div>
+                    <p className="text-xs text-secondary">Set your preferred times (UTC)</p>
+                  </div>
+
+                  {/* Content Preferences */}
+                  <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
+                    <p className="text-sm font-medium">Notification Content</p>
+                    <label className="flex items-center gap-3 text-sm text-secondary hover:text-foreground cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={marketTrends}
+                        onChange={(e) => setMarketTrends(e.target.checked)}
+                        className="w-4 h-4 accent-accent"
+                      />
+                      Market Trend Analysis
+                    </label>
+                    <label className="flex items-center gap-3 text-sm text-secondary hover:text-foreground cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={predictions}
+                        onChange={(e) => setPredictions(e.target.checked)}
+                        className="w-4 h-4 accent-accent"
+                      />
+                      HEX6 Predictions & Allocations
+                    </label>
+                  </div>
+
+                  {/* Watched Assets */}
+                  <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
+                    <p className="text-sm font-medium">Watch Specific Assets (Optional)</p>
+                    <textarea
+                      value={watchedAssets}
+                      onChange={(e) => setWatchedAssets(e.target.value)}
+                      placeholder="e.g., BTC, ETH, SPY (comma-separated)"
+                      className="w-full px-3 py-2 rounded-sm bg-black/20 border border-border text-xs text-white placeholder-white/30 h-16"
+                    />
+                    <p className="text-xs text-secondary">Leave empty to get general market alerts</p>
+                  </div>
+
+                  {/* Test Notification */}
+                  <button
+                    onClick={async () => {
+                      setLoading(true);
+                      try {
+                        const res = await base44.functions.invoke('marketNotifications', {
+                          action: 'sendTest',
+                          notificationPrefs: {
+                            enabled: true,
+                            times: notificationTimes,
+                            marketTrends,
+                            predictions,
+                            assets: watchedAssets.split(',').map(a => a.trim()).filter(Boolean),
+                          },
+                        });
+                        setMessage({ type: 'success', text: res.data?.message || 'Test notification sent' });
+                      } catch (err) {
+                        setMessage({ type: 'error', text: err.message });
+                      } finally {
+                        setLoading(false);
+                      }
+                    }}
+                    disabled={loading}
+                    className="w-full px-4 py-2 rounded-sm border border-border text-sm font-medium hover:bg-muted transition-colors disabled:opacity-40"
+                  >
+                    Send Test Notification
+                  </button>
+                </>
+              )}
             </div>
           )}
 

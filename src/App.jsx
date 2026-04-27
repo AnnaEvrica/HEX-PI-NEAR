@@ -2,6 +2,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { base44 } from '@/api/base44Client';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -27,10 +28,10 @@ const AuthenticatedApp = () => {
   const [consentCompleted, setConsentCompleted] = useState(false);
 
   useEffect(() => {
-    // Check if user has completed consent flow
+    // Check if user has completed consent flow (from backend user data)
     if (user) {
-      const stored = localStorage.getItem(`hex6_consent_${user.id}`);
-      setConsentCompleted(!!stored);
+      // Check if user already has consent flag in their profile
+      setConsentCompleted(user.hex6_consent_completed === true);
     }
   }, [user]);
 
@@ -56,10 +57,8 @@ const AuthenticatedApp = () => {
     return (
       <ConsentFlow
         onComplete={() => {
-          localStorage.setItem(`hex6_consent_${user.id}`, JSON.stringify({
-            version: '1.0',
-            timestamp: new Date().toISOString(),
-          }));
+          // Save consent to user profile (backend)
+          base44.auth.updateMe({ hex6_consent_completed: true });
           setConsentCompleted(true);
         }}
       />
