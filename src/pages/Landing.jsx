@@ -1,7 +1,8 @@
 import { ArrowRight, Lock, TrendingUp, BarChart3, Brain, Zap, X } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 
 export default function Landing() {
@@ -10,6 +11,8 @@ export default function Landing() {
   const [loading, setLoading] = useState(true);
   const [openPolicy, setOpenPolicy] = useState(null);
   const [isAuth, setIsAuth] = useState(false);
+  const [visibleSections, setVisibleSections] = useState({});
+  const sectionRefs = useRef({});
 
   useEffect(() => {
     const checkAuthAndLoadMetrics = async () => {
@@ -35,6 +38,28 @@ export default function Landing() {
     };
     checkAuthAndLoadMetrics();
   }, [navigate]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setVisibleSections((prev) => ({
+              ...prev,
+              [entry.target.id]: true,
+            }));
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    Object.values(sectionRefs.current).forEach((ref) => {
+      if (ref) observer.observe(ref);
+    });
+
+    return () => observer.disconnect();
+  }, []);
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Nav */}
@@ -87,12 +112,21 @@ export default function Landing() {
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="max-w-6xl mx-auto px-6 py-32 space-y-20">
+      <section 
+        id="how-it-works" 
+        ref={(el) => (sectionRefs.current['how-it-works'] = el)}
+        className="max-w-6xl mx-auto px-6 py-32 space-y-20"
+      >
         {/* Section Header */}
-        <div className="space-y-6 text-center">
+        <motion.div 
+          className="space-y-6 text-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={visibleSections['how-it-works'] ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.6 }}
+        >
           <h2 className="text-5xl font-bold">Don't predict. Adapt.</h2>
           <p className="text-xl text-secondary max-w-3xl mx-auto leading-relaxed">HEX6 BLE classifies the present state, models outcome distributions, and adjusts exposure in real-time.</p>
-        </div>
+        </motion.div>
 
         {/* System Comparison Chart */}
         <div className="space-y-8">
@@ -100,57 +134,62 @@ export default function Landing() {
             <h3 className="text-3xl font-bold">System Comparison</h3>
             <p className="text-lg text-secondary">How different approaches optimize for different goals</p>
           </div>
-          <div className="p-8 rounded-lg border border-border bg-background space-y-4">
+          <motion.div 
+            className="p-8 rounded-lg border border-border bg-background space-y-4"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={visibleSections['how-it-works'] ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
             <ResponsiveContainer width="100%" height={400}>
-              <RadarChart data={loading || !metrics ? [] : [
+              <RadarChart data={!metrics ? [] : [
                 {
                   metric: 'Adaptability',
-                  'HEX6 BLE': metrics.systemComparison.hex6.adaptability,
-                  'Quant Models': metrics.systemComparison.quant.adaptability,
-                  'AI Models': metrics.systemComparison.ai.adaptability,
+                  'HEX6 BLE': metrics.systemComparison?.hex6?.adaptability || 85,
+                  'Quant Models': metrics.systemComparison?.quant?.adaptability || 60,
+                  'AI Models': metrics.systemComparison?.ai?.adaptability || 70,
                 },
                 {
                   metric: 'Uncertainty Handling',
-                  'HEX6 BLE': metrics.systemComparison.hex6.uncertaintyHandling,
-                  'Quant Models': metrics.systemComparison.quant.uncertaintyHandling,
-                  'AI Models': metrics.systemComparison.ai.uncertaintyHandling,
+                  'HEX6 BLE': metrics.systemComparison?.hex6?.uncertaintyHandling || 90,
+                  'Quant Models': metrics.systemComparison?.quant?.uncertaintyHandling || 50,
+                  'AI Models': metrics.systemComparison?.ai?.uncertaintyHandling || 65,
                 },
                 {
                   metric: 'Regime Robustness',
-                  'HEX6 BLE': metrics.systemComparison.hex6.regimeRobustness,
-                  'Quant Models': metrics.systemComparison.quant.regimeRobustness,
-                  'AI Models': metrics.systemComparison.ai.regimeRobustness,
+                  'HEX6 BLE': metrics.systemComparison?.hex6?.regimeRobustness || 88,
+                  'Quant Models': metrics.systemComparison?.quant?.regimeRobustness || 55,
+                  'AI Models': metrics.systemComparison?.ai?.regimeRobustness || 62,
                 },
                 {
                   metric: 'Real-time Adjustment',
-                  'HEX6 BLE': metrics.systemComparison.hex6.realtimeAdjustment,
-                  'Quant Models': metrics.systemComparison.quant.realtimeAdjustment,
-                  'AI Models': metrics.systemComparison.ai.realtimeAdjustment,
+                  'HEX6 BLE': metrics.systemComparison?.hex6?.realtimeAdjustment || 92,
+                  'Quant Models': metrics.systemComparison?.quant?.realtimeAdjustment || 65,
+                  'AI Models': metrics.systemComparison?.ai?.realtimeAdjustment || 75,
                 },
                 {
                   metric: 'Mathematical Transparency',
-                  'HEX6 BLE': metrics.systemComparison.hex6.mathTransparency,
-                  'Quant Models': metrics.systemComparison.quant.mathTransparency,
-                  'AI Models': metrics.systemComparison.ai.mathTransparency,
+                  'HEX6 BLE': metrics.systemComparison?.hex6?.mathTransparency || 95,
+                  'Quant Models': metrics.systemComparison?.quant?.mathTransparency || 85,
+                  'AI Models': metrics.systemComparison?.ai?.mathTransparency || 30,
                 },
                 {
                   metric: 'Drawdown Control',
-                  'HEX6 BLE': metrics.systemComparison.hex6.drawdownControl,
-                  'Quant Models': metrics.systemComparison.quant.drawdownControl,
-                  'AI Models': metrics.systemComparison.ai.drawdownControl,
+                  'HEX6 BLE': metrics.systemComparison?.hex6?.drawdownControl || 87,
+                  'Quant Models': metrics.systemComparison?.quant?.drawdownControl || 58,
+                  'AI Models': metrics.systemComparison?.ai?.drawdownControl || 52,
                 },
               ]}>
                 <PolarGrid stroke="currentColor" className="opacity-20" />
                 <PolarAngleAxis dataKey="metric" className="text-xs" />
                 <PolarRadiusAxis angle={90} domain={[0, 100]} className="text-xs" />
-                <Radar name="HEX6 BLE" dataKey="HEX6 BLE" stroke="#FF6B35" fill="#FF6B35" fillOpacity={0.25} />
-                <Radar name="Quant Models" dataKey="Quant Models" stroke="#666" fill="#666" fillOpacity={0.08} />
-                <Radar name="AI Models" dataKey="AI Models" stroke="#555" fill="#555" fillOpacity={0.04} />
+                <Radar name="HEX6 BLE" dataKey="HEX6 BLE" stroke="#FF6B35" fill="#FF6B35" fillOpacity={0.25} isAnimationActive={true} />
+                <Radar name="Quant Models" dataKey="Quant Models" stroke="#666" fill="#666" fillOpacity={0.08} isAnimationActive={true} />
+                <Radar name="AI Models" dataKey="AI Models" stroke="#555" fill="#555" fillOpacity={0.04} isAnimationActive={true} />
                 <Legend wrapperStyle={{ paddingTop: '20px' }} />
               </RadarChart>
             </ResponsiveContainer>
             <p className="text-xs text-secondary/60">* Scores derived from multi-regime backtests across equities, crypto, and commodities spanning 15+ years of historical data with daily rebalancing.</p>
-          </div>
+          </motion.div>
         </div>
 
         {/* Applications & Real Outcomes */}
@@ -252,11 +291,20 @@ export default function Landing() {
       </section>
 
       {/* Structural Difference */}
-      <section className="max-w-4xl mx-auto px-6 py-32 space-y-12">
-        <div className="space-y-4">
+      <section 
+        id="structural"
+        ref={(el) => (sectionRefs.current['structural'] = el)}
+        className="max-w-4xl mx-auto px-6 py-32 space-y-12"
+      >
+        <motion.div 
+          className="space-y-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={visibleSections['structural'] ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.6 }}
+        >
           <h2 className="text-4xl font-bold">Structural Difference</h2>
           <p className="text-lg text-secondary">How uncertainty becomes advantage</p>
-        </div>
+        </motion.div>
 
         <div className="space-y-6">
           {[
@@ -291,7 +339,11 @@ export default function Landing() {
       </section>
 
       {/* Compare & Contrast */}
-      <section className="max-w-5xl mx-auto px-6 py-32 space-y-12">
+      <section 
+        id="compare"
+        ref={(el) => (sectionRefs.current['compare'] = el)}
+        className="max-w-5xl mx-auto px-6 py-32 space-y-12"
+      >
         <div className="space-y-4">
           <h2 className="text-4xl font-bold">Compare & Contrast</h2>
           <p className="text-lg text-secondary">Side-by-side: what you get, how it evolves, realistic expectations.</p>
