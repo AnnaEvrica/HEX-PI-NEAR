@@ -1,22 +1,12 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { BarChart3, Briefcase, Zap, Shield, Settings, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
-
-const NAV_ITEMS = [
-  { path: '/app/dashboard', label: 'Dashboard', icon: BarChart3 },
-  { path: '/app/portfolio', label: 'Portfolio', icon: Briefcase },
-  { path: '/app/trading', label: 'Trade', icon: Zap },
-  { path: '/app/governance', label: 'Governance', icon: Shield },
-  { path: '/app/settings', label: 'Settings', icon: Settings },
-];
 
 export default function MobileLayout({ children, showHeader = true, showNav = true }) {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // Check if current route is a root nav route or a child route
-  const isRootRoute = NAV_ITEMS.some(item => item.path === location.pathname);
-  const showBack = showHeader && !isRootRoute && location.pathname !== '/app';
+  const showBack = showHeader && location.pathname !== '/app';
 
   return (
     <div className="flex flex-col h-screen bg-background overflow-hidden">
