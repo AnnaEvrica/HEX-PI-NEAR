@@ -27,6 +27,7 @@ export default function HEX6ChatInterface() {
   const [uploadedImage, setUploadedImage] = useState(null);
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   // Load conversations on mount
   useEffect(() => {
@@ -389,10 +390,21 @@ export default function HEX6ChatInterface() {
               {listening ? <Mic className="w-4 md:w-5 h-4 md:h-5" /> : <MicOff className="w-4 md:w-5 h-4 md:h-5" />}
             </button>
 
-            <label className="p-2 md:p-2.5 rounded-sm hover:bg-muted text-secondary hover:text-foreground cursor-pointer transition-colors shrink-0 flex items-center justify-center" title="Upload image" style={{ minWidth: '44px', minHeight: '44px' }}>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="p-2 md:p-2.5 rounded-sm hover:bg-muted text-secondary hover:text-foreground transition-colors shrink-0 flex items-center justify-center"
+              title="Upload image"
+              style={{ minWidth: '44px', minHeight: '44px' }}
+            >
               <Image className="w-4 md:w-5 h-4 md:h-5" />
-              <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-            </label>
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="hidden"
+            />
 
             <input
               type="text"
