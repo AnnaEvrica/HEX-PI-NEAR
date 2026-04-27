@@ -1,48 +1,28 @@
 /**
- * EGTS Service — Ethereum Governance & Transparency System
- * Handles minting of immutable, cryptographically verifiable receipts
- * for every portfolio decision made by the HEX6 BLE engine.
+ * EGTS Service — Evrica Global Token Standard
+ * Routes all Supabase operations through the egtsProxy backend function
+ * so server-side secrets (SUPABASE_URL, SUPABASE_ANON_KEY) are used directly.
  */
 
-import { supabase } from '../lib/supabaseClient';
+import { base44 } from '@/api/base44Client';
 
-/**
- * Generate a deterministic SHA-256 hash fingerprint for a receipt payload.
- * Uses the Web Crypto API (available in all modern browsers).
- */
+// ---------------------------------------------------------------------------
+// Crypto utilities (browser-side, no Supabase needed)
+// ---------------------------------------------------------------------------
+
 async function generateReceiptHash(payload) {
   const encoder = new TextEncoder();
   const data = encoder.encode(JSON.stringify(payload));
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
 }
 
-/**
- * Generate a UUID v4 receipt ID.
- */
-function generateReceiptId() {
-  return crypto.randomUUID();
-}
+// ---------------------------------------------------------------------------
+// mintEgtsAssetFromPie
+// ---------------------------------------------------------------------------
 
-/**
- * mintEgtsAssetFromPie
- *
- * Core governance function. Called by the HEX6 BLE engine whenever:
- *  - A portfolio rebalance is triggered
- *  - "Silence" mode is activated
- *
- * Creates an immutable, cryptographically verifiable receipt and stores it
- * in the Supabase egts_receipts table.
- *
- * @param {Object} params
- * @param {string} params.assetId        - The asset/ticker being governed
- * @param {string} params.eventType      - 'REBALANCE' | 'SILENCE' | 'ALLOCATION'
- * @param {Object} params.allocationData - { weights, targetExposure, marketState, ... }
- * @param {string} params.triggeredBy    - User/system identifier
- * @param {Object} params.metadata       - Any extra metadata to embed in the receipt
- * @returns {Promise<Object>}            - The minted EGTS receipt
- */
 export async function mintEgtsAssetFromPie({
   assetId,
   eventType,
@@ -50,21 +30,14 @@ export async function mintEgtsAssetFromPie({
   triggeredBy = 'HEX6_ENGINE',
   metadata = {},
 }) {
-  const receiptId = generateReceiptId();
+  const receiptId = crypto.randomUUID();
   const timestamp = new Date().toISOString();
 
   const payload = {
-    receiptId,
-    assetId,
-    eventType,
-    allocationData,
-    triggeredBy,
-    metadata,
-    timestamp,
-    schemaVersion: '1.0.0',
+    receiptId, assetId, eventType, allocationData,
+    triggeredBy, metadata, timestamp, schemaVersion: '1.0.0',
   };
 
-  // Generate cryptographic hash fingerprint
   const cryptoHash = await generateReceiptHash(payload);
 
   const receipt = {
@@ -80,51 +53,39 @@ export async function mintEgtsAssetFromPie({
     is_verified: true,
   };
 
-  const { data, error } = await supabase
-    .from('egts_receipts')
-    .insert([receipt])
-    .select()
-    .single();
+  const response = await base44.functions.invoke('egtsProxy', {
+    action: 'mint',
+    payload: receipt,
+  });
 
-  if (error) {
-    console.error('[EGTS] Failed to mint receipt:', error);
-    throw new Error(`EGTS mint failed: ${error.message}`);
-  }
-
+  if (response.data?.error) throw new Error(`EGTS mint failed: ${response.data.error}`);
   console.log(`[EGTS] Receipt minted: ${receiptId} | ${eventType} | ${assetId}`);
-  return data;
+  return response.data?.data;
 }
 
-/**
- * Fetch all EGTS receipts for a given asset, sorted by newest first.
- */
-export async function getEgtsReceiptsForAsset(assetId) {
-  const { data, error } = await supabase
-    .from('egts_receipts')
-    .select('*')
-    .eq('asset_id', assetId)
-    .order('timestamp', { ascending: false });
+// ---------------------------------------------------------------------------
+// Fetch helpers
+// ---------------------------------------------------------------------------
 
-  if (error) throw new Error(`EGTS fetch failed: ${error.message}`);
-  return data || [];
-}
-
-/**
- * Fetch all EGTS receipts (for dashboard/audit views).
- */
 export async function getAllEgtsReceipts() {
-  const { data, error } = await supabase
-    .from('egts_receipts')
-    .select('*')
-    .order('timestamp', { ascending: false });
-
-  if (error) throw new Error(`EGTS fetch failed: ${error.message}`);
-  return data || [];
+  const response = await base44.functions.invoke('egtsProxy', { action: 'fetchAll' });
+  if (response.data?.error) throw new Error(`EGTS fetch failed: ${response.data.error}`);
+  return response.data?.data || [];
 }
 
-/**
- * Verify a receipt's integrity by recomputing its hash and comparing.
- */
+export async function getEgtsReceiptsForAsset(assetId) {
+  const response = await base44.functions.invoke('egtsProxy', {
+    action: 'fetchByAsset',
+    payload: { assetId },
+  });
+  if (response.data?.error) throw new Error(`EGTS fetch failed: ${response.data.error}`);
+  return response.data?.data || [];
+}
+
+// ---------------------------------------------------------------------------
+// Verify (browser-side, no network needed)
+// ---------------------------------------------------------------------------
+
 export async function verifyEgtsReceipt(receipt) {
   const payload = {
     receiptId: receipt.id,
@@ -136,7 +97,6 @@ export async function verifyEgtsReceipt(receipt) {
     timestamp: receipt.timestamp,
     schemaVersion: receipt.schema_version,
   };
-
   const recomputedHash = await generateReceiptHash(payload);
   return {
     isValid: recomputedHash === receipt.crypto_hash,
