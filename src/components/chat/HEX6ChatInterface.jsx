@@ -103,22 +103,15 @@ export default function HEX6ChatInterface() {
 
   const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
-    if (!file) {
-      console.log('No file selected');
-      return;
-    }
+    if (!file) return;
     try {
-      console.log('Uploading file:', file.name);
       const res = await base44.integrations.Core.UploadFile({ file });
-      console.log('Upload response:', res);
-      if (res.data?.file_url) {
-        setUploadedImage(res.data.file_url);
-        console.log('Image uploaded successfully');
-      } else {
-        console.error('No file_url in response:', res);
+      const fileUrl = res.file_url || res.data?.file_url;
+      if (fileUrl) {
+        setUploadedImage(fileUrl);
       }
     } catch (err) {
-      console.error('Image upload failed:', err.message || err);
+      console.error('Image upload failed:', err);
     }
   };
 
@@ -376,7 +369,20 @@ export default function HEX6ChatInterface() {
 
         {/* Input */}
         <div className="border-t border-border px-3 md:px-6 py-3 md:py-4 bg-background">
-          <div className="flex items-center gap-2 md:gap-3">
+          <div className="flex flex-col gap-2 md:gap-3">
+            {uploadedImage && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 rounded-sm border border-accent/30">
+                <Image className="w-4 h-4 text-accent" />
+                <span className="text-xs text-secondary truncate">{uploadedImage.split('/').pop()}</span>
+                <button
+                  onClick={() => setUploadedImage(null)}
+                  className="ml-auto text-secondary hover:text-foreground"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+            <div className="flex items-center gap-2 md:gap-3">
             <button
               onClick={handleVoiceInput}
               className={`p-2 md:p-2.5 rounded-sm transition-colors shrink-0 flex items-center justify-center ${
@@ -422,6 +428,7 @@ export default function HEX6ChatInterface() {
             >
               <Send className="w-4 md:w-5 h-4 md:h-5" />
             </button>
+            </div>
           </div>
           <p className="text-xs text-secondary px-1">
             HEX6 BLE is a probabilistic intelligence model. No information provided constitutes financial, legal, or professional advice.
