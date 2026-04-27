@@ -15,6 +15,7 @@ import Backtest from '@/pages/Backtest';
 import Managers from '@/pages/Managers';
 import Thesis from '@/pages/Thesis';
 import Trading from '@/pages/Trading';
+import About from '@/pages/About';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -48,6 +49,7 @@ const AuthenticatedApp = () => {
         <Route path="/managers" element={<Managers />} />
         <Route path="/thesis" element={<Thesis />} />
         <Route path="/trading" element={<Trading />} />
+        <Route path="/about" element={<About />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

@@ -1,5 +1,5 @@
 import { Link, useLocation, Outlet } from 'react-router-dom';
-import { BarChart3, Shield, BookOpen, Activity, FlaskConical, Users } from 'lucide-react';
+import { BarChart3, Shield, BookOpen, Activity, FlaskConical, Users, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const NAV = [
@@ -11,6 +11,7 @@ const NAV = [
   { path: '/managers', label: 'Managers', icon: Users },
   { path: '/governance', label: 'Governance', icon: Shield },
   { path: '/legal', label: 'Legal', icon: BookOpen },
+  { path: '/about', label: 'About', icon: Info },
 ];
 
 export default function AppLayout() {
@@ -21,9 +22,9 @@ export default function AppLayout() {
       {/* Top bar */}
       <header className="border-b border-white/10 px-6 py-4 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
-          <span className="text-sm font-bold tracking-tight text-white">HEX6</span>
+          <span className="text-sm font-bold tracking-tight text-white">HEX6 BLE</span>
           <span className="text-white/20">|</span>
-          <span className="text-sm text-white/50">Portfolio Governance</span>
+          <span className="text-sm text-white/50">by Evrica Technologies Inc.</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-[#C9A84C]" />
@@ -59,7 +60,7 @@ export default function AppLayout() {
 
       {/* Footer */}
       <footer className="border-t border-white/10 py-4 text-center">
-        <p className="text-xs text-white/30">EGTS v1.0.0 | HEX6-BLE-v5.0</p>
+        <p className="text-xs text-white/30">HEX6 BLE v5.0 · EGTS v1.0 · © Evrica Technologies Inc.</p>
       </footer>
     </div>
   );
