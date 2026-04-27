@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useState, useEffect } from 'react';
 import { X, AlertTriangle, Mail, Lock, Trash2, Shield, Eye, Clock, LogOut as LogOutIcon, Bell, Upload, TrendingUp, Zap } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
@@ -213,7 +212,10 @@ export default function SettingsModal({
                 </div>
                 <label className="flex items-center justify-center w-full px-4 py-2 border border-dashed border-border rounded-sm hover:border-accent cursor-pointer transition-colors">
                   <span className="text-xs text-secondary">Choose image or drag here</span>
-                  <input type="file" accept="image/*" onChange={handleImageUpload} disabled={loading} className="hidden" />
+                  <input type="file" accept="image/*" onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) setUploadedImage(file.name);
+                  }} disabled={loading} className="hidden" />
                 </label>
                 {uploadedImage && (
                   <p className="text-xs text-accent">✓ Image ready for HEX6 analysis</p>
@@ -464,7 +466,7 @@ export default function SettingsModal({
                   <div className="space-y-2">
                     <p className="text-xs text-secondary">Add a second layer of security to your account.</p>
                     <button
-                      onClick={handle2FASetup}
+                      onClick={() => setTwoFAEnabled(true)}
                       disabled={loading}
                       className="w-full px-3 py-1.5 rounded-sm bg-accent text-black text-xs font-medium hover:bg-accent/90 transition-colors disabled:opacity-40"
                     >
