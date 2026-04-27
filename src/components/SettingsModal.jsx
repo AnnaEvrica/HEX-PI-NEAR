@@ -365,10 +365,10 @@ export default function SettingsModal({ open, onClose }) {
                 </div>
               </div>
 
-              {/* Risk Aversion */}
+              {/* Output Risk Tolerance */}
               <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-4">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium">Risk Aversion Baseline</p>
+                  <p className="text-sm font-medium">Output Risk Confidence</p>
                   <span className="text-lg font-bold text-accent">{riskAversion.toFixed(1)}</span>
                 </div>
                 <input
@@ -384,7 +384,11 @@ export default function SettingsModal({ open, onClose }) {
                   }}
                   className="w-full accent-accent"
                 />
-                <p className="text-xs text-secondary">Lower values produce more aggressive outputs; higher values prioritize conservative, cautious analysis.</p>
+                <p className="text-xs text-secondary">
+                  <strong>1–2:</strong> High-conviction, aggressive probability outputs emphasizing upside potential.{' '}
+                  <strong>2–3:</strong> Balanced analysis with both bullish and bearish scenarios.{' '}
+                  <strong>3–5:</strong> Conservative outputs prioritizing downside protection and caution.
+                </p>
               </div>
 
               {/* Base Currency */}

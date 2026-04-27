@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { ChevronRight, Check } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import PricingModal from '@/components/PricingModal';
 
 const STEPS = [
@@ -34,28 +34,32 @@ function Step1SystemFraming({ onContinue }) {
   return (
     <div className="max-w-2xl mx-auto space-y-8">
       <div>
-        <h2 className="text-2xl font-bold mb-2">What is HEX6?</h2>
-        <p className="text-secondary">A probabilistic allocation intelligence system.</p>
+        <h2 className="text-2xl font-bold mb-2">System Definition</h2>
+        <p className="text-secondary">What HEX6 is and isn't — Read carefully</p>
       </div>
 
       <div className="space-y-4 p-6 rounded-sm bg-muted border border-border">
-        <p className="font-medium">HEX6 is a computational system that:</p>
+        <p className="font-medium">HEX6 BLE is a computational system that:</p>
         <ul className="space-y-2 text-sm text-secondary">
           <li className="flex gap-3">
             <span className="text-accent font-bold">•</span>
-            <span>Analyzes market data to generate model-derived exposure fields</span>
+            <span>Analyzes market data to generate probabilistic outcome distributions</span>
           </li>
           <li className="flex gap-3">
             <span className="text-accent font-bold">•</span>
-            <span>Does NOT provide investment advice or fiduciary services</span>
+            <span>Does NOT provide investment advice, financial recommendations, or fiduciary services</span>
           </li>
           <li className="flex gap-3">
             <span className="text-accent font-bold">•</span>
-            <span>Does NOT execute trades or manage your capital</span>
+            <span>Does NOT execute trades, manage capital, or guarantee outcomes</span>
           </li>
           <li className="flex gap-3">
             <span className="text-accent font-bold">•</span>
-            <span>Generates outputs that are informational, not instructional</span>
+            <span>Generates outputs that are informational and probabilistic, not predictions</span>
+          </li>
+          <li className="flex gap-3">
+            <span className="text-accent font-bold">•</span>
+            <span>You are solely responsible for all decisions and financial outcomes</span>
           </li>
         </ul>
       </div>
@@ -141,18 +145,23 @@ function Step2RiskAcknowledgment({ onContinue }) {
 function Step3ModularConsent({ onContinue }) {
   const [consents, setConsents] = useState({
     dataProcessing: true,
-    modelImprovement: false,
+    modelTraining: false,
   });
 
   const handleToggle = (key) => {
     setConsents((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
+  // Store consent choices
+  useEffect(() => {
+    localStorage.setItem('hex6_consent_choices', JSON.stringify(consents));
+  }, [consents]);
+
   return (
     <div className="max-w-2xl mx-auto space-y-8">
       <div>
-        <h2 className="text-2xl font-bold mb-2">Control Your Data</h2>
-        <p className="text-secondary">Choose what you consent to</p>
+        <h2 className="text-2xl font-bold mb-2">Data Processing & Consent</h2>
+        <p className="text-secondary">Control your data preferences</p>
       </div>
 
       <div className="space-y-4">
@@ -160,13 +169,13 @@ function Step3ModularConsent({ onContinue }) {
           {
             key: 'dataProcessing',
             label: 'Data Processing',
-            desc: 'Required to run HEX6. Your inputs and market data are processed to generate analysis.',
+            desc: 'Required to run HEX6 BLE. Your inputs and market queries are processed to generate probabilistic analysis.',
             required: true,
           },
           {
-            key: 'modelImprovement',
-            label: 'Model Improvement',
-            desc: 'Optional. Anonymized patterns from your sessions help improve HEX6\'s accuracy over time.',
+            key: 'modelTraining',
+            label: 'Model Training',
+            desc: 'Optional. Anonymized patterns from your sessions help improve HEX6\'s accuracy. You can disable this anytime in Settings.',
             required: false,
           },
         ].map(({ key, label, desc, required }) => (
@@ -207,38 +216,62 @@ function Step3ModularConsent({ onContinue }) {
 function Step4LegalAcceptance({ onContinue }) {
   const [agreed, setAgreed] = useState(false);
 
+  const handleContinue = () => {
+    const timestamp = new Date().toISOString();
+    localStorage.setItem('hex6_consent_timestamp', timestamp);
+    localStorage.setItem('hex6_consent_version', '1.2');
+    onContinue();
+  };
+
   return (
     <div className="max-w-2xl mx-auto space-y-8">
       <div>
         <h2 className="text-2xl font-bold mb-2">Terms & Conditions</h2>
-        <p className="text-secondary">Read and accept</p>
+        <p className="text-secondary">Review and accept legal terms</p>
       </div>
 
-      <div className="p-6 rounded-sm border border-border bg-muted space-y-4 max-h-96 overflow-y-auto">
-        <h3 className="font-bold">System Definition</h3>
-        <p className="text-sm text-secondary leading-relaxed">
-          HEX6 is a probabilistic computational system that analyzes market data to generate exposure fields. It is not an investment advisor, broker, or fiduciary service.
-        </p>
+      <div className="p-6 rounded-sm border border-border bg-muted space-y-4 max-h-96 overflow-y-auto text-sm">
+        <section className="space-y-2">
+          <h3 className="font-bold">System Definition</h3>
+          <p className="text-secondary leading-relaxed">
+            HEX6 BLE is a probabilistic computational system that analyzes market data to generate outcome distributions and probability-weighted exposure recommendations. It is NOT an investment advisor, broker, fiduciary, or financial institution.
+          </p>
+        </section>
 
-        <h3 className="font-bold pt-4">No Advisory Services</h3>
-        <p className="text-sm text-secondary leading-relaxed">
-          All outputs are informational only. HEX6 does not provide investment recommendations, financial advice, or portfolio management services. You are solely responsible for all financial decisions.
-        </p>
+        <section className="space-y-2 border-t border-border pt-4">
+          <h3 className="font-bold">No Advisory or Predictive Services</h3>
+          <p className="text-secondary leading-relaxed">
+            All outputs are informational and probabilistic only. HEX6 does not predict markets, provide investment recommendations, financial advice, or portfolio management services. You are solely responsible for all financial decisions and outcomes.
+          </p>
+        </section>
 
-        <h3 className="font-bold pt-4">Risk Acknowledgment</h3>
-        <p className="text-sm text-secondary leading-relaxed">
-          Model outputs may be incorrect. Market conditions change. Historical performance does not guarantee future results. You assume all risk of financial loss.
-        </p>
+        <section className="space-y-2 border-t border-border pt-4">
+          <h3 className="font-bold">Risk Acknowledgment</h3>
+          <p className="text-secondary leading-relaxed">
+            Model outputs may be incorrect or become outdated. Market conditions change rapidly. Historical performance does not guarantee future results. All investments carry substantial risk of loss. You assume all financial risk.
+          </p>
+        </section>
 
-        <h3 className="font-bold pt-4">Data & Usage</h3>
-        <p className="text-sm text-secondary leading-relaxed">
-          You retain ownership of your inputs. HEX6 and its creators retain all rights to the model, algorithms, and signals. System outputs may be used for model improvement unless you opt out.
-        </p>
+        <section className="space-y-2 border-t border-border pt-4">
+          <h3 className="font-bold">Data Ownership & Usage</h3>
+          <p className="text-secondary leading-relaxed">
+            You retain ownership of your inputs. Evrica Technologies Inc. retains all rights to the model, algorithms, and outputs. Anonymized patterns may be used for model improvement unless you disable this in Settings.
+          </p>
+        </section>
 
-        <h3 className="font-bold pt-4">Compliance</h3>
-        <p className="text-sm text-secondary leading-relaxed">
-          You are responsible for compliance with all applicable laws in your jurisdiction. HEX6 is not registered with any financial authority and offers no regulatory protection.
-        </p>
+        <section className="space-y-2 border-t border-border pt-4">
+          <h3 className="font-bold">Regulatory Compliance</h3>
+          <p className="text-secondary leading-relaxed">
+            You are responsible for compliance with all applicable laws in your jurisdiction. HEX6 is not registered with any financial authority and offers no regulatory protection. Consult a licensed financial advisor for your specific situation.
+          </p>
+        </section>
+
+        <section className="space-y-2 border-t border-border pt-4">
+          <h3 className="font-bold">Limitation of Liability</h3>
+          <p className="text-secondary leading-relaxed">
+            To the fullest extent permitted by law, Evrica Technologies Inc. is not liable for any indirect, incidental, special, or consequential damages, including loss of profits or capital.
+          </p>
+        </section>
       </div>
 
       <label className="flex items-start gap-3 p-4 rounded-sm border border-border">
@@ -249,12 +282,12 @@ function Step4LegalAcceptance({ onContinue }) {
           className="w-5 h-5 rounded-sm accent-accent mt-0.5"
         />
         <span className="text-sm">
-          I accept the HEX6 Terms of Use, Privacy Policy, and Risk Disclosure
+          I accept the HEX6 BLE Terms of Use, Privacy Policy, Risk Disclosure, and Regulatory Compliance requirements
         </span>
       </label>
 
       <button
-        onClick={onContinue}
+        onClick={handleContinue}
         disabled={!agreed}
         className="w-full px-6 py-3 rounded-sm bg-accent text-accent-foreground font-medium hover:bg-accent/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >

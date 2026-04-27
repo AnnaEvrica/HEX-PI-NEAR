@@ -6,6 +6,7 @@ import CalibrationPanel from '@/components/CalibrationPanel';
 import SettingsModal from '@/components/SettingsModal';
 import LegalModal from '@/components/LegalModal';
 import MobileLayout from '@/components/layout/MobileLayout';
+import ConversationItem from '@/components/chat/ConversationItem';
 
 export default function HEX6ChatInterface() {
   const welcomeMessage = {
@@ -186,6 +187,20 @@ export default function HEX6ChatInterface() {
   const handleNewChat = () => {
     setMessages([welcomeMessage]);
     setCurrentConversationId(null);
+    setSidebarOpen(false);
+  };
+
+  const handleRenameConversation = (convId, newTitle) => {
+    setConversations((prev) =>
+      prev.map((c) =>
+        c.id === convId ? { ...c, title: newTitle } : c
+      )
+    );
+  };
+
+  const handleSelectConversation = (convId) => {
+    setCurrentConversationId(convId);
+    setSidebarOpen(false);
   };
 
   const handleDeleteConversation = (convId) => {
@@ -235,32 +250,14 @@ export default function HEX6ChatInterface() {
               <p className="text-xs text-secondary text-center py-4">No conversations yet. Start a chat!</p>
             ) : (
               conversations.map((conv) => (
-                <div
+                <ConversationItem
                   key={conv.id}
-                  className={`group flex items-center gap-1 px-2 py-2 rounded-sm transition-colors ${
-                    currentConversationId === conv.id
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-secondary hover:bg-muted'
-                  }`}
-                >
-                  <button
-                    onClick={() => {
-                      setCurrentConversationId(conv.id);
-                      setSidebarOpen(false);
-                    }}
-                    className="flex-1 text-left text-sm truncate flex items-center gap-2"
-                  >
-                    <MessageCircle className="w-3 h-3 shrink-0" />
-                    {conv.title}
-                  </button>
-                  <button
-                    onClick={() => handleDeleteConversation(conv.id)}
-                    className="p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-black/20 transition-opacity"
-                    title="Delete conversation"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
+                  conversation={conv}
+                  isSelected={currentConversationId === conv.id}
+                  onSelect={() => handleSelectConversation(conv.id)}
+                  onRename={(newTitle) => handleRenameConversation(conv.id, newTitle)}
+                  onDelete={() => handleDeleteConversation(conv.id)}
+                />
               ))
             )}
           </div>

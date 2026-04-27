@@ -101,13 +101,14 @@ export default function Landing() {
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-4 pt-4">
+        <div className="flex flex-col gap-4 pt-4">
           <button
             onClick={() => base44.auth.redirectToLogin()}
             className="inline-flex items-center gap-2 px-6 py-3 rounded-sm bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
           >
             Enter Oracle <ArrowRight className="w-4 h-4" />
           </button>
+          <p className="text-xs text-secondary">Or login with Google, Apple, or Facebook</p>
         </div>
       </section>
 
