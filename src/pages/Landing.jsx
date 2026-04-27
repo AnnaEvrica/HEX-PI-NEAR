@@ -64,7 +64,7 @@ export default function Landing() {
            </button>
            <button
              onClick={() => base44.auth.redirectToLogin()}
-             className="px-5 py-2 rounded-sm bg-accent text-accent-foreground text-sm font-medium hover:bg-accent/90 transition-colors"
+             className="px-5 py-2 rounded-sm bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
            >
              Get Started
            </button>
@@ -86,8 +86,8 @@ export default function Landing() {
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight tracking-tight max-w-3xl">
-            Probability.{' '}
-            <span className="text-accent">Not prediction.</span>
+            <span className="text-accent">Probability.</span>{' '}
+            <span className="text-foreground">Not prediction.</span>
           </h1>
 
           <p className="text-base sm:text-lg text-secondary max-w-2xl leading-relaxed">
@@ -129,7 +129,7 @@ export default function Landing() {
           transition={{ duration: 0.6 }}
         >
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">The odds are now in your favor</h2>
-          <p className="text-base sm:text-lg md:text-2xl font-semibold text-accent max-w-3xl mx-auto leading-relaxed">HEX6 BLE - a new category of intelligence thriving in uncertainty, seeing patterns in chaos</p>
+          <p className="text-base sm:text-lg md:text-2xl font-semibold text-foreground max-w-3xl mx-auto leading-relaxed"><span className="font-bold">HEX6 BLE</span> — a new category of intelligence <br /> thriving in uncertainty, seeing patterns in chaos</p>
         </motion.div>
 
         {/* System Comparison Chart */}
