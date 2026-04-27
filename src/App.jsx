@@ -47,7 +47,7 @@ const AuthenticatedApp = () => {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
-      return <Routes><Route path="/" element={<Landing />} /><Route path="*" element={<Landing />} /></Routes>;
+      return <Landing />;
     }
   }
 
