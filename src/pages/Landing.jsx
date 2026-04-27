@@ -1,16 +1,29 @@
 import { ArrowRight, Lock, TrendingUp, BarChart3, Brain, Zap, X } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 
 export default function Landing() {
+  const navigate = useNavigate();
   const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [openPolicy, setOpenPolicy] = useState(null);
+  const [isAuth, setIsAuth] = useState(false);
 
   useEffect(() => {
-    const fetchMetrics = async () => {
+    const checkAuthAndLoadMetrics = async () => {
+      try {
+        const authed = await base44.auth.isAuthenticated();
+        if (authed) {
+          setIsAuth(true);
+          navigate('/app');
+          return;
+        }
+      } catch (err) {
+        console.log('Auth check failed');
+      }
+
       try {
         const res = await base44.functions.invoke('generateLandingMetrics', {});
         setMetrics(res.data);
@@ -20,8 +33,8 @@ export default function Landing() {
         setLoading(false);
       }
     };
-    fetchMetrics();
-  }, []);
+    checkAuthAndLoadMetrics();
+  }, [navigate]);
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Nav */}
