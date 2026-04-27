@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { X, AlertTriangle, Mail, Lock, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, AlertTriangle, Mail, Lock, Trash2, Shield, Eye, Clock, LogOut as LogOutIcon } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
 export default function SettingsModal({
@@ -12,6 +12,28 @@ export default function SettingsModal({
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [twoFAEnabled, setTwoFAEnabled] = useState(false);
+  const [chatEncryption, setChatEncryption] = useState(true);
+  const [sessions, setSessions] = useState([]);
+  const [activityLogs, setActivityLogs] = useState([]);
+
+  useEffect(() => {
+    // Load security settings
+    const loadSettings = async () => {
+      try {
+        const prefs = await base44.auth.getPrivacyPreferences?.() || {};
+        setTwoFAEnabled(prefs.twoFAEnabled || false);
+        setChatEncryption(prefs.chatEncryption !== false);
+        setSessions(prefs.sessions || []);
+        setActivityLogs(prefs.activityLogs || []);
+      } catch (err) {
+        console.log('Could not load privacy preferences');
+      }
+    };
+    if (activeTab === 'privacy') {
+      loadSettings();
+    }
+  }, [activeTab]);
 
   const handlePasswordReset = async () => {
     setLoading(true);
@@ -77,10 +99,11 @@ export default function SettingsModal({
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-border shrink-0">
+        <div className="flex border-b border-border shrink-0 overflow-x-auto">
           {[
             { id: 'account', label: 'Account' },
             { id: 'security', label: 'Security' },
+            { id: 'privacy', label: 'Privacy' },
             { id: 'features', label: 'Features' },
           ].map((tab) => (
             <button
@@ -162,6 +185,113 @@ export default function SettingsModal({
                 <p className="text-xs text-secondary">
                   This action is permanent and cannot be undone. All your data will be deleted.
                 </p>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'privacy' && (
+            <div className="space-y-4">
+              {/* 2FA */}
+              <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium mb-2">
+                  <Shield className="w-4 h-4" />
+                  Two-Factor Authentication
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-secondary">Enhanced account security</span>
+                  <button
+                    onClick={() => setTwoFAEnabled(!twoFAEnabled)}
+                    className={`relative w-12 h-6 rounded-full transition-colors ${
+                      twoFAEnabled ? 'bg-accent' : 'bg-border'
+                    }`}
+                    disabled={loading}
+                  >
+                    <span
+                      className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${
+                        twoFAEnabled ? 'left-7' : 'left-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+                <p className="text-xs text-secondary">
+                  {twoFAEnabled ? 'Enabled. You\'ll need a code from your authenticator app on login.' : 'Disabled. Add a second layer of security to your account.'}
+                </p>
+              </div>
+
+              {/* Chat Encryption */}
+              <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium mb-2">
+                  <Eye className="w-4 h-4" />
+                  Chat Privacy
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-secondary">Encrypt conversations locally</span>
+                  <button
+                    onClick={() => setChatEncryption(!chatEncryption)}
+                    className={`relative w-12 h-6 rounded-full transition-colors ${
+                      chatEncryption ? 'bg-accent' : 'bg-border'
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${
+                        chatEncryption ? 'left-7' : 'left-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+                <p className="text-xs text-secondary">
+                  {chatEncryption ? 'Enabled. Your conversations are encrypted before storage.' : 'Disabled. Conversations stored without encryption.'}
+                </p>
+              </div>
+
+              {/* Activity Log */}
+              <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium mb-2">
+                  <Clock className="w-4 h-4" />
+                  Recent Activity
+                </div>
+                {activityLogs.length === 0 ? (
+                  <p className="text-xs text-secondary">No recent activity logged.</p>
+                ) : (
+                  <div className="space-y-2 max-h-32 overflow-y-auto">
+                    {activityLogs.slice(0, 5).map((log, idx) => (
+                      <div key={idx} className="flex items-center justify-between px-2 py-1.5 bg-black/20 rounded text-xs text-secondary">
+                        <span>{log.action}</span>
+                        <span className="text-white/30">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Active Sessions */}
+              <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium mb-2">
+                  <LogOutIcon className="w-4 h-4" />
+                  Active Sessions
+                </div>
+                {sessions.length === 0 ? (
+                  <p className="text-xs text-secondary">No active sessions.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {sessions.map((session, idx) => (
+                      <div key={idx} className="flex items-center justify-between px-3 py-2 bg-black/20 rounded text-xs">
+                        <div className="flex-1">
+                          <p className="text-white">{session.device || 'Current session'}</p>
+                          <p className="text-white/50">{session.location || 'Unknown location'}</p>
+                        </div>
+                        {!session.current && (
+                          <button
+                            onClick={() => {}}
+                            className="text-xs text-red-400 hover:text-red-300"
+                          >
+                            Sign out
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}

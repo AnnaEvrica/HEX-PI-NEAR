@@ -8,13 +8,13 @@ import SettingsModal from '@/components/SettingsModal';
 import LegalModal from '@/components/LegalModal';
 
 export default function HEX6ChatInterface() {
-  const [messages, setMessages] = useState([
-    {
-      id: 'welcome',
-      role: 'assistant',
-      content: `Welcome to HEX6 Oracle. I'm a probabilistic allocation intelligence system trained to analyze market behavior and guide you toward better portfolio decisions.\n\nI don't give advice. I generate probability-weighted exposure recommendations based on data.\n\nWhat markets are you thinking about?`,
-    },
-  ]);
+  const welcomeMessage = {
+    id: 'welcome',
+    role: 'assistant',
+    content: `Welcome to HEX6 Oracle. I'm a probabilistic allocation intelligence system trained to analyze market behavior and guide you toward better portfolio decisions.\n\nI don't give advice. I generate probability-weighted exposure recommendations based on data.\n\nWhat markets are you thinking about?`,
+  };
+
+  const [messages, setMessages] = useState([welcomeMessage]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [conversations, setConversations] = useState([]);
@@ -26,6 +26,35 @@ export default function HEX6ChatInterface() {
   const [traderEnabled, setTraderEnabled] = useState(false);
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
+
+  // Load conversations on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('hex6_conversations');
+    if (saved) {
+      try {
+        setConversations(JSON.parse(saved));
+      } catch (err) {
+        console.log('Could not load saved conversations');
+      }
+    }
+  }, []);
+
+  // Save conversations to localStorage whenever they change
+  useEffect(() => {
+    if (conversations.length > 0) {
+      localStorage.setItem('hex6_conversations', JSON.stringify(conversations));
+    }
+  }, [conversations]);
+
+  // Load conversation messages when selected
+  useEffect(() => {
+    if (currentConversationId) {
+      const conv = conversations.find((c) => c.id === currentConversationId);
+      if (conv?.messages) {
+        setMessages(conv.messages);
+      }
+    }
+  }, [currentConversationId, conversations]);
 
   // Initialize Web Speech API
   useEffect(() => {
@@ -79,14 +108,15 @@ export default function HEX6ChatInterface() {
       content: input,
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
     setInput('');
     setLoading(true);
 
     try {
       const response = await base44.functions.invoke('hex6Chat', {
         message: input,
-        conversationHistory: messages,
+        conversationHistory: newMessages,
       });
 
       if (response.data?.error) throw new Error(response.data.error);
@@ -97,32 +127,55 @@ export default function HEX6ChatInterface() {
         content: response.data?.response || 'Unable to process your request.',
       };
 
-      setMessages((prev) => [...prev, assistantMessage]);
+      const updatedMessages = [...newMessages, assistantMessage];
+      setMessages(updatedMessages);
+
+      // Auto-save to conversation
+      if (currentConversationId) {
+        setConversations((prev) =>
+          prev.map((c) =>
+            c.id === currentConversationId
+              ? { ...c, messages: updatedMessages, updated_at: new Date().toISOString() }
+              : c
+          )
+        );
+      } else {
+        // Create new conversation if none selected
+        const title = input.substring(0, 30) + (input.length > 30 ? '...' : '');
+        const newConv = {
+          id: Date.now().toString(),
+          title,
+          messages: updatedMessages,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+        setConversations((prev) => [newConv, ...prev]);
+        setCurrentConversationId(newConv.id);
+      }
     } catch (err) {
       console.error(err);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: 'Error processing your message. Please try again.',
-        },
-      ]);
+      const errorMsg = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: 'Error processing your message. Please try again.',
+      };
+      const updatedMessages = [...newMessages, errorMsg];
+      setMessages(updatedMessages);
     } finally {
       setLoading(false);
     }
   };
 
   const handleNewChat = () => {
-    setMessages([
-      {
-        id: 'welcome',
-        role: 'assistant',
-        content:
-          'Welcome to a new HEX6 session. What markets are you thinking about?',
-      },
-    ]);
+    setMessages([welcomeMessage]);
     setCurrentConversationId(null);
+  };
+
+  const handleDeleteConversation = (convId) => {
+    setConversations((prev) => prev.filter((c) => c.id !== convId));
+    if (currentConversationId === convId) {
+      handleNewChat();
+    }
   };
 
   const handleSignOut = async () => {
@@ -157,25 +210,38 @@ export default function HEX6ChatInterface() {
           </button>
 
           <div className="flex-1 overflow-y-auto space-y-2 mb-4">
-            {conversations.map((conv) => (
-              <button
-                key={conv.id}
-                onClick={() => {
-                  setCurrentConversationId(conv.id);
-                  setSidebarOpen(false);
-                }}
-                className={`w-full text-left px-3 py-2 rounded-sm text-sm transition-colors ${
-                  currentConversationId === conv.id
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-secondary hover:bg-muted'
-                }`}
-              >
-                <div className="truncate flex items-center gap-2">
-                  <MessageCircle className="w-3 h-3 shrink-0" />
-                  {conv.title}
+            {conversations.length === 0 ? (
+              <p className="text-xs text-secondary text-center py-4">No conversations yet. Start a chat!</p>
+            ) : (
+              conversations.map((conv) => (
+                <div
+                  key={conv.id}
+                  className={`group flex items-center gap-1 px-2 py-2 rounded-sm transition-colors ${
+                    currentConversationId === conv.id
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-secondary hover:bg-muted'
+                  }`}
+                >
+                  <button
+                    onClick={() => {
+                      setCurrentConversationId(conv.id);
+                      setSidebarOpen(false);
+                    }}
+                    className="flex-1 text-left text-sm truncate flex items-center gap-2"
+                  >
+                    <MessageCircle className="w-3 h-3 shrink-0" />
+                    {conv.title}
+                  </button>
+                  <button
+                    onClick={() => handleDeleteConversation(conv.id)}
+                    className="p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-black/20 transition-opacity"
+                    title="Delete conversation"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
                 </div>
-              </button>
-            ))}
+              ))
+            )}
           </div>
 
           <div className="space-y-2 border-t border-border pt-4">
