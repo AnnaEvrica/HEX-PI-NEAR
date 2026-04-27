@@ -86,14 +86,19 @@ export default function Landing() {
       </nav>
 
       {/* Hero */}
-      <section className="max-w-4xl mx-auto px-6 py-24 space-y-8">
+      <motion.section 
+        className="max-w-4xl mx-auto px-6 py-24 space-y-8"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+      >
         <div className="space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm bg-accent/10 border border-accent/30">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm bg-accent/10 border border-accent/30 w-fit">
             <span className="text-sm font-bold text-accent">HEX6 BLE</span>
             <span className="text-sm font-medium text-accent">Probabilistic Intelligence</span>
           </div>
 
-          <h1 className="text-5xl sm:text-6xl font-bold leading-tight tracking-tight">
+          <h1 className="text-5xl sm:text-6xl font-bold leading-tight tracking-tight max-w-3xl">
             Probability.{' '}
             <span className="text-accent">Not prediction.</span>
           </h1>
@@ -106,12 +111,12 @@ export default function Landing() {
         <div className="flex flex-col gap-4 pt-4">
           <button
             onClick={() => setAuthModal('login')}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-sm bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-sm bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors w-fit"
           >
             Enter Oracle <ArrowRight className="w-4 h-4" />
           </button>
         </div>
-      </section>
+      </motion.section>
 
       {/* How It Works */}
       <section 
@@ -527,18 +532,18 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border py-16">
-        <div className="max-w-4xl mx-auto px-6 flex items-center justify-between text-sm text-secondary">
+      <footer className="border-t border-border py-12">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between text-xs text-secondary gap-6">
           <p>HEX6 BLE © 2026 · Developed by Evrica Technologies Inc.</p>
-          <div className="flex gap-6">
+          <div className="flex gap-8">
             <button onClick={() => setOpenPolicy('terms')} className="hover:text-foreground transition-colors">
-              Terms
+              Terms of Service
             </button>
             <button onClick={() => setOpenPolicy('privacy')} className="hover:text-foreground transition-colors">
-              Privacy
+              Privacy Policy
             </button>
             <button onClick={() => setOpenPolicy('disclosure')} className="hover:text-foreground transition-colors">
-              Disclosure
+              Risk Disclosure
             </button>
           </div>
         </div>
