@@ -217,7 +217,7 @@ export default function HEX6ChatInterface() {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   return (
-    <div className={`flex ${isMobile ? 'flex-col' : ''} h-full bg-background`}>
+    <div className={`flex ${isMobile ? 'flex-col' : ''} h-screen bg-background`}>
       {/* Sidebar - hidden on mobile */}
       <div
         className={`fixed inset-y-0 left-0 z-40 w-64 bg-card border-r border-border transition-transform duration-300 ${
@@ -287,7 +287,7 @@ export default function HEX6ChatInterface() {
       </div>
 
       {/* Main chat area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <button
