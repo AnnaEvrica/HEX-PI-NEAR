@@ -1,13 +1,23 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import EGTSAuditTrail from '@/components/egts/EGTSAuditTrail';
 import EGTSBadge from '@/components/egts/EGTSBadge';
 import EGTSContractViewer from '@/components/egts/EGTSContractViewer';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
+import PullToRefresh from '@/components/mobile/PullToRefresh';
 
 export default function Governance() {
   const [selectedReceipt, setSelectedReceipt] = useState(null);
+  const handleRefresh = async () => {
+    // Trigger audit trail refresh
+    const event = new CustomEvent('refreshAuditTrail');
+    window.dispatchEvent(event);
+  };
+  
+  const { containerRef, isRefreshing, pullDistance } = usePullToRefresh(handleRefresh);
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12 space-y-8">
+    <div ref={containerRef} className="max-w-6xl mx-auto px-6 py-12 space-y-8">
+      <PullToRefresh isRefreshing={isRefreshing} pullDistance={pullDistance} />
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="space-y-1">
           <h1 className="text-4xl font-bold text-white">Audit Trail</h1>

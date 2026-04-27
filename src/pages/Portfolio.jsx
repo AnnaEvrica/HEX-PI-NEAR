@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Plus, Trash2, ArrowRight, Activity } from 'lucide-react';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
+import PullToRefresh from '@/components/mobile/PullToRefresh';
 
 const ASSET_CLASSES = ['equity', 'crypto', 'fixed_income', 'commodity', 'fx', 'alternative'];
 const MARKET_STATES = ['BULL', 'BEAR', 'LATERAL', 'VOLATILE', 'SILENCE'];
@@ -19,6 +21,8 @@ export default function Portfolio() {
     setAssets(data);
     setLoading(false);
   }
+
+  const { containerRef, isRefreshing, pullDistance } = usePullToRefresh(load);
 
   useEffect(() => { load(); }, []);
 
@@ -39,7 +43,8 @@ export default function Portfolio() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-12 space-y-10">
+    <div ref={containerRef} className="max-w-3xl mx-auto px-6 py-12 space-y-10">
+      <PullToRefresh isRefreshing={isRefreshing} pullDistance={pullDistance} />
       <div className="flex items-end justify-between">
         <div className="space-y-1">
           <h1 className="text-4xl font-bold text-white">Portfolio</h1>

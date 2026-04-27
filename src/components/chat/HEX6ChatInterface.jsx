@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import CalibrationPanel from '@/components/CalibrationPanel';
 import SettingsModal from '@/components/SettingsModal';
 import LegalModal from '@/components/LegalModal';
+import MobileLayout from '@/components/layout/MobileLayout';
 
 export default function HEX6ChatInterface() {
   const welcomeMessage = {
@@ -193,9 +194,13 @@ export default function HEX6ChatInterface() {
     await base44.auth.logout(window.location.origin + '/');
   };
 
+  // Detect if mobile
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
   return (
-    <div className="flex h-screen bg-background">
-      {/* Sidebar */}
+    <MobileLayout showHeader={isMobile} showNav={isMobile}>
+      <div className={`flex ${isMobile ? 'flex-col' : ''} h-full bg-background`}>
+      {/* Sidebar - hidden on mobile */}
       <div
         className={`fixed inset-y-0 left-0 z-40 w-64 bg-card border-r border-border transition-transform duration-300 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
@@ -414,5 +419,6 @@ export default function HEX6ChatInterface() {
       {/* Legal Modal */}
       <LegalModal open={legalOpen} onClose={() => setLegalOpen(false)} />
     </div>
+    </MobileLayout>
   );
 }
