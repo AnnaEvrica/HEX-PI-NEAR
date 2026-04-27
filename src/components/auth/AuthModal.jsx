@@ -27,10 +27,7 @@ export default function AuthModal({ mode, onClose, onSwitchMode }) {
     }
   };
 
-  const handleOAuth = (provider) => {
-    // All OAuth handled by Base44
-    base44.auth.redirectToLogin();
-  };
+
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -103,7 +100,7 @@ export default function AuthModal({ mode, onClose, onSwitchMode }) {
           <div className="space-y-2">
             {/* Google */}
             <button
-              onClick={() => handleOAuth('google')}
+              onClick={() => base44.auth.redirectToLogin()}
               className="w-full px-4 py-2.5 rounded-sm border border-border hover:bg-muted transition-colors flex items-center justify-center gap-2 text-sm font-medium"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
@@ -117,7 +114,7 @@ export default function AuthModal({ mode, onClose, onSwitchMode }) {
 
             {/* Apple */}
             <button
-              onClick={() => handleOAuth('apple')}
+              onClick={() => base44.auth.redirectToLogin()}
               className="w-full px-4 py-2.5 rounded-sm border border-border hover:bg-muted transition-colors flex items-center justify-center gap-2 text-sm font-medium"
             >
               <Apple className="w-4 h-4" />
@@ -126,7 +123,7 @@ export default function AuthModal({ mode, onClose, onSwitchMode }) {
 
             {/* Facebook */}
             <button
-              onClick={() => handleOAuth('facebook')}
+              onClick={() => base44.auth.redirectToLogin()}
               className="w-full px-4 py-2.5 rounded-sm border border-border hover:bg-muted transition-colors flex items-center justify-center gap-2 text-sm font-medium"
             >
               <Facebook className="w-4 h-4" />
