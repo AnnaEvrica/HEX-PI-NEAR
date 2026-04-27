@@ -516,6 +516,13 @@ export default function Landing() {
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">Ready to observe how outcomes reorganize?</h2>
           <p className="text-base sm:text-lg md:text-xl text-secondary">No credit card required. No prediction. Only probability.</p>
         </div>
+        
+        <div className="flex items-center gap-4 my-8 sm:my-12">
+          <div className="flex-1 h-px bg-gradient-to-r from-accent/0 via-accent to-accent/0 shadow-lg shadow-accent/50" />
+          <div className="w-3 h-3 rounded-full bg-accent animate-pulse shadow-lg shadow-accent/70" />
+          <div className="flex-1 h-px bg-gradient-to-r from-accent/0 via-accent to-accent/0 shadow-lg shadow-accent/50" />
+        </div>
+
         <button
           onClick={() => base44.auth.redirectToLogin()}
           className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 rounded-sm bg-accent text-accent-foreground font-medium hover:bg-accent/90 transition-colors text-sm sm:text-base md:text-lg"
