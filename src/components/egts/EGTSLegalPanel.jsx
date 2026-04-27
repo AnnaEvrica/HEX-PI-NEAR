@@ -46,7 +46,7 @@ export default function EGTSLegalPanel({ assetId = null }) {
             <EGTSBadge status="verified" size="sm" />
           </div>
           <p className="text-sm text-slate-400">
-            EGTS (Ethereum Governance & Transparency System) provides cryptographically verifiable,
+            EGTS (Evrica Global Token Standard) provides cryptographically verifiable,
             immutable audit trails for every portfolio governance decision.
             {assetId && ` Currently viewing: ${assetId}`}
           </p>

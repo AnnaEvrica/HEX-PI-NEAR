@@ -5,6 +5,7 @@
  * TypeScript translation of the proprietary Python HEX6 BLE engine.
  * Mathematical formulas and constants are preserved exactly.
  *
+ * EGTS = Evrica Global Token Standard.
  * Async export: output is fed directly into mintEgtsAssetFromPie() from egtsService.
  */
 
