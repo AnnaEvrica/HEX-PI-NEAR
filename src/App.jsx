@@ -13,31 +13,21 @@ import HEX6ChatInterface from '@/components/chat/HEX6ChatInterface';
 import { useState, useEffect } from 'react';
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, user } = useAuth();
+  const { isLoading, user } = useAuth();
   const [consentCompleted, setConsentCompleted] = useState(false);
 
   useEffect(() => {
-    // Check if user has completed consent flow (from backend user data)
     if (user) {
-      // Check if user already has consent flag in their profile
       setConsentCompleted(user.hex6_consent_completed === true);
     }
   }, [user]);
 
-  if (isLoadingPublicSettings || isLoadingAuth) {
+  if (isLoading) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-background">
         <div className="w-8 h-8 border-4 border-border border-t-accent rounded-full animate-spin"></div>
       </div>
     );
-  }
-
-  if (authError) {
-    if (authError.type === 'user_not_registered') {
-      return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required') {
-      return <Landing />;
-    }
   }
 
   return (
