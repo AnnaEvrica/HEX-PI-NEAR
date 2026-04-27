@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
+import AuthButtons from '@/components/auth/AuthButtons';
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -108,7 +109,10 @@ export default function Landing() {
           >
             Enter Oracle <ArrowRight className="w-4 h-4" />
           </button>
-          <p className="text-xs text-secondary">Or login with Google, Apple, or Facebook</p>
+          <div className="space-y-2">
+            <p className="text-xs text-secondary text-center">Or sign in with:</p>
+            <AuthButtons />
+          </div>
         </div>
       </section>
 
