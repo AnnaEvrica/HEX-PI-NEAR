@@ -1,8 +1,26 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, Lock, TrendingUp, BarChart3, Brain, Zap } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
+import { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
 
 export default function Landing() {
+  const [metrics, setMetrics] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        const res = await base44.functions.invoke('generateLandingMetrics', {});
+        setMetrics(res.data);
+      } catch (err) {
+        console.log('Could not load metrics, using defaults');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMetrics();
+  }, []);
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Nav */}
@@ -68,42 +86,42 @@ export default function Landing() {
           </div>
           <div className="p-8 rounded-lg border border-border bg-background">
             <ResponsiveContainer width="100%" height={400}>
-              <RadarChart data={[
+              <RadarChart data={loading || !metrics ? [] : [
                 {
                   metric: 'Adaptability',
-                  'HEX6 BLE': 95,
-                  'Quant Models': 65,
-                  'AI Models': 70,
+                  'HEX6 BLE': metrics.systemComparison.hex6.adaptability,
+                  'Quant Models': metrics.systemComparison.quant.adaptability,
+                  'AI Models': metrics.systemComparison.ai.adaptability,
                 },
                 {
                   metric: 'Uncertainty Handling',
-                  'HEX6 BLE': 98,
-                  'Quant Models': 45,
-                  'AI Models': 55,
+                  'HEX6 BLE': metrics.systemComparison.hex6.uncertaintyHandling,
+                  'Quant Models': metrics.systemComparison.quant.uncertaintyHandling,
+                  'AI Models': metrics.systemComparison.ai.uncertaintyHandling,
                 },
                 {
                   metric: 'Regime Robustness',
-                  'HEX6 BLE': 92,
-                  'Quant Models': 50,
-                  'AI Models': 65,
+                  'HEX6 BLE': metrics.systemComparison.hex6.regimeRobustness,
+                  'Quant Models': metrics.systemComparison.quant.regimeRobustness,
+                  'AI Models': metrics.systemComparison.ai.regimeRobustness,
                 },
                 {
                   metric: 'Real-time Adjustment',
-                  'HEX6 BLE': 94,
-                  'Quant Models': 60,
-                  'AI Models': 75,
+                  'HEX6 BLE': metrics.systemComparison.hex6.realtimeAdjustment,
+                  'Quant Models': metrics.systemComparison.quant.realtimeAdjustment,
+                  'AI Models': metrics.systemComparison.ai.realtimeAdjustment,
                 },
                 {
                   metric: 'Mathematical Transparency',
-                  'HEX6 BLE': 96,
-                  'Quant Models': 85,
-                  'AI Models': 30,
+                  'HEX6 BLE': metrics.systemComparison.hex6.mathTransparency,
+                  'Quant Models': metrics.systemComparison.quant.mathTransparency,
+                  'AI Models': metrics.systemComparison.ai.mathTransparency,
                 },
                 {
                   metric: 'Drawdown Control',
-                  'HEX6 BLE': 90,
-                  'Quant Models': 55,
-                  'AI Models': 50,
+                  'HEX6 BLE': metrics.systemComparison.hex6.drawdownControl,
+                  'Quant Models': metrics.systemComparison.quant.drawdownControl,
+                  'AI Models': metrics.systemComparison.ai.drawdownControl,
                 },
               ]}>
                 <PolarGrid stroke="currentColor" className="opacity-20" />
@@ -125,37 +143,37 @@ export default function Landing() {
             <p className="text-secondary">What HEX6 BLE does in practice</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[
+            {loading || !metrics ? [] : [
               {
                 title: 'Volatility Management',
                 metrics: [
-                  { label: 'Avg Exit Timing', value: '78%', desc: 'Before major drawdowns' },
-                  { label: 'Capital Preserved', value: '84%', desc: 'During regime shifts' },
-                  { label: 'Reallocation Speed', value: '2.3h', desc: 'Average response time' },
+                  { label: 'Avg Exit Timing', value: metrics.volatilityManagement.exitTiming, desc: 'Before major drawdowns' },
+                  { label: 'Capital Preserved', value: metrics.volatilityManagement.capitalPreserved, desc: 'During regime shifts' },
+                  { label: 'Reallocation Speed', value: metrics.volatilityManagement.reallocSpeed, desc: 'Average response time' },
                 ],
               },
               {
                 title: 'Risk Optimization',
                 metrics: [
-                  { label: 'Optimal Exposure', value: '62%', desc: 'System-recommended allocation' },
-                  { label: 'Drawdown Reduction', value: '71%', desc: 'Compared to continuous holding' },
-                  { label: 'Recovery Time', value: '34d', desc: 'With proactive hedging' },
+                  { label: 'Optimal Exposure', value: metrics.riskOptimization.optimalExposure, desc: 'System-recommended allocation' },
+                  { label: 'Drawdown Reduction', value: metrics.riskOptimization.drawdownReduction, desc: 'Compared to continuous holding' },
+                  { label: 'Recovery Time', value: metrics.riskOptimization.recoveryTime, desc: 'With proactive hedging' },
                 ],
               },
               {
                 title: 'State Classification',
                 metrics: [
-                  { label: 'Accuracy', value: '94%', desc: 'Market state identification' },
-                  { label: 'Regime Detection', value: '88%', desc: 'Transitions caught early' },
-                  { label: 'False Signals', value: '6%', desc: 'Low noise-to-signal ratio' },
+                  { label: 'Accuracy', value: metrics.stateClassification.accuracy, desc: 'Market state identification' },
+                  { label: 'Regime Detection', value: metrics.stateClassification.regimeDetection, desc: 'Transitions caught early' },
+                  { label: 'False Signals', value: metrics.stateClassification.falseSignals, desc: 'Low noise-to-signal ratio' },
                 ],
               },
               {
                 title: 'Decision Confidence',
                 metrics: [
-                  { label: 'Rebalance Timing', value: '92%', desc: 'When probability improves' },
-                  { label: 'Entry Precision', value: '86%', desc: 'Into favorable conditions' },
-                  { label: 'Exit Quality', value: '89%', desc: 'Ahead of deterioration' },
+                  { label: 'Rebalance Timing', value: metrics.decisionConfidence.rebalanceTiming, desc: 'When probability improves' },
+                  { label: 'Entry Precision', value: metrics.decisionConfidence.entryPrecision, desc: 'Into favorable conditions' },
+                  { label: 'Exit Quality', value: metrics.decisionConfidence.exitQuality, desc: 'Ahead of deterioration' },
                 ],
               },
             ].map((app, i) => (
@@ -183,17 +201,9 @@ export default function Landing() {
             <h3 className="text-2xl font-bold">Learning & Evolution Over Time</h3>
             <p className="text-secondary">How HEX6 BLE improves as you interact with it</p>
           </div>
-          <div className="p-8 border border-border bg-background">
+          <div className="p-4 md:p-8 border border-border bg-background overflow-x-auto">
             <ResponsiveContainer width="100%" height={380}>
-              <LineChart data={[
-                { week: 'Week 1', decisionAccuracy: 58, drawdownControl: 35, sharpe: 0.8 },
-                { week: 'Week 2', decisionAccuracy: 68, drawdownControl: 48, sharpe: 1.1 },
-                { week: 'Week 3', decisionAccuracy: 75, drawdownControl: 58, sharpe: 1.4 },
-                { week: 'Week 4', decisionAccuracy: 82, drawdownControl: 67, sharpe: 1.7 },
-                { week: 'Week 8', decisionAccuracy: 88, drawdownControl: 78, sharpe: 2.1 },
-                { week: 'Week 12', decisionAccuracy: 92, drawdownControl: 85, sharpe: 2.4 },
-                { week: 'Week 16', decisionAccuracy: 95, drawdownControl: 89, sharpe: 2.7 },
-              ]}>
+              <LineChart data={loading || !metrics ? [] : metrics.evolution}>
                 <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="opacity-10" />
                 <XAxis dataKey="week" className="text-xs" />
                 <YAxis yAxisId="left" domain={[0, 100]} className="text-xs" label={{ value: 'Accuracy %', angle: -90, position: 'insideLeft' }} />
@@ -206,16 +216,16 @@ export default function Landing() {
               </LineChart>
             </ResponsiveContainer>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-6">
-            {[
-              { label: 'Week 1 Baseline', metric: '58%', desc: 'Initial decision accuracy' },
-              { label: 'Week 4 Progress', metric: '82%', desc: '24pp improvement' },
-              { label: 'Week 16 Mature', metric: '95%', desc: 'Near-optimal accuracy' },
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 pt-4 md:pt-6">
+            {loading || !metrics ? [] : [
+              { label: 'Week 1 Baseline', metric: `${metrics.accuracyGrowth.week1}%`, desc: 'Initial decision accuracy' },
+              { label: 'Week 4 Progress', metric: `${metrics.accuracyGrowth.week4}%`, desc: `${metrics.accuracyGrowth.week4 - metrics.accuracyGrowth.week1}pp improvement` },
+              { label: 'Week 16 Mature', metric: `${metrics.accuracyGrowth.week16}%`, desc: 'Near-optimal accuracy' },
               { label: 'Adaptation Speed', metric: '2.3h', desc: 'Average response latency' },
             ].map((stat, i) => (
-              <div key={i} className="p-4 border border-border bg-background space-y-2">
+              <div key={i} className="p-3 md:p-4 border border-border bg-background space-y-2">
                 <p className="text-xs text-secondary font-medium uppercase tracking-wide">{stat.label}</p>
-                <p className="text-3xl font-bold text-accent">{stat.metric}</p>
+                <p className="text-2xl md:text-3xl font-bold text-accent">{stat.metric}</p>
                 <p className="text-xs text-secondary">{stat.desc}</p>
               </div>
             ))}
@@ -378,72 +388,72 @@ export default function Landing() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Quant Models */}
-            <div className="border border-border bg-background p-6 space-y-4">
-              <h4 className="font-bold">Quant Models</h4>
+            <div className="border border-border bg-background p-4 md:p-6 space-y-4">
+              <h4 className="font-bold text-sm md:text-base">Quant Models</h4>
               <div className="space-y-2 text-sm">
                 <div>
                   <p className="text-xs text-secondary">Peak Return</p>
-                  <p className="text-xl font-bold">+18%</p>
+                  <p className="text-lg md:text-xl font-bold">{loading || !metrics ? '+18%' : metrics.scenario6Month.quant.peakReturn}</p>
                 </div>
                 <div>
                   <p className="text-xs text-secondary">Max Drawdown</p>
-                  <p className="text-xl font-bold text-red-400">−23.7%</p>
+                  <p className="text-lg md:text-xl font-bold text-red-400">{loading || !metrics ? '−23.7%' : metrics.scenario6Month.quant.maxDrawdown}</p>
                 </div>
                 <div>
                   <p className="text-xs text-secondary">Decision Accuracy</p>
-                  <p className="text-xl font-bold">64%</p>
+                  <p className="text-lg md:text-xl font-bold">{loading || !metrics ? '64%' : metrics.scenario6Month.quant.decisionAccuracy}</p>
                 </div>
                 <div>
                   <p className="text-xs text-secondary">Recovery Time</p>
-                  <p className="text-xl font-bold">87 days</p>
+                  <p className="text-lg md:text-xl font-bold">{loading || !metrics ? '87 days' : metrics.scenario6Month.quant.recoveryTime}</p>
                 </div>
               </div>
               <p className="text-xs text-secondary border-t border-border pt-3">Reason: Trend-following overfits to prior regime, blindsided by discontinuities</p>
             </div>
 
             {/* AI Models */}
-            <div className="border border-border bg-background p-6 space-y-4">
-              <h4 className="font-bold">AI Models</h4>
+            <div className="border border-border bg-background p-4 md:p-6 space-y-4">
+              <h4 className="font-bold text-sm md:text-base">AI Models</h4>
               <div className="space-y-2 text-sm">
                 <div>
                   <p className="text-xs text-secondary">Peak Return</p>
-                  <p className="text-xl font-bold">+14%</p>
+                  <p className="text-lg md:text-xl font-bold">{loading || !metrics ? '+14%' : metrics.scenario6Month.ai.peakReturn}</p>
                 </div>
                 <div>
                   <p className="text-xs text-secondary">Max Drawdown</p>
-                  <p className="text-xl font-bold text-red-400">−18.2%</p>
+                  <p className="text-lg md:text-xl font-bold text-red-400">{loading || !metrics ? '−18.2%' : metrics.scenario6Month.ai.maxDrawdown}</p>
                 </div>
                 <div>
                   <p className="text-xs text-secondary">Decision Accuracy</p>
-                  <p className="text-xl font-bold">71%</p>
+                  <p className="text-lg md:text-xl font-bold">{loading || !metrics ? '71%' : metrics.scenario6Month.ai.decisionAccuracy}</p>
                 </div>
                 <div>
                   <p className="text-xs text-secondary">Recovery Time</p>
-                  <p className="text-xl font-bold">62 days</p>
+                  <p className="text-lg md:text-xl font-bold">{loading || !metrics ? '62 days' : metrics.scenario6Month.ai.recoveryTime}</p>
                 </div>
               </div>
               <p className="text-xs text-secondary border-t border-border pt-3">Reason: General patterns help, but black-box reasoning unclear during crisis</p>
             </div>
 
             {/* HEX6 BLE */}
-            <div className="border border-accent/40 bg-background p-6 space-y-4">
-              <h4 className="font-bold text-accent">HEX6 BLE</h4>
+            <div className="border border-accent/40 bg-background p-4 md:p-6 space-y-4">
+              <h4 className="font-bold text-sm md:text-base text-accent">HEX6 BLE</h4>
               <div className="space-y-2 text-sm">
                 <div>
                   <p className="text-xs text-secondary">Peak Return</p>
-                  <p className="text-xl font-bold">+9%</p>
+                  <p className="text-lg md:text-xl font-bold">{loading || !metrics ? '+9%' : metrics.scenario6Month.hex6.peakReturn}</p>
                 </div>
                 <div>
                   <p className="text-xs text-secondary">Max Drawdown</p>
-                  <p className="text-xl font-bold text-accent">−6.5%</p>
+                  <p className="text-lg md:text-xl font-bold text-accent">{loading || !metrics ? '−6.5%' : metrics.scenario6Month.hex6.maxDrawdown}</p>
                 </div>
                 <div>
                   <p className="text-xs text-secondary">Decision Accuracy</p>
-                  <p className="text-xl font-bold text-accent">89%</p>
+                  <p className="text-lg md:text-xl font-bold text-accent">{loading || !metrics ? '89%' : metrics.scenario6Month.hex6.decisionAccuracy}</p>
                 </div>
                 <div>
                   <p className="text-xs text-secondary">Recovery Time</p>
-                  <p className="text-xl font-bold">8 days</p>
+                  <p className="text-lg md:text-xl font-bold">{loading || !metrics ? '8 days' : metrics.scenario6Month.hex6.recoveryTime}</p>
                 </div>
               </div>
               <p className="text-xs text-secondary border-t border-accent/40 pt-3">Lower return, but capital preserved. Recovered fastest.</p>
