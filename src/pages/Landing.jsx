@@ -7,7 +7,7 @@ export default function Landing() {
       {/* Nav */}
       <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="text-xl font-bold tracking-tight">HEX6</div>
+          <div className="text-xl font-bold tracking-tight">HEX6 BLE</div>
           <Link
             to="/app"
             className="px-5 py-2 rounded-sm bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
@@ -21,7 +21,7 @@ export default function Landing() {
       <section className="max-w-4xl mx-auto px-6 py-24 space-y-8">
         <div className="space-y-6">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm bg-accent/10 border border-accent/30">
-            <span className="text-sm font-bold text-accent">HEX6</span>
+            <span className="text-sm font-bold text-accent">HEX6 BLE</span>
             <span className="text-sm font-medium text-accent">Probabilistic Intelligence</span>
           </div>
 
@@ -31,7 +31,7 @@ export default function Landing() {
           </h1>
 
           <p className="text-lg text-secondary max-w-2xl leading-relaxed">
-            HEX6 is a probabilistic intelligence system. It identifies system states, preserves outcome distributions, and generates inference—not forecasts. No opinions. No collapse to a single answer. Only probability, continuously updated.
+            HEX6 BLE is a probabilistic intelligence system. It identifies system states, preserves outcome distributions, and generates inference—not forecasts. No opinions. No collapse to a single answer. Only probability, continuously updated.
           </p>
         </div>
 
@@ -57,7 +57,7 @@ export default function Landing() {
           <h2 className="text-3xl font-bold">How It Works</h2>
           <div className="space-y-4 text-secondary">
             <p className="leading-relaxed">Complex systems don't move linearly. They shift between states.</p>
-            <p className="leading-relaxed">HEX6 models those shifts. At any moment, the system estimates:</p>
+            <p className="leading-relaxed">HEX6 BLE models those shifts. At any moment, the system estimates:</p>
             <ul className="space-y-2 ml-6">
               <li>• The current state of the system</li>
               <li>• The range of possible outcomes</li>
@@ -70,18 +70,18 @@ export default function Landing() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
-            {
-              title: 'State',
-              desc: 'Every system exists in a condition defined by structure, behavior, and change over time. HEX6 identifies that condition.',
-            },
-            {
-              title: 'Distribution',
-              desc: 'Outcomes exist as a range—each with a likelihood. HEX6 preserves this distribution instead of collapsing it.',
-            },
-            {
-              title: 'Inference',
-              desc: 'Outputs emerge from probability structure. Not assumption. Not narrative. Only mathematics.',
-            },
+          {
+            title: 'State',
+            desc: 'Every system exists in a condition defined by structure, behavior, and change over time. HEX6 BLE identifies that condition.',
+          },
+          {
+            title: 'Distribution',
+            desc: 'Outcomes exist as a range—each with a likelihood. HEX6 BLE preserves this distribution instead of collapsing it.',
+          },
+          {
+            title: 'Inference',
+            desc: 'Outputs emerge from probability structure. Not assumption. Not narrative. Only mathematics.',
+          },
           ].map((item, i) => (
             <div key={i} className="space-y-3 p-6 rounded-sm border border-border">
               <h3 className="font-bold">{item.title}</h3>
@@ -122,7 +122,7 @@ export default function Landing() {
                 <p className="font-medium">{item.feature}</p>
               </div>
               <div>
-                <p className="text-sm text-secondary mb-2">HEX6</p>
+                <p className="text-sm text-secondary mb-2">HEX6 BLE</p>
                 <p className="font-medium text-accent">{item.hex6}</p>
               </div>
             </div>
@@ -142,20 +142,20 @@ export default function Landing() {
             {
               label: 'High Volatility Regimes',
               desc: 'In a 6-month simulation with extreme asset divergence (+442% to −75%), traditional models remained continuously exposed.',
-              result: 'Naive allocation: −23% drawdown | HEX6: −6.5% drawdown',
-              insight: 'HEX6 eliminated statistically negative exposure states.',
+              result: 'Naive allocation: −23% drawdown | HEX6 BLE: −6.5% drawdown',
+              insight: 'HEX6 BLE eliminated statistically negative exposure states.',
             },
             {
               label: 'Trend + Chop Transitions',
               desc: 'In mixed regimes (trend → sideways → volatility spikes), traditional quants overfitted to prior trends.',
               result: 'Lower trade frequency, higher risk-adjusted returns, reduced volatility clustering',
-              insight: 'Reduced exposure during low-confidence states, re-engaged only at probability stabilization.',
+              insight: 'HEX6 BLE reduced exposure during low-confidence states, re-engaged only at probability stabilization.',
             },
             {
               label: 'Macro / Event-Driven Systems',
               desc: 'Under discontinuities (rate shocks, macro releases), prediction systems collapse to outdated assumptions.',
               result: 'Avoidance of false certainty, faster adaptation to new regimes',
-              insight: 'HEX6 reclassifies system state and expands uncertainty distribution.',
+              insight: 'HEX6 BLE reclassifies system state and expands uncertainty distribution.',
             },
           ].map((item, i) => (
             <div key={i} className="space-y-3 p-6 rounded-sm border border-border bg-muted/30">
@@ -188,7 +188,7 @@ export default function Landing() {
                 Every output is recorded—not as a claim, but as a state. EGTS creates an immutable record of system conditions, probability structures, and resulting inference states. This is not for visibility. It is for verification.
               </p>
               <p className="text-secondary leading-relaxed text-sm pt-2">
-                HEX6 introduces no execution layer. No mandates. No embedded action. A pure computational layer between data and decision.
+                HEX6 BLE introduces no execution layer. No mandates. No embedded action. A pure computational layer between data and decision.
               </p>
             </div>
           </div>
@@ -218,7 +218,7 @@ export default function Landing() {
                   goal: 'Prediction accuracy',
                 },
                 {
-                  label: 'HEX6',
+                  label: 'HEX6 BLE',
                   sub: 'Probabilistic intelligence',
                   goal: 'Probability-weighted exposure under uncertainty',
                   accent: true,
@@ -260,7 +260,7 @@ export default function Landing() {
           </div>
 
           <div className="space-y-4">
-            <h3 className="font-bold">HEX6 Behavior</h3>
+            <h3 className="font-bold">HEX6 BLE Behavior</h3>
             <div className="space-y-3 text-sm">
               <p className="text-secondary">Classifies market state first. Models outcome distribution. Reduces exposure when expected utility turns negative.</p>
               <div className="p-4 bg-accent/10 border border-accent/30 rounded text-sm space-y-2">
@@ -284,7 +284,7 @@ export default function Landing() {
               </ul>
             </div>
             <div className="space-y-3 p-4 rounded-sm border border-accent/30 bg-accent/5">
-              <p className="font-bold text-sm text-accent">HEX6 Adapts Because</p>
+              <p className="font-bold text-sm text-accent">HEX6 BLE Adapts Because</p>
               <ul className="text-xs space-y-2 text-secondary">
                 <li>• Does not require prediction</li>
                 <li>• Recalculates distribution per state</li>
@@ -299,7 +299,7 @@ export default function Landing() {
               <span className="text-secondary">Traditional systems try to be </span><strong>right</strong><span className="text-secondary">.</span>
             </p>
             <p className="text-sm leading-relaxed text-accent font-semibold">
-              HEX6 is designed to <strong>not be wrong when it matters</strong>.
+              HEX6 BLE is designed to <strong>not be wrong when it matters</strong>.
             </p>
           </div>
         </div>
