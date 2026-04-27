@@ -124,7 +124,7 @@ export default function Landing() {
           transition={{ duration: 0.6 }}
         >
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">The odds are now in your favor</h2>
-          <p className="text-base sm:text-lg md:text-xl text-secondary max-w-3xl mx-auto leading-relaxed">HEX6 BLE - a new category of intelligence thriving in uncertainty, seeing patterns in chaos</p>
+          <p className="text-base sm:text-lg md:text-2xl font-semibold text-accent max-w-3xl mx-auto leading-relaxed">HEX6 BLE - a new category of intelligence thriving in uncertainty, seeing patterns in chaos</p>
         </motion.div>
 
         {/* System Comparison Chart */}
