@@ -2,7 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 Deno.serve(async (req) => {
   try {
-    const base44 = createClientFromRequest(req);
+    // Landing metrics are public—no auth required
     
     // Simulate realistic HEX6 engine performance based on historical runs
     // These are derived from actual backtest simulations with various market regimes

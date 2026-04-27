@@ -39,15 +39,6 @@ const AuthenticatedApp = () => {
 };
 
 function App() {
-  useEffect(() => {
-    // Force refresh on mount to ensure auth state is checked
-    const handleStorageChange = () => {
-      window.location.reload();
-    };
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
-
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
