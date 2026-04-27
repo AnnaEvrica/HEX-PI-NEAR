@@ -144,7 +144,7 @@ export default function Landing() {
              <p className="text-base sm:text-lg text-secondary">How different approaches optimize for different goals</p>
            </div>
            <div 
-             className="p-4 sm:p-6 md:p-8 rounded-lg border border-border bg-background space-y-4 overflow-hidden"
+             className="p-4 sm:p-6 md:p-8 rounded-lg border border-border bg-background space-y-4 overflow-visible"
            >
              <ResponsiveContainer width="100%" height={300}>
               <RadarChart data={!metrics ? [] : [
