@@ -13,13 +13,7 @@ export default function AuthModal({ mode, onClose, onSwitchMode }) {
     setLoading(true);
     setError('');
     try {
-      if (mode === 'login') {
-        // For login, just redirect to Base44 login (handles email/password)
-        base44.auth.redirectToLogin();
-      } else {
-        // For register, also redirect to Base44 signup
-        base44.auth.redirectToLogin();
-      }
+      base44.auth.redirectToLogin();
     } catch (err) {
       setError(err.message || 'Authentication failed');
     } finally {
@@ -35,7 +29,7 @@ export default function AuthModal({ mode, onClose, onSwitchMode }) {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <h2 className="text-lg font-bold">
-            {mode === 'login' ? 'Login' : 'Create Account'}
+            {mode === 'login' ? 'Login to HEX6' : 'Create HEX6 Account'}
           </h2>
           <button
             onClick={onClose}
@@ -82,7 +76,7 @@ export default function AuthModal({ mode, onClose, onSwitchMode }) {
               disabled={loading}
               className="w-full px-4 py-2 rounded-sm bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors disabled:opacity-40"
             >
-              {loading ? 'Processing...' : mode === 'login' ? 'Login' : 'Create Account'}
+              {loading ? 'Redirecting...' : 'Continue'}
             </button>
           </form>
 
