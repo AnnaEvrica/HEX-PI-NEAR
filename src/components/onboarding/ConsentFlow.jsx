@@ -270,6 +270,8 @@ export default function ConsentFlow({ onComplete }) {
 
   const handleNext = () => {
     if (currentStep === STEPS.length - 1) {
+      // Store consent timestamp when user completes onboarding
+      localStorage.setItem('hex6_consent_timestamp', new Date().toISOString());
       setShowPricing(true);
     } else {
       setCurrentStep((prev) => prev + 1);

@@ -1,99 +1,76 @@
 import { useState, useEffect } from 'react';
-import { X, AlertTriangle, Mail, Lock, Trash2, Shield, Eye, Clock, LogOut as LogOutIcon, Bell, Upload, TrendingUp, Zap } from 'lucide-react';
+import { X, LogOut as LogOutIcon, Copy, Download, Lock, Key, Shield, Eye, Clock, Bell, TrendingUp, Zap, AlertTriangle, Check } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
-export default function SettingsModal({
-  open,
-  onClose,
-  traderEnabled,
-  onTraderToggle,
-}) {
-  const [activeTab, setActiveTab] = useState('account');
+function generateSystemID() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let id = 'HEX-USER-';
+  for (let i = 0; i < 4; i++) {
+    id += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return id;
+}
+
+export default function SettingsModal({ open, onClose }) {
+  const [activeSection, setActiveSection] = useState('account');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const [twoFAEnabled, setTwoFAEnabled] = useState(false);
-  const [chatEncryption, setChatEncryption] = useState(true);
-  const [sessions, setSessions] = useState([]);
-  const [activityLogs, setActivityLogs] = useState([]);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-  const [notificationTimes, setNotificationTimes] = useState(['09:00', '14:00', '17:00']);
-  const [marketTrends, setMarketTrends] = useState(true);
-  const [predictions, setPredictions] = useState(true);
-  const [watchedAssets, setWatchedAssets] = useState('');
-  const [notificationEmail, setNotificationEmail] = useState('');
-  const [uploadedImage, setUploadedImage] = useState(null);
   const [user, setUser] = useState(null);
-  const [metrics, setMetrics] = useState({
-    behavioralModeling: 0,
-    marketSync: 0,
-    decisionAlignment: 0,
-  });
-  const [recentActivity, setRecentActivity] = useState([]);
-  const [activeSessions, setActiveSessions] = useState([]);
+  const [systemID, setSystemID] = useState(null);
+  const [twoFAEnabled, setTwoFAEnabled] = useState(false);
+  const [modelTraining, setModelTraining] = useState(true);
+  const [analyticalDepth, setAnalyticalDepth] = useState('executive');
+  const [riskAversion, setRiskAversion] = useState(2.5);
+  const [baseCurrency, setBaseCurrency] = useState('USD');
+  const [consentTimestamp, setConsentTimestamp] = useState(null);
 
   useEffect(() => {
-    const loadUser = async () => {
+    const loadUserData = async () => {
       try {
         const u = await base44.auth.me();
         setUser(u);
-        setNotificationEmail(u?.email || '');
-      } catch (err) {
-        console.log('Could not load user');
-      }
-    };
-    loadUser();
-  }, []);
+        
+        // Load or generate system ID
+        const stored = localStorage.getItem('hex6_system_id');
+        if (stored) {
+          setSystemID(stored);
+        } else {
+          const newID = generateSystemID();
+          setSystemID(newID);
+          localStorage.setItem('hex6_system_id', newID);
+        }
 
-  useEffect(() => {
-    // Load live metrics
-    const loadMetrics = async () => {
-      try {
-        const memoryRecords = await base44.entities.HEX6Memory?.list?.() || [];
-        if (memoryRecords.length > 0) {
-          const recent = memoryRecords.slice(-20);
-          const avgSharpe = recent.reduce((s, m) => s + (parseFloat(m.sharpe) || 0), 0) / recent.length;
-          const avgDrawdown = recent.reduce((s, m) => s + (parseFloat(m.max_drawdown) || 0), 0) / recent.length;
-          
-          setMetrics({
-            behavioralModeling: Math.min(95, 50 + (recent.length * 2)),
-            marketSync: Math.min(95, 60 + Math.abs(avgSharpe * 5)),
-            decisionAlignment: Math.min(95, 55 + (Math.abs(avgDrawdown) * -1)),
-          });
+        // Load user preferences
+        const prefs = localStorage.getItem('hex6_user_prefs');
+        if (prefs) {
+          const p = JSON.parse(prefs);
+          setAnalyticalDepth(p.analyticalDepth || 'executive');
+          setRiskAversion(p.riskAversion || 2.5);
+          setBaseCurrency(p.baseCurrency || 'USD');
+          setModelTraining(p.modelTraining !== false);
+        }
+
+        // Get consent timestamp
+        const timestamp = localStorage.getItem('hex6_consent_timestamp');
+        if (timestamp) {
+          setConsentTimestamp(timestamp);
         }
       } catch (err) {
-        console.log('Could not load metrics');
+        console.log('Could not load user data');
       }
     };
-
-    // Simulate recent activity
-    const activity = [
-      { action: 'Logged in', timestamp: new Date(Date.now() - 5 * 60000) },
-      { action: 'Opened chat interface', timestamp: new Date(Date.now() - 12 * 60000) },
-      { action: 'Updated notification preferences', timestamp: new Date(Date.now() - 45 * 60000) },
-      { action: 'Viewed portfolio', timestamp: new Date(Date.now() - 2 * 3600000) },
-      { action: 'Enabled HEX6 insights', timestamp: new Date(Date.now() - 4 * 3600000) },
-    ];
-    setRecentActivity(activity);
-
-    // Simulate active sessions
-    const sessions = [
-      { device: 'Chrome on macOS', location: 'Los Angeles, CA', current: true, timestamp: new Date() },
-      { device: 'Safari on iPhone', location: 'Los Angeles, CA', current: false, timestamp: new Date(Date.now() - 24 * 3600000) },
-    ];
-    setActiveSessions(sessions);
-
-    loadMetrics();
-    const interval = setInterval(loadMetrics, 30000);
-    return () => clearInterval(interval);
+    loadUserData();
   }, []);
+
+  const savePreferences = (prefs) => {
+    localStorage.setItem('hex6_user_prefs', JSON.stringify(prefs));
+  };
 
   const handlePasswordReset = async () => {
     setLoading(true);
     setMessage(null);
     try {
-      // Send password reset email
-      await base44.auth.sendPasswordResetEmail();
+      await base44.auth.sendPasswordResetEmail?.();
       setMessage({ type: 'success', text: 'Password reset email sent to your inbox.' });
     } catch (err) {
       setMessage({ type: 'error', text: err.message });
@@ -102,24 +79,33 @@ export default function SettingsModal({
     }
   };
 
-  const handleDeleteAccount = async () => {
-    if (!confirmDelete) {
-      setConfirmDelete(true);
-      return;
-    }
-    
+  const handleDataExport = async () => {
     setLoading(true);
-    setMessage(null);
     try {
-      // Delete user account and data
-      await base44.auth.deleteAccount();
-      setMessage({ type: 'success', text: 'Account deletion initiated. You will be logged out.' });
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
+      // Simulate data export
+      const data = {
+        user: user?.email,
+        systemID,
+        preferences: {
+          analyticalDepth,
+          riskAversion,
+          baseCurrency,
+          modelTraining,
+        },
+        exportedAt: new Date().toISOString(),
+      };
+      
+      const csv = Object.entries(data).map(([k, v]) => `${k},${JSON.stringify(v)}`).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `hex6-data-${Date.now()}.csv`;
+      a.click();
+      
+      setMessage({ type: 'success', text: 'Data exported successfully.' });
     } catch (err) {
       setMessage({ type: 'error', text: err.message });
-      setConfirmDelete(false);
     } finally {
       setLoading(false);
     }
@@ -135,36 +121,40 @@ export default function SettingsModal({
     }
   };
 
+  const handleBillingPortal = () => {
+    if (window.self !== window.top) {
+      alert('Billing works only from a published app.');
+      return;
+    }
+    // In production, this would redirect to Stripe customer portal
+    window.open('https://billing.stripe.com/p/login/test_1234567890', '_blank');
+  };
+
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-card border border-border rounded-lg max-w-md w-full max-h-[80vh] flex flex-col">
+      <div className="bg-card border border-border rounded-lg max-w-3xl w-full max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
-          <h2 className="text-lg font-bold">Settings</h2>
-          <button
-            onClick={onClose}
-            className="p-1 hover:bg-muted rounded transition-colors"
-          >
+          <h2 className="text-lg font-bold">Account Settings</h2>
+          <button onClick={onClose} className="p-1 hover:bg-muted rounded transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Tabs */}
+        {/* Navigation */}
         <div className="flex border-b border-border shrink-0 overflow-x-auto">
           {[
             { id: 'account', label: 'Account' },
-            { id: 'security', label: 'Security' },
-            { id: 'notifications', label: 'Notifications' },
-            { id: 'privacy', label: 'Privacy' },
-            { id: 'features', label: 'Features' },
+            { id: 'parameters', label: 'Parameters' },
+            { id: 'legal', label: 'Legal' },
           ].map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => setActiveSection(tab.id)}
               className={`flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === tab.id
+                activeSection === tab.id
                   ? 'border-accent text-accent'
                   : 'border-transparent text-secondary hover:text-foreground'
               }`}
@@ -175,7 +165,7 @@ export default function SettingsModal({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
           {message && (
             <div className={`p-3 rounded-sm text-sm ${
               message.type === 'success'
@@ -186,401 +176,330 @@ export default function SettingsModal({
             </div>
           )}
 
-          {activeTab === 'account' && (
-            <div className="space-y-4">
-              {/* Profile Card */}
+          {/* ACCOUNT */}
+          {activeSection === 'account' && (
+            <div className="space-y-6">
+              {/* Profile */}
               {user && (
                 <div className="p-6 border border-border rounded-sm space-y-6">
-                  {/* Avatar & Name */}
                   <div className="flex items-start gap-4">
                     <div className="w-16 h-16 rounded-full bg-accent/20 flex items-center justify-center text-accent font-bold text-lg">
                       {user.full_name?.[0] || user.email?.[0] || '?'}
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <p className="text-lg font-bold">{user.full_name || 'User'}</p>
                       <p className="text-sm text-secondary">{user.email}</p>
-                      <p className="text-xs text-secondary/60 mt-1">Oracle Member</p>
                     </div>
                   </div>
 
-                  {/* Account Details */}
-                  <div className="space-y-3 pt-4 border-t border-border">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-secondary font-medium uppercase">Email</span>
-                      <span className="text-sm text-foreground">{user.email}</span>
+                  {/* System ID */}
+                  <div className="space-y-2 pt-4 border-t border-border">
+                    <p className="text-xs text-secondary font-medium uppercase tracking-wide">System ID</p>
+                    <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 rounded-sm font-mono text-sm">
+                      <span>{systemID}</span>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(systemID);
+                          setMessage({ type: 'success', text: 'System ID copied.' });
+                        }}
+                        className="p-1 hover:bg-border rounded transition-colors"
+                      >
+                        <Copy className="w-4 h-4 text-secondary" />
+                      </button>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-secondary font-medium uppercase">Status</span>
-                      <span className="text-sm text-accent font-medium">Active</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-secondary font-medium uppercase">Role</span>
-                      <span className="text-sm text-foreground capitalize">{user.role || 'user'}</span>
-                    </div>
+                  </div>
+
+                  {/* Account Genesis */}
+                  <div className="space-y-2">
+                    <p className="text-xs text-secondary font-medium uppercase tracking-wide">Account Genesis</p>
+                    <p className="text-sm text-foreground">System accessed since {new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' })}</p>
                   </div>
                 </div>
               )}
+
+              {/* SECURITY */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-bold uppercase tracking-wide">Security</h3>
+
+                {/* Password Reset */}
+                <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <Key className="w-4 h-4" />
+                    Password Management
+                  </div>
+                  <button
+                    onClick={handlePasswordReset}
+                    disabled={loading}
+                    className="w-full px-4 py-2 rounded-sm bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-40"
+                  >
+                    Reset Password
+                  </button>
+                </div>
+
+                {/* 2FA */}
+                <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-4 h-4" />
+                      <label className="text-sm font-medium">Two-Factor Authentication</label>
+                    </div>
+                    <button
+                      onClick={() => setTwoFAEnabled(!twoFAEnabled)}
+                      className={`relative w-12 h-6 rounded-full transition-colors ${
+                        twoFAEnabled ? 'bg-accent' : 'bg-border'
+                      }`}
+                    >
+                      <span
+                        className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${
+                          twoFAEnabled ? 'left-7' : 'left-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                  <p className="text-xs text-secondary">{twoFAEnabled ? '✓ Enabled' : 'Add a second authentication layer'}</p>
+                </div>
+
+                {/* Data Export */}
+                <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <Download className="w-4 h-4" />
+                    Data Export
+                  </div>
+                  <button
+                    onClick={handleDataExport}
+                    disabled={loading}
+                    className="w-full px-4 py-2 rounded-sm border border-border hover:bg-muted text-sm font-medium transition-colors disabled:opacity-40"
+                  >
+                    Download Chat & Analysis History (CSV)
+                  </button>
+                </div>
+              </div>
+
+              {/* BILLING */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-bold uppercase tracking-wide">Billing</h3>
+
+                <div className="p-6 bg-accent/5 border border-accent/30 rounded-sm space-y-4">
+                  <div className="space-y-1">
+                    <p className="text-xs text-secondary font-medium uppercase">Active Tier</p>
+                    <p className="text-lg font-bold">Oracle Mode — Monthly Access</p>
+                    <p className="text-xs text-secondary">7-Day Free Trial</p>
+                  </div>
+
+                  <div className="space-y-1 pt-4 border-t border-accent/20">
+                    <p className="text-xs text-secondary font-medium uppercase">Status</p>
+                    <p className="text-sm text-accent font-medium">Active. Next billing cycle: May 27, 2026.</p>
+                  </div>
+
+                  <div className="flex gap-2 pt-4">
+                    <button
+                      onClick={handleBillingPortal}
+                      className="flex-1 px-4 py-2 rounded-sm bg-accent text-accent-foreground text-sm font-medium hover:bg-accent/90 transition-colors"
+                    >
+                      Manage Billing
+                    </button>
+                    <button
+                      onClick={() => {}}
+                      className="flex-1 px-4 py-2 rounded-sm border border-border text-sm font-medium hover:bg-muted transition-colors text-secondary"
+                    >
+                      Shift to Annual ($369) — Save 56%
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* NOTIFICATIONS */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-bold uppercase tracking-wide">Notifications</h3>
+
+                <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Bell className="w-4 h-4" />
+                      <label className="text-sm font-medium">Email Notifications</label>
+                    </div>
+                    <button className="relative w-12 h-6 rounded-full transition-colors bg-accent">
+                      <span className="absolute top-1 w-4 h-4 rounded-full bg-white left-7" />
+                    </button>
+                  </div>
+                  <p className="text-xs text-secondary">Receive market insights and billing updates</p>
+                </div>
+              </div>
 
               {/* Sign Out */}
               <button
                 onClick={handleLogout}
                 disabled={loading}
-                className="w-full px-4 py-2 rounded-sm border border-destructive/50 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-40"
+                className="w-full px-4 py-3 rounded-sm border border-destructive/50 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-40"
               >
                 Sign Out
               </button>
             </div>
           )}
 
-          {activeTab === 'security' && (
-            <div className="space-y-4">
-              <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
-                <div className="flex items-center gap-2 text-sm font-medium mb-2">
-                  <Lock className="w-4 h-4" />
-                  Password Management
+          {/* PARAMETERS */}
+          {activeSection === 'parameters' && (
+            <div className="space-y-6">
+              <p className="text-sm text-secondary">Customize how HEX6 responds to you.</p>
+
+              {/* Analytical Depth */}
+              <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-4">
+                <p className="text-sm font-medium">Analytical Depth</p>
+                <div className="space-y-2">
+                  {[
+                    { id: 'executive', label: 'Executive Summary', desc: 'Plain English, high-level strategy' },
+                    { id: 'deep', label: 'Deep Quant', desc: 'Raw μ math, variance metrics, Kelly fractions' },
+                  ].map((opt) => (
+                    <label key={opt.id} className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="depth"
+                        value={opt.id}
+                        checked={analyticalDepth === opt.id}
+                        onChange={(e) => {
+                          setAnalyticalDepth(e.target.value);
+                          savePreferences({ analyticalDepth: e.target.value, riskAversion, baseCurrency, modelTraining });
+                        }}
+                        className="mt-1"
+                      />
+                      <div>
+                        <p className="text-sm font-medium">{opt.label}</p>
+                        <p className="text-xs text-secondary">{opt.desc}</p>
+                      </div>
+                    </label>
+                  ))}
                 </div>
-                <button
-                  onClick={handlePasswordReset}
-                  disabled={loading}
-                  className="w-full px-4 py-2 rounded-sm bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-40"
-                >
-                  Reset Password
-                </button>
-                <p className="text-xs text-secondary">
-                  We'll send a reset link to your email address.
-                </p>
               </div>
 
-              <div className="p-4 bg-destructive/5 rounded-sm border border-destructive/30 space-y-3">
-                <div className="flex items-center gap-2 text-sm font-medium mb-2">
-                  <AlertTriangle className="w-4 h-4 text-destructive" />
-                  Danger Zone
+              {/* Risk Aversion */}
+              <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium">Risk Aversion Baseline</p>
+                  <span className="text-lg font-bold text-accent">{riskAversion.toFixed(1)}</span>
                 </div>
-                <button
-                  onClick={handleDeleteAccount}
-                  disabled={loading}
-                  className={`w-full px-4 py-2 rounded-sm text-sm font-medium transition-colors disabled:opacity-40 ${
-                    confirmDelete
-                      ? 'bg-destructive/80 text-white hover:bg-destructive'
-                      : 'border border-destructive/50 text-destructive hover:bg-destructive/10'
-                  }`}
-                >
-                  {confirmDelete ? 'Click again to confirm deletion' : 'Delete Account & Data'}
-                </button>
-                <p className="text-xs text-secondary">
-                  This action is permanent and cannot be undone. All your data will be deleted.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'notifications' && (
-            <div className="space-y-4">
-              {/* Trader Mode Coming Soon */}
-              <div className="p-4 border border-border rounded-sm bg-muted/30 space-y-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <Zap className="w-4 h-4 text-accent" />
-                  <h3 className="text-sm font-medium">Trader Mode</h3>
-                  <span className="text-xs bg-accent/20 text-accent px-2 py-0.5 rounded">Coming Soon</span>
-                </div>
-                <p className="text-xs text-secondary leading-relaxed">
-                  Real-time trade execution signals and momentum alerts. Early access coming soon—register your interest to be notified.
-                </p>
                 <input
-                  type="email"
-                  placeholder="your@email.com"
-                  className="w-full px-3 py-2 rounded-sm border border-border bg-black/20 text-xs text-white placeholder-white/30"
+                  type="range"
+                  min="1"
+                  max="5"
+                  step="0.1"
+                  value={riskAversion}
+                  onChange={(e) => {
+                    const val = parseFloat(e.target.value);
+                    setRiskAversion(val);
+                    savePreferences({ analyticalDepth, riskAversion: val, baseCurrency, modelTraining });
+                  }}
+                  className="w-full accent-accent"
                 />
-                <button className="w-full px-3 py-1.5 rounded-sm border border-accent text-accent text-xs font-medium hover:bg-accent/10 transition-colors">
-                  Notify Me
-                </button>
+                <p className="text-xs text-secondary">Lower values maximize aggression; higher values prioritize capital preservation.</p>
               </div>
 
-              {/* Enable/Disable Market Insights */}
+              {/* Base Currency */}
               <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Bell className="w-4 h-4" />
-                    <label className="text-sm font-medium">HEX6 Market Insights</label>
-                  </div>
-                  <button
-                    onClick={() => setNotificationsEnabled(!notificationsEnabled)}
-                    className={`relative w-12 h-6 rounded-full transition-colors ${
-                      notificationsEnabled ? 'bg-accent' : 'bg-border'
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${
-                        notificationsEnabled ? 'left-7' : 'left-1'
-                      }`}
-                    />
-                  </button>
-                </div>
-                <p className="text-xs text-secondary">
-                  {notificationsEnabled
-                    ? 'Get personalized insights based on your conversations'
-                    : 'Enable to receive HEX6\'s personalized market insights'}
-                </p>
+                <p className="text-sm font-medium">Base Currency Display</p>
+                <select
+                  value={baseCurrency}
+                  onChange={(e) => {
+                    setBaseCurrency(e.target.value);
+                    savePreferences({ analyticalDepth, riskAversion, baseCurrency: e.target.value, modelTraining });
+                  }}
+                  className="w-full px-3 py-2 rounded-sm border border-border bg-black/20 text-sm text-white"
+                >
+                  {['USD', 'EUR', 'USDC'].map((c) => (
+                    <option key={c} value={c} className="bg-black">
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+
+          {/* LEGAL */}
+          {activeSection === 'legal' && (
+            <div className="space-y-6">
+              {/* System Role */}
+              <div className="p-4 bg-muted/30 rounded-sm border border-border">
+                <p className="text-sm font-medium mb-2">System Role Status</p>
+                <p className="text-sm text-secondary">HEX6 is an analytics engine. Not a fiduciary or advisor.</p>
               </div>
 
-              {notificationsEnabled && (
-                <>
-                  {/* Notification Email */}
-                  <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
-                    <p className="text-sm font-medium">Notification Email</p>
-                    <input
-                      type="email"
-                      value={notificationEmail}
-                      onChange={(e) => setNotificationEmail(e.target.value)}
-                      className="w-full px-3 py-2 rounded-sm border border-border bg-black/20 text-sm text-white placeholder-white/30"
-                      placeholder="your@email.com"
-                    />
-                    <p className="text-xs text-secondary">Where HEX6 will send personalized insights</p>
-                  </div>
+              {/* Active Consents */}
+              <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-4">
+                <p className="text-sm font-bold">Active Consents</p>
 
-                  {/* Notification Times */}
-                  <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
-                    <p className="text-sm font-medium">Preferred Times</p>
-                    <div className="space-y-2">
-                      {[0, 1, 2].map((idx) => (
-                        <input
-                          key={idx}
-                          type="time"
-                          value={notificationTimes[idx]}
-                          onChange={(e) => {
-                            const updated = [...notificationTimes];
-                            updated[idx] = e.target.value;
-                            setNotificationTimes(updated);
-                          }}
-                          className="w-full px-3 py-2 rounded-sm bg-black/20 border border-border text-sm text-white"
-                        />
-                      ))}
+                <div className="space-y-3">
+                  {/* Data Processing - Locked */}
+                  <div className="flex items-center justify-between p-3 bg-black/20 rounded-sm">
+                    <div>
+                      <p className="text-sm font-medium">Data Processing</p>
+                      <p className="text-xs text-secondary">Required to run the chat</p>
                     </div>
-                    <p className="text-xs text-secondary">Set your preferred times (UTC)</p>
+                    <div className="flex items-center gap-2">
+                      <Check className="w-4 h-4 text-accent" />
+                      <span className="text-xs text-secondary">ON</span>
+                    </div>
                   </div>
 
-                  {/* Content Preferences */}
-                  <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
-                    <p className="text-sm font-medium">What HEX6 Should Focus On</p>
-                    <p className="text-xs text-secondary/70">HEX6 learns from your chat history to tailor each insight</p>
-                    <label className="flex items-center gap-3 text-sm text-secondary hover:text-foreground cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={marketTrends}
-                        onChange={(e) => setMarketTrends(e.target.checked)}
-                        className="w-4 h-4 accent-accent"
-                      />
-                      Market Trends & Analysis
-                    </label>
-                    <label className="flex items-center gap-3 text-sm text-secondary hover:text-foreground cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={predictions}
-                        onChange={(e) => setPredictions(e.target.checked)}
-                        className="w-4 h-4 accent-accent"
-                      />
-                      Allocations & Opportunities
-                    </label>
-                  </div>
-
-                  {/* Watched Assets */}
-                  <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
-                    <p className="text-sm font-medium">Track Specific Assets (Optional)</p>
-                    <textarea
-                      value={watchedAssets}
-                      onChange={(e) => setWatchedAssets(e.target.value)}
-                      placeholder="e.g., BTC, ETH, SPY (comma-separated)"
-                      className="w-full px-3 py-2 rounded-sm bg-black/20 border border-border text-xs text-white placeholder-white/30 h-14"
-                    />
-                    <p className="text-xs text-secondary">Leave empty for general market insights</p>
-                  </div>
-
-                  {/* Test Notification */}
-                  <button
-                    onClick={async () => {
-                      setLoading(true);
-                      try {
-                        const res = await base44.functions.invoke('generateHEX6Notification', {
-                          action: 'sendTest',
-                          email: notificationEmail,
-                          preferences: {
-                            marketTrends,
-                            predictions,
-                            assets: watchedAssets.split(',').map(a => a.trim()).filter(Boolean),
-                          },
-                        });
-                        setMessage({ type: 'success', text: 'Notification sent—check your inbox!' });
-                      } catch (err) {
-                        setMessage({ type: 'error', text: err.message });
-                      } finally {
-                        setLoading(false);
-                      }
-                    }}
-                    disabled={loading || !notificationEmail}
-                    className="w-full px-4 py-3 rounded-sm bg-accent text-accent-foreground text-sm font-medium hover:bg-accent/90 transition-colors disabled:opacity-40"
-                  >
-                    Send Test Insight
-                  </button>
-                </>
-              )}
-            </div>
-          )}
-
-          {activeTab === 'privacy' && (
-            <div className="space-y-4">
-              {/* 2FA */}
-              <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
-                <div className="flex items-center gap-2 text-sm font-medium mb-2">
-                  <Shield className="w-4 h-4" />
-                  Two-Factor Authentication
-                </div>
-                {twoFAEnabled ? (
-                  <div className="space-y-2">
-                    <p className="text-xs text-accent font-medium">✓ Enabled</p>
-                    <p className="text-xs text-secondary">You'll use your authenticator app on next login.</p>
+                  {/* Model Training - Toggleable */}
+                  <div className="flex items-center justify-between p-3 bg-black/20 rounded-sm">
+                    <div>
+                      <p className="text-sm font-medium">Model Training</p>
+                      <p className="text-xs text-secondary">Allow your chat data to train our AI</p>
+                    </div>
                     <button
-                      onClick={() => setTwoFAEnabled(false)}
-                      disabled={loading}
-                      className="w-full px-3 py-1.5 rounded-sm border border-red-800/40 text-xs text-red-400 hover:bg-red-950/20 transition-colors disabled:opacity-40"
-                    >
-                      Disable 2FA
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <p className="text-xs text-secondary">Add a second layer of security to your account.</p>
-                    <button
-                      onClick={() => setTwoFAEnabled(true)}
-                      disabled={loading}
-                      className="w-full px-3 py-1.5 rounded-sm bg-accent text-black text-xs font-medium hover:bg-accent/90 transition-colors disabled:opacity-40"
-                    >
-                      Enable 2FA
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Chat Encryption */}
-              <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
-                <div className="flex items-center gap-2 text-sm font-medium mb-2">
-                  <Eye className="w-4 h-4" />
-                  Chat Privacy
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-secondary">Encrypt conversations locally</span>
-                  <button
-                    onClick={() => setChatEncryption(!chatEncryption)}
-                    className={`relative w-12 h-6 rounded-full transition-colors ${
-                      chatEncryption ? 'bg-accent' : 'bg-border'
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${
-                        chatEncryption ? 'left-7' : 'left-1'
+                      onClick={() => {
+                        setModelTraining(!modelTraining);
+                        savePreferences({ analyticalDepth, riskAversion, baseCurrency, modelTraining: !modelTraining });
+                      }}
+                      className={`relative w-12 h-6 rounded-full transition-colors ${
+                        modelTraining ? 'bg-accent' : 'bg-border'
                       }`}
-                    />
-                  </button>
-                </div>
-                <p className="text-xs text-secondary">
-                  {chatEncryption ? 'Enabled. Your conversations are encrypted before storage.' : 'Disabled. Conversations stored without encryption.'}
-                </p>
-              </div>
-
-              {/* Recent Activity */}
-              <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
-                <div className="flex items-center gap-2 text-sm font-medium mb-2">
-                  <Clock className="w-4 h-4" />
-                  Recent Activity
-                </div>
-                {recentActivity.length === 0 ? (
-                  <p className="text-xs text-secondary">No recent activity logged.</p>
-                ) : (
-                  <div className="space-y-2 max-h-40 overflow-y-auto">
-                    {recentActivity.map((log, idx) => (
-                      <div key={idx} className="flex items-center justify-between px-2 py-1.5 bg-black/20 rounded text-xs text-secondary">
-                        <span>{log.action}</span>
-                        <span className="text-white/30">{log.timestamp.toLocaleTimeString()}</span>
-                      </div>
-                    ))}
+                    >
+                      <span
+                        className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${
+                          modelTraining ? 'left-7' : 'left-1'
+                        }`}
+                      />
+                    </button>
                   </div>
-                )}
-              </div>
-
-              {/* Active Sessions */}
-              <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
-                <div className="flex items-center gap-2 text-sm font-medium mb-2">
-                  <LogOutIcon className="w-4 h-4" />
-                  Active Sessions
                 </div>
-                {activeSessions.length === 0 ? (
-                  <p className="text-xs text-secondary">No active sessions.</p>
-                ) : (
-                  <div className="space-y-2">
-                    {activeSessions.map((session, idx) => (
-                      <div key={idx} className="flex items-center justify-between px-3 py-2 bg-black/20 rounded text-xs">
-                        <div className="flex-1">
-                          <p className="text-white font-medium">{session.device}</p>
-                          <p className="text-white/50">{session.location}</p>
-                        </div>
-                        {session.current ? (
-                          <span className="text-accent text-xs font-medium">Current</span>
-                        ) : (
-                          <button
-                            onClick={() => {}}
-                            className="text-xs text-red-400 hover:text-red-300"
-                          >
-                            Sign out
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
-            </div>
-          )}
 
-          {activeTab === 'features' && (
-            <div className="space-y-4">
-              {/* Live Metrics */}
-              <div className="p-4 border border-border rounded-sm space-y-4">
-                <p className="text-sm font-medium">HEX6 Awareness</p>
-
+              {/* Legal Disclosures */}
+              <div className="space-y-3">
+                <p className="text-sm font-bold">Legal Disclosures</p>
                 {[
-                  { label: 'Behavioral Modeling', value: metrics.behavioralModeling, desc: 'System understanding of your patterns' },
-                  { label: 'Market Sync', value: metrics.marketSync, desc: 'Real-time market alignment' },
-                  { label: 'Decision Alignment', value: metrics.decisionAlignment, desc: 'System-to-user decision correlation' },
-                ].map((m, i) => (
-                  <div key={i} className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-secondary">{m.label}</span>
-                      <span className="text-sm font-bold text-accent">{Math.round(m.value)}%</span>
-                    </div>
-                    <div className="w-full h-1.5 bg-border rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-accent rounded-full transition-all"
-                        style={{ width: `${m.value}%` }}
-                      />
-                    </div>
-                    <p className="text-xs text-secondary/70">{m.desc}</p>
-                  </div>
+                  { title: 'Risk & Model Disclosure v1.2', content: 'Trading and investing involve substantial risk of loss. HEX6 models are probabilistic and may be incorrect.' },
+                  { title: 'Terms of Use v1.2', content: 'By using HEX6 BLE, you agree to our terms of service and acknowledge you are responsible for all investment decisions.' },
+                  { title: 'Privacy Policy v1.2', content: 'Your data is encrypted and stored securely. We do not sell personal information to third parties.' },
+                ].map((doc, i) => (
+                  <details key={i} className="p-3 bg-muted/30 rounded-sm border border-border cursor-pointer group">
+                    <summary className="font-medium text-sm flex items-center justify-between">
+                      {doc.title}
+                      <span className="text-secondary group-open:hidden">▶</span>
+                      <span className="text-secondary group-open:block hidden">▼</span>
+                    </summary>
+                    <p className="text-xs text-secondary mt-3 leading-relaxed">{doc.content}</p>
+                  </details>
                 ))}
               </div>
 
-              {/* HEX6 Awareness Info */}
-              <div className="p-4 border border-border rounded-sm space-y-2">
-                <div className="flex items-center gap-2 text-sm font-medium">
-                  <TrendingUp className="w-4 h-4 text-accent" />
-                  What HEX6 Knows
+              {/* Consent Timestamp */}
+              {consentTimestamp && (
+                <div className="p-4 bg-accent/5 rounded-sm border border-accent/30 text-center">
+                  <p className="text-xs text-secondary">
+                    Consents accepted on {new Date(consentTimestamp).toLocaleString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      timeZone: 'America/Los_Angeles',
+                    })}{' '}
+                    PDT
+                  </p>
                 </div>
-                <ul className="text-xs text-secondary/80 space-y-1">
-                  <li>✓ Your trading preferences and risk tolerance</li>
-                  <li>✓ Assets you've discussed and tracked</li>
-                  <li>✓ Market regimes and states you care about</li>
-                  <li>✓ Your decision patterns over time</li>
-                  <li>✓ Real-time portfolio and session activity</li>
-                </ul>
-              </div>
+              )}
             </div>
           )}
         </div>
