@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { ChevronRight, Check } from 'lucide-react';
+import PricingModal from '@/components/PricingModal';
 
 const STEPS = [
   {
@@ -265,10 +266,11 @@ function Step4LegalAcceptance({ onContinue }) {
 
 export default function ConsentFlow({ onComplete }) {
   const [currentStep, setCurrentStep] = useState(0);
+  const [showPricing, setShowPricing] = useState(false);
 
   const handleNext = () => {
     if (currentStep === STEPS.length - 1) {
-      onComplete();
+      setShowPricing(true);
     } else {
       setCurrentStep((prev) => prev + 1);
     }
@@ -312,6 +314,15 @@ export default function ConsentFlow({ onComplete }) {
           </p>
         </div>
       </div>
+
+      {/* Pricing Modal */}
+      <PricingModal
+        open={showPricing}
+        onClose={() => {
+          setShowPricing(false);
+          onComplete();
+        }}
+      />
     </div>
   );
 }
