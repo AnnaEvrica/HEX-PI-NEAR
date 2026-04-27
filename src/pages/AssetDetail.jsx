@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 
 const TABS = [
   { id: 'overview', label: 'Overview' },
-  { id: 'ai', label: 'AI Assistant' },
+  { id: 'ai', label: '✦ AI' },
   { id: 'contracts', label: 'Contracts' },
   { id: 'legal', label: 'Legal' },
 ];
@@ -160,9 +160,7 @@ export default function AssetDetail() {
         {activeTab === 'ai' && (
           <AssetAI
             asset={asset}
-            triggering={triggering}
             onRebalance={triggerRebalance}
-            onSilence={triggerSilence}
           />
         )}
 

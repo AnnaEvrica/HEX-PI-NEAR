@@ -1,201 +1,403 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Send, Sparkles, TrendingUp, AlertTriangle, BookOpen, Zap } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Sparkles, TrendingUp, TrendingDown, Shield, ChevronRight, RefreshCw, CheckCircle2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
-const PERSONAS = [
-  { id: 'trader', label: 'Trader', desc: 'Fast, actionable signals' },
-  { id: 'academic', label: 'Academic', desc: 'Rigorous quantitative analysis' },
-  { id: 'simple', label: 'Plain English', desc: 'No jargon, easy to understand' },
-];
+const STEPS = ['predict', 'trade', 'receipt'];
 
-const QUICK_ACTIONS = [
-  { label: 'What is this asset?', icon: BookOpen },
-  { label: 'Should I buy or sell right now?', icon: TrendingUp },
-  { label: 'Explain the market state', icon: Sparkles },
-  { label: 'What does HEX6 recommend?', icon: Zap },
-];
+export default function AssetAI({ asset, onRebalance, triggering }) {
+  const [step, setStep] = useState('predict');
+  const [prediction, setPrediction] = useState(null);
+  const [loadingPrediction, setLoadingPrediction] = useState(false);
+  const [tradeDecision, setTradeDecision] = useState(null); // 'buy' | 'sell' | 'hold'
+  const [tradeQty, setTradeQty] = useState('1');
+  const [submitting, setSubmitting] = useState(false);
+  const [tradeResult, setTradeResult] = useState(null);
+  const [receipt, setReceipt] = useState(null);
+  const [loadingReceipt, setLoadingReceipt] = useState(false);
 
-function getBubbleStyle(role) {
-  if (role === 'user') return 'bg-[#C9A84C]/10 border border-[#C9A84C]/20 text-white self-end';
-  return 'bg-[#111111] border border-white/10 text-white/80 self-start';
-}
-
-export default function AssetAI({ asset, onRebalance, onSilence, triggering }) {
-  const [persona, setPersona] = useState('trader');
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const bottomRef = useRef(null);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, loading]);
-
-  async function sendMessage(text) {
-    const userText = text || input.trim();
-    if (!userText || loading) return;
-    setInput('');
-
-    const newMessages = [...messages, { role: 'user', content: userText }];
-    setMessages(newMessages);
-    setLoading(true);
-
-    const personaInstructions = {
-      trader: `You are a sharp institutional trader's assistant. Be concise, use trading terminology (alpha, beta, drawdown, momentum, Sharpe, etc.). Give direct buy/sell/hold signals. Reference the HEX6 engine state. Use bullet points. Keep it tight.`,
-      academic: `You are a quantitative finance researcher. Be rigorous and precise. Reference statistical concepts, portfolio theory (MPT, Black-Litterman, Kelly Criterion), and the HEX6 BLE SCEFM engine mechanics. Use LaTeX-style notation where helpful. Cite concepts from Markowitz, Fama-French, etc.`,
-      simple: `You are a friendly financial guide explaining things to someone with no finance background. Avoid all jargon. Use simple analogies (e.g., "think of it like..."). Be warm and encouraging. Make the user feel confident. If they ask about technical things, translate them into everyday language.`,
-    };
-
-    // Detect if user is asking to trigger an action
-    const lower = userText.toLowerCase();
-    const wantsRebalance = lower.includes('rebalance') && (lower.includes('run') || lower.includes('trigger') || lower.includes('do') || lower.includes('execute'));
-    const wantsSilence = lower.includes('silence') && (lower.includes('activate') || lower.includes('trigger') || lower.includes('enable') || lower.includes('do'));
-
-    let assistantReply = '';
-
-    if (wantsRebalance) {
-      const confirmMessages = [...newMessages, { role: 'assistant', content: `Triggering HEX6 rebalance for **${asset.ticker}**… 🔄` }];
-      setMessages(confirmMessages);
-      await onRebalance();
-      assistantReply = `✅ Rebalance executed for **${asset.ticker}**. An EGTS receipt has been minted and is now visible in the Contracts tab. The HEX6 engine has re-computed optimal exposure based on current market state: **${asset.market_state || 'UNKNOWN'}**.`;
-    } else if (wantsSilence) {
-      const confirmMessages = [...newMessages, { role: 'assistant', content: `Activating Silence Mode for **${asset.ticker}**… ⚠️` }];
-      setMessages(confirmMessages);
-      await onSilence();
-      assistantReply = `✅ Silence Mode activated for **${asset.ticker}**. Exposure set to zero. An immutable EGTS receipt has been minted. This is a protective measure — the asset is now paused from active allocation until manually reactivated.`;
-    } else {
+  async function generatePrediction() {
+    setLoadingPrediction(true);
+    setPrediction(null);
+    try {
       const prompt = `
-${personaInstructions[persona]}
+You are a friendly financial guide explaining things in plain English to someone who may not know much about investing.
 
-You are analyzing the following asset for a user:
+Analyze this asset and give a prediction:
 - Ticker: ${asset.ticker}
 - Full Name: ${asset.name}
 - Asset Class: ${asset.asset_class}
-- Market State: ${asset.market_state || 'UNKNOWN'}
-- Current Weight: ${asset.current_weight != null ? (asset.current_weight * 100).toFixed(2) + '%' : 'Not set'}
-- Target Weight: ${asset.target_weight != null ? (asset.target_weight * 100).toFixed(2) + '%' : 'Not set'}
-- Status: ${asset.is_active ? 'Active' : 'Inactive'}
-- Description: ${asset.description || 'None provided'}
+- Current Market State: ${asset.market_state || 'UNKNOWN'} (BULL means prices are going up, BEAR means going down, LATERAL means sideways, VOLATILE means unpredictable, SILENCE means paused)
+- Current Portfolio Weight: ${asset.current_weight != null ? (asset.current_weight * 100).toFixed(2) + '%' : 'Not set'}
+- Target Weight from our engine: ${asset.target_weight != null ? (asset.target_weight * 100).toFixed(2) + '%' : 'Not set'}
+- Description: ${asset.description || 'No description'}
 
-The platform uses HEX6 BLE v5.0 (Binary Likelihood Engine), a State-Conditioned Exposure Field Model (SCEFM) that calculates portfolio allocations based on historical return distributions and market states (BULL, BEAR, LATERAL, VOLATILE, SILENCE).
+The HEX6 engine is a smart computer program that watches market patterns and decides how much of each asset to hold.
 
-Governance receipts are minted as cryptographic EGTS (Evrica Global Token Standard) immutable audit records.
-
-Available actions the user can ask you to perform:
-- "trigger rebalance" → runs the HEX6 engine and mints an EGTS receipt
-- "activate silence mode" → sets exposure to zero and mints a EGTS receipt
-
-Conversation history:
-${newMessages.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n')}
-
-Respond to the user's latest message. Use markdown for formatting. Be helpful and match the persona strictly.
+Please respond in this exact JSON format:
+{
+  "direction": "buy" | "sell" | "hold",
+  "confidence": "high" | "medium" | "low",
+  "simple_verdict": "One plain English sentence saying what to do and why (e.g. 'This looks like a good time to buy a small amount because the market is trending up.')",
+  "reasoning": "3-4 sentences in plain English explaining WHY. No jargon. Use everyday language. Mention what the market state means and what the engine is suggesting.",
+  "risk_note": "One plain English sentence about the main risk to be aware of.",
+  "what_happens_next": "One sentence explaining what the user should watch for."
+}
 `.trim();
 
-      const res = await base44.integrations.Core.InvokeLLM({ prompt });
-      assistantReply = typeof res === 'string' ? res : res?.text || 'I could not generate a response.';
+      const res = await base44.integrations.Core.InvokeLLM({
+        prompt,
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            direction: { type: 'string' },
+            confidence: { type: 'string' },
+            simple_verdict: { type: 'string' },
+            reasoning: { type: 'string' },
+            risk_note: { type: 'string' },
+            what_happens_next: { type: 'string' },
+          },
+        },
+      });
+      setPrediction(res);
+      setTradeDecision(res.direction === 'hold' ? null : res.direction);
+    } catch (err) {
+      setPrediction({ error: err.message });
+    } finally {
+      setLoadingPrediction(false);
     }
-
-    setMessages((prev) => [...prev, { role: 'assistant', content: assistantReply }]);
-    setLoading(false);
   }
 
+  async function executeTrade() {
+    if (!tradeDecision || !tradeQty) return;
+    setSubmitting(true);
+    setTradeResult(null);
+    try {
+      const res = await base44.functions.invoke('alpacaTrading', {
+        action: 'placeOrder',
+        symbol: asset.ticker,
+        qty: parseFloat(tradeQty),
+        side: tradeDecision,
+        type: 'market',
+      });
+      if (res.data?.error) throw new Error(res.data.error);
+      setTradeResult({ success: true, order: res.data?.order });
+      setStep('receipt');
+      // Also trigger EGTS rebalance receipt
+      setLoadingReceipt(true);
+      await onRebalance();
+      // Fetch latest receipt
+      const egtsRes = await base44.functions.invoke('egtsProxy', { action: 'fetchByAsset', assetId: asset.ticker });
+      const receipts = egtsRes.data?.data || [];
+      setReceipt(receipts[0] || null);
+      setLoadingReceipt(false);
+    } catch (err) {
+      setTradeResult({ success: false, error: err.message });
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  function reset() {
+    setStep('predict');
+    setPrediction(null);
+    setTradeDecision(null);
+    setTradeQty('1');
+    setTradeResult(null);
+    setReceipt(null);
+  }
+
+  const directionColor = {
+    buy: 'text-[#C9A84C]',
+    sell: 'text-red-400',
+    hold: 'text-white/50',
+  };
+  const directionBg = {
+    buy: 'border-[#C9A84C]/30 bg-[#C9A84C]/5',
+    sell: 'border-red-800/40 bg-red-950/20',
+    hold: 'border-white/10 bg-white/3',
+  };
+
   return (
-    <div className="flex flex-col h-[600px] bg-[#0a0a0a] rounded-xl border border-white/10 overflow-hidden">
-      {/* Persona selector */}
-      <div className="flex items-center gap-2 p-3 border-b border-white/10 shrink-0 bg-[#111111]">
-        <Sparkles className="w-3.5 h-3.5 text-[#C9A84C] shrink-0" />
-        <span className="text-xs text-white/30 mr-1">Explain as:</span>
-        {PERSONAS.map((p) => (
-          <button
-            key={p.id}
-            onClick={() => setPersona(p.id)}
-            className={cn(
-              'text-xs px-3 py-1 rounded-full border transition-colors',
-              persona === p.id
+    <div className="space-y-6">
+      {/* Step indicators */}
+      <div className="flex items-center gap-2">
+        {[
+          { id: 'predict', label: '1. Predict' },
+          { id: 'trade', label: '2. Trade' },
+          { id: 'receipt', label: '3. Receipt' },
+        ].map((s, i) => (
+          <div key={s.id} className="flex items-center gap-2">
+            <span className={`text-xs font-medium px-3 py-1 rounded-full border transition-colors ${
+              step === s.id
                 ? 'border-[#C9A84C] text-[#C9A84C] bg-[#C9A84C]/10'
-                : 'border-white/10 text-white/30 hover:text-white/60'
-            )}
-          >
-            {p.label}
-          </button>
+                : STEPS.indexOf(step) > i
+                ? 'border-white/20 text-white/50 bg-white/5'
+                : 'border-white/10 text-white/20'
+            }`}>{s.label}</span>
+            {i < 2 && <ChevronRight className="w-3 h-3 text-white/15" />}
+          </div>
         ))}
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full gap-6 text-center">
-            <div className="space-y-1">
-              <p className="text-white/60 text-sm font-medium">Ask me anything about {asset.ticker}</p>
-              <p className="text-white/25 text-xs">I can explain, analyze, and even trigger engine actions</p>
+      {/* ── STEP 1: PREDICT ── */}
+      {step === 'predict' && (
+        <div className="space-y-5">
+          {!prediction && !loadingPrediction && (
+            <div className="bg-[#111111] border border-white/10 rounded-xl p-8 text-center space-y-4">
+              <Sparkles className="w-8 h-8 text-[#C9A84C] mx-auto" />
+              <div className="space-y-1">
+                <p className="text-white font-medium">Get an AI prediction for {asset.ticker}</p>
+                <p className="text-white/40 text-sm">We'll look at the market state and tell you what we think in plain English — no jargon.</p>
+              </div>
+              <button
+                onClick={generatePrediction}
+                className="px-6 py-3 rounded-lg bg-[#C9A84C] text-black text-sm font-bold hover:bg-[#b8973d] transition-colors"
+              >
+                Analyse {asset.ticker} Now
+              </button>
             </div>
-            <div className="grid grid-cols-2 gap-2 w-full max-w-sm">
-              {QUICK_ACTIONS.map(({ label, icon: QuickIcon }) => (
+          )}
+
+          {loadingPrediction && (
+            <div className="bg-[#111111] border border-white/10 rounded-xl p-8 text-center space-y-3">
+              <div className="w-6 h-6 border-2 border-white/10 border-t-[#C9A84C] rounded-full animate-spin mx-auto" />
+              <p className="text-white/40 text-sm">Analysing {asset.ticker}…</p>
+            </div>
+          )}
+
+          {prediction && !prediction.error && (
+            <div className="space-y-4">
+              {/* Main verdict */}
+              <div className={`rounded-xl border p-6 space-y-4 ${directionBg[prediction.direction] || 'border-white/10'}`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {prediction.direction === 'buy' ? <TrendingUp className="w-5 h-5 text-[#C9A84C]" /> :
+                     prediction.direction === 'sell' ? <TrendingDown className="w-5 h-5 text-red-400" /> :
+                     <Shield className="w-5 h-5 text-white/40" />}
+                    <span className={`text-2xl font-bold uppercase ${directionColor[prediction.direction] || 'text-white'}`}>
+                      {prediction.direction}
+                    </span>
+                  </div>
+                  <span className={`text-xs px-2 py-1 rounded-full border ${
+                    prediction.confidence === 'high' ? 'border-[#C9A84C]/40 text-[#C9A84C]' :
+                    prediction.confidence === 'medium' ? 'border-white/20 text-white/50' :
+                    'border-white/10 text-white/30'
+                  }`}>{prediction.confidence} confidence</span>
+                </div>
+                <p className="text-white font-medium leading-relaxed">{prediction.simple_verdict}</p>
+              </div>
+
+              {/* Reasoning */}
+              <div className="bg-[#111111] border border-white/10 rounded-xl p-5 space-y-3">
+                <p className="text-xs text-white/30 uppercase tracking-widest">Why we think this</p>
+                <p className="text-white/70 text-sm leading-relaxed">{prediction.reasoning}</p>
+              </div>
+
+              {/* Risk + Next */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="bg-[#111111] border border-white/10 rounded-xl p-4 space-y-1.5">
+                  <p className="text-xs text-white/30 uppercase tracking-widest">⚠️ Main Risk</p>
+                  <p className="text-white/60 text-sm">{prediction.risk_note}</p>
+                </div>
+                <div className="bg-[#111111] border border-white/10 rounded-xl p-4 space-y-1.5">
+                  <p className="text-xs text-white/30 uppercase tracking-widest">👀 Watch For</p>
+                  <p className="text-white/60 text-sm">{prediction.what_happens_next}</p>
+                </div>
+              </div>
+
+              {/* CTA */}
+              <div className="flex gap-3">
+                {prediction.direction !== 'hold' && (
+                  <button
+                    onClick={() => setStep('trade')}
+                    className="flex items-center gap-2 px-5 py-3 rounded-lg bg-[#C9A84C] text-black text-sm font-bold hover:bg-[#b8973d] transition-colors"
+                  >
+                    {prediction.direction === 'buy' ? 'Buy' : 'Sell'} {asset.ticker}
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                )}
                 <button
-                  key={label}
-                  onClick={() => sendMessage(label)}
-                  className="flex items-start gap-2 p-3 rounded-xl bg-[#111111] border border-white/10 text-left hover:border-[#C9A84C]/30 transition-colors group"
+                  onClick={generatePrediction}
+                  className="flex items-center gap-2 px-4 py-3 rounded-lg border border-white/10 text-white/40 text-sm hover:text-white transition-colors"
                 >
-                  <QuickIcon className="w-3.5 h-3.5 text-[#C9A84C] shrink-0 mt-0.5" />
-                  <span className="text-xs text-white/50 group-hover:text-white/70 transition-colors">{label}</span>
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  Re-analyse
                 </button>
-              ))}
+              </div>
+            </div>
+          )}
+
+          {prediction?.error && (
+            <div className="p-4 rounded-xl border border-red-900/40 text-sm text-red-400">
+              Something went wrong: {prediction.error}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── STEP 2: TRADE ── */}
+      {step === 'trade' && (
+        <div className="space-y-5">
+          <div className="bg-[#111111] border border-white/10 rounded-xl p-6 space-y-5">
+            <div className="space-y-1">
+              <p className="text-white font-medium">Place a trade for {asset.ticker}</p>
+              <p className="text-white/40 text-sm">This will place a real market order via Alpaca and create a permanent audit record.</p>
+            </div>
+
+            {/* Direction toggle */}
+            <div>
+              <p className="text-xs text-white/30 uppercase tracking-widest mb-2">Direction</p>
+              <div className="flex gap-2">
+                {['buy', 'sell'].map((side) => (
+                  <button
+                    key={side}
+                    onClick={() => setTradeDecision(side)}
+                    className={`flex-1 py-3 rounded-lg border text-sm font-bold capitalize transition-colors ${
+                      tradeDecision === side
+                        ? side === 'buy'
+                          ? 'border-[#C9A84C] bg-[#C9A84C]/10 text-[#C9A84C]'
+                          : 'border-red-700/60 bg-red-950/30 text-red-400'
+                        : 'border-white/10 text-white/30 hover:text-white/60'
+                    }`}
+                  >
+                    {side === 'buy' ? '↑ Buy' : '↓ Sell'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Quantity */}
+            <div>
+              <label className="text-xs text-white/30 uppercase tracking-widest block mb-2">How many shares / units?</label>
+              <input
+                type="number"
+                min="0.001"
+                step="any"
+                value={tradeQty}
+                onChange={(e) => setTradeQty(e.target.value)}
+                className="w-full bg-black border border-white/10 rounded-lg px-4 py-3 text-white font-mono text-lg focus:outline-none focus:border-[#C9A84C]/50"
+              />
+              <p className="text-xs text-white/20 mt-1.5">Market order — executes immediately at current price</p>
+            </div>
+
+            {/* Summary */}
+            {tradeDecision && (
+              <div className={`rounded-lg border p-4 text-sm ${
+                tradeDecision === 'buy' ? 'border-[#C9A84C]/20 text-[#C9A84C]' : 'border-red-800/30 text-red-400'
+              }`}>
+                You are about to <strong>{tradeDecision}</strong> <strong>{tradeQty} {asset.ticker}</strong> at market price.
+              </div>
+            )}
+
+            {/* Error */}
+            {tradeResult?.error && (
+              <p className="text-sm text-red-400">{tradeResult.error}</p>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={executeTrade}
+                disabled={!tradeDecision || !tradeQty || submitting}
+                className={`flex-1 py-3 rounded-lg text-sm font-bold transition-colors disabled:opacity-40 ${
+                  tradeDecision === 'sell'
+                    ? 'bg-red-900/60 border border-red-800/50 text-red-300 hover:bg-red-900/80'
+                    : 'bg-[#C9A84C] text-black hover:bg-[#b8973d]'
+                }`}
+              >
+                {submitting ? 'Placing order…' : `Confirm ${tradeDecision || 'Trade'}`}
+              </button>
+              <button
+                onClick={() => setStep('predict')}
+                className="px-4 py-3 rounded-lg border border-white/10 text-white/30 text-sm hover:text-white transition-colors"
+              >
+                Back
+              </button>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {messages.map((msg, i) => (
-          <div key={i} className={cn('flex', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
-            <div className={cn('max-w-[85%] px-4 py-3 rounded-xl text-sm', getBubbleStyle(msg.role))}>
-              {msg.role === 'assistant' ? (
-                <ReactMarkdown
-                  className="prose prose-invert prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 prose-p:text-white/80 prose-strong:text-white prose-code:text-[#C9A84C]"
-                >
-                  {msg.content}
-                </ReactMarkdown>
-              ) : (
-                <p>{msg.content}</p>
+      {/* ── STEP 3: RECEIPT ── */}
+      {step === 'receipt' && (
+        <div className="space-y-5">
+          {/* Trade confirmation */}
+          {tradeResult?.success && (
+            <div className="bg-[#111111] border border-[#C9A84C]/20 rounded-xl p-6 space-y-3">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-[#C9A84C]" />
+                <p className="text-white font-medium">Trade placed successfully!</p>
+              </div>
+              <p className="text-white/50 text-sm">Your order to <strong className="text-white">{tradeDecision} {tradeQty} {asset.ticker}</strong> has been sent to the market and will fill at the current price.</p>
+              {tradeResult.order && (
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  {[
+                    ['Order ID', tradeResult.order.id?.slice(0, 8) + '…'],
+                    ['Status', tradeResult.order.status],
+                    ['Type', tradeResult.order.type],
+                    ['Submitted', tradeResult.order.submitted_at ? new Date(tradeResult.order.submitted_at).toLocaleTimeString() : '—'],
+                  ].map(([label, value]) => (
+                    <div key={label} className="bg-black/40 rounded-lg p-3">
+                      <p className="text-xs text-white/30 mb-0.5">{label}</p>
+                      <p className="text-xs font-mono text-white/70">{value}</p>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
-          </div>
-        ))}
+          )}
 
-        {loading && (
-          <div className="flex justify-start">
-            <div className="px-4 py-3 rounded-xl bg-[#111111] border border-white/10 flex items-center gap-2">
-              <div className="flex gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#C9A84C] animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="w-1.5 h-1.5 rounded-full bg-[#C9A84C] animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="w-1.5 h-1.5 rounded-full bg-[#C9A84C] animate-bounce" style={{ animationDelay: '300ms' }} />
-              </div>
-              <span className="text-xs text-white/30">Thinking…</span>
+          {/* EGTS Receipt */}
+          <div className="bg-[#111111] border border-white/10 rounded-xl p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-[#C9A84C]" />
+              <p className="text-white font-medium">Your Governance Receipt (EGTS)</p>
             </div>
-          </div>
-        )}
-        <div ref={bottomRef} />
-      </div>
+            <p className="text-white/40 text-sm">Every trade and engine action is permanently recorded. Think of this like a tamper-proof receipt that can never be deleted or changed — like a blockchain record for your portfolio decisions.</p>
 
-      {/* Input */}
-      <div className="p-3 border-t border-white/10 shrink-0 bg-[#111111]">
-        <div className="flex gap-2">
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-            placeholder={`Ask about ${asset.ticker}… or say "trigger rebalance"`}
-            className="flex-1 bg-black border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C9A84C]/50"
-          />
+            {loadingReceipt && (
+              <div className="flex items-center gap-2 text-sm text-white/30">
+                <div className="w-4 h-4 border-2 border-white/10 border-t-[#C9A84C] rounded-full animate-spin" />
+                Minting your governance receipt…
+              </div>
+            )}
+
+            {receipt && !loadingReceipt && (
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {[
+                    ['Asset', receipt.asset_id],
+                    ['Event Type', receipt.event_type],
+                    ['Date & Time', receipt.created_date ? new Date(receipt.created_date).toLocaleString() : '—'],
+                    ['Verified', 'Yes ✓'],
+                  ].map(([label, value]) => (
+                    <div key={label} className="bg-black/40 rounded-lg p-3">
+                      <p className="text-xs text-white/30 mb-0.5">{label}</p>
+                      <p className="text-sm text-white font-medium">{value}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="bg-black/40 rounded-lg p-3">
+                  <p className="text-xs text-white/30 mb-1">Cryptographic Fingerprint</p>
+                  <p className="text-xs font-mono text-[#C9A84C] break-all">{receipt.crypto_hash}</p>
+                  <p className="text-xs text-white/20 mt-1">This unique code proves this receipt has never been altered.</p>
+                </div>
+              </div>
+            )}
+
+            {!loadingReceipt && !receipt && (
+              <p className="text-sm text-white/30">Receipt is being processed — check the Contracts tab in a moment.</p>
+            )}
+          </div>
+
           <button
-            onClick={() => sendMessage()}
-            disabled={!input.trim() || loading}
-            className="p-2.5 rounded-lg bg-[#C9A84C] text-black hover:bg-[#b8973d] transition-colors disabled:opacity-40"
+            onClick={reset}
+            className="w-full py-3 rounded-lg border border-white/10 text-white/40 text-sm hover:text-white transition-colors"
           >
-            <Send className="w-4 h-4" />
+            Start Over
           </button>
         </div>
-      </div>
+      )}
     </div>
   );
 }
