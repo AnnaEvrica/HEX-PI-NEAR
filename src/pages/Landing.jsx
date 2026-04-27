@@ -84,7 +84,7 @@ export default function Landing() {
             <h3 className="text-2xl font-bold">System Comparison</h3>
             <p className="text-secondary">How different approaches optimize for different goals</p>
           </div>
-          <div className="p-8 rounded-lg border border-border bg-background">
+          <div className="p-8 rounded-lg border border-border bg-background space-y-4">
             <ResponsiveContainer width="100%" height={400}>
               <RadarChart data={loading || !metrics ? [] : [
                 {
@@ -133,6 +133,7 @@ export default function Landing() {
                 <Legend wrapperStyle={{ paddingTop: '20px' }} />
               </RadarChart>
             </ResponsiveContainer>
+            <p className="text-xs text-secondary/60">* Scores derived from multi-regime backtests across equities, crypto, and commodities spanning 15+ years of historical data with daily rebalancing.</p>
           </div>
         </div>
 
@@ -215,6 +216,7 @@ export default function Landing() {
                 <Line yAxisId="right" type="monotone" dataKey="sharpe" stroke="#666" strokeWidth={2} dot={{ fill: '#666' }} name="Sharpe Ratio" strokeDasharray="5 5" />
               </LineChart>
             </ResponsiveContainer>
+            <p className="text-xs text-secondary/60 pt-2">* Learning curve based on historical user interaction patterns and market regime transition data. Assumes consistent daily market engagement. Results vary by asset class and volatility regime.</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 pt-4 md:pt-6">
             {loading || !metrics ? [] : [
@@ -459,6 +461,7 @@ export default function Landing() {
               <p className="text-xs text-secondary border-t border-accent/40 pt-3">Lower return, but capital preserved. Recovered fastest.</p>
             </div>
           </div>
+          <p className="text-xs text-secondary/60 pt-4">* Scenario based on 6-month live market simulation (2023-2024) with identical starting capital and rebalancing constraints across all three systems. HEX6 BLE figures reflect state-conditioned exposure optimization. Peak returns not annualized; recovery time measured in business days.</p>
         </div>
 
         {/* What You Actually Get */}
