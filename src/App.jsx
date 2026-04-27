@@ -18,14 +18,26 @@ import Thesis from '@/pages/Thesis';
 import Trading from '@/pages/Trading.jsx';
 import About from '@/pages/About';
 import Settings from '@/pages/Settings.jsx';
+import ConsentFlow from '@/components/onboarding/ConsentFlow';
+import HEX6ChatInterface from '@/components/chat/HEX6ChatInterface';
+import { useState, useEffect } from 'react';
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
+  const [consentCompleted, setConsentCompleted] = useState(false);
+
+  useEffect(() => {
+    // Check if user has completed consent flow
+    if (user) {
+      const stored = localStorage.getItem(`hex6_consent_${user.id}`);
+      setConsentCompleted(!!stored);
+    }
+  }, [user]);
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-[#080c10]">
-        <div className="w-8 h-8 border-4 border-slate-800 border-t-emerald-500 rounded-full animate-spin"></div>
+      <div className="fixed inset-0 flex items-center justify-center bg-background">
+        <div className="w-8 h-8 border-4 border-border border-t-accent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -39,22 +51,29 @@ const AuthenticatedApp = () => {
     }
   }
 
+  // Show consent flow if user is authenticated but hasn't completed it
+  if (user && !consentCompleted) {
+    return (
+      <ConsentFlow
+        onComplete={() => {
+          localStorage.setItem(`hex6_consent_${user.id}`, JSON.stringify({
+            version: '1.0',
+            timestamp: new Date().toISOString(),
+          }));
+          setConsentCompleted(true);
+        }}
+      />
+    );
+  }
+
+  // After consent, show main chat interface
+  if (user && consentCompleted) {
+    return <HEX6ChatInterface />;
+  }
+
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
-      <Route element={<AppLayout />}>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/portfolio" element={<Portfolio />} />
-        <Route path="/portfolio/:id" element={<AssetDetail />} />
-        <Route path="/governance" element={<Governance />} />
-        <Route path="/legal" element={<Legal />} />
-        <Route path="/backtest" element={<Backtest />} />
-        <Route path="/managers" element={<Managers />} />
-        <Route path="/thesis" element={<Thesis />} />
-        <Route path="/trading" element={<Trading />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/settings" element={<Settings />} />
-      </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
