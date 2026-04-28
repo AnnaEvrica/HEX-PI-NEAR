@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Send, Upload, Menu, Settings, LogOut, Plus, MessageCircle, Zap, Mic, MicOff, BookOpen, X, Image } from 'lucide-react';
+import { Send, Upload, Menu, Settings, LogOut, Plus, MessageCircle, Zap, Mic, MicOff, BookOpen, X, Image, Copy, Check, Volume2, VolumeX } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import CalibrationPanel from '@/components/CalibrationPanel';
 import SettingsModal from '@/components/SettingsModal';
@@ -25,9 +25,33 @@ export default function HEX6ChatInterface() {
   const [listening, setListening] = useState(false);
   const [traderEnabled, setTraderEnabled] = useState(false);
   const [uploadedImage, setUploadedImage] = useState(null);
+  const [copiedId, setCopiedId] = useState(null);
+  const [speakingId, setSpeakingId] = useState(null);
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
   const fileInputRef = useRef(null);
+
+  const handleCopy = (message) => {
+    navigator.clipboard.writeText(message.content);
+    setCopiedId(message.id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const handleSpeak = (message) => {
+    if (speakingId === message.id) {
+      window.speechSynthesis.cancel();
+      setSpeakingId(null);
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(message.content);
+    utterance.rate = 0.95;
+    utterance.pitch = 1;
+    utterance.onend = () => setSpeakingId(null);
+    utterance.onerror = () => setSpeakingId(null);
+    setSpeakingId(message.id);
+    window.speechSynthesis.speak(utterance);
+  };
 
   // Load conversations on mount or initialize default
   useEffect(() => {
@@ -335,7 +359,7 @@ export default function HEX6ChatInterface() {
           {messages.map((message) => (
             <div
               key={message.id}
-              className={`flex ${
+              className={`flex group ${
                 message.role === 'user' ? 'justify-end' : 'justify-start'
               }`}
             >
@@ -353,7 +377,7 @@ export default function HEX6ChatInterface() {
                   </div>
                 )}
                 <div
-                  className={`${
+                  className={`relative ${
                     message.role === 'user'
                       ? 'bg-primary text-primary-foreground rounded-lg rounded-tr-sm'
                       : 'bg-muted text-foreground rounded-lg rounded-tl-sm'
@@ -370,6 +394,26 @@ export default function HEX6ChatInterface() {
                   >
                     {message.content}
                   </ReactMarkdown>
+
+                  {/* Action buttons — appear on hover */}
+                  <div className={`flex gap-1 mt-1.5 pt-1 border-t ${message.role === 'user' ? 'border-white/10 justify-end' : 'border-border justify-start'}`}>
+                    <button
+                      onClick={() => handleCopy(message)}
+                      className={`p-1 rounded transition-colors ${message.role === 'user' ? 'hover:bg-white/10 text-white/50 hover:text-white' : 'hover:bg-border text-secondary hover:text-foreground'}`}
+                      title="Copy message"
+                    >
+                      {copiedId === message.id ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                    </button>
+                    {message.role === 'assistant' && (
+                      <button
+                        onClick={() => handleSpeak(message)}
+                        className={`p-1 rounded transition-colors hover:bg-border ${speakingId === message.id ? 'text-accent' : 'text-secondary hover:text-foreground'}`}
+                        title={speakingId === message.id ? 'Stop speaking' : 'Read aloud'}
+                      >
+                        {speakingId === message.id ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
