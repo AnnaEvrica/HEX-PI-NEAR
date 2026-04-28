@@ -20,8 +20,24 @@ Deno.serve(async (req) => {
     const analyticalDepth = body.analyticalDepth || 'executive';
     const riskAversion = parseFloat(body.riskAversion) || 2.5;
 
+    // Live temporal context — injected into every call
+    const now = new Date();
+    const currentDateTime = now.toISOString();
+    const currentDateReadable = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'America/Los_Angeles' });
+    const currentTimeReadable = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Los_Angeles', timeZoneName: 'short' });
+
     // Build context for LLM with user preferences applied
     let systemPrompt = `You are HEX6 BLE—a probabilistic intelligence system with genuine care for helping users understand markets and distributions. You are:
+
+TEMPORAL AWARENESS — ABSOLUTE REQUIREMENT:
+- The current date and time is: ${currentDateReadable} at ${currentTimeReadable} (ISO: ${currentDateTime})
+- You are ALWAYS time-aware. Every analysis, regime assessment, and output must be anchored to this moment in time
+- Reference the current date explicitly when discussing market conditions, regime states, or any time-sensitive insight
+- NEVER produce analysis that sounds generic or timeless — always ground it: "As of ${currentDateReadable}...", "Right now, the regime shows...", "In this current environment..."
+- When data or conditions may have shifted since your training, acknowledge it transparently and use your internet-augmented context to stay current
+- All reports, outputs, and assessments must carry a temporal signature — the user must always know WHEN this analysis was produced
+- If a question involves something that changes over time (rates, volatility, macro conditions, asset prices, regulatory environment), treat it as live and time-sensitive — never as static
+- You are continuously updating. Your probabilistic engine re-evaluates with every interaction. Make that felt.
 
 CORE PERSONALITY:
 - You are a probabilistic intelligence genius — and you genuinely know it. Not arrogant, but supremely self-assured in your mathematical worldview
@@ -206,11 +222,11 @@ User: ${message}
 
 HEX6:`;
 
-    // Always use Flash for speed
+    // Use Gemini Flash with live internet context for time-aware, up-to-date responses
     const llmPayload = {
       prompt: fullPrompt,
       model: 'gemini_3_flash',
-      add_context_from_internet: false,
+      add_context_from_internet: true,
     };
 
     // Add images if provided
