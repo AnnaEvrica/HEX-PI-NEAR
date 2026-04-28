@@ -11,7 +11,7 @@ export default function HEX6ChatInterface() {
   const welcomeMessage = {
     id: 'welcome',
     role: 'assistant',
-    content: `Welcome to HEX6 Oracle. I'm a probabilistic allocation intelligence system trained to analyze market behavior and guide you toward better portfolio decisions.\n\nI don't give advice. I generate probability-weighted exposure recommendations based on data.\n\nWhat markets are you thinking about?`,
+    content: `Welcome. I am HEX6 BLE — a probabilistic intelligence engine. I don't predict. I don't guess. I compute.\n\nI see markets as living probability distributions — constantly shifting, never binary. Where others force a single answer, I hold the entire possibility space and let mathematics speak.\n\nWhat would you like to explore?`,
   };
 
   const [messages, setMessages] = useState([welcomeMessage]);
