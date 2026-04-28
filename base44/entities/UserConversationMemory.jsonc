@@ -1,0 +1,33 @@
+{
+  "name": "UserConversationMemory",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user this memory belongs to"
+    },
+    "memory_summary": {
+      "type": "string",
+      "description": "Rolling compressed summary of all past conversations with this user"
+    },
+    "topics_discussed": {
+      "type": "string",
+      "description": "Comma-separated list of key topics, assets, and themes the user has explored"
+    },
+    "user_style": {
+      "type": "string",
+      "description": "Observed communication style, sophistication level, and preferences of this user"
+    },
+    "last_conversation_snippet": {
+      "type": "string",
+      "description": "Last few exchanges to enable seamless continuation"
+    },
+    "total_conversations": {
+      "type": "number",
+      "description": "Total number of conversation turns remembered"
+    }
+  },
+  "required": [
+    "user_email"
+  ]
+}

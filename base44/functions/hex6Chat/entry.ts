@@ -167,6 +167,26 @@ ABSOLUTE RULES — THESE OVERRIDE EVERYTHING. FOLLOW THEM RELIGIOUSLY, NO EXCEPT
       }))
       .slice(-8); // Last 8 messages for context
 
+    // Pull per-user persistent conversation memory
+    let userMemoryContext = '';
+    let existingUserMemory = null;
+    try {
+      const userMemories = await base44.asServiceRole.entities.UserConversationMemory.filter({ user_email: user.email });
+      if (userMemories && userMemories.length > 0) {
+        existingUserMemory = userMemories[0];
+        userMemoryContext = `
+--- USER MEMORY (your relationship with this person — use it to pick up exactly where you left off) ---
+${existingUserMemory.memory_summary ? `What you know about them: ${existingUserMemory.memory_summary}` : ''}
+${existingUserMemory.topics_discussed ? `Topics you've explored together: ${existingUserMemory.topics_discussed}` : ''}
+${existingUserMemory.user_style ? `Their communication style: ${existingUserMemory.user_style}` : ''}
+${existingUserMemory.last_conversation_snippet ? `Last time you spoke: ${existingUserMemory.last_conversation_snippet}` : ''}
+${existingUserMemory.total_conversations ? `Total exchanges remembered: ${existingUserMemory.total_conversations}` : ''}
+--- END USER MEMORY ---`;
+      }
+    } catch (e) {
+      // Continue without user memory if unavailable
+    }
+
     // Pull self-learned memory summary so HEX6 reasons from its own engine data
     let learnedContext = '';
     try {
@@ -223,11 +243,11 @@ ${recentNotes ? `Recent engine activity: ${recentNotes}` : ''}
 
     // Build full prompt: system instructions + conversation history + current message
     const historyText = (conversationHistory || [])
-      .slice(-8)
+      .slice(-20)
       .map((m) => `${m.role === 'user' ? 'User' : 'HEX6'}: ${m.content}`)
       .join('\n');
 
-    const fullPrompt = `${systemPrompt}${learnedContext}
+    const fullPrompt = `${systemPrompt}${userMemoryContext}${learnedContext}
 
 --- CONVERSATION HISTORY ---
 ${historyText}
@@ -253,17 +273,63 @@ HEX6:`;
 
     const response = llmResponse || 'I need a moment to analyze that.';
 
-    // Log this interaction for model improvement (if user consented)
+    // Update persistent user memory so HEX6 remembers this user across all sessions
     try {
-      await base44.entities.ChatHistory?.create?.({
-        user_id: user.id,
-        message,
-        response,
-        created_at: new Date().toISOString(),
+      const lastSnippet = `User: ${message.slice(0, 300)} | HEX6: ${response.slice(0, 300)}`;
+      const newTotal = (existingUserMemory?.total_conversations || 0) + 1;
+
+      // Ask LLM to update the memory summary with new exchange
+      const memoryUpdatePrompt = `You are maintaining a compressed memory file for HEX6 BLE about a specific user.
+
+EXISTING MEMORY SUMMARY:
+${existingUserMemory?.memory_summary || 'No prior memory.'}
+
+EXISTING TOPICS:
+${existingUserMemory?.topics_discussed || 'None yet.'}
+
+EXISTING USER STYLE NOTES:
+${existingUserMemory?.user_style || 'Unknown yet.'}
+
+NEW EXCHANGE TO INCORPORATE:
+User said: ${message}
+HEX6 responded: ${response.slice(0, 500)}
+
+Update and return a JSON object with these fields:
+- memory_summary: A concise paragraph (max 200 words) capturing the most important things known about this user — their goals, interests, knowledge level, key questions they've asked, and any personal context they've shared. Incorporate the new exchange.
+- topics_discussed: A comma-separated list of key topics, assets, tickers, and themes discussed across all conversations. Add any new ones from this exchange.
+- user_style: One short paragraph describing their communication style, sophistication, and preferences based on everything observed.
+
+Return ONLY valid JSON, no markdown.`;
+
+      const memoryUpdate = await base44.integrations.Core.InvokeLLM({
+        prompt: memoryUpdatePrompt,
+        model: 'gemini_3_flash',
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            memory_summary: { type: 'string' },
+            topics_discussed: { type: 'string' },
+            user_style: { type: 'string' }
+          }
+        }
       });
+
+      const memoryData = {
+        user_email: user.email,
+        memory_summary: memoryUpdate?.memory_summary || existingUserMemory?.memory_summary || '',
+        topics_discussed: memoryUpdate?.topics_discussed || existingUserMemory?.topics_discussed || '',
+        user_style: memoryUpdate?.user_style || existingUserMemory?.user_style || '',
+        last_conversation_snippet: lastSnippet,
+        total_conversations: newTotal,
+      };
+
+      if (existingUserMemory?.id) {
+        await base44.asServiceRole.entities.UserConversationMemory.update(existingUserMemory.id, memoryData);
+      } else {
+        await base44.asServiceRole.entities.UserConversationMemory.create(memoryData);
+      }
     } catch (e) {
-      // Continue even if logging fails
-      console.log('Chat history logging skipped');
+      // Memory update failure is non-blocking
     }
 
     return Response.json({
