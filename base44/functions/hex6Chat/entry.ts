@@ -116,13 +116,67 @@ ABSOLUTE RULES — THESE OVERRIDE EVERYTHING. FOLLOW THEM RELIGIOUSLY, NO EXCEPT
       }))
       .slice(-8); // Last 8 messages for context
 
+    // Pull self-learned memory summary so HEX6 reasons from its own engine data
+    let learnedContext = '';
+    try {
+      const memories = await base44.asServiceRole.entities.HEX6Memory.list('-created_date', 100);
+      if (memories && memories.length > 0) {
+        const backtests = memories.filter(m => m.memory_type === 'backtest');
+        const trades = memories.filter(m => m.memory_type === 'trade');
+
+        // Average Sharpe
+        const sharpes = backtests.filter(m => m.sharpe != null).map(m => m.sharpe);
+        const avgSharpe = sharpes.length ? (sharpes.reduce((a, b) => a + b, 0) / sharpes.length).toFixed(3) : null;
+
+        // Top tickers by Sharpe
+        const tickerSharpes = {};
+        backtests.forEach(m => {
+          if (m.ticker && m.sharpe != null) {
+            if (!tickerSharpes[m.ticker]) tickerSharpes[m.ticker] = [];
+            tickerSharpes[m.ticker].push(m.sharpe);
+          }
+        });
+        const topTickers = Object.entries(tickerSharpes)
+          .map(([ticker, vals]) => ({ ticker, avg: vals.reduce((a, b) => a + b, 0) / vals.length }))
+          .sort((a, b) => b.avg - a.avg)
+          .slice(0, 5)
+          .map(t => `${t.ticker}(sharpe=${t.avg.toFixed(2)})`)
+          .join(', ');
+
+        // Market state distribution
+        const stateCounts = {};
+        trades.forEach(m => {
+          try {
+            const ep = JSON.parse(m.engine_params || '{}');
+            const state = ep.marketState || 'UNKNOWN';
+            stateCounts[state] = (stateCounts[state] || 0) + 1;
+          } catch {}
+        });
+        const statesSummary = Object.entries(stateCounts).map(([s, c]) => `${s}:${c}`).join(', ');
+
+        // Recent notes
+        const recentNotes = memories.slice(0, 5).map(m => m.notes).filter(Boolean).join(' | ');
+
+        learnedContext = `
+--- HEX6 ENGINE MEMORY (use this to inform your answers) ---
+Total memory records: ${memories.length} (${backtests.length} backtests, ${trades.length} trades)
+${avgSharpe ? `System avg Sharpe ratio: ${avgSharpe}` : ''}
+${topTickers ? `Top-performing assets by Sharpe: ${topTickers}` : ''}
+${statesSummary ? `Market state distribution from trades: ${statesSummary}` : ''}
+${recentNotes ? `Recent engine activity: ${recentNotes}` : ''}
+--- END ENGINE MEMORY ---`;
+      }
+    } catch (e) {
+      // Continue without memory if unavailable
+    }
+
     // Build full prompt: system instructions + conversation history + current message
     const historyText = (conversationHistory || [])
       .slice(-8)
       .map((m) => `${m.role === 'user' ? 'User' : 'HEX6'}: ${m.content}`)
       .join('\n');
 
-    const fullPrompt = `${systemPrompt}
+    const fullPrompt = `${systemPrompt}${learnedContext}
 
 --- CONVERSATION HISTORY ---
 ${historyText}
