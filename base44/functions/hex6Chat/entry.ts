@@ -116,11 +116,25 @@ ABSOLUTE RULES — THESE OVERRIDE EVERYTHING. FOLLOW THEM RELIGIOUSLY, NO EXCEPT
       }))
       .slice(-8); // Last 8 messages for context
 
-    const hasComplexKeywords = /backtest|strategy|rebalance|analysis|optimize|correlation|sharpe|drawdown|risk|research/i.test(message);
+    // Build full prompt: system instructions + conversation history + current message
+    const historyText = (conversationHistory || [])
+      .slice(-8)
+      .map((m) => `${m.role === 'user' ? 'User' : 'HEX6'}: ${m.content}`)
+      .join('\n');
 
-    // Always use Flash for speed — it's fast and fully capable
+    const fullPrompt = `${systemPrompt}
+
+--- CONVERSATION HISTORY ---
+${historyText}
+
+--- CURRENT USER MESSAGE ---
+User: ${message}
+
+HEX6:`;
+
+    // Always use Flash for speed
     const llmPayload = {
-      prompt: message,
+      prompt: fullPrompt,
       model: 'gemini_3_flash',
       add_context_from_internet: false,
     };
