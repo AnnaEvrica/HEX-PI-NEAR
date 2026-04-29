@@ -196,7 +196,10 @@ export default function HEX6ChatInterface() {
         payload.file_urls = [uploadedImage];
       }
 
-      const response = await base44.functions.invoke('hex6Chat', payload);
+      const response = await Promise.race([
+        base44.functions.invoke('hex6Chat', payload),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 90000))
+      ]);
 
       if (response.data?.error) throw new Error(response.data.error);
 
@@ -224,7 +227,9 @@ export default function HEX6ChatInterface() {
       const errorMsg = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: 'Error processing your message. Please try again.',
+        content: err.message === 'timeout'
+          ? 'Still pulling data from the web — took too long this time. Try asking again and I\'ll get it faster.'
+          : 'Something went wrong on my end. Try again in a moment.',
       };
       const updatedMessages = [...newMessages.filter(m => !m.isThinking), errorMsg];
       setMessages(updatedMessages);
