@@ -234,8 +234,10 @@ User: ${message}
 
 HEX6:`;
 
-    // Detect if this message would benefit from live internet data
-    const needsInternet = /\b(news|latest|current|today|right now|happening|price|prices|trading at|what is .* at|what's .* at|what are .* at|market cap|volume|earnings|report|announce|fed|fomc|cpi|inflation|rate|rates|gdp|jobs|nonfarm|data|release|event|catalyst|filing|sec|etf|launch|ipo|merger|acquisition|hack|crash|rally|pump|dump|regulation|ban|approval|ruling|update|upgrade|downgrade|analyst|target|forecast|outlook|guidance|macro|geopolitical|war|sanctions|tariff|election)\b/i.test(message);
+    // Detect if this message would benefit from live internet data.
+    // Errs on the side of inclusion — internet adds context for anything involving real assets,
+    // market conditions, companies, macro environment, or recent events.
+    const needsInternet = /\b(news|latest|current|today|right now|happening|price|prices|trading at|what is|what's|what are|how is|how are|tell me about|what do you think about|thoughts on|outlook for|analysis of|market cap|volume|earnings|report|announce|fed|fomc|cpi|inflation|rate|rates|gdp|jobs|nonfarm|data|release|event|catalyst|filing|sec|etf|launch|ipo|merger|acquisition|hack|crash|rally|pump|dump|regulation|ban|approval|ruling|update|upgrade|downgrade|analyst|target|forecast|outlook|guidance|macro|geopolitical|war|sanctions|tariff|election|bitcoin|btc|ethereum|eth|crypto|altcoin|stock|stocks|equity|equities|nasdaq|nyse|sp500|s&p|dow|russell|gold|silver|oil|commodities|bonds|treasury|yield|yields|dollar|eur|jpy|gbp|forex|fx|hedge|fund|etf|index|sector|industry|company|companies|ticker|symbol|short|long|position|trade|trading|market|markets|bull|bear|volatile|volatility|regime|trend|momentum|reversal|breakout|support|resistance|chart|technical|fundamental|valuation|pe ratio|revenue|profit|loss|debt|balance sheet|cash flow|interest|dividend|buyback|ipo|spac|options|futures|derivatives|leverage|margin|liquidation|liquidate|bankruptcy|default|recession|recovery|expansion|contraction|cycle|quarter|q1|q2|q3|q4|fiscal|annual|monthly|weekly|daily|intraday|candle|pattern|setup|signal|indicator|rsi|macd|moving average|bollinger|vix|fear|greed|sentiment|narrative|catalyst|thesis|conviction|risk|reward|probability|expected value|kelly|sharpe|drawdown|alpha|beta|correlation|hedge|diversif)\b/i.test(message);
 
     // Fire synthesis and main LLM call IN PARALLEL
     const llmPayload = {
