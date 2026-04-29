@@ -14,9 +14,23 @@ export default function HEX6ChatInterface() {
     content: `Welcome. I am HEX6 BLE — a probabilistic intelligence engine. I don't predict. I don't guess. I compute.\n\nI see markets as living probability distributions — constantly shifting, never binary. Where others force a single answer, I hold the entire possibility space and let mathematics speak.\n\nWhat would you like to explore?`,
   };
 
+  const THINKING_STEPS = [
+    'Connecting to live data sources...',
+    'Searching the web for relevant information...',
+    'Fetching latest data...',
+    'Analyzing patterns and market signals...',
+    'Running the probability engine...',
+    'Cross-referencing data sources...',
+    'Computing state distribution...',
+    'Synthesizing results...',
+    'Almost there — finalizing output...',
+  ];
+
   const [messages, setMessages] = useState([welcomeMessage]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [thinkingStep, setThinkingStep] = useState(0);
+  const thinkingIntervalRef = useRef(null);
   const [conversations, setConversations] = useState([]);
   const [currentConversationId, setCurrentConversationId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -168,17 +182,14 @@ export default function HEX6ChatInterface() {
       userMessage.file_urls = [uploadedImage];
     }
 
-    const thinkingMessage = {
-      id: (Date.now() + 0.5).toString(),
-      role: 'assistant',
-      content: 'Acknowledged. Pulling external data and running the engine — this takes about 30 seconds. Stand by.',
-      isThinking: true,
-    };
-
-    const newMessages = [...messages, userMessage, thinkingMessage];
+    const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     setInput('');
     setLoading(true);
+    setThinkingStep(0);
+    thinkingIntervalRef.current = setInterval(() => {
+      setThinkingStep((prev) => Math.min(prev + 1, THINKING_STEPS.length - 1));
+    }, 6000);
 
     try {
       // Get user preferences from localStorage
@@ -209,8 +220,9 @@ export default function HEX6ChatInterface() {
         content: response.data?.response || 'Unable to process your request.',
       };
 
+      clearInterval(thinkingIntervalRef.current);
       // Replace the thinking message with the real response
-      const updatedMessages = [...newMessages.filter(m => !m.isThinking), assistantMessage];
+      const updatedMessages = [...newMessages, assistantMessage];
       setMessages(updatedMessages);
       setUploadedImage(null);
 
@@ -223,6 +235,7 @@ export default function HEX6ChatInterface() {
         )
       );
       } catch (err) {
+      clearInterval(thinkingIntervalRef.current);
       console.error(err);
       const errorMsg = {
         id: (Date.now() + 1).toString(),
@@ -231,7 +244,7 @@ export default function HEX6ChatInterface() {
           ? 'Still pulling data from the web — took too long this time. Try asking again and I\'ll get it faster.'
           : 'Something went wrong on my end. Try again in a moment.',
       };
-      const updatedMessages = [...newMessages.filter(m => !m.isThinking), errorMsg];
+      const updatedMessages = [...newMessages, errorMsg];
       setMessages(updatedMessages);
       setUploadedImage(null);
       } finally {
@@ -433,12 +446,13 @@ export default function HEX6ChatInterface() {
           ))}
           {loading && (
             <div className="flex justify-start">
-              <div className="bg-muted text-foreground rounded-lg rounded-tl-sm px-4 py-3">
-                <div className="flex gap-1">
-                  <div className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
-                  <div className="w-2 h-2 rounded-full bg-secondary animate-pulse animation-delay-100" />
-                  <div className="w-2 h-2 rounded-full bg-secondary animate-pulse animation-delay-200" />
+              <div className="ml-2 bg-muted text-foreground rounded-lg rounded-tl-sm px-4 py-3 text-sm text-secondary flex items-center gap-2 max-w-xs">
+                <div className="flex gap-1 shrink-0">
+                  <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" style={{ animationDelay: '0.2s' }} />
+                  <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" style={{ animationDelay: '0.4s' }} />
                 </div>
+                <span className="transition-all duration-500">{THINKING_STEPS[thinkingStep]}</span>
               </div>
             </div>
           )}
