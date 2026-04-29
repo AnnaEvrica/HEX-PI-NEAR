@@ -446,16 +446,22 @@ export default function HEX6ChatInterface() {
           ))}
           {loading && (
             <div className="flex justify-start">
-              <div className="ml-2 bg-muted text-foreground rounded-lg rounded-tl-sm px-4 py-3 text-sm text-secondary flex items-center gap-2 max-w-xs">
-                <div className="flex gap-1 shrink-0">
-                  <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                  <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" style={{ animationDelay: '0.2s' }} />
-                  <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" style={{ animationDelay: '0.4s' }} />
+              <div className="ml-2 bg-muted text-foreground rounded-lg rounded-tl-sm px-4 py-3 text-sm text-secondary flex flex-col gap-2 max-w-xs">
+                <div className="flex gap-1">
+                  <div className="w-2 h-2 rounded-full bg-secondary" style={{ animation: 'bounce 1.2s infinite', animationDelay: '0s' }} />
+                  <div className="w-2 h-2 rounded-full bg-secondary" style={{ animation: 'bounce 1.2s infinite', animationDelay: '0.2s' }} />
+                  <div className="w-2 h-2 rounded-full bg-secondary" style={{ animation: 'bounce 1.2s infinite', animationDelay: '0.4s' }} />
                 </div>
-                <span className="transition-all duration-500">{THINKING_STEPS[thinkingStep]}</span>
+                <span className="text-xs text-secondary/70 transition-all duration-500">{THINKING_STEPS[thinkingStep]}</span>
               </div>
             </div>
           )}
+          <style>{`
+            @keyframes bounce {
+              0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+              30% { transform: translateY(-6px); opacity: 1; }
+            }
+          `}</style>
           <div ref={messagesEndRef} />
         </div>
 
