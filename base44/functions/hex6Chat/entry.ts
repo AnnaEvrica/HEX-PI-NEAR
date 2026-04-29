@@ -186,7 +186,7 @@ function extractNumberSeries(text) {
 
 // Detect if message is analytical/probabilistic in nature
 function needsEngineAnalysis(text) {
-  return /\b(probability|probabilistic|likelihood|chance|odds|risk|analyze|analysis|predict|forecast|model|distribution|variance|sigma|volatility|exposure|regime|kelly|sharpe|expected value|series|returns|dataset|data|numbers|sequence|trend|pattern|calculate|compute|run|engine|hex6)\b/i.test(text);
+  return /\b(probability|probabilistic|likelihood|chance|odds|risk|analyze|analysis|predict|forecast|model|distribution|variance|sigma|volatility|exposure|regime|kelly|sharpe|expected value|series|returns|dataset|data|numbers|sequence|trend|pattern|calculate|compute|run|engine|hex6|winning|win|lose|beat|game|match|score|performance|streak|record)\b/i.test(text);
 }
 
 // ---------------------------------------------------------------------------
@@ -255,7 +255,7 @@ Decay factor λ: 0.94 (recent observations dominate; half-life ≈ 12 periods)
 --- END ENGINE OUTPUT ---
 Use this computed output directly in your response. Ground your analysis in these exact numbers. Note the decay-weighting and correlation bit context.`;
     } else if (isAnalytical && !hex6WasAskingForData) {
-      // Analytical question but no data yet — flag to ask user
+      // Analytical question but no data — fetch from internet first, then run engine
       shouldAskForData = true;
     }
 
@@ -364,31 +364,45 @@ Latest: ${message}`,
       }).catch(() => null);
     }
 
-    // --- If analytical but no data — override response to ask for data ---
+    // --- If analytical but no data — fetch it from the internet, construct series, run engine ---
     if (shouldAskForData) {
-      // Still run synthesis in background but return a data request immediately via LLM
-      const dataRequestPrompt = `${systemPrompt}${userMemoryContext}
-
---- CONVERSATION HISTORY ---
-${historyText}
+      // Step 1: Use internet search to fetch relevant numerical data for the question
+      const dataFetchPrompt = `${systemPrompt}
 
 --- CURRENT USER MESSAGE ---
 User: ${message}
 
-INSTRUCTION: The user is asking an analytical/probabilistic question but has not provided a numerical data series. Ask them directly and naturally for the data you need to run the HEX6 engine — a series of numbers (returns, rates, observations, etc.), a dataset, or a link to data. Be specific about what format works. Keep it brief and conversational.
+INSTRUCTION: The user is asking a probabilistic/analytical question. Your job is to:
+1. Search the internet for the most relevant recent numerical data that would answer this question (e.g. recent win/loss record, performance scores, price history, stats — whatever is most appropriate).
+2. Extract a clean numerical series of at least 10 recent observations (most recent last). These could be win=1/loss=0 binary values, score differentials, percentage changes, or any consistent metric.
+3. Confirm what data you found and what series you're about to use, in one brief sentence.
+4. Then present your probabilistic analysis using those numbers as if the HEX6 engine has processed them — reason through the mean outcome, volatility, and what the current regime suggests about the probability.
+5. If the data was ambiguous or you want to refine the analysis, ask ONE specific clarifying question at the end.
+
+Do not ask the user to provide data themselves. You have internet access — use it. Be direct and analytical.
 
 HEX6:`;
 
-      const [dataRequestResponse] = await Promise.all([
-        base44.integrations.Core.InvokeLLM({ prompt: dataRequestPrompt, model: 'gemini_3_flash' }),
+      const [dataFetchResponse] = await Promise.all([
+        base44.integrations.Core.InvokeLLM({
+          prompt: dataFetchPrompt,
+          model: 'gemini_3_flash',
+          add_context_from_internet: true,
+        }),
         synthesisPromise,
       ]);
 
-      const response = dataRequestResponse || 'To run the engine on this, I need a data series from you — share the numbers and I\'ll compute it directly.';
+      // Try to extract a series from the LLM's fetched data and run the actual engine
+      const fetchedNumbers = dataFetchResponse ? extractNumberSeries(dataFetchResponse) : null;
+      let autoEngineContext = '';
+      if (fetchedNumbers && fetchedNumbers.length >= 7) {
+        const autoResult = runHex6Engine(fetchedNumbers, riskAversion);
+        autoEngineContext = `\n\n[Engine confirmation: state=${autoResult.stateBits}, μ=${autoResult.mu}, σ=${autoResult.sigma}, E(S_t)=${autoResult.exposure}, regime=${autoResult.regime}, n_eff=${autoResult.nEff}]`;
+      }
 
-      // Fire-and-forget memory update
+      const response = (dataFetchResponse || 'Let me look that up and run the numbers.') + autoEngineContext;
+
       updateMemory(base44, user, existingUserMemory, message, response);
-
       return Response.json({ response, timestamp: new Date().toISOString() });
     }
 
@@ -403,7 +417,7 @@ User: ${message}
 
 HEX6:`;
 
-    const needsInternet = /\b(news|latest|current|today|right now|price|prices|trading at|what is|what's|earnings|report|announce|fed|fomc|cpi|inflation|gdp|jobs|bitcoin|btc|ethereum|eth|crypto|stock|stocks|nasdaq|sp500|s&p|dow|gold|oil|bonds|yield|yields|ipo|merger|acquisition|hack|crash|rally|regulation|ban|approval|ruling|forecast|outlook|macro|geopolitical|war|sanctions|tariff|election)\b/i.test(message);
+    const needsInternet = /\b(news|latest|current|today|right now|price|prices|trading at|what is|what's|earnings|report|announce|fed|fomc|cpi|inflation|gdp|jobs|bitcoin|btc|ethereum|eth|crypto|stock|stocks|nasdaq|sp500|s&p|dow|gold|oil|bonds|yield|yields|ipo|merger|acquisition|hack|crash|rally|regulation|ban|approval|ruling|forecast|outlook|macro|geopolitical|war|sanctions|tariff|election|lakers|celtics|warriors|knicks|nba|nfl|mlb|nhl|game|match|win|winning|score|team|player|season|standings|odds|spread|moneyline|sports|championship)\b/i.test(message);
 
     const llmPayload = { prompt: basePrompt, model: 'gemini_3_flash', add_context_from_internet: needsInternet };
     if (file_urls && file_urls.length > 0) llmPayload.file_urls = file_urls;
