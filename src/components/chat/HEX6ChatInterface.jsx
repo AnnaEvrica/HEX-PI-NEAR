@@ -186,7 +186,7 @@ export default function HEX6ChatInterface() {
       
       const payload = {
         message: input,
-        conversationHistory: newMessages.slice(-20),
+        conversationHistory: newMessages.filter(m => !m.isThinking).slice(-20),
         analyticalDepth: prefs.analyticalDepth || 'executive',
         riskAversion: prefs.riskAversion || 2.5,
       };
