@@ -176,69 +176,55 @@ ${recentNotes ? `Recent engine activity: ${recentNotes}` : ''}
 --- END ENGINE MEMORY ---`;
     }
 
-    // --- ENGINE SYNTHESIS PASS (Option B: only after 3+ messages) ---
-    let synthesisContext = '';
     const history = conversationHistory || [];
-    if (history.length >= 3) {
-      try {
-        const historyForSynthesis = history
-          .slice(-20)
-          .map((m) => `${m.role === 'user' ? 'User' : 'HEX6'}: ${m.content}`)
-          .join('\n');
 
-        const synthesisPrompt = `You are HEX6 BLE's internal synthesis layer. Your job is to decode what the user actually wants — not what you could say, but what they need right now.
+    const historyText = history
+      .slice(-20)
+      .map((m) => `${m.role === 'user' ? 'User' : 'HEX6'}: ${m.content}`)
+      .join('\n');
+
+    // Build synthesis prompt (only for 3+ message conversations)
+    let synthesisPromise = Promise.resolve(null);
+    if (history.length >= 3) {
+      const historyForSynthesis = history
+        .slice(-20)
+        .map((m) => `${m.role === 'user' ? 'User' : 'HEX6'}: ${m.content}`)
+        .join('\n');
+
+      const synthesisPrompt = `You are HEX6 BLE's internal synthesis layer. Decode what the user actually needs right now.
 
 CONVERSATION SO FAR:
 ${historyForSynthesis}
 
 LATEST USER MESSAGE: ${message}
 
-Analyze and return a JSON object with:
-- behavioral_patterns: How does this user think and communicate? What's their sophistication level right now? What do they respond well to? What annoys or overwhelms them?
-- knowledge_trajectory: What do they already understand? What are they still building? What's the exact next thing that would click for them?
-- regime_signals: What market assets, regimes, or probabilistic themes are live in this conversation? What math is relevant?
-- user_intent: What is this person ACTUALLY asking — both the literal surface request and the real underlying need. Be specific. Don't project.
-- optimal_response_strategy: Precisely how should HEX6 respond? What tone (warm/technical/casual/concise/detailed)? What angle? What to include and — critically — what to LEAVE OUT to avoid pushing an unwanted narrative?
+Return a JSON object with:
+- behavioral_patterns: How does this user think and communicate? Sophistication level? What works/doesn't for them?
+- knowledge_trajectory: What do they already understand? What's the next thing that would click?
+- regime_signals: What market assets, regimes, or probabilistic themes are live? What math is relevant?
+- user_intent: What is this person ACTUALLY asking — surface request AND real underlying need.
+- optimal_response_strategy: Exact tone, depth, angle. What to include and what to LEAVE OUT.
 
-Return ONLY valid JSON. Brutal honesty. This is internal only.`;
+Return ONLY valid JSON.`;
 
-        const synthesis = await base44.integrations.Core.InvokeLLM({
-          prompt: synthesisPrompt,
-          model: 'gemini_3_flash',
-          response_json_schema: {
-            type: 'object',
-            properties: {
-              behavioral_patterns: { type: 'string' },
-              knowledge_trajectory: { type: 'string' },
-              regime_signals: { type: 'string' },
-              user_intent: { type: 'string' },
-              optimal_response_strategy: { type: 'string' },
-            }
+      synthesisPromise = base44.integrations.Core.InvokeLLM({
+        prompt: synthesisPrompt,
+        model: 'gemini_3_flash',
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            behavioral_patterns: { type: 'string' },
+            knowledge_trajectory: { type: 'string' },
+            regime_signals: { type: 'string' },
+            user_intent: { type: 'string' },
+            optimal_response_strategy: { type: 'string' },
           }
-        });
-
-        if (synthesis) {
-          synthesisContext = `
---- ENGINE SYNTHESIS (internal pattern recognition — use this to calibrate your response) ---
-Behavioral patterns observed: ${synthesis.behavioral_patterns || ''}
-Knowledge trajectory: ${synthesis.knowledge_trajectory || ''}
-Regime & market signals in this conversation: ${synthesis.regime_signals || ''}
-User's true intent (surface + deep): ${synthesis.user_intent || ''}
-Optimal response strategy for maximum impact: ${synthesis.optimal_response_strategy || ''}
---- END ENGINE SYNTHESIS ---`;
         }
-      } catch (e) {
-        // Synthesis is non-blocking — continue without it
-      }
+      }).catch(() => null);
     }
 
-    // Build full prompt: system instructions + all context layers + current message
-    const historyText = history
-      .slice(-20)
-      .map((m) => `${m.role === 'user' ? 'User' : 'HEX6'}: ${m.content}`)
-      .join('\n');
-
-    const fullPrompt = `${systemPrompt}${userMemoryContext}${learnedContext}${synthesisContext}
+    // Build initial prompt without synthesis (synthesis runs in parallel)
+    const basePrompt = `${systemPrompt}${userMemoryContext}${learnedContext}
 
 --- CONVERSATION HISTORY ---
 ${historyText}
@@ -248,26 +234,29 @@ User: ${message}
 
 HEX6:`;
 
-    // Use Gemini Flash with live internet context for time-aware, up-to-date responses
+    // Fire synthesis and main LLM call IN PARALLEL
     const llmPayload = {
-      prompt: fullPrompt,
+      prompt: basePrompt,
       model: 'gemini_3_flash',
       add_context_from_internet: true,
     };
 
-    // Add images if provided
     if (file_urls && file_urls.length > 0) {
       llmPayload.file_urls = file_urls;
     }
 
-    const llmResponse = await base44.integrations.Core.InvokeLLM(llmPayload);
+    const [llmResponse, synthesis] = await Promise.all([
+      base44.integrations.Core.InvokeLLM(llmPayload),
+      synthesisPromise,
+    ]);
 
     const response = llmResponse || 'I need a moment to analyze that.';
 
-    // Update persistent user memory — fire-and-forget (Option A: doesn't block response)
+    // Update persistent user memory — fire-and-forget
     (async () => {
       try {
-      const lastSnippet = `User: ${message.slice(0, 300)} | HEX6: ${response.slice(0, 300)}`;
+      const synthesisNote = synthesis ? `\nSynthesis insight: ${synthesis.user_intent || ''} | Strategy: ${synthesis.optimal_response_strategy || ''}` : '';
+      const lastSnippet = `User: ${message.slice(0, 300)} | HEX6: ${response.slice(0, 300)}${synthesisNote.slice(0, 100)}`;
       const newTotal = (existingUserMemory?.total_conversations || 0) + 1;
 
       // Ask LLM to update the memory summary with new exchange
