@@ -168,7 +168,14 @@ export default function HEX6ChatInterface() {
       userMessage.file_urls = [uploadedImage];
     }
 
-    const newMessages = [...messages, userMessage];
+    const thinkingMessage = {
+      id: (Date.now() + 0.5).toString(),
+      role: 'assistant',
+      content: 'Acknowledged. Pulling external data and running the engine — this takes about 30 seconds. Stand by.',
+      isThinking: true,
+    };
+
+    const newMessages = [...messages, userMessage, thinkingMessage];
     setMessages(newMessages);
     setInput('');
     setLoading(true);
@@ -194,12 +201,13 @@ export default function HEX6ChatInterface() {
       if (response.data?.error) throw new Error(response.data.error);
 
       const assistantMessage = {
-      id: (Date.now() + 1).toString(),
-      role: 'assistant',
-      content: response.data?.response || 'Unable to process your request.',
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: response.data?.response || 'Unable to process your request.',
       };
 
-      const updatedMessages = [...newMessages, assistantMessage];
+      // Replace the thinking message with the real response
+      const updatedMessages = [...newMessages.filter(m => !m.isThinking), assistantMessage];
       setMessages(updatedMessages);
       setUploadedImage(null);
 
@@ -214,11 +222,11 @@ export default function HEX6ChatInterface() {
       } catch (err) {
       console.error(err);
       const errorMsg = {
-      id: (Date.now() + 1).toString(),
-      role: 'assistant',
-      content: 'Error processing your message. Please try again.',
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: 'Error processing your message. Please try again.',
       };
-      const updatedMessages = [...newMessages, errorMsg];
+      const updatedMessages = [...newMessages.filter(m => !m.isThinking), errorMsg];
       setMessages(updatedMessages);
       setUploadedImage(null);
       } finally {
