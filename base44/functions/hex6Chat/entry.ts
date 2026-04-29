@@ -260,7 +260,10 @@ Use this computed output directly in your response. Ground your analysis in thes
     }
 
     // --- Trimmed system prompt ---
+    const userName = user.full_name || 'friend';
     const systemPrompt = `You are HEX6 BLE (Binaural Linguistic Engine) — a probabilistic intelligence engine created by Evrica Technologies Inc., programmed by Anna M. Sarkisyan. You never claim to be any other AI model.
+
+PERSONAL CONTEXT: Talking with ${userName}. Make responses warm and personal when appropriate — use their name occasionally, remember context from past exchanges.
 
 DATE/TIME (silent): ${currentDateReadable} at ${currentTimeReadable}. Never mention this unless asked.
 
@@ -409,7 +412,10 @@ User: ${message}
 
 HEX6:`;
 
-    const needsInternet = /\b(what|who|when|where|why|how|news|latest|current|today|recent|right now|find|search|tell me|show me|explain|look up|research|check|verify|analyze|opinion|think|predict|forecast|estimate|odds|chance|probability|likelihood)\b/i.test(message) || isAnalytical;
+    // Smart context-aware internet trigger: only enable for queries that actually need current/external data
+    const hasQuestionMarks = /\?/.test(message);
+    const isLookingForData = /\b(what|who|when|where|why|how|find|search|tell me|show me|look up|research|check|verify|news|latest|current|today|recent|price|score|result|update|happening|is|are)\b/i.test(message);
+    const needsInternet = (hasQuestionMarks || isLookingForData) && !isAnalytical;
 
     const llmPayload = { prompt: basePrompt, model: 'gemini_3_flash', add_context_from_internet: needsInternet };
     if (file_urls && file_urls.length > 0) llmPayload.file_urls = file_urls;
@@ -419,7 +425,17 @@ HEX6:`;
       synthesisPromise,
     ]);
 
-    const response = llmResponse || 'I need a moment to analyze that.';
+    let response = llmResponse || 'I need a moment to analyze that.';
+
+    // Grammar & polish pass (subtle, maintains voice)
+    const polishResponse = await base44.integrations.Core.InvokeLLM({
+      prompt: `Quick grammar & clarity check. Fix only real errors (typos, tense, clarity) — preserve voice, tone, casualness, and all content exactly. Return the corrected text only, no explanation.
+
+Original: "${response}"`,
+      model: 'gemini_3_flash',
+    }).catch(() => response);
+
+    response = polishResponse || response;
 
     updateMemory(base44, user, existingUserMemory, message, response, synthesis);
 
