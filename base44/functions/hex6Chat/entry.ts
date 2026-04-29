@@ -234,11 +234,14 @@ User: ${message}
 
 HEX6:`;
 
+    // Detect if this message would benefit from live internet data
+    const needsInternet = /\b(news|latest|current|today|right now|happening|price|prices|trading at|what is .* at|what's .* at|what are .* at|market cap|volume|earnings|report|announce|fed|fomc|cpi|inflation|rate|rates|gdp|jobs|nonfarm|data|release|event|catalyst|filing|sec|etf|launch|ipo|merger|acquisition|hack|crash|rally|pump|dump|regulation|ban|approval|ruling|update|upgrade|downgrade|analyst|target|forecast|outlook|guidance|macro|geopolitical|war|sanctions|tariff|election)\b/i.test(message);
+
     // Fire synthesis and main LLM call IN PARALLEL
     const llmPayload = {
       prompt: basePrompt,
       model: 'gemini_3_flash',
-      add_context_from_internet: true,
+      add_context_from_internet: needsInternet,
     };
 
     if (file_urls && file_urls.length > 0) {
