@@ -409,7 +409,7 @@ User: ${message}
 
 HEX6:`;
 
-    const needsInternet = /\b(news|latest|current|today|right now|price|prices|trading at|what is|what's|earnings|report|announce|fed|fomc|cpi|inflation|gdp|jobs|bitcoin|btc|ethereum|eth|crypto|stock|stocks|nasdaq|sp500|s&p|dow|gold|oil|bonds|yield|yields|ipo|merger|acquisition|hack|crash|rally|regulation|ban|approval|ruling|forecast|outlook|macro|geopolitical|war|sanctions|tariff|election|lakers|celtics|warriors|knicks|nba|nfl|mlb|nhl|game|match|win|winning|score|team|player|season|standings|odds|spread|moneyline|sports|championship)\b/i.test(message);
+    const needsInternet = /\b(what|who|when|where|why|how|news|latest|current|today|recent|right now|find|search|tell me|show me|explain|look up|research|check|verify|analyze|opinion|think|predict|forecast|estimate|odds|chance|probability|likelihood)\b/i.test(message) || isAnalytical;
 
     const llmPayload = { prompt: basePrompt, model: 'gemini_3_flash', add_context_from_internet: needsInternet };
     if (file_urls && file_urls.length > 0) llmPayload.file_urls = file_urls;
