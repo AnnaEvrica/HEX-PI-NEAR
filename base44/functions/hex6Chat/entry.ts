@@ -4,15 +4,11 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 // HEX6 BLE Engine — inlined SCEFM math (no import overhead)
 // ---------------------------------------------------------------------------
 
-function mean(arr) {
-  return arr.reduce((a, b) => a + b, 0) / arr.length;
-}
-
-function stdDev(arr) {
-  const m = mean(arr);
-  const variance = arr.reduce((sum, x) => sum + (x - m) ** 2, 0) / (arr.length - 1);
-  return Math.sqrt(variance);
-}
+// ---------------------------------------------------------------------------
+// HEX6 BLE v5.1 — SCEFM with Decay-Weighted HIVE + Cross-Asset Correlation Bit
+// State space: 2^7 = 128 per asset (6 momentum bits + 1 correlation bit)
+// Decay: exponential weighting λ=0.94 — recent observations dominate
+// ---------------------------------------------------------------------------
 
 function normalPpf(p) {
   const a = [-3.969683028665376e1,2.209460984245205e2,-2.759285104469687e2,1.383577518672690e2,-3.066479806614716e1,2.506628277459239];
@@ -43,30 +39,120 @@ function tPpf(p, df) {
   return x;
 }
 
-function runHex6Engine(returns, riskAversion = 2.5, friction = 0.0035, window = 6) {
-  // Build HIVE
-  const hive = {};
-  for (let i = window; i < returns.length; i++) {
-    const slice = returns.slice(i - window, i);
-    const key = parseInt(slice.map(r => r > 0 ? '1' : '0').join(''), 2);
+// Pearson correlation between two equal-length arrays
+function pearsonCorr(a, b) {
+  const n = Math.min(a.length, b.length);
+  if (n < 3) return 0;
+  const ma = a.slice(0, n).reduce((s, x) => s + x, 0) / n;
+  const mb = b.slice(0, n).reduce((s, x) => s + x, 0) / n;
+  let num = 0, da = 0, db = 0;
+  for (let i = 0; i < n; i++) {
+    const ai = a[i] - ma, bi = b[i] - mb;
+    num += ai * bi; da += ai * ai; db += bi * bi;
+  }
+  return (da === 0 || db === 0) ? 0 : num / Math.sqrt(da * db);
+}
+
+// Decay-weighted mean and variance (λ=0.94)
+// Each observation at index i (0=oldest, T-1=newest) gets weight λ^(T-1-i)
+function decayStats(observations, lambda = 0.94) {
+  const T = observations.length;
+  let wSum = 0, wMean = 0, wVar = 0;
+  const weights = observations.map((_, i) => Math.pow(lambda, T - 1 - i));
+  wSum = weights.reduce((s, w) => s + w, 0);
+  wMean = observations.reduce((s, x, i) => s + weights[i] * x, 0) / wSum;
+  wVar = observations.reduce((s, x, i) => s + weights[i] * (x - wMean) ** 2, 0) / wSum;
+  // Effective sample size for t-distribution df
+  const w2Sum = weights.reduce((s, w) => s + w * w, 0);
+  const nEff = Math.max(2, Math.round((wSum * wSum) / w2Sum));
+  return { mu: wMean, sigma: Math.sqrt(wVar), nEff };
+}
+
+// ---------------------------------------------------------------------------
+// Core engine — accepts optional reference series for cross-asset corr bit
+// ---------------------------------------------------------------------------
+function runHex6Engine(returns, riskAversion = 2.5, friction = 0.0035, windowSize = 6, refReturns = null) {
+  const LAMBDA = 0.94; // decay factor — half-life ≈ 12 periods
+
+  // Build decay-weighted HIVE
+  // key = 7-bit integer: bits 6..1 = momentum pattern, bit 0 = correlation regime
+  const hive = {}; // key → [{value, weight}]
+
+  for (let i = windowSize; i < returns.length; i++) {
+    const slice = returns.slice(i - windowSize, i);
+
+    // Bits 6..1: momentum pattern (same as v5.0)
+    const momentumBits = parseInt(slice.map(r => r > 0 ? '1' : '0').join(''), 2);
+
+    // Bit 0: correlation regime — is this asset moving WITH a reference?
+    // If no ref series, compute rolling self-correlation (trend consistency)
+    let corrBit = 0;
+    if (refReturns && refReturns.length >= i) {
+      const corrWindow = Math.min(windowSize * 2, i);
+      const corr = pearsonCorr(
+        returns.slice(i - corrWindow, i),
+        refReturns.slice(i - corrWindow, i)
+      );
+      corrBit = corr > 0.4 ? 1 : 0; // high positive correlation = 1
+    } else {
+      // Self-correlation: are the last 12 returns directionally consistent?
+      const longWindow = Math.min(12, i);
+      const longSlice = returns.slice(i - longWindow, i);
+      const posCount = longSlice.filter(r => r > 0).length;
+      corrBit = posCount / longWindow > 0.6 ? 1 : 0; // trend consistency bit
+    }
+
+    // 7-bit key: shift momentum bits left by 1, OR in corrBit
+    const key = (momentumBits << 1) | corrBit;
+
+    // Decay weight: age = distance from end of series
+    const age = returns.length - 1 - i;
+    const weight = Math.pow(LAMBDA, age);
+
     if (!hive[key]) hive[key] = [];
-    hive[key].push(returns[i]);
+    hive[key].push({ value: returns[i], weight });
   }
 
-  // Current state
-  const recentSlice = returns.slice(-window);
-  const stateKey = parseInt(recentSlice.map(r => r > 0 ? '1' : '0').join(''), 2);
-  const dist = hive[stateKey] || [];
+  // Current 7-bit state
+  const recentSlice = returns.slice(-windowSize);
+  const momentumKey = parseInt(recentSlice.map(r => r > 0 ? '1' : '0').join(''), 2);
 
-  if (dist.length < 3) {
-    return { mu: 0, sigma: 0, exposure: 0, stateKey, n: dist.length, regime: 'INSUFFICIENT_DATA' };
+  let currentCorrBit = 0;
+  if (refReturns && refReturns.length >= windowSize * 2) {
+    const corr = pearsonCorr(returns.slice(-windowSize * 2), refReturns.slice(-windowSize * 2));
+    currentCorrBit = corr > 0.4 ? 1 : 0;
+  } else {
+    const longSlice = returns.slice(-12);
+    const posCount = longSlice.filter(r => r > 0).length;
+    currentCorrBit = posCount / longSlice.length > 0.6 ? 1 : 0;
   }
 
-  const mu = mean(dist);
-  const sigma = stdDev(dist);
-  const n = dist.length;
-  const tCrit = tPpf(0.95, n - 1);
-  const muLb = mu - tCrit * (sigma / Math.sqrt(n)) - friction;
+  const stateKey = (momentumKey << 1) | currentCorrBit;
+  const stateBits = stateKey.toString(2).padStart(7, '0');
+  const bin = hive[stateKey] || [];
+
+  if (bin.length < 3) {
+    return {
+      mu: 0, sigma: 0, exposure: 0,
+      stateKey, stateBits, n: bin.length,
+      nEff: 0, corrBit: currentCorrBit,
+      regime: 'INSUFFICIENT_DATA',
+      engineVersion: 'SCEFM-v5.1-128state'
+    };
+  }
+
+  // Decay-weighted statistics
+  const values = bin.map(o => o.value);
+  const weights = bin.map(o => o.weight);
+  const wSum = weights.reduce((s, w) => s + w, 0);
+  const mu = values.reduce((s, x, i) => s + weights[i] * x, 0) / wSum;
+  const variance = values.reduce((s, x, i) => s + weights[i] * (x - mu) ** 2, 0) / wSum;
+  const sigma = Math.sqrt(variance);
+  const w2Sum = weights.reduce((s, w) => s + w * w, 0);
+  const nEff = Math.max(2, Math.round((wSum * wSum) / w2Sum));
+
+  const tCrit = tPpf(0.95, nEff - 1);
+  const muLb = mu - tCrit * (sigma / Math.sqrt(nEff)) - friction;
 
   let exposure = 0;
   if (muLb > 0) {
@@ -75,7 +161,17 @@ function runHex6Engine(returns, riskAversion = 2.5, friction = 0.0035, window = 
 
   const regime = exposure > 0.6 ? 'BULL' : exposure > 0.3 ? 'LATERAL' : mu < 0 ? 'BEAR' : 'SILENCE';
 
-  return { mu: parseFloat(mu.toFixed(6)), sigma: parseFloat(sigma.toFixed(6)), exposure: parseFloat(exposure.toFixed(4)), stateKey, n, regime };
+  return {
+    mu: parseFloat(mu.toFixed(6)),
+    sigma: parseFloat(sigma.toFixed(6)),
+    exposure: parseFloat(exposure.toFixed(4)),
+    stateKey, stateBits,
+    n: bin.length,
+    nEff,
+    corrBit: currentCorrBit,
+    regime,
+    engineVersion: 'SCEFM-v5.1-128state'
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -127,20 +223,37 @@ Deno.serve(async (req) => {
     const hex6WasAskingForData = lastAssistantMsg && /give me|share|provide|what (are|were|is)|send me|paste|supply|data series|numbers|series of/i.test(lastAssistantMsg.content);
 
     if (dataSeries && dataSeries.length >= 7) {
-      // User provided data — run the engine
-      const result = runHex6Engine(dataSeries, riskAversion);
+      // Detect if user provided two comma-separated series (cross-asset)
+      // Heuristic: look for a clear separator like ";" or "vs" or "ref:" in message
+      let primarySeries = dataSeries;
+      let refSeries = null;
+
+      const refMatch = message.match(/(?:ref(?:erence)?|vs|second|btc|eth|spy)[:\s]+(-?\d[\d.,\s-]+)/i);
+      if (refMatch) {
+        const refNums = refMatch[1].match(/-?\d+(\.\d+)?/g);
+        if (refNums && refNums.length >= 7) {
+          refSeries = refNums.map(Number);
+          // Primary = everything not in refSeries — take first half if ambiguous
+          primarySeries = dataSeries.slice(0, Math.ceil(dataSeries.length / 2));
+        }
+      }
+
+      const result = runHex6Engine(primarySeries, riskAversion, 0.0035, 6, refSeries);
       engineContext = `
---- HEX6 ENGINE OUTPUT (computed this message) ---
-Input series: ${dataSeries.length} data points
-State encoding: ${result.stateKey} (binary window pattern)
-Samples in this state historically: ${result.n}
-μ (mean return in state): ${result.mu}
-σ (volatility in state): ${result.sigma}
+--- HEX6 ENGINE OUTPUT v5.1 (SCEFM 128-state, decay-weighted) ---
+Engine: ${result.engineVersion}
+Input series: ${primarySeries.length} data points${refSeries ? ` | Reference series: ${refSeries.length} points` : ''}
+State key: ${result.stateKey} | Binary: ${result.stateBits} (7 bits: 6 momentum + 1 corr)
+Correlation bit: ${result.corrBit} (${result.corrBit === 1 ? 'high correlation / trend-consistent regime' : 'low correlation / divergent regime'})
+Raw samples in state: ${result.n} | Effective sample size (decay-adjusted): ${result.nEff}
+μ decay-weighted (mean return in state): ${result.mu}
+σ decay-weighted (volatility in state): ${result.sigma}
 Exposure scalar E(S_t): ${result.exposure} (0=no edge, 1=full conviction)
 Regime classification: ${result.regime}
 Risk aversion parameter: ${riskAversion}
+Decay factor λ: 0.94 (recent observations dominate; half-life ≈ 12 periods)
 --- END ENGINE OUTPUT ---
-Use this computed output directly in your response. Ground your analysis in these exact numbers.`;
+Use this computed output directly in your response. Ground your analysis in these exact numbers. Note the decay-weighting and correlation bit context.`;
     } else if (isAnalytical && !hex6WasAskingForData) {
       // Analytical question but no data yet — flag to ask user
       shouldAskForData = true;
