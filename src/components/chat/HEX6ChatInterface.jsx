@@ -138,7 +138,9 @@ export default function HEX6ChatInterface() {
     }
   }, [conversations]);
 
-  // Load conversation messages when selected
+  // Load conversation messages ONLY when the user explicitly switches conversations.
+  // We intentionally DO NOT depend on `conversations` here — otherwise every save
+  // would overwrite the live message list and wipe the user's just-sent message.
   useEffect(() => {
     if (currentConversationId) {
       const conv = conversations.find((c) => c.id === currentConversationId);
@@ -146,7 +148,8 @@ export default function HEX6ChatInterface() {
         setMessages(conv.messages);
       }
     }
-  }, [currentConversationId, conversations]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentConversationId]);
 
   // Initialize Web Speech API
   useEffect(() => {
@@ -276,8 +279,32 @@ export default function HEX6ChatInterface() {
     }
 
     const newMessages = [...messages, userMessage];
-    const convIdAtSend = currentConversationId;
     const imageAtSend = uploadedImage;
+
+    // Ensure there's always an active conversation so messages are persisted.
+    // If we're on a fresh "New Chat" (no convId), spin one up now.
+    let convIdAtSend = currentConversationId;
+    if (!convIdAtSend) {
+      const newConv = {
+        id: Date.now().toString(),
+        title: polishedInput.slice(0, 40) || 'Chat',
+        messages: newMessages,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      convIdAtSend = newConv.id;
+      setConversations((prev) => [newConv, ...prev]);
+      setCurrentConversationId(newConv.id);
+    } else {
+      // Persist the user's message immediately into the active conversation.
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.id === convIdAtSend
+            ? { ...c, messages: newMessages, updated_at: new Date().toISOString() }
+            : c
+        )
+      );
+    }
     setMessages(newMessages);
     setInput('');
     setUploadedImage(null);
@@ -316,14 +343,16 @@ export default function HEX6ChatInterface() {
           return [...prev, assistantMessage];
         });
 
-        // Persist into conversation store if one was active at send time.
+        // Persist assistant reply into the active conversation.
+        // We append to the messages we sent (newMessages) + the new assistant reply
+        // — using the live ref-state could race with another send.
         if (convIdAtSend) {
           setConversations((prev) =>
             prev.map((c) =>
               c.id === convIdAtSend
                 ? {
                     ...c,
-                    messages: [...(c.messages || newMessages), assistantMessage],
+                    messages: [...newMessages, assistantMessage],
                     updated_at: new Date().toISOString(),
                   }
                 : c

@@ -638,15 +638,13 @@ ABSOLUTE RULES:
       base44.asServiceRole.entities.HEX6Memory.list('-created_date', 100),
     ]);
 
+    // Cross-session memory is stored but NOT injected into the prompt.
+    // Reason: it caused HEX6 to reference past "discussions" that the user
+    // doesn't remember (or that were hallucinated by the memory compressor).
+    // The conversationHistory passed in by the frontend is the single source of truth
+    // for what was actually said. Long-term memory writing is preserved below for future use.
     if (userMemoriesResult.status === 'fulfilled' && userMemoriesResult.value?.length > 0) {
       existingUserMemory = userMemoriesResult.value[0];
-      userMemoryContext = `
---- USER MEMORY ---
-${existingUserMemory.memory_summary ? `Known: ${existingUserMemory.memory_summary}` : ''}
-${existingUserMemory.topics_discussed ? `Topics: ${existingUserMemory.topics_discussed}` : ''}
-${existingUserMemory.user_style ? `Style: ${existingUserMemory.user_style}` : ''}
-${existingUserMemory.last_conversation_snippet ? `Last exchange: ${existingUserMemory.last_conversation_snippet}` : ''}
---- END USER MEMORY ---`;
     }
 
     if (engineMemoriesResult.status === 'fulfilled' && engineMemoriesResult.value?.length > 0) {
