@@ -14,8 +14,15 @@ export default function HEX6ChatInterface() {
     content: `Welcome. I am HEX6 BLE — a probabilistic intelligence engine. I don't predict. I don't guess. I compute.\n\nI see markets as living probability distributions — constantly shifting, never binary. Where others force a single answer, I hold the entire possibility space and let mathematics speak.\n\nWhat would you like to explore?`,
   };
 
-  // Honest, neutral indicator — no claims about engine/web activity by default.
-  const THINKING_STEPS = ['Thinking...'];
+  // Progressive status updates — HEX6 narrates what it's doing so the user knows
+  // long operations (web fetch + engine) are in progress, not stuck.
+  const THINKING_STEPS = [
+    'Thinking...',
+    'Pulling fresh data from the web...',
+    'Running the engine — this might take a minute...',
+    'Crunching probabilities...',
+    'Almost there, finalizing the analysis...',
+  ];
 
   const [messages, setMessages] = useState([welcomeMessage]);
   const [input, setInput] = useState('');
@@ -181,16 +188,6 @@ export default function HEX6ChatInterface() {
         console.log('[voice] recognition ended');
         setListening(false);
       };
-
-      // Auto-start mic on mount — requires user gesture in some browsers, so we try
-      // and silently fail if blocked. User can still tap the mic button manually.
-      try {
-        baseTextRef.current = '';
-        recognitionRef.current.start();
-        setListening(true);
-      } catch (err) {
-        console.log('[voice] auto-start blocked, user must tap mic:', err?.message);
-      }
     }
   }, []);
 
@@ -274,7 +271,7 @@ export default function HEX6ChatInterface() {
     setThinkingStep(0);
     thinkingIntervalRef.current = setInterval(() => {
       setThinkingStep((prev) => Math.min(prev + 1, THINKING_STEPS.length - 1));
-    }, 6000);
+    }, 4000);
 
     try {
       // Get user preferences from localStorage
