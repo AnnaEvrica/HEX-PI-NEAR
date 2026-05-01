@@ -1,0 +1,50 @@
+{
+  "name": "CalibrationScore",
+  "type": "object",
+  "properties": {
+    "score_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date this calibration was computed for"
+    },
+    "ticker": {
+      "type": "string",
+      "description": "Ticker scored (or 'GLOBAL' for aggregate)"
+    },
+    "predictions_evaluated": {
+      "type": "number",
+      "description": "Number of past engine outputs scored"
+    },
+    "directional_accuracy": {
+      "type": "number",
+      "description": "Pct of times engine direction (mu sign) matched realized return sign (0-1)"
+    },
+    "exposure_correlation": {
+      "type": "number",
+      "description": "Pearson correlation between recommended exposure and realized returns"
+    },
+    "avg_realized_return": {
+      "type": "number",
+      "description": "Average realized return across evaluated predictions"
+    },
+    "calibration_grade": {
+      "type": "string",
+      "enum": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "F",
+        "INSUFFICIENT_DATA"
+      ],
+      "description": "Overall calibration grade for this period"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Human-readable summary"
+    }
+  },
+  "required": [
+    "score_date"
+  ]
+}

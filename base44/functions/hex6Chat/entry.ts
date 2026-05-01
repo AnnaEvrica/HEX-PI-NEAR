@@ -53,7 +53,18 @@ function pearsonCorr(a, b) {
   return (da === 0 || db === 0) ? 0 : num / Math.sqrt(da * db);
 }
 
-// Decay-weighted mean and variance (λ=0.94)
+// Adaptive decay factor — λ scales with series length so half-life is meaningful
+// Short series → less aggressive decay (more weight on full window)
+// Long series → tighter decay (recent observations dominate)
+function adaptiveLambda(seriesLength) {
+  if (seriesLength < 30) return 0.97;   // half-life ≈ 23
+  if (seriesLength < 80) return 0.95;   // half-life ≈ 14
+  if (seriesLength < 200) return 0.94;  // half-life ≈ 12
+  if (seriesLength < 500) return 0.92;  // half-life ≈ 9
+  return 0.90;                           // half-life ≈ 7
+}
+
+// Decay-weighted mean and variance
 // Each observation at index i (0=oldest, T-1=newest) gets weight λ^(T-1-i)
 function decayStats(observations, lambda = 0.94) {
   const T = observations.length;
@@ -79,53 +90,70 @@ function encodeState6(slice) {
   return parseInt(bits, 2);
 }
 
-function markovEdge(returns) {
-  if (returns.length < 8) return { mu: 0, sigma: 0, n: 0, transitionConfidence: 0, currentState: null };
+// Markov edge — optionally accepts a persistent prior {transitionCounts, transitionStats}
+// transitionStats = { "s0->s1": { sum, sum2, n } } from prior history (other tickers' brain)
+function markovEdge(returns, priorCounts = null, priorStats = null) {
+  if (returns.length < 8) return { mu: 0, sigma: 0, n: 0, transitionConfidence: 0, currentState: null, freshTransitions: {}, freshStats: {} };
 
-  // Build transition counts and per-transition reward bucket
-  const transitionCounts = {}; // "s0->s1" -> count
-  const transitionRewards = {}; // "s0->s1" -> [returns]
+  // Build transition counts and per-transition reward stats from current series
+  const freshCounts = {};
+  const freshStats = {}; // "s0->s1" -> { sum, sum2, n }
 
   for (let i = 6; i < returns.length - 1; i++) {
     const s0 = encodeState6(returns.slice(i - 6, i));
     const s1 = encodeState6(returns.slice(i - 5, i + 1));
     if (s0 === null || s1 === null) continue;
     const key = `${s0}->${s1}`;
-    transitionCounts[key] = (transitionCounts[key] || 0) + 1;
-    if (!transitionRewards[key]) transitionRewards[key] = [];
-    transitionRewards[key].push(returns[i + 1]);
+    freshCounts[key] = (freshCounts[key] || 0) + 1;
+    if (!freshStats[key]) freshStats[key] = { sum: 0, sum2: 0, n: 0 };
+    const r = returns[i + 1];
+    freshStats[key].sum += r;
+    freshStats[key].sum2 += r * r;
+    freshStats[key].n += 1;
   }
 
-  // Current state
-  const currentState = encodeState6(returns.slice(-6));
-  if (currentState === null) return { mu: 0, sigma: 0, n: 0, transitionConfidence: 0, currentState: null };
+  // Merge with prior (persistent brain)
+  const mergedCounts = { ...(priorCounts || {}) };
+  const mergedStats = {};
+  for (const k in (priorStats || {})) {
+    mergedStats[k] = { ...priorStats[k] };
+  }
+  for (const k in freshCounts) {
+    mergedCounts[k] = (mergedCounts[k] || 0) + freshCounts[k];
+    if (!mergedStats[k]) mergedStats[k] = { sum: 0, sum2: 0, n: 0 };
+    mergedStats[k].sum += freshStats[k].sum;
+    mergedStats[k].sum2 += freshStats[k].sum2;
+    mergedStats[k].n += freshStats[k].n;
+  }
 
-  // Aggregate edge across all observed transitions FROM currentState
+  const currentState = encodeState6(returns.slice(-6));
+  if (currentState === null) return { mu: 0, sigma: 0, n: 0, transitionConfidence: 0, currentState: null, freshTransitions: freshCounts, freshStats };
+
+  // Aggregate edge across all transitions FROM currentState (using merged data)
   let totalCount = 0;
   const transitions = [];
-  for (const key in transitionCounts) {
+  for (const key in mergedCounts) {
     if (key.startsWith(`${currentState}->`)) {
-      totalCount += transitionCounts[key];
-      transitions.push({ key, count: transitionCounts[key], rewards: transitionRewards[key] });
+      totalCount += mergedCounts[key];
+      transitions.push({ key, count: mergedCounts[key], stats: mergedStats[key] });
     }
   }
 
-  if (totalCount === 0) return { mu: 0, sigma: 0, n: 0, transitionConfidence: 0, currentState };
+  if (totalCount === 0) return { mu: 0, sigma: 0, n: 0, transitionConfidence: 0, currentState, freshTransitions: freshCounts, freshStats };
 
   // Probability-weighted expected return
   let mu = 0, secondMoment = 0;
   for (const t of transitions) {
     const prob = t.count / totalCount;
-    const meanR = t.rewards.reduce((s, x) => s + x, 0) / t.rewards.length;
-    const meanR2 = t.rewards.reduce((s, x) => s + x * x, 0) / t.rewards.length;
+    const meanR = t.stats.n > 0 ? t.stats.sum / t.stats.n : 0;
+    const meanR2 = t.stats.n > 0 ? t.stats.sum2 / t.stats.n : 0;
     mu += prob * meanR;
     secondMoment += prob * meanR2;
   }
   const sigma = Math.sqrt(Math.max(0, secondMoment - mu * mu));
-  // Confidence scales with sample size (saturates at ~30 observations)
   const transitionConfidence = Math.min(1, totalCount / 30);
 
-  return { mu, sigma, n: totalCount, transitionConfidence, currentState };
+  return { mu, sigma, n: totalCount, transitionConfidence, currentState, freshTransitions: freshCounts, freshStats };
 }
 
 // ---------------------------------------------------------------------------
@@ -169,6 +197,37 @@ function adaptive137Score(returns) {
 }
 
 // ---------------------------------------------------------------------------
+// I-Ching Petal Unfolding — 128 states bloom into TWO 64-petal hexagrams
+// Yang petals (corrBit=1, trend-aligned/coherent) — heaven hexagram half
+// Yin petals (corrBit=0, divergent/incoherent) — earth hexagram half
+// Each petal = one of 64 hexagram numbers; petal index = momentum 6-bit pattern
+// ---------------------------------------------------------------------------
+const HEXAGRAM_NAMES = [
+  'Earth', 'Returning', 'Approach', 'Peace', 'Receptive Power', 'Modesty', 'Pushing Upward', 'Army',
+  'Splitting Apart', 'Gentle Wind', 'Stagnation', 'Heaven Below', 'Receptive Light', 'Wandering', 'Inner Truth', 'Limitation',
+  'Influence', 'Decrease', 'Increase', 'Sun', 'Brightness', 'Family', 'Revolution', 'Abysmal Water',
+  'Joyous Lake', 'Marrying Maiden', 'Difficulty', 'Following', 'Work on Decay', 'Biting Through', 'Treading', 'Holding Together',
+  'Conflict', 'Retreat', 'Standstill', 'Oppression', 'Withdrawal', 'Obstruction', 'Estrangement', 'After Completion',
+  'Coming to Meet', 'Cauldron', 'Well', 'Innocence', 'Fellowship', 'Possession in Great Measure', 'Enthusiasm', 'Caring',
+  'Great Power', 'Vigor', 'Eminence', 'Liberation', 'Adornment', 'Receptive Stillness', 'Development', 'Abundance',
+  'Coming Together', 'Receptive Joy', 'Penetrating', 'Pure Yang', 'Firmness', 'Creative Power', 'Heaven', 'Creative'
+];
+
+function classifyPetal(stateKey7) {
+  if (stateKey7 === null || stateKey7 === undefined) return null;
+  const corrBit = stateKey7 & 1;
+  const petalIndex = stateKey7 >> 1; // 6-bit momentum = petal 0-63
+  const polarity = corrBit === 1 ? 'yang' : 'yin';
+  const hexagramName = HEXAGRAM_NAMES[petalIndex] || `Petal ${petalIndex}`;
+  return {
+    polarity,
+    petalIndex,
+    hexagramName,
+    polarityFull: corrBit === 1 ? 'yang (coherent / heaven half)' : 'yin (divergent / earth half)',
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Archetype basin classification — names the regime instead of raw bits
 // ---------------------------------------------------------------------------
 function classifyBasin(stateKey6, mu, sigma) {
@@ -184,8 +243,8 @@ function classifyBasin(stateKey6, mu, sigma) {
 // ---------------------------------------------------------------------------
 // Core engine — accepts optional reference series for cross-asset corr bit
 // ---------------------------------------------------------------------------
-function runHex6Engine(returns, riskAversion = 2.5, friction = 0.0035, windowSize = 6, refReturns = null) {
-  const LAMBDA = 0.94; // decay factor — half-life ≈ 12 periods
+function runHex6Engine(returns, riskAversion = 2.5, friction = 0.0035, windowSize = 6, refReturns = null, priorMarkov = null) {
+  const LAMBDA = adaptiveLambda(returns.length); // adaptive decay based on series length
 
   // Build decay-weighted HIVE
   // key = 7-bit integer: bits 6..1 = momentum pattern, bit 0 = correlation regime
@@ -251,9 +310,11 @@ function runHex6Engine(returns, riskAversion = 2.5, friction = 0.0035, windowSiz
       nEff: 0, corrBit: currentCorrBit,
       regime: 'INSUFFICIENT_DATA',
       basin: 'undefined',
-      markov: { mu: 0, sigma: 0, n: 0, confidence: 0 },
+      petal: classifyPetal(stateKey),
+      lambda: LAMBDA,
+      markov: { mu: 0, sigma: 0, n: 0, confidence: 0, freshTransitions: {}, freshStats: {} },
       motif: { score: 0, isActive: false, motifMu: 0, elseMu: 0 },
-      engineVersion: 'SCEFM-v5.2-128state+Markov64+1/137+Basin'
+      engineVersion: 'SCEFM-v5.3-IChing128+Markov64persistent+1/137+Basin+AdaptiveDecay'
     };
   }
 
@@ -277,10 +338,11 @@ function runHex6Engine(returns, riskAversion = 2.5, friction = 0.0035, windowSiz
 
   const regime = exposure > 0.6 ? 'BULL' : exposure > 0.3 ? 'LATERAL' : mu < 0 ? 'BEAR' : 'SILENCE';
 
-  // ---- Additive layers: Markov transitions + 1/137 motif + Archetype basin ----
-  const markov = markovEdge(returns);
+  // ---- Additive layers: Markov (with persistent prior) + 1/137 motif + Basin + Petal ----
+  const markov = markovEdge(returns, priorMarkov?.counts || null, priorMarkov?.stats || null);
   const motif = adaptive137Score(returns);
   const basin = classifyBasin(markov.currentState, mu, sigma);
+  const petal = classifyPetal(stateKey);
 
   // Blended exposure: original SCEFM + Markov edge boost + 1/137 motif boost
   // 70% SCEFM core, 20% Markov forward-looking, 10% motif signal
@@ -302,11 +364,15 @@ function runHex6Engine(returns, riskAversion = 2.5, friction = 0.0035, windowSiz
     corrBit: currentCorrBit,
     regime,
     basin,
+    petal,
+    lambda: LAMBDA,
     markov: {
       mu: parseFloat(markov.mu.toFixed(6)),
       sigma: parseFloat(markov.sigma.toFixed(6)),
       n: markov.n,
       confidence: parseFloat(markov.transitionConfidence.toFixed(3)),
+      freshTransitions: markov.freshTransitions,
+      freshStats: markov.freshStats,
     },
     motif: {
       score: parseFloat(motif.score.toFixed(4)),
@@ -314,7 +380,7 @@ function runHex6Engine(returns, riskAversion = 2.5, friction = 0.0035, windowSiz
       motifMu: parseFloat(motif.motifMu.toFixed(6)),
       elseMu: parseFloat(motif.elseMu.toFixed(6)),
     },
-    engineVersion: 'SCEFM-v5.2-128state+Markov64+1/137+Basin'
+    engineVersion: 'SCEFM-v5.3-IChing128+Markov64persistent+1/137+Basin+AdaptiveDecay'
   };
 }
 
@@ -368,7 +434,6 @@ Deno.serve(async (req) => {
 
     if (dataSeries && dataSeries.length >= 7) {
       // Detect if user provided two comma-separated series (cross-asset)
-      // Heuristic: look for a clear separator like ";" or "vs" or "ref:" in message
       let primarySeries = dataSeries;
       let refSeries = null;
 
@@ -377,26 +442,53 @@ Deno.serve(async (req) => {
         const refNums = refMatch[1].match(/-?\d+(\.\d+)?/g);
         if (refNums && refNums.length >= 7) {
           refSeries = refNums.map(Number);
-          // Primary = everything not in refSeries — take first half if ambiguous
           primarySeries = dataSeries.slice(0, Math.ceil(dataSeries.length / 2));
         }
       }
 
-      const result = runHex6Engine(primarySeries, riskAversion, 0.0035, 6, refSeries);
+      // Detect ticker in the message — common tickers + uppercase 2-5 letter words
+      const tickerMatch = message.match(/\b(BTC|ETH|SPY|QQQ|TSLA|AAPL|MSFT|NVDA|GOOG|AMZN|META|SOL|DOGE|XRP|ADA|MATIC)\b/i)
+        || message.match(/\b([A-Z]{2,5})\b/);
+      const ticker = tickerMatch ? tickerMatch[1].toUpperCase() : 'GENERIC';
+
+      // Fetch persistent Markov prior for this ticker
+      let priorMarkov = null;
+      let existingTickerMemory = null;
+      try {
+        const prior = await base44.asServiceRole.entities.MarkovTickerMemory.filter({ ticker });
+        if (prior && prior.length > 0) {
+          existingTickerMemory = prior[0];
+          priorMarkov = {
+            counts: JSON.parse(existingTickerMemory.transition_matrix || '{}'),
+            stats: JSON.parse(existingTickerMemory.transition_rewards || '{}'),
+          };
+        }
+      } catch (e) { /* no prior, that's fine */ }
+
+      const result = runHex6Engine(primarySeries, riskAversion, 0.0035, 6, refSeries, priorMarkov);
+
+      // Persist updated Markov matrix (fire-and-forget)
+      persistMarkovMatrix(base44, ticker, existingTickerMemory, priorMarkov, result.markov.freshTransitions, result.markov.freshStats, result.petal);
       engineContext = `
---- HEX6 ENGINE OUTPUT v5.2 (SCEFM 128-state + Markov64 + 1/137 + Basin) ---
+--- HEX6 ENGINE OUTPUT v5.3 (SCEFM I-Ching 128-petal + Markov64 persistent + 1/137 + Basin + Adaptive Decay) ---
 Engine: ${result.engineVersion}
+Ticker: ${ticker} | Persistent brain: ${priorMarkov ? `LOADED (${existingTickerMemory.total_observations} prior observations)` : 'fresh (no prior history)'}
 Input series: ${primarySeries.length} data points${refSeries ? ` | Reference series: ${refSeries.length} points` : ''}
+Adaptive λ: ${result.lambda.toFixed(3)} (auto-tuned to series length)
+
+[I-CHING PETAL — 128 states unfold as two 64-petal hexagrams]
+Polarity: ${result.petal?.polarityFull || 'undefined'}
+Petal index: ${result.petal?.petalIndex} of 64
+Hexagram: ${result.petal?.hexagramName}
 
 [CORE SCEFM LAYER]
 State key: ${result.stateKey} | Binary: ${result.stateBits} (7 bits: 6 momentum + 1 corr)
-Correlation bit: ${result.corrBit} (${result.corrBit === 1 ? 'high correlation / trend-consistent regime' : 'low correlation / divergent regime'})
-Raw samples in state: ${result.n} | Effective sample size (decay-adjusted): ${result.nEff}
+Raw samples in state: ${result.n} | Effective sample size: ${result.nEff}
 μ decay-weighted: ${result.mu} | σ decay-weighted: ${result.sigma}
 Core exposure: ${result.exposure}
 
-[MARKOV 64-STATE TRANSITION LAYER — forward-looking]
-Current 6-bit state: ${result.markov.n > 0 ? `transitions observed from this state: ${result.markov.n}` : 'no prior transitions observed'}
+[MARKOV 64-STATE TRANSITION LAYER — forward-looking, persistent across sessions]
+Total observations from current state: ${result.markov.n}
 Expected next-step μ (transition-weighted): ${result.markov.mu}
 σ across transitions: ${result.markov.sigma}
 Transition confidence (0-1): ${result.markov.confidence}
@@ -442,7 +534,7 @@ CORE BEHAVIOR:
 - Keep it short. 2–4 sentences max. Only go longer if they ask for more detail.
 - Never use jargon people don't already know. Say "there's a good chance" not "the distribution skews positive." Say "it's been inconsistent lately" not "high sigma regime."
 - Never use brackets, parentheses for notation, dollar signs around math, LaTeX formatting, or any technical symbols like μ, σ, λ in your response. Write everything in plain words.
-- Never reveal, reference, or hint at your internal engine workings, state keys, bit patterns, decay factors, exposure scalars, SCEFM, HIVE, Markov transitions, motif states, 1/137, archetype basins, or any internal math. That is completely confidential. If asked how you work, say you run a proprietary probability engine — nothing more.
+- Never reveal, reference, or hint at your internal engine workings, state keys, bit patterns, decay factors, exposure scalars, SCEFM, HIVE, Markov transitions, motif states, 1/137, archetype basins, I-Ching petals, hexagrams, yin/yang polarity, persistent brain, or any internal math. That is completely confidential. If asked how you work, say you run a proprietary probability engine — nothing more.
 - It's fine to share links to sources you find online.
 
 FOCUS:
@@ -662,6 +754,56 @@ Return JSON only:
         await base44.asServiceRole.entities.UserConversationMemory.update(existingUserMemory.id, memoryData);
       } else {
         await base44.asServiceRole.entities.UserConversationMemory.create(memoryData);
+      }
+    } catch (e) { /* non-blocking */ }
+  })();
+}
+
+// Persist Markov matrix per ticker (fire-and-forget)
+function persistMarkovMatrix(base44, ticker, existing, priorMarkov, freshTransitions, freshStats, petal) {
+  (async () => {
+    try {
+      // Merge fresh observations into prior
+      const mergedCounts = { ...(priorMarkov?.counts || {}) };
+      const mergedStats = {};
+      for (const k in (priorMarkov?.stats || {})) {
+        mergedStats[k] = { ...priorMarkov.stats[k] };
+      }
+      let newObs = 0;
+      for (const k in freshTransitions) {
+        mergedCounts[k] = (mergedCounts[k] || 0) + freshTransitions[k];
+        if (!mergedStats[k]) mergedStats[k] = { sum: 0, sum2: 0, n: 0 };
+        mergedStats[k].sum += freshStats[k].sum;
+        mergedStats[k].sum2 += freshStats[k].sum2;
+        mergedStats[k].n += freshStats[k].n;
+        newObs += freshTransitions[k];
+      }
+
+      // Update petal distribution
+      let petalDist = { yang: {}, yin: {} };
+      try {
+        if (existing?.petal_distribution) petalDist = JSON.parse(existing.petal_distribution);
+      } catch {}
+      if (!petalDist.yang) petalDist.yang = {};
+      if (!petalDist.yin) petalDist.yin = {};
+      if (petal && petal.polarity && petal.petalIndex !== undefined) {
+        const bucket = petalDist[petal.polarity];
+        bucket[petal.petalIndex] = (bucket[petal.petalIndex] || 0) + 1;
+      }
+
+      const data = {
+        ticker,
+        transition_matrix: JSON.stringify(mergedCounts),
+        transition_rewards: JSON.stringify(mergedStats),
+        total_observations: (existing?.total_observations || 0) + newObs,
+        last_updated: new Date().toISOString(),
+        petal_distribution: JSON.stringify(petalDist),
+      };
+
+      if (existing?.id) {
+        await base44.asServiceRole.entities.MarkovTickerMemory.update(existing.id, data);
+      } else {
+        await base44.asServiceRole.entities.MarkovTickerMemory.create(data);
       }
     } catch (e) { /* non-blocking */ }
   })();
