@@ -148,12 +148,24 @@ export default function HEX6ChatInterface() {
       recognitionRef.current.lang = 'en-US';
 
       recognitionRef.current.onresult = (event) => {
-        // Concatenate every result (final + interim) so words flow in live as spoken.
-        let dictated = '';
+        // Build the full transcript from ALL results in this session — finals + current interim.
+        // This is the only way Web Speech reliably keeps text complete across long dictation.
+        let finalText = '';
+        let interimText = '';
         for (let i = 0; i < event.results.length; i++) {
-          dictated += event.results[i][0].transcript;
+          const t = event.results[i][0].transcript;
+          if (event.results[i].isFinal) finalText += t + ' ';
+          else interimText += t;
         }
-        dictated = dictated.trim();
+        // Light punctuation polish on finalized text: capitalize sentence starts, ensure trailing period.
+        const polish = (raw) => {
+          let s = raw.trim();
+          if (!s) return '';
+          // Capitalize first letter of each sentence
+          s = s.replace(/(^\s*|[.!?]\s+)([a-z])/g, (_, p, c) => p + c.toUpperCase());
+          return s;
+        };
+        const dictated = (polish(finalText) + (interimText ? (finalText ? ' ' : '') + interimText : '')).trim();
         const base = baseTextRef.current;
         setInput(base + (base && dictated ? ' ' : '') + dictated);
       };
@@ -565,13 +577,19 @@ export default function HEX6ChatInterface() {
               className="hidden"
             />
 
-            <input
-              type="text"
+            <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage();
+                }
+              }}
               placeholder="Ask HEX6..."
-              className="flex-1 px-2 md:px-4 py-2 rounded-sm border border-border bg-background text-foreground placeholder-secondary text-sm md:text-base focus:outline-none focus:border-accent"
+              rows={1}
+              className="flex-1 px-2 md:px-4 py-2 rounded-sm border border-border bg-background text-foreground placeholder-secondary text-sm md:text-base focus:outline-none focus:border-accent resize-none max-h-32 overflow-y-auto"
+              style={{ minHeight: '44px' }}
             />
             <button
               onClick={handleSendMessage}

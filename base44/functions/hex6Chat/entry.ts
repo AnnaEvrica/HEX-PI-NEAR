@@ -657,14 +657,23 @@ Latest: ${message}`,
     }
 
     // --- If analytical but no data — ASK the user first whether they want web lookup or engine run.
-    // Do NOT auto-fetch from the internet or auto-run the engine. The user must opt in.
-    // We detect their opt-in by checking if the prior assistant message offered the choice
-    // and the current message confirms (e.g. "yes look online", "run the engine", "go ahead").
-    const userOptedIntoWeb = /\b(look\s*(?:it\s*)?(?:up|online)|search|google|find|fetch|pull (?:it|that|the data)|yes,?\s*(?:look|search|find|fetch)|go ahead|do it|please)\b/i.test(message);
-    const userOptedIntoEngine = /\b(run (?:the|your) engine|run (?:it|the numbers|the analysis|analysis)|use (?:the|your) engine|crunch (?:it|the numbers))\b/i.test(message);
-    const priorOfferedChoice = lastAssistantMsg && /look (?:it )?(?:up )?online|run (?:the|my) engine|want me to (?:look|search|fetch|run|check)/i.test(lastAssistantMsg.content);
+    // Do NOT auto-fetch from the internet or auto-run the engine on the FIRST analytical question.
+    // BUT: if the prior assistant message already offered the choice, treat almost any continuation
+    // as opt-in. The previous regex was too narrow — questions like "did you run the engine?" or
+    // "well?" fell through and HEX6 kept re-asking. Now: any affirmative, any question, any nudge
+    // counts as a green light.
+    const userOptedIntoWeb = /\b(look\s*(?:it\s*)?(?:up|online)|search|google|find|fetch|pull (?:it|that|the data)|web|internet|online)\b/i.test(message);
+    const userOptedIntoEngine = /\b(run (?:the|your)? ?engine|run (?:it|the numbers|the analysis|analysis)|use (?:the|your) engine|crunch (?:it|the numbers)|engine|did you (?:run|use))\b/i.test(message);
+    // Generic "yes / go ahead / sure / please" affirmatives — count as opt-in when prior message offered the choice.
+    const userGenericConfirm = /^\s*(yes|yeah|yep|sure|ok|okay|go ahead|do it|please|alright|sounds good|y|yup|pls)\s*[.!?]?\s*$/i.test(message)
+      || /\b(go ahead|please do|do it|sounds good|yes please)\b/i.test(message);
+    const priorOfferedChoice = lastAssistantMsg && /look (?:it )?(?:up )?online|run (?:the|my) engine|want me to (?:look|search|fetch|run|check)|you('?ve| have) got numbers|share (?:numbers|data)/i.test(lastAssistantMsg.content);
 
-    if (shouldAskForData && !(priorOfferedChoice && (userOptedIntoWeb || userOptedIntoEngine))) {
+    // If prior offered the choice, default behavior: run the engine (web fetch + engine) — since the user
+    // is clearly waiting for action, not another question.
+    const optedIn = priorOfferedChoice && (userOptedIntoWeb || userOptedIntoEngine || userGenericConfirm);
+
+    if (shouldAskForData && !optedIn) {
       // Just ask the user — no engine, no web. Cheap, fast LLM call.
       const askPrompt = `${systemPrompt}
 
@@ -687,8 +696,8 @@ HEX6:`;
       return Response.json({ response, timestamp: new Date().toISOString() });
     }
 
-    // If the user opted in to a web lookup after being asked, do the fetch+engine flow.
-    if (shouldAskForData && priorOfferedChoice && userOptedIntoWeb) {
+    // If the user opted in (web/engine/generic confirm) after being asked, do the fetch+engine flow.
+    if (shouldAskForData && optedIn) {
       const dataFetchPrompt = `${systemPrompt}
 
 --- CONVERSATION HISTORY ---
