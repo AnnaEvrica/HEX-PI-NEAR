@@ -154,19 +154,29 @@ export default function HEX6ChatInterface() {
         setListening(false);
       };
 
+      recognitionRef.current.onstart = () => {
+        console.log('[voice] recognition started — mic is live');
+      };
+
+      recognitionRef.current.onaudiostart = () => {
+        console.log('[voice] audio capture started');
+      };
+
       recognitionRef.current.onerror = (event) => {
         setListening(false);
         const err = event?.error;
+        console.warn('[voice] error:', err, event);
         if (err === 'not-allowed' || err === 'service-not-allowed') {
-          alert('Microphone access is blocked for this site.\n\nTo fix:\n1. Click the lock/tune icon in your browser address bar\n2. Set Microphone to "Allow"\n3. Refresh the page and try again');
-        } else if (err === 'no-speech') {
-          // silent — user didn't say anything
+          alert('Microphone is blocked.\n\nFix:\n1. Click the 🔒 lock icon in the address bar\n2. Find Microphone → set to Allow (or click "Reset permission")\n3. Refresh this page');
+        } else if (err === 'no-speech' || err === 'aborted') {
+          // silent
         } else if (err) {
           console.warn('Speech recognition error:', err);
         }
       };
 
       recognitionRef.current.onend = () => {
+        console.log('[voice] recognition ended');
         setListening(false);
       };
     }
