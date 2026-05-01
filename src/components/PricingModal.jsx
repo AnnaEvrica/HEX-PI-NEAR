@@ -40,11 +40,6 @@ export default function PricingModal({ open, onClose }) {
   ];
 
   const handleCheckout = async (priceId) => {
-    if (window.self !== window.top) {
-      alert('Checkout works only from a published app. Please open this in a new tab.');
-      return;
-    }
-
     setLoading(true);
     setError(null);
     try {

@@ -130,10 +130,6 @@ export default function SettingsModal({ open, onClose }) {
   };
 
   const handleBillingPortal = () => {
-    if (window.self !== window.top) {
-      alert('Billing works only from a published app.');
-      return;
-    }
     // In production, this would redirect to Stripe customer portal
     window.open('https://billing.stripe.com/p/login/test_1234567890', '_blank');
   };
