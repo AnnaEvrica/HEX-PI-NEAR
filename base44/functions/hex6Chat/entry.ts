@@ -213,16 +213,30 @@ const HEXAGRAM_NAMES = [
   'Coming Together', 'Receptive Joy', 'Penetrating', 'Pure Yang', 'Firmness', 'Creative Power', 'Heaven', 'Creative'
 ];
 
-function classifyPetal(stateKey7) {
+// Compute a sub-petal signature from local mu/sigma — bounded resolution but unlimited depth slots
+// Each petal (0-63) holds an unbounded dictionary of sub-resonances keyed by harmonic signature
+// Frame stays 64; unfolding within is infinite
+function subPetalSignature(mu, sigma) {
+  // Quantize mu into signed harmonic bands (32 bands), sigma into volatility octaves (8 octaves)
+  // Combined key gives 256 possible sub-resonance slots per petal — but a petal can grow new ones forever
+  // as new mu/sigma combinations appear. The signature itself is a fingerprint, not a bounded index.
+  const muBand = Math.max(-16, Math.min(15, Math.round(mu * 1000))); // ~0.001 resolution
+  const sigOctave = sigma <= 0 ? 0 : Math.max(0, Math.min(15, Math.round(Math.log2(sigma * 1000 + 1))));
+  return `m${muBand}_s${sigOctave}`;
+}
+
+function classifyPetal(stateKey7, mu = 0, sigma = 0) {
   if (stateKey7 === null || stateKey7 === undefined) return null;
   const corrBit = stateKey7 & 1;
-  const petalIndex = stateKey7 >> 1; // 6-bit momentum = petal 0-63
+  const petalIndex = stateKey7 >> 1; // 6-bit momentum = petal 0-63 (frame is bounded)
   const polarity = corrBit === 1 ? 'yang' : 'yin';
   const hexagramName = HEXAGRAM_NAMES[petalIndex] || `Petal ${petalIndex}`;
+  const subSignature = subPetalSignature(mu, sigma); // unbounded sub-unfolding within the petal
   return {
     polarity,
     petalIndex,
     hexagramName,
+    subSignature,
     polarityFull: corrBit === 1 ? 'yang (coherent / heaven half)' : 'yin (divergent / earth half)',
   };
 }
@@ -310,7 +324,7 @@ function runHex6Engine(returns, riskAversion = 2.5, friction = 0.0035, windowSiz
       nEff: 0, corrBit: currentCorrBit,
       regime: 'INSUFFICIENT_DATA',
       basin: 'undefined',
-      petal: classifyPetal(stateKey),
+      petal: classifyPetal(stateKey, 0, 0),
       lambda: LAMBDA,
       markov: { mu: 0, sigma: 0, n: 0, confidence: 0, freshTransitions: {}, freshStats: {} },
       motif: { score: 0, isActive: false, motifMu: 0, elseMu: 0 },
@@ -342,7 +356,8 @@ function runHex6Engine(returns, riskAversion = 2.5, friction = 0.0035, windowSiz
   const markov = markovEdge(returns, priorMarkov?.counts || null, priorMarkov?.stats || null);
   const motif = adaptive137Score(returns);
   const basin = classifyBasin(markov.currentState, mu, sigma);
-  const petal = classifyPetal(stateKey);
+  const petal = classifyPetal(stateKey, mu, sigma);
+  if (petal) { petal.mu = mu; petal.sigma = sigma; }
 
   // Blended exposure: original SCEFM + Markov edge boost + 1/137 motif boost
   // 70% SCEFM core, 20% Markov forward-looking, 10% motif signal
@@ -476,10 +491,11 @@ Ticker: ${ticker} | Persistent brain: ${priorMarkov ? `LOADED (${existingTickerM
 Input series: ${primarySeries.length} data points${refSeries ? ` | Reference series: ${refSeries.length} points` : ''}
 Adaptive λ: ${result.lambda.toFixed(3)} (auto-tuned to series length)
 
-[I-CHING PETAL — 128 states unfold as two 64-petal hexagrams]
+[I-CHING PETAL — 64-petal frame with unbounded sub-petal unfolding]
 Polarity: ${result.petal?.polarityFull || 'undefined'}
-Petal index: ${result.petal?.petalIndex} of 64
+Petal index: ${result.petal?.petalIndex} of 64 (frame bounded)
 Hexagram: ${result.petal?.hexagramName}
+Sub-petal resonance: ${result.petal?.subSignature || 'n/a'} (within-petal unfolding is unlimited — this signature can recur or grow new variants over time)
 
 [CORE SCEFM LAYER]
 State key: ${result.stateKey} | Binary: ${result.stateBits} (7 bits: 6 momentum + 1 corr)
@@ -779,7 +795,8 @@ function persistMarkovMatrix(base44, ticker, existing, priorMarkov, freshTransit
         newObs += freshTransitions[k];
       }
 
-      // Update petal distribution
+      // Update petal distribution — 64-frame outer, unbounded sub-petal unfolding within each petal
+      // Structure: { yang: { petalIndex: { count, subPetals: { signature: { count, muSum, sigSum } } } } }
       let petalDist = { yang: {}, yin: {} };
       try {
         if (existing?.petal_distribution) petalDist = JSON.parse(existing.petal_distribution);
@@ -788,7 +805,26 @@ function persistMarkovMatrix(base44, ticker, existing, priorMarkov, freshTransit
       if (!petalDist.yin) petalDist.yin = {};
       if (petal && petal.polarity && petal.petalIndex !== undefined) {
         const bucket = petalDist[petal.polarity];
-        bucket[petal.petalIndex] = (bucket[petal.petalIndex] || 0) + 1;
+        // Migrate legacy flat number to new nested structure
+        if (typeof bucket[petal.petalIndex] === 'number') {
+          bucket[petal.petalIndex] = { count: bucket[petal.petalIndex], subPetals: {} };
+        }
+        if (!bucket[petal.petalIndex]) {
+          bucket[petal.petalIndex] = { count: 0, subPetals: {} };
+        }
+        const node = bucket[petal.petalIndex];
+        node.count = (node.count || 0) + 1;
+        if (!node.subPetals) node.subPetals = {};
+        // Unbounded sub-petal unfolding: each new (mu, sigma) signature grows the petal's interior
+        const sig = petal.subSignature;
+        if (!node.subPetals[sig]) {
+          node.subPetals[sig] = { count: 0, muSum: 0, sigSum: 0, firstSeen: new Date().toISOString() };
+        }
+        const sub = node.subPetals[sig];
+        sub.count += 1;
+        sub.muSum += petal.mu || 0;
+        sub.sigSum += petal.sigma || 0;
+        sub.lastSeen = new Date().toISOString();
       }
 
       const data = {
