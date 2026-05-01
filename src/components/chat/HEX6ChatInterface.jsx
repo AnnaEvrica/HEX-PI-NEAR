@@ -35,6 +35,7 @@ export default function HEX6ChatInterface() {
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
   const fileInputRef = useRef(null);
+  const baseTextRef = useRef('');
 
   const handleCopy = (message) => {
     navigator.clipboard.writeText(message.content);
@@ -146,20 +147,13 @@ export default function HEX6ChatInterface() {
       recognitionRef.current.interimResults = true;
       recognitionRef.current.lang = 'en-US';
 
-      // Track text that existed BEFORE this dictation session started, so interim
-      // updates only replace the new dictated portion — not what the user already typed.
-      const baseTextRef = { current: '' };
-      recognitionRef._baseTextRef = baseTextRef;
-
       recognitionRef.current.onresult = (event) => {
-        let finalTranscript = '';
-        let interimTranscript = '';
+        // Concatenate every result (final + interim) so words flow in live as spoken.
+        let dictated = '';
         for (let i = 0; i < event.results.length; i++) {
-          const t = event.results[i][0].transcript;
-          if (event.results[i].isFinal) finalTranscript += t;
-          else interimTranscript += t;
+          dictated += event.results[i][0].transcript;
         }
-        const dictated = (finalTranscript + interimTranscript).trim();
+        dictated = dictated.trim();
         const base = baseTextRef.current;
         setInput(base + (base && dictated ? ' ' : '') + dictated);
       };
@@ -204,9 +198,7 @@ export default function HEX6ChatInterface() {
     try {
       // Snapshot whatever is already in the input so dictation appends to it
       // instead of overwriting on each interim update.
-      if (recognitionRef._baseTextRef) {
-        recognitionRef._baseTextRef.current = input;
-      }
+      baseTextRef.current = input;
       setListening(true);
       recognitionRef.current.start();
     } catch (err) {
