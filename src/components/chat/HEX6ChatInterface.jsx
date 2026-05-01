@@ -44,20 +44,21 @@ export default function HEX6ChatInterface() {
 
   const handleSpeak = (message) => {
     if (typeof window === 'undefined' || !window.speechSynthesis) {
-      console.warn('Speech synthesis not supported in this browser');
       alert('Audio playback is not supported in this browser. Try Chrome, Safari, or Edge.');
       return;
     }
 
+    const synth = window.speechSynthesis;
+
     // Toggle off if already speaking this message
     if (speakingId === message.id) {
-      window.speechSynthesis.cancel();
+      synth.cancel();
       setSpeakingId(null);
       return;
     }
 
-    // Cancel any existing speech first
-    window.speechSynthesis.cancel();
+    // Cancel any existing speech
+    synth.cancel();
 
     // Strip markdown so the voice reads cleanly
     const cleanText = message.content
@@ -73,43 +74,22 @@ export default function HEX6ChatInterface() {
 
     if (!cleanText) return;
 
-    // Chunk into ~200-char sentences
-    const chunks = cleanText.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [cleanText];
-    const merged = [];
-    let buf = '';
-    for (const c of chunks) {
-      if ((buf + c).length > 200 && buf) {
-        merged.push(buf.trim());
-        buf = c;
-      } else {
-        buf += c;
-      }
-    }
-    if (buf.trim()) merged.push(buf.trim());
+    // Speak as ONE utterance — chunking + queue chaining is what was breaking on mobile.
+    // Most browsers handle long text fine; the queue pattern was failing because of cross-origin
+    // iframe restrictions and the cancel/speak race condition.
+    const u = new SpeechSynthesisUtterance(cleanText);
+    u.rate = 0.95;
+    u.pitch = 1;
+    u.lang = 'en-US';
+    u.onend = () => setSpeakingId(null);
+    u.onerror = (e) => {
+      console.error('Speech error:', e?.error || e);
+      setSpeakingId(null);
+    };
 
     setSpeakingId(message.id);
-
-    // Small delay fixes a Safari/iOS race where cancel() blocks immediate speak()
-    setTimeout(() => {
-      let i = 0;
-      const speakNext = () => {
-        if (i >= merged.length) {
-          setSpeakingId(null);
-          return;
-        }
-        const u = new SpeechSynthesisUtterance(merged[i]);
-        u.rate = 0.95;
-        u.pitch = 1;
-        u.lang = 'en-US';
-        u.onend = () => { i++; speakNext(); };
-        u.onerror = (e) => {
-          console.error('Speech error:', e);
-          setSpeakingId(null);
-        };
-        window.speechSynthesis.speak(u);
-      };
-      speakNext();
-    }, 100);
+    // Direct speak() call within the click handler — preserves the user gesture for mobile.
+    synth.speak(u);
   };
 
   // Load conversations on mount or initialize default
@@ -399,21 +379,26 @@ export default function HEX6ChatInterface() {
       {/* Main chat area */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="md:hidden p-2 hover:bg-muted rounded-sm"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-          <h2 className="text-center flex-1 font-medium text-sm text-secondary">
+        <div className="flex items-center px-3 md:px-6 py-3 md:py-4 border-b border-border gap-2">
+          <div className="flex items-center w-10 md:w-0 shrink-0">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="md:hidden p-2 hover:bg-muted rounded-sm flex items-center justify-center"
+              aria-label="Open menu"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          </div>
+          <h2 className="flex-1 text-center font-medium text-sm md:text-base text-secondary truncate">
             HEX6 BLE : ORACLE
           </h2>
-          {traderEnabled && (
-            <span className="text-xs text-accent px-2 py-1 rounded bg-accent/10">
-              Trader: Coming Soon
-            </span>
-          )}
+          <div className="flex items-center justify-end w-10 md:w-auto shrink-0">
+            {traderEnabled && (
+              <span className="text-[10px] md:text-xs text-accent px-2 py-1 rounded bg-accent/10 whitespace-nowrap">
+                Trader: Coming Soon
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Messages */}
