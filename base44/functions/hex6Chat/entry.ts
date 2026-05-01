@@ -428,20 +428,20 @@ ${recentHistory || '(no prior history)'}
 LATEST USER MESSAGE: "${message}"
 
 Decide ONE mode:
-• "chat" — casual conversation, greetings, opinions, definitions, philosophy, emotional/personal talk, follow-up clarifications about something already answered, or anything that doesn't require numerical analysis or fresh external data. Default to this when uncertain.
-• "web" — user wants current/factual information that requires looking up real-world data (news, prices, scores, recent events, factual lookups) but does NOT need probabilistic/statistical analysis.
-• "engine" — user wants probabilistic analysis, odds, predictions, "should I", "what are the chances", "how likely", outcome forecasting, or analysis of a market/asset/team/event — AND the conversation context implies hard numbers should drive the answer.
-• "engine_with_web" — same as "engine" but the data needed isn't in the conversation, so we'll need to fetch it from the web first then run engine.
+• "chat" — casual conversation, greetings, opinions, definitions, philosophy, emotional/personal talk, follow-up clarifications about something already answered, frustration, meta-talk about HEX6, or anything that doesn't require numerical analysis or fresh external data. THIS IS THE DEFAULT — pick this whenever in doubt.
+• "web" — user explicitly asks to look up a CURRENT FACT about a SPECIFIC, NAMED subject (a named asset, team, event, person, score, price). The subject must be unambiguous in the message or recent history.
+• "engine" — user supplied numerical data in their message AND wants probabilistic analysis on it.
+• "engine_with_web" — user explicitly asks for probabilistic analysis on a SPECIFIC, NAMED subject (e.g. "what are the odds Tesla rallies", "run the engine on the Lakers", "analyze NVDA"). The subject MUST be explicitly named in the user message or unambiguously referenced from prior turns.
 
-CRITICAL RULES:
-1. If the user is continuing a thread where HEX6 already offered to look up data or run engine, and they say ANYTHING that signals continuation (yes, do it, please, go ahead, "well?", "and?", a follow-up question, a nudge) → pick whichever mode HEX6 offered to run. Don't loop them back asking again.
-2. If the user already supplied a numerical series (multiple numbers in their message) → "engine".
-3. Casual questions like "what do you think about X", "your thoughts on Y", "is X a good idea" without a strong probabilistic frame → "chat" if it's opinion-seeking, "engine_with_web" if it's clearly about forecasting an outcome.
-4. Explicit intent overrides everything: if they say "look it up", "search", "fetch", "run the engine", "crunch numbers" → honor it.
-5. Identity questions ("who are you", "what are you") → always "chat".
-6. Frustration/meta-conversation about HEX6's behavior → "chat".
+CRITICAL RULES — read carefully, this matters:
+1. If the user did NOT name a specific subject (asset, team, event, person, etc.) and the conversation history does NOT contain one being actively discussed, you MUST pick "chat". Never invent a subject. Never default to crypto, stocks, or any topic the user didn't bring up.
+2. Vague analytical-sounding messages without a subject ("what do you think", "give me odds", "run it", "analyze this") with no clear referent in history → "chat" and let HEX6 ask what they want analyzed.
+3. If the user is continuing a thread where HEX6 already offered to look up data or run engine on a SPECIFIC named subject, and they say "yes/go ahead/do it" → pick whichever mode HEX6 offered, on THAT subject only.
+4. Explicit intent + named subject overrides everything: "look up Tesla", "search BTC price", "run engine on Lakers" → honor it.
+5. Identity questions, frustration, meta-conversation → always "chat".
+6. Greetings, small talk, philosophical questions, opinions → always "chat".
 
-Return JSON only.`,
+Return JSON only. When in doubt, "chat".`,
       model: 'gemini_3_flash',
       response_json_schema: {
         type: 'object',
@@ -707,6 +707,11 @@ Original question: "${originalQuestion}"
 Latest user message: "${message}"
 Conversation context (last 10 turns):
 ${history.slice(-10).map(m => `${m.role === 'user' ? 'User' : 'HEX6'}: ${m.content}`).join('\n')}
+
+CRITICAL — SUBJECT IDENTIFICATION:
+Before searching, identify the EXACT subject the user is asking about. The subject must be EXPLICITLY named in the user's message or unambiguously referenced from the conversation history (e.g. a ticker, team name, person, event, market, or named entity). 
+- If the user did NOT name a specific subject and there is no clear referent in history → DO NOT INVENT ONE. Return series_status="insufficient", ticker="UNKNOWN", series=[], and explain in source_summary that no subject was specified.
+- NEVER default to Bitcoin, stocks, crypto, or any topic the user didn't bring up. Inventing a subject is a critical failure.
 
 DATA QUALITY REQUIREMENTS — these are non-negotiable:
 1. MINIMUM 30 data points. Engine's Markov layer needs at least 30 to be statistically valid. If you can find 50-100, even better. Do NOT return fewer than 30.
