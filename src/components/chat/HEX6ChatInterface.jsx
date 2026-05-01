@@ -149,23 +149,12 @@ export default function HEX6ChatInterface() {
 
       recognitionRef.current.onresult = (event) => {
         // Build the full transcript from ALL results in this session — finals + current interim.
-        // This is the only way Web Speech reliably keeps text complete across long dictation.
-        let finalText = '';
-        let interimText = '';
+        // Send raw dictation through; punctuation/grammar gets fixed by the LLM polish pass on send.
+        let dictated = '';
         for (let i = 0; i < event.results.length; i++) {
-          const t = event.results[i][0].transcript;
-          if (event.results[i].isFinal) finalText += t + ' ';
-          else interimText += t;
+          dictated += event.results[i][0].transcript;
         }
-        // Light punctuation polish on finalized text: capitalize sentence starts, ensure trailing period.
-        const polish = (raw) => {
-          let s = raw.trim();
-          if (!s) return '';
-          // Capitalize first letter of each sentence
-          s = s.replace(/(^\s*|[.!?]\s+)([a-z])/g, (_, p, c) => p + c.toUpperCase());
-          return s;
-        };
-        const dictated = (polish(finalText) + (interimText ? (finalText ? ' ' : '') + interimText : '')).trim();
+        dictated = dictated.trim();
         const base = baseTextRef.current;
         setInput(base + (base && dictated ? ' ' : '') + dictated);
       };
@@ -238,10 +227,30 @@ export default function HEX6ChatInterface() {
   const handleSendMessage = async () => {
     if (!input.trim() && !uploadedImage) return;
 
+    // Auto-polish dictated/long input: fix grammar + punctuation BEFORE sending.
+    // Skip for short messages (< 25 chars) and messages that already have proper punctuation.
+    let polishedInput = input.trim();
+    const looksLikeRawDictation =
+      polishedInput.length >= 25 &&
+      !/[.!?]\s|[.!?]$/.test(polishedInput); // no sentence-ending punctuation anywhere
+    if (looksLikeRawDictation) {
+      try {
+        const polishRes = await base44.integrations.Core.InvokeLLM({
+          prompt: `Add proper punctuation and capitalization to this dictated text. Fix obvious typos. PRESERVE the speaker's voice, slang, and tone exactly — do NOT rephrase or formalize. Return ONLY the corrected text, nothing else.
+
+Text: "${polishedInput}"`,
+          model: 'gemini_3_flash',
+        });
+        if (polishRes && typeof polishRes === 'string' && polishRes.trim()) {
+          polishedInput = polishRes.trim().replace(/^["']|["']$/g, '');
+        }
+      } catch { /* fall back to raw input */ }
+    }
+
     const userMessage = {
       id: Date.now().toString(),
       role: 'user',
-      content: input,
+      content: polishedInput,
     };
 
     if (uploadedImage) {
@@ -262,7 +271,7 @@ export default function HEX6ChatInterface() {
       const prefs = JSON.parse(localStorage.getItem('hex6_user_prefs') || '{}');
       
       const payload = {
-        message: input,
+        message: polishedInput,
         conversationHistory: newMessages.filter(m => !m.isThinking).slice(-20),
         analyticalDepth: prefs.analyticalDepth || 'executive',
         riskAversion: prefs.riskAversion || 2.5,
@@ -601,7 +610,7 @@ export default function HEX6ChatInterface() {
             </button>
             </div>
           </div>
-          <p className="text-xs text-secondary px-1">
+          <p className="text-[11px] text-secondary/70 px-1 mt-3 md:mt-4 leading-relaxed">
             HEX6 BLE is a probabilistic intelligence model. No information provided constitutes financial, legal, or professional advice.
           </p>
         </div>
