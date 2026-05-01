@@ -149,14 +149,19 @@ export default function HEX6ChatInterface() {
 
       recognitionRef.current.onresult = (event) => {
         // Build the full transcript from ALL results in this session — finals + current interim.
-        // Send raw dictation through; punctuation/grammar gets fixed by the LLM polish pass on send.
         let dictated = '';
         for (let i = 0; i < event.results.length; i++) {
           dictated += event.results[i][0].transcript;
         }
         dictated = dictated.trim();
         const base = baseTextRef.current;
-        setInput(base + (base && dictated ? ' ' : '') + dictated);
+        const finalText = base + (base && dictated ? ' ' : '') + dictated;
+        console.log('[voice] transcript:', dictated, '| final input:', finalText);
+        // Wrap in flushSync-style timeout to force render on iOS Safari which sometimes
+        // batches state updates from speech callbacks until the next user gesture.
+        setInput(finalText);
+        // Belt-and-suspenders: schedule a microtask re-set to guarantee React commits the value.
+        Promise.resolve().then(() => setInput(finalText));
       };
 
       recognitionRef.current.onstart = () => {
