@@ -177,7 +177,7 @@ export default function HEX6ChatInterface() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleVoiceInput = async () => {
+  const handleVoiceInput = () => {
     if (!recognitionRef.current) {
       alert('Voice input is not supported in this browser. Try Chrome, Edge, or Safari.');
       return;
@@ -187,20 +187,8 @@ export default function HEX6ChatInterface() {
       setListening(false);
       return;
     }
-    // Request microphone access — triggers the browser permission prompt on first use.
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      stream.getTracks().forEach((t) => t.stop());
-    } catch (err) {
-      if (err?.name === 'NotAllowedError') {
-        alert('Microphone access is blocked. Click the lock icon in your browser address bar, set Microphone to Allow, then refresh.');
-      } else if (err?.name === 'NotFoundError') {
-        alert('No microphone detected on this device.');
-      } else {
-        alert('Could not access microphone: ' + (err?.message || 'unknown error'));
-      }
-      return;
-    }
+    // Start recognition directly — the browser will show its native Allow/Block prompt
+    // automatically on first use. No pre-flight getUserMedia check.
     try {
       setListening(true);
       recognitionRef.current.start();
