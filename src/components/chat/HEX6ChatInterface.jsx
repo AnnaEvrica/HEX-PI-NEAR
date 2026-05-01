@@ -164,15 +164,7 @@ export default function HEX6ChatInterface() {
 
       recognitionRef.current.onerror = (event) => {
         setListening(false);
-        const err = event?.error;
-        console.warn('[voice] error:', err, event);
-        if (err === 'not-allowed' || err === 'service-not-allowed') {
-          alert('Microphone is blocked.\n\nFix:\n1. Click the 🔒 lock icon in the address bar\n2. Find Microphone → set to Allow (or click "Reset permission")\n3. Refresh this page');
-        } else if (err === 'no-speech' || err === 'aborted') {
-          // silent
-        } else if (err) {
-          console.warn('Speech recognition error:', err);
-        }
+        console.warn('[voice] error:', event?.error, event);
       };
 
       recognitionRef.current.onend = () => {
@@ -206,7 +198,6 @@ export default function HEX6ChatInterface() {
       stream.getTracks().forEach((t) => t.stop());
     } catch (err) {
       console.warn('[voice] mic permission denied:', err);
-      alert('Microphone access was denied.\n\nClick the 🔒 lock icon in your address bar, set Microphone to Allow, then refresh.');
       return;
     }
 
