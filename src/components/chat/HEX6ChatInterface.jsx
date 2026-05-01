@@ -43,6 +43,9 @@ export default function HEX6ChatInterface() {
   const recognitionRef = useRef(null);
   const fileInputRef = useRef(null);
   const baseTextRef = useRef('');
+  // Track in-flight requests so they survive tab switches / re-renders.
+  // Each entry: { id, promise, userMessage, baseMessages, convId }
+  const pendingRequestsRef = useRef([]);
 
   const handleCopy = (message) => {
     navigator.clipboard.writeText(message.content);
@@ -265,69 +268,81 @@ export default function HEX6ChatInterface() {
     }
 
     const newMessages = [...messages, userMessage];
+    const convIdAtSend = currentConversationId;
+    const imageAtSend = uploadedImage;
     setMessages(newMessages);
     setInput('');
+    setUploadedImage(null);
     setLoading(true);
     setThinkingStep(0);
     thinkingIntervalRef.current = setInterval(() => {
       setThinkingStep((prev) => Math.min(prev + 1, THINKING_STEPS.length - 1));
     }, 4000);
 
-    try {
-      // Get user preferences from localStorage
-      const prefs = JSON.parse(localStorage.getItem('hex6_user_prefs') || '{}');
-      
-      const payload = {
-        message: polishedInput,
-        conversationHistory: newMessages.filter(m => !m.isThinking).slice(-20),
-        analyticalDepth: prefs.analyticalDepth || 'executive',
-        riskAversion: prefs.riskAversion || 2.5,
-      };
+    // Get user preferences from localStorage
+    const prefs = JSON.parse(localStorage.getItem('hex6_user_prefs') || '{}');
+    const payload = {
+      message: polishedInput,
+      conversationHistory: newMessages.filter(m => !m.isThinking).slice(-20),
+      analyticalDepth: prefs.analyticalDepth || 'executive',
+      riskAversion: prefs.riskAversion || 2.5,
+    };
+    if (imageAtSend) payload.file_urls = [imageAtSend];
 
-      // Add image if uploaded
-      if (uploadedImage) {
-        payload.file_urls = [uploadedImage];
-      }
+    // Fire the request and detach it from the render cycle. It will complete
+    // even if the user switches tabs, navigates around the app, or the
+    // component re-renders. The .then handler commits the result whenever
+    // the response arrives, regardless of UI state at that moment.
+    const reqId = Date.now();
+    const requestPromise = base44.functions.invoke('hex6Chat', payload)
+      .then((response) => {
+        const replyText = response?.data?.response;
+        if (!replyText) return;
 
-      // No timeout race — let the request run to completion regardless of tab state.
-      // Browsers throttle background timers and that was causing false "timeouts" when the user switched tabs.
-      const response = await base44.functions.invoke('hex6Chat', payload);
+        const assistantMessage = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: replyText,
+        };
 
-      const replyText = response?.data?.response;
-      if (!replyText) {
-        // Quietly drop and keep the loading indicator off — no fake error bubble.
+        // Commit using functional setState so we always merge into the latest
+        // conversation state — works even if the user switched conversations
+        // or sent another message while waiting.
+        setConversations((prev) => {
+          const target = prev.find((c) => c.id === convIdAtSend);
+          if (!target) return prev;
+          const baseMessages = target.messages || newMessages;
+          // Avoid duplicate commits if somehow re-entered
+          if (baseMessages.some((m) => m.id === assistantMessage.id)) return prev;
+          const updated = [...baseMessages, assistantMessage];
+          return prev.map((c) =>
+            c.id === convIdAtSend
+              ? { ...c, messages: updated, updated_at: new Date().toISOString() }
+              : c
+          );
+        });
+
+        // If the user is still viewing the same conversation, update the live messages too.
+        setCurrentConversationId((curId) => {
+          if (curId === convIdAtSend) {
+            setMessages((prevMsgs) => {
+              if (prevMsgs.some((m) => m.id === assistantMessage.id)) return prevMsgs;
+              return [...prevMsgs, assistantMessage];
+            });
+          }
+          return curId;
+        });
+      })
+      .catch((err) => {
+        console.error('hex6Chat request failed:', err);
+      })
+      .finally(() => {
         clearInterval(thinkingIntervalRef.current);
-        setUploadedImage(null);
         setLoading(false);
-        return;
-      }
+        pendingRequestsRef.current = pendingRequestsRef.current.filter((r) => r.id !== reqId);
+      });
 
-      const assistantMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: replyText,
-      };
-
-      clearInterval(thinkingIntervalRef.current);
-      const updatedMessages = [...newMessages, assistantMessage];
-      setMessages(updatedMessages);
-      setUploadedImage(null);
-
-      setConversations((prev) =>
-        prev.map((c) =>
-          c.id === currentConversationId
-            ? { ...c, messages: updatedMessages, updated_at: new Date().toISOString() }
-            : c
-        )
-      );
-    } catch (err) {
-      // Network/transport error only. Log silently — don't surface a noisy error bubble.
-      clearInterval(thinkingIntervalRef.current);
-      console.error('hex6Chat request failed:', err);
-      setUploadedImage(null);
-    } finally {
-      setLoading(false);
-    }
+    pendingRequestsRef.current.push({ id: reqId, promise: requestPromise });
   };
 
   const handleNewChat = () => {
