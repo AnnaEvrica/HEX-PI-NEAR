@@ -187,21 +187,15 @@ export default function HEX6ChatInterface() {
       setListening(false);
       return;
     }
-    // Detect cross-origin iframe (Base44 preview shell) — getUserMedia is blocked there
-    // by browser security unless the parent grants `allow="microphone"`. The published app
-    // runs at the top level and works normally.
-    const isInIframe = window.self !== window.top;
-    if (isInIframe) {
-      alert('Voice input is blocked in the preview window because it runs inside an iframe without microphone permission.\n\nIt will work normally on the published app at your live domain. Open the published URL in a new tab to use voice.');
-      return;
-    }
-    // Top-level context — request mic and start recognition
+    // Request microphone access — triggers the browser permission prompt on first use.
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach((t) => t.stop());
     } catch (err) {
       if (err?.name === 'NotAllowedError') {
-        alert('Microphone access was denied. Click the lock icon in the address bar, allow microphone, then refresh.');
+        alert('Microphone access was denied. Tap the lock icon in your address bar, allow microphone, then refresh the page.');
+      } else if (err?.name === 'NotFoundError') {
+        alert('No microphone detected on this device.');
       } else {
         alert('Could not access microphone: ' + (err?.message || 'unknown error'));
       }
