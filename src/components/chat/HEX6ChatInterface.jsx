@@ -430,7 +430,7 @@ export default function HEX6ChatInterface() {
                 message.role === 'user' ? 'justify-end' : 'justify-start'
               }`}
             >
-              <div className={`w-full sm:max-w-lg ${message.role === 'user' ? 'mr-2' : 'ml-2'}`}>
+              <div className={`max-w-[85%] md:max-w-2xl ${message.role === 'user' ? 'mr-2' : 'ml-2'}`}>
                 {message.file_urls && message.file_urls.length > 0 && (
                   <div className="mb-2 flex flex-wrap gap-2">
                     {message.file_urls.map((url, idx) => (
@@ -444,11 +444,11 @@ export default function HEX6ChatInterface() {
                   </div>
                 )}
                 <div
-                  className={`relative ${
+                  className={`${
                     message.role === 'user'
-                      ? 'bg-primary text-primary-foreground rounded-lg rounded-tr-sm'
-                      : 'bg-muted text-foreground rounded-lg rounded-tl-sm'
-                  } px-3 md:px-4 py-2 md:py-3 text-sm md:text-base`}
+                      ? 'bg-primary text-primary-foreground rounded-2xl rounded-tr-sm'
+                      : 'bg-muted text-foreground rounded-2xl rounded-tl-sm'
+                  } px-4 py-2.5 text-sm md:text-base`}
                 >
                   <ReactMarkdown 
                     className="prose prose-sm dark:prose-invert max-w-none [&>*]:my-0 [&>p]:my-1 [&>ul]:my-1 [&>ol]:my-1 [&>li]:my-0"
@@ -461,26 +461,26 @@ export default function HEX6ChatInterface() {
                   >
                     {message.content}
                   </ReactMarkdown>
+                </div>
 
-                  {/* Action buttons — appear on hover */}
-                  <div className={`flex gap-1 mt-1.5 pt-1 border-t ${message.role === 'user' ? 'border-white/10 justify-end' : 'border-border justify-start'}`}>
+                {/* Action buttons — sit under the bubble, only show on hover (or always on touch devices) */}
+                <div className={`flex gap-0.5 mt-1 px-1 opacity-60 hover:opacity-100 transition-opacity ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <button
+                    onClick={() => handleCopy(message)}
+                    className="p-1.5 rounded-md hover:bg-muted text-secondary hover:text-foreground transition-colors"
+                    title="Copy message"
+                  >
+                    {copiedId === message.id ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                  {message.role === 'assistant' && (
                     <button
-                      onClick={() => handleCopy(message)}
-                      className={`p-1 rounded transition-colors ${message.role === 'user' ? 'hover:bg-white/10 text-white/50 hover:text-white' : 'hover:bg-border text-secondary hover:text-foreground'}`}
-                      title="Copy message"
+                      onClick={() => handleSpeak(message)}
+                      className={`p-1.5 rounded-md hover:bg-muted transition-colors ${speakingId === message.id ? 'text-accent' : 'text-secondary hover:text-foreground'}`}
+                      title={speakingId === message.id ? 'Stop speaking' : 'Read aloud'}
                     >
-                      {copiedId === message.id ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                      {speakingId === message.id ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
                     </button>
-                    {message.role === 'assistant' && (
-                      <button
-                        onClick={() => handleSpeak(message)}
-                        className={`p-1 rounded transition-colors hover:bg-border ${speakingId === message.id ? 'text-accent' : 'text-secondary hover:text-foreground'}`}
-                        title={speakingId === message.id ? 'Stop speaking' : 'Read aloud'}
-                      >
-                        {speakingId === message.id ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
-                      </button>
-                    )}
-                  </div>
+                  )}
                 </div>
               </div>
             </div>
