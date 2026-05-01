@@ -142,16 +142,26 @@ export default function HEX6ChatInterface() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
       recognitionRef.current.lang = 'en-US';
 
+      // Track text that existed BEFORE this dictation session started, so interim
+      // updates only replace the new dictated portion — not what the user already typed.
+      const baseTextRef = { current: '' };
+      recognitionRef._baseTextRef = baseTextRef;
+
       recognitionRef.current.onresult = (event) => {
-        const transcript = Array.from(event.results)
-          .map((result) => result[0].transcript)
-          .join('');
-        setInput((prev) => prev + (prev ? ' ' : '') + transcript);
-        setListening(false);
+        let finalTranscript = '';
+        let interimTranscript = '';
+        for (let i = 0; i < event.results.length; i++) {
+          const t = event.results[i][0].transcript;
+          if (event.results[i].isFinal) finalTranscript += t;
+          else interimTranscript += t;
+        }
+        const dictated = (finalTranscript + interimTranscript).trim();
+        const base = baseTextRef.current;
+        setInput(base + (base && dictated ? ' ' : '') + dictated);
       };
 
       recognitionRef.current.onstart = () => {
@@ -192,6 +202,11 @@ export default function HEX6ChatInterface() {
     }
 
     try {
+      // Snapshot whatever is already in the input so dictation appends to it
+      // instead of overwriting on each interim update.
+      if (recognitionRef._baseTextRef) {
+        recognitionRef._baseTextRef.current = input;
+      }
       setListening(true);
       recognitionRef.current.start();
     } catch (err) {
