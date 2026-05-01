@@ -179,7 +179,7 @@ export default function HEX6ChatInterface() {
 
   const handleVoiceInput = async () => {
     if (!recognitionRef.current) {
-      alert('Voice input is not supported in this browser. Try Chrome, Edge, or Safari on desktop.');
+      alert('Voice input is not supported in this browser. Try Chrome, Edge, or Safari.');
       return;
     }
     if (listening) {
@@ -187,24 +187,24 @@ export default function HEX6ChatInterface() {
       setListening(false);
       return;
     }
-    // Check current permission state — if denied at the OS/browser level,
-    // recognition.start() will silently fail with "not-allowed" without re-prompting.
-    if (navigator.permissions) {
-      try {
-        const perm = await navigator.permissions.query({ name: 'microphone' });
-        if (perm.state === 'denied') {
-          alert('Microphone access is blocked for this site.\n\nTo fix:\n1. Click the lock/tune icon in your browser address bar\n2. Set Microphone to "Allow"\n3. Refresh the page and try again');
-          return;
-        }
-      } catch (e) { /* permissions API not supported, continue */ }
+    // Detect cross-origin iframe (Base44 preview shell) — getUserMedia is blocked there
+    // by browser security unless the parent grants `allow="microphone"`. The published app
+    // runs at the top level and works normally.
+    const isInIframe = window.self !== window.top;
+    if (isInIframe) {
+      alert('Voice input is blocked in the preview window because it runs inside an iframe without microphone permission.\n\nIt will work normally on the published app at your live domain. Open the published URL in a new tab to use voice.');
+      return;
     }
-    // Force the browser permission prompt to appear via getUserMedia.
-    // Once granted, recognition.start() will work without re-prompting.
+    // Top-level context — request mic and start recognition
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach((t) => t.stop());
     } catch (err) {
-      alert('Microphone access was denied.\n\nTo fix:\n1. Click the lock/tune icon in your browser address bar\n2. Set Microphone to "Allow"\n3. Refresh the page and try again');
+      if (err?.name === 'NotAllowedError') {
+        alert('Microphone access was denied. Click the lock icon in the address bar, allow microphone, then refresh.');
+      } else {
+        alert('Could not access microphone: ' + (err?.message || 'unknown error'));
+      }
       return;
     }
     try {
