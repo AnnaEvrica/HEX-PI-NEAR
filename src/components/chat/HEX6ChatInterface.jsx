@@ -48,13 +48,20 @@ export default function HEX6ChatInterface() {
   };
 
   const handleSpeak = (message) => {
-    if (!('speechSynthesis' in window)) return;
+    if (typeof window === 'undefined' || !window.speechSynthesis) {
+      console.warn('Speech synthesis not supported in this browser');
+      alert('Audio playback is not supported in this browser. Try Chrome, Safari, or Edge.');
+      return;
+    }
 
+    // Toggle off if already speaking this message
     if (speakingId === message.id) {
       window.speechSynthesis.cancel();
       setSpeakingId(null);
       return;
     }
+
+    // Cancel any existing speech first
     window.speechSynthesis.cancel();
 
     // Strip markdown so the voice reads cleanly
@@ -71,7 +78,7 @@ export default function HEX6ChatInterface() {
 
     if (!cleanText) return;
 
-    // Chunk into ~200-char sentences — Web Speech cuts off long single utterances
+    // Chunk into ~200-char sentences
     const chunks = cleanText.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [cleanText];
     const merged = [];
     let buf = '';
@@ -87,20 +94,27 @@ export default function HEX6ChatInterface() {
 
     setSpeakingId(message.id);
 
-    let i = 0;
-    const speakNext = () => {
-      if (i >= merged.length) {
-        setSpeakingId(null);
-        return;
-      }
-      const u = new SpeechSynthesisUtterance(merged[i]);
-      u.rate = 0.95;
-      u.pitch = 1;
-      u.onend = () => { i++; speakNext(); };
-      u.onerror = () => setSpeakingId(null);
-      window.speechSynthesis.speak(u);
-    };
-    speakNext();
+    // Small delay fixes a Safari/iOS race where cancel() blocks immediate speak()
+    setTimeout(() => {
+      let i = 0;
+      const speakNext = () => {
+        if (i >= merged.length) {
+          setSpeakingId(null);
+          return;
+        }
+        const u = new SpeechSynthesisUtterance(merged[i]);
+        u.rate = 0.95;
+        u.pitch = 1;
+        u.lang = 'en-US';
+        u.onend = () => { i++; speakNext(); };
+        u.onerror = (e) => {
+          console.error('Speech error:', e);
+          setSpeakingId(null);
+        };
+        window.speechSynthesis.speak(u);
+      };
+      speakNext();
+    }, 100);
   };
 
   // Load conversations on mount or initialize default

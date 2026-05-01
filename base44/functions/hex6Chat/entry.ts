@@ -718,15 +718,18 @@ HEX6:`;
 
     let response = llmResponse || 'I need a moment to analyze that.';
 
-    // Grammar & polish pass (subtle, maintains voice)
-    const polishResponse = await base44.integrations.Core.InvokeLLM({
-      prompt: `Quick grammar & clarity check. Fix only real errors (typos, tense, clarity) — preserve voice, tone, casualness, and all content exactly. Return the corrected text only, no explanation.
+    // Grammar polish — only for substantive answers (skip for short greetings/replies)
+    // Saves ~5-10 seconds on simple messages like "hi", "thanks", short follow-ups.
+    const needsPolish = response.length > 200 && (isAnalytical || engineContext);
+    if (needsPolish) {
+      const polishResponse = await base44.integrations.Core.InvokeLLM({
+        prompt: `Quick grammar & clarity check. Fix only real errors (typos, tense, clarity) — preserve voice, tone, casualness, and all content exactly. Return the corrected text only, no explanation.
 
 Original: "${response}"`,
-      model: 'gemini_3_flash',
-    }).catch(() => response);
-
-    response = polishResponse || response;
+        model: 'gemini_3_flash',
+      }).catch(() => response);
+      response = polishResponse || response;
+    }
 
     updateMemory(base44, user, existingUserMemory, message, response, synthesis);
 
