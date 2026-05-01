@@ -193,7 +193,7 @@ export default function HEX6ChatInterface() {
       stream.getTracks().forEach((t) => t.stop());
     } catch (err) {
       if (err?.name === 'NotAllowedError') {
-        alert('Microphone access was denied. Tap the lock icon in your address bar, allow microphone, then refresh the page.');
+        alert('Microphone access is blocked. Click the lock icon in your browser address bar, set Microphone to Allow, then refresh.');
       } else if (err?.name === 'NotFoundError') {
         alert('No microphone detected on this device.');
       } else {
