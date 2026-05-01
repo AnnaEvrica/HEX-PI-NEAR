@@ -46,6 +46,8 @@ export default function HEX6ChatInterface() {
   const pendingRequestsRef = useRef([]);
   // Flag — true when the current input was produced by dictation, so we polish grammar before sending.
   const dictatedRef = useRef(false);
+  // Hard lock to prevent double-firing the send (rapid Enter / double-tap).
+  const sendingRef = useRef(false);
 
   const handleCopy = (message) => {
     navigator.clipboard.writeText(message.content);
@@ -240,6 +242,11 @@ export default function HEX6ChatInterface() {
   };
 
   const handleSendMessage = async () => {
+    // Hard guard against double-fires (rapid Enter, double-tap, etc.).
+    // setLoading is async — using a ref is the only reliable lock.
+    if (sendingRef.current) return;
+    sendingRef.current = true;
+
     // If the mic is still listening, stop it so any pending dictation gets committed.
     if (listening && recognitionRef.current) {
       try { recognitionRef.current.stop(); } catch { /* noop */ }
@@ -251,7 +258,10 @@ export default function HEX6ChatInterface() {
     const textareaEl = document.querySelector('textarea[placeholder="Ask HEX6..."]');
     const liveValue = (textareaEl?.value ?? input).trim();
 
-    if (!liveValue && !uploadedImage) return;
+    if (!liveValue && !uploadedImage) {
+      sendingRef.current = false;
+      return;
+    }
 
     // Polish grammar only for dictated input (saves the LLM call on typed messages).
     let polishedInput = liveValue;
@@ -283,18 +293,25 @@ export default function HEX6ChatInterface() {
 
     // Ensure there's always an active conversation so messages are persisted.
     // If we're on a fresh "New Chat" (no convId), spin one up now.
+    // CRITICAL: we set the messages FIRST, then create the conversation, and we
+    // intentionally do NOT call setCurrentConversationId here for new convos —
+    // doing so would re-trigger the "load messages from conv" effect and race
+    // with our setMessages call. We attach the convId via ref instead.
+    setMessages(newMessages);
+
     let convIdAtSend = currentConversationId;
     if (!convIdAtSend) {
+      convIdAtSend = Date.now().toString();
       const newConv = {
-        id: Date.now().toString(),
+        id: convIdAtSend,
         title: polishedInput.slice(0, 40) || 'Chat',
         messages: newMessages,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
-      convIdAtSend = newConv.id;
       setConversations((prev) => [newConv, ...prev]);
-      setCurrentConversationId(newConv.id);
+      // Defer activating the new conv until AFTER the reply lands, so the
+      // "load messages from conv" effect can't wipe our in-flight state.
     } else {
       // Persist the user's message immediately into the active conversation.
       setConversations((prev) =>
@@ -305,7 +322,6 @@ export default function HEX6ChatInterface() {
         )
       );
     }
-    setMessages(newMessages);
     setInput('');
     setUploadedImage(null);
     setLoading(true);
@@ -344,8 +360,6 @@ export default function HEX6ChatInterface() {
         });
 
         // Persist assistant reply into the active conversation.
-        // We append to the messages we sent (newMessages) + the new assistant reply
-        // — using the live ref-state could race with another send.
         if (convIdAtSend) {
           setConversations((prev) =>
             prev.map((c) =>
@@ -358,6 +372,8 @@ export default function HEX6ChatInterface() {
                 : c
             )
           );
+          // Now safe to activate the conv (reply already in state).
+          setCurrentConversationId((cur) => cur || convIdAtSend);
         }
       })
       .catch((err) => {
@@ -366,6 +382,7 @@ export default function HEX6ChatInterface() {
       .finally(() => {
         clearInterval(thinkingIntervalRef.current);
         setLoading(false);
+        sendingRef.current = false;
         pendingRequestsRef.current = pendingRequestsRef.current.filter((r) => r.id !== reqId);
       });
 
