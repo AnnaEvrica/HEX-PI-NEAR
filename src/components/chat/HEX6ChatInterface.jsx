@@ -188,6 +188,19 @@ export default function HEX6ChatInterface() {
       return;
     }
 
+    // Force the native browser permission prompt by requesting mic access first.
+    // SpeechRecognition.start() alone does NOT reliably trigger the popup,
+    // especially inside iframes or on first use. getUserMedia does.
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Immediately release the stream — SpeechRecognition will open its own.
+      stream.getTracks().forEach((t) => t.stop());
+    } catch (err) {
+      console.warn('[voice] mic permission not granted:', err);
+      // Browser already showed its own denial UI; nothing else to do.
+      return;
+    }
+
     try {
       setListening(true);
       recognitionRef.current.start();
