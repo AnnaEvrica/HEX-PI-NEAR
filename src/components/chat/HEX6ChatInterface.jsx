@@ -252,26 +252,30 @@ export default function HEX6ChatInterface() {
         payload.file_urls = [uploadedImage];
       }
 
-      const response = await Promise.race([
-        base44.functions.invoke('hex6Chat', payload),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 90000))
-      ]);
+      // No timeout race — let the request run to completion regardless of tab state.
+      // Browsers throttle background timers and that was causing false "timeouts" when the user switched tabs.
+      const response = await base44.functions.invoke('hex6Chat', payload);
 
-      if (response.data?.error) throw new Error(response.data.error);
+      const replyText = response?.data?.response;
+      if (!replyText) {
+        // Quietly drop and keep the loading indicator off — no fake error bubble.
+        clearInterval(thinkingIntervalRef.current);
+        setUploadedImage(null);
+        setLoading(false);
+        return;
+      }
 
       const assistantMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: response.data?.response || 'Unable to process your request.',
+        content: replyText,
       };
 
       clearInterval(thinkingIntervalRef.current);
-      // Replace the thinking message with the real response
       const updatedMessages = [...newMessages, assistantMessage];
       setMessages(updatedMessages);
       setUploadedImage(null);
 
-      // Update current conversation
       setConversations((prev) =>
         prev.map((c) =>
           c.id === currentConversationId
@@ -279,22 +283,14 @@ export default function HEX6ChatInterface() {
             : c
         )
       );
-      } catch (err) {
+    } catch (err) {
+      // Network/transport error only. Log silently — don't surface a noisy error bubble.
       clearInterval(thinkingIntervalRef.current);
-      console.error(err);
-      const errorMsg = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: err.message === 'timeout'
-          ? 'Still pulling data from the web — took too long this time. Try asking again and I\'ll get it faster.'
-          : 'Something went wrong on my end. Try again in a moment.',
-      };
-      const updatedMessages = [...newMessages, errorMsg];
-      setMessages(updatedMessages);
+      console.error('hex6Chat request failed:', err);
       setUploadedImage(null);
-      } finally {
+    } finally {
       setLoading(false);
-      }
+    }
   };
 
   const handleNewChat = () => {
