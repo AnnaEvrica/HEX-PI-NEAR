@@ -676,23 +676,9 @@ ${recentNotes ? `Recent: ${recentNotes}` : ''}
 
     const historyText = history.slice(-20).map(m => `${m.role === 'user' ? 'User' : 'HEX6'}: ${m.content}`).join('\n');
 
-    // --- Synthesis (parallel, only for deeper conversations) ---
-    let synthesisPromise = Promise.resolve(null);
-    if (history.length >= 3) {
-      synthesisPromise = base44.integrations.Core.InvokeLLM({
-        prompt: `You are HEX6 BLE's synthesis layer. Given this conversation, return JSON only:
-- user_intent: what they ACTUALLY need
-- optimal_response_strategy: exact tone, depth, what to include/exclude
-
-Conversation: ${history.slice(-10).map(m => `${m.role === 'user' ? 'User' : 'HEX6'}: ${m.content}`).join('\n')}
-Latest: ${message}`,
-        model: 'gemini_3_flash',
-        response_json_schema: {
-          type: 'object',
-          properties: { user_intent: { type: 'string' }, optimal_response_strategy: { type: 'string' } }
-        }
-      }).catch(() => null);
-    }
+    // Synthesis layer disabled — saves ~2-3s per turn. The intent classifier
+    // already determines what the user needs.
+    const synthesisPromise = Promise.resolve(null);
 
     // --- Resolve intent (was kicked off in parallel above) ---
     const intent = await intentPromise;
@@ -910,20 +896,9 @@ HEX6:`;
       synthesisPromise,
     ]);
 
-    let response = llmResponse || 'I need a moment to analyze that.';
-
-    // Grammar polish — only for substantive answers (skip for short greetings/replies)
-    // Saves ~5-10 seconds on simple messages like "hi", "thanks", short follow-ups.
-    const needsPolish = response.length > 200 && (intentMode !== 'chat' || engineContext);
-    if (needsPolish) {
-      const polishResponse = await base44.integrations.Core.InvokeLLM({
-        prompt: `Quick grammar & clarity check. Fix only real errors (typos, tense, clarity) — preserve voice, tone, casualness, and all content exactly. Return the corrected text only, no explanation.
-
-Original: "${response}"`,
-        model: 'gemini_3_flash',
-      }).catch(() => response);
-      response = polishResponse || response;
-    }
+    const response = llmResponse || 'I need a moment to analyze that.';
+    // Grammar polish removed — main LLM call already produces clean output.
+    // This saves 3-5s per message.
 
     updateMemory(base44, user, existingUserMemory, message, response, synthesis);
 

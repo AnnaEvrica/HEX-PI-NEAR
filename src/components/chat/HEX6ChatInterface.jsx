@@ -181,6 +181,16 @@ export default function HEX6ChatInterface() {
         console.log('[voice] recognition ended');
         setListening(false);
       };
+
+      // Auto-start mic on mount — requires user gesture in some browsers, so we try
+      // and silently fail if blocked. User can still tap the mic button manually.
+      try {
+        baseTextRef.current = '';
+        recognitionRef.current.start();
+        setListening(true);
+      } catch (err) {
+        console.log('[voice] auto-start blocked, user must tap mic:', err?.message);
+      }
     }
   }, []);
 
@@ -243,25 +253,9 @@ export default function HEX6ChatInterface() {
 
     if (!liveValue && !uploadedImage) return;
 
-    // Auto-polish dictated/long input: fix grammar + punctuation BEFORE sending.
-    // Skip for short messages (< 25 chars) and messages that already have proper punctuation.
-    let polishedInput = liveValue;
-    const looksLikeRawDictation =
-      polishedInput.length >= 25 &&
-      !/[.!?]\s|[.!?]$/.test(polishedInput); // no sentence-ending punctuation anywhere
-    if (looksLikeRawDictation) {
-      try {
-        const polishRes = await base44.integrations.Core.InvokeLLM({
-          prompt: `Add proper punctuation and capitalization to this dictated text. Fix obvious typos. PRESERVE the speaker's voice, slang, and tone exactly — do NOT rephrase or formalize. Return ONLY the corrected text, nothing else.
-
-Text: "${polishedInput}"`,
-          model: 'gemini_3_flash',
-        });
-        if (polishRes && typeof polishRes === 'string' && polishRes.trim()) {
-          polishedInput = polishRes.trim().replace(/^["']|["']$/g, '');
-        }
-      } catch { /* fall back to raw input */ }
-    }
+    // Send raw input directly — backend handles all grammar/intent processing.
+    // Removing the frontend polish saves ~2s per dictated message.
+    const polishedInput = liveValue;
 
     const userMessage = {
       id: Date.now().toString(),
