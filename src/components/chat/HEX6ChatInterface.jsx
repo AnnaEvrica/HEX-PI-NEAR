@@ -517,7 +517,7 @@ export default function HEX6ChatInterface() {
               title={listening ? 'Stop listening' : 'Start voice input'}
               style={{ minWidth: '44px', minHeight: '44px' }}
             >
-              {listening ? <Mic className="w-4 md:w-5 h-4 md:h-5" /> : <MicOff className="w-4 md:w-5 h-4 md:h-5" />}
+              <Mic className={`w-4 md:w-5 h-4 md:h-5 ${listening ? 'animate-pulse' : ''}`} />
             </button>
 
             <button
