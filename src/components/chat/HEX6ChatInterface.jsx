@@ -230,11 +230,22 @@ export default function HEX6ChatInterface() {
   };
 
   const handleSendMessage = async () => {
-    if (!input.trim() && !uploadedImage) return;
+    // If the mic is still listening, stop it so any pending dictation gets committed.
+    if (listening && recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch { /* noop */ }
+      setListening(false);
+    }
+
+    // Read the latest input value — fall back to the DOM if React state is stale
+    // (can happen right after dictation when state hasn't flushed yet).
+    const textareaEl = document.querySelector('textarea[placeholder="Ask HEX6..."]');
+    const liveValue = (textareaEl?.value ?? input).trim();
+
+    if (!liveValue && !uploadedImage) return;
 
     // Auto-polish dictated/long input: fix grammar + punctuation BEFORE sending.
     // Skip for short messages (< 25 chars) and messages that already have proper punctuation.
-    let polishedInput = input.trim();
+    let polishedInput = liveValue;
     const looksLikeRawDictation =
       polishedInput.length >= 25 &&
       !/[.!?]\s|[.!?]$/.test(polishedInput); // no sentence-ending punctuation anywhere
@@ -607,7 +618,7 @@ Text: "${polishedInput}"`,
             />
             <button
               onClick={handleSendMessage}
-              disabled={!input.trim() || loading}
+              disabled={loading || (!input.trim() && !listening && !uploadedImage)}
               className="p-2 md:p-2.5 rounded-sm bg-accent text-accent-foreground hover:bg-accent/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0 flex items-center justify-center"
               style={{ minWidth: '44px', minHeight: '44px' }}
             >
