@@ -409,23 +409,53 @@ function extractNumberSeries(text) {
   return matches.map(Number);
 }
 
-// Detect if message is analytical/probabilistic in nature
-// Tightened: requires explicit probability/odds language OR a clear analytical ask.
-// Casual greetings ("hi", "how are you", "what's up") must NOT match.
-function needsEngineAnalysis(text) {
-  const t = text.trim();
-  if (t.length < 8) return false; // greetings, "hi", "ok", "thanks" etc.
+// Context-driven intent router — uses an LLM to classify what the user actually wants
+// based on the FULL conversation, not keyword matching. Returns:
+//   mode: "chat" | "engine" | "web" | "engine_with_web"
+//   needs_data: boolean — true only when user wants engine but didn't supply numbers
+//   reasoning: short explanation (debug)
+async function classifyIntent(base44, message, history) {
+  const recentHistory = (history || []).slice(-12)
+    .map(m => `${m.role === 'user' ? 'User' : 'HEX6'}: ${m.content}`).join('\n');
 
-  // Strong probability/odds vocabulary
-  const probabilistic = /\b(probability|probabilistic|likelihood|odds|chance of|chances of|expected value|kelly|sharpe|variance|volatility|distribution|regime|exposure|backtest)\b/i;
+  try {
+    const result = await base44.integrations.Core.InvokeLLM({
+      prompt: `You are an intent router for HEX6 BLE, a probabilistic intelligence engine. Read the FULL conversation and classify what the user wants from THEIR LATEST MESSAGE — based on context and intent, NOT keywords.
 
-  // Analytical-intent verbs combined with a target (returns, prices, scores, performance, etc.)
-  const analyticalAsk = /\b(analyze|analyse|forecast|predict|model|calculate|compute|backtest|run.+(?:engine|analysis|numbers|model))\b/i;
+CONVERSATION HISTORY:
+${recentHistory || '(no prior history)'}
 
-  // Sports/market outcome questions ("will X beat Y", "who wins", "should I bet on")
-  const outcomeQuestion = /\b(will\s+\w+\s+(?:win|beat|lose)|who\s+(?:will\s+)?win|should\s+i\s+(?:bet|buy|sell|invest)|how\s+likely)\b/i;
+LATEST USER MESSAGE: "${message}"
 
-  return probabilistic.test(t) || analyticalAsk.test(t) || outcomeQuestion.test(t);
+Decide ONE mode:
+• "chat" — casual conversation, greetings, opinions, definitions, philosophy, emotional/personal talk, follow-up clarifications about something already answered, or anything that doesn't require numerical analysis or fresh external data. Default to this when uncertain.
+• "web" — user wants current/factual information that requires looking up real-world data (news, prices, scores, recent events, factual lookups) but does NOT need probabilistic/statistical analysis.
+• "engine" — user wants probabilistic analysis, odds, predictions, "should I", "what are the chances", "how likely", outcome forecasting, or analysis of a market/asset/team/event — AND the conversation context implies hard numbers should drive the answer.
+• "engine_with_web" — same as "engine" but the data needed isn't in the conversation, so we'll need to fetch it from the web first then run engine.
+
+CRITICAL RULES:
+1. If the user is continuing a thread where HEX6 already offered to look up data or run engine, and they say ANYTHING that signals continuation (yes, do it, please, go ahead, "well?", "and?", a follow-up question, a nudge) → pick whichever mode HEX6 offered to run. Don't loop them back asking again.
+2. If the user already supplied a numerical series (multiple numbers in their message) → "engine".
+3. Casual questions like "what do you think about X", "your thoughts on Y", "is X a good idea" without a strong probabilistic frame → "chat" if it's opinion-seeking, "engine_with_web" if it's clearly about forecasting an outcome.
+4. Explicit intent overrides everything: if they say "look it up", "search", "fetch", "run the engine", "crunch numbers" → honor it.
+5. Identity questions ("who are you", "what are you") → always "chat".
+6. Frustration/meta-conversation about HEX6's behavior → "chat".
+
+Return JSON only.`,
+      model: 'gemini_3_flash',
+      response_json_schema: {
+        type: 'object',
+        properties: {
+          mode: { type: 'string', enum: ['chat', 'web', 'engine', 'engine_with_web'] },
+          reasoning: { type: 'string' },
+        },
+        required: ['mode'],
+      },
+    });
+    return result || { mode: 'chat', reasoning: 'fallback' };
+  } catch {
+    return { mode: 'chat', reasoning: 'classifier failed, default to chat' };
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -449,17 +479,15 @@ Deno.serve(async (req) => {
     const currentDateReadable = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'America/Los_Angeles' });
     const currentTimeReadable = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Los_Angeles', timeZoneName: 'short' });
 
-    // --- Engine: detect data in message or prior HEX6 data request ---
+    // --- Engine: detect data in message ---
     const history = conversationHistory || [];
     let engineContext = '';
-    let shouldAskForData = false;
 
     const dataSeries = extractNumberSeries(message);
-    const isAnalytical = needsEngineAnalysis(message);
 
-    // Check if the prior HEX6 message was asking for data
-    const lastAssistantMsg = [...history].reverse().find(m => m.role === 'assistant');
-    const hex6WasAskingForData = lastAssistantMsg && /give me|share|provide|what (are|were|is)|send me|paste|supply|data series|numbers|series of/i.test(lastAssistantMsg.content);
+    // Context-driven intent classification — runs in parallel with memory fetches below.
+    // No keyword matching; the LLM reads the full conversation and decides.
+    const intentPromise = classifyIntent(base44, message, history);
 
     if (dataSeries && dataSeries.length >= 7) {
       // Detect if user provided two comma-separated series (cross-asset)
@@ -544,9 +572,6 @@ Regime: ${result.regime}
 Risk aversion: ${riskAversion}
 --- END ENGINE OUTPUT ---
 Use this computed output directly in your response. Ground your analysis in these numbers. The Markov layer tells you where the state is heading next; the 1/137 motif highlights rare high-edge moments; the archetype basin gives a named regime context. Translate everything to plain English.`;
-    } else if (isAnalytical && !hex6WasAskingForData) {
-      // Analytical question but no data — fetch from internet first, then run engine
-      shouldAskForData = true;
     }
 
     // --- Trimmed system prompt ---
@@ -669,55 +694,17 @@ Latest: ${message}`,
       }).catch(() => null);
     }
 
-    // --- If analytical but no data — ASK the user first whether they want web lookup or engine run.
-    // Do NOT auto-fetch from the internet or auto-run the engine on the FIRST analytical question.
-    // BUT: if the prior assistant message already offered the choice, treat almost any continuation
-    // as opt-in. The previous regex was too narrow — questions like "did you run the engine?" or
-    // "well?" fell through and HEX6 kept re-asking. Now: any affirmative, any question, any nudge
-    // counts as a green light.
-    const userOptedIntoWeb = /\b(look\s*(?:it\s*)?(?:up|online)|search|google|find|fetch|pull (?:it|that|the data)|web|internet|online)\b/i.test(message);
-    const userOptedIntoEngine = /\b(run (?:the|your)? ?engine|run (?:it|the numbers|the analysis|analysis)|use (?:the|your) engine|crunch (?:it|the numbers)|engine|did you (?:run|use))\b/i.test(message);
-    // Generic "yes / go ahead / sure / please" affirmatives — count as opt-in when prior message offered the choice.
-    const userGenericConfirm = /^\s*(yes|yeah|yep|sure|ok|okay|go ahead|do it|please|alright|sounds good|y|yup|pls)\s*[.!?]?\s*$/i.test(message)
-      || /\b(go ahead|please do|do it|sounds good|yes please)\b/i.test(message);
-    const priorOfferedChoice = lastAssistantMsg && /look (?:it )?(?:up )?online|run (?:the|my) engine|want me to (?:look|search|fetch|run|check)|you('?ve| have) got numbers|share (?:numbers|data)/i.test(lastAssistantMsg.content);
+    // --- Resolve intent (was kicked off in parallel above) ---
+    const intent = await intentPromise;
+    const intentMode = intent?.mode || 'chat';
 
-    // If prior offered the choice, default behavior: run the engine (web fetch + engine) — since the user
-    // is clearly waiting for action, not another question.
-    const optedIn = priorOfferedChoice && (userOptedIntoWeb || userOptedIntoEngine || userGenericConfirm);
-
-    if (shouldAskForData && !optedIn) {
-      // Just ask the user — no engine, no web. Cheap, fast LLM call.
-      const askPrompt = `${systemPrompt}
-
---- CURRENT USER MESSAGE ---
-User: ${message}
-
-INSTRUCTION: The user is asking a probabilistic/analytical question but hasn't given you data, and you don't have permission to go online or run the engine yet.
-Reply with ONE short, casual sentence acknowledging what they're asking, then ask them: do they want you to look it up online, or do they want to run the engine on data they'll share? Keep it natural — like "want me to look that up online, or you've got numbers you want me to run through the engine?"
-Do NOT search the web. Do NOT run any analysis. Just ask.
-
-HEX6:`;
-
-      const askResponse = await base44.integrations.Core.InvokeLLM({
-        prompt: askPrompt,
-        model: 'gemini_3_flash',
-      });
-
-      const response = askResponse || "Want me to look that up online, or do you have numbers you'd like me to run through the engine?";
-      updateMemory(base44, user, existingUserMemory, message, response);
-      return Response.json({ response, timestamp: new Date().toISOString() });
-    }
-
-    // If the user opted in (web/engine/generic confirm) after being asked, do the fetch+engine flow.
-    // This is the REAL flow: pull a numerical series from the web, run the actual engine on it,
-    // then have the LLM translate engine output into plain English with full conversation awareness.
-    if (shouldAskForData && optedIn) {
-      // Step 1: figure out what the user originally asked. Walk back through history to find the
-      // last analytical question (the one that triggered the "web or engine?" offer).
+    // If intent is engine_with_web (or web alone), run the fetch+engine flow.
+    // No more "ask first then opt-in" loop — the classifier already read context and decided.
+    if (intentMode === 'engine_with_web' || intentMode === 'web') {
+      // Walk back through history to find the original analytical question if this is a follow-up
       const originalQuestion = (() => {
         for (let i = history.length - 1; i >= 0; i--) {
-          if (history[i].role === 'user' && needsEngineAnalysis(history[i].content)) {
+          if (history[i].role === 'user' && history[i].content.length > 15) {
             return history[i].content;
           }
         }
@@ -910,11 +897,10 @@ User: ${message}
 
 HEX6:`;
 
-    // Internet trigger: only fire for queries that genuinely need fresh/external data.
-    // Casual greetings, opinions, follow-ups, and small talk should NOT hit the web.
-    const needsFreshData = /\b(news|latest|current|today|recent|happening|right now|live|price of|stock price|score|results?|update|breaking|this week|this month)\b/i.test(message);
-    const explicitLookup = /\b(look up|search|find me|google|tell me about|show me|research|check (?:on|the)|verify)\b/i.test(message);
-    const needsInternet = (needsFreshData || explicitLookup) && !isAnalytical;
+    // Internet usage in normal flow is now governed entirely by the intent classifier.
+    // engine_with_web and web modes are handled above; here we only enable web context
+    // if the classifier explicitly said "web" but we somehow fell through.
+    const needsInternet = intentMode === 'web';
 
     const llmPayload = { prompt: basePrompt, model: 'gemini_3_flash', add_context_from_internet: needsInternet };
     if (file_urls && file_urls.length > 0) llmPayload.file_urls = file_urls;
@@ -928,7 +914,7 @@ HEX6:`;
 
     // Grammar polish — only for substantive answers (skip for short greetings/replies)
     // Saves ~5-10 seconds on simple messages like "hi", "thanks", short follow-ups.
-    const needsPolish = response.length > 200 && (isAnalytical || engineContext);
+    const needsPolish = response.length > 200 && (intentMode !== 'chat' || engineContext);
     if (needsPolish) {
       const polishResponse = await base44.integrations.Core.InvokeLLM({
         prompt: `Quick grammar & clarity check. Fix only real errors (typos, tense, clarity) — preserve voice, tone, casualness, and all content exactly. Return the corrected text only, no explanation.
