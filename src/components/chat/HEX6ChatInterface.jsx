@@ -14,13 +14,8 @@ export default function HEX6ChatInterface() {
     content: `Welcome. I am HEX6 BLE — a probabilistic intelligence engine. I don't predict. I don't guess. I compute.\n\nI see markets as living probability distributions — constantly shifting, never binary. Where others force a single answer, I hold the entire possibility space and let mathematics speak.\n\nWhat would you like to explore?`,
   };
 
-  // Generic, honest thinking steps — no false claims about web/engine usage.
-  // The backend decides what to actually do; the UI doesn't pretend otherwise.
-  const THINKING_STEPS = [
-    'Thinking...',
-    'Processing your message...',
-    'Almost there...',
-  ];
+  // Honest, neutral indicator — no claims about engine/web activity by default.
+  const THINKING_STEPS = ['Thinking...'];
 
   const [messages, setMessages] = useState([welcomeMessage]);
   const [input, setInput] = useState('');

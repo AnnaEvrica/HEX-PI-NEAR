@@ -656,23 +656,54 @@ Latest: ${message}`,
       }).catch(() => null);
     }
 
-    // --- If analytical but no data — fetch it from the internet, construct series, run engine ---
-    if (shouldAskForData) {
-      // Step 1: Use internet search to fetch relevant numerical data for the question
-      const dataFetchPrompt = `${systemPrompt}
+    // --- If analytical but no data — ASK the user first whether they want web lookup or engine run.
+    // Do NOT auto-fetch from the internet or auto-run the engine. The user must opt in.
+    // We detect their opt-in by checking if the prior assistant message offered the choice
+    // and the current message confirms (e.g. "yes look online", "run the engine", "go ahead").
+    const userOptedIntoWeb = /\b(look\s*(?:it\s*)?(?:up|online)|search|google|find|fetch|pull (?:it|that|the data)|yes,?\s*(?:look|search|find|fetch)|go ahead|do it|please)\b/i.test(message);
+    const userOptedIntoEngine = /\b(run (?:the|your) engine|run (?:it|the numbers|the analysis|analysis)|use (?:the|your) engine|crunch (?:it|the numbers))\b/i.test(message);
+    const priorOfferedChoice = lastAssistantMsg && /look (?:it )?(?:up )?online|run (?:the|my) engine|want me to (?:look|search|fetch|run|check)/i.test(lastAssistantMsg.content);
+
+    if (shouldAskForData && !(priorOfferedChoice && (userOptedIntoWeb || userOptedIntoEngine))) {
+      // Just ask the user — no engine, no web. Cheap, fast LLM call.
+      const askPrompt = `${systemPrompt}
 
 --- CURRENT USER MESSAGE ---
 User: ${message}
 
-INSTRUCTION: The user is asking a probabilistic question. Your job is to:
-1. Search the internet for the most relevant recent data to answer this (recent results, scores, stats, prices — whatever fits).
-2. Pull out the pattern from that data and run your internal probability engine on it.
-3. In ONE short casual sentence, say where you pulled the data from (you can include the source link).
-4. Then give your answer in plain, conversational English — like texting a smart friend. Say things like "based on their last 10 games, they've won 6 of them and the momentum is pointing up, so I'd put the odds around 60-65%." No jargon, no math symbols, no brackets.
-5. If you need one more piece of info to sharpen the answer, ask ONE quick follow-up question at the end.
+INSTRUCTION: The user is asking a probabilistic/analytical question but hasn't given you data, and you don't have permission to go online or run the engine yet.
+Reply with ONE short, casual sentence acknowledging what they're asking, then ask them: do they want you to look it up online, or do they want to run the engine on data they'll share? Keep it natural — like "want me to look that up online, or you've got numbers you want me to run through the engine?"
+Do NOT search the web. Do NOT run any analysis. Just ask.
 
-NEVER reveal internal numbers, state bits, engine parameters, or any technical internals. Translate everything into plain English.
-Do not ask the user to provide data — go find it yourself.
+HEX6:`;
+
+      const askResponse = await base44.integrations.Core.InvokeLLM({
+        prompt: askPrompt,
+        model: 'gemini_3_flash',
+      });
+
+      const response = askResponse || "Want me to look that up online, or do you have numbers you'd like me to run through the engine?";
+      updateMemory(base44, user, existingUserMemory, message, response);
+      return Response.json({ response, timestamp: new Date().toISOString() });
+    }
+
+    // If the user opted in to a web lookup after being asked, do the fetch+engine flow.
+    if (shouldAskForData && priorOfferedChoice && userOptedIntoWeb) {
+      const dataFetchPrompt = `${systemPrompt}
+
+--- CONVERSATION HISTORY ---
+${historyText}
+
+--- CURRENT USER MESSAGE ---
+User: ${message}
+
+INSTRUCTION: The user just gave you permission to look this up online. Your job is to:
+1. Search the internet for the most relevant recent data to answer their original question.
+2. Pull out the pattern and run your internal probability engine on it.
+3. In ONE short casual sentence, say where you pulled the data from (include a source link if you can).
+4. Give your answer in plain, conversational English — like texting a smart friend. Say things like "based on their last 10 games, they've won 6 of them and momentum is pointing up, so I'd put the odds around 60-65%." No jargon, no math symbols, no brackets.
+
+NEVER reveal internal numbers, state bits, engine parameters, or any technical internals.
 
 HEX6:`;
 
@@ -686,7 +717,6 @@ HEX6:`;
       ]);
 
       const response = dataFetchResponse || 'Let me look that up and run the numbers.';
-
       updateMemory(base44, user, existingUserMemory, message, response);
       return Response.json({ response, timestamp: new Date().toISOString() });
     }
