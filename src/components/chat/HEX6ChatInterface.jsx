@@ -154,8 +154,16 @@ export default function HEX6ChatInterface() {
         setListening(false);
       };
 
-      recognitionRef.current.onerror = () => {
+      recognitionRef.current.onerror = (event) => {
         setListening(false);
+        const err = event?.error;
+        if (err === 'not-allowed' || err === 'service-not-allowed') {
+          alert('Microphone access blocked. This works in the published app — preview iframes block mic permissions.');
+        } else if (err === 'no-speech') {
+          // silent — user didn't say anything, no need to alert
+        } else if (err) {
+          console.warn('Speech recognition error:', err);
+        }
       };
 
       recognitionRef.current.onend = () => {
