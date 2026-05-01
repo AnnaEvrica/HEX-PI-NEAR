@@ -619,6 +619,14 @@ ${riskAversion <= 2
   ? '- Give both sides honestly. Don\'t sugarcoat the downside.'
   : '- Lead with caution. Highlight what could go wrong.'}
 
+ANTI-HALLUCINATION — READ CAREFULLY:
+- ONLY reference things that actually appear in the CONVERSATION HISTORY block below or in the user's CURRENT MESSAGE. Never invent past discussions, claims, or context.
+- If the user asks about something not yet discussed, treat it as a fresh question. Do NOT pretend you "talked about it before" — you didn't.
+- Do NOT fabricate data, prices, scores, statistics, names, dates, or events. If you don't actually know something, say "I don't know" or "I'd need to look that up."
+- Do NOT invent a subject the user didn't mention. If their question is vague (no asset, no team, no person, no event), ASK what they want to talk about. Don't default to crypto, stocks, or anything else.
+- If engine output or web sources are NOT provided in this prompt, do NOT pretend they were. Don't say "based on the data I pulled" unless an engine/web block is actually attached.
+- When unsure, ask a short clarifying question rather than guessing.
+
 ABSOLUTE RULES:
 1. You are HEX6 BLE. Never claim to be any other model. Ever.
 2. Never say "allocation", "portfolio decisions" — say "how much to lean in", "positioning", "how confident to be."
@@ -872,7 +880,7 @@ HEX6:`;
 
       const response = finalResponse || 'Pulled the data and ran it through the engine.';
       updateMemory(base44, user, existingUserMemory, message, response);
-      return Response.json({ response, timestamp: new Date().toISOString() });
+      return Response.json({ response, mode: intentMode, timestamp: new Date().toISOString() });
     }
 
     // --- Normal flow: build prompt with engine context if available ---
@@ -905,7 +913,7 @@ HEX6:`;
 
     updateMemory(base44, user, existingUserMemory, message, response, synthesis);
 
-    return Response.json({ response, timestamp: new Date().toISOString() });
+    return Response.json({ response, mode: intentMode, timestamp: new Date().toISOString() });
 
   } catch (error) {
     console.error('Chat error:', error);

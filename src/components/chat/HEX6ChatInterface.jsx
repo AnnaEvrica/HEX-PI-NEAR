@@ -13,21 +13,23 @@ export default function HEX6ChatInterface() {
     content: `Welcome. I am HEX6 BLE — a probabilistic intelligence engine. I don't predict. I don't guess. I compute.\n\nI see markets as living probability distributions — constantly shifting, never binary. Where others force a single answer, I hold the entire possibility space and let mathematics speak.\n\nWhat would you like to explore?`,
   };
 
-  // Progressive status updates — HEX6 narrates what it's doing so the user knows
-  // long operations (web fetch + engine) are in progress, not stuck.
-  const THINKING_STEPS = [
-    'Thinking...',
+  // Loading copy — only "Thinking..." for fast chat replies.
+  // The slower web/engine narration only kicks in if the request is still
+  // pending after 6s (i.e. it's actually doing the slow path).
+  const SLOW_PATH_STEPS = [
     'Pulling fresh data from the web...',
-    'Running the engine — this might take a minute...',
+    'Running the engine...',
     'Crunching probabilities...',
-    'Almost there, finalizing the analysis...',
+    'Finalizing the analysis...',
   ];
 
   const [messages, setMessages] = useState([welcomeMessage]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [thinkingStep, setThinkingStep] = useState(0);
-  const thinkingIntervalRef = useRef(null);
+  // null = show "Thinking..."; ≥0 = show SLOW_PATH_STEPS[index]
+  const [slowStep, setSlowStep] = useState(null);
+  const slowStartTimeoutRef = useRef(null);
+  const slowIntervalRef = useRef(null);
   const [conversations, setConversations] = useState([]);
   const [currentConversationId, setCurrentConversationId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -325,10 +327,14 @@ export default function HEX6ChatInterface() {
     setInput('');
     setUploadedImage(null);
     setLoading(true);
-    setThinkingStep(0);
-    thinkingIntervalRef.current = setInterval(() => {
-      setThinkingStep((prev) => Math.min(prev + 1, THINKING_STEPS.length - 1));
-    }, 4000);
+    setSlowStep(null); // start with "Thinking..."
+    // After 6s, if still pending, escalate to the slow-path narration.
+    slowStartTimeoutRef.current = setTimeout(() => {
+      setSlowStep(0);
+      slowIntervalRef.current = setInterval(() => {
+        setSlowStep((prev) => (prev == null ? 0 : Math.min(prev + 1, SLOW_PATH_STEPS.length - 1)));
+      }, 5000);
+    }, 6000);
 
     // Get user preferences from localStorage
     const prefs = JSON.parse(localStorage.getItem('hex6_user_prefs') || '{}');
@@ -380,7 +386,9 @@ export default function HEX6ChatInterface() {
         console.error('hex6Chat request failed:', err);
       })
       .finally(() => {
-        clearInterval(thinkingIntervalRef.current);
+        clearTimeout(slowStartTimeoutRef.current);
+        clearInterval(slowIntervalRef.current);
+        setSlowStep(null);
         setLoading(false);
         sendingRef.current = false;
         pendingRequestsRef.current = pendingRequestsRef.current.filter((r) => r.id !== reqId);
@@ -589,7 +597,7 @@ export default function HEX6ChatInterface() {
                   <div className="w-2 h-2 rounded-full bg-secondary" style={{ animation: 'bounce 1.2s infinite', animationDelay: '0.2s' }} />
                   <div className="w-2 h-2 rounded-full bg-secondary" style={{ animation: 'bounce 1.2s infinite', animationDelay: '0.4s' }} />
                 </div>
-                <span className="text-xs text-secondary/70 transition-all duration-500">{THINKING_STEPS[thinkingStep]}</span>
+                <span className="text-xs text-secondary/70 transition-all duration-500">{slowStep === null ? 'Thinking...' : SLOW_PATH_STEPS[slowStep]}</span>
               </div>
             </div>
           )}
