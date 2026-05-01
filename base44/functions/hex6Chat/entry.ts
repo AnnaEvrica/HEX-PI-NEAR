@@ -410,8 +410,22 @@ function extractNumberSeries(text) {
 }
 
 // Detect if message is analytical/probabilistic in nature
+// Tightened: requires explicit probability/odds language OR a clear analytical ask.
+// Casual greetings ("hi", "how are you", "what's up") must NOT match.
 function needsEngineAnalysis(text) {
-  return /\b(probability|probabilistic|likelihood|chance|odds|risk|analyze|analysis|predict|forecast|model|distribution|variance|sigma|volatility|exposure|regime|kelly|sharpe|expected value|series|returns|dataset|data|numbers|sequence|trend|pattern|calculate|compute|run|engine|hex6|winning|win|lose|beat|game|match|score|performance|streak|record)\b/i.test(text);
+  const t = text.trim();
+  if (t.length < 8) return false; // greetings, "hi", "ok", "thanks" etc.
+
+  // Strong probability/odds vocabulary
+  const probabilistic = /\b(probability|probabilistic|likelihood|odds|chance of|chances of|expected value|kelly|sharpe|variance|volatility|distribution|regime|exposure|backtest)\b/i;
+
+  // Analytical-intent verbs combined with a target (returns, prices, scores, performance, etc.)
+  const analyticalAsk = /\b(analyze|analyse|forecast|predict|model|calculate|compute|backtest|run.+(?:engine|analysis|numbers|model))\b/i;
+
+  // Sports/market outcome questions ("will X beat Y", "who wins", "should I bet on")
+  const outcomeQuestion = /\b(will\s+\w+\s+(?:win|beat|lose)|who\s+(?:will\s+)?win|should\s+i\s+(?:bet|buy|sell|invest)|how\s+likely)\b/i;
+
+  return probabilistic.test(t) || analyticalAsk.test(t) || outcomeQuestion.test(t);
 }
 
 // ---------------------------------------------------------------------------
@@ -688,10 +702,11 @@ User: ${message}
 
 HEX6:`;
 
-    // Smart context-aware internet trigger: only enable for queries that actually need current/external data
-    const hasQuestionMarks = /\?/.test(message);
-    const isLookingForData = /\b(what|who|when|where|why|how|find|search|tell me|show me|look up|research|check|verify|news|latest|current|today|recent|price|score|result|update|happening|is|are)\b/i.test(message);
-    const needsInternet = (hasQuestionMarks || isLookingForData) && !isAnalytical;
+    // Internet trigger: only fire for queries that genuinely need fresh/external data.
+    // Casual greetings, opinions, follow-ups, and small talk should NOT hit the web.
+    const needsFreshData = /\b(news|latest|current|today|recent|happening|right now|live|price of|stock price|score|results?|update|breaking|this week|this month)\b/i.test(message);
+    const explicitLookup = /\b(look up|search|find me|google|tell me about|show me|research|check (?:on|the)|verify)\b/i.test(message);
+    const needsInternet = (needsFreshData || explicitLookup) && !isAnalytical;
 
     const llmPayload = { prompt: basePrompt, model: 'gemini_3_flash', add_context_from_internet: needsInternet };
     if (file_urls && file_urls.length > 0) llmPayload.file_urls = file_urls;

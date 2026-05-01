@@ -14,16 +14,12 @@ export default function HEX6ChatInterface() {
     content: `Welcome. I am HEX6 BLE — a probabilistic intelligence engine. I don't predict. I don't guess. I compute.\n\nI see markets as living probability distributions — constantly shifting, never binary. Where others force a single answer, I hold the entire possibility space and let mathematics speak.\n\nWhat would you like to explore?`,
   };
 
+  // Generic, honest thinking steps — no false claims about web/engine usage.
+  // The backend decides what to actually do; the UI doesn't pretend otherwise.
   const THINKING_STEPS = [
-    'Connecting to live data sources...',
-    'Searching the web for relevant information...',
-    'Fetching latest data...',
-    'Analyzing patterns and market signals...',
-    'Running the probability engine...',
-    'Cross-referencing data sources...',
-    'Computing state distribution...',
-    'Synthesizing results...',
-    'Almost there — finalizing output...',
+    'Thinking...',
+    'Processing your message...',
+    'Almost there...',
   ];
 
   const [messages, setMessages] = useState([welcomeMessage]);
@@ -52,19 +48,59 @@ export default function HEX6ChatInterface() {
   };
 
   const handleSpeak = (message) => {
+    if (!('speechSynthesis' in window)) return;
+
     if (speakingId === message.id) {
       window.speechSynthesis.cancel();
       setSpeakingId(null);
       return;
     }
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(message.content);
-    utterance.rate = 0.95;
-    utterance.pitch = 1;
-    utterance.onend = () => setSpeakingId(null);
-    utterance.onerror = () => setSpeakingId(null);
+
+    // Strip markdown so the voice reads cleanly
+    const cleanText = message.content
+      .replace(/```[\s\S]*?```/g, '')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/\*\*([^*]+)\*\*/g, '$1')
+      .replace(/\*([^*]+)\*/g, '$1')
+      .replace(/_([^_]+)_/g, '$1')
+      .replace(/#{1,6}\s/g, '')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .replace(/[•·]/g, '')
+      .trim();
+
+    if (!cleanText) return;
+
+    // Chunk into ~200-char sentences — Web Speech cuts off long single utterances
+    const chunks = cleanText.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [cleanText];
+    const merged = [];
+    let buf = '';
+    for (const c of chunks) {
+      if ((buf + c).length > 200 && buf) {
+        merged.push(buf.trim());
+        buf = c;
+      } else {
+        buf += c;
+      }
+    }
+    if (buf.trim()) merged.push(buf.trim());
+
     setSpeakingId(message.id);
-    window.speechSynthesis.speak(utterance);
+
+    let i = 0;
+    const speakNext = () => {
+      if (i >= merged.length) {
+        setSpeakingId(null);
+        return;
+      }
+      const u = new SpeechSynthesisUtterance(merged[i]);
+      u.rate = 0.95;
+      u.pitch = 1;
+      u.onend = () => { i++; speakNext(); };
+      u.onerror = () => setSpeakingId(null);
+      window.speechSynthesis.speak(u);
+    };
+    speakNext();
   };
 
   // Load conversations on mount or initialize default
