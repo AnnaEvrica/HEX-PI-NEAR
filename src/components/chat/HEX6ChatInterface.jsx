@@ -158,9 +158,9 @@ export default function HEX6ChatInterface() {
         setListening(false);
         const err = event?.error;
         if (err === 'not-allowed' || err === 'service-not-allowed') {
-          alert('Microphone access blocked. This works in the published app — preview iframes block mic permissions.');
+          alert('Microphone access is blocked for this site.\n\nTo fix:\n1. Click the lock/tune icon in your browser address bar\n2. Set Microphone to "Allow"\n3. Refresh the page and try again');
         } else if (err === 'no-speech') {
-          // silent — user didn't say anything, no need to alert
+          // silent — user didn't say anything
         } else if (err) {
           console.warn('Speech recognition error:', err);
         }
@@ -177,7 +177,7 @@ export default function HEX6ChatInterface() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleVoiceInput = () => {
+  const handleVoiceInput = async () => {
     if (!recognitionRef.current) {
       alert('Voice input is not supported in this browser. Try Chrome, Edge, or Safari on desktop.');
       return;
@@ -187,19 +187,36 @@ export default function HEX6ChatInterface() {
       setListening(false);
       return;
     }
-    // Start recognition SYNCHRONOUSLY inside the click — this is what triggers
-    // the browser's mic permission prompt and preserves the user gesture.
-    // Do NOT await anything before .start() or the gesture gets lost.
+    // Check current permission state — if denied at the OS/browser level,
+    // recognition.start() will silently fail with "not-allowed" without re-prompting.
+    if (navigator.permissions) {
+      try {
+        const perm = await navigator.permissions.query({ name: 'microphone' });
+        if (perm.state === 'denied') {
+          alert('Microphone access is blocked for this site.\n\nTo fix:\n1. Click the lock/tune icon in your browser address bar\n2. Set Microphone to "Allow"\n3. Refresh the page and try again');
+          return;
+        }
+      } catch (e) { /* permissions API not supported, continue */ }
+    }
+    // Force the browser permission prompt to appear via getUserMedia.
+    // Once granted, recognition.start() will work without re-prompting.
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach((t) => t.stop());
+    } catch (err) {
+      alert('Microphone access was denied.\n\nTo fix:\n1. Click the lock/tune icon in your browser address bar\n2. Set Microphone to "Allow"\n3. Refresh the page and try again');
+      return;
+    }
     try {
       setListening(true);
       recognitionRef.current.start();
     } catch (err) {
-      // Most common: "InvalidStateError" if start() was called while already running
       console.warn('Voice start error:', err);
       setListening(false);
-      try { recognitionRef.current.stop(); } catch (e) { /* noop */ }
     }
   };
+
+
 
   const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
