@@ -44,8 +44,9 @@ export default function HEX6ChatInterface() {
   const fileInputRef = useRef(null);
   const baseTextRef = useRef('');
   // Track in-flight requests so they survive tab switches / re-renders.
-  // Each entry: { id, promise, userMessage, baseMessages, convId }
   const pendingRequestsRef = useRef([]);
+  // Flag — true when the current input was produced by dictation, so we polish grammar before sending.
+  const dictatedRef = useRef(false);
 
   const handleCopy = (message) => {
     navigator.clipboard.writeText(message.content);
@@ -158,7 +159,6 @@ export default function HEX6ChatInterface() {
       recognitionRef.current.lang = 'en-US';
 
       recognitionRef.current.onresult = (event) => {
-        // Build the full transcript from ALL results in this session — finals + current interim.
         let dictated = '';
         for (let i = 0; i < event.results.length; i++) {
           dictated += event.results[i][0].transcript;
@@ -167,10 +167,8 @@ export default function HEX6ChatInterface() {
         const base = baseTextRef.current;
         const finalText = base + (base && dictated ? ' ' : '') + dictated;
         console.log('[voice] transcript:', dictated, '| final input:', finalText);
-        // Wrap in flushSync-style timeout to force render on iOS Safari which sometimes
-        // batches state updates from speech callbacks until the next user gesture.
+        dictatedRef.current = true; // mark so we know to polish grammar on send
         setInput(finalText);
-        // Belt-and-suspenders: schedule a microtask re-set to guarantee React commits the value.
         Promise.resolve().then(() => setInput(finalText));
       };
 
@@ -253,9 +251,20 @@ export default function HEX6ChatInterface() {
 
     if (!liveValue && !uploadedImage) return;
 
-    // Send raw input directly — backend handles all grammar/intent processing.
-    // Removing the frontend polish saves ~2s per dictated message.
-    const polishedInput = liveValue;
+    // Polish grammar only for dictated input (saves the LLM call on typed messages).
+    let polishedInput = liveValue;
+    if (dictatedRef.current && liveValue.length > 0) {
+      try {
+        const polished = await base44.integrations.Core.InvokeLLM({
+          prompt: `Fix grammar, punctuation, and capitalization for this dictated text. Keep the meaning and wording identical — only correct punctuation, capitalization, and obvious transcription errors. Return ONLY the corrected text, nothing else.\n\nText: "${liveValue}"`,
+          model: 'gemini_3_flash',
+        });
+        if (typeof polished === 'string' && polished.trim().length > 0) {
+          polishedInput = polished.trim().replace(/^["']|["']$/g, '');
+        }
+      } catch (e) { /* fall back to raw input */ }
+    }
+    dictatedRef.current = false;
 
     const userMessage = {
       id: Date.now().toString(),
@@ -289,10 +298,7 @@ export default function HEX6ChatInterface() {
     };
     if (imageAtSend) payload.file_urls = [imageAtSend];
 
-    // Fire the request and detach it from the render cycle. It will complete
-    // even if the user switches tabs, navigates around the app, or the
-    // component re-renders. The .then handler commits the result whenever
-    // the response arrives, regardless of UI state at that moment.
+    // Fire the request — completes even if the user switches tabs.
     const reqId = Date.now();
     const requestPromise = base44.functions.invoke('hex6Chat', payload)
       .then((response) => {
@@ -305,33 +311,26 @@ export default function HEX6ChatInterface() {
           content: replyText,
         };
 
-        // Commit using functional setState so we always merge into the latest
-        // conversation state — works even if the user switched conversations
-        // or sent another message while waiting.
-        setConversations((prev) => {
-          const target = prev.find((c) => c.id === convIdAtSend);
-          if (!target) return prev;
-          const baseMessages = target.messages || newMessages;
-          // Avoid duplicate commits if somehow re-entered
-          if (baseMessages.some((m) => m.id === assistantMessage.id)) return prev;
-          const updated = [...baseMessages, assistantMessage];
-          return prev.map((c) =>
-            c.id === convIdAtSend
-              ? { ...c, messages: updated, updated_at: new Date().toISOString() }
-              : c
-          );
+        // Always append to the visible message list — works whether or not a conversation is selected.
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === assistantMessage.id)) return prev;
+          return [...prev, assistantMessage];
         });
 
-        // If the user is still viewing the same conversation, update the live messages too.
-        setCurrentConversationId((curId) => {
-          if (curId === convIdAtSend) {
-            setMessages((prevMsgs) => {
-              if (prevMsgs.some((m) => m.id === assistantMessage.id)) return prevMsgs;
-              return [...prevMsgs, assistantMessage];
-            });
-          }
-          return curId;
-        });
+        // Persist into conversation store if one was active at send time.
+        if (convIdAtSend) {
+          setConversations((prev) =>
+            prev.map((c) =>
+              c.id === convIdAtSend
+                ? {
+                    ...c,
+                    messages: [...(c.messages || newMessages), assistantMessage],
+                    updated_at: new Date().toISOString(),
+                  }
+                : c
+            )
+          );
+        }
       })
       .catch((err) => {
         console.error('hex6Chat request failed:', err);
@@ -610,7 +609,7 @@ export default function HEX6ChatInterface() {
 
             <textarea
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => { dictatedRef.current = false; setInput(e.target.value); }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
