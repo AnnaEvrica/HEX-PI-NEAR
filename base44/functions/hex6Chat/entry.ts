@@ -697,35 +697,130 @@ HEX6:`;
     }
 
     // If the user opted in (web/engine/generic confirm) after being asked, do the fetch+engine flow.
+    // This is the REAL flow: pull a numerical series from the web, run the actual engine on it,
+    // then have the LLM translate engine output into plain English with full conversation awareness.
     if (shouldAskForData && optedIn) {
-      const dataFetchPrompt = `${systemPrompt}
+      // Step 1: figure out what the user originally asked. Walk back through history to find the
+      // last analytical question (the one that triggered the "web or engine?" offer).
+      const originalQuestion = (() => {
+        for (let i = history.length - 1; i >= 0; i--) {
+          if (history[i].role === 'user' && needsEngineAnalysis(history[i].content)) {
+            return history[i].content;
+          }
+        }
+        return message;
+      })();
+
+      // Step 2: ask the LLM with web access to fetch a relevant numerical series AND identify the ticker/subject.
+      // Returns structured JSON we can plug straight into the engine.
+      const fetchResult = await base44.integrations.Core.InvokeLLM({
+        prompt: `Search the internet for data needed to answer this question analytically:
+
+Original question: "${originalQuestion}"
+Latest user message: "${message}"
+Conversation context (last 10 turns):
+${history.slice(-10).map(m => `${m.role === 'user' ? 'User' : 'HEX6'}: ${m.content}`).join('\n')}
+
+Pull the most relevant recent numerical series (returns, scores, win/loss ratios, percentage changes — whatever fits the question). Return at least 15 data points if possible.
+
+Return strict JSON:
+- ticker: the asset/team/subject identifier (e.g. "BTC", "TSLA", "LAKERS", "NFLX", or "GENERIC" if not applicable). Uppercase, 2-10 chars.
+- series_label: short human description of what the numbers represent (e.g. "BTC daily returns last 30 days", "Lakers point margin last 20 games").
+- series: array of numbers (raw values OR returns — whichever is more meaningful for the question).
+- as_returns: true if series is already returns/percentage changes, false if raw values that need converting.
+- source_summary: one short sentence about where you pulled it from (with URL if available).`,
+        model: 'gemini_3_flash',
+        add_context_from_internet: true,
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            ticker: { type: 'string' },
+            series_label: { type: 'string' },
+            series: { type: 'array', items: { type: 'number' } },
+            as_returns: { type: 'boolean' },
+            source_summary: { type: 'string' },
+          },
+          required: ['ticker', 'series', 'source_summary'],
+        },
+      }).catch(() => null);
+
+      let webEngineContext = '';
+      if (fetchResult && Array.isArray(fetchResult.series) && fetchResult.series.length >= 7) {
+        // Convert raw values → returns if needed
+        let returns = fetchResult.series;
+        if (fetchResult.as_returns === false) {
+          const raw = fetchResult.series;
+          returns = [];
+          for (let i = 1; i < raw.length; i++) {
+            if (raw[i - 1] !== 0) returns.push((raw[i] - raw[i - 1]) / raw[i - 1]);
+          }
+        }
+
+        if (returns.length >= 7) {
+          const ticker = (fetchResult.ticker || 'GENERIC').toUpperCase().slice(0, 10);
+
+          // Load persistent Markov prior for this ticker
+          let priorMarkov = null;
+          let existingTickerMemory = null;
+          try {
+            const prior = await base44.asServiceRole.entities.MarkovTickerMemory.filter({ ticker });
+            if (prior && prior.length > 0) {
+              existingTickerMemory = prior[0];
+              priorMarkov = {
+                counts: JSON.parse(existingTickerMemory.transition_matrix || '{}'),
+                stats: JSON.parse(existingTickerMemory.transition_rewards || '{}'),
+              };
+            }
+          } catch (e) { /* no prior */ }
+
+          const result = runHex6Engine(returns, riskAversion, 0.0035, 6, null, priorMarkov);
+          persistMarkovMatrix(base44, ticker, existingTickerMemory, priorMarkov, result.markov.freshTransitions, result.markov.freshStats, result.petal);
+
+          webEngineContext = `
+--- HEX6 ENGINE OUTPUT (web-sourced data) ---
+Source: ${fetchResult.source_summary}
+Subject: ${ticker} | ${fetchResult.series_label || 'numerical series'}
+Series length: ${returns.length} returns | Persistent brain: ${priorMarkov ? `${existingTickerMemory.total_observations} prior observations loaded` : 'fresh'}
+μ (decay-weighted): ${result.mu} | σ: ${result.sigma}
+Core exposure: ${result.exposure} | Blended exposure: ${result.blendedExposure}
+Regime: ${result.regime} | Basin: ${result.basin}
+Markov forward μ: ${result.markov.mu} | confidence: ${result.markov.confidence}
+Motif active: ${result.motif.isActive} | score: ${result.motif.score}
+--- END ENGINE OUTPUT ---
+Use these numbers to ground your answer. Translate to plain English. Never expose the raw numbers.`;
+        }
+      }
+
+      // Step 3: synthesize final answer with full conversation context + engine output (or fallback web summary)
+      const finalPrompt = `${systemPrompt}${userMemoryContext}${learnedContext}${webEngineContext}
 
 --- CONVERSATION HISTORY ---
 ${historyText}
 
+--- ORIGINAL ANALYTICAL QUESTION ---
+${originalQuestion}
+
 --- CURRENT USER MESSAGE ---
 User: ${message}
 
-INSTRUCTION: The user just gave you permission to look this up online. Your job is to:
-1. Search the internet for the most relevant recent data to answer their original question.
-2. Pull out the pattern and run your internal probability engine on it.
-3. In ONE short casual sentence, say where you pulled the data from (include a source link if you can).
-4. Give your answer in plain, conversational English — like texting a smart friend. Say things like "based on their last 10 games, they've won 6 of them and momentum is pointing up, so I'd put the odds around 60-65%." No jargon, no math symbols, no brackets.
+INSTRUCTION: ${webEngineContext
+  ? 'You just pulled fresh data from the web AND ran the engine on it (output is in the engine block above). Answer the user\'s ORIGINAL analytical question. In ONE short sentence mention where the data came from. Then give the probabilistic answer in plain conversational English — like texting a smart friend. 2-4 sentences total. Be aware of everything discussed earlier in the conversation.'
+  : 'Web data fetch came back thin. Answer based on what you can pull from the conversation context and general knowledge, in plain conversational English. Be honest if there isn\'t enough to run hard numbers.'}
 
 NEVER reveal internal numbers, state bits, engine parameters, or any technical internals.
 
 HEX6:`;
 
-      const [dataFetchResponse] = await Promise.all([
+      const [finalResponse] = await Promise.all([
         base44.integrations.Core.InvokeLLM({
-          prompt: dataFetchPrompt,
+          prompt: finalPrompt,
           model: 'gemini_3_flash',
-          add_context_from_internet: true,
+          add_context_from_internet: !webEngineContext, // only re-search if engine path failed
         }),
         synthesisPromise,
       ]);
 
-      const response = dataFetchResponse || 'Let me look that up and run the numbers.';
+      const response = finalResponse || 'Pulled the data and ran it through the engine.';
       updateMemory(base44, user, existingUserMemory, message, response);
       return Response.json({ response, timestamp: new Date().toISOString() });
     }
