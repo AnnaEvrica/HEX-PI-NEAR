@@ -177,14 +177,28 @@ export default function HEX6ChatInterface() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleVoiceInput = () => {
-    if (!recognitionRef.current) return;
+  const handleVoiceInput = async () => {
+    if (!recognitionRef.current) {
+      alert('Voice input is not supported in this browser. Try Chrome, Edge, or Safari.');
+      return;
+    }
     if (listening) {
       recognitionRef.current.stop();
       setListening(false);
-    } else {
+      return;
+    }
+    // Explicitly request mic permission first — this triggers the browser prompt
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach((t) => t.stop()); // release immediately, recognition will reopen
       setListening(true);
       recognitionRef.current.start();
+    } catch (err) {
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        alert('Microphone access was denied. Click the lock icon in your browser address bar to allow microphone access for this site.');
+      } else {
+        alert('Could not access microphone: ' + err.message);
+      }
     }
   };
 
