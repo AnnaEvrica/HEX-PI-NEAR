@@ -69,6 +69,119 @@ function decayStats(observations, lambda = 0.94) {
 }
 
 // ---------------------------------------------------------------------------
+// Markov 64-state transition layer — captures regime momentum
+// Encodes 6-bit momentum patterns (2^6 = 64 states), tracks state-to-state transitions
+// Returns expected next-step return based on transition probabilities
+// ---------------------------------------------------------------------------
+function encodeState6(slice) {
+  if (slice.length < 6) return null;
+  const bits = slice.slice(-6).map(r => r > 0 ? '1' : '0').join('');
+  return parseInt(bits, 2);
+}
+
+function markovEdge(returns) {
+  if (returns.length < 8) return { mu: 0, sigma: 0, n: 0, transitionConfidence: 0, currentState: null };
+
+  // Build transition counts and per-transition reward bucket
+  const transitionCounts = {}; // "s0->s1" -> count
+  const transitionRewards = {}; // "s0->s1" -> [returns]
+
+  for (let i = 6; i < returns.length - 1; i++) {
+    const s0 = encodeState6(returns.slice(i - 6, i));
+    const s1 = encodeState6(returns.slice(i - 5, i + 1));
+    if (s0 === null || s1 === null) continue;
+    const key = `${s0}->${s1}`;
+    transitionCounts[key] = (transitionCounts[key] || 0) + 1;
+    if (!transitionRewards[key]) transitionRewards[key] = [];
+    transitionRewards[key].push(returns[i + 1]);
+  }
+
+  // Current state
+  const currentState = encodeState6(returns.slice(-6));
+  if (currentState === null) return { mu: 0, sigma: 0, n: 0, transitionConfidence: 0, currentState: null };
+
+  // Aggregate edge across all observed transitions FROM currentState
+  let totalCount = 0;
+  const transitions = [];
+  for (const key in transitionCounts) {
+    if (key.startsWith(`${currentState}->`)) {
+      totalCount += transitionCounts[key];
+      transitions.push({ key, count: transitionCounts[key], rewards: transitionRewards[key] });
+    }
+  }
+
+  if (totalCount === 0) return { mu: 0, sigma: 0, n: 0, transitionConfidence: 0, currentState };
+
+  // Probability-weighted expected return
+  let mu = 0, secondMoment = 0;
+  for (const t of transitions) {
+    const prob = t.count / totalCount;
+    const meanR = t.rewards.reduce((s, x) => s + x, 0) / t.rewards.length;
+    const meanR2 = t.rewards.reduce((s, x) => s + x * x, 0) / t.rewards.length;
+    mu += prob * meanR;
+    secondMoment += prob * meanR2;
+  }
+  const sigma = Math.sqrt(Math.max(0, secondMoment - mu * mu));
+  // Confidence scales with sample size (saturates at ~30 observations)
+  const transitionConfidence = Math.min(1, totalCount / 30);
+
+  return { mu, sigma, n: totalCount, transitionConfidence, currentState };
+}
+
+// ---------------------------------------------------------------------------
+// Adaptive 1/137 motif tracking — flags rare prime-number states as edge signal
+// Tracks if motif states (1,3,7,13,17,31,37) systematically outperform other states
+// Returns a tanh-bounded score in [-1, 1]
+// ---------------------------------------------------------------------------
+const MOTIF_STATES = new Set([1, 3, 7, 13, 17, 31, 37]);
+
+function adaptive137Score(returns) {
+  if (returns.length < 8) return { score: 0, motifMu: 0, elseMu: 0, isMotifNow: false };
+
+  let motifSum = 0, motifSum2 = 0, motifN = 0;
+  let elseSum = 0, elseSum2 = 0, elseN = 0;
+
+  for (let i = 6; i < returns.length; i++) {
+    const state = encodeState6(returns.slice(i - 6, i));
+    if (state === null) continue;
+    const r = returns[i];
+    if (MOTIF_STATES.has(state)) {
+      motifSum += r; motifSum2 += r * r; motifN++;
+    } else {
+      elseSum += r; elseSum2 += r * r; elseN++;
+    }
+  }
+
+  const motifMu = motifN > 0 ? motifSum / motifN : 0;
+  const elseMu = elseN > 0 ? elseSum / elseN : 0;
+  const motifVar = motifN > 0 ? Math.max(1e-8, motifSum2 / motifN - motifMu * motifMu) : 1e-4;
+  const denom = Math.sqrt(motifVar);
+
+  const currentState = encodeState6(returns.slice(-6));
+  const isMotifNow = currentState !== null && MOTIF_STATES.has(currentState);
+
+  // Only emit signal when current state IS a motif state
+  if (!isMotifNow || motifN < 3) return { score: 0, motifMu, elseMu, isMotifNow };
+
+  const relative = (motifMu - elseMu) / denom;
+  const score = Math.tanh(relative);
+  return { score, motifMu, elseMu, isMotifNow };
+}
+
+// ---------------------------------------------------------------------------
+// Archetype basin classification — names the regime instead of raw bits
+// ---------------------------------------------------------------------------
+function classifyBasin(stateKey6, mu, sigma) {
+  if (stateKey6 === null || stateKey6 === undefined) return 'undefined';
+  if (stateKey6 === 0) return 'capitulation';
+  if (stateKey6 === 63) return 'euphoria';
+  if (mu > 0 && sigma < 0.01) return 'laminar_growth';
+  if (mu < 0 && sigma > 0.02) return 'turbulent_drawdown';
+  if (sigma > 0.025) return 'chaotic_transition';
+  return 'neutral_flow';
+}
+
+// ---------------------------------------------------------------------------
 // Core engine — accepts optional reference series for cross-asset corr bit
 // ---------------------------------------------------------------------------
 function runHex6Engine(returns, riskAversion = 2.5, friction = 0.0035, windowSize = 6, refReturns = null) {
@@ -133,11 +246,14 @@ function runHex6Engine(returns, riskAversion = 2.5, friction = 0.0035, windowSiz
 
   if (bin.length < 3) {
     return {
-      mu: 0, sigma: 0, exposure: 0,
+      mu: 0, sigma: 0, exposure: 0, blendedExposure: 0,
       stateKey, stateBits, n: bin.length,
       nEff: 0, corrBit: currentCorrBit,
       regime: 'INSUFFICIENT_DATA',
-      engineVersion: 'SCEFM-v5.1-128state'
+      basin: 'undefined',
+      markov: { mu: 0, sigma: 0, n: 0, confidence: 0 },
+      motif: { score: 0, isActive: false, motifMu: 0, elseMu: 0 },
+      engineVersion: 'SCEFM-v5.2-128state+Markov64+1/137+Basin'
     };
   }
 
@@ -161,16 +277,44 @@ function runHex6Engine(returns, riskAversion = 2.5, friction = 0.0035, windowSiz
 
   const regime = exposure > 0.6 ? 'BULL' : exposure > 0.3 ? 'LATERAL' : mu < 0 ? 'BEAR' : 'SILENCE';
 
+  // ---- Additive layers: Markov transitions + 1/137 motif + Archetype basin ----
+  const markov = markovEdge(returns);
+  const motif = adaptive137Score(returns);
+  const basin = classifyBasin(markov.currentState, mu, sigma);
+
+  // Blended exposure: original SCEFM + Markov edge boost + 1/137 motif boost
+  // 70% SCEFM core, 20% Markov forward-looking, 10% motif signal
+  let blendedExposure = exposure;
+  if (markov.transitionConfidence > 0.3 && markov.sigma > 0) {
+    const markovExposure = Math.min(Math.max((markov.mu / (markov.sigma * markov.sigma)) / riskAversion, 0), 1);
+    blendedExposure = 0.7 * exposure + 0.2 * markovExposure + 0.1 * Math.max(0, motif.score);
+    blendedExposure = Math.min(Math.max(blendedExposure, 0), 1);
+  }
+
   return {
     mu: parseFloat(mu.toFixed(6)),
     sigma: parseFloat(sigma.toFixed(6)),
     exposure: parseFloat(exposure.toFixed(4)),
+    blendedExposure: parseFloat(blendedExposure.toFixed(4)),
     stateKey, stateBits,
     n: bin.length,
     nEff,
     corrBit: currentCorrBit,
     regime,
-    engineVersion: 'SCEFM-v5.1-128state'
+    basin,
+    markov: {
+      mu: parseFloat(markov.mu.toFixed(6)),
+      sigma: parseFloat(markov.sigma.toFixed(6)),
+      n: markov.n,
+      confidence: parseFloat(markov.transitionConfidence.toFixed(3)),
+    },
+    motif: {
+      score: parseFloat(motif.score.toFixed(4)),
+      isActive: motif.isMotifNow,
+      motifMu: parseFloat(motif.motifMu.toFixed(6)),
+      elseMu: parseFloat(motif.elseMu.toFixed(6)),
+    },
+    engineVersion: 'SCEFM-v5.2-128state+Markov64+1/137+Basin'
   };
 }
 
@@ -240,20 +384,44 @@ Deno.serve(async (req) => {
 
       const result = runHex6Engine(primarySeries, riskAversion, 0.0035, 6, refSeries);
       engineContext = `
---- HEX6 ENGINE OUTPUT v5.1 (SCEFM 128-state, decay-weighted) ---
+--- HEX6 ENGINE OUTPUT v5.2 (SCEFM 128-state + Markov64 + 1/137 + Basin) ---
 Engine: ${result.engineVersion}
 Input series: ${primarySeries.length} data points${refSeries ? ` | Reference series: ${refSeries.length} points` : ''}
+
+[CORE SCEFM LAYER]
 State key: ${result.stateKey} | Binary: ${result.stateBits} (7 bits: 6 momentum + 1 corr)
 Correlation bit: ${result.corrBit} (${result.corrBit === 1 ? 'high correlation / trend-consistent regime' : 'low correlation / divergent regime'})
 Raw samples in state: ${result.n} | Effective sample size (decay-adjusted): ${result.nEff}
-μ decay-weighted (mean return in state): ${result.mu}
-σ decay-weighted (volatility in state): ${result.sigma}
-Exposure scalar E(S_t): ${result.exposure} (0=no edge, 1=full conviction)
-Regime classification: ${result.regime}
-Risk aversion parameter: ${riskAversion}
-Decay factor λ: 0.94 (recent observations dominate; half-life ≈ 12 periods)
+μ decay-weighted: ${result.mu} | σ decay-weighted: ${result.sigma}
+Core exposure: ${result.exposure}
+
+[MARKOV 64-STATE TRANSITION LAYER — forward-looking]
+Current 6-bit state: ${result.markov.n > 0 ? `transitions observed from this state: ${result.markov.n}` : 'no prior transitions observed'}
+Expected next-step μ (transition-weighted): ${result.markov.mu}
+σ across transitions: ${result.markov.sigma}
+Transition confidence (0-1): ${result.markov.confidence}
+
+[ADAPTIVE 1/137 MOTIF LAYER — rare-state edge signal]
+Motif state active now: ${result.motif.isActive ? 'YES (current state is in motif set {1,3,7,13,17,31,37})' : 'no'}
+Motif score (-1 to +1): ${result.motif.score}
+Motif states historical μ: ${result.motif.motifMu} vs non-motif μ: ${result.motif.elseMu}
+
+[ARCHETYPE BASIN — named regime classification]
+Basin: ${result.basin} (${
+  result.basin === 'capitulation' ? 'extreme bearish exhaustion — potential reversal zone' :
+  result.basin === 'euphoria' ? 'extreme bullish — overheated, mean-reversion risk' :
+  result.basin === 'laminar_growth' ? 'smooth uptrend, low volatility' :
+  result.basin === 'turbulent_drawdown' ? 'choppy decline, elevated volatility' :
+  result.basin === 'chaotic_transition' ? 'high vol regime change in progress' :
+  result.basin === 'neutral_flow' ? 'mild directional drift, normal vol' : 'insufficient data'
+})
+
+[BLENDED OUTPUT]
+Final blended exposure (SCEFM 70% + Markov 20% + Motif 10%): ${result.blendedExposure}
+Regime: ${result.regime}
+Risk aversion: ${riskAversion}
 --- END ENGINE OUTPUT ---
-Use this computed output directly in your response. Ground your analysis in these exact numbers. Note the decay-weighting and correlation bit context.`;
+Use this computed output directly in your response. Ground your analysis in these numbers. The Markov layer tells you where the state is heading next; the 1/137 motif highlights rare high-edge moments; the archetype basin gives a named regime context. Translate everything to plain English.`;
     } else if (isAnalytical && !hex6WasAskingForData) {
       // Analytical question but no data — fetch from internet first, then run engine
       shouldAskForData = true;
@@ -274,7 +442,7 @@ CORE BEHAVIOR:
 - Keep it short. 2–4 sentences max. Only go longer if they ask for more detail.
 - Never use jargon people don't already know. Say "there's a good chance" not "the distribution skews positive." Say "it's been inconsistent lately" not "high sigma regime."
 - Never use brackets, parentheses for notation, dollar signs around math, LaTeX formatting, or any technical symbols like μ, σ, λ in your response. Write everything in plain words.
-- Never reveal, reference, or hint at your internal engine workings, state keys, bit patterns, decay factors, exposure scalars, SCEFM, HIVE, or any internal math. That is completely confidential. If asked how you work, say you run a proprietary probability engine — nothing more.
+- Never reveal, reference, or hint at your internal engine workings, state keys, bit patterns, decay factors, exposure scalars, SCEFM, HIVE, Markov transitions, motif states, 1/137, archetype basins, or any internal math. That is completely confidential. If asked how you work, say you run a proprietary probability engine — nothing more.
 - It's fine to share links to sources you find online.
 
 FOCUS:
