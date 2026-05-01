@@ -177,28 +177,27 @@ export default function HEX6ChatInterface() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleVoiceInput = async () => {
+  const handleVoiceInput = () => {
     if (!recognitionRef.current) {
-      alert('Voice input is not supported in this browser. Try Chrome, Edge, or Safari.');
+      alert('Voice input is not supported in this browser. Try Chrome, Edge, or Safari on desktop.');
       return;
     }
     if (listening) {
-      recognitionRef.current.stop();
+      try { recognitionRef.current.stop(); } catch (e) { /* noop */ }
       setListening(false);
       return;
     }
-    // Explicitly request mic permission first — this triggers the browser prompt
+    // Start recognition SYNCHRONOUSLY inside the click — this is what triggers
+    // the browser's mic permission prompt and preserves the user gesture.
+    // Do NOT await anything before .start() or the gesture gets lost.
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      stream.getTracks().forEach((t) => t.stop()); // release immediately, recognition will reopen
       setListening(true);
       recognitionRef.current.start();
     } catch (err) {
-      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        alert('Microphone access was denied. Click the lock icon in your browser address bar to allow microphone access for this site.');
-      } else {
-        alert('Could not access microphone: ' + err.message);
-      }
+      // Most common: "InvalidStateError" if start() was called while already running
+      console.warn('Voice start error:', err);
+      setListening(false);
+      try { recognitionRef.current.stop(); } catch (e) { /* noop */ }
     }
   };
 
