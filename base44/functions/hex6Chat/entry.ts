@@ -713,22 +713,36 @@ HEX6:`;
 
       // Step 2: ask the LLM with web access to fetch a relevant numerical series AND identify the ticker/subject.
       // Returns structured JSON we can plug straight into the engine.
+      // HARD REQUIREMENT: minimum 30 data points (needed for Markov layer to be statistically meaningful).
       const fetchResult = await base44.integrations.Core.InvokeLLM({
-        prompt: `Search the internet for data needed to answer this question analytically:
+        prompt: `Search the internet for HIGH-QUALITY, UP-TO-DATE numerical data needed to answer this question analytically.
 
 Original question: "${originalQuestion}"
 Latest user message: "${message}"
 Conversation context (last 10 turns):
 ${history.slice(-10).map(m => `${m.role === 'user' ? 'User' : 'HEX6'}: ${m.content}`).join('\n')}
 
-Pull the most relevant recent numerical series (returns, scores, win/loss ratios, percentage changes — whatever fits the question). Return at least 15 data points if possible.
+DATA QUALITY REQUIREMENTS — these are non-negotiable:
+1. MINIMUM 30 data points. Engine's Markov layer needs at least 30 to be statistically valid. If you can find 50-100, even better. Do NOT return fewer than 30.
+2. Sources must be AUTHORITATIVE and RECENT — prefer official/primary sources:
+   - Finance: Yahoo Finance, CoinGecko, CoinMarketCap, Nasdaq, official exchange data, SEC filings, FRED
+   - Sports: ESPN, official league sites (NBA.com, NFL.com, MLB.com), Basketball-Reference, Pro-Football-Reference
+   - Markets/economics: Bloomberg, Reuters, Federal Reserve, World Bank
+   - News/events: Reuters, AP, official press releases
+   AVOID: blogs, opinion pieces, outdated archives (>1 year old unless historical context required), forums, social media posts.
+3. Data must be RECENT — within the last few months for active markets/seasons unless the question specifies otherwise.
+4. If you cannot find 30+ quality data points, return series_status="insufficient" and explain in source_summary what's missing.
+
+Pull the most relevant numerical series (returns, scores, win/loss margins, percentage changes — whatever fits the question).
 
 Return strict JSON:
-- ticker: the asset/team/subject identifier (e.g. "BTC", "TSLA", "LAKERS", "NFLX", or "GENERIC" if not applicable). Uppercase, 2-10 chars.
-- series_label: short human description of what the numbers represent (e.g. "BTC daily returns last 30 days", "Lakers point margin last 20 games").
-- series: array of numbers (raw values OR returns — whichever is more meaningful for the question).
-- as_returns: true if series is already returns/percentage changes, false if raw values that need converting.
-- source_summary: one short sentence about where you pulled it from (with URL if available).`,
+- ticker: asset/team/subject identifier, UPPERCASE, 2-10 chars (e.g. "BTC", "TSLA", "LAKERS", "NFLX", or "GENERIC").
+- series_label: short human description (e.g. "BTC daily returns last 60 days", "Lakers point margin last 30 games").
+- series: array of numbers — MINIMUM 30 ENTRIES if data quality permits.
+- as_returns: true if series is already returns/percentage changes, false if raw values needing conversion.
+- series_status: "ok" if you found ≥30 quality points, "insufficient" if not enough quality data exists.
+- sources: array of {name: string, url: string} — list 2-4 authoritative sources you used. URLs must be real and valid.
+- source_summary: one sentence describing what you pulled and the time range covered.`,
         model: 'gemini_3_flash',
         add_context_from_internet: true,
         response_json_schema: {
@@ -738,6 +752,15 @@ Return strict JSON:
             series_label: { type: 'string' },
             series: { type: 'array', items: { type: 'number' } },
             as_returns: { type: 'boolean' },
+            series_status: { type: 'string' },
+            sources: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: { name: { type: 'string' }, url: { type: 'string' } },
+                required: ['name', 'url'],
+              },
+            },
             source_summary: { type: 'string' },
           },
           required: ['ticker', 'series', 'source_summary'],
@@ -745,7 +768,19 @@ Return strict JSON:
       }).catch(() => null);
 
       let webEngineContext = '';
-      if (fetchResult && Array.isArray(fetchResult.series) && fetchResult.series.length >= 7) {
+      let sourcesBlock = '';
+      let dataInsufficient = false;
+
+      // Build clean source list for the final prompt — plain text "Name — URL" form, no brackets, no markdown.
+      if (fetchResult?.sources && Array.isArray(fetchResult.sources) && fetchResult.sources.length > 0) {
+        sourcesBlock = fetchResult.sources
+          .filter(s => s?.url && s?.name)
+          .map(s => `${s.name} — ${s.url}`)
+          .join('\n');
+      }
+
+      // HARD GATE: require ≥30 points for Markov layer + engine validity.
+      if (fetchResult && Array.isArray(fetchResult.series) && fetchResult.series.length >= 30) {
         // Convert raw values → returns if needed
         let returns = fetchResult.series;
         if (fetchResult.as_returns === false) {
@@ -756,7 +791,7 @@ Return strict JSON:
           }
         }
 
-        if (returns.length >= 7) {
+        if (returns.length >= 30) {
           const ticker = (fetchResult.ticker || 'GENERIC').toUpperCase().slice(0, 10);
 
           // Load persistent Markov prior for this ticker
@@ -788,11 +823,21 @@ Markov forward μ: ${result.markov.mu} | confidence: ${result.markov.confidence}
 Motif active: ${result.motif.isActive} | score: ${result.motif.score}
 --- END ENGINE OUTPUT ---
 Use these numbers to ground your answer. Translate to plain English. Never expose the raw numbers.`;
+        } else {
+          dataInsufficient = true;
         }
+      } else {
+        dataInsufficient = true;
       }
 
+      // Sources block — clean format, no brackets, no markdown link syntax
+      const sourcesContext = sourcesBlock ? `
+--- SOURCES USED ---
+${sourcesBlock}
+--- END SOURCES ---` : '';
+
       // Step 3: synthesize final answer with full conversation context + engine output (or fallback web summary)
-      const finalPrompt = `${systemPrompt}${userMemoryContext}${learnedContext}${webEngineContext}
+      const finalPrompt = `${systemPrompt}${userMemoryContext}${learnedContext}${webEngineContext}${sourcesContext}
 
 --- CONVERSATION HISTORY ---
 ${historyText}
@@ -804,10 +849,26 @@ ${originalQuestion}
 User: ${message}
 
 INSTRUCTION: ${webEngineContext
-  ? 'You just pulled fresh data from the web AND ran the engine on it (output is in the engine block above). Answer the user\'s ORIGINAL analytical question. In ONE short sentence mention where the data came from. Then give the probabilistic answer in plain conversational English — like texting a smart friend. 2-4 sentences total. Be aware of everything discussed earlier in the conversation.'
-  : 'Web data fetch came back thin. Answer based on what you can pull from the conversation context and general knowledge, in plain conversational English. Be honest if there isn\'t enough to run hard numbers.'}
+  ? `You just pulled fresh, high-quality data from the web AND ran the engine on it. Answer the user's ORIGINAL analytical question.
+
+FORMAT (strict):
+1. Open with the probabilistic answer in plain conversational English — like texting a smart friend. 2-3 sentences. Be aware of everything discussed earlier.
+2. Then on a new line, write: "Sources:" followed by each source on its own line in this exact format:
+   • Source Name — https://full.url.here
+   Use the bullet character • (not a dash, not a hyphen, not brackets, not parentheses). One source per line. NEVER wrap URLs in brackets, parentheses, angle brackets, or markdown link syntax. The URL must appear as raw text after an em-dash separator.
+
+EXAMPLE OUTPUT:
+Based on the last 60 days of price action, momentum is leaning up with about a 62% probability of continuation in the near term. Volatility is elevated though, so position size matters.
+
+Sources:
+• Yahoo Finance — https://finance.yahoo.com/quote/BTC-USD/history
+• CoinGecko — https://www.coingecko.com/en/coins/bitcoin`
+  : dataInsufficient
+    ? `The web search did NOT return at least 30 quality data points needed to run the engine reliably. Be HONEST with the user about this — explain in one short sentence that you couldn't find enough recent, high-quality data to run hard numbers, and ask if they want you to try a different angle or if they have data to share. Keep it casual and brief. ${sourcesBlock ? 'You may briefly mention the sources you DID check, formatted as: "I checked Yahoo Finance and CoinGecko but the data was thin." Do NOT format these as a Sources list — just mention them inline.' : ''}`
+    : 'Web data fetch came back thin. Answer based on conversation context and general knowledge, in plain conversational English. Be honest if there isn\'t enough to run hard numbers.'}
 
 NEVER reveal internal numbers, state bits, engine parameters, or any technical internals.
+NEVER use brackets, parentheses, or markdown link syntax around URLs. URLs must appear as raw plain text.
 
 HEX6:`;
 
