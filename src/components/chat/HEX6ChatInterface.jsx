@@ -28,6 +28,7 @@ export default function HEX6ChatInterface() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [legalOpen, setLegalOpen] = useState(false);
   const [listening, setListening] = useState(false);
+  const [micBlocked, setMicBlocked] = useState(false);
   const [traderEnabled, setTraderEnabled] = useState(false);
   const [uploadedImage, setUploadedImage] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
@@ -180,25 +181,36 @@ export default function HEX6ChatInterface() {
   }, [messages]);
 
   const handleVoiceInput = async () => {
-    if (!recognitionRef.current) {
-      alert('Voice input is not supported in this browser. Try Chrome, Edge, or Safari.');
-      return;
-    }
+    if (!recognitionRef.current) return;
+
     if (listening) {
       try { recognitionRef.current.stop(); } catch (e) { /* noop */ }
       setListening(false);
       return;
     }
 
-    // Request mic permission explicitly — this reliably triggers the native browser
-    // Allow/Block prompt on hosted (non-iframe) sites. Once granted, start recognition.
+    // Check existing permission state to avoid an unnecessary re-prompt
+    let permissionState = 'prompt';
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      // Immediately stop the stream — SpeechRecognition opens its own.
-      stream.getTracks().forEach((t) => t.stop());
-    } catch (err) {
-      console.warn('[voice] mic permission denied:', err);
-      return;
+      if (navigator.permissions?.query) {
+        const status = await navigator.permissions.query({ name: 'microphone' });
+        permissionState = status.state; // 'granted' | 'denied' | 'prompt'
+      }
+    } catch (e) { /* not all browsers support this — fall through */ }
+
+    // If permission isn't already granted, request it via getUserMedia (triggers native prompt)
+    if (permissionState !== 'granted') {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach((t) => t.stop());
+        setMicBlocked(false);
+      } catch (err) {
+        console.warn('[voice] mic permission denied:', err);
+        setMicBlocked(true);
+        return;
+      }
+    } else {
+      setMicBlocked(false);
     }
 
     try {
@@ -544,12 +556,20 @@ export default function HEX6ChatInterface() {
               className={`p-2 md:p-2.5 rounded-sm transition-colors shrink-0 flex items-center justify-center ${
                 listening
                   ? 'bg-accent text-accent-foreground'
-                  : 'hover:bg-muted text-secondary hover:text-foreground'
+                  : micBlocked
+                    ? 'text-destructive hover:bg-destructive/10'
+                    : 'hover:bg-muted text-secondary hover:text-foreground'
               }`}
-              title={listening ? 'Stop listening' : 'Start voice input'}
+              title={
+                listening
+                  ? 'Stop listening'
+                  : micBlocked
+                    ? 'Microphone blocked — click the lock icon in your browser address bar to allow'
+                    : 'Start voice input'
+              }
               style={{ minWidth: '44px', minHeight: '44px' }}
             >
-              <Mic className={`w-4 md:w-5 h-4 md:h-5 ${listening ? 'animate-pulse' : ''}`} />
+              {micBlocked ? <MicOff className="w-4 md:w-5 h-4 md:h-5" /> : <Mic className={`w-4 md:w-5 h-4 md:h-5 ${listening ? 'animate-pulse' : ''}`} />}
             </button>
 
             <button
