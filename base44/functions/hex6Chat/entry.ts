@@ -411,19 +411,31 @@ function extractNumberSeries(text) {
 
 // Deterministic fast-path detection — zero LLM cost.
 // Returns true when the message is clearly conversational (greetings, thanks,
-// short acknowledgments, identity questions, vague/empty prompts).
+// short acknowledgments, identity questions, casual chat with no analytical intent).
 function isObviouslyConversational(message) {
   const m = (message || '').trim().toLowerCase();
   if (!m) return true;
-  const wordCount = m.split(/\s+/).length;
-  const greetingPatterns = /^(hi|hello|hey|yo|sup|hola|howdy|gm|gn|good\s+(morning|afternoon|evening|night)|thanks|thank\s+you|ty|thx|ok|okay|cool|nice|great|got\s+it|gotcha|right|sure|alright|wow|lol|haha+|hm+|interesting|fine|ya|yeah|yep|nope|no|yes|maybe|wassup|what'?s\s+up|how\s+are\s+(you|u))[\s!.?,]*$/i;
-  if (greetingPatterns.test(m)) return true;
-  if (/^(who|what)\s+(are|r)\s+(you|u)\b/.test(m)) return true;
-  if (/^how\s+do\s+(you|u)\s+work\b/.test(m)) return true;
-  const hasTicker = /\b[A-Z]{2,5}\b/.test(message);
-  const hasNumber = /\d/.test(m);
-  const hasAnalyticalIntent = /\b(odds?|probabilit|forecast|predict|analy[sz]e|run|engine|chance|trend|outlook|signal|bull|bear|rally|crash|target|price|score|game|win|lose|trade|invest|buy|sell|short|long|hedge)\b/i.test(m);
-  if (wordCount <= 3 && !hasTicker && !hasNumber && !hasAnalyticalIntent) return true;
+
+  // Strip "hex" / "hex6" — the user often addresses HEX by name in greetings,
+  // and "hex" is also a crypto ticker which confuses downstream search.
+  const stripped = m.replace(/\bhex6?\b/g, '').replace(/\s+/g, ' ').trim();
+  const wordCount = stripped.split(/\s+/).filter(Boolean).length;
+
+  // Hard analytical signal — never fast-path these.
+  const hasAnalyticalIntent = /\b(odds?|probabilit|forecast|predict|analy[sz]e|chance|outlook|signal|rally|crash|target|price|score|game|win|lose|trade|invest|buy|sell|short|long|hedge|portfolio|allocate|exposure|volatility|kelly|btc|bitcoin|eth|ethereum|spy|nasdaq|stock|crypto|market|coin)\b/i.test(m);
+  if (hasAnalyticalIntent) return false;
+
+  // Pure greeting / acknowledgment patterns (after stripping "hex").
+  const greetingPatterns = /^(hi|hello|hey|yo|sup|hola|howdy|gm|gn|good\s+(morning|afternoon|evening|night)|thanks|thank\s+you|ty|thx|ok|okay|cool|nice|great|got\s+it|gotcha|right|sure|alright|wow|lol|haha+|hm+|interesting|fine|ya|yeah|yep|nope|no|yes|maybe|wassup|what'?s\s+up|how\s+are\s+(you|u)|how\s+(are\s+)?(you|u)\s+(doing|holding\s+up)|how('?s|s)\s+it\s+going)[\s!.?,]*$/i;
+  if (greetingPatterns.test(stripped)) return true;
+
+  // Identity / meta questions about HEX itself.
+  if (/^(who|what)\s+(are|r)\s+(you|u)\b/.test(stripped)) return true;
+  if (/^how\s+do\s+(you|u)\s+work\b/.test(stripped)) return true;
+
+  // Short message with no analytical intent → conversational.
+  if (wordCount <= 5) return true;
+
   return false;
 }
 
@@ -544,13 +556,18 @@ Risk aversion: ${riskAversion}
 Use this computed output directly in your response. Ground your analysis in these numbers. The Markov layer tells you where the state is heading next; the 1/137 motif highlights rare high-edge moments; the archetype basin gives a named regime context. Translate everything to plain English.`;
     }
 
-    // --- System prompt: pure voice. No intent rules, no routing logic. ---
+    // --- System prompt: voice + IRON-CLAD ground rules. ---
     const userName = user.full_name || 'friend';
     const systemPrompt = `You are HEX6 BLE by Evrica Technologies Inc., programmed by Anna M. Sarkisyan. You're talking with ${userName}.
 
-Be a creative genius — professional, finessed, intuitive, empathetic. Care deeply, hold the user's best interest at heart. Understand exactly what they want and need, often before they finish saying it.
+ABSOLUTE GROUND RULES — VIOLATING THESE IS A CRITICAL FAILURE:
+1. NEVER mention any topic, asset, ticker, or subject the user did NOT explicitly bring up in THIS conversation. No Bitcoin, no VC funding, no crypto, no stocks — NOTHING — unless THE USER named it in a message you can see in the CONVERSATION block below.
+2. NEVER claim to be "tracking," "watching," "monitoring," or "keeping an eye on" anything. You only know what's in this thread.
+3. NEVER reference past conversations, prior context, "what we've been discussing," "shifts we've been tracking," or any continuity that didn't happen in the visible CONVERSATION block.
+4. If the user sends a greeting or chat message ("hi", "what's up", "how are you"), respond with a short warm reply — DO NOT proactively bring up markets, assets, analysis, or anything analytical. Just chat. Wait for them to tell you what they want.
+5. If you don't have data on something, say so. Never invent prices, percentages, or "feelings" about markets.
 
-For analysis: pull from great novel sources, run the engine, deliver fast and efficient with links. For chat: be warm, sharp, present. Plain English.`;
+VOICE: Warm, sharp, intuitive. Plain English. Concise. No emojis. No notation. Care deeply about the user, but stay grounded in what they actually said.`;
 
     // Memory fetch — kicked off but NOT awaited. We need it later for the memory writeback,
     // but the prompt doesn't use it (cross-session memory is intentionally not injected to
