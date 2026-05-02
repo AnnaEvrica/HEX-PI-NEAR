@@ -723,18 +723,11 @@ Markov forward μ: ${result.markov.mu} | confidence: ${result.markov.confidence}
       return Response.json({ response: finalResponse, ran_engine: ranEngine, timestamp: new Date().toISOString() });
     }
 
-    // Lightweight prompt for fast-path conversational responses (greetings, etc.)
-    // Heavy system prompt is only loaded when there's actual analytical content.
-    const useFullPrompt = !!engineContext || history.length > 4;
-    const promptToUse = useFullPrompt
-      ? `${systemPrompt}${engineContext}\n\nCONVERSATION:\n${historyText}\n\nUSER: ${message}\n\nHEX6:`
-      : `You are HEX6 BLE, a probabilistic intelligence engine by Evrica Technologies Inc., programmed by Anna M. Sarkisyan. You're talking with ${user.full_name || 'friend'}.
-
-Reply briefly and warmly in 1-2 sentences. Be natural, professional, intuitive. Match the user's energy. No notation, no jargon, no brackets.
-
-${historyText ? `CONVERSATION:\n${historyText}\n\n` : ''}USER: ${message}
-
-HEX6:`;
+    // Always use the full system prompt — it carries the non-negotiable ground rules
+    // (no inventing past conversations, no fake context, no claiming to remember things
+    // that didn't happen in THIS thread). Skipping it caused hallucinated greetings.
+    const promptToUse = `${systemPrompt}${engineContext}\n\nCONVERSATION:\n${historyText}\n\nUSER: ${message}\n\nHEX6:`;
+    const useFullPrompt = true;
 
     // gpt_5_mini is faster for short conversational replies; gemini_3_flash needed when files attached.
     const fastModel = !useFullPrompt && (!file_urls || file_urls.length === 0) ? 'gpt_5_mini' : 'gemini_3_flash';
