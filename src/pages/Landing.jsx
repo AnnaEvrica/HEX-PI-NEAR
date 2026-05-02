@@ -53,7 +53,7 @@ export default function Landing() {
     <div className="min-h-screen bg-background text-foreground">
       {/* Nav */}
       <nav
-        className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border"
+        className="sticky top-0 z-50 bg-background border-b border-border"
         style={{ paddingTop: 'env(safe-area-inset-top)' }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
