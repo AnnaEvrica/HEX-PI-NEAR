@@ -1,0 +1,30 @@
+{
+  "name": "Series",
+  "type": "object",
+  "properties": {
+    "series_id": {
+      "type": "string",
+      "description": "Unique identifier for this series (subject-agnostic \u2014 any signal source)"
+    },
+    "states": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "description": "Sequence of 6-bit encoded states (0-63) observed for this series",
+      "default": []
+    },
+    "last_routed_brain_id": {
+      "type": "string",
+      "description": "Brain this series is currently routed to (sticky in v1)"
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of last state append"
+    }
+  },
+  "required": [
+    "series_id"
+  ]
+}

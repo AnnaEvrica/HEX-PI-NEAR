@@ -453,33 +453,57 @@ Deno.serve(async (req) => {
         }
       }
 
-      // Detect ticker in the message — common tickers + uppercase 2-5 letter words
+      // Detect series identifier — used as the routing key (subject-agnostic).
+      // Falls back to a hash of the user + first-data-signature so anonymous series still get tracked.
       const tickerMatch = message.match(/\b(BTC|ETH|SPY|QQQ|TSLA|AAPL|MSFT|NVDA|GOOG|AMZN|META|SOL|DOGE|XRP|ADA|MATIC)\b/i)
         || message.match(/\b([A-Z]{2,5})\b/);
-      const ticker = tickerMatch ? tickerMatch[1].toUpperCase() : 'GENERIC';
+      const seriesId = tickerMatch ? tickerMatch[1].toUpperCase() : `anon_${user.email}_${primarySeries[0]}`;
 
-      // Fetch persistent Markov prior for this ticker
-      let priorMarkov = null;
-      let existingTickerMemory = null;
+      // Route this series via the generalized multi-brain processor (fire-and-forget for the brain side).
+      // We still run the local engine for the rich petal/motif/basin/exposure output that drives the LLM context.
+      // The brain layer learns and routes in the background — predictions for the LLM come from the local
+      // engine's SCEFM/Markov/petal computation, which is unchanged.
+      let routedBrainId = 'pending';
+      let routedDistance = null;
+      let routedThreshold = null;
       try {
-        const prior = await base44.asServiceRole.entities.MarkovTickerMemory.filter({ ticker });
-        if (prior && prior.length > 0) {
-          existingTickerMemory = prior[0];
-          priorMarkov = {
-            counts: JSON.parse(existingTickerMemory.transition_matrix || '{}'),
-            stats: JSON.parse(existingTickerMemory.transition_rewards || '{}'),
-          };
+        const routeRes = await base44.functions.invoke('hex6Process', {
+          series_id: seriesId,
+          values: primarySeries,
+          as_returns: true,
+          record_output: true,
+        });
+        if (routeRes?.data) {
+          routedBrainId = routeRes.data.brain_id;
+          routedDistance = routeRes.data.distance;
+          routedThreshold = routeRes.data.threshold;
         }
-      } catch (e) { /* no prior, that's fine */ }
+      } catch (e) { /* routing is non-blocking for the LLM response */ }
+
+      // Pull the routed brain's matrix as the prior for the local engine run (so layered math benefits from it).
+      let priorMarkov = null;
+      try {
+        if (routedBrainId && routedBrainId !== 'pending') {
+          const brains = await base44.asServiceRole.entities.Brain.filter({ brain_id: routedBrainId });
+          if (brains && brains.length > 0) {
+            priorMarkov = {
+              counts: JSON.parse(brains[0].transition_matrix || '{}'),
+              stats: JSON.parse(brains[0].transition_rewards || '{}'),
+            };
+          }
+        }
+      } catch (e) { /* fine — engine just runs without prior */ }
 
       const result = runHex6Engine(primarySeries, riskAversion, 0.0035, 6, refSeries, priorMarkov);
 
-      // Persist updated Markov matrix (fire-and-forget)
-      persistMarkovMatrix(base44, ticker, existingTickerMemory, priorMarkov, result.markov.freshTransitions, result.markov.freshStats, result.petal);
+      // Note: brain persistence is now handled by hex6Process. We no longer write to MarkovTickerMemory here.
+      // We keep the local petal/motif math intact for the LLM context block below.
+      const ticker = seriesId; // reuse variable name in engineContext below
       engineContext = `
---- HEX6 ENGINE OUTPUT v5.3 (SCEFM I-Ching 128-petal + Markov64 persistent + 1/137 + Basin + Adaptive Decay) ---
+--- HEX6 ENGINE OUTPUT v5.4 (Multi-Brain SCEFM + I-Ching 128-petal + Markov64 + 1/137 + Basin + Adaptive Decay) ---
 Engine: ${result.engineVersion}
-Ticker: ${ticker} | Persistent brain: ${priorMarkov ? `LOADED (${existingTickerMemory.total_observations} prior observations)` : 'fresh (no prior history)'}
+Series: ${ticker} | Routed brain: ${routedBrainId} | Distance: ${routedDistance?.toFixed?.(3) ?? 'n/a'} nats | Threshold: ${routedThreshold?.toFixed?.(3) ?? 'n/a'} nats
+Prior brain: ${priorMarkov ? 'LOADED' : 'fresh (new brain seeded)'}
 Input series: ${primarySeries.length} data points${refSeries ? ` | Reference series: ${refSeries.length} points` : ''}
 Adaptive λ: ${result.lambda.toFixed(3)} (auto-tuned to series length)
 
@@ -681,29 +705,36 @@ HEX6:`,
         }
 
         if (returns.length >= 30) {
-          const ticker = (fetchResult.ticker || 'GENERIC').toUpperCase().slice(0, 10);
+          const seriesId = (fetchResult.ticker || 'GENERIC').toUpperCase().slice(0, 12);
 
-          // Load persistent Markov prior (fire-and-forget if it fails)
+          // Route via the generalized multi-brain processor; pull the routed brain as prior.
+          let routedBrainId = 'pending';
           let priorMarkov = null;
-          let existingTickerMemory = null;
           try {
-            const prior = await base44.asServiceRole.entities.MarkovTickerMemory.filter({ ticker });
-            if (prior && prior.length > 0) {
-              existingTickerMemory = prior[0];
-              priorMarkov = {
-                counts: JSON.parse(existingTickerMemory.transition_matrix || '{}'),
-                stats: JSON.parse(existingTickerMemory.transition_rewards || '{}'),
-              };
+            const routeRes = await base44.functions.invoke('hex6Process', {
+              series_id: seriesId,
+              values: returns,
+              as_returns: true,
+              record_output: true,
+            });
+            if (routeRes?.data?.brain_id) {
+              routedBrainId = routeRes.data.brain_id;
+              const brains = await base44.asServiceRole.entities.Brain.filter({ brain_id: routedBrainId });
+              if (brains && brains.length > 0) {
+                priorMarkov = {
+                  counts: JSON.parse(brains[0].transition_matrix || '{}'),
+                  stats: JSON.parse(brains[0].transition_rewards || '{}'),
+                };
+              }
             }
-          } catch (e) { /* no prior */ }
+          } catch (e) { /* non-blocking */ }
 
           const result = runHex6Engine(returns, riskAversion, 0.0035, 6, null, priorMarkov);
-          persistMarkovMatrix(base44, ticker, existingTickerMemory, priorMarkov, result.markov.freshTransitions, result.markov.freshStats, result.petal);
 
           webEngineContext = `
---- HEX6 ENGINE OUTPUT (web-sourced data) ---
+--- HEX6 ENGINE OUTPUT (web-sourced data, multi-brain v5.4) ---
 Source: ${fetchResult.source_summary}
-Subject: ${ticker} | ${fetchResult.series_label || 'numerical series'}
+Series: ${seriesId} | Routed brain: ${routedBrainId} | ${fetchResult.series_label || 'numerical series'}
 Series length: ${returns.length} returns
 μ: ${result.mu} | σ: ${result.sigma}
 Core exposure: ${result.exposure} | Blended: ${result.blendedExposure}

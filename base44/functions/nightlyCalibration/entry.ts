@@ -1,7 +1,8 @@
-// Nightly Calibration Scorer
-// Replays past HEX6 engine outputs against subsequent realized returns
-// Writes a calibration_grade per ticker + GLOBAL aggregate to CalibrationScore entity
-// Triggered by scheduled automation
+// Nightly Calibration Scorer (v2 — multi-brain)
+// Scores predictions stored in the Output entity, grouped by brain_id.
+// For each output, fetches the next state in its Series (after the prediction's current_state)
+// and compares predicted direction vs realized direction.
+// Writes one CalibrationScore row per brain + a GLOBAL aggregate.
 
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
@@ -27,17 +28,25 @@ function gradeFromAccuracy(acc) {
   return 'F';
 }
 
+// Direction implied by the realized state transition (state-bit popularity):
+// If majority of bits in state_t+1 are 1 → UP, else DOWN. FLAT if exactly 3.
+function directionOfState(state) {
+  if (state === null || state === undefined) return 'UNKNOWN';
+  let ones = 0;
+  for (let b = 0; b < 6; b++) if ((state >> b) & 1) ones++;
+  if (ones > 3) return 'UP';
+  if (ones < 3) return 'DOWN';
+  return 'FLAT';
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
-    // Optional: verify caller is admin OR coming from automation
-    // Automations bypass auth, so we allow that path
+    // Pull recent Output records (last 1000)
+    const outputs = await base44.asServiceRole.entities.Output.list('-timestamp', 1000).catch(() => []);
 
-    // Pull recent HEX6Memory backtest/trade records from the last 30 days
-    const memories = await base44.asServiceRole.entities.HEX6Memory.list('-created_date', 500);
-
-    if (!memories || memories.length === 0) {
+    if (!outputs || outputs.length === 0) {
       await base44.asServiceRole.entities.CalibrationScore.create({
         score_date: new Date().toISOString().split('T')[0],
         ticker: 'GLOBAL',
@@ -46,68 +55,68 @@ Deno.serve(async (req) => {
         exposure_correlation: 0,
         avg_realized_return: 0,
         calibration_grade: 'INSUFFICIENT_DATA',
-        notes: 'No engine memories available to score.',
+        notes: 'No Output records available to score.',
       });
-      return Response.json({ ok: true, message: 'No data to score.' });
+      return Response.json({ ok: true, message: 'No outputs to score.' });
     }
 
-    // Group by ticker
-    const byTicker = {};
-    for (const m of memories) {
-      const t = m.ticker || 'UNKNOWN';
-      if (!byTicker[t]) byTicker[t] = [];
-      byTicker[t].push(m);
+    // Group outputs by brain_id
+    const byBrain = {};
+    for (const o of outputs) {
+      const b = o.brain_id || 'UNKNOWN';
+      if (!byBrain[b]) byBrain[b] = [];
+      byBrain[b].push(o);
     }
 
-    const results = [];
+    // Cache series state arrays so we don't re-fetch per output
+    const seriesCache = {};
+    async function getSeriesStates(seriesId) {
+      if (seriesCache[seriesId] !== undefined) return seriesCache[seriesId];
+      const s = await base44.asServiceRole.entities.Series.filter({ series_id: seriesId }).catch(() => []);
+      seriesCache[seriesId] = (s && s.length > 0) ? (s[0].states || []) : [];
+      return seriesCache[seriesId];
+    }
+
     const today = new Date().toISOString().split('T')[0];
+    const results = [];
 
-    // Score each ticker
-    for (const ticker in byTicker) {
-      const records = byTicker[ticker];
-      const exposures = [];
-      const realizedReturns = [];
-      let directionalHits = 0;
-      let directionalTotal = 0;
+    for (const brainId in byBrain) {
+      const records = byBrain[brainId];
+      let hits = 0, total = 0;
+      const expectedReturns = [];
+      const realizedDirs = [];
 
-      for (const r of records) {
-        try {
-          const engineParams = JSON.parse(r.engine_params || '{}');
-          const metrics = JSON.parse(r.metrics || '{}');
-          const exposure = engineParams.exposure ?? engineParams.blendedExposure;
-          const realizedMu = engineParams.mu ?? metrics.realizedReturn ?? null;
-          const predictedMu = engineParams.markov?.mu ?? engineParams.mu ?? null;
+      for (const o of records) {
+        const states = await getSeriesStates(o.series_id);
+        if (!states || states.length === 0) continue;
 
-          if (exposure != null && realizedMu != null) {
-            exposures.push(exposure);
-            realizedReturns.push(realizedMu);
-          }
+        // Find the index of current_state and check the next state
+        const idx = states.lastIndexOf(o.current_state);
+        if (idx < 0 || idx >= states.length - 1) continue;
+        const nextState = states[idx + 1];
+        const realizedDir = directionOfState(nextState);
 
-          // Directional accuracy: did predicted mu sign match realized mu sign?
-          if (predictedMu != null && realizedMu != null) {
-            directionalTotal++;
-            if (Math.sign(predictedMu) === Math.sign(realizedMu)) directionalHits++;
-          }
-        } catch { /* skip malformed */ }
+        if (o.direction && o.direction !== 'UNKNOWN' && realizedDir !== 'UNKNOWN') {
+          total++;
+          if (o.direction === realizedDir) hits++;
+          expectedReturns.push(o.expected_return || 0);
+          realizedDirs.push(realizedDir === 'UP' ? 1 : realizedDir === 'DOWN' ? -1 : 0);
+        }
       }
 
-      const dirAcc = directionalTotal > 0 ? directionalHits / directionalTotal : 0;
-      const expCorr = pearson(exposures, realizedReturns);
-      const avgRealized = realizedReturns.length > 0
-        ? realizedReturns.reduce((s, x) => s + x, 0) / realizedReturns.length
-        : 0;
-
-      const grade = directionalTotal < 5 ? 'INSUFFICIENT_DATA' : gradeFromAccuracy(dirAcc);
+      const dirAcc = total > 0 ? hits / total : 0;
+      const expCorr = pearson(expectedReturns, realizedDirs);
+      const grade = total < 5 ? 'INSUFFICIENT_DATA' : gradeFromAccuracy(dirAcc);
 
       const scoreData = {
         score_date: today,
-        ticker,
-        predictions_evaluated: directionalTotal,
+        ticker: brainId,
+        predictions_evaluated: total,
         directional_accuracy: parseFloat(dirAcc.toFixed(4)),
         exposure_correlation: parseFloat(expCorr.toFixed(4)),
-        avg_realized_return: parseFloat(avgRealized.toFixed(6)),
+        avg_realized_return: 0,
         calibration_grade: grade,
-        notes: `Scored ${directionalTotal} predictions for ${ticker}. Directional accuracy ${(dirAcc * 100).toFixed(1)}%, exposure-return corr ${expCorr.toFixed(3)}.`,
+        notes: `Brain ${brainId}: ${total} predictions scored. Directional accuracy ${(dirAcc * 100).toFixed(1)}%.`,
       };
 
       await base44.asServiceRole.entities.CalibrationScore.create(scoreData);
@@ -115,8 +124,8 @@ Deno.serve(async (req) => {
     }
 
     // Global aggregate
-    const allDirAcc = results.filter(r => r.calibration_grade !== 'INSUFFICIENT_DATA').map(r => r.directional_accuracy);
-    const globalAcc = allDirAcc.length > 0 ? allDirAcc.reduce((s, x) => s + x, 0) / allDirAcc.length : 0;
+    const scored = results.filter(r => r.calibration_grade !== 'INSUFFICIENT_DATA');
+    const globalAcc = scored.length > 0 ? scored.reduce((s, r) => s + r.directional_accuracy, 0) / scored.length : 0;
     const globalEval = results.reduce((s, r) => s + r.predictions_evaluated, 0);
 
     await base44.asServiceRole.entities.CalibrationScore.create({
@@ -127,12 +136,12 @@ Deno.serve(async (req) => {
       exposure_correlation: 0,
       avg_realized_return: 0,
       calibration_grade: globalEval < 10 ? 'INSUFFICIENT_DATA' : gradeFromAccuracy(globalAcc),
-      notes: `Global calibration across ${results.length} tickers, ${globalEval} total predictions.`,
+      notes: `Multi-brain calibration across ${results.length} brains, ${globalEval} total predictions.`,
     });
 
     return Response.json({
       ok: true,
-      tickersScored: results.length,
+      brainsScored: results.length,
       totalPredictions: globalEval,
       globalAccuracy: globalAcc,
       results,
