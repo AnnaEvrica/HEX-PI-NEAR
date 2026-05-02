@@ -96,7 +96,7 @@ export default function Landing() {
           </h1>
 
           <p className="text-base sm:text-lg text-secondary max-w-2xl leading-relaxed">
-            HEX6 BLE (Binaural Linguistic Engine) An autonomous intelligence architecture that treats volatility as a coherent language, abandoning binary assumptions for continuous mathematics. Developed by Evrica Technologies Inc.
+            HEX6 BLE (Binaural Linguistic Engine) — an autonomous intelligence architecture that treats uncertainty as a coherent language, abandoning binary assumptions for continuous mathematics. Developed by Evrica Technologies Inc.
           </p>
         </div>
 
@@ -199,48 +199,48 @@ export default function Landing() {
                 <Legend wrapperStyle={{ paddingTop: '20px' }} />
               </RadarChart>
             </ResponsiveContainer>
-            <p className="text-xs text-secondary/60">* Scores derived from multi-regime backtests across equities, crypto, and commodities spanning 15+ years of historical data with daily rebalancing.</p>
+            <p className="text-xs text-secondary/60">* Illustrative scores from internal simulations across multi-regime sequential data. Comparative benchmarks reflect typical behavior of each system class, not specific implementations.</p>
             </div>
             </motion.div>
 
         {/* Applications & Real Outcomes */}
         <div className="space-y-6 sm:space-y-8">
           <div className="space-y-2 sm:space-y-3">
-            <h3 className="text-2xl sm:text-3xl font-bold">Real Applications Across Industries</h3>
-            <p className="text-base sm:text-lg text-secondary">Verified results from HEX6 engine across proprietary mathematical engineering*</p>
+            <h3 className="text-2xl sm:text-3xl font-bold">Universal Across Domains</h3>
+            <p className="text-base sm:text-lg text-secondary">HEX6 BLE doesn't care what the data represents — it reads the structure of any sequential signal*</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             {loading || !metrics ? [] : [
               {
-                title: 'Equities & Indices',
+                title: 'Stable Environments',
                 metrics: [
-                  { label: 'Pattern Recognition', value: '94%', desc: 'Regime transition detection accuracy*' },
-                  { label: 'Drawdown Avoidance', value: metrics.riskOptimization.drawdownReduction, desc: 'Reduction vs buy-and-hold*' },
-                  { label: 'Response Latency', value: metrics.volatilityManagement.reallocSpeed, desc: 'State reclassification speed*' },
+                  { label: 'Pattern Recognition', value: 'High', desc: 'Detects regime transitions before they fully form*' },
+                  { label: 'Loss Avoidance', value: 'Strong', desc: 'Pulls back when conditions destabilize*' },
+                  { label: 'Response Speed', value: 'Sub-second', desc: 'Reclassifies state as data arrives*' },
                 ],
               },
               {
-                title: 'Crypto Markets',
+                title: 'Volatile Environments',
                 metrics: [
-                  { label: 'Volatility Absorption', value: metrics.volatilityManagement.capitalPreserved, desc: 'Capital preserved during regime shifts*' },
-                  { label: 'Exit Precision', value: '88%', desc: 'Exiting before adverse moves*' },
-                  { label: 'Recovery Time', value: metrics.riskOptimization.recoveryTime, desc: 'From drawdown to stability*' },
+                  { label: 'Shock Absorption', value: 'Strong', desc: 'Holds form during chaotic regime shifts*' },
+                  { label: 'Exit Precision', value: 'High', desc: 'Disengages before adverse cascades*' },
+                  { label: 'Recovery Time', value: 'Fast', desc: 'Returns to confident state quickly*' },
                 ],
               },
               {
-                title: 'Fixed Income & Bonds',
+                title: 'Slow-Moving Systems',
                 metrics: [
-                  { label: 'Interest Rate Sensing', value: '91%', desc: 'Rate environment classification*' },
-                  { label: 'Optimal Positioning', value: '86%', desc: 'Timing entry/exit decisions*' },
-                  { label: 'Curve Adaptation', value: metrics.decisionConfidence.rebalanceTiming, desc: 'Yield curve regime shifts*' },
+                  { label: 'Trend Sensing', value: 'High', desc: 'Reads gradual environmental shifts*' },
+                  { label: 'Optimal Timing', value: 'High', desc: 'Engages and disengages with conviction*' },
+                  { label: 'Curve Adaptation', value: 'Smooth', desc: 'Glides across slow regime evolutions*' },
                 ],
               },
               {
-                title: 'Multi-Asset Allocation',
+                title: 'Multi-Signal Analysis',
                 metrics: [
-                  { label: 'Probability Distribution', value: '95%', desc: 'Outcome space modeling accuracy*' },
-                  { label: 'Correlation Tracking', value: '89%', desc: 'Cross-asset regime detection*' },
-                  { label: 'Decision Confidence', value: metrics.decisionConfidence.rebalanceTiming, desc: 'High-conviction signals only*' },
+                  { label: 'Distribution Modeling', value: 'Robust', desc: 'Holds the entire outcome space at once*' },
+                  { label: 'Correlation Tracking', value: 'High', desc: 'Detects co-movement across signals*' },
+                  { label: 'Decision Confidence', value: 'Calibrated', desc: 'Acts only when probability stabilizes*' },
                 ],
               },
             ].map((app, i) => (
@@ -260,7 +260,7 @@ export default function Landing() {
               </div>
             ))}
           </div>
-          <p className="text-xs text-secondary/60 pt-2">* Results based on HEX6 engine backtests across 15+ years historical data. Proprietary mathematical engineering underlying all probability models. Industry-specific metrics derived from real market regimes and adaptive state classification.</p>
+          <p className="text-xs text-secondary/60 pt-2">* Qualitative descriptors based on internal simulations of the HEX6 BLE engine across multi-regime sequential signals. Behavior generalizes across any domain where state transitions matter — markets, sports, biometrics, traffic, sensor data, language, anything sequential.</p>
         </div>
 
         {/* Evolution & Progression Over Time */}
@@ -275,22 +275,22 @@ export default function Landing() {
                 <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="opacity-10" />
                 <XAxis dataKey="week" className="text-xs" />
                 <YAxis yAxisId="left" domain={[0, 100]} className="text-xs" label={{ value: 'Accuracy %', angle: -90, position: 'insideLeft' }} />
-                <YAxis yAxisId="right" orientation="right" domain={[0, 3]} className="text-xs" label={{ value: 'Sharpe Ratio', angle: 90, position: 'insideRight' }} />
+                <YAxis yAxisId="right" orientation="right" domain={[0, 3]} className="text-xs" label={{ value: 'Conviction Index', angle: 90, position: 'insideRight' }} />
                 <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #FF6B35' }} />
                 <Legend wrapperStyle={{ paddingTop: '20px' }} />
                 <Line yAxisId="left" type="monotone" dataKey="decisionAccuracy" stroke="#FF6B35" strokeWidth={3} dot={{ fill: '#FF6B35', r: 5 }} name="Decision Accuracy %" />
-                <Line yAxisId="left" type="monotone" dataKey="drawdownControl" stroke="#999" strokeWidth={2} dot={{ fill: '#999' }} name="Drawdown Control %" strokeDasharray="5 5" />
-                <Line yAxisId="right" type="monotone" dataKey="sharpe" stroke="#666" strokeWidth={2} dot={{ fill: '#666' }} name="Sharpe Ratio" strokeDasharray="5 5" />
+                <Line yAxisId="left" type="monotone" dataKey="drawdownControl" stroke="#999" strokeWidth={2} dot={{ fill: '#999' }} name="Loss Control %" strokeDasharray="5 5" />
+                <Line yAxisId="right" type="monotone" dataKey="sharpe" stroke="#666" strokeWidth={2} dot={{ fill: '#666' }} name="Conviction Index" strokeDasharray="5 5" />
               </LineChart>
             </ResponsiveContainer>
-            <p className="text-xs text-secondary/60 pt-2">* Learning curve based on historical user interaction patterns and market regime transition data. Assumes consistent daily market engagement. Results vary by asset class and volatility regime.</p>
+            <p className="text-xs text-secondary/60 pt-2">* Illustrative learning curve from internal simulations. Adaptation pace varies with the volatility and complexity of the signal being observed.</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 pt-4 md:pt-6">
             {loading || !metrics ? [] : [
               { label: 'Week 1 Baseline', metric: `${metrics.accuracyGrowth.week1}%`, desc: 'Initial decision accuracy' },
               { label: 'Week 4 Progress', metric: `${metrics.accuracyGrowth.week4}%`, desc: `${metrics.accuracyGrowth.week4 - metrics.accuracyGrowth.week1}pp improvement` },
               { label: 'Week 16 Mature', metric: `${metrics.accuracyGrowth.week16}%`, desc: 'Near-optimal accuracy' },
-              { label: 'Adaptation Speed', metric: '2.3h', desc: 'Average response latency' },
+              { label: 'Adaptation Speed', metric: 'Real-time', desc: 'Reclassifies as new data arrives' },
             ].map((stat, i) => (
               <div key={i} className="p-3 md:p-4 border border-border bg-background space-y-2">
                 <p className="text-xs text-secondary font-medium uppercase tracking-wide">{stat.label}</p>
@@ -380,8 +380,8 @@ export default function Landing() {
               {/* Row: Decision Making */}
               <div className="p-4 text-xs text-secondary font-medium">Decision Model</div>
               <div className="p-4 text-xs">Confidence → Action</div>
-              <div className="p-4 text-xs">Signal strength → Trade</div>
-              <div className="p-4 text-xs text-accent font-medium">Probability → Exposure</div>
+              <div className="p-4 text-xs">Signal strength → Decision</div>
+              <div className="p-4 text-xs text-accent font-medium">Probability → Engagement</div>
 
               {/* Row: On Uncertainty */}
               <div className="p-4 text-xs text-secondary font-medium">Handles Uncertainty By</div>
@@ -401,8 +401,8 @@ export default function Landing() {
         {/* Real Scenario Comparison */}
         <div className="space-y-6">
           <div className="space-y-2">
-            <h3 className="text-2xl font-bold">Real Scenario: 6-Month High Volatility Period</h3>
-            <p className="text-lg text-secondary">Assets ranged from +442% to −75%, with violent regime shifts</p>
+            <h3 className="text-2xl font-bold">How It Behaves in the Wild</h3>
+            <p className="text-lg text-secondary">Across stable, chaotic, and discontinuous regimes — same engine, different responses</p>
           </div>
 
           <div className="grid grid-cols-1 space-y-6">
@@ -412,22 +412,22 @@ export default function Landing() {
              <div className="space-y-6">
           {[
             {
-              label: 'High Volatility Regimes',
-              desc: 'In a 6-month simulation with extreme asset divergence (+442% to −75%), traditional models remained continuously exposed.',
-              result: 'Naive allocation: −23% drawdown | HEX6 BLE: −6.5% drawdown',
-              insight: 'HEX6 BLE eliminated statistically negative exposure states.',
+              label: 'High-Volatility Regimes',
+              desc: 'When the underlying signal swings violently between extremes, traditional models remain continuously engaged regardless of clarity.',
+              result: 'Naive systems: stay exposed through chaos | HEX6 BLE: pulls back when probability collapses',
+              insight: 'HEX6 BLE disengages from statistically unfavorable states rather than averaging through them.',
             },
             {
               label: 'Trend + Chop Transitions',
-              desc: 'In mixed regimes (trend → sideways → volatility spikes), traditional quants overfitted to prior trends.',
-              result: 'Lower trade frequency, higher risk-adjusted returns, reduced volatility clustering',
-              insight: 'HEX6 BLE reduced exposure during low-confidence states, re-engaged only at probability stabilization.',
+              desc: 'In mixed regimes (steady trend → sideways drift → sudden spike), traditional models overfit to the most recent pattern.',
+              result: 'Fewer false moves, higher conviction-to-action ratio, less reactive thrashing',
+              insight: 'HEX6 BLE reduces engagement during low-confidence states, re-engages only when probability stabilizes.',
             },
             {
-              label: 'Macro / Event-Driven Systems',
-              desc: 'Under discontinuities (rate shocks, macro releases), prediction systems collapse to outdated assumptions.',
-              result: 'Avoidance of false certainty, faster adaptation to new regimes',
-              insight: 'HEX6 BLE reclassifies system state and expands uncertainty distribution.',
+              label: 'Discontinuities & Shocks',
+              desc: 'When the system fundamentally changes (regime breaks, structural shifts, new conditions), prediction systems collapse to outdated assumptions.',
+              result: 'No false certainty, faster adaptation to the new regime',
+              insight: 'HEX6 BLE reclassifies system state and expands the uncertainty distribution rather than forcing an answer.',
             },
           ].map((item, i) => (
             <div key={i} className="space-y-3 p-6 rounded-sm border border-border bg-muted/30">
@@ -446,49 +446,49 @@ export default function Landing() {
 
         {/* What You Actually Get */}
         <div className="space-y-4 border border-border bg-background p-8">
-          <h3 className="text-lg font-bold">What You Actually Get: Decision Accuracy Growth</h3>
-          <p className="text-secondary text-sm mb-6">Your decisions become more accurate as HEX6 BLE learns your behavior and market patterns stabilize.</p>
+          <h3 className="text-lg font-bold">What You Actually Get: Calibration Over Time</h3>
+          <p className="text-secondary text-sm mb-6">The engine becomes more confident as it observes more of your signals and the patterns clarify.</p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-3">
-              <p className="font-bold text-sm">Week 1–2</p>
+              <p className="font-bold text-sm">Early</p>
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs text-secondary">Decision Accuracy</span>
-                  <span className="text-sm font-bold">58%</span>
+                  <span className="text-xs text-secondary">Calibration</span>
+                  <span className="text-sm font-bold">Forming</span>
                 </div>
                 <div className="w-full h-1.5 bg-border rounded-full overflow-hidden">
-                  <div className="h-full bg-red-600/60 rounded-full" style={{ width: '58%' }} />
+                  <div className="h-full bg-red-600/60 rounded-full" style={{ width: '33%' }} />
                 </div>
-                <p className="text-xs text-secondary/70">System is new. You're unfamiliar. High variance.</p>
+                <p className="text-xs text-secondary/70">System is new. Patterns are unfamiliar. High variance.</p>
               </div>
             </div>
 
             <div className="space-y-3">
-              <p className="font-bold text-sm">Week 4–8</p>
+              <p className="font-bold text-sm">Mid</p>
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs text-secondary">Decision Accuracy</span>
-                  <span className="text-sm font-bold">82%</span>
+                  <span className="text-xs text-secondary">Calibration</span>
+                  <span className="text-sm font-bold">Sharpening</span>
                 </div>
                 <div className="w-full h-1.5 bg-border rounded-full overflow-hidden">
-                  <div className="h-full bg-amber-500/70 rounded-full" style={{ width: '82%' }} />
+                  <div className="h-full bg-amber-500/70 rounded-full" style={{ width: '66%' }} />
                 </div>
-                <p className="text-xs text-secondary/70">Behavioral patterns emerge. Regime clarity improves.</p>
+                <p className="text-xs text-secondary/70">Behavioral patterns emerge. State clarity improves.</p>
               </div>
             </div>
 
             <div className="space-y-3">
-              <p className="font-bold text-sm">Week 12–16</p>
+              <p className="font-bold text-sm">Mature</p>
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs text-secondary">Decision Accuracy</span>
-                  <span className="text-sm font-bold text-accent">95%</span>
+                  <span className="text-xs text-secondary">Calibration</span>
+                  <span className="text-sm font-bold text-accent">Converged</span>
                 </div>
                 <div className="w-full h-1.5 bg-border rounded-full overflow-hidden">
                   <div className="h-full bg-accent rounded-full" style={{ width: '95%' }} />
                 </div>
-                <p className="text-xs text-secondary/70">System converges. You trust it. Near-optimal calibration.</p>
+                <p className="text-xs text-secondary/70">System stabilizes. You trust it. High-confidence calibration.</p>
               </div>
             </div>
           </div>
@@ -499,22 +499,22 @@ export default function Landing() {
           <div className="border border-border bg-background p-6 space-y-3">
             <p className="font-bold text-sm">Traditional Approach</p>
             <ul className="space-y-2 text-xs text-secondary">
-              <li className="flex gap-2"><span className="text-red-400">✕</span> Tries to predict the market</li>
+              <li className="flex gap-2"><span className="text-red-400">✕</span> Tries to predict the next outcome</li>
               <li className="flex gap-2"><span className="text-red-400">✕</span> Collapses uncertainty into one forecast</li>
               <li className="flex gap-2"><span className="text-red-400">✕</span> Assumes past patterns repeat</li>
-              <li className="flex gap-2"><span className="text-red-400">✕</span> Fails catastrophically during regime change</li>
-              <li className="flex gap-2"><span className="text-red-400">✕</span> Always-on exposure even when no edge</li>
+              <li className="flex gap-2"><span className="text-red-400">✕</span> Fails catastrophically when conditions change</li>
+              <li className="flex gap-2"><span className="text-red-400">✕</span> Always-on engagement even without clarity</li>
             </ul>
           </div>
 
           <div className="border border-accent/40 bg-background p-6 space-y-3">
             <p className="font-bold text-sm text-accent">HEX6 BLE Approach</p>
             <ul className="space-y-2 text-xs text-secondary">
-              <li className="flex gap-2"><span className="text-accent">✓</span> Models current state distribution</li>
-              <li className="flex gap-2"><span className="text-accent">✓</span> Preserves outcome possibilities</li>
+              <li className="flex gap-2"><span className="text-accent">✓</span> Models the current state distribution</li>
+              <li className="flex gap-2"><span className="text-accent">✓</span> Preserves the full possibility space</li>
               <li className="flex gap-2"><span className="text-accent">✓</span> Adapts as conditions evolve</li>
-              <li className="flex gap-2"><span className="text-accent">✓</span> Reduces exposure when uncertain</li>
-              <li className="flex gap-2"><span className="text-accent">✓</span> Scales allocation by probability</li>
+              <li className="flex gap-2"><span className="text-accent">✓</span> Disengages when uncertain</li>
+              <li className="flex gap-2"><span className="text-accent">✓</span> Scales engagement by probability</li>
             </ul>
           </div>
         </div>
