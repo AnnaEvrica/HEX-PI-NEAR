@@ -641,9 +641,7 @@ ${userName}: ${message}
 
 HEX6:`,
         model: 'gemini_3_flash',
-        // If the user attached an image, prioritize vision — disable web search for this call so
-        // the model focuses on the image. Also attach the files so the model can actually see them.
-        add_context_from_internet: !(file_urls && file_urls.length > 0),
+        add_context_from_internet: true,
         response_json_schema: {
           type: 'object',
           properties: {
