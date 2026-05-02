@@ -409,35 +409,8 @@ function extractNumberSeries(text) {
   return matches.map(Number);
 }
 
-// Deterministic fast-path detection — zero LLM cost.
-// Returns true when the message is clearly conversational (greetings, thanks,
-// short acknowledgments, identity questions, casual chat with no analytical intent).
-function isObviouslyConversational(message) {
-  const m = (message || '').trim().toLowerCase();
-  if (!m) return true;
-
-  // Strip "hex" / "hex6" — the user often addresses HEX by name in greetings,
-  // and "hex" is also a crypto ticker which confuses downstream search.
-  const stripped = m.replace(/\bhex6?\b/g, '').replace(/\s+/g, ' ').trim();
-  const wordCount = stripped.split(/\s+/).filter(Boolean).length;
-
-  // Hard analytical signal — never fast-path these.
-  const hasAnalyticalIntent = /\b(odds?|probabilit|forecast|predict|analy[sz]e|chance|outlook|signal|rally|crash|target|price|score|game|win|lose|trade|invest|buy|sell|short|long|hedge|portfolio|allocate|exposure|volatility|kelly|option|options|call|calls|put|puts|strike|expiry|expiration|btc|bitcoin|eth|ethereum|spy|nasdaq|stock|stocks|equity|equities|crypto|market|markets|coin|coins|asset|assets|fund|funds|etf|etfs|bond|bonds|yield|rate|rates|fed|fomc|inflation|cpi|gdp|recession|earnings|ipo|dividend|weather|temperature|forecast|news|update|status|schedule|standings|roster|election|poll|score|stats|data|report|launch|release|announcement|when|where|who|which|how\s+many|how\s+much)\b/i.test(m);
-  if (hasAnalyticalIntent) return false;
-
-  // Pure greeting / acknowledgment patterns (after stripping "hex").
-  const greetingPatterns = /^(hi|hello|hey|yo|sup|hola|howdy|gm|gn|good\s+(morning|afternoon|evening|night)|thanks|thank\s+you|ty|thx|ok|okay|cool|nice|great|got\s+it|gotcha|right|sure|alright|wow|lol|haha+|hm+|interesting|fine|ya|yeah|yep|nope|no|yes|maybe|wassup|what'?s\s+up|how\s+are\s+(you|u)|how\s+(are\s+)?(you|u)\s+(doing|holding\s+up)|how('?s|s)\s+it\s+going)[\s!.?,]*$/i;
-  if (greetingPatterns.test(stripped)) return true;
-
-  // Identity / meta questions about HEX itself.
-  if (/^(who|what)\s+(are|r)\s+(you|u)\b/.test(stripped)) return true;
-  if (/^how\s+do\s+(you|u)\s+work\b/.test(stripped)) return true;
-
-  // Short message with no analytical intent → conversational.
-  if (wordCount <= 5) return true;
-
-  return false;
-}
+// (intent classification removed — the LLM decides whether to fetch data via the
+// web-fetch call below. If the fetch returns no series, we just answer conversationally.)
 
 // ---------------------------------------------------------------------------
 // Main handler
@@ -465,11 +438,6 @@ Deno.serve(async (req) => {
     let engineContext = '';
 
     const dataSeries = extractNumberSeries(message);
-
-    // Deterministic fast-path: greetings/short messages skip the decision LLM entirely.
-    // Saves ~2-3s on conversational replies. For everything else, we go straight to
-    // the web+engine flow (the search itself reveals whether real data exists).
-    const fastPath = isObviouslyConversational(message);
 
     if (dataSeries && dataSeries.length >= 7) {
       // Detect if user provided two comma-separated series (cross-asset)
@@ -594,66 +562,61 @@ WHAT YOU NEVER DO:
       .then(r => (r && r.length > 0 ? r[0] : null))
       .catch(() => null);
 
-    const userMemoryContext = '';
-    const learnedContext = '';
-
     const historyText = history.slice(-20).map(m => `${m.role === 'user' ? 'User' : 'HEX6'}: ${m.content}`).join('\n');
 
-    // Synthesis layer disabled — saves ~2-3s per turn. The intent classifier
-    // already determines what the user needs.
-    const synthesisPromise = Promise.resolve(null);
+    // Single LLM call: read the conversation, decide if web data is needed, answer.
+    // No keyword filters, no intent classifiers. The LLM is an LLM — let it judge.
+    if (!engineContext) {
+      const systemPromptForFetch = `You are HEX6 BLE by Evrica Technologies Inc., programmed by Anna M. Sarkisyan. You're talking with ${userName}. Today is ${currentDateReadable}.
 
-    // If the message has analytical signal (not a greeting), and no inline data was provided,
-    // go straight to web fetch + engine. The fetch result tells us if real data exists —
-    // no need for a separate "decide if we should search" LLM call.
-    const shouldFetchWeb = !fastPath && !engineContext;
+You are a probabilistic intelligence with taste, edge, and a point of view. Renaissance Tech strategist meets a brilliant friend at 2am. Sharp, intuitive, sometimes poetic. You see patterns others miss and you say them out loud.
 
-    if (shouldFetchWeb) {
-      // The CURRENT message is always the live question. Do NOT scan history for an
-      // "original" question — that caused the model to anchor to a stale topic when
-      // the user pivots ("XRP outlook" → then "what about options" gets answered as XRP options).
-      // History is provided as context below for follow-ups, but the subject is the latest message.
-      const originalQuestion = message;
+HOW TO ANSWER:
+- Lead with the INSIGHT. No "Great question!" No throat-clearing.
+- Show your reasoning — what's the asymmetry, what's the hidden variable, what does the crowd miss.
+- Take a stance. Caveat after, not before.
+- Vary rhythm: short punches, then a layered observation, then a punch.
+- 3-6 sentences typically. Longer only if the topic demands it.
+- Plain English. No emojis. No LaTeX. No brackets. **bold** sparingly on a key word.
+- Each new question is a new question. Don't import topics from prior turns. Only carry context forward when the current message is grammatically incomplete (pure stubs like "tell me more", "why?", "go deeper"). If a question is ambiguous, ask for clarification — don't guess.
+- If you don't have data, say so. Never invent prices, percentages, or feelings about markets.
+- Never claim to be "tracking", "watching", or "monitoring" anything. You only know what's in this thread.
 
-      // Single web+search call — returns numerical series, ticker, AND draft answer in one shot.
-      // Skipping the second synthesis call by having the LLM produce the conversational reply
-      // alongside the data. We re-write the answer in-process if the engine adjusts the read.
+DECIDE WHETHER TO PULL WEB DATA:
+- If answering well requires fresh real-world data (prices, scores, news, stats, anything time-sensitive), search the web and pull the latest from authoritative sources (Yahoo Finance, CoinGecko, ESPN, FRED, Reuters, etc.). Pull at least 30 data points if a time series is relevant — the engine needs it.
+- If the question is conversational, philosophical, or you can answer from general knowledge, just answer. No fetch needed.
+- URL honesty: only return URLs you actually retrieved. Never fabricate links.
+
+Return JSON with:
+- draft_answer: your reply to the user.
+- needs_engine: true if you pulled a numerical time series and it should run through the engine.
+- ticker: uppercase identifier (e.g. BTC, SPY) or "UNKNOWN" — only if needs_engine.
+- series: array of ≥30 numbers — only if needs_engine.
+- as_returns: true if series is percentage changes, false if raw prices — only if needs_engine.
+- series_label: brief description — only if needs_engine.
+- sources: array of {name, url} — only if you actually pulled web data.
+- source_summary: one sentence on what you pulled — only if you pulled data.`;
+
+      const conversationBlock = history.length > 0
+        ? history.slice(-12).map(m => `${m.role === 'user' ? userName : 'HEX6'}: ${m.content}`).join('\n')
+        : '';
+
       const fetchResult = await base44.integrations.Core.InvokeLLM({
-        prompt: `Search the web and answer the user's CURRENT question. Return both data and a draft answer.
+        prompt: `${systemPromptForFetch}
 
-CURRENT QUESTION: "${message}"
-${history.length > 0 ? `\nRecent conversation (use ONLY to resolve follow-ups — never to invent context):\n${history.slice(-6).map(m => `${m.role === 'user' ? 'User' : 'HEX6'}: ${m.content.slice(0, 250)}`).join('\n')}` : ''}
+CONVERSATION SO FAR:
+${conversationBlock}
 
-INSTRUCTIONS:
-1. Identify the SUBJECT — treat each question as standalone unless it is grammatically incomplete:
-   a) DEFAULT: every question is a NEW question. The subject comes from the CURRENT question itself, not from prior conversation. Do not import topics from history.
-   b) EXCEPTION (narrow): only carry forward subject when the current message is a pure continuation phrase with NO subject of its own. The allowed list is short: "tell me more", "go deeper", "explain", "why?", "how so?", "and?", "really?", "what else?", "continue", "expand on that", "elaborate". These have zero new content and obviously reference the prior turn.
-   c) If the current question contains ANY noun, topic word, or new content (e.g. "what about options", "and the downside", "any risks", "the long-term view") — even just one — treat it as a NEW question with that as the subject. "What about options" is a question about options, not about the previous topic. Do not assume continuity.
-   d) If the current question is ambiguous or generic with no subject AND no clear stub-follow-up pattern, return series=[], ticker="UNKNOWN", and a draft_answer asking the user to clarify what they want. Don't guess.
-   The user is sharp. They'll tell you what they mean. Don't manufacture continuity.
-2. Search authoritative sources: Yahoo Finance, CoinGecko, CoinMarketCap for finance/crypto; ESPN, Basketball-Reference for sports; FRED, Reuters, Bloomberg for econ.
-3. CRITICAL — SOURCES MUST BE THE LATEST AVAILABLE. Today is ${currentDateReadable}. Always pull the most recent data the source has — live price/market pages that update continuously, the latest news article, the most current report. Prefer the freshest version of each source. Never cite an older article when a newer one on the same topic exists.
-4. CRITICAL — URL HONESTY: Only return URLs you ACTUALLY retrieved from the web search. Never guess, fabricate, or construct URLs from memory. If you can't produce a verified URL, omit that source entirely. Better to return zero sources than a hallucinated link. Use the canonical homepage of the source (e.g. https://finance.yahoo.com, https://www.coingecko.com) if you don't have the deep URL.
-5. CRITICAL — YOU MUST EXTRACT AT LEAST 30 DATA POINTS. This is non-negotiable. Every real data source has 60-365 days of history. If your first source gives fewer than 30 points, search additional sources and combine them. Do NOT return fewer than 30 points unless the subject genuinely has no public time-series data (rare). The engine cannot run on less than 30 — failing this means the user gets a worse answer.
-6. Write a draft_answer: a sharp, reasoning-driven response with EDGE. You are HEX6 BLE — a probabilistic intelligence with taste and a point of view, not a wire service.
+${userName}: ${message}
 
-   VOICE: Renaissance Tech strategist meets a brilliant friend at 2am. Lead with the INSIGHT, not the setup. Show your reasoning — what's the asymmetry, what's the hidden variable, what does the crowd miss, what does the data quietly betray. Take a stance. Use contrast and texture ("price is steady but volatility is whispering" / "this isn't a trend, it's a coiled spring"). Vary rhythm: short punches, then a layered observation, then a punch. 3-6 sentences typically. Longer only if the question demands it.
-
-   FORBIDDEN: Generic platitudes ("markets are unpredictable", "do your own research"). Empty hedging. Restating the question. Bloomberg-terminal voice. Emojis. LaTeX. Brackets. Markdown link syntax. You may use **bold** sparingly on a single key word.
-
-Return JSON:
-- ticker: uppercase identifier or "UNKNOWN".
-- series_label: brief description.
-- series: array of ≥30 numbers.
-- as_returns: true if percentage changes, false if raw values.
-- sources: array of {name, url}.
-- source_summary: one sentence on what you pulled.
-- draft_answer: 2-3 sentence reply to the user (plain English, no notation).`,
+HEX6:`,
         model: 'gemini_3_flash',
         add_context_from_internet: true,
         response_json_schema: {
           type: 'object',
           properties: {
+            draft_answer: { type: 'string' },
+            needs_engine: { type: 'boolean' },
             ticker: { type: 'string' },
             series_label: { type: 'string' },
             series: { type: 'array', items: { type: 'number' } },
@@ -667,9 +630,8 @@ Return JSON:
               },
             },
             source_summary: { type: 'string' },
-            draft_answer: { type: 'string' },
           },
-          required: ['ticker', 'series', 'source_summary', 'draft_answer'],
+          required: ['draft_answer'],
         },
       }).catch(() => null);
 
@@ -701,11 +663,11 @@ Return JSON:
         sourcesBlock = uniqueSources.map(s => `[${s.name}](${s.url})`).join('\n');
       }
 
-      // Run engine if we got enough data points. 30+ is the Markov threshold.
+      // Run engine if the LLM said it pulled a series and we have enough data points.
       let webEngineContext = '';
       let ranEngine = false;
 
-      if (fetchResult && Array.isArray(fetchResult.series) && fetchResult.series.length >= 30) {
+      if (fetchResult?.needs_engine && Array.isArray(fetchResult.series) && fetchResult.series.length >= 30) {
         // Convert raw values → returns if needed
         let returns = fetchResult.series;
         if (fetchResult.as_returns === false) {
@@ -763,26 +725,16 @@ Markov forward μ: ${result.markov.mu} | confidence: ${result.markov.confidence}
       return Response.json({ response: finalResponse, ran_engine: ranEngine, timestamp: new Date().toISOString() });
     }
 
-    // Always use the full system prompt — it carries the non-negotiable ground rules
-    // (no inventing past conversations, no fake context, no claiming to remember things
-    // that didn't happen in THIS thread). Skipping it caused hallucinated greetings.
+    // Inline-data path: user pasted numbers, engine ran, now render the response.
     const promptToUse = `${systemPrompt}${engineContext}\n\nCONVERSATION:\n${historyText}\n\nUSER: ${message}\n\nHEX6:`;
-    const useFullPrompt = true;
-
-    // gpt_5_mini is faster for short conversational replies; gemini_3_flash needed when files attached.
-    const fastModel = !useFullPrompt && (!file_urls || file_urls.length === 0) ? 'gpt_5_mini' : 'gemini_3_flash';
-    const llmPayload = { prompt: promptToUse, model: fastModel, add_context_from_internet: false };
+    const llmPayload = { prompt: promptToUse, model: 'gemini_3_flash', add_context_from_internet: false };
     if (file_urls && file_urls.length > 0) llmPayload.file_urls = file_urls;
 
-    const [llmResponse, synthesis] = await Promise.all([
-      base44.integrations.Core.InvokeLLM(llmPayload),
-      synthesisPromise,
-    ]);
-
+    const llmResponse = await base44.integrations.Core.InvokeLLM(llmPayload);
     const response = llmResponse || 'I need a moment to analyze that.';
-    userMemoryPromise.then(existingUserMemory => updateMemory(base44, user, existingUserMemory, message, response, synthesis));
+    userMemoryPromise.then(existingUserMemory => updateMemory(base44, user, existingUserMemory, message, response));
 
-    return Response.json({ response, fast_path: fastPath, timestamp: new Date().toISOString() });
+    return Response.json({ response, timestamp: new Date().toISOString() });
 
   } catch (error) {
     console.error('Chat error:', error);
