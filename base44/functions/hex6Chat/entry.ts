@@ -615,8 +615,9 @@ ${history.length > 0 ? `Recent context:\n${history.slice(-6).map(m => `${m.role 
 INSTRUCTIONS:
 1. Identify the SUBJECT. Must be explicitly named in the question or recent context. If NO specific subject is named, return series=[], ticker="UNKNOWN", and a draft_answer asking what they want analyzed.
 2. Search authoritative sources: Yahoo Finance, CoinGecko, CoinMarketCap for finance/crypto; ESPN, Basketball-Reference for sports; FRED, Reuters, Bloomberg for econ.
-3. CRITICAL — YOU MUST EXTRACT AT LEAST 30 DATA POINTS. This is non-negotiable. Every real data source has 60-365 days of history. If your first source gives fewer than 30 points, search additional sources and combine them. Do NOT return fewer than 30 points unless the subject genuinely has no public time-series data (rare). The engine cannot run on less than 30 — failing this means the user gets a worse answer.
-4. Write a draft_answer: 2-3 plain English sentences with the probabilistic read (no jargon, no symbols, no brackets, no markdown link syntax). You are HEX6 BLE — warm, professional, intuitive.
+3. CRITICAL — SOURCES MUST BE THE LATEST AVAILABLE. Today is ${currentDateReadable}. Always pull the most recent data the source has — live price/market pages that update continuously, the latest news article, the most current report. Prefer the freshest version of each source. Never cite an older article when a newer one on the same topic exists.
+4. CRITICAL — YOU MUST EXTRACT AT LEAST 30 DATA POINTS. This is non-negotiable. Every real data source has 60-365 days of history. If your first source gives fewer than 30 points, search additional sources and combine them. Do NOT return fewer than 30 points unless the subject genuinely has no public time-series data (rare). The engine cannot run on less than 30 — failing this means the user gets a worse answer.
+5. Write a draft_answer: 2-3 plain English sentences with the probabilistic read (no jargon, no symbols, no brackets, no markdown link syntax). You are HEX6 BLE — warm, professional, intuitive.
 
 Return JSON:
 - ticker: uppercase identifier or "UNKNOWN".
@@ -650,12 +651,12 @@ Return JSON:
         },
       }).catch(() => null);
 
-      // Build clean source list — plain "Name — URL" format, no brackets, no markdown.
+      // Build sources as markdown hyperlinks so ReactMarkdown renders them clickable inside the bubble.
       let sourcesBlock = '';
       if (fetchResult?.sources && Array.isArray(fetchResult.sources) && fetchResult.sources.length > 0) {
         sourcesBlock = fetchResult.sources
           .filter(s => s?.url && s?.name)
-          .map(s => `${s.name} — ${s.url}`)
+          .map(s => `[${s.name}](${s.url})`)
           .join('\n');
       }
 
@@ -711,12 +712,10 @@ Markov forward μ: ${result.markov.mu} | confidence: ${result.markov.confidence}
       // Compose final response: draft_answer from web fetch + sources block.
       // No second LLM call — the draft already incorporates the web context, and engine
       // numbers are too fine-grained to justify a 5s synthesis call to nudge the wording.
-      let answer = (fetchResult?.draft_answer || 'Let me know what you\'d like to dig into.').trim();
-      // Strip any markdown link syntax the LLM may have slipped in
-      answer = answer.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '$1 — $2');
+      const answer = (fetchResult?.draft_answer || 'Let me know what you\'d like to dig into.').trim();
 
       const finalResponse = sourcesBlock
-        ? `${answer}\n\nSources:\n${sourcesBlock.split('\n').map(s => `• ${s}`).join('\n')}`
+        ? `${answer}\n\n**Sources:**\n${sourcesBlock.split('\n').map(s => `- ${s}`).join('\n')}`
         : answer;
 
       userMemoryPromise.then(existingUserMemory => updateMemory(base44, user, existingUserMemory, message, finalResponse));

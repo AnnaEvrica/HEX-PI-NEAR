@@ -561,6 +561,14 @@ export default function HEX6ChatInterface() {
                       ul: ({ node, ...props }) => <ul className="list-disc list-inside" {...props} />,
                       ol: ({ node, ...props }) => <ol className="list-decimal list-inside" {...props} />,
                       li: ({ node, ...props }) => <li {...props} />,
+                      a: ({ node, ...props }) => (
+                        <a
+                          {...props}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-accent underline hover:opacity-80 break-all"
+                        />
+                      ),
                     }}
                   >
                     {message.content}
