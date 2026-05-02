@@ -435,11 +435,12 @@ Decide ONE mode:
 
 CRITICAL RULES — read carefully, this matters:
 1. If the user did NOT name a specific subject (asset, team, event, person, etc.) and the conversation history does NOT contain one being actively discussed, you MUST pick "chat". Never invent a subject. Never default to crypto, stocks, or any topic the user didn't bring up.
-2. Vague analytical-sounding messages without a subject ("what do you think", "give me odds", "run it", "analyze this") with no clear referent in history → "chat" and let HEX6 ask what they want analyzed.
+2. Vague analytical-sounding messages without a subject ("what do you think", "give me odds", "run it", "analyze this", "what are the best trades", "what should I buy", "best options for trading", "what's hot", "any picks") with no clear referent in history → "chat" and let HEX6 ask what they want analyzed. These are open-ended questions, NOT analysis requests on a specific subject.
 3. If the user is continuing a thread where HEX6 already offered to look up data or run engine on a SPECIFIC named subject, and they say "yes/go ahead/do it" → pick whichever mode HEX6 offered, on THAT subject only.
 4. Explicit intent + named subject overrides everything: "look up Tesla", "search BTC price", "run engine on Lakers" → honor it.
 5. Identity questions, frustration, meta-conversation → always "chat".
 6. Greetings, small talk, philosophical questions, opinions → always "chat".
+7. The subject must come from THIS conversation only — never from background memory or assumptions about what the user usually talks about.
 
 Return JSON only. When in doubt, "chat".`,
       model: 'gemini_3_flash',
@@ -673,30 +674,11 @@ ABSOLUTE RULES:
       existingUserMemory = userMemoriesResult.value[0];
     }
 
-    if (engineMemoriesResult.status === 'fulfilled' && engineMemoriesResult.value?.length > 0) {
-      const memories = engineMemoriesResult.value;
-      const backtests = memories.filter(m => m.memory_type === 'backtest');
-      const trades = memories.filter(m => m.memory_type === 'trade');
-      const sharpes = backtests.filter(m => m.sharpe != null).map(m => m.sharpe);
-      const avgSharpe = sharpes.length ? (sharpes.reduce((a, b) => a + b, 0) / sharpes.length).toFixed(3) : null;
-      const tickerSharpes = {};
-      backtests.forEach(m => {
-        if (m.ticker && m.sharpe != null) {
-          if (!tickerSharpes[m.ticker]) tickerSharpes[m.ticker] = [];
-          tickerSharpes[m.ticker].push(m.sharpe);
-        }
-      });
-      const topTickers = Object.entries(tickerSharpes)
-        .map(([ticker, vals]) => ({ ticker, avg: vals.reduce((a, b) => a + b, 0) / vals.length }))
-        .sort((a, b) => b.avg - a.avg).slice(0, 5)
-        .map(t => `${t.ticker}(sharpe=${t.avg.toFixed(2)})`).join(', ');
-      const recentNotes = memories.slice(0, 5).map(m => m.notes).filter(Boolean).join(' | ');
-      learnedContext = `
---- ENGINE MEMORY ---
-${avgSharpe ? `Avg Sharpe: ${avgSharpe}` : ''}${topTickers ? ` | Top assets: ${topTickers}` : ''}
-${recentNotes ? `Recent: ${recentNotes}` : ''}
---- END ENGINE MEMORY ---`;
-    }
+    // Engine memory (ticker stats, backtest notes) is intentionally NOT injected into the prompt.
+    // Reason: it leaks ticker names/biases into the LLM's responses, causing the model to
+    // volunteer specific assets (e.g. "Bitcoin is breaking out") even when the user never
+    // mentioned them. The engine still writes memory below; it's just not read into context.
+    learnedContext = '';
 
     const historyText = history.slice(-20).map(m => `${m.role === 'user' ? 'User' : 'HEX6'}: ${m.content}`).join('\n');
 
