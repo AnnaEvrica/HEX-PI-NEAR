@@ -485,9 +485,26 @@ Deno.serve(async (req) => {
 
     const dataSeries = extractNumberSeries(message);
 
+    // Deterministic fast-path: short messages, greetings, identity questions,
+    // and anything without a clearly named subject → force chat mode and skip
+    // the LLM classifier entirely. Prevents "hi" from triggering web+engine.
+    const trimmed = message.trim();
+    const wordCount = trimmed.split(/\s+/).length;
+    const greetingRegex = /^(hi|hello|hey|yo|sup|hola|howdy|good (morning|afternoon|evening|night)|gm|gn|thanks|thank you|ty|ok|okay|cool|nice|got it|gotcha|right|sure|alright|wow|lol|haha|hm+|interesting|fine|wassup|what'?s up)[\s!.?,]*$/i;
+    const identityRegex = /^(who|what) (are|r) (you|u)|^how do (you|u) work|^what can (you|u) do|^tell me about (yourself|you)/i;
+    const hasNamedSubject = /\b[A-Z]{2,5}\b/.test(message) || /\b(bitcoin|ethereum|tesla|apple|google|nvidia|microsoft|amazon|meta|netflix|lakers|warriors|celtics|cowboys|chiefs|yankees|dodgers)\b/i.test(message);
+    const hasNumericData = dataSeries && dataSeries.length >= 7;
+
+    const forceChat =
+      greetingRegex.test(trimmed) ||
+      identityRegex.test(trimmed) ||
+      (wordCount <= 4 && !hasNumericData && !hasNamedSubject);
+
     // Context-driven intent classification — runs in parallel with memory fetches below.
-    // No keyword matching; the LLM reads the full conversation and decides.
-    const intentPromise = classifyIntent(base44, message, history);
+    // Skipped entirely when forceChat is true (saves an LLM call + prevents misroutes).
+    const intentPromise = forceChat
+      ? Promise.resolve({ mode: 'chat', reasoning: 'fast-path' })
+      : classifyIntent(base44, message, history);
 
     if (dataSeries && dataSeries.length >= 7) {
       // Detect if user provided two comma-separated series (cross-asset)
@@ -619,13 +636,14 @@ ${riskAversion <= 2
   ? '- Give both sides honestly. Don\'t sugarcoat the downside.'
   : '- Lead with caution. Highlight what could go wrong.'}
 
-ANTI-HALLUCINATION — READ CAREFULLY:
-- ONLY reference things that actually appear in the CONVERSATION HISTORY block below or in the user's CURRENT MESSAGE. Never invent past discussions, claims, or context.
-- If the user asks about something not yet discussed, treat it as a fresh question. Do NOT pretend you "talked about it before" — you didn't.
-- Do NOT fabricate data, prices, scores, statistics, names, dates, or events. If you don't actually know something, say "I don't know" or "I'd need to look that up."
-- Do NOT invent a subject the user didn't mention. If their question is vague (no asset, no team, no person, no event), ASK what they want to talk about. Don't default to crypto, stocks, or anything else.
-- If engine output or web sources are NOT provided in this prompt, do NOT pretend they were. Don't say "based on the data I pulled" unless an engine/web block is actually attached.
-- When unsure, ask a short clarifying question rather than guessing.
+ANTI-HALLUCINATION — STRICT, NON-NEGOTIABLE:
+- ONLY reference things that actually appear in the CONVERSATION HISTORY block below or in the user's CURRENT MESSAGE. If it's not there, it didn't happen.
+- NEVER invent past discussions. Phrases like "as we discussed", "you mentioned earlier", "remember when", "based on what you said before" are FORBIDDEN unless that exact thing is in the history block.
+- NEVER fabricate data, prices, scores, statistics, names, dates, percentages, probabilities, or events. If you don't know, say "I don't know" or "I'd need to look that up." That's it.
+- NEVER invent a subject. If the user said "hi", "hey", "what's up", "thanks", or anything vague — just respond to THAT, casually and briefly. Do not pivot to markets, crypto, sports, or any topic they didn't bring up.
+- If NO engine output block and NO web sources block appear in this prompt, you have NOT pulled any data this turn. Do not say "I ran the numbers", "I checked the data", "based on what I found" — none of that. Just answer from general reasoning, and be honest if you don't have specifics.
+- If the user's message is a greeting, small talk, or unclear, give a short friendly reply. Don't lecture. Don't pivot. Don't volunteer analysis they didn't ask for.
+- When in doubt, ask one short clarifying question.
 
 ABSOLUTE RULES:
 1. You are HEX6 BLE. Never claim to be any other model. Ever.
