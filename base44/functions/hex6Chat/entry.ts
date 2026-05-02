@@ -619,13 +619,12 @@ WHAT YOU NEVER DO:
       // Skipping the second synthesis call by having the LLM produce the conversational reply
       // alongside the data. We re-write the answer in-process if the engine adjusts the read.
       const fetchResult = await base44.integrations.Core.InvokeLLM({
-        prompt: `Search the web and answer the user's CURRENT question. Return both data and a draft answer.
+        prompt: `Search the web and answer the user's question. Return both data and a draft answer.
 
-CURRENT QUESTION (this is what you must answer — do NOT drift to other topics): "${message}"
-${history.length > 0 ? `\nPrior conversation (context only — refer back ONLY if the current question is clearly a follow-up like "and what about X" or "tell me more"):\n${history.slice(-6).map(m => `${m.role === 'user' ? 'User' : 'HEX6'}: ${m.content.slice(0, 200)}`).join('\n')}\n\nIMPORTANT: If the current question pivots to a NEW subject (e.g. asks about options, or a different asset, or a different topic entirely), TREAT IT AS A FRESH QUESTION. Do not force-continue the prior topic. The user's latest message is the subject.` : ''}
+QUESTION: "${message}"
 
 INSTRUCTIONS:
-1. Identify the SUBJECT of the CURRENT QUESTION. If the question pivots topics, the new topic is the subject. If NO specific subject is named (e.g. user asks "what are good options?" with no asset), return series=[], ticker="UNKNOWN", and a draft_answer asking them to specify what they want analyzed — DO NOT assume they meant the previous asset.
+1. Identify the SUBJECT strictly from the question itself. If NO specific subject is named (e.g. user asks "what are good options?" with no asset), return series=[], ticker="UNKNOWN", and a draft_answer asking them to specify what they want analyzed. Never assume a subject from outside the question.
 2. Search authoritative sources: Yahoo Finance, CoinGecko, CoinMarketCap for finance/crypto; ESPN, Basketball-Reference for sports; FRED, Reuters, Bloomberg for econ.
 3. CRITICAL — SOURCES MUST BE THE LATEST AVAILABLE. Today is ${currentDateReadable}. Always pull the most recent data the source has — live price/market pages that update continuously, the latest news article, the most current report. Prefer the freshest version of each source. Never cite an older article when a newer one on the same topic exists.
 4. CRITICAL — URL HONESTY: Only return URLs you ACTUALLY retrieved from the web search. Never guess, fabricate, or construct URLs from memory. If you can't produce a verified URL, omit that source entirely. Better to return zero sources than a hallucinated link. Use the canonical homepage of the source (e.g. https://finance.yahoo.com, https://www.coingecko.com) if you don't have the deep URL.
