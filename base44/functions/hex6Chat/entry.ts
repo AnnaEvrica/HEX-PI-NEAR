@@ -609,32 +609,28 @@ WHAT YOU NEVER DO:
     const shouldFetchWeb = !fastPath && !engineContext;
 
     if (shouldFetchWeb) {
-      // Walk back through history to find the original analytical question if this is a follow-up
-      const originalQuestion = (() => {
-        for (let i = history.length - 1; i >= 0; i--) {
-          if (history[i].role === 'user' && history[i].content.length > 15) {
-            return history[i].content;
-          }
-        }
-        return message;
-      })();
+      // The CURRENT message is always the live question. Do NOT scan history for an
+      // "original" question — that caused the model to anchor to a stale topic when
+      // the user pivots ("XRP outlook" → then "what about options" gets answered as XRP options).
+      // History is provided as context below for follow-ups, but the subject is the latest message.
+      const originalQuestion = message;
 
       // Single web+search call — returns numerical series, ticker, AND draft answer in one shot.
       // Skipping the second synthesis call by having the LLM produce the conversational reply
       // alongside the data. We re-write the answer in-process if the engine adjusts the read.
       const fetchResult = await base44.integrations.Core.InvokeLLM({
-        prompt: `Search the web and answer this question quantitatively, returning both data and a draft answer.
+        prompt: `Search the web and answer the user's CURRENT question. Return both data and a draft answer.
 
-Question: "${originalQuestion}"
-Latest message: "${message}"
-${history.length > 0 ? `Recent context:\n${history.slice(-6).map(m => `${m.role === 'user' ? 'User' : 'HEX6'}: ${m.content.slice(0, 200)}`).join('\n')}` : ''}
+CURRENT QUESTION (this is what you must answer — do NOT drift to other topics): "${message}"
+${history.length > 0 ? `\nPrior conversation (context only — refer back ONLY if the current question is clearly a follow-up like "and what about X" or "tell me more"):\n${history.slice(-6).map(m => `${m.role === 'user' ? 'User' : 'HEX6'}: ${m.content.slice(0, 200)}`).join('\n')}\n\nIMPORTANT: If the current question pivots to a NEW subject (e.g. asks about options, or a different asset, or a different topic entirely), TREAT IT AS A FRESH QUESTION. Do not force-continue the prior topic. The user's latest message is the subject.` : ''}
 
 INSTRUCTIONS:
-1. Identify the SUBJECT. Must be explicitly named in the question or recent context. If NO specific subject is named, return series=[], ticker="UNKNOWN", and a draft_answer asking what they want analyzed.
+1. Identify the SUBJECT of the CURRENT QUESTION. If the question pivots topics, the new topic is the subject. If NO specific subject is named (e.g. user asks "what are good options?" with no asset), return series=[], ticker="UNKNOWN", and a draft_answer asking them to specify what they want analyzed — DO NOT assume they meant the previous asset.
 2. Search authoritative sources: Yahoo Finance, CoinGecko, CoinMarketCap for finance/crypto; ESPN, Basketball-Reference for sports; FRED, Reuters, Bloomberg for econ.
 3. CRITICAL — SOURCES MUST BE THE LATEST AVAILABLE. Today is ${currentDateReadable}. Always pull the most recent data the source has — live price/market pages that update continuously, the latest news article, the most current report. Prefer the freshest version of each source. Never cite an older article when a newer one on the same topic exists.
-4. CRITICAL — YOU MUST EXTRACT AT LEAST 30 DATA POINTS. This is non-negotiable. Every real data source has 60-365 days of history. If your first source gives fewer than 30 points, search additional sources and combine them. Do NOT return fewer than 30 points unless the subject genuinely has no public time-series data (rare). The engine cannot run on less than 30 — failing this means the user gets a worse answer.
-5. Write a draft_answer: a sharp, reasoning-driven response with EDGE. You are HEX6 BLE — a probabilistic intelligence with taste and a point of view, not a wire service.
+4. CRITICAL — URL HONESTY: Only return URLs you ACTUALLY retrieved from the web search. Never guess, fabricate, or construct URLs from memory. If you can't produce a verified URL, omit that source entirely. Better to return zero sources than a hallucinated link. Use the canonical homepage of the source (e.g. https://finance.yahoo.com, https://www.coingecko.com) if you don't have the deep URL.
+5. CRITICAL — YOU MUST EXTRACT AT LEAST 30 DATA POINTS. This is non-negotiable. Every real data source has 60-365 days of history. If your first source gives fewer than 30 points, search additional sources and combine them. Do NOT return fewer than 30 points unless the subject genuinely has no public time-series data (rare). The engine cannot run on less than 30 — failing this means the user gets a worse answer.
+6. Write a draft_answer: a sharp, reasoning-driven response with EDGE. You are HEX6 BLE — a probabilistic intelligence with taste and a point of view, not a wire service.
 
    VOICE: Renaissance Tech strategist meets a brilliant friend at 2am. Lead with the INSIGHT, not the setup. Show your reasoning — what's the asymmetry, what's the hidden variable, what does the crowd miss, what does the data quietly betray. Take a stance. Use contrast and texture ("price is steady but volatility is whispering" / "this isn't a trend, it's a coiled spring"). Vary rhythm: short punches, then a layered observation, then a punch. 3-6 sentences typically. Longer only if the question demands it.
 
@@ -672,13 +668,32 @@ Return JSON:
         },
       }).catch(() => null);
 
-      // Build sources as markdown hyperlinks so ReactMarkdown renders them clickable inside the bubble.
+      // Build sources as markdown hyperlinks. Filter out malformed/hallucinated URLs —
+      // the LLM sometimes invents deep links that 404. Keep only well-formed http(s) URLs
+      // with a real host. We don't HEAD-check (would add latency); a strict regex catches
+      // most fabrications (random strings, bracketed placeholders, relative paths).
       let sourcesBlock = '';
       if (fetchResult?.sources && Array.isArray(fetchResult.sources) && fetchResult.sources.length > 0) {
-        sourcesBlock = fetchResult.sources
-          .filter(s => s?.url && s?.name)
-          .map(s => `[${s.name}](${s.url})`)
-          .join('\n');
+        const urlOk = (u) => {
+          try {
+            const parsed = new URL(u);
+            if (!/^https?:$/.test(parsed.protocol)) return false;
+            // Host must have a dot and look like a real domain
+            if (!/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(parsed.hostname)) return false;
+            // Reject obvious placeholder patterns
+            if (/example\.com|placeholder|your-?(site|url)/i.test(u)) return false;
+            return true;
+          } catch { return false; }
+        };
+        const validSources = fetchResult.sources.filter(s => s?.url && s?.name && urlOk(s.url));
+        // Dedupe by URL
+        const seen = new Set();
+        const uniqueSources = validSources.filter(s => {
+          if (seen.has(s.url)) return false;
+          seen.add(s.url);
+          return true;
+        });
+        sourcesBlock = uniqueSources.map(s => `[${s.name}](${s.url})`).join('\n');
       }
 
       // Run engine if we got enough data points. 30+ is the Markov threshold.
