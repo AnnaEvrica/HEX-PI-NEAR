@@ -423,7 +423,11 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
-    const { message, conversationHistory, file_urls } = body;
+    let { message, conversationHistory, file_urls } = body;
+    // Allow image-only messages: if no text but a file is attached, treat it as an implicit "look at this".
+    if ((!message || !message.trim()) && Array.isArray(file_urls) && file_urls.length > 0) {
+      message = '[image attached — please look at it and respond]';
+    }
     if (!message || !message.trim()) return Response.json({ error: 'Message required' }, { status: 400 });
 
     const analyticalDepth = body.analyticalDepth || 'executive';
@@ -627,7 +631,7 @@ Return JSON with:
         ? history.slice(-12).map(m => `${m.role === 'user' ? userName : 'HEX6'}: ${m.content}`).join('\n')
         : '';
 
-      const fetchResult = await base44.integrations.Core.InvokeLLM({
+      const fetchPayload = {
         prompt: `${systemPromptForFetch}
 
 CONVERSATION SO FAR:
@@ -637,7 +641,9 @@ ${userName}: ${message}
 
 HEX6:`,
         model: 'gemini_3_flash',
-        add_context_from_internet: true,
+        // If the user attached an image, prioritize vision — disable web search for this call so
+        // the model focuses on the image. Also attach the files so the model can actually see them.
+        add_context_from_internet: !(file_urls && file_urls.length > 0),
         response_json_schema: {
           type: 'object',
           properties: {
@@ -659,7 +665,9 @@ HEX6:`,
           },
           required: ['draft_answer'],
         },
-      }).catch(() => null);
+      };
+      if (file_urls && file_urls.length > 0) fetchPayload.file_urls = file_urls;
+      const fetchResult = await base44.integrations.Core.InvokeLLM(fetchPayload).catch(() => null);
 
       // Build sources as markdown hyperlinks. Filter out malformed/hallucinated URLs —
       // the LLM sometimes invents deep links that 404. Keep only well-formed http(s) URLs
