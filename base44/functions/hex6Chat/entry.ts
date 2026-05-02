@@ -442,7 +442,7 @@ Return JSON.`,
         properties: {
           needs_web: { type: 'boolean' },
           needs_engine: { type: 'boolean' },
-          subject: { type: ['string', 'null'] },
+          subject: { type: 'string' },
         },
         required: ['needs_web', 'needs_engine'],
       },
