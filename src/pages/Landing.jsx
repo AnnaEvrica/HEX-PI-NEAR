@@ -56,7 +56,7 @@ export default function Landing() {
         className="sticky top-0 z-50 bg-background border-b border-border"
         style={{ paddingTop: 'env(safe-area-inset-top)' }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-5 pb-3 sm:py-4 flex items-center justify-between">
           <div className="text-lg sm:text-xl font-bold tracking-tight">HEX6 BLE</div>
           <div className="flex items-center gap-2 sm:gap-3">
             <button
