@@ -422,7 +422,7 @@ function isObviouslyConversational(message) {
   const wordCount = stripped.split(/\s+/).filter(Boolean).length;
 
   // Hard analytical signal — never fast-path these.
-  const hasAnalyticalIntent = /\b(odds?|probabilit|forecast|predict|analy[sz]e|chance|outlook|signal|rally|crash|target|price|score|game|win|lose|trade|invest|buy|sell|short|long|hedge|portfolio|allocate|exposure|volatility|kelly|btc|bitcoin|eth|ethereum|spy|nasdaq|stock|crypto|market|coin)\b/i.test(m);
+  const hasAnalyticalIntent = /\b(odds?|probabilit|forecast|predict|analy[sz]e|chance|outlook|signal|rally|crash|target|price|score|game|win|lose|trade|invest|buy|sell|short|long|hedge|portfolio|allocate|exposure|volatility|kelly|option|options|call|calls|put|puts|strike|expiry|expiration|btc|bitcoin|eth|ethereum|spy|nasdaq|stock|stocks|equity|equities|crypto|market|markets|coin|coins|asset|assets|fund|funds|etf|etfs|bond|bonds|yield|rate|rates|fed|fomc|inflation|cpi|gdp|recession|earnings|ipo|dividend)\b/i.test(m);
   if (hasAnalyticalIntent) return false;
 
   // Pure greeting / acknowledgment patterns (after stripping "hex").
