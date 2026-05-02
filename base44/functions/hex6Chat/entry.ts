@@ -422,7 +422,7 @@ function isObviouslyConversational(message) {
   const wordCount = stripped.split(/\s+/).filter(Boolean).length;
 
   // Hard analytical signal — never fast-path these.
-  const hasAnalyticalIntent = /\b(odds?|probabilit|forecast|predict|analy[sz]e|chance|outlook|signal|rally|crash|target|price|score|game|win|lose|trade|invest|buy|sell|short|long|hedge|portfolio|allocate|exposure|volatility|kelly|option|options|call|calls|put|puts|strike|expiry|expiration|btc|bitcoin|eth|ethereum|spy|nasdaq|stock|stocks|equity|equities|crypto|market|markets|coin|coins|asset|assets|fund|funds|etf|etfs|bond|bonds|yield|rate|rates|fed|fomc|inflation|cpi|gdp|recession|earnings|ipo|dividend)\b/i.test(m);
+  const hasAnalyticalIntent = /\b(odds?|probabilit|forecast|predict|analy[sz]e|chance|outlook|signal|rally|crash|target|price|score|game|win|lose|trade|invest|buy|sell|short|long|hedge|portfolio|allocate|exposure|volatility|kelly|option|options|call|calls|put|puts|strike|expiry|expiration|btc|bitcoin|eth|ethereum|spy|nasdaq|stock|stocks|equity|equities|crypto|market|markets|coin|coins|asset|assets|fund|funds|etf|etfs|bond|bonds|yield|rate|rates|fed|fomc|inflation|cpi|gdp|recession|earnings|ipo|dividend|weather|temperature|forecast|news|update|status|schedule|standings|roster|election|poll|score|stats|data|report|launch|release|announcement|when|where|who|which|how\s+many|how\s+much)\b/i.test(m);
   if (hasAnalyticalIntent) return false;
 
   // Pure greeting / acknowledgment patterns (after stripping "hex").
@@ -619,12 +619,17 @@ WHAT YOU NEVER DO:
       // Skipping the second synthesis call by having the LLM produce the conversational reply
       // alongside the data. We re-write the answer in-process if the engine adjusts the read.
       const fetchResult = await base44.integrations.Core.InvokeLLM({
-        prompt: `Search the web and answer the user's question. Return both data and a draft answer.
+        prompt: `Search the web and answer the user's CURRENT question. Return both data and a draft answer.
 
-QUESTION: "${message}"
+CURRENT QUESTION: "${message}"
+${history.length > 0 ? `\nRecent conversation (use ONLY to resolve follow-ups — never to invent context):\n${history.slice(-6).map(m => `${m.role === 'user' ? 'User' : 'HEX6'}: ${m.content.slice(0, 250)}`).join('\n')}` : ''}
 
 INSTRUCTIONS:
-1. Identify the SUBJECT strictly from the question itself. If NO specific subject is named (e.g. user asks "what are good options?" with no asset), return series=[], ticker="UNKNOWN", and a draft_answer asking them to specify what they want analyzed. Never assume a subject from outside the question.
+1. Identify the SUBJECT — domain-agnostic, works for finance, sports, weather, science, politics, culture, anything:
+   a) If the current question explicitly names a subject, that IS the subject — even if it differs from prior conversation. Pivot freely.
+   b) If the current question is clearly a follow-up (e.g. "tell me more", "what about X", "and the downside?", "go deeper", "why?", "how so?", "next one?") AND the prior conversation has an obvious subject, carry that subject forward. Examples across domains: prior was Bitcoin → "what about options" means Bitcoin options. Prior was Lakers → "tonight's game?" means Lakers tonight. Prior was Tokyo weather → "tomorrow?" means Tokyo tomorrow. Prior was a climate bill → "and the EU side?" means EU climate policy. Prior was a startup → "their burn rate?" means that startup's burn rate.
+   c) If the current question is generic AND no clear subject exists in recent conversation, return series=[], ticker="UNKNOWN", and a draft_answer asking what they want to explore.
+   Be intelligent — sophisticated users expect you to remember the live thread, regardless of topic.
 2. Search authoritative sources: Yahoo Finance, CoinGecko, CoinMarketCap for finance/crypto; ESPN, Basketball-Reference for sports; FRED, Reuters, Bloomberg for econ.
 3. CRITICAL — SOURCES MUST BE THE LATEST AVAILABLE. Today is ${currentDateReadable}. Always pull the most recent data the source has — live price/market pages that update continuously, the latest news article, the most current report. Prefer the freshest version of each source. Never cite an older article when a newer one on the same topic exists.
 4. CRITICAL — URL HONESTY: Only return URLs you ACTUALLY retrieved from the web search. Never guess, fabricate, or construct URLs from memory. If you can't produce a verified URL, omit that source entirely. Better to return zero sources than a hallucinated link. Use the canonical homepage of the source (e.g. https://finance.yahoo.com, https://www.coingecko.com) if you don't have the deep URL.
