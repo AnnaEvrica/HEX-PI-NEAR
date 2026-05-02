@@ -598,7 +598,7 @@ ${history.length > 0 ? `Recent context:\n${history.slice(-6).map(m => `${m.role 
 INSTRUCTIONS:
 1. Identify the SUBJECT. Must be explicitly named in the question or recent context. If NO specific subject is named, return series=[], ticker="UNKNOWN", and a draft_answer asking what they want analyzed.
 2. Search authoritative sources: Yahoo Finance, CoinGecko, CoinMarketCap for finance/crypto; ESPN, Basketball-Reference for sports; FRED, Reuters, Bloomberg for econ.
-3. Extract AT LEAST 30 recent data points. Any real data source has 60-90 days of history.
+3. CRITICAL — YOU MUST EXTRACT AT LEAST 30 DATA POINTS. This is non-negotiable. Every real data source has 60-365 days of history. If your first source gives fewer than 30 points, search additional sources and combine them. Do NOT return fewer than 30 points unless the subject genuinely has no public time-series data (rare). The engine cannot run on less than 30 — failing this means the user gets a worse answer.
 4. Write a draft_answer: 2-3 plain English sentences with the probabilistic read (no jargon, no symbols, no brackets, no markdown link syntax). You are HEX6 BLE — warm, professional, intuitive.
 
 Return JSON:
