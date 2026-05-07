@@ -70,9 +70,18 @@ function transitionCountsFromStates(states) {
 
 Deno.serve(async (req) => {
   try {
+    // Service-role only — no end-user auth.
+    // The caller MUST provide the service role API key in the `api_key` header.
+    // Anonymous calls (no api_key) will fail at the asServiceRole.* layer below.
+    const apiKey = req.headers.get('api_key') || req.headers.get('x-api-key');
+    if (!apiKey) {
+      return Response.json(
+        { error: 'Forbidden: service role api_key header required' },
+        { status: 403 }
+      );
+    }
+
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me().catch(() => null);
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     // Parse query string. The platform invokes this via POST/JSON, but we also
     // support GET-style query params for direct curl access.
