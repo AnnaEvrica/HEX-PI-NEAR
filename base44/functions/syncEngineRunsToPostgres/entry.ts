@@ -295,6 +295,22 @@ Deno.serve(async (req) => {
     return Response.json({ error: 'POSTGRES_CONNECTION_STRING secret missing' }, { status: 500 });
   }
 
+  // Parse the URI for diagnostics (redact password)
+  let connDiag = { host: null, port: null, database: null, sslmode: null, user: null };
+  try {
+    const u = new URL(connStr);
+    connDiag = {
+      host: u.hostname,
+      port: u.port || '5432 (default)',
+      database: u.pathname.replace(/^\//, ''),
+      sslmode: u.searchParams.get('sslmode') || '(not specified — defaulting to require)',
+      user: u.username,
+    };
+    console.log('[syncEngineRuns] connection target:', JSON.stringify(connDiag));
+  } catch (e) {
+    console.log('[syncEngineRuns] could not parse connection string:', e.message);
+  }
+
   let sql;
   try {
     sql = postgres(connStr, { ssl: 'require', max: 3, idle_timeout: 20, connect_timeout: 10 });
@@ -339,12 +355,17 @@ Deno.serve(async (req) => {
     });
   } catch (error) {
     console.error('syncEngineRuns ERROR:', error);
+    const fullErr = `${error?.code || ''} ${error?.message || error} | host=${connDiag.host} port=${connDiag.port} db=${connDiag.database} sslmode=${connDiag.sslmode} user=${connDiag.user}`;
     await base44.asServiceRole.entities.SyncState.update(stateRecord.id, {
       status: 'error',
-      last_error: String(error?.message || error).slice(0, 1000),
+      last_error: fullErr.slice(0, 1000),
       lock_acquired_at: null,
     });
-    return Response.json({ error: error.message || String(error) }, { status: 500 });
+    return Response.json({
+      error: error.message || String(error),
+      error_code: error?.code,
+      connection_target: connDiag,
+    }, { status: 500 });
   } finally {
     if (sql) {
       try { await sql.end({ timeout: 5 }); } catch { /* noop */ }
