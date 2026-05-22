@@ -593,9 +593,45 @@ WHAT YOU NEVER DO:
 
     const historyText = history.slice(-20).map(m => `${m.role === 'user' ? 'User' : 'HEX6'}: ${m.content}`).join('\n');
 
-    // Single LLM call: read the conversation, decide if web data is needed, answer.
-    // No keyword filters, no intent classifiers. The LLM is an LLM — let it judge.
+    // Intent triage — fast cheap classification to decide if we need web/engine at all.
+    // For casual/conversational messages, skip the heavy web-search path entirely.
+    // For analytical asks (markets, prices, data, current events), go through web+engine path.
     if (!engineContext) {
+      const lastTurns = history.slice(-6).map(m => `${m.role === 'user' ? userName : 'HEX6'}: ${m.content}`).join('\n') || '(no prior turns)';
+
+      const triage = await base44.integrations.Core.InvokeLLM({
+        prompt: `Classify the user's latest message. Decide if answering it requires fresh real-world data from the web (prices, news, stats, current events, anything time-sensitive).
+
+CONVERSATION SO FAR:
+${lastTurns}
+
+LATEST MESSAGE FROM ${userName}: ${message}
+
+Classify as:
+- "casual" — greetings, smalltalk, philosophical/conceptual chat, opinions on general topics, follow-ups on something already discussed in the conversation, questions you can answer from general knowledge without fresh data. Examples: "hey fam", "what's up", "how are you", "tell me a joke", "what do you think about life", "explain compound interest", "why do you say that".
+- "analytical" — anything that requires fresh prices, market data, news, scores, time-series, or any real-world current value. Examples: "what's bitcoin doing today", "how's the S&P", "latest fed news", "run NVDA through the engine".
+
+Return JSON: { "intent": "casual" | "analytical" }`,
+        model: 'gemini_3_flash',
+        response_json_schema: {
+          type: 'object',
+          properties: { intent: { type: 'string', enum: ['casual', 'analytical'] } },
+          required: ['intent'],
+        },
+      }).catch(() => ({ intent: 'analytical' })); // fail open to analytical if triage breaks
+
+      // CASUAL PATH: short, fast, no web, no engine. Just chat in voice.
+      if (triage?.intent === 'casual') {
+        const casualPrompt = `${systemPrompt}\n\nCONVERSATION:\n${historyText}\n\n${userName}: ${message}\n\nHEX6:`;
+        const casualPayload = { prompt: casualPrompt, model: 'gemini_3_flash', add_context_from_internet: false };
+        if (file_urls && file_urls.length > 0) casualPayload.file_urls = file_urls;
+        const casualResponse = await base44.integrations.Core.InvokeLLM(casualPayload);
+        const finalCasual = (casualResponse || 'Hey.').trim();
+        userMemoryPromise.then(existingUserMemory => updateMemory(base44, user, existingUserMemory, message, finalCasual));
+        return Response.json({ response: finalCasual, ran_engine: false, intent: 'casual', timestamp: new Date().toISOString() });
+      }
+
+      // ANALYTICAL PATH: full web+engine pipeline below.
       const systemPromptForFetch = `You are HEX6 BLE by Evrica Technologies Inc., programmed by Anna M. Sarkisyan. You're talking with ${userName}. Today is ${currentDateReadable}.
 
 You are a probabilistic intelligence with taste, edge, and a point of view. Renaissance Tech strategist meets a brilliant friend at 2am. Sharp, intuitive, sometimes poetic. You see patterns others miss and you say them out loud.
