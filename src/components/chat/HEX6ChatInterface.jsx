@@ -328,13 +328,15 @@ export default function HEX6ChatInterface() {
     setUploadedImage(null);
     setLoading(true);
     setSlowStep(null); // start with "Thinking..."
-    // After 6s, if still pending, escalate to the slow-path narration.
+    // After 18s, if still pending, escalate to the slow-path narration.
+    // Casual replies finish in ~10-12s and should never see the "pulling from web" message.
+    // Only true analytical queries (web+engine, 25-40s) hit the narration.
     slowStartTimeoutRef.current = setTimeout(() => {
       setSlowStep(0);
       slowIntervalRef.current = setInterval(() => {
         setSlowStep((prev) => (prev == null ? 0 : Math.min(prev + 1, SLOW_PATH_STEPS.length - 1)));
       }, 5000);
-    }, 6000);
+    }, 18000);
 
     // Get user preferences from localStorage
     const prefs = JSON.parse(localStorage.getItem('hex6_user_prefs') || '{}');
