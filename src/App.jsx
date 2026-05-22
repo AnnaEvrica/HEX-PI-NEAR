@@ -10,6 +10,7 @@ import AppLayout from '@/components/layout/AppLayout';
 import Landing from '@/pages/Landing.jsx';
 import ConsentFlow from '@/components/onboarding/ConsentFlow';
 import HEX6ChatInterface from '@/components/chat/HEX6ChatInterface';
+import SubscriptionGate from '@/components/SubscriptionGate';
 import { useState, useEffect } from 'react';
 
 const AuthenticatedApp = () => {
@@ -32,7 +33,7 @@ const AuthenticatedApp = () => {
 
   return (
     <Routes>
-      <Route path="/" element={user ? (consentCompleted ? <HEX6ChatInterface /> : <ConsentFlow onComplete={() => { base44.auth.updateMe({ hex6_consent_completed: true }); setConsentCompleted(true); }} />) : <Landing />} />
+      <Route path="/" element={user ? (consentCompleted ? <SubscriptionGate user={user}><HEX6ChatInterface /></SubscriptionGate> : <ConsentFlow onComplete={() => { base44.auth.updateMe({ hex6_consent_completed: true }); setConsentCompleted(true); }} />) : <Landing />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

@@ -9,31 +9,17 @@ export default function PricingModal({ open, onClose }) {
   const prices = [
     {
       name: '7 Day Free Trial',
-      description: 'Then billed monthly',
-      amount: '$69',
+      description: 'Then $9.99 billed monthly',
+      amount: '$9.99',
       period: '/month',
-      priceId: 'price_1TQvKCAiPqDqb4PqnFms0rQJ',
+      priceId: 'price_1TZoLPAUnMzNlphWv2ioPGPx',
       features: [
         'Full HEX6 system access',
         'Real-time market analysis',
         'Probabilistic allocation models',
         'Conversation history',
         'Priority support',
-      ],
-    },
-    {
-      name: 'Annual Plan',
-      description: 'Save 44% vs monthly',
-      amount: '$369',
-      period: '/year',
-      priceId: 'price_1TQvKCAiPqDqb4PqhuG26MmL',
-      features: [
-        'Full HEX6 system access',
-        'Real-time market analysis',
-        'Probabilistic allocation models',
-        'Conversation history',
-        'Priority support',
-        '2 months free',
+        'Cancel anytime during trial',
       ],
       highlighted: true,
     },
@@ -84,7 +70,7 @@ export default function PricingModal({ open, onClose }) {
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 max-w-md mx-auto gap-6">
             {prices.map((plan, idx) => (
               <div
                 key={idx}

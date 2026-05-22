@@ -35,8 +35,8 @@ Deno.serve(async (req) => {
           },
         },
       },
-      success_url: `${Deno.env.get('APP_URL')}/app?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${Deno.env.get('APP_URL')}/pricing`,
+      success_url: `${Deno.env.get('APP_URL') || req.headers.get('origin') || ''}/?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${Deno.env.get('APP_URL') || req.headers.get('origin') || ''}/?checkout=canceled`,
       metadata: {
         base44_app_id: Deno.env.get('BASE44_APP_ID'),
         user_email: user.email,

@@ -1,4 +1,6 @@
 {
+  "name": "User",
+  "type": "object",
   "properties": {
     "role": {
       "type": "string",
@@ -7,11 +9,45 @@
         "admin",
         "user"
       ]
+    },
+    "subscription_status": {
+      "type": "string",
+      "enum": [
+        "none",
+        "trialing",
+        "active",
+        "past_due",
+        "canceled",
+        "incomplete"
+      ],
+      "default": "none",
+      "description": "Stripe subscription status"
+    },
+    "stripe_customer_id": {
+      "type": "string",
+      "description": "Stripe customer ID for this user"
+    },
+    "stripe_subscription_id": {
+      "type": "string",
+      "description": "Active Stripe subscription ID"
+    },
+    "trial_ends_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the free trial ends"
+    },
+    "current_period_end": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the current billing period ends"
+    },
+    "hex6_consent_completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the user has completed the consent flow"
     }
   },
   "required": [
     "role"
-  ],
-  "name": "User",
-  "type": "object"
+  ]
 }
