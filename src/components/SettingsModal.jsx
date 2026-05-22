@@ -129,11 +129,6 @@ export default function SettingsModal({ open, onClose }) {
     }
   };
 
-  const handleBillingPortal = () => {
-    // In production, this would redirect to Stripe customer portal
-    window.open('https://billing.stripe.com/p/login/test_1234567890', '_blank');
-  };
-
   if (!open) return null;
 
   return (
@@ -264,39 +259,6 @@ export default function SettingsModal({ open, onClose }) {
                 </div>
 
                 </div>
-
-              {/* BILLING */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-bold uppercase tracking-wide">Billing</h3>
-
-                <div className="p-6 bg-accent/5 border border-accent/30 rounded-sm space-y-4">
-                  <div className="space-y-1">
-                    <p className="text-xs text-secondary font-medium uppercase">Active Tier</p>
-                    <p className="text-lg font-bold">Oracle Mode — Monthly Access</p>
-                    <p className="text-xs text-secondary">7-Day Free Trial</p>
-                  </div>
-
-                  <div className="space-y-1 pt-4 border-t border-accent/20">
-                    <p className="text-xs text-secondary font-medium uppercase">Status</p>
-                    <p className="text-sm text-accent font-medium">Active. Next billing cycle: May 27, 2026.</p>
-                  </div>
-
-                  <div className="flex gap-2 pt-4">
-                    <button
-                      onClick={handleBillingPortal}
-                      className="flex-1 px-4 py-2 rounded-sm bg-accent text-accent-foreground text-sm font-medium hover:bg-accent/90 transition-colors"
-                    >
-                      Manage Billing
-                    </button>
-                    <button
-                      onClick={() => {}}
-                      className="flex-1 px-4 py-2 rounded-sm border border-border text-sm font-medium hover:bg-muted transition-colors text-secondary"
-                    >
-                      Shift to Annual ($369) — Save 56%
-                    </button>
-                  </div>
-                </div>
-              </div>
 
               {/* Data Export - at the very end */}
               <div className="pt-6 border-t border-border space-y-4 mt-8">
