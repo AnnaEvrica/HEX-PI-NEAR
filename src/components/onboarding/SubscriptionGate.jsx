@@ -6,12 +6,16 @@ export default function SubscriptionGate({ children }) {
   const [checking, setChecking] = useState(true);
   const [hasSubscription, setHasSubscription] = useState(false);
 
-  const checkSubscription = async () => {
+  const checkSubscription = async (retries = 2) => {
     try {
       const res = await base44.functions.invoke('getSubscriptionStatus', {});
       setHasSubscription(!!res?.data?.hasSubscription);
     } catch (err) {
       console.error('Subscription check failed:', err);
+      if (retries > 0) {
+        await new Promise((r) => setTimeout(r, 1500));
+        return checkSubscription(retries - 1);
+      }
       setHasSubscription(false);
     } finally {
       setChecking(false);
