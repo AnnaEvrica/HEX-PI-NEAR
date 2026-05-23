@@ -1,0 +1,48 @@
+{
+  "name": "Subscription",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email of the subscriber"
+    },
+    "stripe_customer_id": {
+      "type": "string",
+      "description": "Stripe customer ID"
+    },
+    "stripe_subscription_id": {
+      "type": "string",
+      "description": "Stripe subscription ID"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "trialing",
+        "active",
+        "past_due",
+        "canceled",
+        "incomplete",
+        "unpaid"
+      ],
+      "description": "Subscription status from Stripe"
+    },
+    "current_period_end": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the current billing period ends"
+    },
+    "trial_end": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the free trial ends"
+    },
+    "cancel_at_period_end": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the subscription will cancel at period end"
+    }
+  },
+  "required": [
+    "user_email"
+  ]
+}
