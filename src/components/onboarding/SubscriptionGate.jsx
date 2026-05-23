@@ -25,20 +25,18 @@ export default function SubscriptionGate({ children }) {
   useEffect(() => {
     checkSubscription();
 
-    // If returning from Stripe checkout, poll briefly for webhook to land.
+    // If returning from Stripe checkout, sync subscription directly from Stripe.
     const params = new URLSearchParams(window.location.search);
     if (params.get('checkout') === 'success') {
-      let attempts = 0;
-      const poll = setInterval(async () => {
-        attempts += 1;
-        await checkSubscription();
-        if (attempts >= 6) {
-          clearInterval(poll);
-          // Clean URL
-          window.history.replaceState({}, '', window.location.pathname);
+      (async () => {
+        try {
+          await base44.functions.invoke('syncSubscriptionFromStripe', {});
+        } catch (err) {
+          console.error('Sync failed:', err);
         }
-      }, 2000);
-      return () => clearInterval(poll);
+        await checkSubscription();
+        window.history.replaceState({}, '', window.location.pathname);
+      })();
     }
   }, []);
 
