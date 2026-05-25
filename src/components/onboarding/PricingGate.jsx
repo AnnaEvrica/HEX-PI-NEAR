@@ -40,14 +40,17 @@ export default function PricingGate() {
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Start your free trial</h1>
           <p className="text-secondary text-sm sm:text-base">
-            7 days free. Then $9.99/month. Cancel anytime.
+            7 days free. Then $9.99/month — research mode pricing. Cancel anytime.
           </p>
         </div>
 
         <div className="border border-border bg-card rounded-sm p-6 space-y-5">
-          <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-bold">$9.99</span>
-            <span className="text-secondary text-sm">/ month</span>
+          <div className="space-y-1">
+            <div className="flex items-baseline gap-2">
+              <span className="text-4xl font-bold">$9.99</span>
+              <span className="text-secondary text-sm">/ month</span>
+            </div>
+            <p className="text-xs text-accent font-medium">Research mode — early access pricing</p>
           </div>
 
           <ul className="space-y-3 text-sm">
