@@ -313,10 +313,21 @@ Deno.serve(async (req) => {
 
   let sql;
   try {
-    sql = postgres(connStr, { ssl: 'require', max: 3, idle_timeout: 20, connect_timeout: 10 });
+    sql = postgres(connStr, { ssl: 'require', max: 3, idle_timeout: 20, connect_timeout: 30 });
 
-    // 5. Ensure schema
-    await ensureSchema(sql);
+    // 5. Ensure schema — retry once on connect timeout (Neon cold wake)
+    const withRetry = async (fn) => {
+      try { return await fn(); }
+      catch (e) {
+        if (e?.code === 'CONNECT_TIMEOUT' || e?.message?.includes('CONNECT_TIMEOUT')) {
+          log('connect timeout, waiting 5s and retrying...');
+          await new Promise(r => setTimeout(r, 5000));
+          return await fn();
+        }
+        throw e;
+      }
+    };
+    await withRetry(() => ensureSchema(sql));
 
     // 6. Pull engine run logs since watermark
     const watermark = stateRecord.last_synced_timestamp || null;
