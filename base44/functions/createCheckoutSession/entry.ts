@@ -37,6 +37,7 @@ Deno.serve(async (req) => {
         trial_period_days: 7,
         metadata: { user_email: user.email },
       },
+      allow_promotion_codes: true,
       success_url: `${origin}/?checkout=success`,
       cancel_url: `${origin}/?checkout=canceled`,
       metadata: { user_email: user.email },

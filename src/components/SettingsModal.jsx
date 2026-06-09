@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, LogOut as LogOutIcon, Copy, Download, Lock, Key, Shield, Eye, Clock, Bell, TrendingUp, Zap, AlertTriangle, Check } from 'lucide-react';
+import { X, LogOut as LogOutIcon, Copy, Download, Lock, Key, Shield, Eye, Clock, Bell, TrendingUp, Zap, AlertTriangle, Check, CreditCard, Gift } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
 function generateSystemID() {
@@ -23,6 +23,9 @@ export default function SettingsModal({ open, onClose }) {
   const [riskAversion, setRiskAversion] = useState(2.5);
   const [baseCurrency, setBaseCurrency] = useState('USD');
   const [consentTimestamp, setConsentTimestamp] = useState(null);
+  const [subscription, setSubscription] = useState(null);
+  const [promoCode, setPromoCode] = useState('');
+  const [promoLoading, setPromoLoading] = useState(false);
 
   useEffect(() => {
     const loadUserData = async () => {
@@ -55,6 +58,12 @@ export default function SettingsModal({ open, onClose }) {
         if (timestamp) {
           setConsentTimestamp(timestamp);
         }
+
+        // Load subscription status
+        try {
+          const res = await base44.functions.invoke('getSubscriptionStatus', {});
+          setSubscription(res?.data || null);
+        } catch { /* noop */ }
       } catch (err) {
         console.log('Could not load user data');
       }
@@ -119,6 +128,50 @@ export default function SettingsModal({ open, onClose }) {
     }
   };
 
+  const handleCancelSubscription = async () => {
+    if (!window.confirm('Cancel subscription? You\'ll keep access until the end of the billing period.')) return;
+    setLoading(true);
+    try {
+      await base44.functions.invoke('cancelSubscription', {});
+      setSubscription((prev) => ({ ...prev, cancel_at_period_end: true }));
+      setMessage({ type: 'success', text: 'Subscription will cancel at period end.' });
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReactivateSubscription = async () => {
+    setLoading(true);
+    try {
+      await base44.functions.invoke('reactivateSubscription', {});
+      setSubscription((prev) => ({ ...prev, cancel_at_period_end: false }));
+      setMessage({ type: 'success', text: 'Subscription reactivated.' });
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim()) return;
+    setPromoLoading(true);
+    try {
+      const res = await base44.functions.invoke('applyLifetimePromo', { code: promoCode.trim() });
+      if (res?.data?.lifetime) {
+        setSubscription({ hasSubscription: true, status: 'active', lifetime: true, cancel_at_period_end: false });
+        setMessage({ type: 'success', text: '🎉 Lifetime access activated!' });
+        setPromoCode('');
+      }
+    } catch (err) {
+      setMessage({ type: 'error', text: 'Invalid promo code.' });
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
   const handleLogout = async () => {
     setLoading(true);
     try {
@@ -146,6 +199,7 @@ export default function SettingsModal({ open, onClose }) {
         <div className="flex border-b border-border shrink-0 overflow-x-auto">
           {[
             { id: 'account', label: 'Account' },
+            { id: 'subscription', label: 'Subscription' },
             { id: 'parameters', label: 'Parameters' },
             { id: 'legal', label: 'Legal' },
           ].map((tab) => (
@@ -286,6 +340,107 @@ export default function SettingsModal({ open, onClose }) {
               >
                 Sign Out
               </button>
+            </div>
+          )}
+
+          {/* SUBSCRIPTION */}
+          {activeSection === 'subscription' && (
+            <div className="space-y-6">
+              {/* Current Status */}
+              <div className="p-5 border border-border rounded-sm space-y-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <CreditCard className="w-4 h-4 text-accent" />
+                  <p className="text-sm font-bold uppercase tracking-wide">Subscription Status</p>
+                </div>
+
+                {subscription ? (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-secondary">Status</span>
+                      <span className={`text-sm font-bold px-2 py-0.5 rounded-sm ${
+                        subscription.status === 'active' ? 'bg-green-900/30 text-green-300' :
+                        subscription.status === 'trialing' ? 'bg-accent/20 text-accent' :
+                        'bg-red-900/30 text-red-300'
+                      }`}>
+                        {subscription.stripe_subscription_id?.startsWith('lifetime_') ? 'Lifetime ∞' :
+                         subscription.status === 'trialing' ? 'Free Trial' :
+                         subscription.status === 'active' ? 'Active' : subscription.status}
+                      </span>
+                    </div>
+
+                    {subscription.status === 'trialing' && subscription.trial_end && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-secondary">Trial ends</span>
+                        <span className="text-sm">{new Date(subscription.trial_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                      </div>
+                    )}
+
+                    {subscription.current_period_end && !subscription.stripe_subscription_id?.startsWith('lifetime_') && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-secondary">
+                          {subscription.cancel_at_period_end ? 'Access until' : 'Next billing'}
+                        </span>
+                        <span className="text-sm">{new Date(subscription.current_period_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                      </div>
+                    )}
+
+                    {subscription.cancel_at_period_end && (
+                      <div className="p-3 bg-amber-900/20 border border-amber-700/30 rounded-sm text-xs text-amber-300">
+                        Your subscription is set to cancel. You'll keep access until the end of the billing period.
+                      </div>
+                    )}
+
+                    {/* Cancel / Reactivate */}
+                    {!subscription.stripe_subscription_id?.startsWith('lifetime_') && subscription.hasSubscription && (
+                      subscription.cancel_at_period_end ? (
+                        <button
+                          onClick={handleReactivateSubscription}
+                          disabled={loading}
+                          className="w-full px-4 py-2 rounded-sm bg-accent text-accent-foreground text-sm font-medium hover:bg-accent/90 transition-colors disabled:opacity-40"
+                        >
+                          Reactivate Subscription
+                        </button>
+                      ) : (
+                        <button
+                          onClick={handleCancelSubscription}
+                          disabled={loading}
+                          className="w-full px-4 py-2 rounded-sm border border-destructive/50 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-40"
+                        >
+                          Cancel Subscription
+                        </button>
+                      )
+                    )}
+                  </>
+                ) : (
+                  <p className="text-sm text-secondary">No active subscription found.</p>
+                )}
+              </div>
+
+              {/* Promo Code */}
+              <div className="p-5 border border-border rounded-sm space-y-4">
+                <div className="flex items-center gap-2">
+                  <Gift className="w-4 h-4 text-accent" />
+                  <p className="text-sm font-bold uppercase tracking-wide">Promo Code</p>
+                </div>
+                <p className="text-xs text-secondary">Have a promo code? Enter it below. Standard Stripe discount codes can be applied during checkout.</p>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                    placeholder="Enter code..."
+                    className="flex-1 px-3 py-2 rounded-sm border border-border bg-muted/30 text-sm font-mono focus:outline-none focus:border-accent"
+                    onKeyDown={(e) => e.key === 'Enter' && handleApplyPromo()}
+                  />
+                  <button
+                    onClick={handleApplyPromo}
+                    disabled={promoLoading || !promoCode.trim()}
+                    className="px-4 py-2 rounded-sm bg-accent text-accent-foreground text-sm font-medium hover:bg-accent/90 transition-colors disabled:opacity-40"
+                  >
+                    {promoLoading ? '...' : 'Apply'}
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 

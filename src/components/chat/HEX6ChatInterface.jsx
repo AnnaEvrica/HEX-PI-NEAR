@@ -429,11 +429,16 @@ export default function HEX6ChatInterface() {
     await base44.auth.logout(window.location.origin + '/');
   };
 
-  // Detect if mobile
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  // Detect if mobile — reactive to window resize
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < 768);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
 
   return (
-    <div className={`flex ${isMobile ? 'flex-col' : ''} h-screen bg-background`}>
+    <div className="flex h-screen bg-background overflow-hidden">
       {/* Sidebar - hidden on mobile */}
       <div
         className={`fixed inset-y-0 left-0 z-40 w-64 bg-card border-r border-border transition-transform duration-300 ${
