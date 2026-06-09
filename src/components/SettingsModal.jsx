@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, LogOut as LogOutIcon, Copy, Download, Lock, Key, Shield, Eye, Clock, Bell, TrendingUp, Zap, AlertTriangle, Check, CreditCard, Gift } from 'lucide-react';
+import { X, LogOut as LogOutIcon, Copy, Download, Lock, Key, Shield, Eye, Clock, Bell, TrendingUp, Zap, AlertTriangle, Check, CreditCard } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
 function generateSystemID() {
@@ -24,8 +24,7 @@ export default function SettingsModal({ open, onClose }) {
   const [baseCurrency, setBaseCurrency] = useState('USD');
   const [consentTimestamp, setConsentTimestamp] = useState(null);
   const [subscription, setSubscription] = useState(null);
-  const [promoCode, setPromoCode] = useState('');
-  const [promoLoading, setPromoLoading] = useState(false);
+
 
   useEffect(() => {
     const loadUserData = async () => {
@@ -152,23 +151,6 @@ export default function SettingsModal({ open, onClose }) {
       setMessage({ type: 'error', text: err.message });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleApplyPromo = async () => {
-    if (!promoCode.trim()) return;
-    setPromoLoading(true);
-    try {
-      const res = await base44.functions.invoke('applyLifetimePromo', { code: promoCode.trim() });
-      if (res?.data?.lifetime) {
-        setSubscription({ hasSubscription: true, status: 'active', lifetime: true, cancel_at_period_end: false });
-        setMessage({ type: 'success', text: '🎉 Lifetime access activated!' });
-        setPromoCode('');
-      }
-    } catch (err) {
-      setMessage({ type: 'error', text: 'Invalid promo code.' });
-    } finally {
-      setPromoLoading(false);
     }
   };
 
@@ -416,31 +398,6 @@ export default function SettingsModal({ open, onClose }) {
                 )}
               </div>
 
-              {/* Promo Code */}
-              <div className="p-5 border border-border rounded-sm space-y-4">
-                <div className="flex items-center gap-2">
-                  <Gift className="w-4 h-4 text-accent" />
-                  <p className="text-sm font-bold uppercase tracking-wide">Promo Code</p>
-                </div>
-                <p className="text-xs text-secondary">Have a promo code? Enter it below. Standard Stripe discount codes can be applied during checkout.</p>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={promoCode}
-                    onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                    placeholder="Enter code..."
-                    className="flex-1 px-3 py-2 rounded-sm border border-border bg-muted/30 text-sm font-mono focus:outline-none focus:border-accent"
-                    onKeyDown={(e) => e.key === 'Enter' && handleApplyPromo()}
-                  />
-                  <button
-                    onClick={handleApplyPromo}
-                    disabled={promoLoading || !promoCode.trim()}
-                    className="px-4 py-2 rounded-sm bg-accent text-accent-foreground text-sm font-medium hover:bg-accent/90 transition-colors disabled:opacity-40"
-                  >
-                    {promoLoading ? '...' : 'Apply'}
-                  </button>
-                </div>
-              </div>
             </div>
           )}
 
