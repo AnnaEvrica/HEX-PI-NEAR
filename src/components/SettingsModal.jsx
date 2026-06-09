@@ -24,6 +24,8 @@ export default function SettingsModal({ open, onClose }) {
   const [baseCurrency, setBaseCurrency] = useState('USD');
   const [consentTimestamp, setConsentTimestamp] = useState(null);
   const [subscription, setSubscription] = useState(null);
+  const [promoCode, setPromoCode] = useState('');
+  const [promoLoading, setPromoLoading] = useState(false);
 
 
   useEffect(() => {
@@ -151,6 +153,25 @@ export default function SettingsModal({ open, onClose }) {
       setMessage({ type: 'error', text: err.message });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim()) return;
+    setPromoLoading(true);
+    setMessage(null);
+    try {
+      const res = await base44.functions.invoke('applyPromoCode', {
+        code: promoCode.trim(),
+        origin: window.location.origin,
+      });
+      if (res?.data?.url) {
+        window.location.href = res.data.url;
+      }
+    } catch (err) {
+      setMessage({ type: 'error', text: err?.response?.data?.error || 'Invalid or expired promo code.' });
+    } finally {
+      setPromoLoading(false);
     }
   };
 
@@ -398,6 +419,28 @@ export default function SettingsModal({ open, onClose }) {
                 )}
               </div>
 
+              {/* Promo Code */}
+              <div className="p-5 border border-border rounded-sm space-y-4">
+                <p className="text-sm font-bold uppercase tracking-wide">Have a Promo Code?</p>
+                <p className="text-xs text-secondary">Enter your code below — you'll be redirected to checkout with the discount applied.</p>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                    placeholder="e.g. FIRSTMONTH"
+                    className="flex-1 px-3 py-2 rounded-sm border border-border bg-muted/30 text-sm font-mono focus:outline-none focus:border-accent"
+                    onKeyDown={(e) => e.key === 'Enter' && handleApplyPromo()}
+                  />
+                  <button
+                    onClick={handleApplyPromo}
+                    disabled={promoLoading || !promoCode.trim()}
+                    className="px-4 py-2 rounded-sm bg-accent text-accent-foreground text-sm font-medium hover:bg-accent/90 transition-colors disabled:opacity-40"
+                  >
+                    {promoLoading ? '...' : 'Apply'}
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
