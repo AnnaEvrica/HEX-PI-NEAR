@@ -394,7 +394,7 @@ export default function SettingsModal({ open, onClose }) {
                     )}
 
                     {/* Cancel / Reactivate */}
-                    {!subscription.stripe_subscription_id?.startsWith('lifetime_') && subscription.hasSubscription && (
+                    {subscription.hasSubscription && subscription.stripe_subscription_id && !subscription.stripe_subscription_id.startsWith('lifetime_') && (
                       subscription.cancel_at_period_end ? (
                         <button
                           onClick={handleReactivateSubscription}

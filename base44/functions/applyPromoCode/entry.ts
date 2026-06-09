@@ -1,10 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 import Stripe from 'npm:stripe@17.3.1';
 
-// This function looks up a Stripe promotion code and redirects the user
-// to a new checkout session with that discount pre-applied.
-// Use it for "1st month free" or any other Stripe coupon-backed promo.
-
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -14,7 +10,7 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json().catch(() => ({}));
-    const code = (body.code || '').trim().toUpperCase();
+    const code = (body.code || '').trim();
     const origin = body.origin || req.headers.get('origin') || '';
 
     if (!code) {
@@ -24,12 +20,19 @@ Deno.serve(async (req) => {
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
     const priceId = Deno.env.get('STRIPE_PRICE_ID');
 
-    // Look up the promotion code in Stripe
-    const promoCodes = await stripe.promotionCodes.list({ code, active: true, limit: 1 });
-    if (!promoCodes.data.length) {
-      return Response.json({ error: 'Invalid or expired promo code' }, { status: 400 });
+    // Look up the promotion code in Stripe (case-insensitive search)
+    const promoCodes = await stripe.promotionCodes.list({ code: code.toUpperCase(), active: true, limit: 1 });
+    const promoCodeObj = promoCodes.data[0] || null;
+
+    if (!promoCodeObj) {
+      // Try original case as fallback
+      const promoCodes2 = await stripe.promotionCodes.list({ code, active: true, limit: 1 });
+      if (!promoCodes2.data.length) {
+        return Response.json({ error: 'Invalid or expired promo code' }, { status: 400 });
+      }
     }
-    const promoCodeObj = promoCodes.data[0];
+
+    const finalPromo = promoCodeObj || (await stripe.promotionCodes.list({ code, active: true, limit: 1 })).data[0];
 
     // Find or create Stripe customer
     let customerId;
@@ -45,16 +48,16 @@ Deno.serve(async (req) => {
       customerId = customer.id;
     }
 
-    // Create a new checkout session with the promo pre-applied
+    // NOTE: Stripe does NOT allow combining discounts with trial_period_days on the same session.
+    // When a promo code is used, we skip the trial — the coupon itself IS the benefit.
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       customer: customerId,
       line_items: [{ price: priceId, quantity: 1 }],
       subscription_data: {
-        trial_period_days: 7,
         metadata: { user_email: user.email },
       },
-      discounts: [{ promotion_code: promoCodeObj.id }],
+      discounts: [{ promotion_code: finalPromo.id }],
       success_url: `${origin}/?checkout=success`,
       cancel_url: `${origin}/?checkout=canceled`,
       metadata: { user_email: user.email },

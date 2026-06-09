@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 Deno.serve(async (req) => {
   try {
@@ -20,9 +20,11 @@ Deno.serve(async (req) => {
     return Response.json({
       hasSubscription: isActive,
       status: sub.status,
+      stripe_subscription_id: sub.stripe_subscription_id,
+      stripe_customer_id: sub.stripe_customer_id,
       trial_end: sub.trial_end,
       current_period_end: sub.current_period_end,
-      cancel_at_period_end: sub.cancel_at_period_end,
+      cancel_at_period_end: sub.cancel_at_period_end ?? false,
     });
   } catch (error) {
     console.error('getSubscriptionStatus error:', error.message);
