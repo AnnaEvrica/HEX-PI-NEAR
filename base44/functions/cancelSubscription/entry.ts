@@ -12,31 +12,25 @@ Deno.serve(async (req) => {
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
 
     const subs = await base44.asServiceRole.entities.Subscription.filter({ user_email: user.email });
-    if (subs.length === 0 || !subs[0].stripe_subscription_id) {
-      return Response.json({ error: 'No active subscription found' }, { status: 404 });
+    if (subs.length === 0) {
+      return Response.json({ error: 'No subscription record found' }, { status: 404 });
     }
 
     const sub = subs[0];
 
-    // Cancel at period end (not immediately)
-    try {
-      await stripe.subscriptions.update(sub.stripe_subscription_id, {
-        cancel_at_period_end: true,
-      });
-    } catch (stripeErr) {
-      console.error('Stripe update failed:', stripeErr.message);
-      // If subscription doesn't exist in Stripe (e.g. stale ID), mark locally as canceled
-      if (stripeErr.code === 'resource_missing') {
-        await base44.asServiceRole.entities.Subscription.update(sub.id, {
-          status: 'canceled',
+    // Only call Stripe if we have a real subscription ID
+    if (sub.stripe_subscription_id && !sub.stripe_subscription_id.startsWith('lifetime_')) {
+      try {
+        await stripe.subscriptions.update(sub.stripe_subscription_id, {
           cancel_at_period_end: true,
         });
-        return Response.json({ ok: true, cancel_at_period_end: true, note: 'Marked locally' });
+      } catch (stripeErr) {
+        console.error('Stripe update failed:', stripeErr.message);
+        // Fall through and mark locally anyway
       }
-      throw stripeErr;
     }
 
-    // Update local record
+    // Always update local record
     await base44.asServiceRole.entities.Subscription.update(sub.id, {
       cancel_at_period_end: true,
     });

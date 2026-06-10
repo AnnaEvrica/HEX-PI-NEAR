@@ -12,16 +12,23 @@ Deno.serve(async (req) => {
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
 
     const subs = await base44.asServiceRole.entities.Subscription.filter({ user_email: user.email });
-    if (subs.length === 0 || !subs[0].stripe_subscription_id) {
-      return Response.json({ error: 'No subscription found' }, { status: 404 });
+    if (subs.length === 0) {
+      return Response.json({ error: 'No subscription record found' }, { status: 404 });
     }
 
     const sub = subs[0];
 
-    // Re-enable — remove cancel_at_period_end
-    await stripe.subscriptions.update(sub.stripe_subscription_id, {
-      cancel_at_period_end: false,
-    });
+    // Only call Stripe if we have a real subscription ID
+    if (sub.stripe_subscription_id && !sub.stripe_subscription_id.startsWith('lifetime_')) {
+      try {
+        await stripe.subscriptions.update(sub.stripe_subscription_id, {
+          cancel_at_period_end: false,
+        });
+      } catch (stripeErr) {
+        console.error('Stripe reactivate failed:', stripeErr.message);
+        // Fall through and mark locally anyway
+      }
+    }
 
     await base44.asServiceRole.entities.Subscription.update(sub.id, {
       cancel_at_period_end: false,
