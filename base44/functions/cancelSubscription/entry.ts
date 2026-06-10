@@ -19,9 +19,22 @@ Deno.serve(async (req) => {
     const sub = subs[0];
 
     // Cancel at period end (not immediately)
-    await stripe.subscriptions.update(sub.stripe_subscription_id, {
-      cancel_at_period_end: true,
-    });
+    try {
+      await stripe.subscriptions.update(sub.stripe_subscription_id, {
+        cancel_at_period_end: true,
+      });
+    } catch (stripeErr) {
+      console.error('Stripe update failed:', stripeErr.message);
+      // If subscription doesn't exist in Stripe (e.g. stale ID), mark locally as canceled
+      if (stripeErr.code === 'resource_missing') {
+        await base44.asServiceRole.entities.Subscription.update(sub.id, {
+          status: 'canceled',
+          cancel_at_period_end: true,
+        });
+        return Response.json({ ok: true, cancel_at_period_end: true, note: 'Marked locally' });
+      }
+      throw stripeErr;
+    }
 
     // Update local record
     await base44.asServiceRole.entities.Subscription.update(sub.id, {
