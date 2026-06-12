@@ -41,11 +41,7 @@ export default function SubscriptionGate({ children }) {
   };
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const isReturningFromCheckout = params.get('checkout') === 'success';
-
-    if (isReturningFromCheckout) {
-      // URL already cleared in useState initializer above
+    if (fromCheckout) {
       // Wait 3s for webhook to land, then poll aggressively
       setTimeout(() => checkSubscription(6, 2500), 3000);
     } else {
