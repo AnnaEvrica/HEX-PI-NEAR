@@ -47,11 +47,15 @@ Deno.serve(async (req) => {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object;
-        if (session.subscription) {
+        const userEmail = session.metadata?.user_email || session.customer_details?.email;
+        if (session.subscription && userEmail) {
+          // Patch metadata on Stripe so future subscription events also carry user_email
           const sub = await stripe.subscriptions.retrieve(session.subscription);
-          // Ensure metadata is set
-          if (!sub.metadata?.user_email && session.metadata?.user_email) {
-            sub.metadata = { ...sub.metadata, user_email: session.metadata.user_email };
+          if (!sub.metadata?.user_email) {
+            await stripe.subscriptions.update(session.subscription, {
+              metadata: { ...sub.metadata, user_email: userEmail },
+            });
+            sub.metadata = { ...sub.metadata, user_email: userEmail };
           }
           await upsertFromSubscription(sub);
         }
