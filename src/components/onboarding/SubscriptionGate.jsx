@@ -11,12 +11,19 @@ export default function SubscriptionGate({ children }) {
     try {
       const res = await base44.functions.invoke('getSubscriptionStatus', {});
       const active = !!res?.data?.hasSubscription;
-      setHasSubscription(active);
-      // If still no subscription and we have retries left, keep polling
-      if (!active && retries > 0) {
+      if (active) {
+        setHasSubscription(true);
+        setChecking(false);
+        return;
+      }
+      // Not active yet — retry if we have attempts left
+      if (retries > 0) {
         await new Promise((r) => setTimeout(r, delay));
         return checkSubscription(retries - 1, delay);
       }
+      // Exhausted retries
+      setHasSubscription(false);
+      setChecking(false);
     } catch (err) {
       console.error('Subscription check failed:', err);
       if (retries > 0) {
@@ -24,7 +31,6 @@ export default function SubscriptionGate({ children }) {
         return checkSubscription(retries - 1, delay);
       }
       setHasSubscription(false);
-    } finally {
       setChecking(false);
     }
   };
