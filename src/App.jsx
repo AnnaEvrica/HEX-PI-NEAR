@@ -17,9 +17,12 @@ const AuthenticatedApp = () => {
   const { isLoading, user } = useAuth();
   const [consentCompleted, setConsentCompleted] = useState(false);
 
+  // Sync from user object — runs synchronously after user is available
+  const consentDone = user?.hex6_consent_completed === true || consentCompleted;
+
   useEffect(() => {
-    if (user) {
-      setConsentCompleted(user.hex6_consent_completed === true);
+    if (user?.hex6_consent_completed === true) {
+      setConsentCompleted(true);
     }
   }, [user]);
 
@@ -33,7 +36,7 @@ const AuthenticatedApp = () => {
 
   return (
     <Routes>
-      <Route path="/" element={user ? (consentCompleted ? <SubscriptionGate><HEX6ChatInterface /></SubscriptionGate> : <ConsentFlow onComplete={() => { base44.auth.updateMe({ hex6_consent_completed: true }); setConsentCompleted(true); }} />) : <Landing />} />
+      <Route path="/" element={user ? (consentDone ? <SubscriptionGate><HEX6ChatInterface /></SubscriptionGate> : <ConsentFlow onComplete={() => { base44.auth.updateMe({ hex6_consent_completed: true }); setConsentCompleted(true); }} />) : <Landing />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
