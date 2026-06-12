@@ -11,11 +11,18 @@ import Landing from '@/pages/Landing.jsx';
 import ConsentFlow from '@/components/onboarding/ConsentFlow';
 import SubscriptionGate from '@/components/onboarding/SubscriptionGate';
 import HEX6ChatInterface from '@/components/chat/HEX6ChatInterface';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+
+// Capture checkout param IMMEDIATELY on script load — before any React renders clear the URL
+const checkoutSuccessOnLoad = new URLSearchParams(window.location.search).get('checkout') === 'success';
+if (checkoutSuccessOnLoad) {
+  window.history.replaceState({}, '', window.location.pathname);
+}
 
 const AuthenticatedApp = () => {
   const { isLoading, user } = useAuth();
   const [consentCompleted, setConsentCompleted] = useState(false);
+  const fromCheckout = useRef(checkoutSuccessOnLoad);
 
   // Sync from user object — runs synchronously after user is available
   const consentDone = user?.hex6_consent_completed === true || consentCompleted;
@@ -36,7 +43,7 @@ const AuthenticatedApp = () => {
 
   return (
     <Routes>
-      <Route path="/" element={user ? (consentDone ? <SubscriptionGate><HEX6ChatInterface /></SubscriptionGate> : <ConsentFlow onComplete={() => { base44.auth.updateMe({ hex6_consent_completed: true }); setConsentCompleted(true); }} />) : <Landing />} />
+      <Route path="/" element={user ? (consentDone ? <SubscriptionGate fromCheckout={fromCheckout.current}><HEX6ChatInterface /></SubscriptionGate> : <ConsentFlow onComplete={() => { base44.auth.updateMe({ hex6_consent_completed: true }); setConsentCompleted(true); }} />) : <Landing />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
