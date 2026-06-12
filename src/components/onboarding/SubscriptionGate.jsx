@@ -5,16 +5,23 @@ import PricingGate from './PricingGate';
 export default function SubscriptionGate({ children }) {
   const [checking, setChecking] = useState(true);
   const [hasSubscription, setHasSubscription] = useState(false);
+  const [fromCheckout] = useState(() => new URLSearchParams(window.location.search).get('checkout') === 'success');
 
-  const checkSubscription = async (retries = 2) => {
+  const checkSubscription = async (retries = 5, delay = 2000) => {
     try {
       const res = await base44.functions.invoke('getSubscriptionStatus', {});
-      setHasSubscription(!!res?.data?.hasSubscription);
+      const active = !!res?.data?.hasSubscription;
+      setHasSubscription(active);
+      // If still no subscription and we have retries left, keep polling
+      if (!active && retries > 0) {
+        await new Promise((r) => setTimeout(r, delay));
+        return checkSubscription(retries - 1, delay);
+      }
     } catch (err) {
       console.error('Subscription check failed:', err);
       if (retries > 0) {
-        await new Promise((r) => setTimeout(r, 1500));
-        return checkSubscription(retries - 1);
+        await new Promise((r) => setTimeout(r, delay));
+        return checkSubscription(retries - 1, delay);
       }
       setHasSubscription(false);
     } finally {
@@ -23,27 +30,23 @@ export default function SubscriptionGate({ children }) {
   };
 
   useEffect(() => {
-    checkSubscription();
-
-    // If returning from Stripe checkout, sync subscription directly from Stripe.
     const params = new URLSearchParams(window.location.search);
-    if (params.get('checkout') === 'success') {
-      (async () => {
-        try {
-          await base44.functions.invoke('syncSubscriptionFromStripe', {});
-        } catch (err) {
-          console.error('Sync failed:', err);
-        }
-        await checkSubscription();
-        window.history.replaceState({}, '', window.location.pathname);
-      })();
+    const isReturningFromCheckout = params.get('checkout') === 'success';
+
+    if (isReturningFromCheckout) {
+      window.history.replaceState({}, '', window.location.pathname);
+      // Wait 3s for webhook to land, then poll aggressively
+      setTimeout(() => checkSubscription(6, 2500), 3000);
+    } else {
+      checkSubscription(2, 1500);
     }
   }, []);
 
   if (checking) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-background">
+      <div className="fixed inset-0 flex items-center justify-center bg-background flex-col gap-4">
         <div className="w-8 h-8 border-4 border-border border-t-accent rounded-full animate-spin" />
+        {fromCheckout && <p className="text-sm text-secondary animate-pulse">Activating your subscription…</p>}
       </div>
     );
   }
