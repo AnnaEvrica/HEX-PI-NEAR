@@ -42,10 +42,11 @@ export default function SubscriptionGate({ children }) {
 
   useEffect(() => {
     if (fromCheckout) {
-      // Wait 3s for webhook to land, then poll aggressively
-      setTimeout(() => checkSubscription(6, 2500), 3000);
+      // Wait 4s for webhook to land, then poll aggressively
+      setTimeout(() => checkSubscription(8, 3000), 4000);
     } else {
-      checkSubscription(2, 1500);
+      // Normal load — still give a few retries in case of brief latency
+      checkSubscription(3, 2000);
     }
   }, []);
 
