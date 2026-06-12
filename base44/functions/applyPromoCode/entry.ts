@@ -20,19 +20,15 @@ Deno.serve(async (req) => {
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
     const priceId = Deno.env.get('STRIPE_PRICE_ID');
 
-    // Look up the promotion code in Stripe (case-insensitive search)
-    const promoCodes = await stripe.promotionCodes.list({ code: code.toUpperCase(), active: true, limit: 1 });
-    const promoCodeObj = promoCodes.data[0] || null;
-
-    if (!promoCodeObj) {
-      // Try original case as fallback
-      const promoCodes2 = await stripe.promotionCodes.list({ code, active: true, limit: 1 });
-      if (!promoCodes2.data.length) {
-        return Response.json({ error: 'Invalid or expired promo code' }, { status: 400 });
-      }
+    // Look up the promotion code in Stripe (try uppercase first, then original)
+    let finalPromo = null;
+    for (const attempt of [code.toUpperCase(), code]) {
+      const result = await stripe.promotionCodes.list({ code: attempt, active: true, limit: 1 });
+      if (result.data.length) { finalPromo = result.data[0]; break; }
     }
-
-    const finalPromo = promoCodeObj || (await stripe.promotionCodes.list({ code, active: true, limit: 1 })).data[0];
+    if (!finalPromo) {
+      return Response.json({ error: 'Invalid or expired promo code' }, { status: 400 });
+    }
 
     // Find or create Stripe customer (handle stale IDs gracefully)
     let customerId;

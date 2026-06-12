@@ -15,12 +15,16 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const origin = body.origin || req.headers.get('origin') || '';
 
-    // Find or create customer
+    // Find or create customer (verify stale IDs gracefully)
     let customerId;
     const existing = await base44.asServiceRole.entities.Subscription.filter({ user_email: user.email });
     if (existing.length > 0 && existing[0].stripe_customer_id) {
-      customerId = existing[0].stripe_customer_id;
-    } else {
+      try {
+        const cust = await stripe.customers.retrieve(existing[0].stripe_customer_id);
+        if (!cust.deleted) customerId = cust.id;
+      } catch (_) { /* stale ID — fall through */ }
+    }
+    if (!customerId) {
       const customer = await stripe.customers.create({
         email: user.email,
         name: user.full_name || undefined,
