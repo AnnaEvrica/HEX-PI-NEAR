@@ -8,9 +8,10 @@ export default function SubscriptionGate({ children, fromCheckout = false }) {
   const isFromCheckout = useRef(fromCheckout);
 
   useEffect(() => {
-    const maxRetries = isFromCheckout.current ? 12 : 1;
-    const delay = isFromCheckout.current ? 3000 : 0;
-    const initialWait = isFromCheckout.current ? 2000 : 0;
+    // From checkout: poll aggressively for up to 40s (Stripe webhook can be slow)
+    const maxRetries = isFromCheckout.current ? 13 : 1;
+    const delay = isFromCheckout.current ? 3000 : 500;
+    const initialWait = isFromCheckout.current ? 1000 : 0;
 
     const poll = async (attemptsLeft) => {
       if (resolved.current) return;
@@ -40,9 +41,9 @@ export default function SubscriptionGate({ children, fromCheckout = false }) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-background flex-col gap-4">
         <div className="w-8 h-8 border-4 border-border border-t-accent rounded-full animate-spin" />
-        {isFromCheckout.current && (
-          <p className="text-sm text-secondary animate-pulse">Activating your subscription…</p>
-        )}
+        <p className="text-sm text-muted-foreground animate-pulse">
+          {isFromCheckout.current ? 'Activating your subscription…' : 'Checking access…'}
+        </p>
       </div>
     );
   }
