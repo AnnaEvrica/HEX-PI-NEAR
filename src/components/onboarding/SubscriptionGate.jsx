@@ -1,65 +1,61 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import PricingGate from './PricingGate';
 
 export default function SubscriptionGate({ children }) {
-  const [checking, setChecking] = useState(true);
-  const [hasSubscription, setHasSubscription] = useState(false);
-  // Capture before replaceState clears the URL
-  const [fromCheckout] = useState(() => {
-    const val = new URLSearchParams(window.location.search).get('checkout') === 'success';
-    if (val) window.history.replaceState({}, '', window.location.pathname);
-    return val;
-  });
+  const [status, setStatus] = useState('checking'); // 'checking' | 'active' | 'inactive'
+  const resolved = useRef(false);
 
-  const checkSubscription = async (retries = 5, delay = 2000) => {
-    try {
-      const res = await base44.functions.invoke('getSubscriptionStatus', {});
-      const active = !!res?.data?.hasSubscription;
-      if (active) {
-        setHasSubscription(true);
-        setChecking(false);
-        return;
-      }
-      // Not active yet — retry if we have attempts left
-      if (retries > 0) {
-        await new Promise((r) => setTimeout(r, delay));
-        return checkSubscription(retries - 1, delay);
-      }
-      // Exhausted retries
-      setHasSubscription(false);
-      setChecking(false);
-    } catch (err) {
-      console.error('Subscription check failed:', err);
-      if (retries > 0) {
-        await new Promise((r) => setTimeout(r, delay));
-        return checkSubscription(retries - 1, delay);
-      }
-      setHasSubscription(false);
-      setChecking(false);
-    }
-  };
+  // Capture checkout flag before replaceState clears the URL
+  const fromCheckout = useRef(
+    new URLSearchParams(window.location.search).get('checkout') === 'success'
+  );
 
   useEffect(() => {
-    if (fromCheckout) {
-      // Wait 4s for webhook to land, then poll aggressively
-      setTimeout(() => checkSubscription(8, 3000), 4000);
-    } else {
-      // Normal load — still give a few retries in case of brief latency
-      checkSubscription(3, 2000);
+    if (fromCheckout.current) {
+      window.history.replaceState({}, '', window.location.pathname);
     }
+
+    const maxRetries = fromCheckout.current ? 10 : 5;
+    const delay = fromCheckout.current ? 3000 : 2000;
+    const initialWait = fromCheckout.current ? 4000 : 0;
+
+    const poll = async (attemptsLeft) => {
+      if (resolved.current) return;
+      try {
+        const res = await base44.functions.invoke('getSubscriptionStatus', {});
+        if (res?.data?.hasSubscription) {
+          resolved.current = true;
+          setStatus('active');
+          return;
+        }
+      } catch (err) {
+        console.error('Subscription check error:', err);
+      }
+
+      if (attemptsLeft > 0) {
+        setTimeout(() => poll(attemptsLeft - 1), delay);
+      } else {
+        resolved.current = true;
+        setStatus('inactive');
+      }
+    };
+
+    setTimeout(() => poll(maxRetries), initialWait);
   }, []);
 
-  if (checking) {
+  if (status === 'checking') {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-background flex-col gap-4">
         <div className="w-8 h-8 border-4 border-border border-t-accent rounded-full animate-spin" />
-        {fromCheckout && <p className="text-sm text-secondary animate-pulse">Activating your subscription…</p>}
+        {fromCheckout.current && (
+          <p className="text-sm text-secondary animate-pulse">Activating your subscription…</p>
+        )}
       </div>
     );
   }
 
-  if (!hasSubscription) {
+  if (status === 'inactive') {
     return <PricingGate />;
   }
 
