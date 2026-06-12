@@ -5,7 +5,12 @@ import PricingGate from './PricingGate';
 export default function SubscriptionGate({ children }) {
   const [checking, setChecking] = useState(true);
   const [hasSubscription, setHasSubscription] = useState(false);
-  const [fromCheckout] = useState(() => new URLSearchParams(window.location.search).get('checkout') === 'success');
+  // Capture before replaceState clears the URL
+  const [fromCheckout] = useState(() => {
+    const val = new URLSearchParams(window.location.search).get('checkout') === 'success';
+    if (val) window.history.replaceState({}, '', window.location.pathname);
+    return val;
+  });
 
   const checkSubscription = async (retries = 5, delay = 2000) => {
     try {
@@ -40,7 +45,7 @@ export default function SubscriptionGate({ children }) {
     const isReturningFromCheckout = params.get('checkout') === 'success';
 
     if (isReturningFromCheckout) {
-      window.history.replaceState({}, '', window.location.pathname);
+      // URL already cleared in useState initializer above
       // Wait 3s for webhook to land, then poll aggressively
       setTimeout(() => checkSubscription(6, 2500), 3000);
     } else {
