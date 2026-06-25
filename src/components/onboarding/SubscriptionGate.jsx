@@ -2,16 +2,44 @@ import { useEffect, useState, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import PricingGate from './PricingGate';
 
+const CACHE_KEY = 'hex6_sub_status';
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+function getCached() {
+  try {
+    const raw = sessionStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const { value, ts } = JSON.parse(raw);
+    if (Date.now() - ts < CACHE_TTL) return value;
+    sessionStorage.removeItem(CACHE_KEY);
+  } catch {}
+  return null;
+}
+
+function setCache(value) {
+  try {
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ value, ts: Date.now() }));
+  } catch {}
+}
+
 export default function SubscriptionGate({ children, fromCheckout = false }) {
   const [status, setStatus] = useState('checking');
   const resolved = useRef(false);
   const isFromCheckout = useRef(fromCheckout);
 
   useEffect(() => {
-    // From checkout: poll aggressively for up to 40s (Stripe webhook can be slow)
-    const maxRetries = isFromCheckout.current ? 13 : 1;
-    const delay = isFromCheckout.current ? 3000 : 500;
-    const initialWait = isFromCheckout.current ? 1000 : 0;
+    // From checkout: clear cache and poll up to 40s for webhook to fire
+    if (isFromCheckout.current) {
+      sessionStorage.removeItem(CACHE_KEY);
+    } else {
+      // For normal loads, check session cache first (avoids Stripe round-trip on every page load)
+      const cached = getCached();
+      if (cached === true) { setStatus('active'); return; }
+      if (cached === false) { setStatus('inactive'); return; }
+    }
+
+    const maxRetries = isFromCheckout.current ? 13 : 4;
+    const delay = isFromCheckout.current ? 3000 : 2000;
 
     const poll = async (attemptsLeft) => {
       if (resolved.current) return;
@@ -19,7 +47,15 @@ export default function SubscriptionGate({ children, fromCheckout = false }) {
         const res = await base44.functions.invoke('getSubscriptionStatus', {});
         if (res?.data?.hasSubscription) {
           resolved.current = true;
+          setCache(true);
           setStatus('active');
+          return;
+        }
+        // Got a clean "no subscription" response — don't retry, it's definitive
+        if (res?.data?.hasSubscription === false && !isFromCheckout.current) {
+          resolved.current = true;
+          setCache(false);
+          setStatus('inactive');
           return;
         }
       } catch (err) {
@@ -34,7 +70,7 @@ export default function SubscriptionGate({ children, fromCheckout = false }) {
       }
     };
 
-    setTimeout(() => poll(maxRetries), initialWait);
+    poll(maxRetries);
   }, []);
 
   if (status === 'checking') {
