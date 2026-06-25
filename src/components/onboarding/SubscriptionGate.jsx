@@ -51,10 +51,10 @@ export default function SubscriptionGate({ children, fromCheckout = false }) {
           setStatus('active');
           return;
         }
-        // Got a clean "no subscription" response — don't retry, it's definitive
-        if (res?.data?.hasSubscription === false && !isFromCheckout.current) {
+        // For non-checkout, a definitive "no subscription" is final — no need to retry
+        if (res?.data?.hasSubscription === false && !isFromCheckout.current && attemptsLeft > 2) {
           resolved.current = true;
-          setCache(false);
+          // Don't cache false — next load should re-check in case they subscribed
           setStatus('inactive');
           return;
         }
@@ -66,7 +66,7 @@ export default function SubscriptionGate({ children, fromCheckout = false }) {
         setTimeout(() => poll(attemptsLeft - 1), delay);
       } else {
         resolved.current = true;
-        setStatus('inactive');
+        setStatus('inactive'); // Never cache false — allow re-check on next load
       }
     };
 
