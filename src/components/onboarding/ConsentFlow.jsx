@@ -298,7 +298,6 @@ function Step4LegalAcceptance({ onContinue }) {
 
 export default function ConsentFlow({ onComplete }) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [showPricing, setShowPricing] = useState(false);
 
   const handleNext = () => {
     if (currentStep === STEPS.length - 1) {
