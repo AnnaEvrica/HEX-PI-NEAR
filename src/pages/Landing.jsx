@@ -5,10 +5,37 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 
+const DEFAULT_METRICS = {
+  systemComparison: {
+    hex6: { adaptability: 85, uncertaintyHandling: 90, regimeRobustness: 88, realtimeAdjustment: 92, mathTransparency: 95, drawdownControl: 87 },
+    quant: { adaptability: 60, uncertaintyHandling: 50, regimeRobustness: 55, realtimeAdjustment: 65, mathTransparency: 85, drawdownControl: 58 },
+    ai: { adaptability: 70, uncertaintyHandling: 65, regimeRobustness: 62, realtimeAdjustment: 75, mathTransparency: 30, drawdownControl: 52 },
+  },
+  evolution: [
+    { week: 'W1', decisionAccuracy: 58, drawdownControl: 50, sharpe: 0.8 },
+    { week: 'W2', decisionAccuracy: 62, drawdownControl: 53, sharpe: 0.9 },
+    { week: 'W3', decisionAccuracy: 65, drawdownControl: 56, sharpe: 1.0 },
+    { week: 'W4', decisionAccuracy: 68, drawdownControl: 59, sharpe: 1.1 },
+    { week: 'W5', decisionAccuracy: 72, drawdownControl: 62, sharpe: 1.3 },
+    { week: 'W6', decisionAccuracy: 75, drawdownControl: 65, sharpe: 1.5 },
+    { week: 'W7', decisionAccuracy: 78, drawdownControl: 68, sharpe: 1.7 },
+    { week: 'W8', decisionAccuracy: 80, drawdownControl: 71, sharpe: 1.8 },
+    { week: 'W9', decisionAccuracy: 82, drawdownControl: 74, sharpe: 1.9 },
+    { week: 'W10', decisionAccuracy: 84, drawdownControl: 77, sharpe: 2.0 },
+    { week: 'W11', decisionAccuracy: 86, drawdownControl: 80, sharpe: 2.1 },
+    { week: 'W12', decisionAccuracy: 88, drawdownControl: 82, sharpe: 2.2 },
+    { week: 'W13', decisionAccuracy: 89, drawdownControl: 84, sharpe: 2.3 },
+    { week: 'W14', decisionAccuracy: 90, drawdownControl: 86, sharpe: 2.35 },
+    { week: 'W15', decisionAccuracy: 91, drawdownControl: 87, sharpe: 2.4 },
+    { week: 'W16', decisionAccuracy: 92, drawdownControl: 88, sharpe: 2.4 },
+  ],
+  accuracyGrowth: { week1: 58, week4: 72, week16: 91 },
+};
+
 export default function Landing() {
   const navigate = useNavigate();
-  const [metrics, setMetrics] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [metrics, setMetrics] = useState(DEFAULT_METRICS);
+  const [loading, setLoading] = useState(false);
   const [openPolicy, setOpenPolicy] = useState(null);
   const [isAuth, setIsAuth] = useState(false);
   const [visibleSections, setVisibleSections] = useState({});
