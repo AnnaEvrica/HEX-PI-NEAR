@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, LogOut as LogOutIcon, Copy, Download, Lock, Key, Shield, Eye, Clock, Bell, TrendingUp, Zap, AlertTriangle, Check } from 'lucide-react';
+import { X, LogOut as LogOutIcon, Copy, Download, Lock, Key, Shield, Eye, Clock, Bell, TrendingUp, Zap, AlertTriangle, Check, CreditCard, RefreshCw, Loader2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
 function generateSystemID() {
@@ -23,6 +23,8 @@ export default function SettingsModal({ open, onClose }) {
   const [riskAversion, setRiskAversion] = useState(2.5);
   const [baseCurrency, setBaseCurrency] = useState('USD');
   const [consentTimestamp, setConsentTimestamp] = useState(null);
+  const [subscription, setSubscription] = useState(null);
+  const [subActionLoading, setSubActionLoading] = useState(false);
 
 
   useEffect(() => {
@@ -55,6 +57,14 @@ export default function SettingsModal({ open, onClose }) {
         const timestamp = localStorage.getItem('hex6_consent_timestamp');
         if (timestamp) {
           setConsentTimestamp(timestamp);
+        }
+
+        // Fetch subscription status
+        try {
+          const subRes = await base44.functions.invoke('getSubscriptionStatus', {});
+          setSubscription(subRes.data);
+        } catch (e) {
+          console.log('Could not load subscription status');
         }
       } catch (err) {
         console.log('Could not load user data');
@@ -130,6 +140,36 @@ export default function SettingsModal({ open, onClose }) {
     }
   };
 
+  const handleManageBilling = async () => {
+    setSubActionLoading(true);
+    try {
+      const res = await base44.functions.invoke('manageBilling', {});
+      if (res.data?.url) window.location.href = res.data.url;
+    } catch (err) {
+      setMessage({ type: 'error', text: err?.message || 'Billing portal unavailable' });
+    } finally {
+      setSubActionLoading(false);
+    }
+  };
+
+  const handleRestoreSubscription = async () => {
+    setSubActionLoading(true);
+    try {
+      const res = await base44.functions.invoke('createCheckout', {});
+      if (res.data?.url) {
+        window.location.href = res.data.url;
+      } else if (res.data?.already_subscribed) {
+        const subRes = await base44.functions.invoke('getSubscriptionStatus', {});
+        setSubscription(subRes.data);
+        setMessage({ type: 'success', text: 'Your subscription is already active.' });
+      }
+    } catch (err) {
+      setMessage({ type: 'error', text: err?.message || 'Could not start checkout' });
+    } finally {
+      setSubActionLoading(false);
+    }
+  };
+
   if (!open) return null;
 
   return (
@@ -147,6 +187,7 @@ export default function SettingsModal({ open, onClose }) {
         <div className="flex border-b border-border shrink-0 overflow-x-auto">
           {[
             { id: 'account', label: 'Account' },
+            { id: 'subscription', label: 'Subscription' },
             { id: 'parameters', label: 'Parameters' },
             { id: 'legal', label: 'Legal' },
           ].map((tab) => (
@@ -287,6 +328,86 @@ export default function SettingsModal({ open, onClose }) {
               >
                 Sign Out
               </button>
+            </div>
+          )}
+
+          {/* SUBSCRIPTION */}
+          {activeSection === 'subscription' && (
+            <div className="space-y-6">
+              <p className="text-sm text-secondary">Manage your HEX6 BLE subscription.</p>
+
+              <div className="p-6 border border-border rounded-sm space-y-4">
+                {!subscription ? (
+                  <div className="flex items-center gap-2 text-sm text-secondary">
+                    <Loader2 className="w-4 h-4 animate-spin" /> Loading subscription...
+                  </div>
+                ) : subscription.has_subscription ? (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium">Current Plan</p>
+                        <p className="text-xs text-secondary">
+                          {subscription.pricing
+                            ? `$${subscription.pricing.amount.toFixed(2)}/${subscription.pricing.interval === 'year' ? 'yr' : 'mo'}`
+                            : 'HEX6 BLE'}
+                        </p>
+                      </div>
+                      <span className={`px-3 py-1 rounded-sm text-xs font-bold uppercase ${
+                        subscription.status === 'active' || subscription.status === 'trialing'
+                          ? 'bg-accent/10 text-accent border border-accent/30'
+                          : 'bg-muted text-secondary border border-border'
+                      }`}>
+                        {subscription.status}
+                      </span>
+                    </div>
+
+                    {subscription.status === 'trialing' && subscription.trial_end && (
+                      <p className="text-xs text-secondary">
+                        Trial ends {new Date(subscription.trial_end).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}. No charge until then.
+                      </p>
+                    )}
+                    {subscription.status === 'active' && subscription.current_period_end && (
+                      <p className="text-xs text-secondary">
+                        {subscription.cancel_at_period_end ? 'Cancels on' : 'Renews on'} {new Date(subscription.current_period_end).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}.
+                      </p>
+                    )}
+                    {(subscription.status === 'canceled' || subscription.status === 'past_due' || subscription.status === 'unpaid') && (
+                      <p className="text-xs text-destructive">
+                        {subscription.status === 'canceled' ? 'Your subscription has ended.' : subscription.status === 'past_due' ? 'Payment past due — update your billing.' : 'Payment failed.'}
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-sm text-secondary">No active subscription. Start your 7-day free trial to unlock HEX6 BLE.</p>
+                )}
+              </div>
+
+              <div className="space-y-3">
+                {subscription?.has_subscription && (subscription.status === 'active' || subscription.status === 'trialing') && (
+                  <button
+                    onClick={handleManageBilling}
+                    disabled={subActionLoading}
+                    className="w-full px-4 py-2.5 rounded-sm border border-border hover:bg-muted text-sm font-medium transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
+                  >
+                    <CreditCard className="w-4 h-4" />
+                    {subActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Manage Billing / Cancel'}
+                  </button>
+                )}
+                {(!subscription?.has_subscription || subscription?.status === 'canceled' || subscription?.status === 'past_due' || subscription?.status === 'unpaid') && (
+                  <button
+                    onClick={handleRestoreSubscription}
+                    disabled={subActionLoading}
+                    className="w-full px-4 py-2.5 rounded-sm bg-accent text-accent-foreground text-sm font-medium hover:bg-accent/90 transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    {subActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Restore / Start Subscription'}
+                  </button>
+                )}
+              </div>
+
+              <p className="text-xs text-secondary/70">
+                Cancel anytime via the Stripe billing portal. You'll keep access until the end of your current billing period.
+              </p>
             </div>
           )}
 
