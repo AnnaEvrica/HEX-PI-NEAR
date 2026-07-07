@@ -38,6 +38,7 @@ const AuthenticatedApp = () => {
   return (
     <Routes>
       <Route path="/" element={user ? (consentDone ? <SubscriptionGate><HEX6ChatInterface /></SubscriptionGate> : <ConsentFlow onComplete={() => setConsentCompleted(true)} />) : <Landing />} />
+      <Route path="/home" element={<Landing />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

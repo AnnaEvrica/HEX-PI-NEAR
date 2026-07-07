@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { Loader2, ArrowRight, Check, CreditCard } from 'lucide-react';
+import { Loader2, ArrowRight, Check, CreditCard, ArrowLeft } from 'lucide-react';
 
 export default function SubscriptionGate({ children }) {
   const [loading, setLoading] = useState(true);
@@ -99,6 +100,10 @@ export default function SubscriptionGate({ children }) {
   return (
     <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full space-y-6">
+        <Link to="/home" className="flex items-center gap-1.5 text-sm text-secondary hover:text-foreground transition-colors w-fit">
+          <ArrowLeft className="w-4 h-4" /> Back to homepage
+        </Link>
+
         <div className="text-center space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm bg-accent/10 border border-accent/30">
             <span className="text-sm font-bold text-accent">7-Day Free Trial</span>
