@@ -6,6 +6,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isNotRegistered, setIsNotRegistered] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -15,14 +16,24 @@ export const AuthProvider = ({ children }) => {
     try {
       const isAuth = await base44.auth.isAuthenticated();
       if (isAuth) {
-        const currentUser = await base44.auth.me();
-        setUser(currentUser);
+        try {
+          const currentUser = await base44.auth.me();
+          setUser(currentUser);
+          setIsNotRegistered(false);
+        } catch (meErr) {
+          // Authenticated in the platform but not registered in this app's User table.
+          console.error('me() error (likely not registered):', meErr);
+          setUser(null);
+          setIsNotRegistered(true);
+        }
       } else {
         setUser(null);
+        setIsNotRegistered(false);
       }
     } catch (err) {
       console.error('Auth check error:', err);
       setUser(null);
+      setIsNotRegistered(false);
     } finally {
       setIsLoading(false);
     }
@@ -39,7 +50,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, logout, checkAuth }}>
+    <AuthContext.Provider value={{ user, isLoading, isNotRegistered, logout, checkAuth }}>
       {children}
     </AuthContext.Provider>
   );
