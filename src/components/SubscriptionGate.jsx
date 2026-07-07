@@ -132,9 +132,6 @@ export default function SubscriptionGate({ children }) {
           </div>
         </div>
 
-        {sub?.status === 'canceled' && (
-          <p className="text-center text-xs text-secondary">Your previous subscription was canceled. Restart anytime.</p>
-        )}
         {sub?.status === 'past_due' && (
           <p className="text-center text-xs text-destructive">Your payment is past due. Update billing to restore access.</p>
         )}
