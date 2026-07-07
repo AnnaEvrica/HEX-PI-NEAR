@@ -87,14 +87,14 @@ export default function Landing() {
           <div className="text-lg sm:text-xl font-bold tracking-tight">HEX6 BLE</div>
           <div className="flex items-center gap-2 sm:gap-3">
             <button
-              onClick={() => base44.auth.loginWithProvider('google', '/')}
+              onClick={() => base44.auth.loginWithProvider('google', '/app')}
               className="px-3 sm:px-5 py-1.5 sm:py-2 rounded-sm border border-border text-xs sm:text-sm font-medium hover:bg-muted transition-colors"
               style={{ minWidth: 'auto', minHeight: 'auto' }}
             >
               Log In
             </button>
             <button
-              onClick={() => base44.auth.loginWithProvider('google', '/')}
+              onClick={() => base44.auth.loginWithProvider('google', '/app')}
               className="px-3 sm:px-5 py-1.5 sm:py-2 rounded-sm bg-primary text-primary-foreground text-xs sm:text-sm font-medium hover:bg-primary/90 transition-colors"
               style={{ minWidth: 'auto', minHeight: 'auto' }}
             >
@@ -128,7 +128,7 @@ export default function Landing() {
         </div>
 
         <button
-          onClick={() => base44.auth.loginWithProvider('google', '/')}
+          onClick={() => base44.auth.loginWithProvider('google', '/app')}
           className="inline-flex items-center gap-2 px-6 py-3 rounded-sm bg-accent text-accent-foreground font-medium hover:bg-accent/90 transition-colors text-sm sm:text-base"
         >
           Enter Oracle <ArrowRight className="w-4 h-4" />
@@ -554,7 +554,7 @@ export default function Landing() {
           <p className="text-base sm:text-lg md:text-xl text-secondary">No credit card required. No prediction. Only probability.</p>
         </div>
         <button
-          onClick={() => base44.auth.loginWithProvider('google', '/')}
+          onClick={() => base44.auth.loginWithProvider('google', '/app')}
           className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 rounded-sm bg-accent text-accent-foreground font-medium hover:bg-accent/90 transition-colors text-sm sm:text-base md:text-lg"
         >
           Enter Oracle <ArrowRight className="w-4 h-4" />

@@ -31,8 +31,8 @@ Deno.serve(async (req) => {
       line_items: [{ price: priceId, quantity: 1 }],
       subscription_data: { trial_period_days: 7 },
       customer_email: user.email,
-      success_url: `${origin}/?checkout=success`,
-      cancel_url: `${origin}/?checkout=cancel`,
+      success_url: `${origin}/app?checkout=success`,
+      cancel_url: `${origin}/app?checkout=cancel`,
       allow_promotion_codes: true,
     });
 

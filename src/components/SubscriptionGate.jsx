@@ -100,7 +100,7 @@ export default function SubscriptionGate({ children }) {
   return (
     <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full space-y-6">
-        <Link to="/home" className="flex items-center gap-1.5 text-sm text-secondary hover:text-foreground transition-colors w-fit">
+        <Link to="/" className="flex items-center gap-1.5 text-sm text-secondary hover:text-foreground transition-colors w-fit">
           <ArrowLeft className="w-4 h-4" /> Back to homepage
         </Link>
 
