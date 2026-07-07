@@ -25,12 +25,11 @@ Deno.serve(async (req) => {
     }
 
     const origin = new URL(req.url).origin;
-    const trialEnd = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60; // 7 days from now
 
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       line_items: [{ price: priceId, quantity: 1 }],
-      subscription_data: { trial_period_end: trialEnd },
+      subscription_data: { trial_period_days: 7 },
       customer_email: user.email,
       success_url: `${origin}/?checkout=success`,
       cancel_url: `${origin}/?checkout=cancel`,
