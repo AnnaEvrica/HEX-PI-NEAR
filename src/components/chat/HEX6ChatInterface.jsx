@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Send, Upload, Menu, Settings, LogOut, Plus, MessageCircle, Zap, Mic, MicOff, BookOpen, X, Image, Copy, Check, Volume2, VolumeX } from 'lucide-react';
+import { Send, Upload, Menu, Settings, LogOut, Plus, MessageCircle, Zap, Mic, MicOff, BookOpen, X, Image, Copy, Check, Volume2, VolumeX, CreditCard } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import SettingsModal from '@/components/SettingsModal';
 import LegalModal from '@/components/LegalModal';
@@ -429,6 +429,15 @@ export default function HEX6ChatInterface() {
     await base44.auth.logout(window.location.origin + '/');
   };
 
+  const handleManageBilling = async () => {
+    try {
+      const res = await base44.functions.invoke('manageBilling', {});
+      if (res.data?.url) window.location.href = res.data.url;
+    } catch (err) {
+      console.error('Billing portal failed:', err);
+    }
+  };
+
   // Detect if mobile — reactive to window resize
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < 768);
   useEffect(() => {
@@ -495,6 +504,13 @@ export default function HEX6ChatInterface() {
             >
               <BookOpen className="w-4 h-4" />
               Legal
+            </button>
+            <button
+              onClick={handleManageBilling}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-secondary hover:text-foreground hover:bg-muted rounded-sm transition-colors"
+            >
+              <CreditCard className="w-4 h-4" />
+              Billing
             </button>
             <button
               onClick={handleSignOut}
