@@ -10,11 +10,7 @@ export default function SubscriptionGate({ children }) {
   const [actionLoading, setActionLoading] = useState(false);
 
   const fetchStatus = async () => {
-    const invokePromise = base44.functions.invoke('getSubscriptionStatus', {});
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Status check timed out. Please retry.')), 12000)
-    );
-    const res = await Promise.race([invokePromise, timeoutPromise]);
+    const res = await base44.functions.invoke('getSubscriptionStatus', {});
     return res.data;
   };
 
@@ -140,24 +136,7 @@ export default function SubscriptionGate({ children }) {
           <p className="text-center text-xs text-destructive">Your payment is past due. Update billing to restore access.</p>
         )}
 
-        {error && (
-          <div className="space-y-2 text-center">
-            <p className="text-sm text-destructive">{error}</p>
-            <button
-              onClick={() => {
-                setError(null);
-                setLoading(true);
-                fetchStatus()
-                  .then((data) => setSub(data))
-                  .catch((e) => setError(e?.message || 'Failed to load subscription status'))
-                  .finally(() => setLoading(false));
-              }}
-              className="text-xs text-accent hover:text-accent/80 font-medium"
-            >
-              Retry
-            </button>
-          </div>
-        )}
+        {error && <p className="text-sm text-destructive text-center">{error}</p>}
 
         <button
           onClick={handleStartTrial}
