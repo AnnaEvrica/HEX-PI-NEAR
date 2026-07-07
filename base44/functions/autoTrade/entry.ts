@@ -99,6 +99,8 @@ Deno.serve(async (req) => {
 
     const { ticker, riskAversion = 2.5 } = await req.json();
     if (!ticker) return Response.json({ error: 'ticker required' }, { status: 400 });
+    // Strict ticker validation — prevents path traversal / URL manipulation into the Yahoo Finance fetch.
+    if (!/^[A-Z0-9.-]{1,10}$/.test(ticker)) return Response.json({ error: 'invalid ticker' }, { status: 400 });
 
     // 1. Fetch market data
     let returns = [], latestPrice = null, synthetic = false;

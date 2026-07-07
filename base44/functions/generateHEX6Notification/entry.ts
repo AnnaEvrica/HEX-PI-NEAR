@@ -9,22 +9,34 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { action, email, preferences = {} } = await req.json();
+    const { action, preferences = {} } = await req.json();
 
     if (action !== 'sendTest') {
       return Response.json({ error: 'Invalid action' }, { status: 400 });
     }
 
-    if (!email) {
-      return Response.json({ error: 'Email required' }, { status: 400 });
+    // Recipient is always the authenticated user — never trust a client-supplied email.
+    const recipient = user.email;
+    if (!recipient) {
+      return Response.json({ error: 'No verified email on account' }, { status: 400 });
     }
 
+    // Validate preferences schema — only allow known, primitive fields to prevent LLM prompt injection.
+    const safePrefs = {};
+    if (Array.isArray(preferences.assets)) {
+      safePrefs.assets = preferences.assets
+        .filter((a) => typeof a === 'string' && /^[A-Z0-9.-]{1,10}$/.test(a))
+        .slice(0, 10);
+    }
+    if (typeof preferences.marketTrends === 'boolean') safePrefs.marketTrends = preferences.marketTrends;
+    if (typeof preferences.predictions === 'boolean') safePrefs.predictions = preferences.predictions;
+
     // Generate personalized HEX6 insight using LLM
-    const insight = await generateInsight(base44, user, preferences);
+    const insight = await generateInsight(base44, user, safePrefs);
 
     // Send email with HEX6 voice and formatting
     await base44.integrations.Core.SendEmail({
-      to: email,
+      to: recipient,
       subject: `HEX6 Oracle: ${insight.subject}`,
       body: formatEmailBody(insight, user),
       from_name: 'HEX6 Oracle',

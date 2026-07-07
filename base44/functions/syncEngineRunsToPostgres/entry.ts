@@ -365,17 +365,17 @@ Deno.serve(async (req) => {
       duration_ms: durationMs,
     });
   } catch (error) {
-    console.error('syncEngineRuns ERROR:', error);
-    const fullErr = `${error?.code || ''} ${error?.message || error} | host=${connDiag.host} port=${connDiag.port} db=${connDiag.database} sslmode=${connDiag.sslmode} user=${connDiag.user}`;
+    // Keep connection diagnostics out of persisted error fields (console only) to avoid leaking DB topology.
+    console.error('syncEngineRuns ERROR:', error, '| connDiag=', connDiag);
+    const errMsg = `${error?.code || ''} ${error?.message || error}`.trim();
     await base44.asServiceRole.entities.SyncState.update(stateRecord.id, {
       status: 'error',
-      last_error: fullErr.slice(0, 1000),
+      last_error: errMsg.slice(0, 1000),
       lock_acquired_at: null,
     });
     return Response.json({
-      error: error.message || String(error),
+      error: errMsg,
       error_code: error?.code,
-      connection_target: connDiag,
     }, { status: 500 });
   } finally {
     if (sql) {

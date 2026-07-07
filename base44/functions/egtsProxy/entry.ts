@@ -25,6 +25,8 @@ Deno.serve(async (req) => {
 
     // ── MINT ──────────────────────────────────────────────────────────────
     if (action === 'mint') {
+      // Only admins may mint governance receipts — protects EGTS audit integrity.
+      if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
       const { data, error } = await supabase
         .from('egts_receipts')
         .insert([payload])

@@ -3,6 +3,12 @@ import { base44 } from '@/api/base44Client';
 import { Sparkles, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
+// Only allow safe URL protocols in rendered markdown — blocks javascript:/data:/vbscript: vectors.
+const safeUrlTransform = (url) => {
+  if (!url) return url;
+  return /^(https?:|mailto:|tel:|#|\/|\.\.?\/)/i.test(url) ? url : '';
+};
+
 export default function Thesis() {
   const [assets, setAssets] = useState([]);
   const [selectedTicker, setSelectedTicker] = useState('');
@@ -144,7 +150,7 @@ Be concise but rigorous. Use markdown formatting.`,
           {thesis.recommended_action && (
             <div className="p-5 bg-[#111111] border border-[#C9A84C]/20 rounded-xl">
               <p className="text-xs text-[#C9A84C]/60 uppercase tracking-widest mb-2">Analyst Commentary</p>
-              <ReactMarkdown className="text-sm text-white/70 leading-relaxed prose prose-sm prose-invert max-w-none">
+              <ReactMarkdown className="text-sm text-white/70 leading-relaxed prose prose-sm prose-invert max-w-none" urlTransform={safeUrlTransform}>
                 {thesis.recommended_action}
               </ReactMarkdown>
             </div>
@@ -166,7 +172,7 @@ Be concise but rigorous. Use markdown formatting.`,
               </button>
               {expanded[key] && (
                 <div className="px-5 pb-5 border-t border-white/5">
-                  <ReactMarkdown className="text-sm text-white/60 leading-relaxed prose prose-sm prose-invert max-w-none mt-4">
+                  <ReactMarkdown className="text-sm text-white/60 leading-relaxed prose prose-sm prose-invert max-w-none mt-4" urlTransform={safeUrlTransform}>
                     {thesis[key]}
                   </ReactMarkdown>
                 </div>
