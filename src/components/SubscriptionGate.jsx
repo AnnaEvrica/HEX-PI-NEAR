@@ -8,9 +8,11 @@ export default function SubscriptionGate({ children }) {
   const [sub, setSub] = useState(null);
   const [error, setError] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
 
   const fetchStatus = async () => {
     const res = await base44.functions.invoke('getSubscriptionStatus', {});
+    if (res.data?.error) throw new Error(res.data.error);
     return res.data;
   };
 
@@ -20,14 +22,14 @@ export default function SubscriptionGate({ children }) {
       try {
         const urlParams = new URLSearchParams(window.location.search);
         const justCheckedOut = urlParams.get('checkout') === 'success';
-        if (justCheckedOut) window.history.replaceState({}, '', '/');
+        if (urlParams.get('checkout')) window.history.replaceState({}, '', '/');
 
         let data = await fetchStatus();
         // Webhook may lag the redirect by a second or two — retry briefly on success return.
         if (justCheckedOut) {
           for (let i = 0; i < 6 && !(data && (data.status === 'trialing' || data.status === 'active')); i++) {
             await new Promise((r) => setTimeout(r, 1500));
-            data = await fetchStatus();
+            try { data = await fetchStatus(); } catch { /* tolerate transient failure during webhook lag */ }
           }
         }
         if (!cancelled) {
@@ -44,7 +46,7 @@ export default function SubscriptionGate({ children }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [retryKey]);
 
   const handleStartTrial = async () => {
     setActionLoading(true);
@@ -146,7 +148,17 @@ export default function SubscriptionGate({ children }) {
           <p className="text-center text-xs text-destructive">Your payment is past due. Update billing to restore access.</p>
         )}
 
-        {error && <p className="text-sm text-destructive text-center">{error}</p>}
+        {error && (
+          <div className="text-center space-y-2">
+            <p className="text-sm text-destructive">{error}</p>
+            <button
+              onClick={() => { setError(null); setLoading(true); setRetryKey(k => k + 1); }}
+              className="text-sm text-accent hover:underline font-medium"
+            >
+              Try again
+            </button>
+          </div>
+        )}
 
         <button
           onClick={handleStartTrial}

@@ -21,10 +21,18 @@ export const AuthProvider = ({ children }) => {
           setUser(currentUser);
           setIsNotRegistered(false);
         } catch (meErr) {
-          // Authenticated in the platform but not registered in this app's User table.
-          console.error('me() error (likely not registered):', meErr);
-          setUser(null);
-          setIsNotRegistered(true);
+          // me() can fail transiently right after OAuth redirect (token propagation delay).
+          // Retry once before declaring the user unregistered — prevents false lockouts.
+          try {
+            await new Promise((r) => setTimeout(r, 2000));
+            const currentUser = await base44.auth.me();
+            setUser(currentUser);
+            setIsNotRegistered(false);
+          } catch (meErr2) {
+            console.error('me() error after retry:', meErr2);
+            setUser(null);
+            setIsNotRegistered(true);
+          }
         }
       } else {
         setUser(null);
