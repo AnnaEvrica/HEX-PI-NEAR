@@ -17,11 +17,23 @@ Deno.serve(async (req) => {
 
     const stripe = new Stripe(secretKey);
 
-    // Avoid duplicate subscriptions: if the user already has an active/trialing sub, bail.
+    // Avoid duplicate subscriptions: check DB first, then Stripe directly (webhook may not have fired).
     const existing = await base44.asServiceRole.entities.Subscription.filter({ user_email: user.email });
     const live = existing.find((s) => s.status === 'trialing' || s.status === 'active');
     if (live) {
       return Response.json({ url: null, already_subscribed: true });
+    }
+    try {
+      const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+      if (customers.data.length > 0) {
+        const stripeSubs = await stripe.subscriptions.list({ customer: customers.data[0].id, limit: 1 });
+        const liveStripe = stripeSubs.data.find((s) => s.status === 'trialing' || s.status === 'active');
+        if (liveStripe) {
+          return Response.json({ url: null, already_subscribed: true });
+        }
+      }
+    } catch (_e) {
+      // ignore — proceed to create checkout
     }
 
     const origin = new URL(req.url).origin;
