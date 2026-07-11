@@ -50,7 +50,11 @@ export default function SubscriptionGate({ children }) {
     setActionLoading(true);
     setError(null);
     try {
-      const res = await base44.functions.invoke('createCheckout', {});
+      const res = await base44.functions.invoke('createCheckout', { origin: window.location.origin });
+      if (res.data?.error) {
+        setError(res.data.error);
+        return;
+      }
       if (res.data?.url) {
         window.location.href = res.data.url;
         return;
@@ -58,7 +62,9 @@ export default function SubscriptionGate({ children }) {
       if (res.data?.already_subscribed) {
         const d = await fetchStatus();
         setSub(d);
+        return;
       }
+      setError('Checkout could not be started. Please try again.');
     } catch (e) {
       setError(e?.message || 'Checkout failed to start');
     } finally {
@@ -70,7 +76,11 @@ export default function SubscriptionGate({ children }) {
     setActionLoading(true);
     setError(null);
     try {
-      const res = await base44.functions.invoke('manageBilling', {});
+      const res = await base44.functions.invoke('manageBilling', { origin: window.location.origin });
+      if (res.data?.error) {
+        setError(res.data.error);
+        return;
+      }
       if (res.data?.url) {
         window.location.href = res.data.url;
       }

@@ -9,6 +9,10 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const body = await req.json().catch(() => ({}));
+    // The frontend knows the real app origin; req.url inside a function is the platform API endpoint, not the app.
+    const appOrigin = body?.origin || new URL(req.url).origin;
+
     const secretKey = Deno.env.get('STRIPE_SECRET_KEY');
     const priceId = Deno.env.get('STRIPE_PRICE_ID');
     if (!secretKey || !priceId) {
@@ -36,7 +40,7 @@ Deno.serve(async (req) => {
       // ignore — proceed to create checkout
     }
 
-    const origin = new URL(req.url).origin;
+    const origin = appOrigin;
 
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',

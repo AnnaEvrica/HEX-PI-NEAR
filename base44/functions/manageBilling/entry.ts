@@ -37,7 +37,8 @@ Deno.serve(async (req) => {
       configId = cfg.id;
     }
 
-    const origin = new URL(req.url).origin;
+    const body = await req.json().catch(() => ({}));
+    const origin = body?.origin || new URL(req.url).origin;
     const session = await stripe.billingPortal.sessions.create({
       customer: sub.stripe_customer_id,
       return_url: `${origin}/`,
