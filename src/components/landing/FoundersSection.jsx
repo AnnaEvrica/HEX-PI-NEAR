@@ -26,11 +26,11 @@ const THINKERS = [
     span: 'narrow',
   },
   {
-    name: 'Max Planck',
-    years: '1858–1947',
-    theory: 'Energy is emitted in discrete quanta proportional to frequency (E = hf).',
-    application: 'Planck\'s constant links frequency to energy — the bedrock of quantum mechanics.',
-    portrait: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Max_Planck_by_Hugo_Erfurth_1938cr_-_restoration1.jpg/330px-Max_Planck_by_Hugo_Erfurth_1938cr_-_restoration1.jpg',
+    name: 'Carl Jung',
+    years: '1875–1961',
+    theory: 'Archetypal patterns structure the psyche through a collective unconscious.',
+    application: 'Reveals deep structural frameworks shared across human cognition and meaning-making.',
+    portrait: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/ETH-BIB-Jung%2C_Carl_Gustav_%281875-1961%29-Portrait-Portr_14163_%28cropped%29.tif/lossy-page1-330px-ETH-BIB-Jung%2C_Carl_Gustav_%281875-1961%29-Portrait-Portr_14163_%28cropped%29.tif.jpg',
     span: 'wide',
   },
   {
@@ -42,11 +42,11 @@ const THINKERS = [
     span: 'wide',
   },
   {
-    name: 'Niels Bohr',
-    years: '1885–1962',
-    theory: 'Electrons orbit at discrete energy levels, emitting photons at specific frequencies.',
-    application: 'Atomic frequency spectra reveal quantum state transitions — matter as frequency.',
-    portrait: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Niels_Bohr.jpg/330px-Niels_Bohr.jpg',
+    name: 'Wolfgang Pauli',
+    years: '1900–1958',
+    theory: 'No two identical fermions can occupy the same quantum state (exclusion principle).',
+    application: 'Quantum exclusion governs atomic structure — and inspired acausal synchronicity with Jung.',
+    portrait: 'https://upload.wikimedia.org/wikipedia/commons/4/43/Pauli.jpg',
     span: 'narrow',
   },
 ];
@@ -61,7 +61,7 @@ function ThinkerCard({ thinker }) {
             alt={thinker.name}
             loading="lazy"
             className="w-full h-full object-cover"
-            style={{ filter: 'grayscale(100%) contrast(1.1)' }}
+            style={{ filter: 'grayscale(100%) contrast(1.1)', objectPosition: 'center 25%' }}
           />
         </div>
         <div className="min-w-0">
