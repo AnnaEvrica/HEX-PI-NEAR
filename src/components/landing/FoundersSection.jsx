@@ -26,28 +26,12 @@ const THINKERS = [
     span: 'narrow',
   },
   {
-    name: 'Carl Jung',
-    years: '1875–1961',
-    theory: 'Archetypal patterns structure the psyche through a collective unconscious.',
-    application: 'Reveals deep structural frameworks shared across human cognition and meaning-making.',
-    portrait: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/ETH-BIB-Jung%2C_Carl_Gustav_%281875-1961%29-Portrait-Portr_14163_%28cropped%29.tif/lossy-page1-330px-ETH-BIB-Jung%2C_Carl_Gustav_%281875-1961%29-Portrait-Portr_14163_%28cropped%29.tif.jpg',
-    span: 'wide',
-  },
-  {
     name: 'Albert Einstein',
     years: '1879–1955',
     theory: 'Light energy is quantized — frequency determines the energy of each photon.',
     application: 'Photoelectric effect converts light frequency into electrical current — birthed quantum theory.',
     portrait: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Albert_Einstein_Head_cleaned.jpg/330px-Albert_Einstein_Head_cleaned.jpg',
     span: 'wide',
-  },
-  {
-    name: 'Wolfgang Pauli',
-    years: '1900–1958',
-    theory: 'No two identical fermions can occupy the same quantum state (exclusion principle).',
-    application: 'Quantum exclusion governs atomic structure — and inspired acausal synchronicity with Jung.',
-    portrait: 'https://upload.wikimedia.org/wikipedia/commons/4/43/Pauli.jpg',
-    span: 'narrow',
   },
   {
     name: 'Andrey Markov',
@@ -108,35 +92,37 @@ function MorseBand({ speed = 35, delay = 0, opacity = 0.25 }) {
 export default function FoundersSection() {
   return (
     <section id="forefathers" className="relative max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24 md:py-32 overflow-hidden">
-      {/* Solar orb — large circular animation, radiant energy */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0">
-        <div className="relative w-[250px] h-[250px] sm:w-[350px] sm:h-[350px] md:w-[450px] md:h-[450px]">
-          <svg viewBox="0 0 200 200" className="absolute inset-0 w-full h-full text-accent" style={{ animation: 'solar-rotate 40s linear infinite' }}>
-            {Array.from({ length: 16 }).map((_, i) => (
-              <line key={i} x1="100" y1="100" x2="100" y2="25" stroke="currentColor" strokeWidth="1" opacity="0.12" transform={`rotate(${i * 22.5} 100 100)`} />
+      {/* Solar orb — radiant backdrop behind the heading, accentuates the title */}
+      <div className="absolute left-1/2 top-[30%] -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0">
+        <div className="relative w-[300px] h-[300px] sm:w-[450px] sm:h-[450px] md:w-[550px] md:h-[550px]">
+          <svg viewBox="0 0 200 200" className="absolute inset-0 w-full h-full text-accent" style={{ animation: 'solar-rotate 60s linear infinite' }}>
+            {Array.from({ length: 24 }).map((_, i) => (
+              <line key={i} x1="100" y1="100" x2="100" y2="22" stroke="currentColor" strokeWidth="0.75" opacity="0.1" transform={`rotate(${i * 15} 100 100)`} />
             ))}
           </svg>
-          <div className="absolute inset-[12%] rounded-full border-2 border-accent/25" style={{ animation: 'solar-expand 4s ease-out infinite' }} />
-          <div className="absolute inset-[12%] rounded-full border-2 border-accent/25" style={{ animation: 'solar-expand 4s ease-out infinite', animationDelay: '1.3s' }} />
-          <div className="absolute inset-[12%] rounded-full border-2 border-accent/25" style={{ animation: 'solar-expand 4s ease-out infinite', animationDelay: '2.6s' }} />
-          <div className="absolute inset-[35%] rounded-full" style={{
-            background: 'radial-gradient(circle, hsl(12 100% 55%) 0%, hsl(12 100% 45%) 50%, transparent 80%)',
-            animation: 'solar-pulse 4s ease-in-out infinite',
-            filter: 'blur(6px)',
+          <svg viewBox="0 0 200 200" className="absolute inset-0 w-full h-full text-accent" style={{ animation: 'solar-rotate 80s linear infinite reverse' }}>
+            {Array.from({ length: 12 }).map((_, i) => (
+              <line key={i} x1="100" y1="100" x2="100" y2="32" stroke="currentColor" strokeWidth="0.5" opacity="0.06" transform={`rotate(${i * 30} 100 100)`} />
+            ))}
+          </svg>
+          <div className="absolute inset-[15%] rounded-full border border-accent/20" style={{ animation: 'solar-expand 5s ease-out infinite' }} />
+          <div className="absolute inset-[15%] rounded-full border border-accent/20" style={{ animation: 'solar-expand 5s ease-out infinite', animationDelay: '1.7s' }} />
+          <div className="absolute inset-[15%] rounded-full border border-accent/20" style={{ animation: 'solar-expand 5s ease-out infinite', animationDelay: '3.4s' }} />
+          <div className="absolute inset-[40%] rounded-full" style={{
+            background: 'radial-gradient(circle, hsl(12 100% 55%) 0%, hsl(12 100% 45%) 45%, transparent 75%)',
+            animation: 'solar-pulse 5s ease-in-out infinite',
+            filter: 'blur(10px)',
           }} />
         </div>
       </div>
 
-      {/* Morse code bands — flowing through, 3D parallax depth */}
+      {/* Morse code bands — subtle data streams at top and bottom edges */}
       <div className="absolute inset-0 pointer-events-none z-[5]">
-        <div className="absolute top-[6%] left-0 right-0 overflow-hidden" style={{ transform: 'perspective(800px) rotateX(10deg)' }}>
-          <MorseBand speed={35} opacity={0.18} />
+        <div className="absolute top-[2%] left-0 right-0 overflow-hidden" style={{ transform: 'perspective(800px) rotateX(8deg)' }}>
+          <MorseBand speed={40} opacity={0.12} />
         </div>
-        <div className="absolute top-[44%] left-0 right-0 overflow-hidden">
-          <MorseBand speed={45} delay={3} opacity={0.12} />
-        </div>
-        <div className="absolute bottom-[8%] left-0 right-0 overflow-hidden" style={{ transform: 'perspective(800px) rotateX(-10deg)' }}>
-          <MorseBand speed={40} delay={6} opacity={0.15} />
+        <div className="absolute bottom-[3%] left-0 right-0 overflow-hidden" style={{ transform: 'perspective(800px) rotateX(-8deg)' }}>
+          <MorseBand speed={50} delay={5} opacity={0.1} />
         </div>
       </div>
 
@@ -174,8 +160,8 @@ export default function FoundersSection() {
 
       <style>{`
         @keyframes solar-rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes solar-expand { 0% { transform: scale(0.5); opacity: 0.5; } 100% { transform: scale(1.8); opacity: 0; } }
-        @keyframes solar-pulse { 0%, 100% { transform: scale(1); opacity: 0.85; } 50% { transform: scale(1.12); opacity: 0.6; } }
+        @keyframes solar-expand { 0% { transform: scale(0.4); opacity: 0.3; } 100% { transform: scale(1.8); opacity: 0; } }
+        @keyframes solar-pulse { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.15); opacity: 0.2; } }
         @keyframes morse-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         .hex-clip { clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); }
       `}</style>
