@@ -72,28 +72,53 @@ export default function PILayerVisualization() {
             animate={{ y: [-6, 6, -6] }}
             transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
           >
-            {/* Pulsing glow behind hexagon */}
+            {/* Soft glow behind hexagon */}
             <motion.div
               className="absolute w-20 h-20 sm:w-28 sm:h-28"
               style={{
                 clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
                 background: 'hsl(12 100% 50%)',
-                filter: 'blur(18px)',
+                filter: 'blur(20px)',
               }}
-              animate={{ opacity: [0.25, 0.5, 0.25], scale: [1, 1.25, 1] }}
+              animate={{ opacity: [0.15, 0.3, 0.15], scale: [1, 1.2, 1] }}
               transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
             />
-            {/* Hexagon body */}
-            <div
-              className="w-20 h-20 sm:w-28 sm:h-28 flex items-center justify-center relative"
-              style={{
-                clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
-                background: 'radial-gradient(circle, hsl(12 100% 60%) 0%, hsl(12 100% 45%) 55%, hsl(12 100% 35%) 100%)',
-              }}
-            >
-              <div className="text-center text-white">
-                <div className="text-base sm:text-xl font-bold leading-none">PI</div>
-                <div className="text-[8px] sm:text-[10px] font-medium opacity-80 mt-0.5">V5.4</div>
+            {/* Hexagon outline with state-space pathways inside */}
+            <div className="w-20 h-20 sm:w-28 sm:h-28 relative">
+              <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full">
+                {/* Hexagon outline */}
+                <polygon points="50,5 88,26 88,74 50,95 12,74 12,26" fill="none" className="text-accent" stroke="currentColor" strokeWidth="1.5" />
+                {/* State-space pathways — reorganized trajectories through time */}
+                <path d="M 18 38 Q 35 28, 50 42 Q 65 56, 82 46" fill="none" className="text-accent" stroke="currentColor" strokeWidth="0.8" opacity="0.5" strokeDasharray="3,2">
+                  <animate attributeName="stroke-dashoffset" from="0" to="-10" dur="2s" repeatCount="indefinite" />
+                </path>
+                <path d="M 18 52 Q 38 62, 50 52 Q 62 42, 82 52" fill="none" className="text-accent" stroke="currentColor" strokeWidth="0.8" opacity="0.5" strokeDasharray="3,2">
+                  <animate attributeName="stroke-dashoffset" from="0" to="-10" dur="2.5s" repeatCount="indefinite" />
+                </path>
+                <path d="M 18 66 Q 35 76, 50 62 Q 65 48, 82 58" fill="none" className="text-accent" stroke="currentColor" strokeWidth="0.8" opacity="0.5" strokeDasharray="3,2">
+                  <animate attributeName="stroke-dashoffset" from="0" to="-10" dur="3s" repeatCount="indefinite" />
+                </path>
+                {/* State-space nodes (intersection points) */}
+                <circle cx="50" cy="42" r="1.5" className="text-accent" fill="currentColor" opacity="0.6" />
+                <circle cx="50" cy="52" r="1.5" className="text-accent" fill="currentColor" opacity="0.6" />
+                <circle cx="50" cy="62" r="1.5" className="text-accent" fill="currentColor" opacity="0.6" />
+                {/* Dots traveling along pathways — state evolution through time */}
+                <circle r="1.2" className="text-accent" fill="currentColor">
+                  <animateMotion dur="4s" repeatCount="indefinite" path="M 18 38 Q 35 28, 50 42 Q 65 56, 82 46" />
+                </circle>
+                <circle r="1.2" className="text-accent" fill="currentColor">
+                  <animateMotion dur="5s" repeatCount="indefinite" path="M 18 52 Q 38 62, 50 52 Q 62 42, 82 52" />
+                </circle>
+                <circle r="1.2" className="text-accent" fill="currentColor">
+                  <animateMotion dur="4.5s" repeatCount="indefinite" path="M 18 66 Q 35 76, 50 62 Q 65 48, 82 58" />
+                </circle>
+              </svg>
+              {/* PI V5.4 label */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="text-center">
+                  <div className="text-[9px] sm:text-xs font-bold text-accent leading-none">PI</div>
+                  <div className="text-[6px] sm:text-[7px] font-medium text-accent/70 mt-0.5">V5.4</div>
+                </div>
               </div>
             </div>
           </motion.div>

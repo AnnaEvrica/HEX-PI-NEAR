@@ -125,7 +125,7 @@ export default function Landing() {
           </h1>
 
           <p className="text-base sm:text-lg text-secondary max-w-2xl leading-relaxed">
-            HEX6 BLE (Binaural Linguistic Engine) — an autonomous intelligence architecture that treats uncertainty as a coherent language, abandoning binary assumptions for continuous mathematics. Developed by Evrica Technologies Inc.
+            <span className="font-bold text-foreground">HEX6 BLE (Binaural Linguistic Engine)</span> — an autonomous intelligence architecture that treats uncertainty as a coherent language, abandoning binary assumptions for continuous mathematics. Developed by Evrica Technologies Inc.
           </p>
         </div>
 
@@ -140,7 +140,7 @@ export default function Landing() {
             <span className="font-bold text-accent text-xs sm:text-sm tracking-tight">[PI (PROBABILISTIC INTELLIGENCE (PI) MODEL V5.4)]</span>
           </div>
           <p className="text-sm sm:text-base text-secondary max-w-2xl leading-relaxed">
-            The PI layer wraps traditional LLMs — reading the full probability space that Gemini, GPT, and Claude collapse into a single answer.
+            The <span className="font-bold text-accent">PI layer</span> wraps traditional LLMs — reading the full probability space that Gemini, GPT, and Claude collapse into a single answer.
           </p>
           <PILayerVisualization />
         </div>
