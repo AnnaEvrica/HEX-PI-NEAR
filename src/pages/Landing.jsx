@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
+import FoundersSection from '@/components/landing/FoundersSection';
 
 const DEFAULT_METRICS = {
   systemComparison: {
@@ -146,6 +147,9 @@ export default function Landing() {
           `}</style>
         </div>
       </motion.section>
+
+      {/* Forefathers of Probability — Graphic Elements */}
+      <FoundersSection />
 
       {/* How It Works */}
       <section 
