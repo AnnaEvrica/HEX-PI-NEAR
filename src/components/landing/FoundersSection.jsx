@@ -91,7 +91,7 @@ function MorseBand({ speed = 35, delay = 0, opacity = 0.25 }) {
 
 export default function FoundersSection() {
   return (
-    <section id="forefathers" className="relative max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24 md:py-32 overflow-hidden">
+    <section id="forefathers" className="relative max-w-6xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12 md:pt-16 pb-16 sm:pb-24 md:pb-32 overflow-hidden">
       {/* Solar orb — radiant backdrop behind the heading, accentuates the title */}
       <div className="absolute left-1/2 top-[30%] -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0">
         <div className="relative w-[300px] h-[300px] sm:w-[450px] sm:h-[450px] md:w-[550px] md:h-[550px]">

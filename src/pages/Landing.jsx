@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import FoundersSection from '@/components/landing/FoundersSection';
+import PILayerVisualization from '@/components/landing/PILayerVisualization';
 
 const DEFAULT_METRICS = {
   systemComparison: {
@@ -107,7 +108,7 @@ export default function Landing() {
 
       {/* Hero */}
       <motion.section 
-        className="max-w-4xl mx-auto px-4 sm:px-6 py-16 sm:py-24 md:py-32 space-y-6 sm:space-y-8"
+        className="max-w-4xl mx-auto px-4 sm:px-6 pt-12 sm:pt-16 md:pt-20 pb-8 sm:pb-12 space-y-6 sm:space-y-8"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
@@ -128,23 +129,20 @@ export default function Landing() {
           </p>
         </div>
 
-        <button
-          onClick={() => base44.auth.loginWithProvider('google', '/app')}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-sm bg-accent text-accent-foreground font-medium hover:bg-accent/90 transition-colors text-sm sm:text-base"
-        >
-          Enter Oracle <ArrowRight className="w-4 h-4" />
-        </button>
-
-        <div className="mt-8 flex justify-center">
-          <svg className="w-24 h-8" viewBox="0 0 100 20" preserveAspectRatio="none">
-            <line x1="0" y1="10" x2="100" y2="10" stroke="currentColor" strokeWidth="1.5" strokeDasharray="4,6" className="text-accent opacity-60" style={{animation: 'dashMove 20s linear infinite'}} />
-          </svg>
-          <style>{`
-            @keyframes dashMove {
-              0% { stroke-dashoffset: 0; }
-              100% { stroke-dashoffset: 10; }
-            }
-          `}</style>
+        <div className="space-y-5">
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={() => base44.auth.loginWithProvider('google', '/app')}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-sm bg-accent text-accent-foreground font-medium hover:bg-accent/90 transition-colors text-sm sm:text-base"
+            >
+              Enter Oracle <ArrowRight className="w-4 h-4" />
+            </button>
+            <span className="font-bold text-accent text-xs sm:text-sm tracking-tight">[PI (PROBABILISTIC INTELLIGENCE (PI) MODEL V5.4)]</span>
+          </div>
+          <p className="text-sm sm:text-base text-secondary max-w-2xl leading-relaxed">
+            The PI layer wraps traditional LLMs — reading the full probability space that Gemini, GPT, and Claude collapse into a single answer.
+          </p>
+          <PILayerVisualization />
         </div>
       </motion.section>
 
