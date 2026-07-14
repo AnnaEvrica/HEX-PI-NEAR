@@ -2,11 +2,11 @@ import { motion } from 'framer-motion';
 
 const THINKERS = [
   {
-    name: 'Thomas Bayes',
-    years: 'c. 1701–1761',
-    theory: 'Prior knowledge updates with new evidence to produce posterior probability.',
-    application: 'Bayesian inference underpins all modern probabilistic learning and prediction systems.',
-    portrait: 'https://upload.wikimedia.org/wikipedia/commons/d/d4/Thomas_Bayes.gif',
+    name: 'Pierre-Simon Laplace',
+    years: '1749–1827',
+    theory: 'Prior probabilities update with observed data to yield posterior beliefs — the rule of succession.',
+    application: 'Systematized Bayesian inference and inverse probability — the engine of all probabilistic modeling.',
+    portrait: 'https://upload.wikimedia.org/wikipedia/commons/3/39/Laplace%2C_Pierre-Simon%2C_marquis_de.jpg',
     span: 'wide',
   },
   {
@@ -48,6 +48,22 @@ const THINKERS = [
     application: 'Quantum exclusion governs atomic structure — and inspired acausal synchronicity with Jung.',
     portrait: 'https://upload.wikimedia.org/wikipedia/commons/4/43/Pauli.jpg',
     span: 'narrow',
+  },
+  {
+    name: 'Andrey Markov',
+    years: '1856–1922',
+    theory: 'Future states depend only on the present state, not the past — memoryless transitions.',
+    application: 'Markov chains model sequential state transitions — the backbone of HEX6\'s probabilistic engine.',
+    portrait: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Andrei_Markov.jpg/330px-Andrei_Markov.jpg',
+    span: 'narrow',
+  },
+  {
+    name: 'Alan Turing',
+    years: '1912–1954',
+    theory: 'Intelligence can be measured by a machine\'s ability to exhibit indistinguishable human reasoning.',
+    application: 'Founded computational theory and asked "Can machines think?" — the genesis of machine learning.',
+    portrait: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Alan_turing_header.jpg/330px-Alan_turing_header.jpg',
+    span: 'wide',
   },
 ];
 
