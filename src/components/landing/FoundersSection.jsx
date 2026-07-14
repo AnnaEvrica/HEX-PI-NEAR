@@ -2,148 +2,72 @@ import { motion } from 'framer-motion';
 
 const THINKERS = [
   {
+    name: 'Thomas Bayes',
+    years: 'c. 1701–1761',
+    theory: 'Prior knowledge updates with new evidence to produce posterior probability.',
+    application: 'Bayesian inference underpins all modern probabilistic learning and prediction systems.',
+    portrait: 'https://upload.wikimedia.org/wikipedia/commons/d/d4/Thomas_Bayes.gif',
+    span: 'wide',
+  },
+  {
     name: 'Blaise Pascal',
     years: '1623–1662',
     theory: 'Expected value governs rational decisions under uncertainty.',
-    application: 'Foundation of modern risk assessment and expected-value calculation.',
-    visual: 'pascal',
-    badge: 'Coming Soon',
-    span: 'wide',
-  },
-  {
-    name: 'Carl Jung & Wolfgang Pauli',
-    years: '1875–1961 · 1900–1958',
-    theory: 'Archetypal patterns structure both psyche and matter through acausal orderedness.',
-    application: 'Reveals structural resonance between consciousness and physical systems.',
-    visual: 'mandala',
-    badge: 'Coming Soon',
+    application: 'Foundation of modern risk assessment and decision theory.',
+    portrait: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Blaise_Pascal_Versailles.JPG/330px-Blaise_Pascal_Versailles.JPG',
     span: 'narrow',
   },
   {
-    name: 'Warren McCulloch',
-    years: '1898–1969',
-    theory: 'Neural activity is computation — neurons as logical gates processing reality.',
-    application: 'Birthed every artificial neural network from biological first principles.',
-    visual: 'neuron',
-    badge: 'Coming Soon',
+    name: 'Nikola Tesla',
+    years: '1856–1943',
+    theory: 'Every system has a natural resonant frequency that amplifies energy.',
+    application: 'Resonant frequency tuning enables wireless energy and signal processing.',
+    portrait: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Tesla_circa_1890.jpeg/330px-Tesla_circa_1890.jpeg',
     span: 'narrow',
   },
   {
-    name: 'Karl Friston',
-    years: '1959–present',
-    theory: 'Living systems minimize surprise to maintain structural integrity.',
-    application: 'Active inference models self-organizing intelligence across all life.',
-    visual: 'wave',
-    badge: 'Coming Soon',
+    name: 'Max Planck',
+    years: '1858–1947',
+    theory: 'Energy is emitted in discrete quanta proportional to frequency (E = hf).',
+    application: 'Planck\'s constant links frequency to energy — the bedrock of quantum mechanics.',
+    portrait: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Max_Planck_by_Hugo_Erfurth_1938cr_-_restoration1.jpg/330px-Max_Planck_by_Hugo_Erfurth_1938cr_-_restoration1.jpg',
     span: 'wide',
+  },
+  {
+    name: 'Albert Einstein',
+    years: '1879–1955',
+    theory: 'Light energy is quantized — frequency determines the energy of each photon.',
+    application: 'Photoelectric effect converts light frequency into electrical current — birthed quantum theory.',
+    portrait: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Albert_Einstein_Head_cleaned.jpg/330px-Albert_Einstein_Head_cleaned.jpg',
+    span: 'wide',
+  },
+  {
+    name: 'Niels Bohr',
+    years: '1885–1962',
+    theory: 'Electrons orbit at discrete energy levels, emitting photons at specific frequencies.',
+    application: 'Atomic frequency spectra reveal quantum state transitions — matter as frequency.',
+    portrait: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Niels_Bohr.jpg/330px-Niels_Bohr.jpg',
+    span: 'narrow',
   },
 ];
 
-function PascalVisual() {
-  const rows = [[1], [1, 1], [1, 2, 1], [1, 3, 3, 1]];
-  return (
-    <svg viewBox="0 0 100 80" className="w-full h-full">
-      {rows.slice(0, -1).map((row, ri) =>
-        row.map((_, ci) => {
-          const x1 = 50 + (ci - (row.length - 1) / 2) * 18;
-          const y1 = 12 + ri * 18;
-          const nextRow = rows[ri + 1];
-          const x2a = 50 + (ci - (nextRow.length - 1) / 2) * 18;
-          const x2b = 50 + (ci + 1 - (nextRow.length - 1) / 2) * 18;
-          const y2 = y1 + 18;
-          return (
-            <g key={`l-${ri}-${ci}`}>
-              <line x1={x1} y1={y1 + 7.5} x2={x2a} y2={y2 - 7.5} stroke="currentColor" strokeWidth="0.4" className="text-accent" opacity="0.25" />
-              <line x1={x1} y1={y1 + 7.5} x2={x2b} y2={y2 - 7.5} stroke="currentColor" strokeWidth="0.4" className="text-accent" opacity="0.25" />
-            </g>
-          );
-        })
-      )}
-      {rows.map((row, ri) =>
-        row.map((num, ci) => {
-          const x = 50 + (ci - (row.length - 1) / 2) * 18;
-          const y = 12 + ri * 18;
-          return (
-            <g key={`n-${ri}-${ci}`}>
-              <circle cx={x} cy={y} r="7.5" fill="none" stroke="currentColor" strokeWidth="0.8" className="text-accent" opacity="0.5" />
-              <text x={x} y={y + 2.5} textAnchor="middle" fontSize="6" fill="currentColor" className="text-accent">{num}</text>
-            </g>
-          );
-        })
-      )}
-    </svg>
-  );
-}
-
-function MandalaVisual() {
-  return (
-    <svg viewBox="0 0 100 80" className="w-full h-full">
-      {[12, 22, 32].map((r) => (
-        <circle key={r} cx="50" cy="40" r={r} fill="none" stroke="currentColor" strokeWidth="0.6" className="text-accent" opacity="0.4" />
-      ))}
-      {Array.from({ length: 8 }).map((_, i) => {
-        const angle = (i * 45) * Math.PI / 180;
-        return (
-          <line key={i} x1={50 + 12 * Math.cos(angle)} y1={40 + 12 * Math.sin(angle)} x2={50 + 32 * Math.cos(angle)} y2={40 + 32 * Math.sin(angle)} stroke="currentColor" strokeWidth="0.5" className="text-accent" opacity="0.3" />
-        );
-      })}
-      <circle cx="50" cy="40" r="4" fill="currentColor" className="text-accent" opacity="0.6" />
-    </svg>
-  );
-}
-
-function NeuronVisual() {
-  const nodes = [{ x: 15, y: 18 }, { x: 15, y: 62 }, { x: 50, y: 40 }, { x: 85, y: 18 }, { x: 85, y: 62 }];
-  const edges = [[0, 2], [1, 2], [2, 3], [2, 4]];
-  return (
-    <svg viewBox="0 0 100 80" className="w-full h-full">
-      {edges.map(([a, b], i) => (
-        <line key={i} x1={nodes[a].x} y1={nodes[a].y} x2={nodes[b].x} y2={nodes[b].y} stroke="currentColor" strokeWidth="0.6" className="text-accent" opacity="0.35" />
-      ))}
-      {nodes.map((n, i) => (
-        <circle key={i} cx={n.x} cy={n.y} r="5" fill={i === 2 ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="0.8" className="text-accent" opacity={i === 2 ? 0.7 : 0.5} />
-      ))}
-    </svg>
-  );
-}
-
-function WaveVisual() {
-  const points = Array.from({ length: 50 }, (_, i) => {
-    const x = (i / 49) * 90 + 5;
-    const decay = Math.exp(-i / 15);
-    const y = 15 + (1 - decay) * 45 + Math.sin(i * 0.8) * decay * 12;
-    return `${x},${y}`;
-  }).join(' ');
-  return (
-    <svg viewBox="0 0 100 80" className="w-full h-full">
-      <line x1="5" y1="62" x2="95" y2="62" stroke="currentColor" strokeWidth="0.4" className="text-accent" opacity="0.2" />
-      <polyline points={points} fill="none" stroke="currentColor" strokeWidth="1" className="text-accent" opacity="0.6" />
-      <circle cx="92" cy="60" r="2.5" fill="currentColor" className="text-accent" opacity="0.7" />
-    </svg>
-  );
-}
-
-const VISUALS = { pascal: PascalVisual, mandala: MandalaVisual, neuron: NeuronVisual, wave: WaveVisual };
-
 function ThinkerCard({ thinker }) {
-  const Visual = VISUALS[thinker.visual];
   return (
     <div className={`relative border border-border bg-card/80 backdrop-blur-sm p-5 sm:p-6 space-y-4 overflow-hidden ${thinker.span === 'wide' ? 'md:col-span-3' : 'md:col-span-2'}`}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-14 h-14 sm:w-16 sm:h-16 shrink-0 hex-clip bg-accent/10 flex items-center justify-center p-2">
-            <Visual />
-          </div>
-          <div className="min-w-0">
-            <h3 className="font-bold text-sm sm:text-base leading-tight">{thinker.name}</h3>
-            <p className="text-xs text-secondary mt-0.5">{thinker.years}</p>
-          </div>
+      <div className="flex items-center gap-3">
+        <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 hex-clip overflow-hidden bg-muted">
+          <img
+            src={thinker.portrait}
+            alt={thinker.name}
+            loading="lazy"
+            className="w-full h-full object-cover"
+            style={{ filter: 'grayscale(100%) contrast(1.1)' }}
+          />
         </div>
-        {thinker.badge && (
-          <span className="text-[10px] uppercase tracking-wide text-accent bg-accent/10 px-2 py-1 rounded-sm border border-accent/30 shrink-0">
-            {thinker.badge}
-          </span>
-        )}
+        <div className="min-w-0">
+          <h3 className="font-bold text-sm sm:text-base leading-tight">{thinker.name}</h3>
+          <p className="text-xs text-secondary mt-0.5">{thinker.years}</p>
+        </div>
       </div>
       <div className="space-y-2 text-xs sm:text-sm">
         <p className="text-foreground leading-relaxed"><span className="text-accent font-medium">Theory: </span>{thinker.theory}</p>
@@ -218,7 +142,7 @@ export default function FoundersSection() {
           </p>
         </motion.div>
 
-        {/* Hex-tetris grid: wide + narrow cards interlock in an S-curve */}
+        {/* Hex-tetris grid: wide + narrow cards interlock in an S-curve across 3 rows */}
         <motion.div
           className="grid grid-cols-1 md:grid-cols-5 gap-3 sm:gap-4 items-stretch"
           initial={{ opacity: 0, y: 30 }}
