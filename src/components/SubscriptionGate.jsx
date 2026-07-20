@@ -24,13 +24,24 @@ export default function SubscriptionGate({ children }) {
         const justCheckedOut = urlParams.get('checkout') === 'success';
         if (urlParams.get('checkout')) window.history.replaceState({}, '', '/');
 
+        // If a checkout was initiated in this session, the user may reload BEFORE Stripe
+        // redirects back (slow connection / drop). Without this guard the paywall re-shows
+        // and a second "Start Free Trial" click would mint a second checkout → double charge.
+        const pendingTs = sessionStorage.getItem('hex6_checkout_pending');
+        const pendingRecent = pendingTs && (Date.now() - Number(pendingTs) < 10 * 60 * 1000);
+        const pollForActive = justCheckedOut || pendingRecent;
+
         let data = await fetchStatus();
         // Webhook may lag the redirect by a second or two — retry briefly on success return.
-        if (justCheckedOut) {
+        if (pollForActive) {
           for (let i = 0; i < 6 && !(data && (data.status === 'trialing' || data.status === 'active')); i++) {
             await new Promise((r) => setTimeout(r, 1500));
             try { data = await fetchStatus(); } catch { /* tolerate transient failure during webhook lag */ }
           }
+        }
+        // Clear the pending flag once we've confirmed an active/trialing sub.
+        if (data && (data.status === 'trialing' || data.status === 'active')) {
+          sessionStorage.removeItem('hex6_checkout_pending');
         }
         if (!cancelled) {
           setSub(data);
@@ -58,6 +69,9 @@ export default function SubscriptionGate({ children }) {
         return;
       }
       if (res.data?.url) {
+        // Mark a pending checkout so a reload during the (possibly slow) Stripe redirect
+        // polls for the active sub instead of re-offering the trial button.
+        sessionStorage.setItem('hex6_checkout_pending', Date.now().toString());
         window.location.href = res.data.url;
         return;
       }

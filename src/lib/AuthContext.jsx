@@ -22,16 +22,23 @@ export const AuthProvider = ({ children }) => {
           setIsNotRegistered(false);
         } catch (meErr) {
           // me() can fail transiently right after OAuth redirect (token propagation delay).
-          // Retry once before declaring the user unregistered — prevents false lockouts.
-          try {
-            await new Promise((r) => setTimeout(r, 2000));
-            const currentUser = await base44.auth.me();
-            setUser(currentUser);
-            setIsNotRegistered(false);
-          } catch (meErr2) {
-            console.error('me() error after retry:', meErr2);
-            setUser(null);
-            setIsNotRegistered(true);
+          // Retry with backoff (1s, 2s, 3s) before declaring the user unregistered —
+          // prevents false "Access Restricted" lockouts on slower token propagation.
+          let recovered = false;
+          for (let attempt = 1; attempt <= 3 && !recovered; attempt++) {
+            try {
+              await new Promise((r) => setTimeout(r, attempt * 1000));
+              const currentUser = await base44.auth.me();
+              setUser(currentUser);
+              setIsNotRegistered(false);
+              recovered = true;
+            } catch (retryErr) {
+              if (attempt === 3) {
+                console.error('me() error after 3 retries:', retryErr);
+                setUser(null);
+                setIsNotRegistered(true);
+              }
+            }
           }
         }
       } else {
