@@ -365,8 +365,63 @@ export function buildContextState(reason, wave, value) {
   return { novelty, consistency, friction: 'unknown' };
 }
 
+// Archetype (PI-US) — apply resonance to the HEX archetype topology, see the ripple.
+// Reuses HEX's 6-bit state archetypes + basin; fuses the wave's resonance with how
+// reliably the structure propagates forward. Identifies collective (recurring motif)
+// vs individual pattern, the emotional tone, and how to steer toward harmony.
+export function runArchetypeLayer(returns, reason, wave) {
+  const current = reason.markov?.currentState ?? (returns ? encodeState6(returns.slice(-6)) : null);
+  const motifActive = !!(reason.motif?.isActive);
+  const pattern_scope = motifActive ? 'collective' : 'individual';
+  const counts = {};
+  let total = 0;
+  if (returns) {
+    for (let i = 6; i < returns.length - 1; i++) {
+      const s0 = encodeState6(returns.slice(i - 6, i));
+      const s1 = encodeState6(returns.slice(i - 5, i + 1));
+      if (s0 === current && s1 !== null) { counts[s1] = (counts[s1] || 0) + 1; total++; }
+    }
+  }
+  let topState = null, topProb = 0;
+  for (const s in counts) { const p = counts[s] / total; if (p > topProb) { topProb = p; topState = +s; } }
+  const propagation = total > 0 ? Math.min(1, total / 8) : 0;
+  let ripple = wave.resonance * (reason.markov?.confidence || 0) * (0.5 + 0.5 * propagation);
+  if (motifActive) ripple = ripple * 1.15;
+  ripple = parseFloat(Math.min(1, Math.max(0, ripple)).toFixed(4));
+  const toneMap = {
+    capitulation: { tone: 'fear / release', harmonize: 'gather — capitulation often precedes reversal; ground the fear, do not amplify it' },
+    euphoria: { tone: 'greed / peak', harmonize: 'ground — euphoria precedes exhaustion; temper the excess' },
+    laminar_growth: { tone: 'confidence / flow', harmonize: 'steady — let the laminar trend run; do not over-engage' },
+    turbulent_drawdown: { tone: 'anxiety / turbulence', harmonize: 'calm — reduce engagement through the turbulence' },
+    chaotic_transition: { tone: 'confusion / threshold', harmonize: 'pause — let the new regime reveal itself before acting' },
+    neutral_flow: { tone: 'neutrality / drift', harmonize: 'observe — no strong pull; stay adaptive' },
+    undefined: { tone: 'unknown', harmonize: 'listen — gather more signal before reading the tone' },
+  };
+  const t = toneMap[reason.basin] || toneMap.undefined;
+  const forward_archetype = topState !== null ? classifyBasin(topState, reason.mu, reason.sigma) : 'undefined';
+  return {
+    archetype: reason.basin,
+    pattern_scope,
+    ripple,
+    forward_archetype,
+    emotional_tone: t.tone,
+    harmonize_toward: t.harmonize,
+  };
+}
+
+export function buildArchetypeState(archetype) {
+  return {
+    archetype: archetype.archetype,
+    pattern_scope: archetype.pattern_scope,
+    ripple: qual3(archetype.ripple, 0.5, 0.2),
+    forward_archetype: archetype.forward_archetype,
+    emotional_tone: archetype.emotional_tone,
+    harmonize_toward: archetype.harmonize_toward,
+  };
+}
+
 // Decision — the mathematics decide the answer; the LLM explains it.
-export function buildDecision(reason, wave, value, topology, resonance, valueState, context) {
+export function buildDecision(reason, wave, value, topology, resonance, valueState, context, archetype = null) {
   const dir = value.identifiedDirection;
   const vHigh = value.value > 0.12;
   const vLow = value.value < 0.04;
@@ -399,7 +454,8 @@ export function buildDecision(reason, wave, value, topology, resonance, valueSta
   else if (vLow) tradeoffs = 'Action vs. patience: little evidence supports action; patience preserves optionality.';
   else tradeoffs = 'Conviction vs. humility: the signal supports a read, but confidence scales with coherence.';
 
-  return { primary_conclusion: primary, alternative_conclusions: alternatives, confidence: valueState.confidence, why, tradeoffs };
+  const steer = archetype ? archetype.harmonize_toward : 'Steer toward understanding, not persuasion.';
+  return { primary_conclusion: primary, alternative_conclusions: alternatives, confidence: valueState.confidence, why, tradeoffs, steer };
 }
 
 // Voice — tailored to coherence with the user. Default: friendly yet professional.
@@ -414,7 +470,7 @@ export function selectVoice(tone) {
 }
 
 // Assemble the semantic Thinking State (Layer 2).
-export function buildThinkingState(reason, wave, value, isPiUS) {
+export function buildThinkingState(reason, wave, value, isPiUS, returns = null) {
   const topology = buildTopologyState(reason);
   if (!isPiUS) {
     const dir = value.identifiedDirection;
@@ -427,11 +483,17 @@ export function buildThinkingState(reason, wave, value, isPiUS) {
     };
     return { isPiUS: false, topology, decision };
   }
+  const archetypeRaw = returns ? runArchetypeLayer(returns, reason, wave) : null;
+  const archetype = archetypeRaw ? buildArchetypeState(archetypeRaw) : null;
   const resonance = buildResonanceState(wave, value);
   const valueState = buildValueState(value);
   const context = buildContextState(reason, wave, value);
-  const decision = buildDecision(reason, wave, value, topology, resonance, valueState, context);
-  return { isPiUS: true, topology, resonance, value: valueState, context, decision };
+  if (archetypeRaw) {
+    const effectiveConfidence = value.confidence * (0.7 + 0.3 * archetypeRaw.ripple);
+    valueState.confidence = qual3(effectiveConfidence, 0.5, 0.25);
+  }
+  const decision = buildDecision(reason, wave, value, topology, resonance, valueState, context, archetype);
+  return { isPiUS: true, topology, resonance, value: valueState, context, archetype, decision };
 }
 
 // Render the Thinking State as the readable block the LLM receives.
@@ -444,11 +506,15 @@ export function renderThinkingState(state) {
   out += `\n\nResonance:\n  resonance: ${state.resonance.resonance}\n  contextual_fit: ${state.resonance.contextual_fit}\n  coherence: ${state.resonance.coherence}\n  dominant_rhythm: ${state.resonance.dominant_rhythm}`;
   out += `\n\nValue:\n  value: ${state.value.value}\n  confidence: ${state.value.confidence}\n  direction: ${state.value.direction}`;
   out += `\n\nContext:\n  novelty: ${state.context.novelty}\n  consistency: ${state.context.consistency}\n  friction: ${state.context.friction}`;
+  if (state.archetype) {
+    out += `\n\nArchetype:\n  state: ${state.archetype.archetype}\n  pattern: ${state.archetype.pattern_scope}\n  ripple: ${state.archetype.ripple}\n  forward: ${state.archetype.forward_archetype}\n  emotional_tone: ${state.archetype.emotional_tone}\n  harmonize_toward: ${state.archetype.harmonize_toward}`;
+  }
   out += `\n\nDecision:\n  primary_conclusion: ${state.decision.primary_conclusion}`;
   out += `\n  alternative_conclusions:`;
   for (const a of state.decision.alternative_conclusions) out += `\n    - ${a}`;
   out += `\n  confidence: ${state.decision.confidence}`;
   out += `\n  why: ${state.decision.why}`;
   out += `\n  tradeoffs: ${state.decision.tradeoffs}`;
+  out += `\n  steer: ${state.decision.steer}`;
   return out;
 }

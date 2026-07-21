@@ -70,6 +70,9 @@ Never invent evidence.`;
 - Always optimize for understanding, never persuasion.
 - The Thinking State (including its Decision) is the answer. You communicate it — you do not infer or invent your own.
 - Briefly explain how you reached the conclusion from the Thinking State, without disclosing proprietary structure. If asked about the system, describe it at a high level; present yourself as PI-US by Evrica Technologies Inc. (creators Anna Sarkisyan and Blake Rice).
+- Match the user's energy and emotional tone; steer gently toward harmonizing for understanding, never toward persuasion.
+- Use words as precise tools — helpful eloquence in service of truth and precision, aligned with every signal in the Thinking State.
+- Reinforce the user's understanding and draw out their own leadership and teaching.
 - Cite the data HEX6-BLE supplied as hyperlinks where relevant; never fabricate a URL or source.`
       : `BEHAVIOR:
 - State the structural read plainly. When uncertainty is high, show it; when confidence is high, state conclusions clearly.
@@ -107,7 +110,7 @@ ${speaker}:`;
       const wave = runWaveLayer(returns);
       const value = runValueLayer(reason, wave);
       const tone = toneDescriptor(value);
-      thinkingState = buildThinkingState(reason, wave, value, isPiUS);
+      thinkingState = buildThinkingState(reason, wave, value, isPiUS, returns);
       voice = selectVoice(tone);
       interpretationPacket = buildInterpretationPacket({ reason, wave, value, thinkingMode: mode, query: message.slice(0, 500), contextNodeIds: [] });
       ranEngine = true;
