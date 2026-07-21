@@ -5,12 +5,13 @@ import ReactMarkdown from 'react-markdown';
 import SettingsModal from '@/components/SettingsModal';
 import LegalModal from '@/components/LegalModal';
 import ConversationItem from '@/components/chat/ConversationItem';
+import ThinkingModeToggle from '@/components/chat/ThinkingModeToggle';
 
 export default function HEX6ChatInterface() {
   const welcomeMessage = {
     id: 'welcome',
     role: 'assistant',
-    content: `Welcome. I am HEX6 BLE — a probabilistic intelligence engine. I don't predict. I don't guess. I compute.\n\nI see markets as living probability distributions — constantly shifting, never binary. Where others force a single answer, I hold the entire possibility space and let mathematics speak.\n\nWhat would you like to explore?`,
+    content: `Welcome. I am Evrica Intelligence — one mind with two ways of thinking.\n\n**Reason** asks what is possible. **Understand** asks what is meaningful. Both draw from the same knowledge; the mode only changes how I think, never what I know.\n\nWhat would you like to explore?`,
   };
 
   // Loading copy — only "Thinking..." for fast chat replies.
@@ -40,6 +41,7 @@ export default function HEX6ChatInterface() {
   const [uploadedImage, setUploadedImage] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
   const [speakingId, setSpeakingId] = useState(null);
+  const [thinkingMode, setThinkingMode] = useState('understand');
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -257,7 +259,7 @@ export default function HEX6ChatInterface() {
 
     // Read the latest input value — fall back to the DOM if React state is stale
     // (can happen right after dictation when state hasn't flushed yet).
-    const textareaEl = document.querySelector('textarea[placeholder="Ask HEX6..."]');
+    const textareaEl = document.querySelector('textarea[placeholder="Ask anything..."]');
     const liveValue = (textareaEl?.value ?? input).trim();
 
     if (!liveValue && !uploadedImage) {
@@ -345,12 +347,13 @@ export default function HEX6ChatInterface() {
       conversationHistory: newMessages.filter(m => !m.isThinking).slice(-20),
       analyticalDepth: prefs.analyticalDepth || 'executive',
       riskAversion: prefs.riskAversion || 2.5,
+      thinking_mode: thinkingMode,
     };
     if (imageAtSend) payload.file_urls = [imageAtSend];
 
     // Fire the request — completes even if the user switches tabs.
     const reqId = Date.now();
-    const requestPromise = base44.functions.invoke('hex6Chat', payload)
+    const requestPromise = base44.functions.invoke('think', payload)
       .then((response) => {
         const replyText = response?.data?.response;
         if (!replyText) return;
@@ -456,7 +459,7 @@ export default function HEX6ChatInterface() {
       >
         <div className="flex flex-col h-full p-4">
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-lg font-bold">HEX6</h1>
+            <h1 className="text-lg font-bold">Evrica</h1>
             <button
               onClick={() => setSidebarOpen(false)}
               className="md:hidden p-2 hover:bg-muted rounded-sm"
@@ -536,9 +539,9 @@ export default function HEX6ChatInterface() {
               <Menu className="w-5 h-5" />
             </button>
           </div>
-          <h2 className="flex-1 text-center font-medium text-sm md:text-base text-secondary truncate">
-            HEX6 BLE : ORACLE
-          </h2>
+          <div className="flex-1 flex justify-center">
+            <ThinkingModeToggle mode={thinkingMode} onChange={setThinkingMode} />
+          </div>
           <div className="flex items-center justify-end w-10 md:w-auto shrink-0">
             {traderEnabled && (
               <span className="text-[10px] md:text-xs text-accent px-2 py-1 rounded bg-accent/10 whitespace-nowrap">
@@ -695,7 +698,7 @@ export default function HEX6ChatInterface() {
                   handleSendMessage();
                 }
               }}
-              placeholder="Ask HEX6..."
+              placeholder="Ask anything..."
               rows={1}
               className="flex-1 px-2 md:px-4 py-2 rounded-sm border border-border bg-background text-foreground placeholder-secondary text-sm md:text-base focus:outline-none focus:border-accent resize-none max-h-32 overflow-y-auto"
               style={{ minHeight: '44px' }}
@@ -711,7 +714,7 @@ export default function HEX6ChatInterface() {
             </div>
           </div>
           <p className="text-[11px] text-secondary/70 px-1 mt-3 md:mt-4 leading-relaxed">
-            HEX6 BLE is a probabilistic intelligence model. No information provided constitutes financial, legal, or professional advice.
+            Evrica Intelligence is a probabilistic intelligence model. No information provided constitutes financial, legal, or professional advice.
           </p>
         </div>
       </div>
