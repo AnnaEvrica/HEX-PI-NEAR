@@ -114,7 +114,7 @@ ${behaviorPrompt}
 
 VOICE: ${voice} — tailored to coherence with the user (default: conversational, professional, friendly). Today is ${currentDateReadable}.
 
-${stateBlock}${dataBlock ? `\n\n${dataBlock}` : ''}
+${userContextBlock ? userContextBlock + '\n\n' : ''}${stateBlock}${dataBlock ? `\n\n${dataBlock}` : ''}
 
 CONVERSATION:
 ${historyText}
@@ -156,11 +156,19 @@ ${speaker}:`;
       inlineStateBlock = renderThinkingState(thinkingState);
     }
 
-    // --- Memory fetch (fire-and-forget, writeback only) ---
-    const userMemoryPromise = base44.asServiceRole.entities.UserConversationMemory
-      .filter({ user_email: user.email })
-      .then(r => (r && r.length > 0 ? r[0] : null))
-      .catch(() => null);
+    // --- Memory fetch (read now to calibrate; write back after responding) ---
+    let userMemory = null;
+    try {
+      const memRows = await base44.asServiceRole.entities.UserConversationMemory
+        .filter({ user_email: user.email });
+      userMemory = memRows && memRows.length > 0 ? memRows[0] : null;
+    } catch { /* non-blocking */ }
+    const userStyle = userMemory?.user_style?.trim();
+    const userTopics = userMemory?.topics_discussed?.trim();
+    const userSummary = userMemory?.memory_summary?.trim();
+    const userContextBlock = (userStyle || userTopics || userSummary)
+      ? `ABOUT THE USER (from memory):\n${userStyle ? `Style: ${userStyle}\n` : ''}${userTopics ? `Topics explored: ${userTopics}\n` : ''}${userSummary ? `Summary: ${userSummary}` : ''}\nCalibrate your tone, depth, and framing to this user; meet them where they are.`
+      : '';
 
     // --- Save the CognitiveState packet (temporary thinking record) ---
     const saveCognitiveState = () => {
@@ -195,7 +203,7 @@ ${speaker}:`;
       const llmResponse = await base44.integrations.Core.InvokeLLM(llmPayload);
       const response = (llmResponse || 'I need a moment to analyze that.').trim();
       saveCognitiveState();
-      userMemoryPromise.then(existing => updateMemory(base44, user, existing, message, response));
+      updateMemory(base44, user, userMemory, message, response);
       return Response.json({ response, ran_engine: true, model: modelSelected, timestamp: new Date().toISOString() });
     }
 
@@ -213,7 +221,7 @@ ${speaker}:`;
       if (file_urls && file_urls.length > 0) casualPayload.file_urls = file_urls;
       const casualResponse = await base44.integrations.Core.InvokeLLM(casualPayload);
       const finalCasual = (casualResponse || 'Hey.').trim();
-      userMemoryPromise.then(existing => updateMemory(base44, user, existing, message, finalCasual));
+      updateMemory(base44, user, userMemory, message, finalCasual);
       saveCognitiveState();
       return Response.json({ response: finalCasual, ran_engine: false, model: modelSelected, timestamp: new Date().toISOString() });
     }
@@ -277,7 +285,7 @@ Return JSON with:
     if (sourcesBlock) finalResponse = `${finalResponse}\n\n**Sources:**\n${sourcesBlock.split('\n').map(s => `- ${s}`).join('\n')}`;
 
     saveCognitiveState();
-    userMemoryPromise.then(existing => updateMemory(base44, user, existing, message, finalResponse));
+    updateMemory(base44, user, userMemory, message, finalResponse);
     return Response.json({ response: finalResponse, ran_engine: ranEngine, model: modelSelected, timestamp: new Date().toISOString() });
 
   } catch (error) {
