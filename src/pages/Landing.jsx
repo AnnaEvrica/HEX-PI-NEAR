@@ -4,8 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
+import HeroSection from '@/components/landing/HeroSection';
 import FoundersSection from '@/components/landing/FoundersSection';
-import PILayerVisualization from '@/components/landing/PILayerVisualization';
 import MirrorSection from '@/components/landing/MirrorSection';
 import InvitationSection from '@/components/landing/InvitationSection';
 
@@ -109,43 +109,7 @@ export default function Landing() {
       </nav>
 
       {/* Hero */}
-      <motion.section 
-        className="max-w-4xl mx-auto px-4 sm:px-6 pt-12 sm:pt-16 md:pt-20 pb-8 sm:pb-12 space-y-6 sm:space-y-8"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-      >
-        <div className="space-y-4 sm:space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm bg-accent/10 border border-accent/30 w-fit">
-            <span className="text-sm font-bold text-accent">HEX6 BLE</span>
-            <span className="text-sm font-medium text-accent">Probabilistic Intelligence</span>
-          </div>
-
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight tracking-tight max-w-3xl">
-            <span className="text-accent">Elevate your intelligence.</span>
-          </h1>
-
-          <p className="text-base sm:text-lg text-secondary max-w-2xl leading-relaxed">
-            <span className="font-bold text-foreground">HEX6 BLE (Binaural Linguistic Engine)</span> — an autonomous intelligence architecture that treats uncertainty as a coherent language, abandoning binary assumptions for continuous mathematics. Developed by Evrica Technologies Inc.
-          </p>
-        </div>
-
-        <div className="space-y-5">
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              onClick={() => base44.auth.loginWithProvider('google', '/app')}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-sm bg-accent text-accent-foreground font-medium hover:bg-accent/90 transition-colors text-sm sm:text-base"
-            >
-              Enter Oracle <ArrowRight className="w-4 h-4" />
-            </button>
-            <span className="font-bold text-accent text-xs sm:text-sm tracking-tight">[PI-US · PROBABILISTIC INTELLIGENCE MODEL V5.5]</span>
-          </div>
-          <p className="text-sm sm:text-base text-secondary max-w-2xl leading-relaxed">
-            The <span className="font-bold text-accent">PI layer</span> reads the full probability space that Gemini, GPT, and Claude collapse into a single answer — then reasons through it and decides through resonance.
-          </p>
-          <PILayerVisualization />
-        </div>
-      </motion.section>
+      <HeroSection />
 
       {/* Mirror — HEX6-BLE & PI-US, two lenses on one mind */}
       <MirrorSection />
