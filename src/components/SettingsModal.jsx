@@ -142,9 +142,16 @@ export default function SettingsModal({ open, onClose }) {
 
   const handleManageBilling = async () => {
     setSubActionLoading(true);
+    setMessage(null);
     try {
-      const res = await base44.functions.invoke('manageBilling', {});
-      if (res.data?.url) window.location.href = res.data.url;
+      const res = await base44.functions.invoke('manageBilling', { origin: window.location.origin });
+      if (res.data?.error) {
+        setMessage({ type: 'error', text: res.data.error });
+      } else if (res.data?.url) {
+        window.location.href = res.data.url;
+      } else {
+        setMessage({ type: 'error', text: 'Billing portal unavailable. Please try again.' });
+      }
     } catch (err) {
       setMessage({ type: 'error', text: err?.message || 'Billing portal unavailable' });
     } finally {
