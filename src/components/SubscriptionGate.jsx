@@ -22,7 +22,7 @@ export default function SubscriptionGate({ children }) {
       try {
         const urlParams = new URLSearchParams(window.location.search);
         const justCheckedOut = urlParams.get('checkout') === 'success';
-        if (urlParams.get('checkout')) window.history.replaceState({}, '', '/');
+        if (urlParams.get('checkout')) window.history.replaceState({}, '', '/app');
 
         // If a checkout was initiated in this session, the user may reload BEFORE Stripe
         // redirects back (slow connection / drop). Without this guard the paywall re-shows
