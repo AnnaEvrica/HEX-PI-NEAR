@@ -147,7 +147,7 @@ Deno.serve(async (req) => {
     if (asset) {
       const ticker = asset;
       const fetchResult = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are a data retrieval step for HEX6-BLE. Pull the latest price history for ${ticker} from authoritative sources (Yahoo Finance, CoinGecko, etc.). Return at least 60 recent daily closes as a series.\n\nReturn JSON: factual_summary (neutral context, no conclusions), ticker (string), series (array of >=60 numbers — daily closes), source_summary (one sentence), sources (array of {name,url} you actually retrieved).`,
+        prompt: `You are a data retrieval step for HEX6-BLE. Pull the latest price history for ${ticker} from authoritative sources (Yahoo Finance, CoinGecko, etc.). Return at least 250 recent daily closes (~1 year of history) as a series — more history gives finer structural resolution and a meaningful walk-forward test.\n\nReturn JSON: factual_summary (neutral context, no conclusions), ticker (string), series (array of >=250 numbers — daily closes, oldest first), source_summary (one sentence), sources (array of {name,url} you actually retrieved).`,
         model: 'gemini_3_flash',
         add_context_from_internet: true,
         response_json_schema: {
