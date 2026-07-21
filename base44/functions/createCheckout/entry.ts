@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
     // Block if ANY non-canceled subscription exists (DB) — prevents double checkout when a
     // prior session left a sub in incomplete/past_due/unpaid state.
     const existing = await base44.asServiceRole.entities.Subscription.filter({ user_email: user.email });
-    const live = existing.find((s) => s.status && s.status !== 'canceled');
+    const live = existing.find((s) => s.status && s.status !== 'canceled' && s.status !== 'incomplete');
     if (live) {
       return Response.json({ url: null, already_subscribed: true });
     }
@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
       if (customers.data.length > 0) {
         // List ALL subscriptions (not just 1) — a customer can have more than one.
         const stripeSubs = await stripe.subscriptions.list({ customer: customers.data[0].id, limit: 50 });
-        const liveStripe = stripeSubs.data.find((s) => s.status && s.status !== 'canceled');
+        const liveStripe = stripeSubs.data.find((s) => s.status && s.status !== 'canceled' && s.status !== 'incomplete');
         if (liveStripe) {
           return Response.json({ url: null, already_subscribed: true });
         }

@@ -80,7 +80,34 @@ Deno.serve(async (req) => {
     }
 
     subs.sort((a, b) => PRIORITY.indexOf(a.status) - PRIORITY.indexOf(b.status));
-    const s = subs[0];
+    let s = subs[0];
+
+    // Authoritative sync: reconcile the DB record with Stripe's live status so
+    // cancellation / state changes always reflect (the webhook may lag or miss).
+    if (s.stripe_subscription_id) {
+      const syncKey = Deno.env.get('STRIPE_SECRET_KEY');
+      if (syncKey) {
+        try {
+          const stripeSync = new Stripe(syncKey);
+          const live = await stripeSync.subscriptions.retrieve(s.stripe_subscription_id);
+          const livePeriodEnd = live.current_period_end ? new Date(live.current_period_end * 1000).toISOString() : null;
+          const liveTrialEnd = live.trial_end ? new Date(live.trial_end * 1000).toISOString() : null;
+          const liveCancel = !!live.cancel_at_period_end;
+          if (live.status !== s.status || liveCancel !== !!s.cancel_at_period_end) {
+            try {
+              await base44.asServiceRole.entities.Subscription.update(s.id, {
+                status: live.status,
+                current_period_end: livePeriodEnd,
+                trial_end: liveTrialEnd,
+                cancel_at_period_end: liveCancel,
+              });
+            } catch (_e) { /* non-blocking */ }
+            s = { ...s, status: live.status, current_period_end: livePeriodEnd, trial_end: liveTrialEnd, cancel_at_period_end: liveCancel };
+          }
+        } catch (_e) { /* Stripe unreachable — fall back to DB status */ }
+      }
+    }
+
     return Response.json({
       has_subscription: true,
       status: s.status,
