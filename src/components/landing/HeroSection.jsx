@@ -100,13 +100,12 @@ function Operator({ op, delay }) {
 
 export default function HeroSection() {
   return (
-    <section className="px-4 sm:px-6 pt-10 sm:pt-14 md:pt-20 pb-10 sm:pb-16">
-      <div className="relative mx-auto max-w-5xl border-2 border-foreground/25 overflow-hidden">
-        {/* Framed signature-pattern background */}
-        <SignaturePatternBackground />
+    <section className="relative w-full overflow-hidden pt-10 sm:pt-14 md:pt-20 pb-10 sm:pb-16">
+      {/* Full-bleed signature-pattern background */}
+      <SignaturePatternBackground />
 
-        <motion.div
-          className="relative z-10 px-4 sm:px-6 py-10 sm:py-14"
+      <motion.div
+        className="relative z-10 max-w-4xl mx-auto px-6 sm:px-10 py-10 sm:py-14 bg-background/55 backdrop-blur-md rounded-lg"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
@@ -150,7 +149,6 @@ export default function HeroSection() {
           <span className="font-bold text-accent text-xs sm:text-sm tracking-tight">[HEX6-BLE PI-US · PROBABILISTIC INTELLIGENCE MODEL V5.5]</span>
         </div>
       </motion.div>
-      </div>
     </section>
   );
 }

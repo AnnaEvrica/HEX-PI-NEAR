@@ -171,7 +171,6 @@ export default function SignaturePatternBackground() {
   return (
     <div className="absolute inset-0 overflow-hidden">
       <div className="absolute inset-0 flex flex-col">
-        <LabelBar>Signature Pattern of Vibration</LabelBar>
         <div className="grid grid-cols-5 flex-1 min-h-0">
           <Panel><Ripples /></Panel>
           <Panel><Liquid /></Panel>
