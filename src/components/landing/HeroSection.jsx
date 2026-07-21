@@ -112,13 +112,17 @@ export default function HeroSection() {
         transition={{ duration: 0.8 }}
       >
         <div className="flex justify-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm bg-accent/10 border border-accent/30 w-fit">
-            <span className="text-sm font-bold text-accent">HEX6 BLE</span>
-            <span className="text-sm font-medium text-accent">Probabilistic Intelligence</span>
-          </div>
+          <a
+            href="https://evrica.tech"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-secondary hover:text-foreground transition-colors"
+          >
+            Developed by Evrica Technologies Inc.
+          </a>
         </div>
 
-        <div className="mt-6">
+        <div className="mt-3">
           <HeroWord word="Probability" motif={<ProbabilityMotif />} delay={0.1} />
           <Operator op="+" delay={0.2} />
           <HeroWord word="Resonance" motif={<ResonanceMotif />} delay={0.3} />
