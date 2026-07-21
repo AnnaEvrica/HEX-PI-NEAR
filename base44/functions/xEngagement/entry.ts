@@ -91,8 +91,8 @@ async function xPostReply(text, inReplyToId) {
   return json?.data?.id || null;
 }
 
-async function discordPost(content) {
-  const webhook = Deno.env.get('DISCORD_WEBHOOK_URL');
+async function discordPost(content, channel = 'signals') {
+  const webhook = (channel === 'signals' && Deno.env.get('DISCORD_SIGNALS_WEBHOOK_URL')) || Deno.env.get('DISCORD_WEBHOOK_URL');
   if (!webhook) throw new Error('No Discord webhook configured');
   // Discord message cap is 2000 chars; truncate gracefully.
   const body = content.length > 1950 ? content.slice(0, 1940) + '\n…(truncated)' : content;
@@ -369,7 +369,7 @@ Produce JSON with two fields:
       let discordPosted = false;
       const discordBody = `**HEX6-BLE · validated signal — @${author} on ${ticker}**\n> ${text.replace(/\n/g, ' ')}\n\n${discordElab}\n\n${statsLine}\n\n📥 Join the HEX6-BLE community: https://discord.gg/KuPKVmYkD`;
       try {
-        await discordPost(discordBody);
+        await discordPost(discordBody, 'signals');
         discordPosted = true;
       } catch (e) { log(`Discord post failed ${tweetId}`, e?.message); }
 
