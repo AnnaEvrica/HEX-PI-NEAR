@@ -75,6 +75,7 @@ function HeroWord({ word, motif, delay }) {
       <div className="absolute inset-0">{motif}</div>
       <motion.h2
         className="relative text-5xl sm:text-7xl md:text-8xl font-bold tracking-tight text-foreground"
+        style={{ textShadow: '0 2px 18px rgba(0,0,0,0.45)' }}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, delay }}
@@ -105,7 +106,7 @@ export default function HeroSection() {
       <SignaturePatternBackground />
 
       <motion.div
-        className="relative z-10 max-w-4xl mx-auto px-6 sm:px-10 py-10 sm:py-14 bg-background/55 backdrop-blur-md rounded-lg"
+        className="relative z-10 max-w-4xl mx-auto px-6 sm:px-10 py-10 sm:py-14 bg-background/75 backdrop-blur-md rounded-lg"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
