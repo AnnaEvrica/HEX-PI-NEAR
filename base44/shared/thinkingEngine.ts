@@ -1,12 +1,14 @@
 // ---------------------------------------------------------------------------
-// Evrica Thinking Engine — the unified math beneath both Thinking Modes.
+// HEX6 BLE Thinking Engine — the unified math beneath the model switch.
 //
-// Law 1: Knowledge is permanent. Thinking is temporary.  (This layer never writes to the Core.)
-// Law 2: There is only one intelligence — Reason and Understand share the same knowledge.
-// Law 4: Every thinking mode asks a different question.
-//        Reason  (HEX6-BLE): "What is possible?"   → probability distributions
-//        Understand (PI-US): "What is meaningful?" → wave resonance + value
-// Law 6: Same lifecycle — only Interpret changes.
+// One organism, one sequence.
+//   Reason  (HEX6-BLE): "What is possible?"   → structural probability
+//   Understand (PI-US): "What is meaningful?" → wave resonance + value
+//
+// Legacy model = Reason layer only (structural probability).
+// PI-US model  = Reason + Understand fused (probability × resonance × value),
+//                with tone modulation — the intuition layer on top of HEX6-BLE.
+// This layer never writes to the Core (Law 1); only validated experience does.
 // ---------------------------------------------------------------------------
 
 // ===========================================================================

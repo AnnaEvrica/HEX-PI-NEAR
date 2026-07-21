@@ -22,10 +22,10 @@ export function filterSourcesBlock(sources) {
 export function updateMemory(base44, user, existing, message, response) {
   (async () => {
     try {
-      const lastSnippet = `User: ${message.slice(0, 300)} | Evrica: ${response.slice(0, 300)}`;
+      const lastSnippet = `User: ${message.slice(0, 300)} | HEX6 BLE: ${response.slice(0, 300)}`;
       const newTotal = (existing?.total_conversations || 0) + 1;
       const memoryUpdate = await base44.integrations.Core.InvokeLLM({
-        prompt: `Maintain compressed memory for Evrica Intelligence about this user.\n\nEXISTING SUMMARY: ${existing?.memory_summary || 'None.'}\nEXISTING TOPICS: ${existing?.topics_discussed || 'None.'}\nEXISTING STYLE: ${existing?.user_style || 'Unknown.'}\n\nNEW EXCHANGE:\nUser: ${message}\nEvrica: ${response.slice(0, 500)}\n\nReturn JSON only:\n- memory_summary: concise paragraph (max 200 words)\n- topics_discussed: comma-separated topics/assets/themes\n- user_style: one paragraph on their communication style`,
+        prompt: `Maintain compressed memory for HEX6 BLE about this user.\n\nEXISTING SUMMARY: ${existing?.memory_summary || 'None.'}\nEXISTING TOPICS: ${existing?.topics_discussed || 'None.'}\nEXISTING STYLE: ${existing?.user_style || 'Unknown.'}\n\nNEW EXCHANGE:\nUser: ${message}\nHEX6 BLE: ${response.slice(0, 500)}\n\nReturn JSON only:\n- memory_summary: concise paragraph (max 200 words)\n- topics_discussed: comma-separated topics/assets/themes\n- user_style: one paragraph on their communication style`,
         model: 'gemini_3_flash',
         response_json_schema: { type: 'object', properties: { memory_summary: { type: 'string' }, topics_discussed: { type: 'string' }, user_style: { type: 'string' } } },
       });
