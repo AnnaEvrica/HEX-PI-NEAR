@@ -6,6 +6,8 @@ import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import FoundersSection from '@/components/landing/FoundersSection';
 import PILayerVisualization from '@/components/landing/PILayerVisualization';
+import ArchitectureSection from '@/components/landing/ArchitectureSection';
+import ConstitutionSection from '@/components/landing/ConstitutionSection';
 
 const DEFAULT_METRICS = {
   systemComparison: {
@@ -145,6 +147,12 @@ export default function Landing() {
           <PILayerVisualization />
         </div>
       </motion.section>
+
+      {/* Architecture — the inverted structure (Core at the foundation) */}
+      <ArchitectureSection />
+
+      {/* Constitution — the six laws, mutually supportive */}
+      <ConstitutionSection />
 
       {/* Forefathers of Probability — Graphic Elements */}
       <FoundersSection />
