@@ -93,6 +93,7 @@ async function xPostReply(text, inReplyToId) {
 
 async function discordPost(content) {
   const webhook = Deno.env.get('DISCORD_WEBHOOK_URL');
+  if (!webhook) throw new Error('No Discord webhook configured');
   // Discord message cap is 2000 chars; truncate gracefully.
   const body = content.length > 1950 ? content.slice(0, 1940) + '\n…(truncated)' : content;
   const res = await fetch(webhook, {
@@ -307,7 +308,7 @@ STATS: ${statsLine}
 
 Produce JSON with two fields:
 1. "x_reply": a single X reply, <=270 characters. Conversational, professional, no emojis, no mention of being a bot, no fabricated links. State the validated truth plainly, calibrated to the support/confidence — do not hedge when support is high; acknowledge thin support honestly when it is low. Speak to the claim in the tweet.
-2. "discord_elaboration": a fuller explanation, <=1800 characters, for Discord. Markdown ok. Include the STATS line explicitly, explain the reasoning in plain terms, state the decision, and give one alternative. Do not disclose proprietary internals.`,
+2. "discord_elaboration": a fuller explanation, <=1800 characters, for the Discord #signals channel. Markdown ok. This must be a GOLD-WEIGHT signal — incredibly valuable to a serious reader of prediction markets, crypto, equities, and global market trends. Include the STATS line explicitly. Cover: the asset and its current structural read; how it connects to prediction markets / crypto / equities and the broader global trend; the concrete effect it has NOW and the forward-looking effect it WILL have (on price, flows, sentiment, and risk); the decision with calibrated conviction; and one alternative. Be specific and actionable, not generic. Do not disclose proprietary internals.`,
           model: 'gemini_3_flash',
           response_json_schema: {
             type: 'object',
@@ -364,9 +365,9 @@ Produce JSON with two fields:
         continue;
       }
 
-      // 9. Post the Discord elaboration.
+      // 9. Post the gold-weight signal to Discord (#signals channel via webhook).
       let discordPosted = false;
-      const discordBody = `**HEX6-BLE · validated reply to @${author} on ${ticker}**\n> ${text.replace(/\n/g, ' ')}\n\n${discordElab}\n\n${statsLine}`;
+      const discordBody = `**HEX6-BLE · validated signal — @${author} on ${ticker}**\n> ${text.replace(/\n/g, ' ')}\n\n${discordElab}\n\n${statsLine}\n\n📥 Join the HEX6-BLE community: https://discord.gg/KuPKVmYkD`;
       try {
         await discordPost(discordBody);
         discordPosted = true;
