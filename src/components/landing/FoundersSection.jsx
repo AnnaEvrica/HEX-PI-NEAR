@@ -38,7 +38,7 @@ const THINKERS = [
     years: '1856–1922',
     theory: 'Future states depend only on the present state, not the past — memoryless transitions.',
     application: 'Markov chains model sequential state transitions — the backbone of HEX6\'s probabilistic engine.',
-    portrait: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Andrei_Markov.jpg/330px-Andrei_Markov.jpg',
+    portrait: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Andrei_Markov.jpg/500px-Andrei_Markov.jpg',
     span: 'narrow',
   },
   {
@@ -46,8 +46,9 @@ const THINKERS = [
     years: '1912–1954',
     theory: 'Intelligence can be measured by a machine\'s ability to exhibit indistinguishable human reasoning.',
     application: 'Founded computational theory and asked "Can machines think?" — the genesis of machine learning.',
-    portrait: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Alan_turing_header.jpg/330px-Alan_turing_header.jpg',
+    portrait: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Alan_turing_header.jpg/500px-Alan_turing_header.jpg',
     span: 'wide',
+    dark: true,
   },
 ];
 
@@ -55,14 +56,17 @@ function ThinkerCard({ thinker }) {
   return (
     <div className="relative border border-border bg-card p-5 sm:p-6 space-y-4 overflow-hidden">
       <div className="flex items-center gap-3">
-        <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 overflow-hidden bg-muted">
+        <div className="relative w-16 h-16 sm:w-20 sm:h-20 shrink-0 overflow-hidden bg-muted">
           <img
             src={thinker.portrait}
             alt={thinker.name}
             loading="lazy"
             className="w-full h-full object-cover"
-            style={{ filter: 'grayscale(100%) contrast(1.1)', objectPosition: 'center 25%' }}
+            style={{ filter: thinker.dark ? 'grayscale(100%) contrast(1.1) brightness(0.8)' : 'grayscale(100%) contrast(1.1)', objectPosition: 'center 25%' }}
           />
+          {thinker.dark && (
+            <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.9) 100%)' }} />
+          )}
         </div>
         <div className="min-w-0">
           <h3 className="font-bold text-sm sm:text-base leading-tight">{thinker.name}</h3>
