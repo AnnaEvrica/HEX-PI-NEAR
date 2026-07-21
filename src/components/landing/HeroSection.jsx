@@ -145,7 +145,7 @@ export default function HeroSection() {
         >
           Enter Oracle <ArrowRight className="w-4 h-4" />
         </button>
-        <span className="font-bold text-accent text-xs sm:text-sm tracking-tight">[PI-US · PROBABILISTIC INTELLIGENCE MODEL V5.5]</span>
+        <span className="font-bold text-accent text-xs sm:text-sm tracking-tight">[HEX6-BLE PI-US · PROBABILISTIC INTELLIGENCE MODEL V5.5]</span>
       </div>
     </motion.section>
   );

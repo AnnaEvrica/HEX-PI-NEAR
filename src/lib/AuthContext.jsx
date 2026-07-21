@@ -14,7 +14,16 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const isAuth = await base44.auth.isAuthenticated();
+      // isAuthenticated() can briefly return false right after an OAuth redirect
+      // (token-propagation delay). Retry a few times before concluding logged-out —
+      // otherwise the app bounces /app → "/" and re-triggers login (login loop).
+      let isAuth = false;
+      for (let attempt = 1; attempt <= 3 && !isAuth; attempt++) {
+        try {
+          isAuth = await base44.auth.isAuthenticated();
+        } catch { /* transient — keep retrying */ }
+        if (!isAuth && attempt < 3) await new Promise((r) => setTimeout(r, attempt * 700));
+      }
       if (isAuth) {
         try {
           const currentUser = await base44.auth.me();
