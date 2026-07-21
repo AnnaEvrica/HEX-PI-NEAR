@@ -134,6 +134,15 @@ function classifyBasin(stateKey6, mu, sigma) {
 
 export function runReasonLayer(returns, riskAversion = 2.5, friction = 0.0035, windowSize = 6, refReturns = null, priorMarkov = null) {
   const LAMBDA = adaptiveLambda(returns.length);
+  // Adaptive friction: the honesty hurdle scales to the asset's own daily
+  // volatility (half a typical move) instead of a fixed 35 bps. Calmer regimes
+  // get a proportionally fairer bar and surface real edges; volatile assets keep
+  // a proportional floor. SILENCE becomes regime-dependent, not absolute.
+  const meanR = returns.length ? returns.reduce((s, x) => s + x, 0) / returns.length : 0;
+  const seriesSigma = returns.length
+    ? Math.sqrt(returns.reduce((s, x) => s + (x - meanR) ** 2, 0) / returns.length)
+    : 0;
+  const adaptiveFriction = 0.5 * seriesSigma;
   // Multi-resolution hive — resolution adapts to available evidence, with no
   // fixed minimum length. The 7-bit state is pooled at several bit-widths
   // (keeping the most recent bits: corr + recent momentum), and we resolve at
@@ -196,7 +205,7 @@ export function runReasonLayer(returns, riskAversion = 2.5, friction = 0.0035, w
   const w2Sum = weights.reduce((s, w) => s + w * w, 0);
   const nEff = Math.max(2, Math.round((wSum * wSum) / w2Sum));
   const tCrit = tPpf(0.95, nEff - 1);
-  const muLb = mu - tCrit * (sigma / Math.sqrt(nEff)) - friction;
+  const muLb = mu - tCrit * (sigma / Math.sqrt(nEff)) - adaptiveFriction;
   let exposure = 0;
   if (muLb > 0) exposure = Math.min(Math.max((muLb / sigma ** 2) / riskAversion, 0), 1);
   const regime = exposure > 0.6 ? 'BULL' : exposure > 0.3 ? 'LATERAL' : mu < 0 ? 'BEAR' : 'SILENCE';
