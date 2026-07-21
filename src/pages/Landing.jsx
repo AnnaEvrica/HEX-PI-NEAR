@@ -6,8 +6,8 @@ import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import FoundersSection from '@/components/landing/FoundersSection';
 import PILayerVisualization from '@/components/landing/PILayerVisualization';
-import ArchitectureSection from '@/components/landing/ArchitectureSection';
-import ConstitutionSection from '@/components/landing/ConstitutionSection';
+import MirrorSection from '@/components/landing/MirrorSection';
+import InvitationSection from '@/components/landing/InvitationSection';
 
 const DEFAULT_METRICS = {
   systemComparison: {
@@ -148,11 +148,11 @@ export default function Landing() {
         </div>
       </motion.section>
 
-      {/* Architecture — the inverted structure (Core at the foundation) */}
-      <ArchitectureSection />
+      {/* Mirror — HEX6-BLE & PI-US, two lenses on one mind */}
+      <MirrorSection />
 
-      {/* Constitution — the six laws, mutually supportive */}
-      <ConstitutionSection />
+      {/* Invitation — see it for yourself */}
+      <InvitationSection />
 
       {/* Forefathers of Probability — Graphic Elements */}
       <FoundersSection />
