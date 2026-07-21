@@ -1,68 +1,86 @@
 import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import SignaturePatternBackground from '@/components/landing/SignaturePatternBackground';
 
 const POOL = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ∑∫π∞≈±∇√∂λμ';
 
-// Probability — 3D stream of numbers + letters generating out of depth
+// Probability — realistic falling data stream (matrix-style columns of digits)
 function ProbabilityMotif() {
-  const [chars, setChars] = useState(() =>
-    Array.from({ length: 16 }, () => POOL[Math.floor(Math.random() * POOL.length)])
-  );
-  useEffect(() => {
-    const id = setInterval(() => {
-      setChars((prev) =>
-        prev.map((c) => (Math.random() < 0.55 ? POOL[Math.floor(Math.random() * POOL.length)] : c))
-      );
-    }, 230);
-    return () => clearInterval(id);
+  const columns = useMemo(() => {
+    const COLS = 18;
+    return Array.from({ length: COLS }, (_, c) => ({
+      left: (c / (COLS - 1)) * 94 + 3,
+      delay: (c * 0.43) % 5,
+      dur: 2.2 + (c % 6) * 0.45,
+      size: 9 + (c % 4) * 3,
+      chars: Array.from({ length: 5 }, () => POOL[Math.floor(Math.random() * POOL.length)]),
+    }));
   }, []);
   return (
-    <div className="absolute inset-0 overflow-hidden" style={{ perspective: '720px' }}>
-      {chars.map((c, i) => {
-        const left = ((i * 6.1) % 90) + 4;
-        const top = ((i * 23) % 80) + 8;
-        const size = 9 + (i % 5) * 6;
-        return (
-          <motion.span
-            key={i}
-            className="absolute font-mono font-bold text-accent"
-            style={{ left: `${left}%`, top: `${top}%`, fontSize: `${size}px` }}
-            initial={{ opacity: 0, z: -280, scale: 0.4, rotateX: 35 }}
-            animate={{ opacity: [0, 0.3, 0.05], z: [-280, 70], scale: [0.4, 1.1], rotateX: [35, 0] }}
-            transition={{ duration: 2.6 + (i % 4) * 0.6, repeat: Infinity, delay: (i * 0.12) % 3, ease: 'easeOut' }}
-          >
-            {c}
-          </motion.span>
-        );
-      })}
+    <div className="absolute inset-0 overflow-hidden">
+      {columns.map((col, ci) => (
+        <div key={ci} className="absolute top-0 flex flex-col items-center leading-none" style={{ left: `${col.left}%` }}>
+          {col.chars.map((ch, i) => (
+            <motion.span
+              key={i}
+              className="font-mono font-bold text-accent"
+              style={{ fontSize: `${col.size}px` }}
+              initial={{ y: -30, opacity: 0 }}
+              animate={{ y: [-30, 150], opacity: [0, 0.45 - i * 0.06, 0] }}
+              transition={{ duration: col.dur, repeat: Infinity, delay: col.delay + i * 0.16, ease: 'linear' }}
+            >
+              {ch}
+            </motion.span>
+          ))}
+        </div>
+      ))}
     </div>
   );
 }
 
-// Resonance — wave-like patterns flowing behind the word
+// Resonance — soft concentric ripple waves of varying strength
 function ResonanceMotif() {
-  const waves = [
-    { d: 'M0 40 Q 50 8 100 40 T 200 40 T 300 40 T 400 40', dur: 4, op: 0.4, w: 2 },
-    { d: 'M0 40 Q 50 70 100 40 T 200 40 T 300 40 T 400 40', dur: 6, op: 0.22, w: 1.5 },
-    { d: 'M0 40 Q 50 24 100 40 T 200 40 T 300 40 T 400 40', dur: 5, op: 0.16, w: 1 },
+  const ripples = [
+    { dur: 4.0, op: 0.45, w: 2 },
+    { dur: 5.5, op: 0.30, w: 1.5 },
+    { dur: 7.0, op: 0.18, w: 1 },
+    { dur: 3.2, op: 0.26, w: 1.5 },
+    { dur: 6.0, op: 0.12, w: 0.8 },
   ];
   return (
-    <svg viewBox="0 0 400 80" className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
-      {waves.map((wv, i) => (
-        <motion.path
+    <svg viewBox="0 0 400 80" className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid meet">
+      {ripples.map((r, i) => (
+        <motion.circle
           key={i}
-          d={wv.d}
-          fill="none"
+          cx="200" cy="40" fill="none"
           className="text-accent"
           stroke="currentColor"
-          strokeWidth={wv.w}
-          strokeDasharray="6 8"
-          opacity={wv.op}
-          animate={{ strokeDashoffset: [0, -28] }}
-          transition={{ duration: wv.dur, repeat: Infinity, ease: 'linear' }}
+          strokeWidth={r.w}
+          initial={{ r: 4, opacity: 0 }}
+          animate={{ r: [4, 190], opacity: [r.op, 0] }}
+          transition={{ duration: r.dur, repeat: Infinity, delay: i * 0.7, ease: 'easeOut' }}
+        />
+      ))}
+    </svg>
+  );
+}
+
+// PI — radiating concentric pulses behind the result symbol
+function PIMotif() {
+  return (
+    <svg viewBox="0 0 200 200" className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid meet">
+      {[0, 1, 2, 3].map((i) => (
+        <motion.circle
+          key={i}
+          cx="100" cy="100" fill="none"
+          className="text-accent"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          initial={{ r: 8, opacity: 0.4 }}
+          animate={{ r: [8, 95], opacity: [0.4, 0] }}
+          transition={{ duration: 3, repeat: Infinity, delay: i * 0.75, ease: 'easeOut' }}
         />
       ))}
     </svg>
@@ -122,6 +140,12 @@ export default function HeroSection() {
           </a>
         </div>
 
+        <div className="flex justify-center mt-5 sm:mt-7">
+          <span className="text-xs sm:text-sm text-secondary/80 tracking-tight">
+            Welcome to <span className="text-accent font-semibold">genius</span> mode
+          </span>
+        </div>
+
         <div className="mt-3">
           <HeroWord word="Probability" motif={<ProbabilityMotif />} delay={0.1} />
           <Operator op="+" delay={0.2} />
@@ -139,7 +163,10 @@ export default function HeroSection() {
           <div className="flex items-center justify-center gap-4 sm:gap-6">
             <span className="text-5xl sm:text-7xl md:text-8xl font-bold text-secondary line-through decoration-2 decoration-accent">AI</span>
             <ArrowRight className="w-7 h-7 sm:w-10 sm:h-10 text-accent" />
-            <span className="text-5xl sm:text-7xl md:text-8xl font-bold text-accent">PI</span>
+            <div className="relative inline-flex items-center justify-center">
+              <div className="absolute inset-0 -m-8 sm:-m-10"><PIMotif /></div>
+              <span className="relative text-5xl sm:text-7xl md:text-8xl font-bold text-accent">PI</span>
+            </div>
           </div>
           <span className="text-base sm:text-xl font-semibold text-foreground tracking-tight">intelligence like never before</span>
         </motion.div>

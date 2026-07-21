@@ -38,8 +38,9 @@ const THINKERS = [
     years: '1856–1922',
     theory: 'Future states depend only on the present state, not the past — memoryless transitions.',
     application: 'Markov chains model sequential state transitions — the backbone of HEX6\'s probabilistic engine.',
-    portrait: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Andrei_Markov.jpg/500px-Andrei_Markov.jpg',
+    portrait: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/AAMarkov.jpg/500px-AAMarkov.jpg',
     span: 'narrow',
+    dark: true,
   },
   {
     name: 'Alan Turing',
