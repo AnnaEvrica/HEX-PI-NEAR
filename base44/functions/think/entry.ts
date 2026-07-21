@@ -156,7 +156,7 @@ ${speaker}:`;
             coherence: validation.agreement,
             value: validation.support,
             confidence: validation.confidence,
-            friction: null,
+            friction: thinkingState?.forward?.friction ?? null,
             context_node_ids: interpretationPacket.context_node_ids,
           });
         } catch (e) { /* non-blocking */ }

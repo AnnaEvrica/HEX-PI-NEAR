@@ -311,6 +311,63 @@ export function buildInterpretationPacket({ reason, wave, validation, thinkingMo
   };
 }
 
+// Cross-Check — HEX6-BLE and PI-US evaluate each other and offer improvements.
+// Each operator critiques the other: does the structure support the wave, and
+// does the wave refine the structure? Their agreement (and disagreement) is a signal.
+export function runCrossCheck(reason, wave, validation) {
+  const prob = validation.probability;
+  const resonance = wave.resonance;
+  const structDir = reason.mu > 0 ? 1 : reason.mu < 0 ? -1 : 0;
+  const waveDir = Math.cos(wave.phase || 0) > 0 ? 1 : Math.cos(wave.phase || 0) < 0 ? -1 : 0;
+  const directionalAlignment = structDir === waveDir ? 'aligned' : (structDir === 0 || waveDir === 0 ? 'neutral' : 'conflicting');
+  const friction = parseFloat((1 - validation.agreement).toFixed(4));
+
+  let hexCritique;
+  if (prob > 0.5 && resonance < 0.3)
+    hexCritique = 'HEX6-BLE → PI-US: the structure shows real probability but the wave is incoherent; treat the meaning as provisional — the signal is loud but not yet clean.';
+  else if (prob < 0.2 && resonance > 0.5)
+    hexCritique = 'HEX6-BLE → PI-US: the structure is flat (SILENCE) yet the wave is strong; the meaning may be running ahead of the evidence — hold it lightly.';
+  else if (directionalAlignment === 'conflicting')
+    hexCritique = 'HEX6-BLE → PI-US: the structural direction and the wave phase disagree; the wave may be describing a turning point, not a continuation.';
+  else
+    hexCritique = 'HEX6-BLE → PI-US: the structure and the wave agree; the meaning is well-grounded.';
+
+  let piusCritique;
+  if (resonance > 0.5 && prob < 0.3)
+    piusCritique = 'PI-US → HEX6-BLE: a coherent wave is forming beneath a flat structure; consider that the probability understates an emerging pattern.';
+  else if (resonance < 0.25 && prob > 0.5)
+    piusCritique = 'PI-US → HEX6-BLE: the wave is diffuse despite the probability; the structural read may be overfitting noise — damp exposure until the wave confirms.';
+  else if (directionalAlignment === 'conflicting')
+    piusCritique = 'PI-US → HEX6-BLE: the wave suggests a phase shift; the structural continuation assumption may be near exhaustion.';
+  else
+    piusCritique = 'PI-US → HEX6-BLE: the wave confirms the structure; the probability is trustworthy as-is.';
+
+  return { directionalAlignment, friction, hexCritique, piusCritique };
+}
+
+// Forward Test — a walk-forward backtest on the supplied series: train on the
+// first 80%, predict the rest, measure directional accuracy. The resulting
+// friction is how the engine adjusts to its own track record (and is saved for
+// the nightly calibration / learning phase).
+export function runForwardTest(returns) {
+  const n = returns.length;
+  if (n < 20) return { tested: false, directionalAccuracy: null, friction: null };
+  const split = Math.floor(n * 0.8);
+  const trainBase = returns.slice(0, split);
+  const test = returns.slice(split).slice(0, 10);
+  let correct = 0, total = 0;
+  for (let i = 0; i < test.length; i++) {
+    const window = trainBase.concat(test.slice(0, i));
+    const r = runReasonLayer(window);
+    const predicted = r.mu > 0 ? 1 : r.mu < 0 ? -1 : 0;
+    const actual = test[i] > 0 ? 1 : test[i] < 0 ? -1 : 0;
+    if (predicted !== 0 && actual !== 0) { total++; if (predicted === actual) correct++; }
+  }
+  if (total === 0) return { tested: true, directionalAccuracy: null, friction: null };
+  const directionalAccuracy = correct / total;
+  return { tested: true, directionalAccuracy: parseFloat(directionalAccuracy.toFixed(4)), friction: parseFloat((1 - directionalAccuracy).toFixed(4)) };
+}
+
 // Extract a numerical series from free text (for inline-data detection).
 export function extractNumberSeries(text) {
   const matches = text.match(/-?\d+(\.\d+)?/g);
@@ -485,6 +542,7 @@ export function selectVoice(tone) {
 // Assemble the semantic Thinking State (Layer 2).
 export function buildThinkingState(reason, wave, validation, isPiUS, returns = null) {
   const topology = buildTopologyState(reason);
+  const forward = returns ? runForwardTest(returns) : { tested: false, directionalAccuracy: null, friction: null };
   if (!isPiUS) {
     const dir = validation.identifiedDirection;
     const decision = {
@@ -494,19 +552,28 @@ export function buildThinkingState(reason, wave, validation, isPiUS, returns = n
       confidence: qual3(validation.confidence, 0.5, 0.25),
       why: `Topology: ${topology.possibility} possibility, ${topology.regime} regime, uncertainty ${topology.uncertainty}.`,
     };
-    return { isPiUS: false, topology, decision };
+    return { isPiUS: false, topology, forward, decision };
   }
+  // HEX6-BLE and PI-US check each other and offer improvements.
+  const crossCheck = runCrossCheck(reason, wave, validation);
   const archetypeRaw = returns ? runArchetypeLayer(returns, reason, wave) : null;
   const archetype = archetypeRaw ? buildArchetypeState(archetypeRaw) : null;
   const resonance = buildResonanceState(wave, validation);
   const supportState = buildSupportState(validation);
   const context = buildContextState(reason, wave, validation);
-  if (archetypeRaw) {
-    const effectiveConfidence = validation.confidence * (0.7 + 0.3 * archetypeRaw.ripple);
-    supportState.confidence = qual3(effectiveConfidence, 0.5, 0.25);
+  // Confidence adjusts to: archetype ripple, cross-check alignment, and the
+  // empirical forward-test friction — i.e. the engine adjusts to its own track record.
+  let adj = 1;
+  if (crossCheck.directionalAlignment === 'aligned') adj *= 1.05;
+  else if (crossCheck.directionalAlignment === 'conflicting') adj *= 0.8;
+  if (forward.tested && forward.friction != null) {
+    if (forward.friction > 0.5) adj *= 0.85;
+    else if (forward.friction < 0.2) adj *= 1.05;
   }
+  const effectiveConfidence = validation.confidence * (0.7 + 0.3 * (archetypeRaw ? archetypeRaw.ripple : 0)) * adj;
+  supportState.confidence = qual3(Math.min(1, effectiveConfidence), 0.5, 0.25);
   const decision = buildDecision(reason, wave, validation, topology, resonance, supportState, context, archetype);
-  return { isPiUS: true, topology, resonance, support: supportState, context, archetype, decision };
+  return { isPiUS: true, topology, resonance, support: supportState, context, archetype, crossCheck, forward, decision };
 }
 
 // Render the Thinking State as the readable block the LLM receives.
@@ -529,5 +596,11 @@ export function renderThinkingState(state) {
   out += `\n  why: ${state.decision.why}`;
   out += `\n  tradeoffs: ${state.decision.tradeoffs}`;
   out += `\n  steer: ${state.decision.steer}`;
+  if (state.crossCheck) {
+    out += `\n\nCross-Check:\n  directional_alignment: ${state.crossCheck.directionalAlignment}\n  friction: ${state.crossCheck.friction}\n  hex6_ble_critique: ${state.crossCheck.hexCritique}\n  pi_us_critique: ${state.crossCheck.piusCritique}`;
+  }
+  if (state.forward && state.forward.tested) {
+    out += `\n\nForward Test:\n  directional_accuracy: ${state.forward.directionalAccuracy}\n  friction: ${state.forward.friction}`;
+  }
   return out;
 }
