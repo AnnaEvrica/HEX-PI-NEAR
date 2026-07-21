@@ -6,6 +6,23 @@ import {
 } from '../../shared/thinkingEngine.ts';
 import { filterSourcesBlock, updateMemory } from '../../shared/chatHelpers.ts';
 
+// Convert a raw numeric series to returns. If the values look like price
+// levels (all positive, magnitude > 1), convert to percent changes; otherwise
+// assume the series is already a return series and leave it intact.
+function toReturns(series) {
+  if (!Array.isArray(series) || series.length < 2) return series;
+  const allPos = series.every((v) => v > 0);
+  const level = Math.min(...series);
+  if (allPos && level > 1) {
+    const out = [];
+    for (let i = 1; i < series.length; i++) {
+      if (series[i - 1] !== 0) out.push((series[i] - series[i - 1]) / series[i - 1]);
+    }
+    return out;
+  }
+  return series;
+}
+
 // ===========================================================================
 // HEX6 BLE → PI-US. Intelligence lives in computation, not in prompts.
 //
@@ -125,12 +142,12 @@ ${speaker}:`;
     let inlineStateBlock = '';
     const dataSeries = extractNumberSeries(message);
     if (dataSeries && dataSeries.length >= 7) {
-      let primarySeries = dataSeries;
+      let primarySeries = toReturns(dataSeries);
       let refSeries = null;
       const refMatch = message.match(/(?:ref(?:erence)?|vs|second|btc|eth|spy)[:\s]+(-?\d[\d.,\s-]+)/i);
       if (refMatch) {
         const refNums = refMatch[1].match(/-?\d+(\.\d+)?/g);
-        if (refNums && refNums.length >= 7) { refSeries = refNums.map(Number); primarySeries = dataSeries.slice(0, Math.ceil(dataSeries.length / 2)); }
+        if (refNums && refNums.length >= 7) { refSeries = toReturns(refNums.map(Number)); primarySeries = toReturns(dataSeries.slice(0, Math.ceil(dataSeries.length / 2))); }
       }
       const tickerMatch = message.match(/\b(BTC|ETH|SPY|QQQ|TSLA|AAPL|MSFT|NVDA|GOOG|AMZN|META|SOL|DOGE|XRP|ADA|MATIC)\b/i) || message.match(/\b([A-Z]{2,5})\b/);
       await runUnifiedEngine(primarySeries, refSeries);
