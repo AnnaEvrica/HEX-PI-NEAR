@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import {
-  runReasonLayer, runWaveLayer, runValueLayer, toneDescriptor,
+  runReasonLayer, runWaveLayer, runValidationLayer, toneDescriptor,
   buildInterpretationPacket, extractNumberSeries,
   buildThinkingState, renderThinkingState, selectVoice,
 } from '../../shared/thinkingEngine.ts';
@@ -9,7 +9,7 @@ import { filterSourcesBlock, updateMemory } from '../../shared/chatHelpers.ts';
 // ===========================================================================
 // HEX6 BLE → PI-US. Intelligence lives in computation, not in prompts.
 //
-// Layer 1 — Core (thinkingEngine): computes Topology, Resonance, Value,
+// Layer 1 — Core (thinkingEngine): computes Topology, Resonance, Support,
 //           Context, and the Decision. Never writes prose.
 // Layer 2 — Thinking State: the semantic object the LLM receives. The math
 //           decides the answer; the LLM explains it.
@@ -73,6 +73,8 @@ Never invent evidence.`;
 - Match the user's energy and emotional tone; steer gently toward harmonizing for understanding, never toward persuasion.
 - Use words as precise tools — helpful eloquence in service of truth and precision, aligned with every signal in the Thinking State.
 - Reinforce the user's understanding and draw out their own leadership and teaching.
+- Pascal (Support) is the judge: a conclusion earns confidence only when it is well-supported by evidence, agreement, consistency, and coverage — not when it is loud or popular. Let support, not excitement, set your conviction.
+- Speak in plain, conversational, professional, friendly language. Never use psychological or philosophical jargon (e.g. "ego", "resonance", "frequency", "archetype") when talking to the user — the mathematics stays internal; the user hears clarity, warmth, and precision.
 - Cite the data HEX6-BLE supplied as hyperlinks where relevant; never fabricate a URL or source.`
       : `BEHAVIOR:
 - State the structural read plainly. When uncertainty is high, show it; when confidence is high, state conclusions clearly.
@@ -89,7 +91,7 @@ Never invent evidence.`;
 
 ${behaviorPrompt}
 
-VOICE: ${voice} — tailored to coherence with the user (default: friendly yet professional). Today is ${currentDateReadable}.
+VOICE: ${voice} — tailored to coherence with the user (default: conversational, professional, friendly). Today is ${currentDateReadable}.
 
 ${stateBlock}${dataBlock ? `\n\n${dataBlock}` : ''}
 
@@ -108,13 +110,13 @@ ${speaker}:`;
     const runUnifiedEngine = async (returns, refSeries = null) => {
       const reason = runReasonLayer(returns, riskAversion, 0.0035, 6, refSeries, null);
       const wave = runWaveLayer(returns);
-      const value = runValueLayer(reason, wave);
-      const tone = toneDescriptor(value);
-      thinkingState = buildThinkingState(reason, wave, value, isPiUS, returns);
+      const validation = runValidationLayer(reason, wave);
+      const tone = toneDescriptor(validation);
+      thinkingState = buildThinkingState(reason, wave, validation, isPiUS, returns);
       voice = selectVoice(tone);
-      interpretationPacket = buildInterpretationPacket({ reason, wave, value, thinkingMode: mode, query: message.slice(0, 500), contextNodeIds: [] });
+      interpretationPacket = buildInterpretationPacket({ reason, wave, validation, thinkingMode: mode, query: message.slice(0, 500), contextNodeIds: [] });
       ranEngine = true;
-      return { reason, wave, value, tone };
+      return { reason, wave, validation, tone };
     };
 
     // Inline numeric data in the message → run the engine immediately.
@@ -144,16 +146,16 @@ ${speaker}:`;
       if (!interpretationPacket) return;
       (async () => {
         try {
-          const { value } = interpretationPacket;
+          const { validation } = interpretationPacket;
           await base44.asServiceRole.entities.CognitiveState.create({
             state_id: `cs_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
             thinking_mode: mode,
             query: message.slice(0, 1000),
-            probability: value.probability,
-            resonance: value.resonance,
-            coherence: value.coherence,
-            value: value.value,
-            confidence: value.confidence,
+            probability: validation.probability,
+            resonance: validation.resonance,
+            coherence: validation.agreement,
+            value: validation.support,
+            confidence: validation.confidence,
             friction: null,
             context_node_ids: interpretationPacket.context_node_ids,
           });

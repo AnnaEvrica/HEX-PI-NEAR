@@ -247,56 +247,66 @@ export function runWaveLayer(returns) {
   };
 }
 
-// Pascal value fusion — probability × resonance × coherence.
-// Coherence = how well the structural probability and the wave resonance agree.
-export function runValueLayer(reasonResult, waveResult) {
-  const probability = Math.min(1, Math.abs(reasonResult.blendedExposure || reasonResult.exposure || 0));
-  const resonance = waveResult.resonance || 0;
-  const coherence = Math.min(1, Math.sqrt(probability * resonance));
-  const value = probability * resonance * coherence;
-  const direction = reasonResult.mu > 0 ? 'UP' : reasonResult.mu < 0 ? 'DOWN' : 'FLAT';
-  // Overall confidence: geometric mean of the three signals
-  const confidence = Math.cbrt(probability * resonance * coherence);
+// Pascal Validation — the judge. Measures structural SUPPORT, not value.
+// A conclusion earns confidence only when all four pillars are strong; the
+// product rewards balanced, well-supported reads over isolated peaks.
+//   Evidence    — how much information backs this (sample size + transition reliability)
+//   Agreement  — do independent signals point the same way (probability ↔ resonance)
+//   Consistency — does it fit the existing rhythm (phase coherence over time)
+//   Coverage   — does it explain most of what we observe (spectral concentration)
+export function runValidationLayer(reason, wave) {
+  const probability = Math.min(1, Math.abs(reason.blendedExposure || reason.exposure || 0));
+  const resonance   = wave.resonance || 0;
+  const evidence    = Math.min(1, 0.6 * Math.min(1, (reason.nEff || 0) / 30) + 0.4 * (reason.markov?.confidence || 0));
+  const agreement   = Math.min(1, Math.sqrt(probability * resonance));
+  const consistency = wave.phaseAlignment || 0;
+  const coverage    = wave.spectralConcentration || 0;
+  const support     = evidence * agreement * consistency * coverage;
+  const direction   = reason.mu > 0 ? 'UP' : reason.mu < 0 ? 'DOWN' : 'FLAT';
+  // The judge's confidence: geometric mean of the four pillars
+  const confidence  = Math.pow(evidence * agreement * consistency * coverage, 1 / 4);
   return {
     probability: parseFloat(probability.toFixed(4)),
     resonance: parseFloat(resonance.toFixed(4)),
-    coherence: parseFloat(coherence.toFixed(4)),
-    value: parseFloat(value.toFixed(4)),
+    evidence: parseFloat(evidence.toFixed(4)),
+    agreement: parseFloat(agreement.toFixed(4)),
+    consistency: parseFloat(consistency.toFixed(4)),
+    coverage: parseFloat(coverage.toFixed(4)),
+    support: parseFloat(support.toFixed(4)),
     confidence: parseFloat(confidence.toFixed(4)),
     identifiedDirection: direction,
-    identifiedValue: `${direction} · ${(value * 100).toFixed(1)}% value conviction`,
+    identifiedSupport: `${direction} · ${(support * 100).toFixed(1)}% structural support`,
   };
 }
 
-// Tone modulation — PI-US value/resonance feeds back to modulate the response tone.
-// This is the "feed back to HEX6-BLE and adjust tone" step: the value layer's
-// output chooses the register the response is written in.
-export function toneDescriptor(valueLayer) {
-  const { value, resonance, probability, coherence } = valueLayer;
-  if (value > 0.12 && resonance > 0.45) {
+// Tone modulation — Pascal's support + coverage choose the register the
+// response is written in. Conversational, professional, friendly is the default.
+export function toneDescriptor(validation) {
+  const { support, coverage, agreement, probability } = validation;
+  if (support > 0.10 && coverage > 0.4) {
     return { register: 'resonant', confidence: 'high',
-      instruction: 'The signal is resonant and high-value. Speak with quiet certainty — poetic, decisive, unhedged. Let the conviction land in short lyrical sentences. The waves are coherent; trust them.' };
+      instruction: 'The conclusion is well-supported and covers most of the signal. Speak with quiet certainty — warm, clear, and unhedged. Let the conviction land in plain, confident sentences.' };
   }
-  if (probability > 0.4 && resonance < 0.3) {
+  if (probability > 0.4 && coverage < 0.3) {
     return { register: 'structural', confidence: 'medium',
-      instruction: 'The probability is clear but the waves are incoherent. Speak with analytical precision — structural, measured, show the scaffolding. Let the math lead, not the poetry.' };
+      instruction: 'The probability is clear but the explanation does not cover the signal. Speak with analytical precision — measured, show the reasoning plainly. Let the structure lead, not flourish.' };
   }
-  if (value < 0.04) {
+  if (support < 0.03) {
     return { register: 'exploratory', confidence: 'low',
-      instruction: 'The signal is weak and the waves are diffuse. Speak with openness — exploratory, curious, hold the possibility space without forcing a conclusion. Honesty over false confidence.' };
+      instruction: 'The support is thin. Speak with openness — exploratory, curious, hold the possibility space without forcing a conclusion. Honesty over false confidence.' };
   }
   return { register: 'balanced', confidence: 'medium',
-    instruction: 'The signal is balanced. Speak with calm clarity — neither overclaiming nor hedging. Let both the probability and the resonance show through.' };
+    instruction: 'The support is balanced. Speak with calm clarity — conversational, professional, friendly. Neither overclaim nor hedge.' };
 }
 
 // Build the unified interpretation packet (the temporary thinking record).
-export function buildInterpretationPacket({ reason, wave, value, thinkingMode, query, contextNodeIds = [] }) {
+export function buildInterpretationPacket({ reason, wave, validation, thinkingMode, query, contextNodeIds = [] }) {
   return {
     thinking_mode: thinkingMode,
     query,
     reason,
     wave,
-    value,
+    validation,
     context_node_ids: contextNodeIds,
   };
 }
@@ -311,7 +321,7 @@ export function extractNumberSeries(text) {
 // ===========================================================================
 // THINKING STATE — the semantic layer the LLM receives (Layer 2).
 // The Core computes; these functions translate numbers into meaning.
-// Topology (HEX) · Resonance (PI-US) · Value (Pascal) · Context · Decision.
+// Topology (HEX) · Resonance (PI-US) · Support (Pascal) · Context · Decision.
 // The math decides the answer; renderThinkingState formats it for the LLM.
 // ===========================================================================
 
@@ -340,28 +350,29 @@ export function buildTopologyState(reason) {
 }
 
 // Resonance state (PI-US) — waves / meaning, semantic.
-export function buildResonanceState(wave, value) {
+export function buildResonanceState(wave, validation) {
   return {
     resonance: qual3(wave.resonance, 0.5, 0.25),
-    contextual_fit: qualFit((wave.phaseAlignment + value.coherence) / 2, 0.6, 0.3),
-    coherence: qual3(value.coherence, 0.5, 0.25),
+    contextual_fit: qualFit((wave.phaseAlignment + validation.agreement) / 2, 0.6, 0.3),
+    agreement: qual3(validation.agreement, 0.5, 0.25),
     dominant_rhythm: wave.dominantPeriod > 0 ? `${wave.dominantPeriod} bars` : 'none',
   };
 }
 
-// Value state (Pascal) — semantic.
-export function buildValueState(value) {
+// Support state (Pascal) — semantic. Pascal is the judge: how much structural
+// support does this conclusion have, not how loud or popular it is.
+export function buildSupportState(validation) {
   return {
-    value: qual3(value.value, 0.12, 0.04),
-    confidence: qual3(value.confidence, 0.5, 0.25),
-    direction: value.identifiedDirection,
+    support: qual3(validation.support, 0.10, 0.03),
+    confidence: qual3(validation.confidence, 0.5, 0.25),
+    direction: validation.identifiedDirection,
   };
 }
 
 // Context — novelty, consistency, friction.
-export function buildContextState(reason, wave, value) {
+export function buildContextState(reason, wave, validation) {
   const novelty = (reason.motif?.isActive || reason.basin === 'capitulation' || reason.basin === 'euphoria') ? 'High' : 'Medium';
-  const consistency = wave.resonance < 0.2 ? 'Low' : qual3(value.coherence, 0.5, 0.25);
+  const consistency = wave.resonance < 0.2 ? 'Low' : qual3(validation.agreement, 0.5, 0.25);
   return { novelty, consistency, friction: 'unknown' };
 }
 
@@ -421,79 +432,81 @@ export function buildArchetypeState(archetype) {
 }
 
 // Decision — the mathematics decide the answer; the LLM explains it.
-export function buildDecision(reason, wave, value, topology, resonance, valueState, context, archetype = null) {
-  const dir = value.identifiedDirection;
-  const vHigh = value.value > 0.12;
-  const vLow = value.value < 0.04;
+// Pascal (Support) is the judge: a conclusion advances only if it is
+// well-supported, not merely possible or meaningful.
+export function buildDecision(reason, wave, validation, topology, resonance, supportState, context, archetype = null) {
+  const dir = validation.identifiedDirection;
+  const sHigh = validation.support > 0.10;
+  const sLow = validation.support < 0.03;
   const resHigh = wave.resonance > 0.45;
   const resLow = wave.resonance < 0.3;
 
   let primary;
   if (reason.regime === 'INSUFFICIENT_DATA') {
     primary = 'No reliable conclusion: insufficient data to resolve the structure.';
-  } else if (vLow) {
-    primary = 'No reliable conclusion: the signal is weak and incoherent. Hold the possibility space rather than force a read.';
-  } else if (vHigh && resHigh) {
-    primary = `The structure and its waves align ${dir.toLowerCase()}; engagement is supported with coherent conviction.`;
-  } else if (vHigh && resLow) {
-    primary = `The structure favors ${dir.toLowerCase()} continuation, but the waves are incoherent; engagement is probable yet not resonant.`;
+  } else if (sLow) {
+    primary = 'No reliable conclusion: the conclusion is not sufficiently supported by the evidence. Hold the possibility space rather than force a read.';
+  } else if (sHigh && resHigh) {
+    primary = `The structure and its meaning are well-supported ${dir.toLowerCase()}; the conclusion has earned confidence.`;
+  } else if (sHigh && resLow) {
+    primary = `The structure favors ${dir.toLowerCase()} continuation, but the meaning is thinly supported; the conclusion is probable yet not fully reinforced.`;
   } else {
-    primary = `The structure leans ${dir.toLowerCase()} with moderate conviction; act proportionally to coherence, not to hope.`;
+    primary = `The structure leans ${dir.toLowerCase()} with moderate support; act proportionally to support, not to hope.`;
   }
 
   const alternatives = [];
   if (topology.uncertainty === 'High') alternatives.push('Alternatively, the apparent pattern may dissolve under a regime change.');
-  if (resLow && topology.possibility !== 'Low') alternatives.push('Alternatively, a stronger coherent wave may be forming beneath the noise.');
-  if (vLow) alternatives.push('Alternatively, conditions may clarify as more data arrives.');
-  if (alternatives.length === 0) alternatives.push('Alternatively, a shift in resonance could weaken the current read.');
+  if (resLow && topology.possibility !== 'Low') alternatives.push('Alternatively, a stronger supported read may be forming beneath the noise.');
+  if (sLow) alternatives.push('Alternatively, conditions may clarify as more evidence arrives.');
+  if (alternatives.length === 0) alternatives.push('Alternatively, a shift in support could weaken the current read.');
 
-  const why = `Topology: ${topology.possibility} possibility, ${topology.regime} regime, uncertainty ${topology.uncertainty}. Resonance: ${resonance.resonance}, coherence ${resonance.coherence}, contextual fit ${resonance.contextual_fit}. Value: ${valueState.value} (${dir}). Consistency: ${context.consistency}, novelty: ${context.novelty}.`;
+  const why = `Topology: ${topology.possibility} possibility, ${topology.regime} regime, uncertainty ${topology.uncertainty}. Resonance: ${resonance.resonance}, agreement ${resonance.agreement}, contextual fit ${resonance.contextual_fit}. Support: ${supportState.support} (${dir}). Consistency: ${context.consistency}, novelty: ${context.novelty}.`;
 
   let tradeoffs;
-  if (topology.possibility === 'High' && resLow) tradeoffs = 'Engagement vs. caution: structure supports engagement, but thin resonance limits conviction.';
-  else if (vLow) tradeoffs = 'Action vs. patience: little evidence supports action; patience preserves optionality.';
-  else tradeoffs = 'Conviction vs. humility: the signal supports a read, but confidence scales with coherence.';
+  if (topology.possibility === 'High' && resLow) tradeoffs = 'Engagement vs. caution: structure supports engagement, but thin support limits conviction.';
+  else if (sLow) tradeoffs = 'Action vs. patience: little evidence supports action; patience preserves optionality.';
+  else tradeoffs = 'Conviction vs. humility: the conclusion is supported, but confidence scales with structural support.';
 
   const steer = archetype ? archetype.harmonize_toward : 'Steer toward understanding, not persuasion.';
-  return { primary_conclusion: primary, alternative_conclusions: alternatives, confidence: valueState.confidence, why, tradeoffs, steer };
+  return { primary_conclusion: primary, alternative_conclusions: alternatives, confidence: supportState.confidence, why, tradeoffs, steer };
 }
 
-// Voice — tailored to coherence with the user. Default: friendly yet professional.
+// Voice — tailored to coherence with the user. Default: conversational, professional, friendly.
 export function selectVoice(tone) {
   switch (tone.register) {
-    case 'resonant': return 'poetic';
-    case 'structural': return 'scientific';
-    case 'exploratory': return 'minimal';
-    case 'balanced': return 'teacher';
-    default: return 'friendly yet professional';
+    case 'resonant': return 'warm and certain';
+    case 'structural': return 'clear and analytical';
+    case 'exploratory': return 'open and curious';
+    case 'balanced': return 'conversational, professional, friendly';
+    default: return 'conversational, professional, friendly';
   }
 }
 
 // Assemble the semantic Thinking State (Layer 2).
-export function buildThinkingState(reason, wave, value, isPiUS, returns = null) {
+export function buildThinkingState(reason, wave, validation, isPiUS, returns = null) {
   const topology = buildTopologyState(reason);
   if (!isPiUS) {
-    const dir = value.identifiedDirection;
+    const dir = validation.identifiedDirection;
     const decision = {
       primary_conclusion: reason.regime === 'INSUFFICIENT_DATA'
         ? 'No reliable structural conclusion: insufficient data.'
         : `The structure favors ${dir.toLowerCase()} continuation; probability supports ${topology.possibility.toLowerCase()} engagement.`,
-      confidence: qual3(value.confidence, 0.5, 0.25),
+      confidence: qual3(validation.confidence, 0.5, 0.25),
       why: `Topology: ${topology.possibility} possibility, ${topology.regime} regime, uncertainty ${topology.uncertainty}.`,
     };
     return { isPiUS: false, topology, decision };
   }
   const archetypeRaw = returns ? runArchetypeLayer(returns, reason, wave) : null;
   const archetype = archetypeRaw ? buildArchetypeState(archetypeRaw) : null;
-  const resonance = buildResonanceState(wave, value);
-  const valueState = buildValueState(value);
-  const context = buildContextState(reason, wave, value);
+  const resonance = buildResonanceState(wave, validation);
+  const supportState = buildSupportState(validation);
+  const context = buildContextState(reason, wave, validation);
   if (archetypeRaw) {
-    const effectiveConfidence = value.confidence * (0.7 + 0.3 * archetypeRaw.ripple);
-    valueState.confidence = qual3(effectiveConfidence, 0.5, 0.25);
+    const effectiveConfidence = validation.confidence * (0.7 + 0.3 * archetypeRaw.ripple);
+    supportState.confidence = qual3(effectiveConfidence, 0.5, 0.25);
   }
-  const decision = buildDecision(reason, wave, value, topology, resonance, valueState, context, archetype);
-  return { isPiUS: true, topology, resonance, value: valueState, context, archetype, decision };
+  const decision = buildDecision(reason, wave, validation, topology, resonance, supportState, context, archetype);
+  return { isPiUS: true, topology, resonance, support: supportState, context, archetype, decision };
 }
 
 // Render the Thinking State as the readable block the LLM receives.
@@ -503,8 +516,8 @@ export function renderThinkingState(state) {
     out += `\n\nDecision:\n  primary_conclusion: ${state.decision.primary_conclusion}\n  confidence: ${state.decision.confidence}\n  why: ${state.decision.why}`;
     return out;
   }
-  out += `\n\nResonance:\n  resonance: ${state.resonance.resonance}\n  contextual_fit: ${state.resonance.contextual_fit}\n  coherence: ${state.resonance.coherence}\n  dominant_rhythm: ${state.resonance.dominant_rhythm}`;
-  out += `\n\nValue:\n  value: ${state.value.value}\n  confidence: ${state.value.confidence}\n  direction: ${state.value.direction}`;
+  out += `\n\nResonance:\n  resonance: ${state.resonance.resonance}\n  contextual_fit: ${state.resonance.contextual_fit}\n  agreement: ${state.resonance.agreement}\n  dominant_rhythm: ${state.resonance.dominant_rhythm}`;
+  out += `\n\nSupport:\n  support: ${state.support.support}\n  confidence: ${state.support.confidence}\n  direction: ${state.support.direction}`;
   out += `\n\nContext:\n  novelty: ${state.context.novelty}\n  consistency: ${state.context.consistency}\n  friction: ${state.context.friction}`;
   if (state.archetype) {
     out += `\n\nArchetype:\n  state: ${state.archetype.archetype}\n  pattern: ${state.archetype.pattern_scope}\n  ripple: ${state.archetype.ripple}\n  forward: ${state.archetype.forward_archetype}\n  emotional_tone: ${state.archetype.emotional_tone}\n  harmonize_toward: ${state.archetype.harmonize_toward}`;
