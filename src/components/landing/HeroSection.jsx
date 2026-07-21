@@ -140,10 +140,10 @@ export default function HeroSection() {
           </a>
         </div>
 
-        <div className="flex justify-center mt-5 sm:mt-7 px-2">
-          <h1 className="text-6xl sm:text-8xl md:text-9xl font-bold tracking-tight text-center leading-tight text-foreground" style={{ textShadow: '0 2px 18px rgba(0,0,0,0.45)' }}>
-            Welcome to <span className="text-accent">genius</span> mode
-          </h1>
+        <div className="flex justify-center mt-5 sm:mt-7">
+          <span className="text-xs sm:text-sm uppercase tracking-[0.25em] text-secondary whitespace-nowrap">
+            Welcome to <span className="text-accent font-semibold">genius</span> mode
+          </span>
         </div>
 
         <div className="mt-3">
