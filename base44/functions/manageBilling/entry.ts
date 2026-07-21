@@ -27,7 +27,6 @@ Deno.serve(async (req) => {
     let configId = configs.data[0]?.id;
     if (!configId) {
       const cfg = await stripe.billingPortal.configurations.create({
-        business_profile: { name: 'HEX6 BLE' },
         features: {
           customer_update: { enabled: true, allowed_updates: ['email', 'address'] },
           subscription_cancel: { enabled: true, mode: 'at_period_end' },
