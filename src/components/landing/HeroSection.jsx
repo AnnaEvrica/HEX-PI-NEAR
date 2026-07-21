@@ -41,38 +41,82 @@ function ProbabilityMotif() {
   );
 }
 
-// Resonance — distinct motion: chars generate while flowing along a soft horizontal wave
+// Resonance — wave-like patterns flowing behind the word
 function ResonanceMotif() {
-  const [chars, setChars] = useState(() =>
-    Array.from({ length: 14 }, () => POOL[Math.floor(Math.random() * POOL.length)])
-  );
-  useEffect(() => {
-    const id = setInterval(() => {
-      setChars((prev) =>
-        prev.map((c) => (Math.random() < 0.5 ? POOL[Math.floor(Math.random() * POOL.length)] : c))
-      );
-    }, 260);
-    return () => clearInterval(id);
-  }, []);
+  const waves = [
+    { d: 'M0 40 Q 50 8 100 40 T 200 40 T 300 40 T 400 40', dur: 4, op: 0.4, w: 2 },
+    { d: 'M0 40 Q 50 70 100 40 T 200 40 T 300 40 T 400 40', dur: 6, op: 0.22, w: 1.5 },
+    { d: 'M0 40 Q 50 24 100 40 T 200 40 T 300 40 T 400 40', dur: 5, op: 0.16, w: 1 },
+  ];
   return (
-    <div className="absolute inset-0 overflow-hidden">
-      {chars.map((c, i) => {
-        const top = 16 + (i % 5) * 16;
-        const size = 9 + (i % 4) * 5;
-        return (
-          <motion.span
-            key={i}
-            className="absolute font-mono font-bold text-accent"
-            style={{ top: `${top}%`, fontSize: `${size}px` }}
-            initial={{ x: '-20vw', opacity: 0 }}
-            animate={{ x: ['-20vw', '120vw'], y: [0, -10, 0], opacity: [0, 0.3, 0.3, 0] }}
-            transition={{ duration: 6 + (i % 4), repeat: Infinity, delay: i * 0.3, ease: 'linear' }}
-          >
-            {c}
-          </motion.span>
-        );
-      })}
-    </div>
+    <svg viewBox="0 0 400 80" className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
+      {waves.map((wv, i) => (
+        <motion.path
+          key={i}
+          d={wv.d}
+          fill="none"
+          className="text-accent"
+          stroke="currentColor"
+          strokeWidth={wv.w}
+          strokeDasharray="6 8"
+          opacity={wv.op}
+          animate={{ strokeDashoffset: [0, -28] }}
+          transition={{ duration: wv.dur, repeat: Infinity, ease: 'linear' }}
+        />
+      ))}
+    </svg>
+  );
+}
+
+// Harmonization — geometry fusing Probability's structure with Resonance's waves,
+// shown where "PI" is written.
+function HarmonizationGeometry() {
+  return (
+    <svg viewBox="0 0 120 120" className="absolute inset-0 w-full h-full" style={{ overflow: 'visible' }}>
+      <motion.g
+        className="text-accent"
+        stroke="currentColor"
+        fill="none"
+        strokeWidth="1.2"
+        opacity="0.5"
+        style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
+        animate={{ rotate: 360 }}
+        transition={{ duration: 24, repeat: Infinity, ease: 'linear' }}
+      >
+        <polygon points="60,16 92,34 92,70 60,88 28,70 28,34" />
+      </motion.g>
+      <motion.g
+        className="text-accent"
+        stroke="currentColor"
+        fill="none"
+        strokeWidth="0.8"
+        opacity="0.3"
+        style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
+        animate={{ rotate: -360 }}
+        transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
+      >
+        <polygon points="60,30 80,42 80,62 60,74 40,62 40,42" />
+      </motion.g>
+      <motion.path
+        d="M16 60 Q 38 30 60 60 T 104 60"
+        fill="none"
+        className="text-accent"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        opacity="0.7"
+        animate={{ d: ['M16 60 Q 38 30 60 60 T 104 60', 'M16 60 Q 38 90 60 60 T 104 60', 'M16 60 Q 38 30 60 60 T 104 60'] }}
+        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      <motion.circle
+        cx="60"
+        cy="60"
+        r="4"
+        className="text-accent"
+        fill="currentColor"
+        animate={{ scale: [1, 1.6, 1], opacity: [0.6, 1, 0.6] }}
+        transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+      />
+    </svg>
   );
 }
 
@@ -135,7 +179,10 @@ export default function HeroSection() {
       >
         <span className="text-2xl sm:text-4xl font-bold text-secondary line-through decoration-2 decoration-accent">AI</span>
         <ArrowRight className="w-5 h-5 sm:w-7 sm:h-7 text-accent" />
-        <span className="text-3xl sm:text-5xl font-bold text-accent">PI</span>
+        <div className="relative w-20 h-20 sm:w-28 sm:h-28 flex items-center justify-center">
+          <HarmonizationGeometry />
+          <span className="relative text-3xl sm:text-5xl font-bold text-accent">PI</span>
+        </div>
       </motion.div>
 
       <div className="flex flex-col items-center gap-4 pt-6">
