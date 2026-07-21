@@ -561,15 +561,12 @@ export function buildThinkingState(reason, wave, validation, isPiUS, returns = n
   const resonance = buildResonanceState(wave, validation);
   const supportState = buildSupportState(validation);
   const context = buildContextState(reason, wave, validation);
-  // Confidence adjusts to: archetype ripple, cross-check alignment, and the
-  // empirical forward-test friction — i.e. the engine adjusts to its own track record.
+  // Confidence adjusts to: archetype ripple and cross-check alignment (the
+  // signal the backtest proves discriminates quality). The forward-test friction
+  // stays a reported + saved diagnostic — not yet a validated next-bar calibrator.
   let adj = 1;
   if (crossCheck.directionalAlignment === 'aligned') adj *= 1.05;
   else if (crossCheck.directionalAlignment === 'conflicting') adj *= 0.8;
-  if (forward.tested && forward.friction != null) {
-    if (forward.friction > 0.5) adj *= 0.85;
-    else if (forward.friction < 0.2) adj *= 1.05;
-  }
   const effectiveConfidence = validation.confidence * (0.7 + 0.3 * (archetypeRaw ? archetypeRaw.ripple : 0)) * adj;
   supportState.confidence = qual3(Math.min(1, effectiveConfidence), 0.5, 0.25);
   const decision = buildDecision(reason, wave, validation, topology, resonance, supportState, context, archetype);
