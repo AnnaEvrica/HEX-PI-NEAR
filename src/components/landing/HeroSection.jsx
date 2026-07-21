@@ -111,15 +111,32 @@ export default function HeroSection() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
       >
-        <div className="flex justify-center">
+        <div className="flex items-center justify-center gap-4">
+          {/* Evrica — moon: white logo on black */}
           <a
             href="https://evrica.tech"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-secondary hover:text-foreground transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-sm bg-black hover:opacity-80 transition-opacity"
           >
-            Developed by Evrica Technologies Inc.
+            <img
+              src="https://media.base44.com/images/public/69eef3d514386627566a9bf6/301086d24_evrica-logo.png"
+              alt="Evrica Technologies"
+              className="h-5 w-5 object-contain"
+            />
+            <span className="text-xs font-medium text-white tracking-wide">Evrica Technologies Inc.</span>
           </a>
+
+          {/* HEX6-BLE — mars: orange-tinted logo */}
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-sm bg-accent/10 border border-accent/30">
+            <img
+              src="https://media.base44.com/images/public/69eef3d514386627566a9bf6/301086d24_evrica-logo.png"
+              alt="HEX6-BLE"
+              className="h-5 w-5 object-contain"
+              style={{ filter: 'sepia(1) saturate(4) hue-rotate(-10deg) brightness(1.1)' }}
+            />
+            <span className="text-xs font-bold text-accent tracking-wide">HEX6-BLE · PI-US</span>
+          </div>
         </div>
 
         <div className="mt-3">
