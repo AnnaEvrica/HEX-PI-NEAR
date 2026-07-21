@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import SignaturePatternBackground from '@/components/landing/SignaturePatternBackground';
 
 const POOL = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ∑∫π∞≈±∇√∂λμ';
 
@@ -68,58 +69,6 @@ function ResonanceMotif() {
   );
 }
 
-// Harmonization — geometry fusing Probability's structure with Resonance's waves,
-// shown where "PI" is written.
-function HarmonizationGeometry() {
-  return (
-    <svg viewBox="0 0 120 120" className="absolute inset-0 w-full h-full" style={{ overflow: 'visible' }}>
-      <motion.g
-        className="text-accent"
-        stroke="currentColor"
-        fill="none"
-        strokeWidth="1.2"
-        opacity="0.5"
-        style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
-        animate={{ rotate: 360 }}
-        transition={{ duration: 24, repeat: Infinity, ease: 'linear' }}
-      >
-        <polygon points="60,16 92,34 92,70 60,88 28,70 28,34" />
-      </motion.g>
-      <motion.g
-        className="text-accent"
-        stroke="currentColor"
-        fill="none"
-        strokeWidth="0.8"
-        opacity="0.3"
-        style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
-        animate={{ rotate: -360 }}
-        transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
-      >
-        <polygon points="60,30 80,42 80,62 60,74 40,62 40,42" />
-      </motion.g>
-      <motion.path
-        d="M16 60 Q 38 30 60 60 T 104 60"
-        fill="none"
-        className="text-accent"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        opacity="0.7"
-        animate={{ d: ['M16 60 Q 38 30 60 60 T 104 60', 'M16 60 Q 38 90 60 60 T 104 60', 'M16 60 Q 38 30 60 60 T 104 60'] }}
-        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <motion.circle
-        cx="60"
-        cy="60"
-        r="4"
-        className="text-accent"
-        fill="currentColor"
-        animate={{ scale: [1, 1.6, 1], opacity: [0.6, 1, 0.6] }}
-        transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
-      />
-    </svg>
-  );
-}
-
 function HeroWord({ word, motif, delay }) {
   return (
     <div className="relative flex items-center justify-center py-2 sm:py-3">
@@ -151,49 +100,55 @@ function Operator({ op, delay }) {
 
 export default function HeroSection() {
   return (
-    <motion.section
-      className="max-w-4xl mx-auto px-4 sm:px-6 pt-10 sm:pt-14 md:pt-20 pb-10 sm:pb-16"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8 }}
-    >
-      <div className="flex justify-center">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm bg-accent/10 border border-accent/30 w-fit">
-          <span className="text-sm font-bold text-accent">HEX6 BLE</span>
-          <span className="text-sm font-medium text-accent">Probabilistic Intelligence</span>
-        </div>
-      </div>
-
-      <div className="mt-6">
-        <HeroWord word="Probability" motif={<ProbabilityMotif />} delay={0.1} />
-        <Operator op="+" delay={0.2} />
-        <HeroWord word="Resonance" motif={<ResonanceMotif />} delay={0.3} />
-        <Operator op="=" delay={0.4} />
-      </div>
+    <section className="relative w-full overflow-hidden pt-10 sm:pt-14 md:pt-20 pb-10 sm:pb-16">
+      {/* Full-bleed signature-pattern background */}
+      <SignaturePatternBackground />
 
       <motion.div
-        className="flex items-center justify-center gap-3 sm:gap-5 mt-4"
-        initial={{ opacity: 0, y: 10 }}
+        className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6"
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.55 }}
+        transition={{ duration: 0.8 }}
       >
-        <span className="text-2xl sm:text-4xl font-bold text-secondary line-through decoration-2 decoration-accent">AI</span>
-        <ArrowRight className="w-5 h-5 sm:w-7 sm:h-7 text-accent" />
-        <div className="relative w-20 h-20 sm:w-28 sm:h-28 flex items-center justify-center">
-          <HarmonizationGeometry />
-          <span className="relative text-3xl sm:text-5xl font-bold text-accent">PI</span>
+        <div className="flex justify-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm bg-accent/10 border border-accent/30 w-fit">
+            <span className="text-sm font-bold text-accent">HEX6 BLE</span>
+            <span className="text-sm font-medium text-accent">Probabilistic Intelligence</span>
+          </div>
+        </div>
+
+        <div className="mt-6">
+          <HeroWord word="Probability" motif={<ProbabilityMotif />} delay={0.1} />
+          <Operator op="+" delay={0.2} />
+          <HeroWord word="Resonance" motif={<ResonanceMotif />} delay={0.3} />
+          <Operator op="=" delay={0.4} />
+        </div>
+
+        {/* AI → PI, sized to match the equation, with tagline */}
+        <motion.div
+          className="flex flex-col items-center gap-3 mt-6"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.55 }}
+        >
+          <div className="flex items-center justify-center gap-4 sm:gap-6">
+            <span className="text-5xl sm:text-7xl md:text-8xl font-bold text-secondary line-through decoration-2 decoration-accent">AI</span>
+            <ArrowRight className="w-7 h-7 sm:w-10 sm:h-10 text-accent" />
+            <span className="text-5xl sm:text-7xl md:text-8xl font-bold text-accent">PI</span>
+          </div>
+          <span className="text-base sm:text-xl font-semibold text-foreground tracking-tight">intelligence like never before</span>
+        </motion.div>
+
+        <div className="flex flex-col items-center gap-4 pt-8">
+          <button
+            onClick={() => base44.auth.loginWithProvider('google', '/app')}
+            className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 rounded-sm bg-accent text-accent-foreground font-medium hover:bg-accent/90 transition-colors text-sm sm:text-base md:text-lg"
+          >
+            Enter Oracle <ArrowRight className="w-4 h-4" />
+          </button>
+          <span className="font-bold text-accent text-xs sm:text-sm tracking-tight">[HEX6-BLE PI-US · PROBABILISTIC INTELLIGENCE MODEL V5.5]</span>
         </div>
       </motion.div>
-
-      <div className="flex flex-col items-center gap-4 pt-6">
-        <button
-          onClick={() => base44.auth.loginWithProvider('google', '/app')}
-          className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 rounded-sm bg-accent text-accent-foreground font-medium hover:bg-accent/90 transition-colors text-sm sm:text-base md:text-lg"
-        >
-          Enter Oracle <ArrowRight className="w-4 h-4" />
-        </button>
-        <span className="font-bold text-accent text-xs sm:text-sm tracking-tight">[HEX6-BLE PI-US · PROBABILISTIC INTELLIGENCE MODEL V5.5]</span>
-      </div>
-    </motion.section>
+    </section>
   );
 }
