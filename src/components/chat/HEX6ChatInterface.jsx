@@ -5,13 +5,12 @@ import ReactMarkdown from 'react-markdown';
 import SettingsModal from '@/components/SettingsModal';
 import LegalModal from '@/components/LegalModal';
 import ConversationItem from '@/components/chat/ConversationItem';
-import ThinkingModeToggle from '@/components/chat/ThinkingModeToggle';
 
 export default function HEX6ChatInterface() {
   const welcomeMessage = {
     id: 'welcome',
     role: 'assistant',
-    content: `Welcome. I am Evrica Intelligence — one mind with two ways of thinking.\n\n**Reason** asks what is possible. **Understand** asks what is meaningful. Both draw from the same knowledge; the mode only changes how I think, never what I know.\n\nWhat would you like to explore?`,
+    content: `Welcome. I am HEX6 BLE — one intelligence that thinks two ways at once.\n\n**Reason** maps what's possible. **Understand** reads what's meaningful. They never compete and you never choose — every answer fuses both, with reasoning you can follow.\n\nWhat would you like to explore?`,
   };
 
   // Loading copy — only "Thinking..." for fast chat replies.
@@ -41,7 +40,6 @@ export default function HEX6ChatInterface() {
   const [uploadedImage, setUploadedImage] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
   const [speakingId, setSpeakingId] = useState(null);
-  const [thinkingMode, setThinkingMode] = useState('understand');
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -347,7 +345,6 @@ export default function HEX6ChatInterface() {
       conversationHistory: newMessages.filter(m => !m.isThinking).slice(-20),
       analyticalDepth: prefs.analyticalDepth || 'executive',
       riskAversion: prefs.riskAversion || 2.5,
-      thinking_mode: thinkingMode,
     };
     if (imageAtSend) payload.file_urls = [imageAtSend];
 
@@ -540,7 +537,9 @@ export default function HEX6ChatInterface() {
             </button>
           </div>
           <div className="flex-1 flex justify-center">
-            <ThinkingModeToggle mode={thinkingMode} onChange={setThinkingMode} />
+            <span className="text-[10px] md:text-xs text-accent px-3 py-1.5 rounded-full bg-accent/10 border border-accent/30 font-medium whitespace-nowrap">
+              Reason + Understand · fused
+            </span>
           </div>
           <div className="flex items-center justify-end w-10 md:w-auto shrink-0">
             {traderEnabled && (

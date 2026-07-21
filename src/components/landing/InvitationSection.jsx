@@ -1,11 +1,14 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Brain, Waves } from 'lucide-react';
+import { ArrowRight, Link2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
-// A live-feel preview of the experience — the exact toggle and voice people will
-// meet inside. Makes you want to try it. Non-interactive mock (presentation only).
+// A live-feel preview — no mode toggle, because there's no differentiation.
+// One unified answer: a brief reasoning, a sources line, and a reinforcing
+// nudge that teaches and learns with the user. Presentation only.
 
-const SAMPLE_ANSWER = `Bayesian updating starts with a prior belief and sharpens it with every new observation — your posterior becomes your next prior, so learning never restarts, it refines. Hand me your sequence and I'll learn its rhythm; each point reshapes what I expect next. You teach me the data, I teach you the structure beneath it — and we both walk away sharper.`;
+const SAMPLE_Q = 'Walk me through how Bayesian updating actually learns — then quiz me.';
+const SAMPLE_A = `Bayesian updating starts with a prior belief and sharpens it with every new observation — your posterior becomes the next prior, so learning never restarts, it refines. The reason: each piece of evidence shifts belief by how surprising it is relative to what you expected. Here's a quick check — I'll give you a coin that came up heads three times in a row; tell me your updated guess for the fourth flip, and I'll show how the math moved beneath your intuition. That back-and-forth is reinforcement, and it's how we both get sharper.`;
+const SAMPLE_SOURCES = [{ name: 'Bayes\' theorem', url: 'https://en.wikipedia.org/wiki/Bayes%27_theorem' }];
 
 export default function InvitationSection() {
   return (
@@ -24,17 +27,17 @@ export default function InvitationSection() {
           <span className="text-sm font-bold text-accent">See it for yourself</span>
         </div>
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
-          Stop getting one answer. <br className="hidden sm:block" />
-          Start seeing the whole space.
+          One answer. <br className="hidden sm:block" />
+          Reasoning you can follow.
         </h2>
         <p className="text-base sm:text-lg text-secondary max-w-2xl mx-auto leading-relaxed">
-          Others collapse uncertainty into a single prediction. Evrica holds the entire
-          possibility space — and reads what it means. Switch modes mid-conversation;
-          the knowledge stays, only the thinking changes.
+          Every response fuses what's possible with what's meaningful — with valid sources,
+          brief reasoning, and a nudge that helps it stick. It teaches and learns with you,
+          so you walk away sharper every time.
         </p>
       </motion.div>
 
-      {/* Mock chat preview */}
+      {/* Mock chat preview — one unified answer */}
       <motion.div
         className="mx-auto max-w-2xl border border-border bg-card rounded-lg overflow-hidden shadow-sm"
         initial={{ opacity: 0, y: 28 }}
@@ -42,26 +45,19 @@ export default function InvitationSection() {
         viewport={{ once: true, margin: '-40px' }}
         transition={{ duration: 0.6, delay: 0.15 }}
       >
-        {/* Header with the live toggle — Understand active */}
+        {/* Header — unified, no toggle */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
           <span className="text-xs font-bold text-secondary uppercase tracking-wide">HEX6 BLE</span>
-          <div className="flex items-center bg-muted/60 rounded-full p-1 border border-border">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-secondary">
-              <Brain className="w-3.5 h-3.5" />
-              <span>Reason</span>
-            </div>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-accent-foreground bg-accent">
-              <Waves className="w-3.5 h-3.5" />
-              <span>Understand</span>
-            </div>
-          </div>
+          <span className="text-[10px] sm:text-xs text-accent px-2 py-1 rounded bg-accent/10 font-medium">
+            Reason + Understand · fused
+          </span>
         </div>
 
         {/* Conversation */}
         <div className="px-4 sm:px-6 py-5 space-y-4 bg-background min-h-[200px]">
           <div className="flex justify-end">
-            <div className="bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-4 py-2.5 text-sm max-w-[80%]">
-              Explain Bayesian updating — then I'll feed you my own sequence.
+            <div className="bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-4 py-2.5 text-sm max-w-[85%]">
+              {SAMPLE_Q}
             </div>
           </div>
           <motion.div
@@ -71,8 +67,26 @@ export default function InvitationSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.5 }}
           >
-            <div className="bg-muted text-foreground rounded-2xl rounded-tl-sm px-4 py-2.5 text-sm max-w-[85%] leading-relaxed">
-              {SAMPLE_ANSWER}
+            <div className="max-w-[88%]">
+              <div className="bg-muted text-foreground rounded-2xl rounded-tl-sm px-4 py-2.5 text-sm leading-relaxed">
+                {SAMPLE_A}
+              </div>
+              {/* Sources — valid, only what was actually referenced */}
+              <div className="flex items-center gap-1.5 mt-1.5 ml-1">
+                <Link2 className="w-3 h-3 text-secondary" />
+                <span className="text-xs text-secondary">Sources:</span>
+                {SAMPLE_SOURCES.map((s) => (
+                  <a
+                    key={s.url}
+                    href={s.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-accent underline hover:opacity-80 break-all"
+                  >
+                    {s.name}
+                  </a>
+                ))}
+              </div>
             </div>
           </motion.div>
         </div>
@@ -96,7 +110,7 @@ export default function InvitationSection() {
         transition={{ duration: 0.6, delay: 0.3 }}
       >
         <p className="text-sm text-secondary max-w-md mx-auto">
-          Same knowledge in. Same interface out. The only thing that changes is <span className="font-bold text-foreground">how it thinks</span>.
+          Same knowledge in. One fused answer out — with the reasoning shown, and a way to make it yours.
         </p>
         <button
           onClick={() => base44.auth.loginWithProvider('google', '/app')}
