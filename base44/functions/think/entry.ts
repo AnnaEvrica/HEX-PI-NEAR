@@ -157,6 +157,10 @@ ${speaker}:`;
             value: validation.support,
             confidence: validation.confidence,
             friction: thinkingState?.forward?.friction ?? null,
+            predicted_direction: validation.identifiedDirection,
+            forward_accuracy: thinkingState?.forward?.directionalAccuracy ?? null,
+            forward_count: thinkingState?.forward?.count ?? null,
+            cross_alignment: thinkingState?.crossCheck?.directionalAlignment ?? null,
             context_node_ids: interpretationPacket.context_node_ids,
           });
         } catch (e) { /* non-blocking */ }

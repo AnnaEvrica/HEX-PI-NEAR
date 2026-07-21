@@ -351,7 +351,7 @@ export function runCrossCheck(reason, wave, validation) {
 // the nightly calibration / learning phase).
 export function runForwardTest(returns) {
   const n = returns.length;
-  if (n < 20) return { tested: false, directionalAccuracy: null, friction: null };
+  if (n < 20) return { tested: false, directionalAccuracy: null, friction: null, count: 0 };
   const split = Math.floor(n * 0.8);
   const trainBase = returns.slice(0, split);
   const test = returns.slice(split).slice(0, 10);
@@ -363,9 +363,9 @@ export function runForwardTest(returns) {
     const actual = test[i] > 0 ? 1 : test[i] < 0 ? -1 : 0;
     if (predicted !== 0 && actual !== 0) { total++; if (predicted === actual) correct++; }
   }
-  if (total === 0) return { tested: true, directionalAccuracy: null, friction: null };
+  if (total === 0) return { tested: true, directionalAccuracy: null, friction: null, count: 0 };
   const directionalAccuracy = correct / total;
-  return { tested: true, directionalAccuracy: parseFloat(directionalAccuracy.toFixed(4)), friction: parseFloat((1 - directionalAccuracy).toFixed(4)) };
+  return { tested: true, directionalAccuracy: parseFloat(directionalAccuracy.toFixed(4)), friction: parseFloat((1 - directionalAccuracy).toFixed(4)), count: total };
 }
 
 // Extract a numerical series from free text (for inline-data detection).

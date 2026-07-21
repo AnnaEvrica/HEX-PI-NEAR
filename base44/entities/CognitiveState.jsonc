@@ -32,15 +32,36 @@
     },
     "coherence": {
       "type": "number",
-      "description": "Contextual coherence score (0-1)"
+      "description": "Agreement between probability and resonance (0-1)"
     },
     "value": {
       "type": "number",
-      "description": "Pascal-fused value score (probability \u00d7 resonance \u00d7 context)"
+      "description": "Pascal structural support score (Evidence x Agreement x Consistency x Coverage)"
     },
     "confidence": {
       "type": "number",
       "description": "Overall confidence of the thinking cycle (0-1)"
+    },
+    "predicted_direction": {
+      "type": "string",
+      "enum": [
+        "UP",
+        "DOWN",
+        "FLAT"
+      ],
+      "description": "The direction the engine predicted for the next step"
+    },
+    "forward_accuracy": {
+      "type": "number",
+      "description": "Walk-forward directional accuracy on the held-out tail of the input series (0-1); null if not tested"
+    },
+    "forward_count": {
+      "type": "number",
+      "description": "Number of held-out predictions in the forward test"
+    },
+    "cross_alignment": {
+      "type": "string",
+      "description": "HEX6-BLE <-> PI-US directional alignment: aligned / neutral / conflicting"
     },
     "friction": {
       "type": "number",
