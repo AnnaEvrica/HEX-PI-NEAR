@@ -1,0 +1,92 @@
+{
+  "name": "CognitiveState",
+  "type": "object",
+  "properties": {
+    "state_id": {
+      "type": "string",
+      "description": "Unique identifier for this cognitive state packet"
+    },
+    "thinking_mode": {
+      "type": "string",
+      "enum": [
+        "reason",
+        "understand"
+      ],
+      "description": "Which thinking mode produced this state"
+    },
+    "conversation_id": {
+      "type": "string",
+      "description": "Reference to the conversation that produced this state"
+    },
+    "query": {
+      "type": "string",
+      "description": "The user query that triggered this thinking cycle"
+    },
+    "probability": {
+      "type": "number",
+      "description": "HEX6-BLE probability score (0-1)"
+    },
+    "resonance": {
+      "type": "number",
+      "description": "PI-US resonance score (0-1)"
+    },
+    "coherence": {
+      "type": "number",
+      "description": "Contextual coherence score (0-1)"
+    },
+    "value": {
+      "type": "number",
+      "description": "Pascal-fused value score (probability \u00d7 resonance \u00d7 context)"
+    },
+    "confidence": {
+      "type": "number",
+      "description": "Overall confidence of the thinking cycle (0-1)"
+    },
+    "friction": {
+      "type": "number",
+      "description": "Prediction-vs-reality friction score, filled when outcome is known"
+    },
+    "context_node_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "CoreNode IDs that formed the knowledge context for this cycle"
+    },
+    "resolved_outcome": {
+      "type": "string",
+      "description": "The realized outcome, filled when known (drives the Learning phase)"
+    }
+  },
+  "required": [
+    "state_id",
+    "thinking_mode"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
