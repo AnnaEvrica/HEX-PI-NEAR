@@ -147,7 +147,8 @@ export default function HeroSection() {
         <div className="flex flex-col items-center gap-4 pt-8">
           <button
             onClick={() => base44.auth.loginWithProvider('google', '/app')}
-            className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 rounded-sm bg-accent text-accent-foreground font-medium hover:bg-accent/90 transition-colors text-sm sm:text-base md:text-lg"
+            className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 rounded-sm bg-accent text-accent-foreground font-medium hover:bg-accent/90 transition-all text-sm sm:text-base md:text-lg shadow-lg shadow-accent/25"
+            style={{ boxShadow: '0 2px 18px rgba(0,0,0,0.35), 0 0 24px rgba(255,106,0,0.15)' }}
           >
             Enter Oracle <ArrowRight className="w-4 h-4" />
           </button>

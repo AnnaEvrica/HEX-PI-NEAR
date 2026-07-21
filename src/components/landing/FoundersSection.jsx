@@ -53,9 +53,9 @@ const THINKERS = [
 
 function ThinkerCard({ thinker }) {
   return (
-    <div className={`relative border border-border bg-card/80 backdrop-blur-sm p-5 sm:p-6 space-y-4 overflow-hidden ${thinker.span === 'wide' ? 'md:col-span-3' : 'md:col-span-2'}`}>
+    <div className="relative border border-border bg-card p-5 sm:p-6 space-y-4 overflow-hidden">
       <div className="flex items-center gap-3">
-        <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 hex-clip overflow-hidden bg-muted">
+        <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 overflow-hidden bg-muted">
           <img
             src={thinker.portrait}
             alt={thinker.name}
@@ -144,9 +144,9 @@ export default function FoundersSection() {
           </p>
         </motion.div>
 
-        {/* Hex-tetris grid: wide + narrow cards interlock in an S-curve across 3 rows */}
+        {/* Uniform grid: equal-size square cards, aligned across rows */}
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-5 gap-3 sm:gap-4 items-stretch"
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 items-stretch"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-50px' }}
