@@ -166,7 +166,7 @@ Deno.serve(async (req) => {
     let processed = 0;
     let posted = 0;
 
-    for (const { tweet, engagement } of ranked) {
+    for (const { tweet } of ranked) {
       if (processed >= TOP_N) break;
       const tweetId = tweet.id;
       const author = usernameById[tweet.author_id] || 'unknown';
@@ -245,10 +245,11 @@ Deno.serve(async (req) => {
       } catch (e) { log(`fetch failed ${tweetId}`, e?.message); }
 
       const rawSeries = Array.isArray(fetchResult?.series) ? fetchResult.series : [];
-      let returns = [];
-      if (rawSeries.length >= 30) {
-        returns = fetchResult.as_returns === false ? toReturns(rawSeries) : rawSeries;
-      }
+      // Normalize through toReturns unconditionally: it converts price levels
+      // (all positive, magnitude > 1) to percent returns and leaves genuine
+      // return series intact (mixed sign or magnitude < 1). Safer than trusting
+      // the LLM's as_returns flag, which can be omitted.
+      const returns = toReturns(rawSeries);
 
       // 6. Run the HEX6-BLE / PI-US engine.
       let stateBlock = '';
