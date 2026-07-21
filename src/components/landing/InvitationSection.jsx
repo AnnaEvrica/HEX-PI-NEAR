@@ -5,7 +5,7 @@ import { base44 } from '@/api/base44Client';
 // A live-feel preview of the experience — the exact toggle and voice people will
 // meet inside. Makes you want to try it. Non-interactive mock (presentation only).
 
-const SAMPLE_ANSWER = `Bitcoin is breathing in a narrow range, a quiet but firm pulse. The wave is no longer a violent surge — it's a steady tide finding its new level. There's a resonance of stability here, a gathering of strength. This is the market re-learning its own floor.`;
+const SAMPLE_ANSWER = `Bayesian updating starts with a prior belief and sharpens it with every new observation — your posterior becomes your next prior, so learning never restarts, it refines. Hand me your sequence and I'll learn its rhythm; each point reshapes what I expect next. You teach me the data, I teach you the structure beneath it — and we both walk away sharper.`;
 
 export default function InvitationSection() {
   return (
@@ -44,7 +44,7 @@ export default function InvitationSection() {
       >
         {/* Header with the live toggle — Understand active */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
-          <span className="text-xs font-bold text-secondary uppercase tracking-wide">Evrica</span>
+          <span className="text-xs font-bold text-secondary uppercase tracking-wide">HEX6 BLE</span>
           <div className="flex items-center bg-muted/60 rounded-full p-1 border border-border">
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-secondary">
               <Brain className="w-3.5 h-3.5" />
@@ -61,7 +61,7 @@ export default function InvitationSection() {
         <div className="px-4 sm:px-6 py-5 space-y-4 bg-background min-h-[200px]">
           <div className="flex justify-end">
             <div className="bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-4 py-2.5 text-sm max-w-[80%]">
-              What's Bitcoin doing right now?
+              Explain Bayesian updating — then I'll feed you my own sequence.
             </div>
           </div>
           <motion.div
@@ -102,7 +102,7 @@ export default function InvitationSection() {
           onClick={() => base44.auth.loginWithProvider('google', '/app')}
           className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 rounded-sm bg-accent text-accent-foreground font-medium hover:bg-accent/90 transition-colors text-sm sm:text-base md:text-lg"
         >
-          Enter Evrica <ArrowRight className="w-4 h-4" />
+          Enter Oracle <ArrowRight className="w-4 h-4" />
         </button>
         <p className="text-xs text-secondary/70">7-day free trial. No charge today. Cancel anytime.</p>
       </motion.div>

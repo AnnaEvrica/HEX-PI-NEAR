@@ -459,7 +459,7 @@ export default function HEX6ChatInterface() {
       >
         <div className="flex flex-col h-full p-4">
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-lg font-bold">Evrica</h1>
+            <h1 className="text-lg font-bold">HEX6 BLE</h1>
             <button
               onClick={() => setSidebarOpen(false)}
               className="md:hidden p-2 hover:bg-muted rounded-sm"
@@ -714,7 +714,7 @@ export default function HEX6ChatInterface() {
             </div>
           </div>
           <p className="text-[11px] text-secondary/70 px-1 mt-3 md:mt-4 leading-relaxed">
-            Evrica Intelligence is a probabilistic intelligence model. No information provided constitutes financial, legal, or professional advice.
+            HEX6 BLE is a probabilistic intelligence model. No information provided constitutes financial, legal, or professional advice.
           </p>
         </div>
       </div>
