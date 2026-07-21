@@ -11,7 +11,7 @@ export default function HEX6ChatInterface() {
   const welcomeMessage = {
     id: 'welcome',
     role: 'assistant',
-    content: `Welcome. I am HEX6 BLE — a probabilistic intelligence: one organism, one sequence.\n\nWith **PI-US**, I'm the predictability genius with an intuition that coheres with you and adapts over time — every answer fuses what's possible with what's meaningful, with sources and reasoning you can follow. Switch to **Legacy** for the pure structural-probability engine.\n\nWhat would you like to explore?`,
+    content: `Welcome. I am HEX6 BLE — a probabilistic intelligence: one organism, one sequence.\n\nWith **PI-US**, I'm a brilliant intelligence that coheres with you and adapts over time — operating by truth, not ego, fusing what's possible with what's meaningful, with sources and reasoning you can follow. Switch to **Legacy** for the pure structural-probability engine.\n\nWhat would you like to explore?`,
   };
 
   // Loading copy — only "Thinking..." for fast chat replies.
