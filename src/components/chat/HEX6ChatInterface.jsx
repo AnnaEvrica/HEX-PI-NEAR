@@ -115,9 +115,22 @@ export default function HEX6ChatInterface() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        setConversations(parsed);
-        if (parsed.length > 0) {
-          setCurrentConversationId(parsed[0].id);
+        // Migrate stale content: drop any "Evrica Intelligence" branding and
+        // refresh the intro so the AI always presents as HEX6 BLE.
+        const sanitized = parsed.map(c => {
+          let messages = (c.messages || []).map(m =>
+            typeof m?.content === 'string'
+              ? { ...m, content: m.content.replace(/Evrica Intelligence/g, 'HEX6 BLE') }
+              : m
+          );
+          if (messages[0]?.role === 'assistant' && messages[0]?.content !== welcomeMessage.content) {
+            messages = [welcomeMessage, ...messages.slice(1)];
+          }
+          return { ...c, messages };
+        });
+        setConversations(sanitized);
+        if (sanitized.length > 0) {
+          setCurrentConversationId(sanitized[0].id);
         }
       } catch (err) {
         console.log('Could not load saved conversations');
