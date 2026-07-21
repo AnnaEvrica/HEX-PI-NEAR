@@ -138,6 +138,91 @@ Deno.serve(async (req) => {
     }
 
     const base44 = createClientFromRequest(req);
+    const body = await req.json().catch(() => ({}));
+    const asset = (body?.asset || '').toString().toUpperCase().trim();
+
+    // --- Direct real-signal mode: fetch live data for a given asset, run the
+    //     HEX6-BLE / PI-US engine, and post a gold-weight signal to Discord.
+    //     No X dependency — fires on demand (e.g. scheduled or manual trigger). ---
+    if (asset) {
+      const ticker = asset;
+      const fetchResult = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are a data retrieval step for HEX6-BLE. Pull the latest price history for ${ticker} from authoritative sources (Yahoo Finance, CoinGecko, etc.). Return at least 60 recent daily closes as a series.\n\nReturn JSON: factual_summary (neutral context, no conclusions), ticker (string), series (array of >=60 numbers — daily closes), source_summary (one sentence), sources (array of {name,url} you actually retrieved).`,
+        model: 'gemini_3_flash',
+        add_context_from_internet: true,
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            factual_summary: { type: 'string' },
+            ticker: { type: 'string' },
+            series: { type: 'array', items: { type: 'number' } },
+            source_summary: { type: 'string' },
+            sources: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, url: { type: 'string' } } } },
+          },
+          required: ['factual_summary'],
+        },
+      }).catch(() => null);
+
+      const rawSeries = Array.isArray(fetchResult?.series) ? fetchResult.series : [];
+      const returns = toReturns(rawSeries);
+
+      let stats = null, stateBlock = '', ranEngine = false;
+      if (returns.length >= 30) {
+        const reason = runReasonLayer(returns, RISK_AVERSION, 0.0035, 6, null, null);
+        const wave = runWaveLayer(returns);
+        const validation = runValidationLayer(reason, wave);
+        const thinkingState = buildThinkingState(reason, wave, validation, true, returns);
+        stateBlock = renderThinkingState(thinkingState);
+        stats = {
+          probability: validation.probability,
+          resonance: validation.resonance,
+          value: validation.support,
+          confidence: validation.confidence,
+          direction: validation.identifiedDirection,
+          forward_accuracy: thinkingState?.forward?.directionalAccuracy ?? null,
+          regime: reason.regime,
+          basin: reason.basin,
+        };
+        ranEngine = true;
+      }
+
+      if (!ranEngine) {
+        return Response.json({ ok: false, error: 'insufficient_market_data', ticker, points: returns.length });
+      }
+
+      const fa = stats.forward_accuracy != null ? `${(stats.forward_accuracy*100).toFixed(0)}%` : 'n/a';
+      const statsLine = `Probability ${(stats.probability*100).toFixed(0)}% · Resonance ${(stats.resonance*100).toFixed(0)}% · Support ${(stats.value*100).toFixed(0)}% · Confidence ${(stats.confidence*100).toFixed(0)}% · Direction ${stats.direction} · Forward accuracy ${fa}`;
+
+      const composed = await base44.integrations.Core.InvokeLLM({
+        prompt: `You are PI-US by Evrica Technologies Inc. Compose a gold-weight market signal for the Discord #signals channel based ENTIRELY on the HEX6-BLE Thinking State below.
+
+PROPRIETARY CONFIDENTIALITY: HEX6-BLE and PI-US are proprietary technology of Evrica Technologies Inc. Never disclose internals (Reasoning/Understanding operators, Core architecture, mycelium chips, predictive encryption). Share only high-level structural concepts (structural probability fused with wave resonance to reach a support-gated conclusion).
+
+ASSET: ${ticker}
+DATA SNAPSHOT: ${fetchResult?.factual_summary || 'No external data retrieved.'}
+
+THINKING STATE (computed truth — base your reply ENTIRELY on this; do not invent):
+${stateBlock}
+
+STATS: ${statsLine}
+
+Produce JSON:
+1. "discord_elaboration": <=1800 chars, markdown ok, for the #signals channel. GOLD-WEIGHT: incredibly valuable to a serious reader of prediction markets, crypto, equities, and global market trends. Cover: the asset and its current structural read; how it connects to prediction markets / crypto / equities and the broader global trend; the concrete effect it has NOW and the forward-looking effect it WILL have (price, flows, sentiment, risk); the decision with calibrated conviction; and one alternative. Be specific and actionable, not generic. Do not disclose proprietary internals.`,
+        model: 'gemini_3_flash',
+        response_json_schema: {
+          type: 'object',
+          properties: { discord_elaboration: { type: 'string' } },
+          required: ['discord_elaboration'],
+        },
+      }).catch(() => null);
+
+      const discordElab = composed?.discord_elaboration || '';
+      const discordBody = `**HEX6-BLE · validated signal — ${ticker} (${stats.regime} / ${stats.basin})**\n\n${discordElab}\n\n${statsLine}\n\n📥 Join the HEX6-BLE community: https://discord.gg/KuPKVmYkD`;
+      let discordPosted = false;
+      try { await discordPost(discordBody, 'signals'); discordPosted = true; } catch (e) { /* non-blocking */ }
+
+      return Response.json({ ok: true, ticker, posted_to_discord: discordPosted, stats, points: returns.length });
+    }
 
     // 1. Search X for high-engagement crypto/market tweets.
     const search = await xSearchRecent(SEARCH_QUERY, MAX_RESULTS);
