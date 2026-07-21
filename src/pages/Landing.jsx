@@ -122,8 +122,8 @@ export default function Landing() {
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight tracking-tight max-w-3xl">
-            <span className="text-accent">Probability.</span>{' '}
-            <span className="text-foreground">Not prediction.</span>
+            <span className="text-accent">Reasoning through probability.</span>{' '}
+            <span className="text-foreground">Decision through resonance.</span>
           </h1>
 
           <p className="text-base sm:text-lg text-secondary max-w-2xl leading-relaxed">
@@ -139,10 +139,10 @@ export default function Landing() {
             >
               Enter Oracle <ArrowRight className="w-4 h-4" />
             </button>
-            <span className="font-bold text-accent text-xs sm:text-sm tracking-tight">[PI (PROBABILISTIC INTELLIGENCE (PI) MODEL V5.4)]</span>
+            <span className="font-bold text-accent text-xs sm:text-sm tracking-tight">[PI-US · PROBABILISTIC INTELLIGENCE MODEL V5.5]</span>
           </div>
           <p className="text-sm sm:text-base text-secondary max-w-2xl leading-relaxed">
-            The <span className="font-bold text-accent">PI layer</span> wraps traditional LLMs — reading the full probability space that Gemini, GPT, and Claude collapse into a single answer.
+            The <span className="font-bold text-accent">PI layer</span> reads the full probability space that Gemini, GPT, and Claude collapse into a single answer — then reasons through it and decides through resonance.
           </p>
           <PILayerVisualization />
         </div>
@@ -561,7 +561,7 @@ export default function Landing() {
       <section className="max-w-4xl mx-auto px-4 sm:px-6 py-16 sm:py-24 md:py-32 space-y-6 sm:space-y-8">
         <div className="space-y-4 sm:space-y-6">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">Ready to observe how outcomes reorganize?</h2>
-          <p className="text-base sm:text-lg md:text-xl text-secondary">No credit card required. No prediction. Only probability.</p>
+          <p className="text-base sm:text-lg md:text-xl text-secondary">No credit card required. Reasoning through probability. Decisions through resonance.</p>
         </div>
         <button
           onClick={() => base44.auth.loginWithProvider('google', '/app')}

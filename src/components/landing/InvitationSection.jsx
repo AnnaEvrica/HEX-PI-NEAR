@@ -1,21 +1,39 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Link2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowRight, Sparkles, Bot } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { base44 } from '@/api/base44Client';
 
-// A live-feel preview — no mode toggle, because there's no differentiation.
-// One unified answer: a brief reasoning, a sources line, and a reinforcing
-// nudge that teaches and learns with the user. Presentation only.
+const QUESTION = 'Is now a good time to invest, or should I wait?';
 
-const SAMPLE_Q = 'Walk me through how Bayesian updating actually learns — then quiz me.';
-const SAMPLE_A = `Bayesian updating starts with a prior belief and sharpens it with every new observation — your posterior becomes the next prior, so learning never restarts, it refines. The reason: each piece of evidence shifts belief by how surprising it is relative to what you expected. Here's a quick check — I'll give you a coin that came up heads three times in a row; tell me your updated guess for the fourth flip, and I'll show how the math moved beneath your intuition. That back-and-forth is reinforcement, and it's how we both get sharper.`;
-const SAMPLE_SOURCES = [{ name: 'Bayes\' theorem', url: 'https://en.wikipedia.org/wiki/Bayes%27_theorem' }];
+// Representative generic-AI (e.g. GPT) answer to the same question — shown for
+// comparison. The HEX6 column is the LIVE model response from `landingComparison`.
+const GPT_ANSWER = `It depends on your goals and time horizon. As a general rule, time in the market tends to beat timing the market, so many advisors suggest dollar-cost averaging — investing a set amount on a regular schedule rather than waiting for the "right" moment. If you're unsure, consider starting with a small, diversified position and speaking with a licensed financial advisor. Past performance doesn't guarantee future results.`;
 
 export default function InvitationSection() {
+  const [hex6, setHex6] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const res = await base44.functions.invoke('landingComparison', {});
+        if (!alive) return;
+        const ans = res?.data?.hex6_answer || res?.hex6_answer;
+        if (ans) { setHex6(ans); setError(false); } else setError(true);
+      } catch {
+        if (alive) setError(true);
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+    return () => { alive = false; };
+  }, []);
+
   return (
-    <section
-      id="try-it"
-      className="max-w-5xl mx-auto px-4 sm:px-6 py-16 sm:py-24 md:py-28 space-y-10 sm:space-y-14"
-    >
+    <section id="try-it" className="max-w-5xl mx-auto px-4 sm:px-6 py-16 sm:py-24 md:py-28 space-y-10 sm:space-y-14">
       <motion.div
         className="space-y-4 text-center"
         initial={{ opacity: 0, y: 20 }}
@@ -27,80 +45,81 @@ export default function InvitationSection() {
           <span className="text-sm font-bold text-accent">See it for yourself</span>
         </div>
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
-          One answer. <br className="hidden sm:block" />
-          Reasoning you can follow.
+          A question people ask GPT every day.
+          <br className="hidden sm:block" /> Two very different answers.
         </h2>
         <p className="text-base sm:text-lg text-secondary max-w-2xl mx-auto leading-relaxed">
-          Every response fuses what's possible with what's meaningful — with valid sources,
-          brief reasoning, and a nudge that helps it stick. It teaches and learns with you,
-          so you walk away sharper every time.
+          We asked a common question — and put a typical generic-AI answer next to the live HEX6 BLE response. Same question, different intelligence.
         </p>
       </motion.div>
 
-      {/* Mock chat preview — one unified answer */}
+      {/* The question */}
       <motion.div
         className="mx-auto max-w-2xl border border-border bg-card rounded-lg overflow-hidden shadow-sm"
-        initial={{ opacity: 0, y: 28 }}
+        initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-40px' }}
         transition={{ duration: 0.6, delay: 0.15 }}
       >
-        {/* Header — unified, no toggle */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
-          <span className="text-xs font-bold text-secondary uppercase tracking-wide">HEX6 BLE</span>
-          <span className="text-[10px] sm:text-xs text-accent px-2 py-1 rounded bg-accent/10 font-medium">
-            Reason + Understand · fused
-          </span>
-        </div>
-
-        {/* Conversation */}
-        <div className="px-4 sm:px-6 py-5 space-y-4 bg-background min-h-[200px]">
+        <div className="px-4 py-3 border-b border-border bg-muted/30 text-xs font-bold text-secondary uppercase tracking-wide">The question</div>
+        <div className="px-4 sm:px-6 py-5 bg-background">
           <div className="flex justify-end">
-            <div className="bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-4 py-2.5 text-sm max-w-[85%]">
-              {SAMPLE_Q}
-            </div>
-          </div>
-          <motion.div
-            className="flex justify-start"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-          >
-            <div className="max-w-[88%]">
-              <div className="bg-muted text-foreground rounded-2xl rounded-tl-sm px-4 py-2.5 text-sm leading-relaxed">
-                {SAMPLE_A}
-              </div>
-              {/* Sources — valid, only what was actually referenced */}
-              <div className="flex items-center gap-1.5 mt-1.5 ml-1">
-                <Link2 className="w-3 h-3 text-secondary" />
-                <span className="text-xs text-secondary">Sources:</span>
-                {SAMPLE_SOURCES.map((s) => (
-                  <a
-                    key={s.url}
-                    href={s.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-accent underline hover:opacity-80 break-all"
-                  >
-                    {s.name}
-                  </a>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Input bar (visual only) */}
-        <div className="border-t border-border px-4 py-3 bg-background flex items-center gap-2">
-          <div className="flex-1 px-3 py-2 rounded-sm border border-border text-xs text-secondary/60 bg-muted/20">
-            Ask anything...
-          </div>
-          <div className="w-9 h-9 rounded-sm bg-accent flex items-center justify-center shrink-0">
-            <ArrowRight className="w-4 h-4 text-accent-foreground" />
+            <div className="bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-4 py-2.5 text-sm max-w-[90%]">{QUESTION}</div>
           </div>
         </div>
       </motion.div>
+
+      {/* Side-by-side comparison */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        {/* GPT column */}
+        <motion.div
+          className="border border-border bg-card rounded-lg overflow-hidden"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-40px' }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-secondary uppercase tracking-wide"><Bot className="w-3.5 h-3.5" /> Typical GPT</span>
+            <span className="text-[10px] text-secondary/70 px-2 py-1 rounded bg-muted/40">generic · representative</span>
+          </div>
+          <div className="px-4 sm:px-6 py-5 bg-background text-sm leading-relaxed text-secondary">{GPT_ANSWER}</div>
+        </motion.div>
+
+        {/* HEX6 column — live model output */}
+        <motion.div
+          className="border border-accent/40 bg-card rounded-lg overflow-hidden"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-40px' }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <div className="flex items-center justify-between px-4 py-3 border-b border-accent/30 bg-accent/5">
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-accent uppercase tracking-wide"><Sparkles className="w-3.5 h-3.5" /> HEX6 BLE · PI-US</span>
+            <span className="text-[10px] text-accent px-2 py-1 rounded bg-accent/10 font-medium">live model response</span>
+          </div>
+          <div className="px-4 sm:px-6 py-5 bg-background text-sm leading-relaxed min-h-[140px]">
+            {loading ? (
+              <div className="flex items-center gap-2 text-secondary">
+                <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+                <span className="text-xs">Reasoning through probability…</span>
+              </div>
+            ) : error || !hex6 ? (
+              <p className="text-secondary text-xs">HEX6 BLE is reasoning — try again in a moment, or enter the Oracle to ask it directly.</p>
+            ) : (
+              <div className="prose prose-sm dark:prose-invert max-w-none [&>*]:my-1 [&>p]:my-1 [&>ul]:my-1 [&>li]:my-0">
+                <ReactMarkdown
+                  components={{
+                    a: ({ node, ...props }) => <a {...props} target="_blank" rel="noopener noreferrer" className="text-accent underline hover:opacity-80 break-all" />,
+                  }}
+                >
+                  {hex6}
+                </ReactMarkdown>
+              </div>
+            )}
+          </div>
+        </motion.div>
+      </div>
 
       <motion.div
         className="text-center space-y-4"
@@ -110,7 +129,7 @@ export default function InvitationSection() {
         transition={{ duration: 0.6, delay: 0.3 }}
       >
         <p className="text-sm text-secondary max-w-md mx-auto">
-          Same knowledge in. One fused answer out — with the reasoning shown, and a way to make it yours.
+          Same question in. Different intelligence out — HEX6 reasons through probability and decides through resonance.
         </p>
         <button
           onClick={() => base44.auth.loginWithProvider('google', '/app')}

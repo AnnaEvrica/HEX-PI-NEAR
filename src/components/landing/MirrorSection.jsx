@@ -92,8 +92,8 @@ export default function MirrorSection() {
           Every answer thinks two ways at once
         </h2>
         <p className="text-base sm:text-lg text-secondary max-w-2xl mx-auto leading-relaxed">
-          <span className="font-bold text-foreground">Reason</span> maps what's possible.
-          <span className="font-bold text-accent"> Understand</span> reads what's meaningful.
+          <span className="font-bold text-foreground">Reason</span> reasons through probability.
+          <span className="font-bold text-accent"> Understand</span> decides through resonance.
           They never compete and you never choose — they fuse into one answer, with sources
           and reasoning you can follow.
         </p>
