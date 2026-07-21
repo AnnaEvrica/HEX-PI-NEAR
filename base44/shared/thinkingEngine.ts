@@ -134,7 +134,16 @@ function classifyBasin(stateKey6, mu, sigma) {
 
 export function runReasonLayer(returns, riskAversion = 2.5, friction = 0.0035, windowSize = 6, refReturns = null, priorMarkov = null) {
   const LAMBDA = adaptiveLambda(returns.length);
-  const hive = {};
+  // Multi-resolution hive — resolution adapts to available evidence, with no
+  // fixed minimum length. The 7-bit state is pooled at several bit-widths
+  // (keeping the most recent bits: corr + recent momentum), and we resolve at
+  // the FINEST level with enough neighbors. Long series resolve at 7-bit;
+  // short series gracefully drop to 5/3/1-bit, so the engine engages instead of
+  // cliffing to SILENCE. Coarser pools have larger sigma → tempered exposure,
+  // and smaller nEff → lower Pascal evidence, so confidence degrades honestly.
+  const LEVELS = [7, 5, 3, 1];
+  const hives = {};
+  for (const L of LEVELS) hives[L] = {};
   for (let i = windowSize; i < returns.length; i++) {
     const slice = returns.slice(i - windowSize, i);
     const momentumBits = parseInt(slice.map(r => r > 0 ? '1' : '0').join(''), 2);
@@ -150,8 +159,11 @@ export function runReasonLayer(returns, riskAversion = 2.5, friction = 0.0035, w
     const key = (momentumBits << 1) | corrBit;
     const age = returns.length - 1 - i;
     const weight = Math.pow(LAMBDA, age);
-    if (!hive[key]) hive[key] = [];
-    hive[key].push({ value: returns[i], weight });
+    for (const L of LEVELS) {
+      const ck = key & ((1 << L) - 1);
+      if (!hives[L][ck]) hives[L][ck] = [];
+      hives[L][ck].push({ value: returns[i], weight });
+    }
   }
   const recentSlice = returns.slice(-windowSize);
   const momentumKey = parseInt(recentSlice.map(r => r > 0 ? '1' : '0').join(''), 2);
@@ -164,9 +176,16 @@ export function runReasonLayer(returns, riskAversion = 2.5, friction = 0.0035, w
   }
   const stateKey = (momentumKey << 1) | currentCorrBit;
   const stateBits = stateKey.toString(2).padStart(7, '0');
-  const bin = hive[stateKey] || [];
+  // Finest level with enough neighbors; coarser levels fill in when data is thin.
+  let bin = [];
+  let resolution = 0;
+  for (const L of LEVELS) {
+    const ck = stateKey & ((1 << L) - 1);
+    const candidates = hives[L][ck] || [];
+    if (candidates.length >= 3) { bin = candidates; resolution = L; break; }
+  }
   if (bin.length < 3) {
-    return { mu:0, sigma:0, exposure:0, blendedExposure:0, stateKey, stateBits, n:bin.length, nEff:0, regime:'INSUFFICIENT_DATA', basin:'undefined', lambda:LAMBDA, markov:{mu:0,sigma:0,n:0,confidence:0}, motif:{score:0,isActive:false} };
+    return { mu:0, sigma:0, exposure:0, blendedExposure:0, stateKey, stateBits, n:bin.length, nEff:0, regime:'INSUFFICIENT_DATA', basin:'undefined', lambda:LAMBDA, resolution, markov:{mu:0,sigma:0,n:0,confidence:0}, motif:{score:0,isActive:false} };
   }
   const values = bin.map(o => o.value);
   const weights = bin.map(o => o.weight);
@@ -192,7 +211,7 @@ export function runReasonLayer(returns, riskAversion = 2.5, friction = 0.0035, w
   return {
     mu: parseFloat(mu.toFixed(6)), sigma: parseFloat(sigma.toFixed(6)),
     exposure: parseFloat(exposure.toFixed(4)), blendedExposure: parseFloat(blendedExposure.toFixed(4)),
-    stateKey, stateBits, n: bin.length, nEff, regime, basin, lambda: LAMBDA,
+    stateKey, stateBits, n: bin.length, nEff, regime, basin, lambda: LAMBDA, resolution,
     markov: { mu: parseFloat(markov.mu.toFixed(6)), sigma: parseFloat(markov.sigma.toFixed(6)), n: markov.n, confidence: parseFloat(markov.transitionConfidence.toFixed(3)) },
     motif: { score: parseFloat(motif.score.toFixed(4)), isActive: motif.isMotifNow },
   };
@@ -403,7 +422,8 @@ export function buildTopologyState(reason) {
   if (reason.regime === 'INSUFFICIENT_DATA') strongest_path = 'No dominant path — insufficient data.';
   else if (reason.regime === 'SILENCE') strongest_path = 'No dominant path — the structure is flat.';
   else strongest_path = `${dir[0].toUpperCase()}${dir.slice(1)} continuation is the dominant structural path.`;
-  return { possibility, uncertainty, regime: reason.regime, strongest_path };
+  const resLabel = reason.resolution >= 7 ? 'fine' : reason.resolution >= 5 ? 'moderate' : reason.resolution >= 3 ? 'coarse' : reason.resolution >= 1 ? 'regime-only' : 'none';
+  return { possibility, uncertainty, regime: reason.regime, resolution: resLabel, strongest_path };
 }
 
 // Resonance state (PI-US) — waves / meaning, semantic.
@@ -575,7 +595,7 @@ export function buildThinkingState(reason, wave, validation, isPiUS, returns = n
 
 // Render the Thinking State as the readable block the LLM receives.
 export function renderThinkingState(state) {
-  let out = `THINKING STATE\nTopology:\n  possibility: ${state.topology.possibility}\n  uncertainty: ${state.topology.uncertainty}\n  regime: ${state.topology.regime}\n  strongest_path: ${state.topology.strongest_path}`;
+  let out = `THINKING STATE\nTopology:\n  possibility: ${state.topology.possibility}\n  uncertainty: ${state.topology.uncertainty}\n  regime: ${state.topology.regime}\n  resolution: ${state.topology.resolution}\n  strongest_path: ${state.topology.strongest_path}`;
   if (!state.isPiUS) {
     out += `\n\nDecision:\n  primary_conclusion: ${state.decision.primary_conclusion}\n  confidence: ${state.decision.confidence}\n  why: ${state.decision.why}`;
     return out;
