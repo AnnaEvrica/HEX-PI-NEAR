@@ -14,10 +14,31 @@ import {
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const SEARCH_QUERY = '(BTC OR ETH OR SOL OR bitcoin OR ethereum OR SPY OR QQQ OR NASDAQ) (bullish OR bearish OR pump OR dump OR rally OR crash OR target OR breakout OR support OR resistance) -is:retweet -is:reply lang:en';
-const MAX_RESULTS = 100;            // recent-search cap
+// Categorized hunt — each niche gets its own search so high-volume categories
+// (major crypto / equities) can't bury niche alpha (DAO staking, prediction
+// markets, emerging alts). We pool ranked candidates across ALL categories,
+// then pick the best overall — diversity surfaces, engagement still gates.
+const SEARCH_CATEGORIES = [
+  {
+    name: 'major_markets',
+    query: '(BTC OR ETH OR SOL OR bitcoin OR ethereum OR SPY OR QQQ OR NASDAQ) (bullish OR bearish OR pump OR dump OR rally OR crash OR target OR breakout OR support OR resistance) -is:retweet -is:reply lang:en',
+  },
+  {
+    name: 'dao_staking',
+    query: '("liquid staking" OR "restaking" OR "eigenlayer" OR "governance token" OR "yield farming" OR "dao vote" OR "staking rewards") (stake OR staking OR "apy" OR "yield" OR "dao" OR "voting" OR "governance" OR bullish OR bearish OR breakout) -is:retweet -is:reply lang:en',
+  },
+  {
+    name: 'prediction_markets',
+    query: '("Kalshi" OR "Polymarket" OR "prediction market" OR "event contract" OR "binary option") (bet OR bets OR "odds" OR "win" OR "yes" OR "no" OR "election" OR "forecast" OR bullish OR bearish OR target) -is:retweet -is:reply lang:en',
+  },
+  {
+    name: 'emerging_alts',
+    query: '("low cap" OR "lowcap" OR "gem" OR "narrative" OR "alpha call" OR "airdrop" OR "token launch" OR "altcoin") (breakout OR bullish OR "going up" OR pump OR target OR "watch list" OR "due diligence") -is:retweet -is:reply lang:en',
+  },
+];
+const MAX_RESULTS = 100;            // recent-search cap per category
 const ENGAGEMENT_FLOOR = 800;       // min (likes + retweets + replies + quotes) to consider
-const TOP_N = 3;                     // tweets processed per run
+const TOP_N = 3;                     // tweets processed per run (across all categories)
 const RISK_AVERSION = 2.5;
 const X_API = 'https://api.twitter.com/2';
 
@@ -224,30 +245,44 @@ Produce JSON:
       return Response.json({ ok: true, ticker, posted_to_discord: discordPosted, stats, points: returns.length });
     }
 
-    // 1. Search X for high-engagement crypto/market tweets.
-    const search = await xSearchRecent(SEARCH_QUERY, MAX_RESULTS);
-    const tweets = Array.isArray(search?.data) ? search.data : [];
-    const users = Array.isArray(search?.includes?.users) ? search.includes.users : [];
+    // 1. Search X across all niche categories — pool candidates so no single
+    //    high-volume category buries niche alpha.
+    const seenTweetIds = new Set();
+    const allCandidates = [];
     const usernameById = {};
-    for (const u of users) usernameById[u.id] = u.username;
+    for (const cat of SEARCH_CATEGORIES) {
+      let search;
+      try {
+        search = await xSearchRecent(cat.query, MAX_RESULTS);
+      } catch (e) {
+        log(`search failed for ${cat.name}`, e?.message);
+        continue;
+      }
+      const tweets = Array.isArray(search?.data) ? search.data : [];
+      const users = Array.isArray(search?.includes?.users) ? search.includes.users : [];
+      for (const u of users) usernameById[u.id] = u.username;
+      for (const t of tweets) {
+        if (seenTweetIds.has(t.id)) continue;
+        seenTweetIds.add(t.id);
+        const m = t.public_metrics || {};
+        const engagement = (m.like_count || 0) + (m.retweet_count || 0) + (m.reply_count || 0) + (m.quote_count || 0);
+        allCandidates.push({ tweet: t, engagement, category: cat.name });
+      }
+      log(`category ${cat.name}: ${tweets.length} tweets`);
+    }
 
-    if (tweets.length === 0) {
-      log('no tweets returned');
+    if (allCandidates.length === 0) {
+      log('no tweets returned across categories');
       return Response.json({ ok: true, processed: 0, reason: 'no_tweets' });
     }
 
     // 2. Rank by total engagement and filter to actionable candidates.
-    const ranked = tweets
-      .map((t) => {
-        const m = t.public_metrics || {};
-        const engagement = (m.like_count || 0) + (m.retweet_count || 0) + (m.reply_count || 0) + (m.quote_count || 0);
-        return { tweet: t, engagement };
-      })
+    const ranked = allCandidates
       .filter((x) => x.engagement >= ENGAGEMENT_FLOOR)
       .sort((a, b) => b.engagement - a.engagement)
       .slice(0, TOP_N * 3); // pool a little wider than TOP_N for skips
 
-    log(`ranked pool: ${ranked.length} candidates`);
+    log(`ranked pool: ${ranked.length} candidates (from ${allCandidates.length} across ${SEARCH_CATEGORIES.length} categories)`);
 
     let processed = 0;
     let posted = 0;
