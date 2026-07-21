@@ -122,8 +122,7 @@ export default function Landing() {
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight tracking-tight max-w-3xl">
-            <span className="text-accent">Reasoning through probability.</span>
-            <span className="text-foreground ml-4 sm:ml-12">Decision through resonance.</span>
+            <span className="text-accent">Elevate your intelligence.</span>
           </h1>
 
           <p className="text-base sm:text-lg text-secondary max-w-2xl leading-relaxed">
