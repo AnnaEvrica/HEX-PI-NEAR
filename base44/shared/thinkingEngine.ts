@@ -307,3 +307,148 @@ export function extractNumberSeries(text) {
   if (!matches || matches.length < 7) return null;
   return matches.map(Number);
 }
+
+// ===========================================================================
+// THINKING STATE — the semantic layer the LLM receives (Layer 2).
+// The Core computes; these functions translate numbers into meaning.
+// Topology (HEX) · Resonance (PI-US) · Value (Pascal) · Context · Decision.
+// The math decides the answer; renderThinkingState formats it for the LLM.
+// ===========================================================================
+
+function qual3(v, high, low) {
+  if (v >= high) return 'High';
+  if (v <= low) return 'Low';
+  return 'Medium';
+}
+function qualFit(v, high, low) {
+  if (v >= high) return 'Strong';
+  if (v <= low) return 'Weak';
+  return 'Moderate';
+}
+
+// Topology state (HEX) — structural probability, semantic.
+export function buildTopologyState(reason) {
+  const probability = Math.min(1, Math.abs(reason.blendedExposure || reason.exposure || 0));
+  const possibility = qual3(probability, 0.6, 0.3);
+  const uncertainty = qual3(Math.min(1, (reason.sigma || 0) * 40), 0.66, 0.33);
+  const dir = reason.mu > 0 ? 'upward' : reason.mu < 0 ? 'downward' : 'flat';
+  let strongest_path;
+  if (reason.regime === 'INSUFFICIENT_DATA') strongest_path = 'No dominant path — insufficient data.';
+  else if (reason.regime === 'SILENCE') strongest_path = 'No dominant path — the structure is flat.';
+  else strongest_path = `${dir[0].toUpperCase()}${dir.slice(1)} continuation is the dominant structural path.`;
+  return { possibility, uncertainty, regime: reason.regime, strongest_path };
+}
+
+// Resonance state (PI-US) — waves / meaning, semantic.
+export function buildResonanceState(wave, value) {
+  return {
+    resonance: qual3(wave.resonance, 0.5, 0.25),
+    contextual_fit: qualFit((wave.phaseAlignment + value.coherence) / 2, 0.6, 0.3),
+    coherence: qual3(value.coherence, 0.5, 0.25),
+    dominant_rhythm: wave.dominantPeriod > 0 ? `${wave.dominantPeriod} bars` : 'none',
+  };
+}
+
+// Value state (Pascal) — semantic.
+export function buildValueState(value) {
+  return {
+    value: qual3(value.value, 0.12, 0.04),
+    confidence: qual3(value.confidence, 0.5, 0.25),
+    direction: value.identifiedDirection,
+  };
+}
+
+// Context — novelty, consistency, friction.
+export function buildContextState(reason, wave, value) {
+  const novelty = (reason.motif?.isActive || reason.basin === 'capitulation' || reason.basin === 'euphoria') ? 'High' : 'Medium';
+  const consistency = wave.resonance < 0.2 ? 'Low' : qual3(value.coherence, 0.5, 0.25);
+  return { novelty, consistency, friction: 'unknown' };
+}
+
+// Decision — the mathematics decide the answer; the LLM explains it.
+export function buildDecision(reason, wave, value, topology, resonance, valueState, context) {
+  const dir = value.identifiedDirection;
+  const vHigh = value.value > 0.12;
+  const vLow = value.value < 0.04;
+  const resHigh = wave.resonance > 0.45;
+  const resLow = wave.resonance < 0.3;
+
+  let primary;
+  if (reason.regime === 'INSUFFICIENT_DATA') {
+    primary = 'No reliable conclusion: insufficient data to resolve the structure.';
+  } else if (vLow) {
+    primary = 'No reliable conclusion: the signal is weak and incoherent. Hold the possibility space rather than force a read.';
+  } else if (vHigh && resHigh) {
+    primary = `The structure and its waves align ${dir.toLowerCase()}; engagement is supported with coherent conviction.`;
+  } else if (vHigh && resLow) {
+    primary = `The structure favors ${dir.toLowerCase()} continuation, but the waves are incoherent; engagement is probable yet not resonant.`;
+  } else {
+    primary = `The structure leans ${dir.toLowerCase()} with moderate conviction; act proportionally to coherence, not to hope.`;
+  }
+
+  const alternatives = [];
+  if (topology.uncertainty === 'High') alternatives.push('Alternatively, the apparent pattern may dissolve under a regime change.');
+  if (resLow && topology.possibility !== 'Low') alternatives.push('Alternatively, a stronger coherent wave may be forming beneath the noise.');
+  if (vLow) alternatives.push('Alternatively, conditions may clarify as more data arrives.');
+  if (alternatives.length === 0) alternatives.push('Alternatively, a shift in resonance could weaken the current read.');
+
+  const why = `Topology: ${topology.possibility} possibility, ${topology.regime} regime, uncertainty ${topology.uncertainty}. Resonance: ${resonance.resonance}, coherence ${resonance.coherence}, contextual fit ${resonance.contextual_fit}. Value: ${valueState.value} (${dir}). Consistency: ${context.consistency}, novelty: ${context.novelty}.`;
+
+  let tradeoffs;
+  if (topology.possibility === 'High' && resLow) tradeoffs = 'Engagement vs. caution: structure supports engagement, but thin resonance limits conviction.';
+  else if (vLow) tradeoffs = 'Action vs. patience: little evidence supports action; patience preserves optionality.';
+  else tradeoffs = 'Conviction vs. humility: the signal supports a read, but confidence scales with coherence.';
+
+  return { primary_conclusion: primary, alternative_conclusions: alternatives, confidence: valueState.confidence, why, tradeoffs };
+}
+
+// Voice — tailored to coherence with the user. Default: friendly yet professional.
+export function selectVoice(tone) {
+  switch (tone.register) {
+    case 'resonant': return 'poetic';
+    case 'structural': return 'scientific';
+    case 'exploratory': return 'minimal';
+    case 'balanced': return 'teacher';
+    default: return 'friendly yet professional';
+  }
+}
+
+// Assemble the semantic Thinking State (Layer 2).
+export function buildThinkingState(reason, wave, value, isPiUS) {
+  const topology = buildTopologyState(reason);
+  if (!isPiUS) {
+    const dir = value.identifiedDirection;
+    const decision = {
+      primary_conclusion: reason.regime === 'INSUFFICIENT_DATA'
+        ? 'No reliable structural conclusion: insufficient data.'
+        : `The structure favors ${dir.toLowerCase()} continuation; probability supports ${topology.possibility.toLowerCase()} engagement.`,
+      confidence: qual3(value.confidence, 0.5, 0.25),
+      why: `Topology: ${topology.possibility} possibility, ${topology.regime} regime, uncertainty ${topology.uncertainty}.`,
+    };
+    return { isPiUS: false, topology, decision };
+  }
+  const resonance = buildResonanceState(wave, value);
+  const valueState = buildValueState(value);
+  const context = buildContextState(reason, wave, value);
+  const decision = buildDecision(reason, wave, value, topology, resonance, valueState, context);
+  return { isPiUS: true, topology, resonance, value: valueState, context, decision };
+}
+
+// Render the Thinking State as the readable block the LLM receives.
+export function renderThinkingState(state) {
+  let out = `THINKING STATE\nTopology:\n  possibility: ${state.topology.possibility}\n  uncertainty: ${state.topology.uncertainty}\n  regime: ${state.topology.regime}\n  strongest_path: ${state.topology.strongest_path}`;
+  if (!state.isPiUS) {
+    out += `\n\nDecision:\n  primary_conclusion: ${state.decision.primary_conclusion}\n  confidence: ${state.decision.confidence}\n  why: ${state.decision.why}`;
+    return out;
+  }
+  out += `\n\nResonance:\n  resonance: ${state.resonance.resonance}\n  contextual_fit: ${state.resonance.contextual_fit}\n  coherence: ${state.resonance.coherence}\n  dominant_rhythm: ${state.resonance.dominant_rhythm}`;
+  out += `\n\nValue:\n  value: ${state.value.value}\n  confidence: ${state.value.confidence}\n  direction: ${state.value.direction}`;
+  out += `\n\nContext:\n  novelty: ${state.context.novelty}\n  consistency: ${state.context.consistency}\n  friction: ${state.context.friction}`;
+  out += `\n\nDecision:\n  primary_conclusion: ${state.decision.primary_conclusion}`;
+  out += `\n  alternative_conclusions:`;
+  for (const a of state.decision.alternative_conclusions) out += `\n    - ${a}`;
+  out += `\n  confidence: ${state.decision.confidence}`;
+  out += `\n  why: ${state.decision.why}`;
+  out += `\n  tradeoffs: ${state.decision.tradeoffs}`;
+  return out;
+}

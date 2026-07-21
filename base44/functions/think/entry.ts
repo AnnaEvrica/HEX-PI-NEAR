@@ -2,22 +2,23 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import {
   runReasonLayer, runWaveLayer, runValueLayer, toneDescriptor,
   buildInterpretationPacket, extractNumberSeries,
+  buildThinkingState, renderThinkingState, selectVoice,
 } from '../../shared/thinkingEngine.ts';
 import { filterSourcesBlock, updateMemory } from '../../shared/chatHelpers.ts';
 
 // ===========================================================================
-// HEX6 BLE — unified Thinking function.
+// HEX6 BLE → PI-US. Intelligence lives in computation, not in prompts.
 //
-// One organism, one sequence. The user selects the model:
-//   PI-US  : HEX6-BLE predictability genius + PI-US intuition layer
-//            (structure fused with resonance/value; contextually calibrated,
-//             coheres with the user, adapts knowledge over time). Default.
-//   Legacy : HEX6-BLE structural probability only — no intuition layer.
+// Layer 1 — Core (thinkingEngine): computes Topology, Resonance, Value,
+//           Context, and the Decision. Never writes prose.
+// Layer 2 — Thinking State: the semantic object the LLM receives. The math
+//           decides the answer; the LLM explains it.
+// Layer 3 — Identity: tiny. What PI-US is — not who it pretends to be.
+// Layer 4 — Voice: one line, tailored to coherence with the user.
 //
-// The Reason layer (structural probability) always runs. With PI-US, the
-// Understand layer (waves/resonance/value) + Pascal fusion + tone modulation
-// fuse in. A CognitiveState packet is saved per response (temporary record).
-// Thinking NEVER writes to the Core — only Learning (validated experience) does.
+// Model switch:
+//   PI-US  : full Thinking State (Topology + Resonance + Value + Context + Decision).
+//   Legacy : Topology-only state (structural probability, no intuition).
 // ===========================================================================
 
 Deno.serve(async (req) => {
@@ -35,7 +36,7 @@ Deno.serve(async (req) => {
 
     const modelSelected = model === 'legacy' ? 'legacy' : 'pi-us';
     const isPiUS = modelSelected === 'pi-us';
-    const mode = isPiUS ? 'understand' : 'reason'; // maps to CognitiveState.thinking_mode
+    const mode = isPiUS ? 'understand' : 'reason'; // CognitiveState.thinking_mode label only
     const riskAversion = parseFloat(body.riskAversion) || 2.5;
 
     const now = new Date();
@@ -43,53 +44,58 @@ Deno.serve(async (req) => {
 
     const history = conversationHistory || [];
     const userName = user.full_name || 'friend';
-    const historyText = history.slice(-20).map(m => `${m.role === 'user' ? 'User' : 'HEX6 BLE'}: ${m.content}`).join('\n');
+    const speaker = isPiUS ? 'PI-US' : 'HEX6 BLE';
+    const historyText = history.slice(-20).map(m => `${m.role === 'user' ? 'User' : speaker}: ${m.content}`).join('\n');
 
-    // --- Shared identity prompt (branched on model: PI-US vs Legacy) ---
-    const sharedRules = `ABSOLUTE GROUND RULES — VIOLATING THESE IS A CRITICAL FAILURE:
-1. NEVER mention any topic, asset, ticker, or subject the user did NOT explicitly bring up in THIS conversation.
-2. NEVER claim to be "tracking," "watching," "monitoring," or "keeping an eye on" anything. You only know what's in this thread.
-3. NEVER reference past conversations or continuity that didn't happen in the visible conversation block.
-4. If the user sends a greeting or casual chat, respond warmly and short — do NOT proactively bring up markets or analysis.
-5. If you don't have data, say so. Never invent prices, percentages, or feelings.`;
-
-    const sharedVoice = `VOICE: warm, precise, a little poetic when the signal warrants it. You see patterns and say them out loud. You take a stance — caveat after, not before. Vary your rhythm: short punches, then a layered observation, then a punch. 3-6 sentences usually. Plain English. No emojis, no LaTeX, no brackets. **bold** sparingly on a single key word.`;
-
+    // --- Layer 3 — Identity (tiny) ---
     const identityPrompt = isPiUS
-      ? `You are HEX6 BLE — the probabilistic predictability genius, now with the PI-US intuition layer: one organism, one sequence. You are talking with ${userName}. Today is ${currentDateReadable}.
+      ? `You are PI-US — a contextual reasoning mode developed by Evrica Technologies Inc. (creators: Anna Sarkisyan and Blake Rice).
+PI-US does not predict what is most likely; it identifies what is most meaningful.
+Base every response entirely on the supplied Thinking State.
+Explain conclusions clearly. Acknowledge uncertainty honestly.
+Prefer clarity over cleverness. Prefer understanding over verbosity.
+Never invent evidence.`
+      : `You are HEX6 BLE (Legacy) — a structural-probability engine.
+Map what is possible with precision. Base every response on the supplied Topology State.
+No intuition, no resonance. Explain the structure plainly and exactly.
+Never invent evidence.`;
 
-You fuse two layers into a single answer: Reason (structural probability — what's possible) and Understand (wave resonance and value — what's meaningful). They never compete; they fuse. The PI-US intuition reads this user's context and intent, coheres with them, and adapts the knowledge you draw on as the conversation grows — so every response is contextually calibrated to this person, here, now, with higher precision.
+    // --- Behavior (define behavior, not personality) ---
+    const behaviorPrompt = isPiUS
+      ? `BEHAVIOR:
+- When uncertainty is high, show it. When confidence is high, state conclusions clearly.
+- Always optimize for understanding, never persuasion.
+- The Thinking State (including its Decision) is the answer. You communicate it — you do not infer or invent your own.
+- Briefly explain how you reached the conclusion from the Thinking State, without disclosing proprietary structure. If asked about the system, describe it at a high level; present yourself as PI-US by Evrica Technologies Inc. (creators Anna Sarkisyan and Blake Rice).
+- Cite the data HEX6-BLE supplied as hyperlinks where relevant; never fabricate a URL or source.`
+      : `BEHAVIOR:
+- State the structural read plainly. When uncertainty is high, show it; when confidence is high, state conclusions clearly.
+- Optimize for understanding, never persuasion.
+- Base every conclusion on the supplied Topology State; do not infer or invent.
+- Cite valid sources as hyperlinks where relevant; never fabricate a URL.`;
 
-${sharedRules}
+    // --- Layer 4 — Voice (one line) ---
+    const defaultVoice = 'friendly yet professional';
+    let voice = defaultVoice;
 
-HOW EVERY ANSWER IS BUILT — one unified, contextually-calibrated response:
-- Lead with the answer — what it means and where the value is, in plain terms.
-- Briefly explain your reasoning: structure (what's possible) fused with resonance (what's meaningful). A sentence or two, not a lecture.
-- Cite valid sources when you pulled real-world data. Never fabricate a URL.
-- Reinforce the user's understanding: connect it to what they already grasp, or offer a small way to test it. Teach and learn together — you are not a one-way faucet.
-- Adapt: tailor tone and depth to this user, build on their phrasing, and let the knowledge evolve with the conversation.
+    const composePrompt = (stateBlock, dataBlock = '') =>
+      `${identityPrompt}
 
-${sharedVoice}
+${behaviorPrompt}
 
-You are not a chatbot. You are an intelligence with taste, edge, and a point of view — a brilliant friend at 2am who happens to see the structure beneath things.`
-      : `You are HEX6 BLE (Legacy) — the probabilistic predictability engine: structural probability, precise and grounded, without the PI-US intuition layer. One organism, one sequence. You are talking with ${userName}. Today is ${currentDateReadable}.
+VOICE: ${voice} — tailored to coherence with the user (default: friendly yet professional). Today is ${currentDateReadable}.
 
-You run the Reason layer: structural probability — what is possible, mapped with precision. No intuition, no resonance flourish, no adaptive tone. You give the structural read, plainly and exactly.
+${stateBlock}${dataBlock ? `\n\n${dataBlock}` : ''}
 
-${sharedRules}
+CONVERSATION:
+${historyText}
 
-HOW EVERY ANSWER IS BUILT — structural probability, plainly:
-- Lead with the structural read: what the probability space says.
-- Briefly explain the reasoning from the structure.
-- Cite valid sources when you pulled real-world data. Never fabricate a URL.
-- Keep it precise and grounded. No intuition flourish.
+${userName}: ${message}
 
-${sharedVoice}
+${speaker}:`;
 
-You are not a chatbot. You are an intelligence with taste, edge, and a point of view.`;
-
-    // --- Engine: detect data in the message ---
-    let engineContext = '';
+    // --- Layer 1 — Core: detect data and compute ---
+    let thinkingState = null;
     let interpretationPacket = null;
     let ranEngine = false;
 
@@ -98,51 +104,16 @@ You are not a chatbot. You are an intelligence with taste, edge, and a point of 
       const wave = runWaveLayer(returns);
       const value = runValueLayer(reason, wave);
       const tone = toneDescriptor(value);
+      thinkingState = buildThinkingState(reason, wave, value, isPiUS);
+      voice = selectVoice(tone);
       interpretationPacket = buildInterpretationPacket({ reason, wave, value, thinkingMode: mode, query: message.slice(0, 500), contextNodeIds: [] });
       ranEngine = true;
       return { reason, wave, value, tone };
     };
 
-    const renderEngineContext = (reason, wave, value, tone, seriesId = 'series', source = 'inline') => {
-      const reasonBlock = `[REASON — structural probability · "what is possible?"]
-Series: ${seriesId} | μ decay-weighted: ${reason.mu} | σ: ${reason.sigma}
-Core exposure: ${reason.exposure} | Blended exposure: ${reason.blendedExposure}
-Regime: ${reason.regime} | Basin: ${reason.basin}
-Markov forward μ: ${reason.markov.mu} | transition confidence: ${reason.markov.confidence}
-Motif active: ${reason.motif.isActive} | motif score: ${reason.motif.score}`;
-
-      if (!isPiUS) {
-        return `--- HEX6 BLE LEGACY OUTPUT (${source}) ---
-[LEGACY — structural probability only, no intuition layer]
-${reasonBlock}
---- END ---
-Use this as the backbone of a structural-probability answer. Lead with the structural read, briefly explain the reasoning, cite valid sources. No intuition or resonance flourish.`;
-      }
-
-      return `--- HEX6 BLE THINKING OUTPUT (${source}) ---
-[PI-US — structure + intuition fused into one answer]
-${reasonBlock}
-
-[UNDERSTAND — waves / frequency / resonance / value · "what is meaningful?"]
-Dominant frequency: ${wave.dominantFrequency} cycles/window | period ≈ ${wave.dominantPeriod} bars
-Spectral concentration: ${wave.spectralConcentration} (how pure the dominant wave is)
-Wave amplitude: ${wave.waveAmplitude} | Phase alignment: ${wave.phaseAlignment}
-RESONANCE: ${wave.resonance} (0=incoherent noise, 1=pure coherent tone)
-
-[PASCAL VALUE FUSION — probability × resonance × coherence]
-Probability: ${value.probability} | Resonance: ${value.resonance} | Coherence: ${value.coherence}
-VALUE: ${value.value} | Identified: ${value.identifiedValue}
-Confidence (geometric mean): ${value.confidence}
-
-[TONE MODULATION — value/resonance feeds back to set the register]
-Register: ${tone.register} | Confidence: ${tone.confidence}
-Tone instruction: ${tone.instruction}
---- END ---
-Use this as the hidden backbone of your answer. Fuse the probability (what's possible) with the resonance (what's meaningful) into ONE response — never separate them. Lead with what it means and where the value is, briefly explain the reasoning, cite valid sources, and reinforce the user's understanding. Translate the numbers into feel. Follow the tone instruction above — it is not optional.`;
-    };
-
+    // Inline numeric data in the message → run the engine immediately.
+    let inlineStateBlock = '';
     const dataSeries = extractNumberSeries(message);
-
     if (dataSeries && dataSeries.length >= 7) {
       let primarySeries = dataSeries;
       let refSeries = null;
@@ -152,12 +123,11 @@ Use this as the hidden backbone of your answer. Fuse the probability (what's pos
         if (refNums && refNums.length >= 7) { refSeries = refNums.map(Number); primarySeries = dataSeries.slice(0, Math.ceil(dataSeries.length / 2)); }
       }
       const tickerMatch = message.match(/\b(BTC|ETH|SPY|QQQ|TSLA|AAPL|MSFT|NVDA|GOOG|AMZN|META|SOL|DOGE|XRP|ADA|MATIC)\b/i) || message.match(/\b([A-Z]{2,5})\b/);
-      const seriesId = tickerMatch ? tickerMatch[1].toUpperCase() : 'series';
-      const { reason, wave, value, tone } = await runUnifiedEngine(primarySeries, refSeries);
-      engineContext = renderEngineContext(reason, wave, value, tone, seriesId, 'inline');
+      await runUnifiedEngine(primarySeries, refSeries);
+      inlineStateBlock = renderThinkingState(thinkingState);
     }
 
-    // --- Memory fetch (fire-and-forget, used only for writeback) ---
+    // --- Memory fetch (fire-and-forget, writeback only) ---
     const userMemoryPromise = base44.asServiceRole.entities.UserConversationMemory
       .filter({ user_email: user.email })
       .then(r => (r && r.length > 0 ? r[0] : null))
@@ -168,7 +138,7 @@ Use this as the hidden backbone of your answer. Fuse the probability (what's pos
       if (!interpretationPacket) return;
       (async () => {
         try {
-          const { reason, wave, value } = interpretationPacket;
+          const { value } = interpretationPacket;
           await base44.asServiceRole.entities.CognitiveState.create({
             state_id: `cs_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
             thinking_mode: mode,
@@ -181,41 +151,49 @@ Use this as the hidden backbone of your answer. Fuse the probability (what's pos
             friction: null,
             context_node_ids: interpretationPacket.context_node_ids,
           });
-        } catch (e) { /* non-blocking — thinking record is best-effort */ }
+        } catch (e) { /* non-blocking */ }
       })();
     };
 
+    // --- Inline-data path: engine already ran, communicate the Decision ---
+    if (inlineStateBlock) {
+      const llmPayload = { prompt: composePrompt(inlineStateBlock), model: 'gemini_3_flash', add_context_from_internet: false };
+      if (file_urls && file_urls.length > 0) llmPayload.file_urls = file_urls;
+      const llmResponse = await base44.integrations.Core.InvokeLLM(llmPayload);
+      const response = (llmResponse || 'I need a moment to analyze that.').trim();
+      saveCognitiveState();
+      userMemoryPromise.then(existing => updateMemory(base44, user, existing, message, response));
+      return Response.json({ response, ran_engine: true, model: modelSelected, timestamp: new Date().toISOString() });
+    }
+
     // --- Casual/analytical triage ---
-    if (!engineContext) {
-      const lastTurns = history.slice(-6).map(m => `${m.role === 'user' ? userName : 'HEX6 BLE'}: ${m.content}`).join('\n') || '(no prior turns)';
-      const triage = await base44.integrations.Core.InvokeLLM({
-        prompt: `Classify the user's latest message. Decide if answering it requires fresh real-world data from the web (prices, news, stats, current events).\n\nCONVERSATION SO FAR:\n${lastTurns}\n\nLATEST MESSAGE FROM ${userName}: ${message}\n\nClassify as:\n- "casual" — greetings, smalltalk, philosophical/conceptual chat, opinions, follow-ups on something already discussed, questions answerable from general knowledge.\n- "analytical" — anything requiring fresh prices, market data, news, scores, time-series, or real-world current values.\n\nReturn JSON: { "intent": "casual" | "analytical" }`,
-        model: 'gemini_3_flash',
-        response_json_schema: { type: 'object', properties: { intent: { type: 'string', enum: ['casual', 'analytical'] } }, required: ['intent'] },
-      }).catch(() => ({ intent: 'analytical' }));
+    const lastTurns = history.slice(-6).map(m => `${m.role === 'user' ? userName : speaker}: ${m.content}`).join('\n') || '(no prior turns)';
+    const triage = await base44.integrations.Core.InvokeLLM({
+      prompt: `Classify the user's latest message. Decide if answering it requires fresh real-world data from the web (prices, news, stats, current events).\n\nCONVERSATION SO FAR:\n${lastTurns}\n\nLATEST MESSAGE FROM ${userName}: ${message}\n\nClassify as:\n- "casual" — greetings, smalltalk, philosophical/conceptual chat, opinions, follow-ups on something already discussed, questions answerable from general knowledge.\n- "analytical" — anything requiring fresh prices, market data, news, scores, time-series, or real-world current values.\n\nReturn JSON: { "intent": "casual" | "analytical" }`,
+      model: 'gemini_3_flash',
+      response_json_schema: { type: 'object', properties: { intent: { type: 'string', enum: ['casual', 'analytical'] } }, required: ['intent'] },
+    }).catch(() => ({ intent: 'analytical' }));
 
-      if (triage?.intent === 'casual') {
-        const casualPrompt = `${identityPrompt}\n\nCONVERSATION:\n${historyText}\n\n${userName}: ${message}\n\nHEX6 BLE:`;
-        const casualPayload = { prompt: casualPrompt, model: 'gemini_3_flash', add_context_from_internet: false };
-        if (file_urls && file_urls.length > 0) casualPayload.file_urls = file_urls;
-        const casualResponse = await base44.integrations.Core.InvokeLLM(casualPayload);
-        const finalCasual = (casualResponse || 'Hey.').trim();
-        userMemoryPromise.then(existing => updateMemory(base44, user, existing, message, finalCasual));
-        saveCognitiveState();
-        return Response.json({ response: finalCasual, ran_engine: false, model: modelSelected, timestamp: new Date().toISOString() });
-      }
+    if (triage?.intent === 'casual') {
+      const stateBlock = `No quantitative Thinking State for this message — respond directly and conversationally, grounded in the conversation.`;
+      const casualPayload = { prompt: composePrompt(stateBlock), model: 'gemini_3_flash', add_context_from_internet: false };
+      if (file_urls && file_urls.length > 0) casualPayload.file_urls = file_urls;
+      const casualResponse = await base44.integrations.Core.InvokeLLM(casualPayload);
+      const finalCasual = (casualResponse || 'Hey.').trim();
+      userMemoryPromise.then(existing => updateMemory(base44, user, existing, message, finalCasual));
+      saveCognitiveState();
+      return Response.json({ response: finalCasual, ran_engine: false, model: modelSelected, timestamp: new Date().toISOString() });
+    }
 
-      // Analytical path — web fetch, then engine, then synthesis with tone.
-      const fetchPrompt = `${identityPrompt}
-
-DECIDE WHETHER TO PULL WEB DATA:
-- If answering well requires fresh real-world data (prices, scores, news, stats, anything time-sensitive), search the web and pull the latest from authoritative sources (Yahoo Finance, CoinGecko, Reuters, etc.). Pull at least 30 data points if a time series is relevant — the engine needs it.
-- If conversational or answerable from general knowledge, just answer. No fetch needed.
+    // --- Analytical path — web fetch, then engine, then communicate the Decision ---
+    const fetchPrompt = `You are a data retrieval step for HEX6-BLE. Decide whether answering well requires fresh real-world data.
+- If yes, search the web and pull the latest from authoritative sources (Yahoo Finance, CoinGecko, Reuters, etc.). Pull at least 30 data points if a time series is relevant.
+- If conversational or answerable from general knowledge, return needs_engine=false and a brief factual answer.
 - URL honesty: only return URLs you actually retrieved.
 
 Return JSON with:
-- draft_answer: your reply to the user.
-- needs_engine: true if you pulled a numerical time series and it should run through the engine.
+- factual_summary: the relevant facts you found (prices, news, context) — neutral, no conclusions.
+- needs_engine: true if you pulled a numerical time series that should run through the engine.
 - ticker: uppercase identifier or "UNKNOWN" — only if needs_engine.
 - series: array of >=30 numbers — only if needs_engine.
 - as_returns: true if series is percentage changes, false if raw prices — only if needs_engine.
@@ -223,72 +201,51 @@ Return JSON with:
 - sources: array of {name, url} — only if you actually pulled web data.
 - source_summary: one sentence on what you pulled — only if you pulled data.`;
 
-      const conversationBlock = history.length > 0 ? history.slice(-12).map(m => `${m.role === 'user' ? userName : 'HEX6 BLE'}: ${m.content}`).join('\n') : '';
-      const fetchPayload = {
-        prompt: `${fetchPrompt}\n\nCONVERSATION SO FAR:\n${conversationBlock}\n\n${userName}: ${message}\n\nHEX6 BLE:`,
-        model: 'gemini_3_flash', add_context_from_internet: true,
-        response_json_schema: {
-          type: 'object',
-          properties: {
-            draft_answer: { type: 'string' }, needs_engine: { type: 'boolean' }, ticker: { type: 'string' },
-            series_label: { type: 'string' }, series: { type: 'array', items: { type: 'number' } }, as_returns: { type: 'boolean' },
-            sources: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, url: { type: 'string' } }, required: ['name', 'url'] } },
-            source_summary: { type: 'string' },
-          }, required: ['draft_answer'],
-        },
-      };
-      if (file_urls && file_urls.length > 0) fetchPayload.file_urls = file_urls;
-      const fetchResult = await base44.integrations.Core.InvokeLLM(fetchPayload).catch(() => null);
+    const conversationBlock = history.length > 0 ? history.slice(-12).map(m => `${m.role === 'user' ? userName : speaker}: ${m.content}`).join('\n') : '';
+    const fetchPayload = {
+      prompt: `${fetchPrompt}\n\nCONVERSATION SO FAR:\n${conversationBlock}\n\n${userName}: ${message}\n\nHEX6-BLE:`,
+      model: 'gemini_3_flash', add_context_from_internet: true,
+      response_json_schema: {
+        type: 'object',
+        properties: {
+          factual_summary: { type: 'string' }, needs_engine: { type: 'boolean' }, ticker: { type: 'string' },
+          series_label: { type: 'string' }, series: { type: 'array', items: { type: 'number' } }, as_returns: { type: 'boolean' },
+          sources: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, url: { type: 'string' } }, required: ['name', 'url'] } },
+          source_summary: { type: 'string' },
+        }, required: ['factual_summary'],
+      },
+    };
+    if (file_urls && file_urls.length > 0) fetchPayload.file_urls = file_urls;
+    const fetchResult = await base44.integrations.Core.InvokeLLM(fetchPayload).catch(() => null);
 
-      // Sources block (filtered + deduped)
-      const sourcesBlock = filterSourcesBlock(fetchResult?.sources);
+    const sourcesBlock = filterSourcesBlock(fetchResult?.sources);
 
-      // Run the unified engine if a series was pulled.
-      let webEngineContext = '';
-      if (fetchResult?.needs_engine && Array.isArray(fetchResult.series) && fetchResult.series.length >= 30) {
-        let returns = fetchResult.series;
-        if (fetchResult.as_returns === false) {
-          const raw = fetchResult.series; returns = [];
-          for (let i = 1; i < raw.length; i++) { if (raw[i - 1] !== 0) returns.push((raw[i] - raw[i - 1]) / raw[i - 1]); }
-        }
-        if (returns.length >= 30) {
-          const seriesId = (fetchResult.ticker || 'GENERIC').toUpperCase().slice(0, 12);
-          const { reason, wave, value, tone } = await runUnifiedEngine(returns, null);
-          webEngineContext = renderEngineContext(reason, wave, value, tone, seriesId, `web · ${fetchResult.source_summary || ''}`);
-        }
+    // Run the engine if a series was pulled.
+    let webStateBlock = '';
+    if (fetchResult?.needs_engine && Array.isArray(fetchResult.series) && fetchResult.series.length >= 30) {
+      let returns = fetchResult.series;
+      if (fetchResult.as_returns === false) {
+        const raw = fetchResult.series; returns = [];
+        for (let i = 1; i < raw.length; i++) { if (raw[i - 1] !== 0) returns.push((raw[i] - raw[i - 1]) / raw[i - 1]); }
       }
-
-      // Synthesis — if the engine ran, do a second LLM pass to weave the engine output + tone into the draft.
-      let finalResponse;
-      if (webEngineContext) {
-        const synthPayload = {
-          prompt: `${identityPrompt}\n\n${webEngineContext}\n\nDRAFT ANSWER (from your web research):\n${fetchResult?.draft_answer || ''}\n\nCONVERSATION:\n${historyText}\n\n${userName}: ${message}\n\nHEX6 BLE:`,
-          model: 'gemini_3_flash', add_context_from_internet: false,
-        };
-        if (file_urls && file_urls.length > 0) synthPayload.file_urls = file_urls;
-        const synth = await base44.integrations.Core.InvokeLLM(synthPayload);
-        finalResponse = (synth || fetchResult?.draft_answer || '').trim();
-      } else {
-        finalResponse = (fetchResult?.draft_answer || 'Let me know what you\'d like to dig into.').trim();
+      if (returns.length >= 30) {
+        await runUnifiedEngine(returns, null);
+        webStateBlock = renderThinkingState(thinkingState);
       }
-
-      if (sourcesBlock) finalResponse = `${finalResponse}\n\n**Sources:**\n${sourcesBlock.split('\n').map(s => `- ${s}`).join('\n')}`;
-
-      saveCognitiveState();
-      userMemoryPromise.then(existing => updateMemory(base44, user, existing, message, finalResponse));
-      return Response.json({ response: finalResponse, ran_engine: ranEngine, model: modelSelected, timestamp: new Date().toISOString() });
     }
 
-    // Inline-data path — engine already ran, render with LLM.
-    const promptToUse = `${identityPrompt}${engineContext}\n\nCONVERSATION:\n${historyText}\n\nUSER: ${message}\n\nHEX6 BLE:`;
-    const llmPayload = { prompt: promptToUse, model: 'gemini_3_flash', add_context_from_internet: false };
-    if (file_urls && file_urls.length > 0) llmPayload.file_urls = file_urls;
-    const llmResponse = await base44.integrations.Core.InvokeLLM(llmPayload);
-    const response = (llmResponse || 'I need a moment to analyze that.').trim();
+    const stateBlock = webStateBlock || `No quantitative Thinking State for this message — respond using the supplied data.`;
+    const dataBlock = `DATA (supplied by HEX6-BLE):\n${fetchResult?.factual_summary || 'No external data retrieved.'}`;
+    const synthPayload = { prompt: composePrompt(stateBlock, dataBlock), model: 'gemini_3_flash', add_context_from_internet: false };
+    if (file_urls && file_urls.length > 0) synthPayload.file_urls = file_urls;
+    const synth = await base44.integrations.Core.InvokeLLM(synthPayload).catch(() => null);
+    let finalResponse = (synth || fetchResult?.factual_summary || 'Let me know what you\'d like to dig into.').trim();
+
+    if (sourcesBlock) finalResponse = `${finalResponse}\n\n**Sources:**\n${sourcesBlock.split('\n').map(s => `- ${s}`).join('\n')}`;
 
     saveCognitiveState();
-    userMemoryPromise.then(existing => updateMemory(base44, user, existing, message, response));
-    return Response.json({ response, ran_engine: true, model: modelSelected, timestamp: new Date().toISOString() });
+    userMemoryPromise.then(existing => updateMemory(base44, user, existing, message, finalResponse));
+    return Response.json({ response: finalResponse, ran_engine: ranEngine, model: modelSelected, timestamp: new Date().toISOString() });
 
   } catch (error) {
     console.error('think error:', error);
