@@ -14,7 +14,7 @@ import {
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const SEARCH_QUERY = '(BTC OR ETH OR bitcoin OR ethereum OR crypto OR cryptocurrency OR SPY OR "S&P 500") -is:retweet -is:reply lang:en';
+const SEARCH_QUERY = '(BTC OR ETH OR SOL OR bitcoin OR ethereum OR SPY OR QQQ OR NASDAQ) (bullish OR bearish OR pump OR dump OR rally OR crash OR target OR breakout OR support OR resistance) -is:retweet -is:reply lang:en';
 const MAX_RESULTS = 100;            // recent-search cap
 const ENGAGEMENT_FLOOR = 800;       // min (likes + retweets + replies + quotes) to consider
 const TOP_N = 3;                     // tweets processed per run
