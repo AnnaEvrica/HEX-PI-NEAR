@@ -1,0 +1,117 @@
+{
+  "name": "XEngagement",
+  "type": "object",
+  "properties": {
+    "tweet_id": {
+      "type": "string",
+      "description": "X tweet ID that was analyzed and (where supported) replied to"
+    },
+    "author_username": {
+      "type": "string",
+      "description": "Author @handle of the original tweet"
+    },
+    "text_snippet": {
+      "type": "string",
+      "description": "First 280 chars of the original tweet text"
+    },
+    "ticker": {
+      "type": "string",
+      "description": "Asset ticker identified from the tweet (e.g. BTC) or UNKNOWN"
+    },
+    "claim": {
+      "type": "string",
+      "description": "One-sentence market claim extracted from the tweet"
+    },
+    "actionable": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the tweet made a HEX6-validatable directional market claim"
+    },
+    "reply_tweet_id": {
+      "type": "string",
+      "description": "ID of the bot's reply tweet on X, if posted"
+    },
+    "x_reply_text": {
+      "type": "string",
+      "description": "The validated reply text posted on X"
+    },
+    "discord_posted": {
+      "type": "boolean",
+      "default": false
+    },
+    "discord_elaboration": {
+      "type": "string",
+      "description": "Full elaboration + stats posted to Discord"
+    },
+    "probability": {
+      "type": "number",
+      "description": "HEX6-BLE structural probability (0-1)"
+    },
+    "resonance": {
+      "type": "number",
+      "description": "PI-US resonance (0-1)"
+    },
+    "value": {
+      "type": "number",
+      "description": "Pascal structural support (0-1)"
+    },
+    "confidence": {
+      "type": "number",
+      "description": "Overall confidence (0-1)"
+    },
+    "predicted_direction": {
+      "type": "string",
+      "enum": [
+        "UP",
+        "DOWN",
+        "FLAT"
+      ]
+    },
+    "forward_accuracy": {
+      "type": "number",
+      "description": "Walk-forward directional accuracy on held-out tail (0-1)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "posted",
+        "skipped",
+        "failed"
+      ],
+      "default": "posted"
+    },
+    "skip_reason": {
+      "type": "string",
+      "description": "Why the tweet was skipped, if status=skipped"
+    },
+    "error": {
+      "type": "string",
+      "description": "Error message if status=failed"
+    }
+  },
+  "required": [
+    "tweet_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
