@@ -57,6 +57,9 @@ Deno.serve(async (req) => {
 
     return Response.json({ url: session.url });
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    // Return 200 with the real Stripe message so the frontend's
+    // `res.data?.error` branch can surface the actual cause — a 500 makes the
+    // SDK throw and the user sees a generic "500" instead of the reason.
+    return Response.json({ error: error.message }, { status: 200 });
   }
 });

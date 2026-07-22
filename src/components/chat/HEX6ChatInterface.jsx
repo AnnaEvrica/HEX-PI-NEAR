@@ -445,7 +445,7 @@ export default function HEX6ChatInterface() {
 
   const handleManageBilling = async () => {
     try {
-      const res = await base44.functions.invoke('manageBilling', {});
+      const res = await base44.functions.invoke('manageBilling', { origin: window.location.origin });
       if (res.data?.url) window.location.href = res.data.url;
     } catch (err) {
       console.error('Billing portal failed:', err);

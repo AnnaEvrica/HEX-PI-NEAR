@@ -162,7 +162,11 @@ export default function SettingsModal({ open, onClose }) {
   const handleRestoreSubscription = async () => {
     setSubActionLoading(true);
     try {
-      const res = await base44.functions.invoke('createCheckout', {});
+      const res = await base44.functions.invoke('createCheckout', { origin: window.location.origin });
+      if (res.data?.error) {
+        setMessage({ type: 'error', text: res.data.error });
+        return;
+      }
       if (res.data?.url) {
         window.location.href = res.data.url;
       } else if (res.data?.already_subscribed) {
