@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion';
-import { useMemo, useState, useEffect } from 'react';
+import { motion, useScroll, useSpring, useTransform } from 'framer-motion';
+import { useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import SignaturePatternBackground from '@/components/landing/SignaturePatternBackground';
@@ -139,21 +139,16 @@ function Operator({ op, delay }) {
 
 export default function HeroSection() {
   const navigate = useNavigate();
-  const [wordGap, setWordGap] = useState(0);
-
-  useEffect(() => {
-    const onScroll = () => {
-      const max = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
-      setWordGap(Math.round(progress * 48));
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  const heroRef = useRef(null);
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
+  const smooth = useSpring(scrollYProgress, { stiffness: 90, damping: 18, mass: 0.6 });
+  const leftX = useTransform(smooth, [0, 1], [-36, 0]);
+  const rightX = useTransform(smooth, [0, 1], [36, 0]);
+  const depth = useTransform(smooth, [0, 1], [-80, 0]);
+  const rotY = useTransform(smooth, [0, 1], [10, 0]);
 
   return (
-    <section className="relative w-full overflow-hidden pt-10 sm:pt-14 md:pt-20 pb-10 sm:pb-16">
+    <section ref={heroRef} className="relative w-full overflow-hidden pt-10 sm:pt-14 md:pt-20 pb-10 sm:pb-16">
       {/* Full-bleed signature-pattern background */}
       <SignaturePatternBackground />
 
@@ -187,16 +182,26 @@ export default function HeroSection() {
         {/* Right-aligned supporting block: subtitle + CTAs + tagline */}
         <div className="flex flex-col items-end text-right mt-6">
           <motion.div
-            className="relative inline-flex items-center justify-center"
+            className="relative flex w-full items-center justify-center"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.55 }}
           >
-            <div className="absolute inset-0 -m-8 sm:-m-10"><PIMotif /></div>
-            <span className="relative text-[2.625rem] sm:text-[3.9375rem] md:text-[5.25rem] font-bold text-secondary tracking-tight inline-flex flex-wrap justify-end" style={{ gap: `${wordGap}px` }}>
-              <span>Probabilistic</span>
-              <span>Intelligence</span>
-            </span>
+            <div className="relative flex flex-col items-center" style={{ perspective: 900 }}>
+              <div className="absolute inset-0 -m-8 sm:-m-10"><PIMotif /></div>
+              <motion.span
+                className="relative text-[1.875rem] sm:text-[3.9375rem] md:text-[5.25rem] font-bold text-secondary tracking-tight inline-block"
+                style={{ x: leftX, z: depth, rotateY: rotY }}
+              >
+                Probabilistic
+              </motion.span>
+              <motion.span
+                className="relative text-[1.875rem] sm:text-[3.9375rem] md:text-[5.25rem] font-bold text-secondary tracking-tight inline-block"
+                style={{ x: rightX, z: depth, rotateY: rotY }}
+              >
+                Intelligence
+              </motion.span>
+            </div>
           </motion.div>
 
           <div className="self-center flex flex-col sm:flex-row gap-3 w-full sm:w-[30rem] pt-8">
