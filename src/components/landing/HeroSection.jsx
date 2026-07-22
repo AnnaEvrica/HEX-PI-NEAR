@@ -97,30 +97,19 @@ export default function HeroSection({ onAsteriskHover }) {
       <SignaturePatternBackground />
 
       <motion.div
-        className="relative z-10 max-w-6xl mx-auto px-6 sm:px-10 py-10 sm:py-14 bg-background/75 backdrop-blur-md rounded-lg"
+        className="relative z-10 max-w-6xl mx-auto px-6 sm:px-10 py-[2.75rem] sm:py-[3.85rem] bg-background/75 backdrop-blur-md rounded-lg"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
       >
-        <div className="flex justify-center">
-          <a
-            href="https://evrica.tech"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-[#0a1929] hover:text-[#1c3a5e] transition-colors"
-          >
-            Developed by Evrica Technologies Inc.
-          </a>
-        </div>
-
-        <div className="flex justify-center mt-5 sm:mt-7">
-          <span className="text-xs sm:text-sm uppercase tracking-[0.25em] text-secondary whitespace-nowrap">
+        <div className="flex justify-center mt-[1.375rem] sm:mt-[1.925rem]">
+          <span className="text-xs sm:text-sm uppercase tracking-[0.12em] text-secondary whitespace-nowrap">
             Welcome to
           </span>
         </div>
 
         {/* Title block — two balanced rows: headline word (left) · system label (right) */}
-        <div className="relative mt-10 sm:mt-14">
+        <div className="relative mt-[2.75rem] sm:mt-[3.85rem]">
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <ProbabilityMotif />
             <ResonanceMotif />
@@ -180,12 +169,12 @@ export default function HeroSection({ onAsteriskHover }) {
             </div>
           </div>
 
-          <div className="relative mt-3 text-secondary text-[0.7rem] sm:text-[1.3rem] md:text-[1.75rem] font-medium tracking-[0.05em] whitespace-nowrap">
+          <div className="relative mt-[0.825rem] text-secondary text-[0.7rem] sm:text-[1.3rem] md:text-[1.75rem] font-medium tracking-[0.05em] whitespace-nowrap">
             Probabilistic Intelligence <span className="font-bold text-secondary">[PI]</span>
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-[30rem] mx-auto pt-8">
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-[30rem] mx-auto pt-[2.2rem]">
           <button
             onClick={() => navigate('/discover')}
             className="flex-1 inline-flex items-center justify-center px-6 py-3 sm:py-4 rounded-sm border-2 border-accent bg-white text-black font-medium hover:bg-accent/10 transition-all text-sm sm:text-base md:text-lg"
@@ -203,7 +192,7 @@ export default function HeroSection({ onAsteriskHover }) {
 
         {/* Version line — multi-colored segments */}
         <div className="flex justify-center">
-          <span className="font-semibold tracking-tight mt-4 text-xs sm:text-sm">
+          <span className="font-semibold tracking-tight mt-[1.1rem] text-xs sm:text-sm">
             <span className="text-secondary">[</span>
             <span className="font-bold text-accent">Version:</span>
             <span className="text-white font-bold" style={{ textShadow: WHITE_SHADOW }}>
