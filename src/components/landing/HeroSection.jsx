@@ -142,43 +142,43 @@ export default function HeroSection() {
 
         <div className="flex justify-center mt-5 sm:mt-7">
           <span className="text-xs sm:text-sm uppercase tracking-[0.25em] text-secondary whitespace-nowrap">
-            Welcome to <span className="text-accent font-semibold">genius</span> mode
+            Welcome to
           </span>
         </div>
 
         <div className="mt-3">
-          <HeroWord word="Probability" motif={<ProbabilityMotif />} delay={0.1} />
-          <Operator op="+" delay={0.2} />
-          <HeroWord word="Resonance" motif={<ResonanceMotif />} delay={0.3} />
-          <Operator op="=" delay={0.4} />
+          <HeroWord word="The Model" motif={<><ProbabilityMotif /><ResonanceMotif /></>} delay={0.1} />
         </div>
 
-        {/* AI → PI, sized to match the equation, with tagline */}
+        {/* Probabilistic Intelligence — the name of the model */}
         <motion.div
           className="flex flex-col items-center gap-3 mt-6"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.55 }}
         >
-          <div className="flex items-center justify-center gap-4 sm:gap-6">
-            <span className="text-5xl sm:text-7xl md:text-8xl font-bold text-secondary line-through decoration-2 decoration-accent">AI</span>
-            <ArrowRight className="w-7 h-7 sm:w-10 sm:h-10 text-accent" />
-            <div className="relative inline-flex items-center justify-center">
-              <div className="absolute inset-0 -m-8 sm:-m-10"><PIMotif /></div>
-              <span className="relative text-5xl sm:text-7xl md:text-8xl font-bold text-accent">PI</span>
-            </div>
+          <div className="relative inline-flex items-center justify-center">
+            <div className="absolute inset-0 -m-8 sm:-m-10"><PIMotif /></div>
+            <span className="relative text-4xl sm:text-6xl md:text-7xl font-bold text-accent tracking-tight">Probabilistic Intelligence</span>
           </div>
-          <span className="text-base sm:text-xl font-semibold text-foreground tracking-tight">intelligence like never before</span>
         </motion.div>
 
         <div className="flex flex-col items-center gap-4 pt-8">
-          <button
-            onClick={() => base44.auth.loginWithProvider('google', '/app')}
-            className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 rounded-sm bg-accent text-accent-foreground font-medium hover:bg-accent/90 transition-all text-sm sm:text-base md:text-lg shadow-lg shadow-accent/25"
-            style={{ boxShadow: '0 2px 18px rgba(0,0,0,0.35), 0 0 24px rgba(255,106,0,0.15)' }}
-          >
-            Enter Oracle <ArrowRight className="w-4 h-4" />
-          </button>
+          <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
+            <button
+              onClick={() => base44.auth.loginWithProvider('google', '/app')}
+              className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 rounded-sm bg-accent text-accent-foreground font-medium hover:bg-accent/90 transition-all text-sm sm:text-base md:text-lg shadow-lg shadow-accent/25"
+              style={{ boxShadow: '0 2px 18px rgba(0,0,0,0.35), 0 0 24px rgba(255,106,0,0.15)' }}
+            >
+              Enter World <ArrowRight className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => document.getElementById('invitation')?.scrollIntoView({ behavior: 'smooth' })}
+              className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 rounded-sm border border-border text-foreground font-medium hover:bg-muted transition-all text-sm sm:text-base md:text-lg"
+            >
+              See it live
+            </button>
+          </div>
           <span className="font-bold text-accent text-xs sm:text-sm tracking-tight">[HEX6-BLE PI-US · PROBABILISTIC INTELLIGENCE MODEL V5.5]</span>
         </div>
       </motion.div>

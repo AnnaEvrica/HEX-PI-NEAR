@@ -115,7 +115,7 @@ export default function Landing() {
       <MirrorSection />
 
       {/* Invitation — see it for yourself */}
-      <InvitationSection />
+      <div id="invitation"><InvitationSection /></div>
 
       {/* Forefathers of Probability — Graphic Elements */}
       <FoundersSection />
