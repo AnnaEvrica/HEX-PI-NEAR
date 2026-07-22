@@ -87,31 +87,6 @@ function ResonanceMotif() {
   );
 }
 
-function HeroWord({ word, motif, delay, onAsteriskHover }) {
-  return (
-    <div className="relative flex items-center justify-start py-2 sm:py-3">
-      <div className="absolute inset-0">{motif}</div>
-      <motion.h2
-        className="relative text-[3.25rem] sm:text-[6rem] md:text-[9rem] lg:text-[12rem] leading-[0.85] font-bold tracking-tight text-foreground"
-        style={{ textShadow: '0 2px 18px rgba(0,0,0,0.45)' }}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay }}
-      >
-        {word}
-        <span
-          onMouseEnter={() => onAsteriskHover?.(true)}
-          onMouseLeave={() => onAsteriskHover?.(false)}
-          className="ml-1 text-accent align-super cursor-pointer transition-transform duration-200 hover:scale-125"
-          style={{ fontSize: '0.38em' }}
-        >
-          *
-        </span>
-      </motion.h2>
-    </div>
-  );
-}
-
 const WHITE_SHADOW = '0 1px 2px rgba(0,0,0,0.9), 0 2px 14px rgba(0,0,0,0.7)';
 
 export default function HeroSection({ onAsteriskHover }) {
@@ -144,27 +119,69 @@ export default function HeroSection({ onAsteriskHover }) {
           </span>
         </div>
 
-        {/* Title row: The Model* (left) · HEX6-BLE (right) */}
-        <div className="mt-3 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-col items-start">
-            <HeroWord
-              word="The Model"
-              motif={<><ProbabilityMotif /><ResonanceMotif /></>}
-              delay={0.1}
-              onAsteriskHover={onAsteriskHover}
-            />
-            <div className="mt-2 text-secondary text-[0.7rem] sm:text-[1.3rem] md:text-[1.75rem] font-medium tracking-[0.05em] whitespace-nowrap">
-              Probabilistic Intelligence <span className="font-bold text-secondary">[PI]</span>
+        {/* Title block — two balanced rows: headline word (left) · system label (right) */}
+        <div className="relative mt-4">
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <ProbabilityMotif />
+            <ResonanceMotif />
+          </div>
+
+          <div className="relative flex flex-col">
+            {/* Row 1 — "The" · [HEX6-BLE] (same font/size, soft white glow) */}
+            <div className="flex items-baseline justify-between gap-4">
+              <motion.h2
+                className="text-[2rem] sm:text-[3rem] md:text-[4.5rem] lg:text-[6.5rem] xl:text-[8rem] leading-[0.9] font-bold tracking-tight text-foreground"
+                style={{ textShadow: '0 2px 18px rgba(0,0,0,0.45)' }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.1 }}
+              >
+                The
+              </motion.h2>
+              <motion.span
+                className="text-white/85 font-bold tracking-tight text-[2rem] sm:text-[3rem] md:text-[4.5rem] lg:text-[6.5rem] xl:text-[8rem] leading-[0.9] whitespace-nowrap"
+                style={{ textShadow: '0 0 24px rgba(255,255,255,0.5), 0 2px 14px rgba(0,0,0,0.65)' }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.2 }}
+              >
+                [HEX6-BLE]
+              </motion.span>
+            </div>
+
+            {/* Row 2 — "Model*" · [BLE: Binaureal Linguistic Engine] (balanced) */}
+            <div className="flex items-baseline justify-between gap-4">
+              <motion.h2
+                className="text-[2rem] sm:text-[3rem] md:text-[4.5rem] lg:text-[6.5rem] xl:text-[8rem] leading-[0.9] font-bold tracking-tight text-foreground"
+                style={{ textShadow: '0 2px 18px rgba(0,0,0,0.45)' }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.18 }}
+              >
+                Model
+                <span
+                  onMouseEnter={() => onAsteriskHover?.(true)}
+                  onMouseLeave={() => onAsteriskHover?.(false)}
+                  className="ml-1 text-accent align-super cursor-pointer transition-transform duration-200 hover:scale-125"
+                  style={{ fontSize: '0.38em' }}
+                >
+                  *
+                </span>
+              </motion.h2>
+              <motion.span
+                className="text-white/70 font-semibold tracking-tight text-[0.75rem] sm:text-[0.95rem] md:text-[1.2rem] lg:text-[1.5rem] leading-tight whitespace-nowrap"
+                style={{ textShadow: '0 0 16px rgba(255,255,255,0.35), 0 2px 10px rgba(0,0,0,0.6)' }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.28 }}
+              >
+                [BLE: Binaureal Linguistic Engine]
+              </motion.span>
             </div>
           </div>
 
-          <div className="self-end sm:self-center rounded-md bg-black/75 px-4 py-2 sm:px-5 sm:py-3 backdrop-blur-sm">
-            <div className="text-white font-bold tracking-tight text-2xl sm:text-3xl md:text-4xl leading-tight">
-              [HEX6-BLE]
-            </div>
-            <div className="text-white/90 text-[0.6rem] sm:text-xs md:text-sm tracking-tight mt-1 text-center whitespace-nowrap">
-              [BLE: Binaureal Linguistic Engine]
-            </div>
+          <div className="relative mt-3 text-secondary text-[0.7rem] sm:text-[1.3rem] md:text-[1.75rem] font-medium tracking-[0.05em] whitespace-nowrap">
+            Probabilistic Intelligence <span className="font-bold text-secondary">[PI]</span>
           </div>
         </div>
 
