@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import SignaturePatternBackground from '@/components/landing/SignaturePatternBackground';
@@ -139,6 +139,19 @@ function Operator({ op, delay }) {
 
 export default function HeroSection() {
   const navigate = useNavigate();
+  const [wordGap, setWordGap] = useState(0);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+      setWordGap(Math.round(progress * 48));
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
     <section className="relative w-full overflow-hidden pt-10 sm:pt-14 md:pt-20 pb-10 sm:pb-16">
       {/* Full-bleed signature-pattern background */}
@@ -180,7 +193,10 @@ export default function HeroSection() {
             transition={{ duration: 0.6, delay: 0.55 }}
           >
             <div className="absolute inset-0 -m-8 sm:-m-10"><PIMotif /></div>
-            <span className="relative text-[2.625rem] sm:text-[3.9375rem] md:text-[5.25rem] font-bold text-secondary tracking-tight">Probabilistic Intelligence</span>
+            <span className="relative text-[2.625rem] sm:text-[3.9375rem] md:text-[5.25rem] font-bold text-secondary tracking-tight inline-flex flex-wrap justify-end" style={{ gap: `${wordGap}px` }}>
+              <span>Probabilistic</span>
+              <span>Intelligence</span>
+            </span>
           </motion.div>
 
           <div className="self-center flex flex-col sm:flex-row gap-3 w-full sm:w-[30rem] pt-8">
