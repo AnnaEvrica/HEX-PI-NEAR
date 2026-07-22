@@ -1,4 +1,4 @@
-import { ArrowRight, Lock, TrendingUp, BarChart3, Brain, Zap, X } from 'lucide-react';
+import { ArrowRight, Lock, TrendingUp, BarChart3, Brain, Zap, X, Mail, Search } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -8,6 +8,8 @@ import HeroSection from '@/components/landing/HeroSection';
 import FoundersSection from '@/components/landing/FoundersSection';
 import MirrorSection from '@/components/landing/MirrorSection';
 import InvitationSection from '@/components/landing/InvitationSection';
+import ContactModal from '@/components/landing/ContactModal';
+import SearchOverlay from '@/components/landing/SearchOverlay';
 
 const DEFAULT_METRICS = {
   systemComparison: {
@@ -42,6 +44,8 @@ export default function Landing() {
   const [loading, setLoading] = useState(false);
   const [openPolicy, setOpenPolicy] = useState(null);
   const [isAuth, setIsAuth] = useState(false);
+  const [showContact, setShowContact] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
   const [visibleSections, setVisibleSections] = useState({});
   const sectionRefs = useRef({});
 
@@ -91,18 +95,20 @@ export default function Landing() {
           <div className="text-lg sm:text-xl font-bold tracking-tight">HEX6 BLE</div>
           <div className="flex items-center gap-2 sm:gap-3">
             <button
-              onClick={() => base44.auth.loginWithProvider('google', '/app')}
-              className="px-3 sm:px-5 py-1.5 sm:py-2 rounded-sm border border-border text-xs sm:text-sm font-medium hover:bg-muted transition-colors"
+              onClick={() => setShowSearch(true)}
+              aria-label="Search the page"
+              className="p-2 rounded-sm hover:bg-muted transition-colors text-foreground"
               style={{ minWidth: 'auto', minHeight: 'auto' }}
             >
-              Log In
+              <Search className="w-5 h-5" />
             </button>
             <button
-              onClick={() => base44.auth.loginWithProvider('google', '/app')}
-              className="px-3 sm:px-5 py-1.5 sm:py-2 rounded-sm bg-primary text-primary-foreground text-xs sm:text-sm font-medium hover:bg-primary/90 transition-colors"
+              onClick={() => setShowContact(true)}
+              aria-label="Contact us"
+              className="p-2 rounded-sm hover:bg-muted transition-colors text-foreground"
               style={{ minWidth: 'auto', minHeight: 'auto' }}
             >
-              Get Started
+              <Mail className="w-5 h-5" />
             </button>
           </div>
         </div>
@@ -112,13 +118,13 @@ export default function Landing() {
       <HeroSection />
 
       {/* Mirror — HEX6-BLE & PI-US, two lenses on one mind */}
-      <MirrorSection />
+      <div id="mirror"><MirrorSection /></div>
 
       {/* Invitation — see it for yourself */}
       <div id="invitation"><InvitationSection /></div>
 
       {/* Forefathers of Probability — Graphic Elements */}
-      <FoundersSection />
+      <div id="founders"><FoundersSection /></div>
 
       {/* How It Works */}
       <section 
@@ -521,7 +527,7 @@ export default function Landing() {
       </section>
 
       {/* CTA Section */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 py-16 sm:py-24 md:py-32 space-y-6 sm:space-y-8">
+      <section id="cta" className="max-w-4xl mx-auto px-4 sm:px-6 py-16 sm:py-24 md:py-32 space-y-6 sm:space-y-8">
         <div className="space-y-4 sm:space-y-6">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">Ready to observe how outcomes reorganize?</h2>
           <p className="text-base sm:text-lg md:text-xl text-secondary">No credit card required. Reasoning through probability. Decisions through resonance.</p>
@@ -789,6 +795,9 @@ export default function Landing() {
           </div>
         </PolicyModal>
       )}
+
+      {showContact && <ContactModal onClose={() => setShowContact(false)} />}
+      {showSearch && <SearchOverlay onClose={() => setShowSearch(false)} />}
     </div>
   );
 }
