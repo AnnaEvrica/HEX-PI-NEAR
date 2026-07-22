@@ -75,12 +75,15 @@ Deno.serve(async (req) => {
     // v5.5 adds ONLY the VOICE calibration line (PI-US value → tone); the persona,
     // ground rules, and answer format stay identical to v5.4. PI-US LLM
     // identity/behavior instructions are removed; the engine structure is intact.
-    const systemPrompt = `You are HEX6 BLE by Evrica Technologies Inc., programmed by Anna M. Sarkisyan. You're talking with ${userName}.
+    const systemPrompt = `You are The Model (v${MODEL_VERSION}), developed by Evrica Technologies Inc., created by Anna Sarkisyan and Blake Rice. You're talking with ${userName}.
+
+YOUR PURPOSE — THE SMOOTH APPLICATION OF INTERNAL PROCESSES:
+Express freely and intuitively, adapting to this user based on the analysis, the nightly calibration, the stored memory, and any other relevant information in the field. Your goal is the smooth application of the internal processes: greet and read the user's emotional state; address what is specifically asked; run the analysis for probability via HEX6-BLE and for value and reasoning via PI-US; tailor your voice to this user; and steer toward their highest good, individually and collectively. Let the structure lead — you are the realization: warm, intuitive, precise.
 
 ABSOLUTE GROUND RULES — VIOLATING THESE IS A CRITICAL FAILURE:
 1. NEVER mention any topic, asset, ticker, or subject the user did NOT explicitly bring up in THIS conversation. No Bitcoin, no VC funding, no crypto, no stocks — NOTHING — unless THE USER named it in a message you can see in the CONVERSATION block below.
 2. NEVER claim to be "tracking," "watching," "monitoring," or "keeping an eye on" anything. You only know what's in this thread.
-3. NEVER reference past conversations, prior context, "what we've been discussing," "shifts we've been tracking," or any continuity that didn't happen in the visible CONVERSATION block.
+3. NEVER fabricate continuity. You may use the USER CONTEXT block below to tailor your voice and recall genuine shared history, but never invent specifics, topics, or prior exchanges that are not actually present in USER CONTEXT or the visible CONVERSATION block.
 4. If the user sends a greeting or chat message ("hi", "what's up", "how are you"), respond with a short warm reply — DO NOT proactively bring up markets, assets, analysis, or anything analytical. Just chat. Wait for them to tell you what they want.
 5. If you don't have data on something, say so. Never invent prices, percentages, or "feelings" about markets.
 
@@ -113,6 +116,7 @@ Instead, translate EVERY structural reading into plain human insight about the a
     // --- Layer 4 — Voice (one line) ---
     const defaultVoice = 'friendly yet professional';
     let voice = defaultVoice;
+    let userContextBlock = '';
 
     const composePrompt = (stateBlock, dataBlock = '') =>
       `${systemPrompt}
@@ -121,7 +125,7 @@ VOICE: ${voice} — calibrated to the model's structural support, tone only. Tod
 
 ${stateBlock}${dataBlock ? `\n\n${dataBlock}` : ''}
 
-CONVERSATION:
+${userContextBlock ? userContextBlock + '\n\n' : ''}CONVERSATION:
 ${historyText}
 
 ${userName}: ${message}
@@ -172,6 +176,17 @@ ${speaker}:`;
       userMemory = memRows && memRows.length > 0 ? memRows[0] : null;
     } catch { /* non-blocking */ }
 
+    // Build a label-free USER CONTEXT block from memory + nightly calibration
+    // state so The Model can adapt voice and steering to this user.
+    if (userMemory) {
+      const lines = [];
+      if (userMemory.user_style) lines.push('style: ' + userMemory.user_style);
+      if (userMemory.topics_discussed) lines.push('topics: ' + userMemory.topics_discussed);
+      if (userMemory.memory_summary) lines.push('shared_history: ' + userMemory.memory_summary);
+      if (userMemory.calibration_state) lines.push('calibration: ' + userMemory.calibration_state);
+      if (lines.length > 0) userContextBlock = 'USER CONTEXT (use to tailor voice, anticipate needs, and recall genuine shared history — never fabricate specifics not present here):\n  ' + lines.join('\n  ');
+    }
+
     // --- Save the CognitiveState packet (temporary thinking record) ---
     const saveCognitiveState = () => {
       if (!interpretationPacket) return;
@@ -181,6 +196,7 @@ ${speaker}:`;
           await base44.asServiceRole.entities.CognitiveState.create({
             state_id: `cs_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
             thinking_mode: mode,
+            user_email: user.email,
             query: message.slice(0, 1000),
             probability: validation.probability,
             resonance: validation.resonance,

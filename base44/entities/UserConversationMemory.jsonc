@@ -22,6 +22,10 @@
       "type": "string",
       "description": "Last few exchanges to enable seamless continuation"
     },
+    "calibration_state": {
+      "type": "string",
+      "description": "Per-user nightly calibration digest (engine grade, cycle count, avg confidence, dominant lean) written by the nightly calibration job"
+    },
     "total_conversations": {
       "type": "number",
       "description": "Total number of conversation turns remembered"

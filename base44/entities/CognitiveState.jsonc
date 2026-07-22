@@ -14,6 +14,10 @@
       ],
       "description": "Which thinking mode produced this state"
     },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user whose query produced this cognitive state"
+    },
     "conversation_id": {
       "type": "string",
       "description": "Reference to the conversation that produced this state"

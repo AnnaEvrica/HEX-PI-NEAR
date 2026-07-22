@@ -128,6 +128,7 @@ Deno.serve(async (req) => {
     const globalAcc = scored.length > 0 ? scored.reduce((s, r) => s + r.directional_accuracy, 0) / scored.length : 0;
     const globalEval = results.reduce((s, r) => s + r.predictions_evaluated, 0);
 
+    const globalGrade = globalEval < 10 ? 'INSUFFICIENT_DATA' : gradeFromAccuracy(globalAcc);
     await base44.asServiceRole.entities.CalibrationScore.create({
       score_date: today,
       ticker: 'GLOBAL',
@@ -135,9 +136,36 @@ Deno.serve(async (req) => {
       directional_accuracy: parseFloat(globalAcc.toFixed(4)),
       exposure_correlation: 0,
       avg_realized_return: 0,
-      calibration_grade: globalEval < 10 ? 'INSUFFICIENT_DATA' : gradeFromAccuracy(globalAcc),
+      calibration_grade: globalGrade,
       notes: `Multi-brain calibration across ${results.length} brains, ${globalEval} total predictions.`,
     });
+
+    // Per-user memory: derive a calibration-aware state from each user's recent
+    // cognitive cycles and store it on their UserConversationMemory so The Model
+    // can adapt voice and steering to their tracked pattern.
+    try {
+      const states = await base44.asServiceRole.entities.CognitiveState.list('-created_date', 500).catch(() => []);
+      const byUser = {};
+      for (const s of (states || [])) {
+        if (!s.user_email) continue;
+        if (!byUser[s.user_email]) byUser[s.user_email] = [];
+        byUser[s.user_email].push(s);
+      }
+      for (const email of Object.keys(byUser)) {
+        const cycles = byUser[email];
+        const conf = cycles.reduce((t, c) => t + (c.confidence || 0), 0) / cycles.length;
+        const dirs = { UP: 0, DOWN: 0, FLAT: 0 };
+        for (const c of cycles) if (c.predicted_direction) dirs[c.predicted_direction] = (dirs[c.predicted_direction] || 0) + 1;
+        const lean = dirs.UP > dirs.DOWN ? 'UP' : dirs.DOWN > dirs.UP ? 'DOWN' : 'flat';
+        const calibrationState = `Engine calibration grade ${globalGrade}; ${cycles.length} recent cycles, avg confidence ${conf.toFixed(2)}, lean ${lean}.`;
+        const existing = await base44.asServiceRole.entities.UserConversationMemory.filter({ user_email: email }).catch(() => []);
+        if (existing && existing.length > 0) {
+          await base44.asServiceRole.entities.UserConversationMemory.update(existing[0].id, { calibration_state: calibrationState });
+        } else {
+          await base44.asServiceRole.entities.UserConversationMemory.create({ user_email: email, calibration_state: calibrationState, total_conversations: 0 });
+        }
+      }
+    } catch (e) { /* non-blocking */ }
 
     return Response.json({
       ok: true,
