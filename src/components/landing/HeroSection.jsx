@@ -95,7 +95,7 @@ export default function HeroSection({ onAsteriskHover }) {
       <SignaturePatternBackground />
 
       <motion.div
-        className="relative z-10 max-w-6xl mx-auto px-6 sm:px-10 py-[2.75rem] sm:py-[3.85rem] bg-background/75 backdrop-blur-md rounded-lg"
+        className="relative z-10 max-w-6xl mx-auto px-6 sm:px-10 py-[2.75rem] sm:py-[3.85rem] bg-background/75 backdrop-blur-md rounded-lg shadow-[0_0_50px_rgba(255,255,255,0.1),0_14px_40px_rgba(0,0,0,0.4)]"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
@@ -168,8 +168,9 @@ export default function HeroSection({ onAsteriskHover }) {
             </div>
           </div>
 
-          <div className="relative mt-[0.825rem] text-secondary text-[0.7rem] sm:text-[1.3rem] md:text-[1.75rem] font-medium tracking-[0.05em] whitespace-nowrap">
-            Probabilistic Intelligence <span className="font-bold text-[#0d4f57]">[PI]</span>
+          <div className="relative mt-[1.65rem] sm:mt-[2.5rem] flex items-baseline justify-between text-secondary text-[0.7rem] sm:text-[1.3rem] md:text-[1.75rem] font-medium tracking-[0.05em]">
+            <span className="whitespace-nowrap">Probabilistic Intelligence</span>
+            <span className="font-bold text-[#0d4f57] whitespace-nowrap">[PI]</span>
           </div>
         </div>
 
