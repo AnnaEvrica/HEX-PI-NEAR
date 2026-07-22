@@ -120,7 +120,7 @@ export default function HeroSection({ onAsteriskHover }) {
         </div>
 
         {/* Title block — two balanced rows: headline word (left) · system label (right) */}
-        <div className="relative mt-4">
+        <div className="relative mt-10 sm:mt-14">
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <ProbabilityMotif />
             <ResonanceMotif />
@@ -130,7 +130,7 @@ export default function HeroSection({ onAsteriskHover }) {
             {/* Row 1 — "The" · [HEX6-BLE] (same font/size, soft white glow) */}
             <div className="flex items-baseline justify-between gap-4">
               <motion.h2
-                className="text-[2rem] sm:text-[3rem] md:text-[4.5rem] lg:text-[6.5rem] xl:text-[8rem] leading-[0.9] font-bold tracking-tight text-foreground"
+                className="text-[3.75rem] sm:text-[5rem] md:text-[7rem] lg:text-[10.5rem] xl:text-[11rem] leading-[0.9] font-bold tracking-tight text-foreground"
                 style={{ textShadow: '0 2px 18px rgba(0,0,0,0.45)' }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -139,7 +139,7 @@ export default function HeroSection({ onAsteriskHover }) {
                 The
               </motion.h2>
               <motion.span
-                className="text-white/85 font-bold tracking-tight text-[2rem] sm:text-[3rem] md:text-[4.5rem] lg:text-[6.5rem] xl:text-[8rem] leading-[0.9] whitespace-nowrap"
+                className="text-white/85 font-bold tracking-tight text-[1.25rem] sm:text-[1.67rem] md:text-[2.33rem] lg:text-[3.5rem] xl:text-[3.67rem] leading-[0.9] whitespace-nowrap"
                 style={{ textShadow: '0 0 24px rgba(255,255,255,0.5), 0 2px 14px rgba(0,0,0,0.65)' }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -152,7 +152,7 @@ export default function HeroSection({ onAsteriskHover }) {
             {/* Row 2 — "Model*" · [BLE: Binaureal Linguistic Engine] (balanced) */}
             <div className="flex items-baseline justify-between gap-4">
               <motion.h2
-                className="text-[2rem] sm:text-[3rem] md:text-[4.5rem] lg:text-[6.5rem] xl:text-[8rem] leading-[0.9] font-bold tracking-tight text-foreground"
+                className="text-[3.75rem] sm:text-[5rem] md:text-[7rem] lg:text-[10.5rem] xl:text-[11rem] leading-[0.9] font-bold tracking-tight text-foreground"
                 style={{ textShadow: '0 2px 18px rgba(0,0,0,0.45)' }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -169,7 +169,7 @@ export default function HeroSection({ onAsteriskHover }) {
                 </span>
               </motion.h2>
               <motion.span
-                className="text-white/70 font-semibold tracking-tight text-[0.75rem] sm:text-[0.95rem] md:text-[1.2rem] lg:text-[1.5rem] leading-tight whitespace-nowrap"
+                className="text-white/70 font-semibold tracking-tight text-[0.625rem] sm:text-[0.83rem] md:text-[1.17rem] lg:text-[1.75rem] xl:text-[1.83rem] leading-tight min-w-0 text-right whitespace-normal sm:whitespace-nowrap"
                 style={{ textShadow: '0 0 16px rgba(255,255,255,0.35), 0 2px 10px rgba(0,0,0,0.6)' }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
