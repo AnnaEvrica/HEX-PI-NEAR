@@ -44,9 +44,11 @@ export default function Landing() {
 
       {/* Footer */}
       <footer className="border-t border-border py-8 sm:py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between text-xs text-secondary gap-4 sm:gap-6">
-          <p>HEX6 BLE © 2026 · Developed by Evrica Technologies Inc.</p>
-          <div className="flex gap-6 sm:gap-8 flex-wrap justify-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col gap-4 sm:gap-6">
+          <p className="text-xs text-secondary max-w-3xl leading-relaxed">
+            The Model is an experimental Probabilistic Intelligence [PI] framework proposing a systems methodology for machine learning. It integrates probabilistic inference, semantic analysis, and transformer-based language models within a unified architecture for computational reasoning under uncertainty. It unifies probabilistic inference, semantic analysis, and transformer-based language models within a layered computational architecture. © Evrica Technologies Inc. 2026
+          </p>
+          <div className="flex gap-6 sm:gap-8 flex-wrap justify-center md:justify-start text-xs text-secondary">
             <button onClick={() => setOpenPolicy('terms')} className="hover:text-foreground transition-colors">
               Terms of Service
             </button>

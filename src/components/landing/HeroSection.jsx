@@ -1,5 +1,5 @@
-import { motion, useScroll, useSpring, useTransform, useMotionValue, useMotionValueEvent } from 'framer-motion';
-import { useMemo, useRef, useLayoutEffect } from 'react';
+import { motion } from 'framer-motion';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import SignaturePatternBackground from '@/components/landing/SignaturePatternBackground';
@@ -87,32 +87,12 @@ function ResonanceMotif() {
   );
 }
 
-// PI — radiating concentric pulses behind the result symbol
-function PIMotif() {
-  return (
-    <svg viewBox="0 0 200 200" className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid meet">
-      {[0, 1, 2, 3].map((i) => (
-        <motion.circle
-          key={i}
-          cx="100" cy="100" fill="none"
-          className="text-accent"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          initial={{ r: 8, opacity: 0.4 }}
-          animate={{ r: [8, 95], opacity: [0.4, 0] }}
-          transition={{ duration: 3, repeat: Infinity, delay: i * 0.75, ease: 'easeOut' }}
-        />
-      ))}
-    </svg>
-  );
-}
-
 function HeroWord({ word, motif, delay }) {
   return (
     <div className="relative flex items-center justify-center py-2 sm:py-3">
       <div className="absolute inset-0">{motif}</div>
       <motion.h2
-        className="relative text-5xl sm:text-7xl md:text-8xl font-semibold tracking-tight text-foreground"
+        className="relative text-[8rem] sm:text-[12rem] md:text-[15rem] leading-[0.85] font-bold tracking-tight text-foreground"
         style={{ textShadow: '0 2px 18px rgba(0,0,0,0.45)' }}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -124,66 +104,17 @@ function HeroWord({ word, motif, delay }) {
   );
 }
 
-function Operator({ op, delay }) {
-  return (
-    <motion.div
-      className="flex items-center justify-center py-0.5"
-      initial={{ opacity: 0, scale: 0.6 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5, delay }}
-    >
-      <span className="text-3xl sm:text-5xl font-bold text-accent/80">{op}</span>
-    </motion.div>
-  );
-}
-
 export default function HeroSection() {
   const navigate = useNavigate();
-  const heroRef = useRef(null);
-  const containerRef = useRef(null);
-  const probRef = useRef(null);
-  const intelRef = useRef(null);
-  const ampLeft = useRef(0);
-  const ampRight = useRef(0);
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
-  const smooth = useSpring(scrollYProgress, { stiffness: 90, damping: 18, mass: 0.6 });
-  const leftX = useMotionValue(0);
-  const rightX = useMotionValue(0);
-  const depth = useTransform(smooth, [0, 1], [-80, 0]);
-  const rotY = useTransform(smooth, [0, 1], [10, 0]);
-
-  const applyX = (v) => {
-    leftX.set(-ampLeft.current * (1 - v));
-    rightX.set(ampRight.current * (1 - v));
-  };
-  useMotionValueEvent(smooth, 'change', applyX);
-
-  useLayoutEffect(() => {
-    const measure = () => {
-      const cw = containerRef.current?.clientWidth ?? 0;
-      const pw = probRef.current?.offsetWidth ?? 0;
-      const iw = intelRef.current?.offsetWidth ?? 0;
-      const buffer = 8;
-      ampLeft.current = Math.max(0, (cw - pw) / 2 - buffer);
-      ampRight.current = Math.max(0, (cw - iw) / 2 - buffer);
-      applyX(smooth.get());
-    };
-    measure();
-    window.addEventListener('resize', measure);
-    const ro = new ResizeObserver(measure);
-    if (containerRef.current) ro.observe(containerRef.current);
-    if (probRef.current) ro.observe(probRef.current);
-    if (intelRef.current) ro.observe(intelRef.current);
-    return () => { window.removeEventListener('resize', measure); ro.disconnect(); };
-  }, []);
+  const [piHover, setPiHover] = useState(false);
+  const piColor = piHover ? 'text-accent' : 'text-accent/55';
 
   return (
-    <section ref={heroRef} className="relative w-full overflow-hidden pt-10 sm:pt-14 md:pt-20 pb-10 sm:pb-16">
-      {/* Full-bleed signature-pattern background */}
+    <section className="relative w-full overflow-hidden pt-10 sm:pt-14 md:pt-20 pb-10 sm:pb-16">
       <SignaturePatternBackground />
 
       <motion.div
-        className="relative z-10 max-w-4xl mx-auto px-6 sm:px-10 py-10 sm:py-14 bg-background/75 backdrop-blur-md rounded-lg"
+        className="relative z-10 max-w-6xl mx-auto px-6 sm:px-10 py-10 sm:py-14 bg-background/75 backdrop-blur-md rounded-lg"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
@@ -209,51 +140,45 @@ export default function HeroSection() {
           <HeroWord word="The Model" motif={<><ProbabilityMotif /><ResonanceMotif /></>} delay={0.1} />
         </div>
 
-        {/* Right-aligned supporting block: subtitle + CTAs + tagline */}
-        <div className="flex flex-col items-end text-right mt-6">
-          <motion.div
-            ref={containerRef}
-            className="relative flex w-full items-center justify-center"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.55 }}
+        {/* Probabilistic Intelligence [PI] — small, tight, letter-spaced, muted orange */}
+        <div className="mt-6 flex flex-col items-center text-accent/55 leading-[0.95] tracking-[0.05em] font-medium text-[0.7rem] sm:text-[1.3rem] md:text-[1.75rem]">
+          <span>Probabilistic</span>
+          <span>
+            Intelligence{' '}
+            <span
+              onMouseEnter={() => setPiHover(true)}
+              onMouseLeave={() => setPiHover(false)}
+              className={`cursor-default transition-colors duration-300 ${piColor}`}
+            >
+              [PI]
+            </span>
+          </span>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-[30rem] mx-auto pt-8">
+          <button
+            onClick={() => navigate('/discover')}
+            className="flex-1 inline-flex items-center justify-center px-6 py-3 sm:py-4 rounded-sm border-2 border-accent bg-white text-black font-medium hover:bg-accent/10 transition-all text-sm sm:text-base md:text-lg"
           >
-            <div className="relative flex flex-col items-center gap-2" style={{ perspective: 900 }}>
-              <div className="absolute inset-0 -m-8 sm:-m-10"><PIMotif /></div>
-              <motion.span
-                ref={probRef}
-                className="relative text-[1.875rem] sm:text-[3.9375rem] md:text-[5.25rem] font-light text-secondary tracking-tight inline-block"
-                style={{ x: leftX, z: depth, rotateY: rotY }}
-              >
-                Probabilistic
-              </motion.span>
-              <motion.span
-                ref={intelRef}
-                className="relative text-[1.875rem] sm:text-[3.9375rem] md:text-[5.25rem] font-light text-secondary tracking-tight inline-block"
-                style={{ x: rightX, z: depth, rotateY: rotY }}
-              >
-                Intelligence
-              </motion.span>
-            </div>
-          </motion.div>
+            Discover
+          </button>
+          <button
+            onClick={() => base44.auth.loginWithProvider('google', '/app')}
+            className="flex-1 inline-flex items-center justify-center px-6 py-3 sm:py-4 rounded-sm bg-accent text-accent-foreground border-2 border-white font-medium hover:bg-accent/90 transition-all text-sm sm:text-base md:text-lg shadow-lg shadow-accent/25"
+            style={{ boxShadow: '0 2px 18px rgba(0,0,0,0.35), 0 0 24px rgba(255,106,0,0.15)' }}
+          >
+            Enter
+          </button>
+        </div>
 
-          <div className="self-center flex flex-col sm:flex-row gap-3 w-full sm:w-[30rem] pt-8">
-            <button
-              onClick={() => navigate('/discover')}
-              className="flex-1 inline-flex items-center justify-center px-6 py-3 sm:py-4 rounded-sm border-2 border-accent bg-white text-black font-medium hover:bg-accent/10 transition-all text-sm sm:text-base md:text-lg"
-            >
-              Discover
-            </button>
-            <button
-              onClick={() => base44.auth.loginWithProvider('google', '/app')}
-              className="flex-1 inline-flex items-center justify-center px-6 py-3 sm:py-4 rounded-sm bg-accent text-accent-foreground border-2 border-white font-medium hover:bg-accent/90 transition-all text-sm sm:text-base md:text-lg shadow-lg shadow-accent/25"
-              style={{ boxShadow: '0 2px 18px rgba(0,0,0,0.35), 0 0 24px rgba(255,106,0,0.15)' }}
-            >
-              Enter
-            </button>
-          </div>
-
-          <span className="font-semibold text-accent text-xs sm:text-sm tracking-tight mt-4">[HEX6-BLE PI-US · PROBABILISTIC INTELLIGENCE MODEL V5.5]</span>
+        <div className="flex justify-center">
+          <span
+            className={`font-semibold tracking-tight mt-4 text-xs sm:text-sm transition-colors duration-300 ${
+              piHover ? 'text-accent' : 'text-accent/50'
+            }`}
+          >
+            [HEX6-BLE PI-US · PROBABILISTIC INTELLIGENCE MODEL V5.5]
+          </span>
         </div>
       </motion.div>
     </section>
