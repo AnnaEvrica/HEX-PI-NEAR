@@ -218,18 +218,18 @@ export default function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.55 }}
           >
-            <div className="relative flex flex-col items-center" style={{ perspective: 900 }}>
+            <div className="relative flex flex-col items-center gap-2" style={{ perspective: 900 }}>
               <div className="absolute inset-0 -m-8 sm:-m-10"><PIMotif /></div>
               <motion.span
                 ref={probRef}
-                className="relative text-[1.875rem] sm:text-[3.9375rem] md:text-[5.25rem] font-bold text-secondary tracking-tight inline-block"
+                className="relative text-[1.875rem] sm:text-[3.9375rem] md:text-[5.25rem] font-light text-secondary tracking-tight inline-block"
                 style={{ x: leftX, z: depth, rotateY: rotY }}
               >
                 Probabilistic
               </motion.span>
               <motion.span
                 ref={intelRef}
-                className="relative text-[1.875rem] sm:text-[3.9375rem] md:text-[5.25rem] font-bold text-secondary tracking-tight inline-block"
+                className="relative text-[1.875rem] sm:text-[3.9375rem] md:text-[5.25rem] font-light text-secondary tracking-tight inline-block"
                 style={{ x: rightX, z: depth, rotateY: rotY }}
               >
                 Intelligence
