@@ -6,34 +6,54 @@ import SignaturePatternBackground from '@/components/landing/SignaturePatternBac
 
 const POOL = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ∑∫π∞≈±∇√∂λμ';
 
-// Probability — realistic falling data stream (matrix-style columns of digits)
+// Probability — orange matrix stream of digits, letters & words flowing BOTH
+// directions (some columns fall top→bottom, some rise bottom→top).
 function ProbabilityMotif() {
+  const WORDS = ['HEX6', 'PI', 'PROB', 'RESONANCE', 'MODEL', 'BLE', 'CORE', 'STATE'];
   const columns = useMemo(() => {
     const COLS = 18;
-    return Array.from({ length: COLS }, (_, c) => ({
-      left: (c / (COLS - 1)) * 94 + 3,
-      delay: (c * 0.43) % 5,
-      dur: 2.2 + (c % 6) * 0.45,
-      size: 9 + (c % 4) * 3,
-      chars: Array.from({ length: 5 }, () => POOL[Math.floor(Math.random() * POOL.length)]),
-    }));
+    return Array.from({ length: COLS }, (_, c) => {
+      const isWord = c % 4 === 0;
+      return {
+        left: (c / (COLS - 1)) * 94 + 3,
+        delay: (c * 0.43) % 5,
+        dur: 2.2 + (c % 6) * 0.45,
+        size: 9 + (c % 4) * 3,
+        up: c % 2 === 0,
+        isWord,
+        word: isWord ? WORDS[c % WORDS.length] : '',
+        chars: Array.from({ length: 5 }, () => POOL[Math.floor(Math.random() * POOL.length)]),
+      };
+    });
   }, []);
   return (
     <div className="absolute inset-0 overflow-hidden">
       {columns.map((col, ci) => (
         <div key={ci} className="absolute top-0 flex flex-col items-center leading-none" style={{ left: `${col.left}%` }}>
-          {col.chars.map((ch, i) => (
+          {col.isWord ? (
             <motion.span
-              key={i}
-              className="font-mono font-bold text-accent"
+              className="font-mono font-bold text-accent whitespace-nowrap"
               style={{ fontSize: `${col.size}px` }}
-              initial={{ y: -30, opacity: 0 }}
-              animate={{ y: [-30, 150], opacity: [0, 0.45 - i * 0.06, 0] }}
-              transition={{ duration: col.dur, repeat: Infinity, delay: col.delay + i * 0.16, ease: 'linear' }}
+              initial={{ y: col.up ? 150 : -30, opacity: 0 }}
+              animate={{ y: col.up ? [150, -30] : [-30, 150], opacity: [0, 0.5, 0] }}
+              transition={{ duration: col.dur, repeat: Infinity, delay: col.delay, ease: 'linear' }}
             >
-              {ch}
+              {col.word}
             </motion.span>
-          ))}
+          ) : (
+            col.chars.map((ch, i) => (
+              <motion.span
+                key={i}
+                className="font-mono font-bold text-accent"
+                style={{ fontSize: `${col.size}px` }}
+                initial={{ y: col.up ? 150 : -30, opacity: 0 }}
+                animate={{ y: col.up ? [150, -30] : [-30, 150], opacity: [0, 0.45 - i * 0.06, 0] }}
+                transition={{ duration: col.dur, repeat: Infinity, delay: col.delay + i * 0.16, ease: 'linear' }}
+              >
+                {ch}
+              </motion.span>
+            ))
+          )}
         </div>
       ))}
     </div>
@@ -160,10 +180,10 @@ export default function HeroSection() {
             transition={{ duration: 0.6, delay: 0.55 }}
           >
             <div className="absolute inset-0 -m-8 sm:-m-10"><PIMotif /></div>
-            <span className="relative text-[2.55rem] sm:text-[3.825rem] md:text-[5.1rem] font-bold text-secondary tracking-tight">Probabilistic Intelligence</span>
+            <span className="relative text-[2.625rem] sm:text-[3.9375rem] md:text-[5.25rem] font-bold text-secondary tracking-tight">Probabilistic Intelligence</span>
           </motion.div>
 
-          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-[30rem] pt-8">
+          <div className="self-center flex flex-col sm:flex-row gap-3 w-full sm:w-[30rem] pt-8">
             <button
               onClick={() => navigate('/discover')}
               className="flex-1 inline-flex items-center justify-center px-6 py-3 sm:py-4 rounded-sm border-2 border-accent bg-white text-black font-medium hover:bg-accent/10 transition-all text-sm sm:text-base md:text-lg"
