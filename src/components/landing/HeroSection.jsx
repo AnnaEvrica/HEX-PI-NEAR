@@ -101,9 +101,10 @@ export default function HeroSection({ onAsteriskHover }) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
+        style={{ textShadow: '0 0 10px rgba(255,255,255,0.25), 0 1px 3px rgba(0,0,0,0.45)' }}
       >
         <div className="flex justify-start mt-[1.375rem] sm:mt-[1.925rem]">
-          <span className="text-xs sm:text-sm uppercase tracking-[0.12em] text-secondary whitespace-nowrap">
+          <span className="text-xs sm:text-sm uppercase tracking-[0.12em] text-secondary font-medium whitespace-nowrap">
             Welcome to
           </span>
         </div>
@@ -120,7 +121,7 @@ export default function HeroSection({ onAsteriskHover }) {
             <div className="flex items-baseline justify-between gap-4">
               <motion.h2
                 className="text-[3.75rem] sm:text-[5rem] md:text-[7rem] lg:text-[10.5rem] xl:text-[11rem] leading-[0.9] font-bold tracking-tight text-foreground"
-                style={{ textShadow: '0 2px 18px rgba(0,0,0,0.45)' }}
+                style={{ textShadow: '0 0 14px rgba(255,255,255,0.3), 0 2px 18px rgba(0,0,0,0.45)' }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.1 }}
@@ -142,7 +143,7 @@ export default function HeroSection({ onAsteriskHover }) {
             <div className="flex items-baseline justify-between gap-4">
               <motion.h2
                 className="text-[3.75rem] sm:text-[5rem] md:text-[7rem] lg:text-[10.5rem] xl:text-[11rem] leading-[0.9] font-bold tracking-tight text-foreground"
-                style={{ textShadow: '0 2px 18px rgba(0,0,0,0.45)' }}
+                style={{ textShadow: '0 0 14px rgba(255,255,255,0.3), 0 2px 18px rgba(0,0,0,0.45)' }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.18 }}
@@ -177,14 +178,14 @@ export default function HeroSection({ onAsteriskHover }) {
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-[30rem] mx-auto pt-[2.2rem]">
           <button
             onClick={() => navigate('/discover')}
-            className="flex-1 inline-flex items-center justify-center px-6 py-3 sm:py-4 rounded-sm border-2 border-accent bg-white text-black font-medium hover:bg-accent/10 transition-all text-sm sm:text-base md:text-lg"
+            className="flex-1 inline-flex items-center justify-center px-6 py-3 sm:py-4 rounded-sm border-2 border-accent bg-white text-black font-medium hover:bg-accent/10 transition-all text-sm sm:text-base md:text-lg shadow-[0_0_14px_rgba(255,255,255,0.2)]"
           >
             Discover
           </button>
           <button
             onClick={() => base44.auth.loginWithProvider('google', '/app')}
             className="flex-1 inline-flex items-center justify-center px-6 py-3 sm:py-4 rounded-sm bg-accent text-accent-foreground border-2 border-white font-medium hover:bg-accent/90 transition-all text-sm sm:text-base md:text-lg shadow-lg shadow-accent/25"
-            style={{ boxShadow: '0 2px 18px rgba(0,0,0,0.35), 0 0 24px rgba(255,106,0,0.15)' }}
+            style={{ boxShadow: '0 2px 18px rgba(0,0,0,0.35), 0 0 16px rgba(255,255,255,0.25), 0 0 24px rgba(255,106,0,0.15)' }}
           >
             Enter
           </button>
