@@ -33,7 +33,7 @@ function ProbabilityMotif() {
           {col.isWord ? (
             <motion.span
               className="font-mono font-bold text-accent whitespace-nowrap"
-              style={{ fontSize: `${col.size}px` }}
+              style={{ fontSize: `${col.size}px`, textShadow: '0 0 6px rgba(255,107,53,0.55), 0 1px 2px rgba(0,0,0,0.45)' }}
               initial={{ y: col.up ? 150 : -30, opacity: 0 }}
               animate={{ y: col.up ? [150, -30] : [-30, 150], opacity: [0, 0.5, 0] }}
               transition={{ duration: col.dur, repeat: Infinity, delay: col.delay, ease: 'linear' }}
@@ -45,7 +45,7 @@ function ProbabilityMotif() {
               <motion.span
                 key={i}
                 className="font-mono font-bold text-accent"
-                style={{ fontSize: `${col.size}px` }}
+                style={{ fontSize: `${col.size}px`, textShadow: '0 0 6px rgba(255,107,53,0.55), 0 1px 2px rgba(0,0,0,0.45)' }}
                 initial={{ y: col.up ? 150 : -30, opacity: 0 }}
                 animate={{ y: col.up ? [150, -30] : [-30, 150], opacity: [0, 0.45 - i * 0.06, 0] }}
                 transition={{ duration: col.dur, repeat: Infinity, delay: col.delay + i * 0.16, ease: 'linear' }}
@@ -87,8 +87,6 @@ function ResonanceMotif() {
   );
 }
 
-const WHITE_SHADOW = '0 1px 2px rgba(0,0,0,0.9), 0 2px 14px rgba(0,0,0,0.7)';
-
 export default function HeroSection({ onAsteriskHover }) {
   const navigate = useNavigate();
 
@@ -129,13 +127,13 @@ export default function HeroSection({ onAsteriskHover }) {
                 The
               </motion.h2>
               <motion.span
-                className="text-white/85 font-bold tracking-tight text-[1.25rem] sm:text-[1.67rem] md:text-[2.33rem] lg:text-[3.5rem] xl:text-[3.67rem] leading-[0.9] whitespace-nowrap"
-                style={{ textShadow: '0 0 24px rgba(255,255,255,0.5), 0 2px 14px rgba(0,0,0,0.65)' }}
+                className="text-white/75 font-bold tracking-tight text-[1.25rem] sm:text-[1.67rem] md:text-[2.33rem] lg:text-[3.5rem] xl:text-[3.67rem] leading-[0.9] whitespace-nowrap"
+                style={{ textShadow: '0 0 24px rgba(255,255,255,0.55), 0 1px 0 rgba(255,255,255,0.25), 0 2px 14px rgba(0,0,0,0.65)' }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.2 }}
               >
-                <span className="text-white">[</span><span className="text-[#f4f1dd]">HEX6</span><span className="text-white">-BLE]</span>
+                <span className="text-white/75">[</span><span className="text-[#f4f1dd]/75">HEX6</span><span className="text-white/75">-BLE]</span>
               </motion.span>
             </div>
 
@@ -159,8 +157,8 @@ export default function HeroSection({ onAsteriskHover }) {
                 </span>
               </motion.h2>
               <motion.span
-                className="text-white/70 font-semibold tracking-tight text-[0.625rem] sm:text-[0.83rem] md:text-[1.17rem] lg:text-[1.75rem] xl:text-[1.83rem] leading-tight min-w-0 text-right whitespace-normal sm:whitespace-nowrap"
-                style={{ textShadow: '0 0 16px rgba(255,255,255,0.35), 0 2px 10px rgba(0,0,0,0.6)' }}
+                className="text-white/60 font-semibold tracking-tight text-[0.625rem] sm:text-[0.83rem] md:text-[1.17rem] lg:text-[1.75rem] xl:text-[1.83rem] leading-tight min-w-0 text-right whitespace-normal sm:whitespace-nowrap"
+                style={{ textShadow: '0 0 16px rgba(255,255,255,0.4), 0 1px 0 rgba(255,255,255,0.2), 0 2px 10px rgba(0,0,0,0.6)' }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.28 }}
@@ -193,12 +191,12 @@ export default function HeroSection({ onAsteriskHover }) {
 
         {/* Version line — multi-colored segments */}
         <div className="flex justify-center">
-          <span className="font-semibold tracking-tight mt-[1.1rem] text-xs sm:text-sm">
-            <span className="text-secondary">[</span>
-            <span className="font-bold text-secondary uppercase">VERSION:</span>
-            <span className="font-bold" style={{ textShadow: WHITE_SHADOW }}>{' '}<span className="text-[#f4f1dd]">HEX6</span><span className="text-white">-BLE</span></span>
-            <span className="text-[#0d4f57] font-semibold"> PI-US</span>
-            <span className="text-secondary"> · PROBABILISTIC INTELLIGENCE MODEL <span className="font-bold">V5.5</span>]</span>
+          <span className="font-semibold tracking-tight mt-[1.1rem] text-xs sm:text-sm text-secondary">
+            <span>[</span>
+            <span className="font-bold uppercase">VERSION:</span>
+            <span className="font-bold">{' '}HEX6-BLE</span>
+            <span className="font-semibold"> PI-US</span>
+            <span> · PROBABILISTIC INTELLIGENCE MODEL <span className="font-bold">V5.5</span>]</span>
           </span>
         </div>
       </motion.div>
