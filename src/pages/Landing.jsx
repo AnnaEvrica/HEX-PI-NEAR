@@ -17,7 +17,7 @@ export default function Landing() {
         style={{ paddingTop: 'env(safe-area-inset-top)' }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-5 pb-3 sm:py-4 flex items-center justify-between">
-          <div className="text-lg sm:text-xl font-bold tracking-tight">HEX6 BLE</div>
+          <img src="https://media.base44.com/images/public/69eef3d514386627566a9bf6/a8d57d01f_evrica-logo.png" alt="Evrica" className="h-7 sm:h-8 w-7 sm:w-8 object-contain rounded-sm" />
           <div className="flex items-center gap-2 sm:gap-3">
             <button
               onClick={() => setShowSearch(true)}

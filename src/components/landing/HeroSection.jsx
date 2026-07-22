@@ -112,7 +112,7 @@ function HeroWord({ word, motif, delay }) {
     <div className="relative flex items-center justify-center py-2 sm:py-3">
       <div className="absolute inset-0">{motif}</div>
       <motion.h2
-        className="relative text-5xl sm:text-7xl md:text-8xl font-bold tracking-tight text-foreground"
+        className="relative text-5xl sm:text-7xl md:text-8xl font-semibold tracking-tight text-foreground"
         style={{ textShadow: '0 2px 18px rgba(0,0,0,0.45)' }}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -253,7 +253,7 @@ export default function HeroSection() {
             </button>
           </div>
 
-          <span className="font-bold text-accent text-xs sm:text-sm tracking-tight mt-4">[HEX6-BLE PI-US · PROBABILISTIC INTELLIGENCE MODEL V5.5]</span>
+          <span className="font-semibold text-accent text-xs sm:text-sm tracking-tight mt-4">[HEX6-BLE PI-US · PROBABILISTIC INTELLIGENCE MODEL V5.5]</span>
         </div>
       </motion.div>
     </section>
