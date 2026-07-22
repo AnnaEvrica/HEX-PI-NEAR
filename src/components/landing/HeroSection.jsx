@@ -1,5 +1,5 @@
-import { motion, useScroll, useSpring, useTransform } from 'framer-motion';
-import { useMemo, useRef } from 'react';
+import { motion, useScroll, useSpring, useTransform, useMotionValue, useMotionValueEvent } from 'framer-motion';
+import { useMemo, useRef, useLayoutEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import SignaturePatternBackground from '@/components/landing/SignaturePatternBackground';
@@ -140,12 +140,42 @@ function Operator({ op, delay }) {
 export default function HeroSection() {
   const navigate = useNavigate();
   const heroRef = useRef(null);
+  const containerRef = useRef(null);
+  const probRef = useRef(null);
+  const intelRef = useRef(null);
+  const ampLeft = useRef(0);
+  const ampRight = useRef(0);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
   const smooth = useSpring(scrollYProgress, { stiffness: 90, damping: 18, mass: 0.6 });
-  const leftX = useTransform(smooth, [0, 1], [-36, 0]);
-  const rightX = useTransform(smooth, [0, 1], [36, 0]);
+  const leftX = useMotionValue(0);
+  const rightX = useMotionValue(0);
   const depth = useTransform(smooth, [0, 1], [-80, 0]);
   const rotY = useTransform(smooth, [0, 1], [10, 0]);
+
+  const applyX = (v) => {
+    leftX.set(-ampLeft.current * (1 - v));
+    rightX.set(ampRight.current * (1 - v));
+  };
+  useMotionValueEvent(smooth, 'change', applyX);
+
+  useLayoutEffect(() => {
+    const measure = () => {
+      const cw = containerRef.current?.clientWidth ?? 0;
+      const pw = probRef.current?.offsetWidth ?? 0;
+      const iw = intelRef.current?.offsetWidth ?? 0;
+      const buffer = 8;
+      ampLeft.current = Math.max(0, (cw - pw) / 2 - buffer);
+      ampRight.current = Math.max(0, (cw - iw) / 2 - buffer);
+      applyX(smooth.get());
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    const ro = new ResizeObserver(measure);
+    if (containerRef.current) ro.observe(containerRef.current);
+    if (probRef.current) ro.observe(probRef.current);
+    if (intelRef.current) ro.observe(intelRef.current);
+    return () => { window.removeEventListener('resize', measure); ro.disconnect(); };
+  }, []);
 
   return (
     <section ref={heroRef} className="relative w-full overflow-hidden pt-10 sm:pt-14 md:pt-20 pb-10 sm:pb-16">
@@ -182,6 +212,7 @@ export default function HeroSection() {
         {/* Right-aligned supporting block: subtitle + CTAs + tagline */}
         <div className="flex flex-col items-end text-right mt-6">
           <motion.div
+            ref={containerRef}
             className="relative flex w-full items-center justify-center"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -190,12 +221,14 @@ export default function HeroSection() {
             <div className="relative flex flex-col items-center" style={{ perspective: 900 }}>
               <div className="absolute inset-0 -m-8 sm:-m-10"><PIMotif /></div>
               <motion.span
+                ref={probRef}
                 className="relative text-[1.875rem] sm:text-[3.9375rem] md:text-[5.25rem] font-bold text-secondary tracking-tight inline-block"
                 style={{ x: leftX, z: depth, rotateY: rotY }}
               >
                 Probabilistic
               </motion.span>
               <motion.span
+                ref={intelRef}
                 className="relative text-[1.875rem] sm:text-[3.9375rem] md:text-[5.25rem] font-bold text-secondary tracking-tight inline-block"
                 style={{ x: rightX, z: depth, rotateY: rotY }}
               >
