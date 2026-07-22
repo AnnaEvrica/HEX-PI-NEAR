@@ -194,10 +194,10 @@ export default function HeroSection({ onAsteriskHover }) {
         <div className="flex justify-center">
           <span className="font-semibold tracking-tight mt-[1.1rem] text-xs sm:text-sm">
             <span className="text-secondary">[</span>
-            <span className="font-bold text-accent">Version:</span>
+            <span className="font-bold text-secondary uppercase">VERSION:</span>
             <span className="font-bold" style={{ textShadow: WHITE_SHADOW }}>{' '}<span className="text-[#f4f1dd]">HEX6</span><span className="text-white">-BLE</span></span>
             <span className="text-[#0d4f57] font-semibold"> PI-US</span>
-            <span className="text-secondary"> · PROBABILISTIC INTELLIGENCE MODEL V5.5]</span>
+            <span className="text-secondary"> · PROBABILISTIC INTELLIGENCE MODEL <span className="font-bold">V5.5</span>]</span>
           </span>
         </div>
       </motion.div>
