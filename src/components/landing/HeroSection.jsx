@@ -115,11 +115,11 @@ export default function HeroSection({ onAsteriskHover }) {
             <ResonanceMotif />
           </div>
 
-          <div className="relative flex flex-col gap-[0.75rem] sm:gap-[1.25rem]">
+          <div className="relative flex flex-col">
             {/* Row 1 — "The" · [HEX6-BLE] (same font/size, soft white glow) */}
             <div className="flex items-baseline justify-between gap-4">
               <motion.h2
-                className="text-[5.625rem] sm:text-[7.5rem] md:text-[10.5rem] lg:text-[15.75rem] xl:text-[16.5rem] leading-[0.9] font-bold tracking-tight text-foreground"
+                className="text-[3.75rem] sm:text-[5rem] md:text-[7rem] lg:text-[10.5rem] xl:text-[11rem] leading-[0.9] font-bold tracking-tight text-foreground"
                 style={{ textShadow: '0 2px 18px rgba(0,0,0,0.45)' }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -141,7 +141,7 @@ export default function HeroSection({ onAsteriskHover }) {
             {/* Row 2 — "Model*" · [BLE: Binaureal Linguistic Engine] (balanced) */}
             <div className="flex items-baseline justify-between gap-4">
               <motion.h2
-                className="text-[5.625rem] sm:text-[7.5rem] md:text-[10.5rem] lg:text-[15.75rem] xl:text-[16.5rem] leading-[0.9] font-bold tracking-tight text-foreground"
+                className="text-[3.75rem] sm:text-[5rem] md:text-[7rem] lg:text-[10.5rem] xl:text-[11rem] leading-[0.9] font-bold tracking-tight text-foreground"
                 style={{ textShadow: '0 2px 18px rgba(0,0,0,0.45)' }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -174,17 +174,17 @@ export default function HeroSection({ onAsteriskHover }) {
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-[30rem] mx-auto pt-[3.3rem] pb-[1.65rem]">
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-[30rem] mx-auto pt-[2.2rem]">
           <button
             onClick={() => navigate('/discover')}
-            className="flex-1 inline-flex items-center justify-center px-6 py-3 sm:py-4 rounded-sm border-2 border-accent bg-[#f4f1dd] text-black font-medium hover:bg-black hover:text-[#f4f1dd] transition-all text-sm sm:text-base md:text-lg"
+            className="flex-1 inline-flex items-center justify-center px-6 py-3 sm:py-4 rounded-sm border-2 border-accent bg-white text-black font-medium hover:bg-accent/10 transition-all text-sm sm:text-base md:text-lg"
           >
             Discover
           </button>
           <button
             onClick={() => base44.auth.loginWithProvider('google', '/app')}
-            className="flex-1 inline-flex items-center justify-center px-6 py-3 sm:py-4 rounded-sm bg-[#0d4f57] text-white border-2 border-white font-medium hover:bg-white hover:text-[#0d4f57] hover:border-[#0d4f57] transition-all text-sm sm:text-base md:text-lg"
-            style={{ boxShadow: '0 2px 18px rgba(0,0,0,0.35), 0 0 24px rgba(13,79,87,0.2)' }}
+            className="flex-1 inline-flex items-center justify-center px-6 py-3 sm:py-4 rounded-sm bg-accent text-accent-foreground border-2 border-white font-medium hover:bg-accent/90 transition-all text-sm sm:text-base md:text-lg shadow-lg shadow-accent/25"
+            style={{ boxShadow: '0 2px 18px rgba(0,0,0,0.35), 0 0 24px rgba(255,106,0,0.15)' }}
           >
             Enter
           </button>
