@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import SignaturePatternBackground from '@/components/landing/SignaturePatternBackground';
@@ -87,27 +87,35 @@ function ResonanceMotif() {
   );
 }
 
-function HeroWord({ word, motif, delay }) {
+function HeroWord({ word, motif, delay, onAsteriskHover }) {
   return (
-    <div className="relative flex items-center justify-center py-2 sm:py-3">
+    <div className="relative flex items-center justify-start py-2 sm:py-3">
       <div className="absolute inset-0">{motif}</div>
       <motion.h2
-        className="relative text-[8rem] sm:text-[12rem] md:text-[15rem] leading-[0.85] font-bold tracking-tight text-foreground"
+        className="relative text-[3.25rem] sm:text-[6rem] md:text-[9rem] lg:text-[12rem] leading-[0.85] font-bold tracking-tight text-foreground"
         style={{ textShadow: '0 2px 18px rgba(0,0,0,0.45)' }}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, delay }}
       >
         {word}
+        <span
+          onMouseEnter={() => onAsteriskHover?.(true)}
+          onMouseLeave={() => onAsteriskHover?.(false)}
+          className="ml-1 text-accent align-super cursor-pointer transition-transform duration-200 hover:scale-125"
+          style={{ fontSize: '0.38em' }}
+        >
+          *
+        </span>
       </motion.h2>
     </div>
   );
 }
 
-export default function HeroSection() {
+const WHITE_SHADOW = '0 1px 2px rgba(0,0,0,0.9), 0 2px 14px rgba(0,0,0,0.7)';
+
+export default function HeroSection({ onAsteriskHover }) {
   const navigate = useNavigate();
-  const [piHover, setPiHover] = useState(false);
-  const piColor = piHover ? 'text-accent' : 'text-accent/55';
 
   return (
     <section className="relative w-full overflow-hidden pt-10 sm:pt-14 md:pt-20 pb-10 sm:pb-16">
@@ -124,7 +132,7 @@ export default function HeroSection() {
             href="https://evrica.tech"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-secondary hover:text-foreground transition-colors"
+            className="text-sm text-[#0a1929] hover:text-[#1c3a5e] transition-colors"
           >
             Developed by Evrica Technologies Inc.
           </a>
@@ -136,23 +144,28 @@ export default function HeroSection() {
           </span>
         </div>
 
-        <div className="mt-3">
-          <HeroWord word="The Model" motif={<><ProbabilityMotif /><ResonanceMotif /></>} delay={0.1} />
-        </div>
+        {/* Title row: The Model* (left) · HEX6-BLE (right) */}
+        <div className="mt-3 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col items-start">
+            <HeroWord
+              word="The Model"
+              motif={<><ProbabilityMotif /><ResonanceMotif /></>}
+              delay={0.1}
+              onAsteriskHover={onAsteriskHover}
+            />
+            <div className="mt-2 text-secondary text-[0.7rem] sm:text-[1.3rem] md:text-[1.75rem] font-medium tracking-[0.05em] whitespace-nowrap">
+              Probabilistic Intelligence <span className="font-bold text-secondary">[PI]</span>
+            </div>
+          </div>
 
-        {/* Probabilistic Intelligence [PI] — small, tight, letter-spaced, muted orange */}
-        <div className="mt-6 flex flex-col items-center text-accent/55 leading-[0.95] tracking-[0.05em] font-medium text-[0.7rem] sm:text-[1.3rem] md:text-[1.75rem]">
-          <span>Probabilistic</span>
-          <span>
-            Intelligence{' '}
+          <div className="self-end sm:self-center">
             <span
-              onMouseEnter={() => setPiHover(true)}
-              onMouseLeave={() => setPiHover(false)}
-              className={`cursor-default transition-colors duration-300 ${piColor}`}
+              className="text-white font-bold tracking-tight text-2xl sm:text-4xl md:text-5xl"
+              style={{ textShadow: WHITE_SHADOW }}
             >
-              [PI]
+              HEX6-BLE
             </span>
-          </span>
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-[30rem] mx-auto pt-8">
@@ -171,13 +184,16 @@ export default function HeroSection() {
           </button>
         </div>
 
+        {/* Version line — multi-colored segments */}
         <div className="flex justify-center">
-          <span
-            className={`font-semibold tracking-tight mt-4 text-xs sm:text-sm transition-colors duration-300 ${
-              piHover ? 'text-accent' : 'text-accent/50'
-            }`}
-          >
-            [HEX6-BLE PI-US · PROBABILISTIC INTELLIGENCE MODEL V5.5]
+          <span className="font-semibold tracking-tight mt-4 text-xs sm:text-sm">
+            <span className="text-secondary">[</span>
+            <span className="font-bold text-accent">Version:</span>
+            <span className="text-white font-bold" style={{ textShadow: WHITE_SHADOW }}>
+              {' '}HEX6-BLE
+            </span>
+            <span className="text-accent font-semibold"> PI-US</span>
+            <span className="text-secondary"> · PROBABILISTIC INTELLIGENCE MODEL V5.5]</span>
           </span>
         </div>
       </motion.div>
