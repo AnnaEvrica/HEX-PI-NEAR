@@ -158,13 +158,13 @@ export default function HeroSection({ onAsteriskHover }) {
             </div>
           </div>
 
-          <div className="self-end sm:self-center">
-            <span
-              className="text-white font-bold tracking-tight text-2xl sm:text-4xl md:text-5xl"
-              style={{ textShadow: WHITE_SHADOW }}
-            >
-              HEX6-BLE
-            </span>
+          <div className="self-end sm:self-center rounded-md bg-black/75 px-4 py-2 sm:px-5 sm:py-3 backdrop-blur-sm">
+            <div className="text-white font-bold tracking-tight text-2xl sm:text-3xl md:text-4xl leading-tight">
+              [HEX6-BLE]
+            </div>
+            <div className="text-white/90 text-[0.6rem] sm:text-xs md:text-sm tracking-tight mt-1 text-center whitespace-nowrap">
+              [BLE: Binaureal Linguistic Engine]
+            </div>
           </div>
         </div>
 
