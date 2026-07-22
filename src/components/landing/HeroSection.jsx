@@ -134,7 +134,7 @@ export default function HeroSection({ onAsteriskHover }) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.2 }}
               >
-                [HEX6-BLE]
+                <span className="text-white">[</span><span className="text-[#f4f1dd]">HEX6</span><span className="text-white">-BLE]</span>
               </motion.span>
             </div>
 
@@ -195,10 +195,8 @@ export default function HeroSection({ onAsteriskHover }) {
           <span className="font-semibold tracking-tight mt-[1.1rem] text-xs sm:text-sm">
             <span className="text-secondary">[</span>
             <span className="font-bold text-accent">Version:</span>
-            <span className="text-white font-bold" style={{ textShadow: WHITE_SHADOW }}>
-              {' '}HEX6-BLE
-            </span>
-            <span className="text-accent font-semibold"> PI-US</span>
+            <span className="font-bold" style={{ textShadow: WHITE_SHADOW }}>{' '}<span className="text-[#f4f1dd]">HEX6</span><span className="text-white">-BLE</span></span>
+            <span className="text-[#0d4f57] font-semibold"> PI-US</span>
             <span className="text-secondary"> · PROBABILISTIC INTELLIGENCE MODEL V5.5]</span>
           </span>
         </div>
