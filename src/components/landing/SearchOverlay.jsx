@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { X, Search } from 'lucide-react';
 
 // In-page search — best-practices lightweight index over the landing sections:
@@ -17,6 +18,7 @@ const INDEX = [
 
 export default function SearchOverlay({ onClose }) {
   const [q, setQ] = useState('');
+  const navigate = useNavigate();
 
   const results = useMemo(() => {
     const query = q.trim().toLowerCase();
@@ -35,8 +37,12 @@ export default function SearchOverlay({ onClose }) {
   }, [onClose]);
 
   const go = (target) => {
-    if (target === 'top') window.scrollTo({ top: 0, behavior: 'smooth' });
-    else document.getElementById(target)?.scrollIntoView({ behavior: 'smooth' });
+    if (target === 'top') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      onClose();
+      return;
+    }
+    navigate('/discover', { state: { scrollTo: target } });
     onClose();
   };
 

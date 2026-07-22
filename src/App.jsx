@@ -6,6 +6,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import Landing from '@/pages/Landing.jsx';
+import Discover from '@/pages/Discover.jsx';
 import ConsentFlow from '@/components/onboarding/ConsentFlow';
 import HEX6ChatInterface from '@/components/chat/HEX6ChatInterface';
 import SubscriptionGate from '@/components/SubscriptionGate';
@@ -48,6 +49,7 @@ const AuthenticatedApp = () => {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
+      <Route path="/discover" element={<Discover />} />
       <Route path="/app" element={<AppExperience />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>

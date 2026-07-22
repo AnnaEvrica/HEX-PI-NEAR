@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useMemo } from 'react';
-import { ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import SignaturePatternBackground from '@/components/landing/SignaturePatternBackground';
 
@@ -118,6 +118,7 @@ function Operator({ op, delay }) {
 }
 
 export default function HeroSection() {
+  const navigate = useNavigate();
   return (
     <section className="relative w-full overflow-hidden pt-10 sm:pt-14 md:pt-20 pb-10 sm:pb-16">
       {/* Full-bleed signature-pattern background */}
@@ -150,36 +151,35 @@ export default function HeroSection() {
           <HeroWord word="The Model" motif={<><ProbabilityMotif /><ResonanceMotif /></>} delay={0.1} />
         </div>
 
-        {/* Probabilistic Intelligence — the name of the model */}
-        <motion.div
-          className="flex flex-col items-center gap-3 mt-6"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.55 }}
-        >
-          <div className="relative inline-flex items-center justify-center">
+        {/* Right-aligned supporting block: subtitle + CTAs + tagline */}
+        <div className="flex flex-col items-end text-right mt-6">
+          <motion.div
+            className="relative inline-flex items-center justify-center"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.55 }}
+          >
             <div className="absolute inset-0 -m-8 sm:-m-10"><PIMotif /></div>
             <span className="relative text-[2.55rem] sm:text-[3.825rem] md:text-[5.1rem] font-bold text-secondary tracking-tight">Probabilistic Intelligence</span>
-          </div>
-        </motion.div>
+          </motion.div>
 
-        <div className="flex flex-col items-center gap-4 pt-8">
-          <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-[30rem] pt-8">
             <button
-              onClick={() => base44.auth.loginWithProvider('google', '/app')}
-              className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 rounded-sm bg-accent text-accent-foreground border-2 border-white font-medium hover:bg-accent/90 transition-all text-sm sm:text-base md:text-lg shadow-lg shadow-accent/25"
-              style={{ boxShadow: '0 2px 18px rgba(0,0,0,0.35), 0 0 24px rgba(255,106,0,0.15)' }}
-            >
-              Enter <ArrowRight className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => document.getElementById('mirror')?.scrollIntoView({ behavior: 'smooth' })}
-              className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 rounded-sm border-2 border-accent bg-white text-black font-medium hover:bg-accent/10 transition-all text-sm sm:text-base md:text-lg"
+              onClick={() => navigate('/discover')}
+              className="flex-1 inline-flex items-center justify-center px-6 py-3 sm:py-4 rounded-sm border-2 border-accent bg-white text-black font-medium hover:bg-accent/10 transition-all text-sm sm:text-base md:text-lg"
             >
               Discover
             </button>
+            <button
+              onClick={() => base44.auth.loginWithProvider('google', '/app')}
+              className="flex-1 inline-flex items-center justify-center px-6 py-3 sm:py-4 rounded-sm bg-accent text-accent-foreground border-2 border-white font-medium hover:bg-accent/90 transition-all text-sm sm:text-base md:text-lg shadow-lg shadow-accent/25"
+              style={{ boxShadow: '0 2px 18px rgba(0,0,0,0.35), 0 0 24px rgba(255,106,0,0.15)' }}
+            >
+              Enter
+            </button>
           </div>
-          <span className="font-bold text-accent text-xs sm:text-sm tracking-tight">[HEX6-BLE PI-US · PROBABILISTIC INTELLIGENCE MODEL V5.5]</span>
+
+          <span className="font-bold text-accent text-xs sm:text-sm tracking-tight mt-4">[HEX6-BLE PI-US · PROBABILISTIC INTELLIGENCE MODEL V5.5]</span>
         </div>
       </motion.div>
     </section>
