@@ -5,6 +5,7 @@ import {
   buildThinkingState, renderDirective, selectVoice,
 } from '../../shared/thinkingEngine.ts';
 import { filterSourcesBlock, updateMemory } from '../../shared/chatHelpers.ts';
+import { fetchYahooReturns } from '../../shared/marketDataClient.ts';
 import { selectSynthesisModel, INTERPRETATION_MODEL, adaptVoiceForModel } from '../../shared/modelRouter.ts';
 
 // Convert a raw numeric series to returns. If the values look like price
@@ -264,9 +265,27 @@ Return JSON with:
 
     const sourcesBlock = filterSourcesBlock(fetchResult?.sources);
 
-    // Run the engine if a series was pulled.
+    // --- Contextual trigger: if the message names a ticker, pull a REAL return
+    // series from Yahoo and run the engine on actual data. The Model collapses
+    // the directional read on real prices, not LLM-narrated stats. Falls back
+    // to any series the web-fetch extracted if Yahoo has nothing.
     let webStateBlock = '';
-    if (fetchResult?.needs_engine && Array.isArray(fetchResult.series) && fetchResult.series.length >= 30) {
+    let contextPriceLine = '';
+    const TICKER_RE = /\b(BTC|ETH|SOL|DOGE|XRP|ADA|MATIC|SPY|QQQ|TSLA|AAPL|MSFT|NVDA|GOOG|GOOGL|AMZN|META)\b/i;
+    const tickerHit = message.match(TICKER_RE);
+    if (tickerHit) {
+      try {
+        const md = await fetchYahooReturns(tickerHit[1], 730);
+        if (md.returns && md.returns.length >= 30) {
+          await runUnifiedEngine(md.returns, null);
+          webStateBlock = renderDirective(thinkingState, voice);
+          if (md.latestPrice != null) contextPriceLine = `${tickerHit[1].toUpperCase()} last close: $${md.latestPrice.toFixed(2)} (${md.dataPoints} daily bars, 2yr window).`;
+        }
+      } catch (e) { /* fall through to web-fetch series */ }
+    }
+
+    // Fallback: run the engine on a series the web-fetch extracted, if any.
+    if (!webStateBlock && fetchResult?.needs_engine && Array.isArray(fetchResult.series) && fetchResult.series.length >= 30) {
       let returns = fetchResult.series;
       if (fetchResult.as_returns === false) {
         const raw = fetchResult.series; returns = [];
@@ -279,7 +298,7 @@ Return JSON with:
     }
 
     const stateBlock = webStateBlock || `No quantitative Thinking State for this message — respond using the supplied data.`;
-    const dataBlock = `DATA (supplied by HEX6-BLE):\n${fetchResult?.factual_summary || 'No external data retrieved.'}`;
+    const dataBlock = `DATA (supplied by HEX6-BLE):\n${contextPriceLine ? contextPriceLine + '\n' : ''}${fetchResult?.factual_summary || 'No external data retrieved.'}`;
     const synthModel = selectSynthesisModel(triage?.intent === 'research' ? 'research' : 'analytical');
     voice = adaptVoiceForModel(voice, synthModel);
     const synthPayload = { prompt: composePrompt(stateBlock, dataBlock), model: synthModel, add_context_from_internet: false };

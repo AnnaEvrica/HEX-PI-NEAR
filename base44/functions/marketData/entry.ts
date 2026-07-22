@@ -1,40 +1,11 @@
 /**
  * marketData — Fetches real OHLCV data from Yahoo Finance (no API key needed).
  * Returns daily close prices and computed log returns for the HEX6 BLE engine.
+ * The Yahoo fetch + return math live in the shared marketDataClient module so
+ * the think engine can pull the same real series directly.
  */
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
-
-/**
- * Fetch Yahoo Finance chart data for a ticker over a given period.
- * period1/period2 are Unix timestamps.
- */
-async function fetchYahooFinance(ticker, period1, period2, interval = '1d') {
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?period1=${period1}&period2=${period2}&interval=${interval}&events=history`;
-  const res = await fetch(url, {
-    headers: {
-      'User-Agent': 'Mozilla/5.0',
-      'Accept': 'application/json',
-    },
-  });
-  if (!res.ok) throw new Error(`Yahoo Finance error for ${ticker}: ${res.status}`);
-  const json = await res.json();
-  const result = json?.chart?.result?.[0];
-  if (!result) throw new Error(`No data for ${ticker}`);
-  const closes = result.indicators?.quote?.[0]?.close || [];
-  const timestamps = result.timestamp || [];
-  return { closes, timestamps };
-}
-
-/** Compute log returns from a price series */
-function logReturns(closes) {
-  const returns = [];
-  for (let i = 1; i < closes.length; i++) {
-    if (closes[i] && closes[i - 1]) {
-      returns.push(Math.log(closes[i] / closes[i - 1]));
-    }
-  }
-  return returns;
-}
+import { fetchYahooReturns } from '../../shared/marketDataClient.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -49,27 +20,22 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'tickers array required' }, { status: 400 });
     }
 
-    // Current date: April 27 2026
-    const now = Math.floor(Date.now() / 1000);
-    const period1 = now - lookbackDays * 86400;
-
     const results = {};
     const errors = {};
 
     await Promise.all(
       tickers.map(async (ticker) => {
         try {
-          const { closes, timestamps } = await fetchYahooFinance(ticker, period1, now);
-          const validCloses = closes.filter((c) => c !== null && c !== undefined);
+          const md = await fetchYahooReturns(ticker, lookbackDays);
           results[ticker] = {
-            closes: validCloses,
-            returns: logReturns(validCloses),
-            latestPrice: validCloses[validCloses.length - 1] ?? null,
-            dataPoints: validCloses.length,
+            closes: md.closes,
+            returns: md.returns,
+            latestPrice: md.latestPrice,
+            dataPoints: md.dataPoints,
           };
         } catch (err) {
           errors[ticker] = err.message;
-          // Fallback: synthetic data so engine doesn't break
+          // Fallback: empty so callers degrade gracefully.
           results[ticker] = {
             closes: [],
             returns: [],
