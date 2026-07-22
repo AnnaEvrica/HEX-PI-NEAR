@@ -5,13 +5,13 @@ import ReactMarkdown from 'react-markdown';
 import SettingsModal from '@/components/SettingsModal';
 import LegalModal from '@/components/LegalModal';
 import ConversationItem from '@/components/chat/ConversationItem';
-import ModelSwitch from '@/components/chat/ModelSwitch';
+import ChatHeaderBrand from '@/components/chat/ChatHeaderBrand';
 
 export default function HEX6ChatInterface() {
   const welcomeMessage = {
     id: 'welcome',
     role: 'assistant',
-    content: `Welcome. I am HEX6 BLE — a probabilistic intelligence: one organism, one sequence.\n\nWith **PI-US**, I'm an intelligence that coheres with you and adapts over time — fusing what's possible with what's meaningful, with sources and reasoning you can follow. Switch to **Legacy** for the pure structural-probability engine.\n\nWhat would you like to explore?`,
+    content: `Welcome. I am HEX6 BLE — a probabilistic intelligence: one organism, one sequence. I fuse what's possible with what's meaningful, with sources and reasoning you can follow.\n\nWhat would you like to explore?`,
   };
 
   // Loading copy — only "Thinking..." for fast chat replies.
@@ -41,7 +41,6 @@ export default function HEX6ChatInterface() {
   const [uploadedImage, setUploadedImage] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
   const [speakingId, setSpeakingId] = useState(null);
-  const [model, setModel] = useState('pi-us');
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -360,7 +359,6 @@ export default function HEX6ChatInterface() {
       conversationHistory: newMessages.filter(m => !m.isThinking).slice(-20),
       analyticalDepth: prefs.analyticalDepth || 'executive',
       riskAversion: prefs.riskAversion || 2.5,
-      model,
     };
     if (imageAtSend) payload.file_urls = [imageAtSend];
 
@@ -553,7 +551,7 @@ export default function HEX6ChatInterface() {
             </button>
           </div>
           <div className="flex-1 flex justify-center">
-            <ModelSwitch model={model} onChange={setModel} />
+            <ChatHeaderBrand />
           </div>
           <div className="flex items-center justify-end w-10 md:w-auto shrink-0">
             {traderEnabled && (

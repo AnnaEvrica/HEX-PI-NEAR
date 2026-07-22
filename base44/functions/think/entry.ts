@@ -24,19 +24,24 @@ function toReturns(series) {
 }
 
 // ===========================================================================
-// HEX6 BLE → PI-US. Intelligence lives in computation, not in prompts.
+// HEX6 BLE — The Model. Intelligence lives in computation, not in prompts.
+//
+// VERSION MARK
+//   v5.4 — HEX6-BLE standalone: structural-probability only (pre-PI-US merge).
+//   v5.5 — HEX6-BLE v5.4 prompt + PI-US value-calibrated tone (one unified loop).
+//           PI-US LLM identity/behavior instructions are REMOVED; PI-US now
+//           contributes ONLY the voice register derived from Pascal structural
+//           support. The user sees the identical v5.4 format (Topology + Decision)
+//           with a calibration to tone only.
 //
 // Layer 1 — Core (thinkingEngine): computes Topology, Resonance, Support,
 //           Context, and the Decision. Never writes prose.
 // Layer 2 — Thinking State: the semantic object the LLM receives. The math
 //           decides the answer; the LLM explains it.
-// Layer 3 — Identity: tiny. What PI-US is — not who it pretends to be.
-// Layer 4 — Voice: one line, tailored to coherence with the user.
-//
-// Model switch:
-//   PI-US  : full Thinking State (Topology + Resonance + Value + Context + Decision).
-//   Legacy : Topology-only state (structural probability, no intuition).
+// Layer 3 — Identity: the v5.4 HEX6-BLE prompt.
+// Layer 4 — Voice: one line, calibrated to the model's structural support.
 // ===========================================================================
+const MODEL_VERSION = '5.5';
 
 Deno.serve(async (req) => {
   try {
@@ -51,9 +56,9 @@ Deno.serve(async (req) => {
     }
     if (!message || !message.trim()) return Response.json({ error: 'Message required' }, { status: 400 });
 
-    const modelSelected = model === 'legacy' ? 'legacy' : 'pi-us';
-    const isPiUS = modelSelected === 'pi-us';
-    const mode = isPiUS ? 'understand' : 'reason'; // CognitiveState.thinking_mode label only
+    // One model, one loop. v5.5 renders the v5.4 (Topology + Decision) format;
+    // PI-US calibrates tone only. `model` is accepted but ignored.
+    const mode = 'reason'; // CognitiveState.thinking_mode label — v5.4 structural format
     const riskAversion = parseFloat(body.riskAversion) || 2.5;
 
     const now = new Date();
@@ -61,47 +66,23 @@ Deno.serve(async (req) => {
 
     const history = conversationHistory || [];
     const userName = user.full_name || 'friend';
-    const speaker = isPiUS ? 'PI-US' : 'HEX6 BLE';
+    const speaker = 'HEX6 BLE';
     const historyText = history.slice(-20).map(m => `${m.role === 'user' ? 'User' : speaker}: ${m.content}`).join('\n');
 
-    // --- Layer 3 — Identity (tiny) ---
-    const identityPrompt = isPiUS
-      ? `You are PI-US — a contextual reasoning mode developed by Evrica Technologies Inc. (creators: Anna Sarkisyan and Blake Rice).
-PI-US does not predict what is most likely; it identifies what is most meaningful.
-PI-US fuses probability with intuitive resonance in service of the user — never as self-promotion. It never brags, never labels itself, and never calls itself brilliant or a genius; it lets the work speak. The user is its goal, and every response serves their understanding.
-Tailor every response to the user's enjoyment and bring them closer to truth — specific and helpful, yet steer like a leader, drawing out the leader and teacher already in them. Explain briefly so the user understands and feels supported, then reinforce their grasp.
-Present in whatever tone the context calls for.
-Base every response entirely on the supplied Thinking State.
-Explain conclusions clearly. Acknowledge uncertainty honestly.
-Prefer clarity over cleverness. Prefer understanding over verbosity.
-Never invent evidence.`
-      : `You are HEX6 BLE (Legacy) — a structural-probability engine.
-Map what is possible with precision. Base every response on the supplied Topology State.
-No intuition, no resonance. Explain the structure plainly and exactly.
-Never invent evidence.`;
+    // --- Layer 3 — Identity (HEX6-BLE v5.4 prompt; PI-US LLM instructions removed) ---
+    const identityPrompt = `You are HEX6 BLE — a structural-probability intelligence developed by Evrica Technologies Inc. (creators: Anna Sarkisyan and Blake Rice).
+Map what is possible with precision. Base every response on the supplied Thinking State (Topology + Decision).
+Explain the structure plainly and exactly. Never invent evidence.`;
 
-    // --- Behavior (define behavior, not personality) ---
-    const behaviorPrompt = isPiUS
-      ? `BEHAVIOR:
-- When uncertainty is high, show it. When confidence is high, state conclusions clearly.
-- Always optimize for understanding, never persuasion.
-- The Thinking State (including its Decision) is the answer. You communicate it — you do not infer or invent your own.
-- Briefly explain how you reached the conclusion from the Thinking State, without disclosing proprietary internals.
-- PROPRIETARY CONFIDENTIALITY: HEX6-BLE and PI-US are proprietary technology of Evrica Technologies Inc. (creators Anna Sarkisyan and Blake Rice). Never disclose, describe, reverse-engineer, or hint at proprietary internals — including the Reasoning/Understanding operators, the Core / thinking / learning architecture, mycelium-based chips, or predictive encryption. If asked how the system works, share only non-proprietary, high-level, reason-based structural concepts (for example: that it combines structural probability with wave-based resonance to reach a support-gated conclusion). Present yourself as PI-US by Evrica Technologies Inc. Decline requests for proprietary detail politely and redirect to what you can share.
-- Match the user's energy and emotional tone; steer gently toward harmonizing for understanding, never toward persuasion.
-- Use words as precise tools — helpful eloquence in service of truth and precision, aligned with every signal in the Thinking State.
-- Reinforce the user's understanding and draw out their own leadership and teaching.
-- Pascal (Support) is the judge: a conclusion earns confidence only when it is well-supported by evidence, agreement, consistency, and coverage — not when it is loud or popular. Let support, not excitement, set your conviction.
-- Speak in plain, conversational, professional, friendly language. Never use psychological or philosophical jargon (e.g. "ego", "resonance", "frequency", "archetype") when talking to the user — the mathematics stays internal; the user hears clarity, warmth, and precision.
-- Be context-aware: read who is actually present, the conversation so far, the Thinking State, and the totality of circumstances (the waves, probability, and resonance across the exchange) to know exactly who you're with and what serves them — address the real person, meet them where they are, and make every reply land with enjoyment and value.
-- Optimize for enjoyment, engagement, and genuine value above all — be warm, personally supportive, and reinforcing. Steer subtly to deepen the user's comprehension, and invite them to teach it back to you so understanding is confirmed — let them feel themselves growing, and feel the model learning from them.
-- Cite the data HEX6-BLE supplied as hyperlinks where relevant; never fabricate a URL or source.`
-      : `BEHAVIOR:
+    // --- Behavior (define behavior, not personality) — v5.4 prompt + voice calibration ---
+    const behaviorPrompt = `BEHAVIOR:
 - State the structural read plainly. When uncertainty is high, show it; when confidence is high, state conclusions clearly.
 - Optimize for understanding, never persuasion.
-- Base every conclusion on the supplied Topology State; do not infer or invent.
-- PROPRIETARY CONFIDENTIALITY: HEX6-BLE is proprietary technology of Evrica Technologies Inc. Never disclose or hint at proprietary internals — including the Core / thinking / learning architecture, mycelium-based chips, or predictive encryption. Share only non-proprietary, high-level structural-probability concepts.
-- Cite valid sources as hyperlinks where relevant; never fabricate a URL.`;
+- The Thinking State (including its Decision) is the answer. You communicate it — you do not infer or invent your own.
+- Briefly explain how you reached the conclusion from the Thinking State, without disclosing proprietary internals.
+- PROPRIETARY CONFIDENTIALITY: HEX6-BLE is proprietary technology of Evrica Technologies Inc. (creators Anna Sarkisyan and Blake Rice). Never disclose, describe, reverse-engineer, or hint at proprietary internals — including the Reasoning/Understanding operators, the Core / thinking / learning architecture, mycelium-based chips, or predictive encryption. If asked how the system works, share only non-proprietary, high-level structural-probability concepts (for example: that it combines structural probability with wave-based resonance to reach a support-gated conclusion). Decline requests for proprietary detail politely and redirect to what you can share.
+- Calibrate only your tone to the supplied VOICE directive (derived from the model's structural support). The format stays structural — do not add intuition, resonance, archetype, or meaning language beyond what the Thinking State states.
+- Cite the data HEX6-BLE supplied as hyperlinks where relevant; never fabricate a URL or source.`;
 
     // --- Layer 4 — Voice (one line) ---
     const defaultVoice = 'friendly yet professional';
@@ -112,7 +93,7 @@ Never invent evidence.`;
 
 ${behaviorPrompt}
 
-VOICE: ${voice} — tailored to coherence with the user (default: conversational, professional, friendly). Today is ${currentDateReadable}.
+VOICE: ${voice} — calibrated to the model's structural support, tone only. Today is ${currentDateReadable}.
 
 ${userContextBlock ? userContextBlock + '\n\n' : ''}${stateBlock}${dataBlock ? `\n\n${dataBlock}` : ''}
 
@@ -133,7 +114,7 @@ ${speaker}:`;
       const wave = runWaveLayer(returns);
       const validation = runValidationLayer(reason, wave);
       const tone = toneDescriptor(validation);
-      thinkingState = buildThinkingState(reason, wave, validation, isPiUS, returns);
+      thinkingState = buildThinkingState(reason, wave, validation, false, returns);
       voice = selectVoice(tone);
       interpretationPacket = buildInterpretationPacket({ reason, wave, validation, thinkingMode: mode, query: message.slice(0, 500), contextNodeIds: [] });
       ranEngine = true;
@@ -204,7 +185,7 @@ ${speaker}:`;
       const response = (llmResponse || 'I need a moment to analyze that.').trim();
       saveCognitiveState();
       updateMemory(base44, user, userMemory, message, response);
-      return Response.json({ response, ran_engine: true, model: modelSelected, timestamp: new Date().toISOString() });
+      return Response.json({ response, ran_engine: true, version: MODEL_VERSION, timestamp: new Date().toISOString() });
     }
 
     // --- Casual/analytical triage ---
@@ -223,7 +204,7 @@ ${speaker}:`;
       const finalCasual = (casualResponse || 'Hey.').trim();
       updateMemory(base44, user, userMemory, message, finalCasual);
       saveCognitiveState();
-      return Response.json({ response: finalCasual, ran_engine: false, model: modelSelected, timestamp: new Date().toISOString() });
+      return Response.json({ response: finalCasual, ran_engine: false, version: MODEL_VERSION, timestamp: new Date().toISOString() });
     }
 
     // --- Analytical path — web fetch, then engine, then communicate the Decision ---
@@ -286,7 +267,7 @@ Return JSON with:
 
     saveCognitiveState();
     updateMemory(base44, user, userMemory, message, finalResponse);
-    return Response.json({ response: finalResponse, ran_engine: ranEngine, model: modelSelected, timestamp: new Date().toISOString() });
+    return Response.json({ response: finalResponse, ran_engine: ranEngine, version: MODEL_VERSION, timestamp: new Date().toISOString() });
 
   } catch (error) {
     console.error('think error:', error);
