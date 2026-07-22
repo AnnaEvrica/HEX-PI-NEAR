@@ -629,3 +629,44 @@ export function renderThinkingState(state) {
   }
   return out;
 }
+
+// Directive — a label-free, plain-English read distilled from the Thinking State.
+// This is what the realizer (LLM) actually receives: the actionable conclusion +
+// conviction + register + steer, with ZERO internal nomenclature to echo. The full
+// labeled Thinking State stays an internal/audit artifact and never reaches the
+// realizer, so it has nothing to mirror back as "status," "goals," or process.
+function sanitizeRead(s) {
+  return (s || '')
+    .replace(/\bstructural(ly)?\b/gi, '')
+    .replace(/\bresonance\b/gi, 'pulse')
+    .replace(/\barchetype\b/gi, 'pattern')
+    .replace(/\bcapitulation\b/gi, 'exhaustion')
+    .replace(/\beuphoria\b/gi, 'peak exuberance')
+    .replace(/\bHEX6[-\s]?BLE\b/gi, '')
+    .replace(/\bPI-US\b/gi, '')
+    .replace(/\bSILENCE\b/gi, 'quiet')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+export function renderDirective(state, voice = 'conversational, professional, friendly') {
+  if (!state) return '';
+  const conf = state.decision?.confidence || state.support?.confidence || 'Medium';
+  if (!state.isPiUS) {
+    const read = sanitizeRead(state.decision?.primary_conclusion || 'No reliable read.');
+    return `(Embody this read — never describe it, the engine, labels, "status," "goals," or the process.) ${read} Conviction: ${conf}. Speak in a ${voice} register. Answer only about the actual subject in plain English.`;
+  }
+  const dir = (state.support?.direction || 'FLAT').toLowerCase();
+  const sup = (state.support?.support || 'Medium').toLowerCase();
+  const res = (state.resonance?.resonance || 'Medium').toLowerCase();
+  let read;
+  if (sup === 'low') read = `the signal is thin — hold it lightly rather than commit.`;
+  else if (dir === 'flat') read = `the signal is flat — no lean worth committing to.`;
+  else if (sup === 'high' && res === 'high') read = `it leans ${dir} with real backing; conviction is earned.`;
+  else if (sup === 'high') read = `it leans ${dir}, probable but not fully reinforced.`;
+  else read = `it leans ${dir} with moderate backing; act proportionally.`;
+  const steerRaw = state.archetype?.harmonize_toward || '';
+  const steerAction = steerRaw.split('—')[0].trim();
+  const steer = steerAction ? ` ${steerAction.charAt(0).toUpperCase() + steerAction.slice(1)}.` : '';
+  return `(Embody this read — never describe it, the engine, labels, "status," "goals," or the process.) ${read} Conviction: ${conf}. Speak in a ${voice} register.${steer} Answer only about the actual subject in plain English.`;
+}

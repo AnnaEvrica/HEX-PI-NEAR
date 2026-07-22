@@ -2,7 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import {
   runReasonLayer, runWaveLayer, runValidationLayer, toneDescriptor,
   buildInterpretationPacket, extractNumberSeries,
-  buildThinkingState, renderThinkingState, selectVoice,
+  buildThinkingState, renderDirective, selectVoice,
 } from '../../shared/thinkingEngine.ts';
 import { filterSourcesBlock, updateMemory } from '../../shared/chatHelpers.ts';
 
@@ -136,7 +136,7 @@ ${speaker}:`;
       const wave = runWaveLayer(returns);
       const validation = runValidationLayer(reason, wave);
       const tone = toneDescriptor(validation);
-      thinkingState = buildThinkingState(reason, wave, validation, false, returns);
+      thinkingState = buildThinkingState(reason, wave, validation, true, returns);
       voice = selectVoice(tone);
       interpretationPacket = buildInterpretationPacket({ reason, wave, validation, thinkingMode: mode, query: message.slice(0, 500), contextNodeIds: [] });
       ranEngine = true;
@@ -156,7 +156,7 @@ ${speaker}:`;
       }
       const tickerMatch = message.match(/\b(BTC|ETH|SPY|QQQ|TSLA|AAPL|MSFT|NVDA|GOOG|AMZN|META|SOL|DOGE|XRP|ADA|MATIC)\b/i) || message.match(/\b([A-Z]{2,5})\b/);
       await runUnifiedEngine(primarySeries, refSeries);
-      inlineStateBlock = renderThinkingState(thinkingState);
+      inlineStateBlock = renderDirective(thinkingState, voice);
     }
 
     // --- Memory fetch (for writeback after responding) ---
@@ -271,7 +271,7 @@ Return JSON with:
       }
       if (returns.length >= 30) {
         await runUnifiedEngine(returns, null);
-        webStateBlock = renderThinkingState(thinkingState);
+        webStateBlock = renderDirective(thinkingState, voice);
       }
     }
 
