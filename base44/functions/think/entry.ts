@@ -5,7 +5,7 @@ import {
   buildThinkingState, renderDirective, selectVoice,
 } from '../../shared/thinkingEngine.ts';
 import { filterSourcesBlock, updateMemory } from '../../shared/chatHelpers.ts';
-import { selectSynthesisModel, INTERPRETATION_MODEL } from '../../shared/modelRouter.ts';
+import { selectSynthesisModel, INTERPRETATION_MODEL, adaptVoiceForModel } from '../../shared/modelRouter.ts';
 
 // Convert a raw numeric series to returns. If the values look like price
 // levels (all positive, magnitude > 1), convert to percent changes; otherwise
@@ -199,6 +199,7 @@ ${speaker}:`;
 
     // --- Inline-data path: engine already ran, communicate the Decision ---
     if (inlineStateBlock) {
+      voice = adaptVoiceForModel(voice, selectSynthesisModel('inline'));
       const llmPayload = { prompt: composePrompt(inlineStateBlock), model: selectSynthesisModel('inline'), add_context_from_internet: false };
       if (file_urls && file_urls.length > 0) llmPayload.file_urls = file_urls;
       const llmResponse = await base44.integrations.Core.InvokeLLM(llmPayload);
@@ -218,6 +219,7 @@ ${speaker}:`;
 
     if (triage?.intent === 'casual') {
       const stateBlock = `No quantitative Thinking State for this message — respond directly and conversationally, grounded in the conversation.`;
+      voice = adaptVoiceForModel(defaultVoice, selectSynthesisModel('casual'));
       const casualPayload = { prompt: composePrompt(stateBlock), model: selectSynthesisModel('casual'), add_context_from_internet: false };
       if (file_urls && file_urls.length > 0) casualPayload.file_urls = file_urls;
       const casualResponse = await base44.integrations.Core.InvokeLLM(casualPayload);
@@ -279,6 +281,7 @@ Return JSON with:
     const stateBlock = webStateBlock || `No quantitative Thinking State for this message — respond using the supplied data.`;
     const dataBlock = `DATA (supplied by HEX6-BLE):\n${fetchResult?.factual_summary || 'No external data retrieved.'}`;
     const synthModel = selectSynthesisModel(triage?.intent === 'research' ? 'research' : 'analytical');
+    voice = adaptVoiceForModel(voice, synthModel);
     const synthPayload = { prompt: composePrompt(stateBlock, dataBlock), model: synthModel, add_context_from_internet: false };
     if (file_urls && file_urls.length > 0) synthPayload.file_urls = file_urls;
     const synth = await base44.integrations.Core.InvokeLLM(synthPayload).catch(() => null);

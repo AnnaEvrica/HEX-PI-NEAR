@@ -43,3 +43,16 @@ export function selectSynthesisModel(task) {
   if (task === 'casual') return LLM_POOL.gpt;
   return LLM_POOL.gemini;
 }
+
+// Model-aware tone/resonance — the PI-US voice register adapts to the
+// methodology of the realizing LLM the Model selected. The Model leads; the LLM
+// is a tool, and the tone steers each tool toward the structural read rather
+// than letting the tool's native tendencies drift the answer.
+export function adaptVoiceForModel(baseVoice, model) {
+  if (model === LLM_POOL.claude)
+    return `${baseVoice}; lean into Claude's trans-contextual coherence — sustain the register across long form, let the structure carry, don't restate`;
+  if (model === LLM_POOL.gpt)
+    return `${baseVoice}; keep it textured and specific — favor one concrete image over generic phrasing`;
+  // Gemini Flash (MoE) — default realization tool
+  return `${baseVoice}; stay focused and precise — converge on the answer, don't let the mixture sprawl`;
+}
