@@ -5,6 +5,7 @@ import {
   buildThinkingState, renderDirective, selectVoice,
 } from '../../shared/thinkingEngine.ts';
 import { filterSourcesBlock, updateMemory } from '../../shared/chatHelpers.ts';
+import { selectSynthesisModel, INTERPRETATION_MODEL } from '../../shared/modelRouter.ts';
 
 // Convert a raw numeric series to returns. If the values look like price
 // levels (all positive, magnitude > 1), convert to percent changes; otherwise
@@ -198,7 +199,7 @@ ${speaker}:`;
 
     // --- Inline-data path: engine already ran, communicate the Decision ---
     if (inlineStateBlock) {
-      const llmPayload = { prompt: composePrompt(inlineStateBlock), model: 'gemini_3_flash', add_context_from_internet: false };
+      const llmPayload = { prompt: composePrompt(inlineStateBlock), model: selectSynthesisModel('inline'), add_context_from_internet: false };
       if (file_urls && file_urls.length > 0) llmPayload.file_urls = file_urls;
       const llmResponse = await base44.integrations.Core.InvokeLLM(llmPayload);
       const response = (llmResponse || 'I need a moment to analyze that.').trim();
@@ -210,14 +211,14 @@ ${speaker}:`;
     // --- Casual/analytical triage ---
     const lastTurns = history.slice(-6).map(m => `${m.role === 'user' ? userName : speaker}: ${m.content}`).join('\n') || '(no prior turns)';
     const triage = await base44.integrations.Core.InvokeLLM({
-      prompt: `Classify the user's latest message. Decide if answering it requires fresh real-world data from the web (prices, news, stats, current events).\n\nCONVERSATION SO FAR:\n${lastTurns}\n\nLATEST MESSAGE FROM ${userName}: ${message}\n\nClassify as:\n- "casual" — greetings, smalltalk, philosophical/conceptual chat, opinions, follow-ups on something already discussed, questions answerable from general knowledge.\n- "analytical" — anything requiring fresh prices, market data, news, scores, time-series, or real-world current values.\n\nReturn JSON: { "intent": "casual" | "analytical" }`,
-      model: 'gemini_3_flash',
-      response_json_schema: { type: 'object', properties: { intent: { type: 'string', enum: ['casual', 'analytical'] } }, required: ['intent'] },
+      prompt: `Classify the user's latest message. Decide if answering it requires fresh real-world data from the web (prices, news, stats, current events).\n\nCONVERSATION SO FAR:\n${lastTurns}\n\nLATEST MESSAGE FROM ${userName}: ${message}\n\nClassify as:\n- "casual" — greetings, smalltalk, philosophical/conceptual chat, opinions, follow-ups on something already discussed, questions answerable from general knowledge.\n- "analytical" — anything requiring fresh prices, market data, news, scores, time-series, or real-world current values.\n- "research" — long-form generation requests: "write an article", "draft a paper/report/essay/whitepaper", legal or analytical deep-dives, or extended coherent writing (e.g. for the Evrica Foundation).\n\nReturn JSON: { "intent": "casual" | "analytical" | "research" }`,
+      model: INTERPRETATION_MODEL,
+      response_json_schema: { type: 'object', properties: { intent: { type: 'string', enum: ['casual', 'analytical', 'research'] } }, required: ['intent'] },
     }).catch(() => ({ intent: 'analytical' }));
 
     if (triage?.intent === 'casual') {
       const stateBlock = `No quantitative Thinking State for this message — respond directly and conversationally, grounded in the conversation.`;
-      const casualPayload = { prompt: composePrompt(stateBlock), model: 'gemini_3_flash', add_context_from_internet: false };
+      const casualPayload = { prompt: composePrompt(stateBlock), model: selectSynthesisModel('casual'), add_context_from_internet: false };
       if (file_urls && file_urls.length > 0) casualPayload.file_urls = file_urls;
       const casualResponse = await base44.integrations.Core.InvokeLLM(casualPayload);
       const finalCasual = (casualResponse || 'Hey.').trim();
@@ -245,7 +246,7 @@ Return JSON with:
     const conversationBlock = history.length > 0 ? history.slice(-12).map(m => `${m.role === 'user' ? userName : speaker}: ${m.content}`).join('\n') : '';
     const fetchPayload = {
       prompt: `${fetchPrompt}\n\nCONVERSATION SO FAR:\n${conversationBlock}\n\n${userName}: ${message}\n\nHEX6-BLE:`,
-      model: 'gemini_3_flash', add_context_from_internet: true,
+      model: INTERPRETATION_MODEL, add_context_from_internet: true,
       response_json_schema: {
         type: 'object',
         properties: {
@@ -277,7 +278,8 @@ Return JSON with:
 
     const stateBlock = webStateBlock || `No quantitative Thinking State for this message — respond using the supplied data.`;
     const dataBlock = `DATA (supplied by HEX6-BLE):\n${fetchResult?.factual_summary || 'No external data retrieved.'}`;
-    const synthPayload = { prompt: composePrompt(stateBlock, dataBlock), model: 'gemini_3_flash', add_context_from_internet: false };
+    const synthModel = selectSynthesisModel(triage?.intent === 'research' ? 'research' : 'analytical');
+    const synthPayload = { prompt: composePrompt(stateBlock, dataBlock), model: synthModel, add_context_from_internet: false };
     if (file_urls && file_urls.length > 0) synthPayload.file_urls = file_urls;
     const synth = await base44.integrations.Core.InvokeLLM(synthPayload).catch(() => null);
     let finalResponse = (synth || fetchResult?.factual_summary || 'Let me know what you\'d like to dig into.').trim();
