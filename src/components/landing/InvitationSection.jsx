@@ -95,7 +95,7 @@ export default function InvitationSection() {
           transition={{ duration: 0.6, delay: 0.3 }}
         >
           <div className="flex items-center justify-between px-4 py-3 border-b border-accent/30 bg-accent/5">
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-accent uppercase tracking-wide"><Sparkles className="w-3.5 h-3.5" /> HEX6 BLE · PI-US</span>
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide"><Sparkles className="w-3.5 h-3.5 text-accent" /> <span className="text-[#f4f1dd]" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>HEX6</span><span className="text-foreground"> BLE </span><span className="text-[#0d4f57]">· PI-US</span></span>
             <span className="text-[10px] text-accent px-2 py-1 rounded bg-accent/10 font-medium">live model response</span>
           </div>
           <div className="px-4 sm:px-6 py-5 bg-background text-sm leading-relaxed min-h-[140px]">

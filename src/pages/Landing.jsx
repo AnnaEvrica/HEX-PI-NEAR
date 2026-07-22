@@ -20,7 +20,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-5 pb-3 sm:py-4 flex items-center justify-between">
           <a href="https://evrica.tech" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 sm:gap-3">
             <img src="https://media.base44.com/images/public/69eef3d514386627566a9bf6/a8d57d01f_evrica-logo.png" alt="Evrica" className="h-7 sm:h-8 w-7 sm:w-8 object-contain rounded-sm" />
-            <span className="text-[0.7rem] sm:text-xs text-[#0a1929] font-medium tracking-tight leading-tight">Developed by Evrica Technologies Inc.</span>
+            <span className="text-[0.62rem] sm:text-[0.7rem] text-[#0a1929] font-medium leading-tight tracking-[0.04em] sm:tracking-[0.16em] sm:uppercase">Developed by Evrica Technologies Inc.</span>
           </a>
           <div className="flex items-center gap-2 sm:gap-3">
             <button
@@ -50,7 +50,7 @@ export default function Landing() {
       <footer className="border-t border-border py-8 sm:py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col gap-4 sm:gap-6">
           <p className={`text-xs max-w-3xl leading-relaxed transition-colors duration-300 ${footerLit ? 'text-foreground' : 'text-secondary'}`}>
-            The Model is an experimental Probabilistic Intelligence [PI] framework proposing a systems methodology for machine learning. It integrates probabilistic inference, semantic analysis, and transformer-based language models within a unified architecture for computational reasoning under uncertainty. It unifies probabilistic inference, semantic analysis, and transformer-based language models within a layered computational architecture. © Evrica Technologies Inc. 2026
+            The Model is an experimental Probabilistic Intelligence <span className="text-[#0d4f57] font-semibold">[PI]</span> framework proposing a systems methodology for machine learning. It integrates probabilistic inference, semantic analysis, and transformer-based language models within a unified architecture for computational reasoning under uncertainty. It unifies probabilistic inference, semantic analysis, and transformer-based language models within a layered computational architecture. © Evrica Technologies Inc. 2026
           </p>
           <div className="flex gap-6 sm:gap-8 flex-wrap justify-center md:justify-start text-xs text-secondary">
             <button onClick={() => setOpenPolicy('terms')} className="hover:text-foreground transition-colors">

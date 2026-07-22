@@ -99,7 +99,7 @@ export default function Discover() {
         style={{ paddingTop: 'env(safe-area-inset-top)' }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="text-lg sm:text-xl font-bold tracking-tight">HEX6 BLE</Link>
+          <Link to="/" className="text-lg sm:text-xl font-bold tracking-tight"><span className="text-[#f4f1dd]" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.45)' }}>HEX6</span><span className="text-foreground"> BLE</span></Link>
           <Link to="/" className="text-sm text-secondary hover:text-foreground transition-colors" style={{ minWidth: 'auto', minHeight: 'auto' }}>← Back to home</Link>
         </div>
       </nav>

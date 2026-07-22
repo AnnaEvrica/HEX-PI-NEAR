@@ -170,7 +170,7 @@ export default function HeroSection({ onAsteriskHover }) {
           </div>
 
           <div className="relative mt-[0.825rem] text-secondary text-[0.7rem] sm:text-[1.3rem] md:text-[1.75rem] font-medium tracking-[0.05em] whitespace-nowrap">
-            Probabilistic Intelligence <span className="font-bold text-secondary">[PI]</span>
+            Probabilistic Intelligence <span className="font-bold text-[#0d4f57]">[PI]</span>
           </div>
         </div>
 
