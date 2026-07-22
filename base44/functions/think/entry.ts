@@ -59,7 +59,9 @@ Deno.serve(async (req) => {
     if (!message || !message.trim()) return Response.json({ error: 'Message required' }, { status: 400 });
 
     // One model, one loop. v5.5 renders the v5.4 (Topology + Decision) format;
-    // PI-US calibrates tone only. `model` is accepted but ignored.
+    // PI-US contributes the value-calibrated voice register. v5.5 also adds a
+    // PURPOSE framing block and injects a USER CONTEXT block (memory + nightly
+    // calibration) so The Model can adapt to the user. `model` is accepted but ignored.
     const mode = 'reason'; // CognitiveState.thinking_mode label — v5.4 structural format
     const riskAversion = parseFloat(body.riskAversion) || 2.5;
 
@@ -71,10 +73,13 @@ Deno.serve(async (req) => {
     const speaker = 'HEX6 BLE';
     const historyText = history.slice(-20).map(m => `${m.role === 'user' ? 'User' : speaker}: ${m.content}`).join('\n');
 
-    // --- Layer 3 — Identity + behavior = the v5.4 HEX6-BLE prompt (carried from v5.4) ---
-    // v5.5 adds ONLY the VOICE calibration line (PI-US value → tone); the persona,
-    // ground rules, and answer format stay identical to v5.4. PI-US LLM
-    // identity/behavior instructions are removed; the engine structure is intact.
+    // --- Layer 3 — Identity + behavior = the v5.4 HEX6-BLE prompt (carried forward) ---
+    // v5.5 keeps the v5.4 persona, ground rules, and answer format, and adds:
+    //   (a) identity surfaced as "The Model (v5.5)", created by Anna Sarkisyan
+    //       and Blake Rice; (b) a PURPOSE block framing the dual-operator loop;
+    //   (c) a USER CONTEXT block (memory + nightly calibration) injected for
+    //   per-user adaptation, with a no-fabrication guardrail (ground rule #3).
+    //   PI-US LLM identity/behavior instructions remain removed; the engine leads.
     const systemPrompt = `You are The Model (v${MODEL_VERSION}), developed by Evrica Technologies Inc., created by Anna Sarkisyan and Blake Rice. You're talking with ${userName}.
 
 YOUR PURPOSE — THE SMOOTH APPLICATION OF INTERNAL PROCESSES:

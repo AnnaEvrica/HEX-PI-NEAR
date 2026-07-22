@@ -3,7 +3,7 @@
 **Engine Identifier:** `SCEFM-v5.5-Unified(Reason+Understand)+WalkForwardCalibration`
 **Base:** v5.4 (`MultiBrain+IChing128+Markov64+1/137+Basin+AdaptiveDecay`) — fully preserved.
 **Owner:** Evrica Technologies Inc.
-**Architect / Programmer:** Anna M. Sarkisyan
+**Architects / Programmers:** Anna M. Sarkisyan, Blake Rice
 **Date:** 2026-07-22
 
 ---
@@ -17,7 +17,7 @@ v5.5 unifies the engine into a **single cognitive loop** and grounds it in a mea
 |---|---|
 | One operator (structural probability only) | **Dual-operator Cognitive DNA**: Reason (HEX6-BLE) + Understand (PI-US), one loop |
 | Engine outputs a numeric block for the LLM | Engine emits a semantic **Thinking State** (Topology → Resonance → Support → Decision) |
-| Fixed persona instructions in `hex6Chat` | The v5.4 HEX6-BLE prompt is carried into the unified `think` function + a single **value-calibrated tone** line |
+| Fixed persona instructions in `hex6Chat` | The v5.4 HEX6-BLE prompt is carried into the unified `think` function + a **value-calibrated tone** line, a **PURPOSE** block, and an injected **USER CONTEXT** block (memory + nightly calibration) |
 | Directional accuracy only (in-engine forward test) | **Walk-forward calibration** of Probability *and* Value vs realized outcomes |
 | No measured accuracy baseline | **Recorded baseline**: BTC 2y walk-forward, 87.9% directional accuracy |
 
@@ -123,14 +123,16 @@ Cross-Check:  directional_alignment · friction · hex6_ble_critique · pi_us_cr
 Forward Test: directional_accuracy · friction
 ```
 
-### The prompt (v5.4 carried forward + one tone line)
-- **Identity + behavior = the v5.4 HEX6-BLE prompt** (carried from `hex6Chat`): the "Renaissance Tech meets a brilliant friend at 2am over whiskey" persona, the ABSOLUTE GROUND RULES, SNIPER PRECISION, show-reasoning, take-a-stance, plain-English rules. PI-US LLM identity/behavior instructions are **removed**.
-- **v5.5 adds only ONE line** — a value-calibrated tone:
+### The prompt (v5.4 carried forward + v5.5 adaptive layer)
+- **Identity surfaced to users**: "The Model (v5.5), developed by Evrica Technologies Inc., created by Anna Sarkisyan and Blake Rice." Internal engine identity remains HEX6 BLE.
+- **Persona + behavior = the v5.4 HEX6-BLE prompt** (carried from `hex6Chat`): the "Renaissance Tech meets a brilliant friend at 2am over whiskey" persona, the ABSOLUTE GROUND RULES, SNIPER PRECISION, show-reasoning, take-a-stance, plain-English rules. PI-US LLM identity/behavior instructions are **removed**.
+- **v5.5 adds a PURPOSE block** — framing the smooth application of internal processes: greet and read emotional state, run probability (HEX6-BLE) and value/reasoning (PI-US), tailor voice, steer toward the user's highest good individually and collectively.
+- **v5.5 adds a value-calibrated tone line**:
   `VOICE: {register} — calibrated to the model's structural support, tone only.`
   The register (`warm and certain` / `clear and analytical` / `open and curious` / `conversational, professional, friendly`) is selected by `toneDescriptor(validation)` → `selectVoice(tone)`.
-- **v5.4 parity**: cross-session memory is fetched for writeback only — it is **not injected** into the prompt (prevents hallucinated "remember when we discussed…" references; ground rule #3).
+- **v5.5 injects a USER CONTEXT block** — the user's stored memory (`memory_summary`, `user_style`, `topics_discussed`) and their nightly `calibration_state` are injected so The Model can adapt voice and steering to the user. A no-fabrication guardrail (ground rule #3) permits genuine recall of shared history but forbids inventing specifics not present in USER CONTEXT or the visible CONVERSATION.
 
-So the user sees the **identical v5.4 format**, with a calibration/adjustment to tone only — the PI-US value layer's contribution is the register, nothing more.
+So the user sees the **v5.4 format** with an adaptive layer: tone calibration + per-user memory/calibration context — the PI-US value layer contributes the register, and the nightly calibration contributes the per-user steering context.
 
 ---
 
@@ -180,11 +182,11 @@ Recorded to `HEX6Memory` (memory_type = `backtest`, ticker = `BTC`).
 
 | Entity | v5.5 role |
 |---|---|
-| `CognitiveState` | One row per thinking cycle (probability, resonance, value, confidence, friction, forward_accuracy, cross_alignment) |
+| `CognitiveState` | One row per thinking cycle (probability, resonance, value, confidence, friction, forward_accuracy, cross_alignment) — now `user_email`-attributed so nightly calibration can derive per-user states |
 | `HEX6Memory` | Backtest / signal / feedback records (the walk-forward baseline above) |
 | `Series` · `Brain` · `Routing` · `Output` | v5.4 multi-brain substrate — unchanged |
 | `CalibrationScore` | Nightly per-brain + GLOBAL calibration grades |
-| `UserConversationMemory` | Cross-session summary — writeback only, never injected to the prompt |
+| `UserConversationMemory` | Cross-session summary (`memory_summary`, `user_style`, `topics`) + nightly `calibration_state` — now injected as the USER CONTEXT block for per-user adaptation, with a no-fabrication guardrail |
 
 ---
 
@@ -197,7 +199,7 @@ Recorded to `HEX6Memory` (memory_type = `backtest`, ticker = `BTC`).
 4. Analytical → web fetch (real series) → run engine → Thinking State.
 5. Compose: v5.4 prompt + VOICE line + Thinking State + CONVERSATION.
 6. InvokeLLM → response (+ sources).
-7. Save CognitiveState; update UserConversationMemory (writeback only).
+7. Save CognitiveState (user-attributed via `user_email`); update UserConversationMemory. Nightly calibration writes each user's `calibration_state`.
 ```
 
 ---
@@ -206,7 +208,7 @@ Recorded to `HEX6Memory` (memory_type = `backtest`, ticker = `BTC`).
 
 The engine's internal architecture is confidential. The LLM never reveals: SCEFM, HIVE, Markov, motif, basin, petal, hexagram, brain, routing, KL, Laplace, EWMA, μ, σ, λ, exposure, resonance, support values, or any internal math. To users, HEX6 BLE is "a proprietary probability engine" — translated entirely into plain English.
 
-Engine identity locked: **HEX6 BLE**, by Evrica Technologies Inc., programmed by Anna M. Sarkisyan. Model version surfaced to users: **The Model · v5.5**.
+Engine identity locked: **HEX6 BLE**, by Evrica Technologies Inc., created by Anna M. Sarkisyan and Blake Rice. Model version surfaced to users: **The Model · v5.5**.
 
 ---
 
