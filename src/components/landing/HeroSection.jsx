@@ -3,8 +3,6 @@ import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import SignaturePatternBackground from '@/components/landing/SignaturePatternBackground';
-import CognitiveDistortionMotif from '@/components/landing/CognitiveDistortionMotif';
-import ResonanceCalibrationMotif from '@/components/landing/ResonanceCalibrationMotif';
 
 const POOL = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ∑∫π∞≈±∇√∂λμ';
 
@@ -109,6 +107,15 @@ export default function HeroSection({ onAsteriskHover }) {
           </span>
         </div>
 
+        {/* The Model — dual-hemisphere brain video, the main event */}
+        <div className="relative mt-[1.6rem] sm:mt-[2.4rem] flex justify-center">
+          <video
+            src="https://media.base44.com/videos/public/69eef3d514386627566a9bf6/51e8e4cc9_u3683223828_an_hd_photo_of_a_brain_with_two_hemispheres_re_a42b0d40-0b05-42d1-a5dd-e02cbb9078fc_0.mp4"
+            autoPlay loop muted playsInline
+            className="w-full max-w-[22rem] sm:max-w-[30rem] lg:max-w-[40rem] rounded-lg shadow-[0_0_40px_rgba(255,255,255,0.12),0_14px_40px_rgba(0,0,0,0.5)] ring-1 ring-white/20"
+          />
+        </div>
+
         {/* Title block — two balanced rows: headline word (left) · system label (right) */}
         <div className="relative mt-[3.16rem] sm:mt-[4.43rem]">
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -176,29 +183,20 @@ export default function HeroSection({ onAsteriskHover }) {
           </div>
 
           <div className="relative mt-[3rem] sm:mt-[4.5rem] flex flex-col items-center">
-            {/* Brain — dual hemispheres, the seat of the two operators */}
-            <div className="w-28 sm:w-40 lg:w-48 rounded-full overflow-hidden bg-white shadow-[0_0_30px_rgba(255,255,255,0.18),0_10px_30px_rgba(0,0,0,0.45)] ring-1 ring-white/30">
-              <img src="https://media.base44.com/images/public/69eef3d514386627566a9bf6/042efac4f_generated_image.png" alt="Dual-hemisphere brain" className="w-full h-auto block" />
-            </div>
-
-            <span className="mt-[1.4rem] text-accent font-serif italic font-light text-[1.05rem] sm:text-[1.45rem] md:text-[1.85rem] tracking-wide whitespace-nowrap text-center" style={{ textShadow: '0 0 18px rgba(255,107,53,0.5), 0 1px 2px rgba(0,0,0,0.45)' }}>
+            <span className="text-[2.6rem] sm:text-[3.5rem] md:text-[4.9rem] lg:text-[7.35rem] xl:text-[7.7rem] leading-[0.9] font-bold tracking-tight text-foreground text-center" style={{ textShadow: '0 0 14px rgba(255,255,255,0.3), 0 2px 18px rgba(0,0,0,0.45)' }}>
               Time to elevate your thinking
             </span>
 
-            {/* Left + right: image and words for each operator */}
-            <div className="mt-[1.8rem] sm:mt-[2.6rem] w-full flex items-start justify-center gap-6 sm:gap-12 lg:gap-24">
-              <div className="flex-1 flex flex-col items-center sm:items-end text-center sm:text-right max-w-[14rem]">
-                <div className="w-24 sm:w-32 lg:w-40 opacity-90"><CognitiveDistortionMotif /></div>
-                <p className="mt-3 text-[0.68rem] sm:text-[0.82rem] text-foreground/70 font-light leading-snug">
-                  Cognitive distortions — addressed &amp; cured through objective reasoning and statistical analysis
-                </p>
-              </div>
-              <div className="flex-1 flex flex-col items-center sm:items-start text-center sm:text-left max-w-[14rem]">
-                <div className="w-24 sm:w-32 lg:w-40 opacity-90"><ResonanceCalibrationMotif /></div>
-                <p className="mt-3 text-[0.68rem] sm:text-[0.82rem] text-foreground/70 font-light leading-snug">
-                  Experiential bias weight — addressed with resonance calibration
-                </p>
-              </div>
+            <div className="relative mt-[1.8rem] sm:mt-[2.6rem] flex flex-col items-center gap-2 text-center max-w-2xl mx-auto">
+              <p className="text-[0.72rem] sm:text-[0.9rem] md:text-[1.05rem] text-foreground/75 font-light leading-snug">
+                Cognitive distortions — addressed &amp; cured through objective reasoning and statistical analysis.
+              </p>
+              <p className="text-[0.72rem] sm:text-[0.9rem] md:text-[1.05rem] text-foreground/75 font-light leading-snug">
+                Experiential bias weight — addressed with resonance calibration.
+              </p>
+              <p className="mt-2 text-[0.66rem] sm:text-[0.78rem] md:text-[0.88rem] text-secondary font-light leading-relaxed">
+                The Model is an experimental Probabilistic Intelligence <span className="text-[#0d4f57] font-semibold">[PI]</span> framework proposing a systems methodology for machine learning. It integrates probabilistic inference, semantic analysis, and transformer-based language models within a unified architecture for computational reasoning under uncertainty. It unifies probabilistic inference, semantic analysis, and transformer-based language models within a layered computational architecture. © Evrica Technologies Inc. 2026.
+              </p>
             </div>
           </div>
         </div>
