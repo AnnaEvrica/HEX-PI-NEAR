@@ -180,7 +180,7 @@ export default function HeroSection({ onAsteriskHover }) {
             <span className="font-bold text-[#0d4f57] whitespace-nowrap">[PI]</span>
           </div>
 
-          <div className="relative mt-[3rem] sm:mt-[4.5rem] flex flex-col items-center">
+          <div className="relative mt-[15rem] sm:mt-[16.5rem] flex flex-col items-center">
             <span className="text-[2.21rem] sm:text-[2.975rem] md:text-[4.165rem] lg:text-[6.25rem] xl:text-[6.545rem] leading-[0.9] font-bold tracking-tight text-center whitespace-nowrap" style={{ textShadow: '0 0 14px rgba(255,255,255,0.3), 0 2px 18px rgba(0,0,0,0.45)' }}>
               <span className="text-foreground">elevate</span><span className="text-foreground"> your thinking</span>
             </span>
