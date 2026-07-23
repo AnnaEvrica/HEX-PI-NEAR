@@ -117,6 +117,8 @@ Deno.serve(async (req) => {
       pricing,
     });
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    // 200 + error payload so the SubscriptionGate can surface the real cause
+    // (a 500 makes the SDK throw and the user sees a generic failure instead).
+    return Response.json({ error: error.message }, { status: 200 });
   }
 });
