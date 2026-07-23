@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import SignaturePatternBackground from '@/components/landing/SignaturePatternBackground';
+import BrainVideo from '@/components/landing/BrainVideo';
 
 const POOL = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ∑∫π∞≈±∇√∂λμ';
 
@@ -109,11 +110,7 @@ export default function HeroSection({ onAsteriskHover }) {
 
         {/* The Model — dual-hemisphere brain video, the main event */}
         <div className="relative mt-[1.6rem] sm:mt-[2.4rem] flex justify-center">
-          <video
-            src="https://media.base44.com/videos/public/69eef3d514386627566a9bf6/51e8e4cc9_u3683223828_an_hd_photo_of_a_brain_with_two_hemispheres_re_a42b0d40-0b05-42d1-a5dd-e02cbb9078fc_0.mp4"
-            autoPlay loop muted playsInline
-            className="w-full max-w-[22rem] sm:max-w-[30rem] lg:max-w-[40rem] rounded-lg shadow-[0_0_40px_rgba(255,255,255,0.12),0_14px_40px_rgba(0,0,0,0.5)] ring-1 ring-white/20"
-          />
+          <BrainVideo />
         </div>
 
         {/* Title block — two balanced rows: headline word (left) · system label (right) */}
