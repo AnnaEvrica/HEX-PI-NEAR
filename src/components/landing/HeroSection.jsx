@@ -184,8 +184,8 @@ export default function HeroSection({ onAsteriskHover }) {
               <span className="text-foreground">elevate</span><span className="text-foreground"> your thinking</span>
             </span>
 
-            {/* Two powerful statements — bold labels, left- and right-aligned. */}
-            <div className="relative mt-[3.25rem] sm:mt-[4.75rem] w-full grid grid-cols-2 gap-6 sm:gap-10 lg:gap-16 max-w-3xl mx-auto items-center">
+            {/* Two powerful statements — bold labels, pushed to the edges. */}
+            <div className="relative mt-[3.25rem] sm:mt-[4.75rem] w-full grid grid-cols-2 gap-8 sm:gap-16 lg:gap-24 items-center">
               <p className="text-left text-[0.72rem] sm:text-[0.9rem] md:text-[1.05rem] text-foreground leading-snug">
                 <span className="font-bold">Cognitive distortions:</span> addressed &amp; cured through objective reasoning and statistical analysis.
               </p>
