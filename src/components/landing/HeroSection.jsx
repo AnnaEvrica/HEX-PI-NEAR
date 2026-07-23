@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import SignaturePatternBackground from '@/components/landing/SignaturePatternBackground';
 import BrainVideo from '@/components/landing/BrainVideo';
+import StarWarsCrawl from '@/components/landing/StarWarsCrawl';
 
 const POOL = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ∑∫π∞≈±∇√∂λμ';
 
@@ -184,19 +185,28 @@ export default function HeroSection({ onAsteriskHover }) {
               <span className="text-foreground">elevate</span><span className="text-foreground"> your thinking</span>
             </span>
 
-            <div className="relative mt-[1.8rem] sm:mt-[2.6rem] w-full flex items-start justify-center gap-6 sm:gap-12 lg:gap-20 max-w-3xl mx-auto">
-              <p className="flex-1 text-center text-[0.72rem] sm:text-[0.9rem] md:text-[1.05rem] text-foreground/75 font-light leading-snug">
-                <span className="font-bold">Cognitive distortions</span> — addressed &amp; cured through objective reasoning and statistical analysis.
-              </p>
-              <p className="flex-1 text-center text-[0.72rem] sm:text-[0.9rem] md:text-[1.05rem] text-foreground/75 font-light leading-snug">
-                <span className="font-bold">Experiential bias</span> weight — addressed with resonance calibration.
-              </p>
+            {/* Two boxes aligned under the "elevate your thinking" line:
+                 left — Cognitive distortions in a black & white frame;
+                 right — Experiential bias in a square split orange / PI-US blue. */}
+            <div className="relative mt-[1.8rem] sm:mt-[2.6rem] w-full grid grid-cols-2 gap-4 sm:gap-8 lg:gap-12 max-w-3xl mx-auto">
+              <div className="aspect-square rounded-sm border-2 border-foreground p-3 flex items-center">
+                <p className="text-center text-[0.66rem] sm:text-[0.8rem] md:text-[0.95rem] text-foreground font-light leading-snug">
+                  <span className="font-bold">Cognitive distortions</span> — addressed &amp; cured through objective reasoning and statistical analysis.
+                </p>
+              </div>
+              <div
+                className="relative aspect-square rounded-sm overflow-hidden flex items-center justify-center p-3"
+                style={{ background: 'linear-gradient(to right, #FF6B35 50%, #0d4f57 50%)' }}
+              >
+                <p className="relative z-10 text-center text-white text-[0.66rem] sm:text-[0.8rem] md:text-[0.95rem] font-light leading-snug">
+                  <span className="font-bold">Experiential bias</span> weight — addressed with resonance calibration.
+                </p>
+              </div>
             </div>
 
-            <div className="relative mt-[1.6rem] sm:mt-[2.2rem] w-full rounded-md border border-border/60 bg-background/40 px-4 py-3">
-              <p className="text-center text-[0.66rem] sm:text-[0.78rem] md:text-[0.88rem] text-secondary font-light leading-relaxed">
-                The Model is an experimental Probabilistic Intelligence <span className="text-[#0d4f57] font-semibold">[PI]</span> framework proposing a systems methodology for machine learning. It integrates probabilistic inference, semantic analysis, and transformer-based language models within a unified architecture for computational reasoning under uncertainty. It unifies probabilistic inference, semantic analysis, and transformer-based language models within a layered computational architecture. © Evrica Technologies Inc. 2026.
-              </p>
+            {/* The disclaimer, reimagined as a Star-Wars-style opening crawl. */}
+            <div className="relative mt-[1.6rem] sm:mt-[2.2rem] w-full">
+              <StarWarsCrawl />
             </div>
           </div>
         </div>
