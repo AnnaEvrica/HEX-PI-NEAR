@@ -563,7 +563,7 @@ export default function HEX6ChatInterface() {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-3 md:px-6 py-4 md:py-8 space-y-4 md:space-y-6">
+        <div className="flex-1 overflow-y-auto px-4 md:px-8 py-5 md:py-10 space-y-5 md:space-y-8">
           {messages.map((message) => (
             <div
               key={message.id}
@@ -589,10 +589,10 @@ export default function HEX6ChatInterface() {
                     message.role === 'user'
                       ? 'bg-primary text-primary-foreground rounded-2xl rounded-tr-sm'
                       : 'bg-muted text-foreground rounded-2xl rounded-tl-sm'
-                  } px-4 py-2.5 text-sm md:text-base`}
+                  } px-4 py-3 md:px-5 md:py-3.5 text-base md:text-lg leading-relaxed`}
                 >
                   <ReactMarkdown 
-                    className="prose prose-sm dark:prose-invert max-w-none [&>*]:my-0 [&>p]:my-1 [&>ul]:my-1 [&>ol]:my-1 [&>li]:my-0"
+                    className="prose prose-sm dark:prose-invert max-w-none text-foreground [&>*]:my-0 [&>p]:leading-relaxed [&>p]:my-1.5 [&>ul]:my-1.5 [&>ol]:my-1.5 [&>li]:my-0.5"
                     components={{
                       p: ({ node, ...props }) => <p {...props} />,
                       ul: ({ node, ...props }) => <ul className="list-disc list-inside" {...props} />,
@@ -724,7 +724,7 @@ export default function HEX6ChatInterface() {
             </button>
             </div>
           </div>
-          <p className="text-[11px] text-secondary/70 px-1 mt-3 md:mt-4 leading-relaxed">
+          <p className="text-xs text-muted-foreground px-1 mt-4 md:mt-5 leading-relaxed">
             HEX6 BLE is a probabilistic intelligence model. No information provided constitutes financial, legal, or professional advice.
           </p>
         </div>
