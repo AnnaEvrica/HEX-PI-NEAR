@@ -7,6 +7,7 @@ import {
 import { filterSourcesBlock, updateMemory } from '../../shared/chatHelpers.ts';
 import { fetchYahooReturns } from '../../shared/marketDataClient.ts';
 import { selectSynthesisModel, INTERPRETATION_MODEL, adaptVoiceForModel } from '../../shared/modelRouter.ts';
+import { triage } from '../../shared/triage.ts';
 
 // Convert a raw numeric series to returns. If the values look like price
 // levels (all positive, magnitude > 1), convert to percent changes; otherwise
@@ -231,15 +232,11 @@ ${speaker}:`;
       return Response.json({ response, ran_engine: true, version: MODEL_VERSION, timestamp: new Date().toISOString() });
     }
 
-    // --- Casual/analytical triage ---
+    // --- Casual/analytical triage (hybrid: fast local scorer + LLM fallback) ---
     const lastTurns = history.slice(-6).map(m => `${m.role === 'user' ? userName : speaker}: ${m.content}`).join('\n') || '(no prior turns)';
-    const triage = await base44.integrations.Core.InvokeLLM({
-      prompt: `Classify the user's latest message. Decide if answering it requires fresh real-world data from the web (prices, news, stats, current events).\n\nCONVERSATION SO FAR:\n${lastTurns}\n\nLATEST MESSAGE FROM ${userName}: ${message}\n\nClassify as:\n- "casual" — greetings, smalltalk, philosophical/conceptual chat, opinions, follow-ups on something already discussed, questions answerable from general knowledge.\n- "analytical" — anything requiring fresh prices, market data, news, scores, time-series, or real-world current values.\n- "research" — long-form generation requests: "write an article", "draft a paper/report/essay/whitepaper", legal or analytical deep-dives, or extended coherent writing (e.g. for the Evrica Foundation).\n\nReturn JSON: { "intent": "casual" | "analytical" | "research" }`,
-      model: INTERPRETATION_MODEL,
-      response_json_schema: { type: 'object', properties: { intent: { type: 'string', enum: ['casual', 'analytical', 'research'] } }, required: ['intent'] },
-    }).catch(() => ({ intent: 'analytical' }));
+    const intent = await triage(message, (opts) => base44.integrations.Core.InvokeLLM({ ...opts, model: INTERPRETATION_MODEL }), lastTurns);
 
-    if (triage?.intent === 'casual') {
+    if (intent === 'casual') {
       const stateBlock = `No quantitative Thinking State for this message — respond directly and conversationally, grounded in the conversation.`;
       voice = adaptVoiceForModel(defaultVoice, selectSynthesisModel('casual'));
       const casualPayload = { prompt: composePrompt(stateBlock), model: selectSynthesisModel('casual'), add_context_from_internet: false };
@@ -320,7 +317,7 @@ Return JSON with:
 
     const stateBlock = webStateBlock || `No quantitative Thinking State for this message — respond using the supplied data.`;
     const dataBlock = `DATA (supplied by HEX6-BLE):\n${contextPriceLine ? contextPriceLine + '\n' : ''}${fetchResult?.factual_summary || 'No external data retrieved.'}`;
-    const synthModel = selectSynthesisModel(triage?.intent === 'research' ? 'research' : 'analytical');
+    const synthModel = selectSynthesisModel(intent === 'research' ? 'research' : 'analytical');
     voice = adaptVoiceForModel(voice, synthModel);
     const synthPayload = { prompt: composePrompt(stateBlock, dataBlock), model: synthModel, add_context_from_internet: false };
     if (file_urls && file_urls.length > 0) synthPayload.file_urls = file_urls;
