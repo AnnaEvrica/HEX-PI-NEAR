@@ -180,8 +180,8 @@ export default function HeroSection({ onAsteriskHover }) {
           </div>
 
           <div className="relative mt-[3rem] sm:mt-[4.5rem] flex flex-col items-center">
-            <span className="text-[2.6rem] sm:text-[3.5rem] md:text-[4.9rem] lg:text-[7.35rem] xl:text-[7.7rem] leading-[0.9] font-bold tracking-tight text-center whitespace-nowrap" style={{ textShadow: '0 0 14px rgba(255,255,255,0.3), 0 2px 18px rgba(0,0,0,0.45)' }}>
-              <span className="text-foreground" style={{ textShadow: '0 0 22px rgba(255,107,53,0.6), 0 2px 18px rgba(0,0,0,0.45)' }}>elevate</span><span className="text-foreground"> your thinking</span>
+            <span className="text-[2.21rem] sm:text-[2.975rem] md:text-[4.165rem] lg:text-[6.25rem] xl:text-[6.545rem] leading-[0.9] font-bold tracking-tight text-center whitespace-nowrap" style={{ textShadow: '0 0 14px rgba(255,255,255,0.3), 0 2px 18px rgba(0,0,0,0.45)' }}>
+              <span className="text-foreground">elevate</span><span className="text-foreground"> your thinking</span>
             </span>
 
             <div className="relative mt-[1.8rem] sm:mt-[2.6rem] w-full flex items-start justify-center gap-6 sm:gap-12 lg:gap-20 max-w-3xl mx-auto">
