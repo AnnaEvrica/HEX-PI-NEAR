@@ -33,6 +33,30 @@
     "total_conversations": {
       "type": "number",
       "description": "Total number of conversation turns remembered"
+    },
+    "boundary_warning_count": {
+      "type": "number",
+      "description": "Running count of boundary warnings issued to this user since the last escalation (0 after escalation)",
+      "default": 0
+    },
+    "last_warning_reason": {
+      "type": "string",
+      "description": "Short reason phrase of the most recent boundary warning (emitted by the persona via BOUNDARY_SIGNAL)"
+    },
+    "last_warning_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the most recent boundary warning was issued"
+    },
+    "escalation_count": {
+      "type": "number",
+      "description": "How many times this user has crossed the 3-warning threshold (incremented on each mediation escalation)",
+      "default": 0
+    },
+    "last_escalation_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the most recent mediation escalation was triggered"
     }
   },
   "required": [
