@@ -181,19 +181,19 @@ export default function HeroSection({ onAsteriskHover }) {
 
           <div className="relative mt-[3rem] sm:mt-[4.5rem] flex flex-col items-center">
             <span className="text-[2.6rem] sm:text-[3.5rem] md:text-[4.9rem] lg:text-[7.35rem] xl:text-[7.7rem] leading-[0.9] font-bold tracking-tight text-center whitespace-nowrap" style={{ textShadow: '0 0 14px rgba(255,255,255,0.3), 0 2px 18px rgba(0,0,0,0.45)' }}>
-              <span className="text-accent" style={{ textShadow: '0 0 22px rgba(255,107,53,0.6), 0 2px 18px rgba(0,0,0,0.45)' }}>elevate</span><span className="text-foreground"> your thinking</span>
+              <span className="text-foreground" style={{ textShadow: '0 0 22px rgba(255,107,53,0.6), 0 2px 18px rgba(0,0,0,0.45)' }}>elevate</span><span className="text-foreground"> your thinking</span>
             </span>
 
             <div className="relative mt-[1.8rem] sm:mt-[2.6rem] w-full flex items-start justify-center gap-6 sm:gap-12 lg:gap-20 max-w-3xl mx-auto">
               <p className="flex-1 text-center text-[0.72rem] sm:text-[0.9rem] md:text-[1.05rem] text-foreground/75 font-light leading-snug">
-                Cognitive distortions — addressed &amp; cured through objective reasoning and statistical analysis.
+                <span className="font-bold">Cognitive distortions</span> — addressed &amp; cured through objective reasoning and statistical analysis.
               </p>
               <p className="flex-1 text-center text-[0.72rem] sm:text-[0.9rem] md:text-[1.05rem] text-foreground/75 font-light leading-snug">
-                Experiential bias weight — addressed with resonance calibration.
+                <span className="font-bold">Experiential bias</span> weight — addressed with resonance calibration.
               </p>
             </div>
 
-            <div className="relative mt-[1.6rem] sm:mt-[2.2rem] w-full max-w-2xl mx-auto rounded-md border border-border/60 bg-background/40 px-4 py-3">
+            <div className="relative mt-[1.6rem] sm:mt-[2.2rem] w-full rounded-md border border-border/60 bg-background/40 px-4 py-3">
               <p className="text-center text-[0.66rem] sm:text-[0.78rem] md:text-[0.88rem] text-secondary font-light leading-relaxed">
                 The Model is an experimental Probabilistic Intelligence <span className="text-[#0d4f57] font-semibold">[PI]</span> framework proposing a systems methodology for machine learning. It integrates probabilistic inference, semantic analysis, and transformer-based language models within a unified architecture for computational reasoning under uncertainty. It unifies probabilistic inference, semantic analysis, and transformer-based language models within a layered computational architecture. © Evrica Technologies Inc. 2026.
               </p>
