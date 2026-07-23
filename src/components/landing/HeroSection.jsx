@@ -174,7 +174,7 @@ export default function HeroSection({ onAsteriskHover }) {
             </div>
           </div>
 
-          <div className="relative mt-[2.19rem] sm:mt-[3.31rem] flex items-baseline justify-between text-foreground/80 text-[0.7rem] sm:text-[1.3rem] md:text-[1.75rem] font-light tracking-[0.05em]">
+          <div className="relative mt-[2.19rem] sm:mt-[3.31rem] flex items-baseline justify-between text-foreground/80 text-[0.84rem] sm:text-[1.56rem] md:text-[2.1rem] font-light tracking-[0.05em]">
             <span className="whitespace-nowrap">Probabilistic Intelligence</span>
             <span className="font-bold text-[#0d4f57] whitespace-nowrap">[PI]</span>
           </div>
@@ -187,10 +187,10 @@ export default function HeroSection({ onAsteriskHover }) {
             {/* Two powerful statements — bold labels, pushed to the edges. */}
             <div className="relative mt-[3.25rem] sm:mt-[4.75rem] w-full grid grid-cols-2 gap-8 sm:gap-16 lg:gap-24 items-center">
               <p className="text-left text-[0.72rem] sm:text-[0.9rem] md:text-[1.05rem] text-foreground leading-snug">
-                <span className="font-bold">Cognitive distortions:</span> addressed &amp; cured through objective reasoning and statistical analysis.
+                <span className="font-bold text-[#A0420C]">Cognitive distortions:</span> addressed &amp; cured through objective reasoning and statistical analysis.
               </p>
               <p className="text-right text-[0.72rem] sm:text-[0.9rem] md:text-[1.05rem] text-foreground leading-snug">
-                <span className="font-bold">Experiential bias:</span> weight — addressed with resonance calibration.
+                <span className="font-bold text-[#A0420C]">Experiential bias:</span> weight — addressed with resonance calibration.
               </p>
             </div>
 

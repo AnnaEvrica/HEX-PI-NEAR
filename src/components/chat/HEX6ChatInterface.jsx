@@ -11,7 +11,7 @@ export default function HEX6ChatInterface() {
   const welcomeMessage = {
     id: 'welcome',
     role: 'assistant',
-    content: `Welcome. I am HEX6 BLE — a probabilistic intelligence: one organism, one sequence. I fuse what's possible with what's meaningful, with sources and reasoning you can follow.\n\nWhat would you like to explore?`,
+    content: `Welcome. I'm The Model — a probabilistic intelligence.\n\nI fuse what's possible with what's meaningful, with reasoning you can follow. I read the data behind the moment, name the patterns others miss, and tell you where the weight actually sits — clearly, and without the noise.\n\nAsk me about a market, a number, or an idea you can't quite shake. Let's think clearly — and elevate the way you think.`,
   };
 
   // Loading copy — only "Thinking..." for fast chat replies.
@@ -587,7 +587,7 @@ export default function HEX6ChatInterface() {
                 <div
                   className={`${
                     message.role === 'user'
-                      ? 'bg-primary text-primary-foreground rounded-2xl rounded-tr-sm'
+                      ? 'bg-accent/10 text-foreground border border-accent/30 rounded-2xl rounded-tr-sm'
                       : 'bg-muted text-foreground rounded-2xl rounded-tl-sm'
                   } px-4 py-2.5 text-sm md:text-base`}
                 >
