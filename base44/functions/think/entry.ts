@@ -234,7 +234,9 @@ ${speaker}:`;
 
     // --- Casual/analytical triage (hybrid: fast local scorer + LLM fallback) ---
     const lastTurns = history.slice(-6).map(m => `${m.role === 'user' ? userName : speaker}: ${m.content}`).join('\n') || '(no prior turns)';
-    const intent = await triage(message, (opts) => base44.integrations.Core.InvokeLLM({ ...opts, model: INTERPRETATION_MODEL }), lastTurns);
+    let triageProfile;
+    if (userMemory?.triage_profile) { try { triageProfile = JSON.parse(userMemory.triage_profile); } catch (_e) { /* ignore */ } }
+    const intent = await triage(message, (opts) => base44.integrations.Core.InvokeLLM({ ...opts, model: INTERPRETATION_MODEL }), lastTurns, triageProfile);
 
     if (intent === 'casual') {
       const stateBlock = `No quantitative Thinking State for this message — respond directly and conversationally, grounded in the conversation.`;

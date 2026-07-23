@@ -26,6 +26,10 @@
       "type": "string",
       "description": "Per-user nightly calibration digest (engine grade, cycle count, avg confidence, dominant lean) written by the nightly calibration job"
     },
+    "triage_profile": {
+      "type": "string",
+      "description": "JSON-encoded adaptive triage profile {analytical_cues:[], casual_cues:[]} derived nightly from this user's CognitiveState query history (engine-ran vs not), consumed by the hybrid triage classifier"
+    },
     "total_conversations": {
       "type": "number",
       "description": "Total number of conversation turns remembered"
