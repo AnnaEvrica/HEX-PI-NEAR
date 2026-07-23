@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import SignaturePatternBackground from '@/components/landing/SignaturePatternBackground';
 import BrainVideo from '@/components/landing/BrainVideo';
+import WaveSignal3D from '@/components/landing/WaveSignal3D';
 
 const POOL = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ∑∫π∞≈±∇√∂λμ';
 
@@ -184,14 +185,9 @@ export default function HeroSection({ onAsteriskHover }) {
               <span className="text-foreground">elevate</span><span className="text-foreground"> your thinking</span>
             </span>
 
-            {/* Two powerful statements — bold labels, pushed to the edges. */}
-            <div className="relative mt-[3.25rem] sm:mt-[4.75rem] w-full grid grid-cols-2 gap-8 sm:gap-16 lg:gap-24 items-center">
-              <p className="text-left text-[0.72rem] sm:text-[0.9rem] md:text-[1.05rem] text-foreground leading-snug">
-                <span className="font-bold text-[#A0420C]">Cognitive distortions:</span> addressed &amp; cured through objective reasoning and statistical analysis.
-              </p>
-              <p className="text-right text-[0.72rem] sm:text-[0.9rem] md:text-[1.05rem] text-foreground leading-snug">
-                <span className="font-bold text-[#A0420C]">Experiential bias:</span> weight — addressed with resonance calibration.
-              </p>
+            {/* 3D radial wave field with identified signal points — circular ripple overlay on top. */}
+            <div className="relative mt-[3.25rem] sm:mt-[4.75rem] w-full">
+              <WaveSignal3D />
             </div>
 
             {/* The disclaimer — simple black-on-white, filling the rectangle. */}
