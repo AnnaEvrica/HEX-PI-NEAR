@@ -175,12 +175,31 @@ export default function HeroSection({ onAsteriskHover }) {
             <span className="font-bold text-[#0d4f57] whitespace-nowrap">[PI]</span>
           </div>
 
-          <div className="relative mt-[3.4rem] sm:mt-[5rem] flex items-center justify-center gap-3 sm:gap-8 lg:gap-12">
-            <div className="hidden sm:block w-28 lg:w-44 opacity-90"><CognitiveDistortionMotif /></div>
-            <span className="text-accent font-serif italic font-light text-[1.05rem] sm:text-[1.45rem] md:text-[1.85rem] tracking-wide whitespace-nowrap" style={{ textShadow: '0 0 18px rgba(255,107,53,0.5), 0 1px 2px rgba(0,0,0,0.45)' }}>
+          <div className="relative mt-[3rem] sm:mt-[4.5rem] flex flex-col items-center">
+            {/* Brain — dual hemispheres, the seat of the two operators */}
+            <div className="w-28 sm:w-40 lg:w-48 rounded-full overflow-hidden bg-white shadow-[0_0_30px_rgba(255,255,255,0.18),0_10px_30px_rgba(0,0,0,0.45)] ring-1 ring-white/30">
+              <img src="https://media.base44.com/images/public/69eef3d514386627566a9bf6/042efac4f_generated_image.png" alt="Dual-hemisphere brain" className="w-full h-auto block" />
+            </div>
+
+            <span className="mt-[1.4rem] text-accent font-serif italic font-light text-[1.05rem] sm:text-[1.45rem] md:text-[1.85rem] tracking-wide whitespace-nowrap text-center" style={{ textShadow: '0 0 18px rgba(255,107,53,0.5), 0 1px 2px rgba(0,0,0,0.45)' }}>
               Time to elevate your thinking
             </span>
-            <div className="hidden sm:block w-28 lg:w-44 opacity-90"><ResonanceCalibrationMotif /></div>
+
+            {/* Left + right: image and words for each operator */}
+            <div className="mt-[1.8rem] sm:mt-[2.6rem] w-full flex items-start justify-center gap-6 sm:gap-12 lg:gap-24">
+              <div className="flex-1 flex flex-col items-center sm:items-end text-center sm:text-right max-w-[14rem]">
+                <div className="w-24 sm:w-32 lg:w-40 opacity-90"><CognitiveDistortionMotif /></div>
+                <p className="mt-3 text-[0.68rem] sm:text-[0.82rem] text-foreground/70 font-light leading-snug">
+                  Cognitive distortions — addressed &amp; cured through objective reasoning and statistical analysis
+                </p>
+              </div>
+              <div className="flex-1 flex flex-col items-center sm:items-start text-center sm:text-left max-w-[14rem]">
+                <div className="w-24 sm:w-32 lg:w-40 opacity-90"><ResonanceCalibrationMotif /></div>
+                <p className="mt-3 text-[0.68rem] sm:text-[0.82rem] text-foreground/70 font-light leading-snug">
+                  Experiential bias weight — addressed with resonance calibration
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
