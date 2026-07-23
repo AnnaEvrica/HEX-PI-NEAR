@@ -101,14 +101,14 @@ export default function HeroSection({ onAsteriskHover }) {
         transition={{ duration: 0.8 }}
         style={{ textShadow: '0 0 10px rgba(255,255,255,0.25), 0 1px 3px rgba(0,0,0,0.45)' }}
       >
-        <div className="flex justify-start mt-[1.375rem] sm:mt-[1.925rem]">
-          <span className="text-xs sm:text-sm uppercase tracking-[0.12em] text-secondary font-medium whitespace-nowrap">
+        <div className="flex justify-start mt-[1.58rem] sm:mt-[2.21rem]">
+          <span className="text-xs sm:text-sm uppercase tracking-[0.12em] text-foreground/80 font-light whitespace-nowrap">
             Welcome to
           </span>
         </div>
 
         {/* Title block — two balanced rows: headline word (left) · system label (right) */}
-        <div className="relative mt-[2.75rem] sm:mt-[3.85rem]">
+        <div className="relative mt-[3.16rem] sm:mt-[4.43rem]">
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <ProbabilityMotif />
             <ResonanceMotif />
@@ -168,13 +168,13 @@ export default function HeroSection({ onAsteriskHover }) {
             </div>
           </div>
 
-          <div className="relative mt-[1.65rem] sm:mt-[2.5rem] flex items-baseline justify-between text-secondary text-[0.7rem] sm:text-[1.3rem] md:text-[1.75rem] font-medium tracking-[0.05em]">
+          <div className="relative mt-[1.90rem] sm:mt-[2.88rem] flex items-baseline justify-between text-foreground/80 text-[0.7rem] sm:text-[1.3rem] md:text-[1.75rem] font-light tracking-[0.05em]">
             <span className="whitespace-nowrap">Probabilistic Intelligence</span>
             <span className="font-bold text-[#0d4f57] whitespace-nowrap">[PI]</span>
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-[30rem] mx-auto pt-[2.2rem]">
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-[30rem] mx-auto pt-[2.53rem]">
           <button
             onClick={() => navigate('/discover')}
             className="flex-1 inline-flex items-center justify-center px-6 py-3 sm:py-4 rounded-sm border-2 border-accent bg-white text-black font-medium hover:bg-accent/10 transition-all text-sm sm:text-base md:text-lg shadow-[0_0_14px_rgba(255,255,255,0.2)]"
@@ -192,7 +192,7 @@ export default function HeroSection({ onAsteriskHover }) {
 
         {/* Version line — multi-colored segments */}
         <div className="flex justify-center">
-          <span className="font-semibold tracking-tight mt-[1.1rem] text-xs sm:text-sm text-secondary">
+          <span className="font-semibold tracking-tight mt-[1.27rem] text-xs sm:text-sm text-secondary" style={{ textShadow: 'none' }}>
             <span>[</span>
             <span className="font-bold uppercase">VERSION:</span>
             <span className="font-bold">{' '}HEX6-BLE</span>
