@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import SignaturePatternBackground from '@/components/landing/SignaturePatternBackground';
 import BrainVideo from '@/components/landing/BrainVideo';
-import StarWarsCrawl from '@/components/landing/StarWarsCrawl';
 
 const POOL = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ∑∫π∞≈±∇√∂λμ';
 
@@ -185,19 +184,21 @@ export default function HeroSection({ onAsteriskHover }) {
               <span className="text-foreground">elevate</span><span className="text-foreground"> your thinking</span>
             </span>
 
-            {/* Two powerful statements, side by side — no frames, no color. */}
+            {/* Two powerful statements — bold labels, left- and right-aligned. */}
             <div className="relative mt-[1.8rem] sm:mt-[2.6rem] w-full grid grid-cols-2 gap-4 sm:gap-8 lg:gap-12 max-w-3xl mx-auto items-center">
-              <p className="text-center text-[0.72rem] sm:text-[0.9rem] md:text-[1.05rem] text-foreground font-bold leading-snug">
-                Cognitive distortions — addressed &amp; cured through objective reasoning and statistical analysis.
+              <p className="text-left text-[0.72rem] sm:text-[0.9rem] md:text-[1.05rem] text-foreground leading-snug">
+                <span className="font-bold">Cognitive distortions:</span> addressed &amp; cured through objective reasoning and statistical analysis.
               </p>
-              <p className="text-center text-[0.72rem] sm:text-[0.9rem] md:text-[1.05rem] text-foreground font-bold leading-snug sm:border-l sm:border-border/50 sm:pl-6">
-                Experiential bias weight — addressed with resonance calibration.
+              <p className="text-right text-[0.72rem] sm:text-[0.9rem] md:text-[1.05rem] text-foreground leading-snug">
+                <span className="font-bold">Experiential bias:</span> weight — addressed with resonance calibration.
               </p>
             </div>
 
-            {/* The disclaimer, reimagined as a Star-Wars-style opening crawl. */}
-            <div className="relative mt-[1.6rem] sm:mt-[2.2rem] w-full">
-              <StarWarsCrawl />
+            {/* The disclaimer — simple black-on-white, filling the rectangle. */}
+            <div className="relative mt-[1.6rem] sm:mt-[2.2rem] w-full rounded-md bg-white px-4 py-3">
+              <p className="text-left text-[0.72rem] sm:text-[0.9rem] md:text-[1.05rem] text-black font-bold leading-snug">
+                The Model is an experimental Probabilistic Intelligence <span className="text-[#0d4f57] font-bold">[PI]</span> framework proposing a systems methodology for machine learning. It integrates probabilistic inference, semantic analysis, and transformer-based language models within a unified architecture for computational reasoning under uncertainty. It unifies probabilistic inference, semantic analysis, and transformer-based language models within a layered computational architecture. © Evrica Technologies Inc. 2026.
+              </p>
             </div>
           </div>
         </div>
