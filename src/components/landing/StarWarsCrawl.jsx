@@ -1,47 +1,40 @@
-import { motion } from 'framer-motion';
-
-// Star-Wars-style opening crawl: bold perspective text receding into the
-// distance, scrolling upward on a dark plane. Replaces the static disclaimer
-// paragraph that previously lived both here and in the footer.
+// Static "crawl" — the Star Wars look (perspective receding plane, bold) but
+// with NO motion. The heading tapers from a wider line to narrower lines,
+// forming a legible wedge shape. Replaces the previously animated crawl.
 export default function StarWarsCrawl() {
+  const lines = [
+    { t: 'The Model is an experimental Probabilistic Intelligence [PI] framework proposing a systems methodology for machine learning.', s: '1.05rem' },
+    { t: 'It integrates probabilistic inference, semantic analysis, and transformer-based language models within a unified architecture for computational reasoning under uncertainty.', s: '0.82rem' },
+    { t: 'It unifies probabilistic inference, semantic analysis, and transformer-based language models within a layered computational architecture.', s: '0.66rem' },
+    { t: '© Evrica Technologies Inc. 2026.', s: '0.56rem' },
+  ];
+
   return (
     <div
       className="relative w-full overflow-hidden rounded-md border border-border/60"
       style={{
-        perspective: '340px',
-        height: '11rem',
+        perspective: '360px',
+        height: '13rem',
         background: 'linear-gradient(180deg,#05080f 0%,#0a1020 55%,#02040a 100%)',
       }}
     >
-      {/* tilted receding plane */}
+      {/* static receding plane — no animation */}
       <div
-        className="absolute inset-0"
-        style={{ transform: 'rotateX(30deg)', transformOrigin: '50% 100%' }}
+        className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-6"
+        style={{ transform: 'rotateX(26deg)', transformOrigin: '50% 100%' }}
       >
-        <motion.div
-          className="absolute left-0 right-0 px-6"
-          style={{ top: '100%' }}
-          initial={{ y: '0%' }}
-          animate={{ y: '-260%' }}
-          transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
-        >
+        {lines.map((l, i) => (
           <p
-            className="text-center font-bold leading-relaxed text-[#FFE81F]"
-            style={{ fontSize: '0.8rem', textShadow: '0 0 8px rgba(255,232,31,0.35)' }}
+            key={i}
+            className="text-center font-bold leading-snug text-[#FFE81F]"
+            style={{ fontSize: l.s, textShadow: '0 0 8px rgba(255,232,31,0.3)', maxWidth: '46ch' }}
           >
-            The Model is an experimental Probabilistic Intelligence{' '}
-            <span className="text-white">[PI]</span> framework proposing a systems
-            methodology for machine learning. It integrates probabilistic
-            inference, semantic analysis, and transformer-based language models
-            within a unified architecture for computational reasoning under
-            uncertainty. It unifies probabilistic inference, semantic analysis,
-            and transformer-based language models within a layered computational
-            architecture. © Evrica Technologies Inc. 2026.
+            {l.t}
           </p>
-        </motion.div>
+        ))}
       </div>
 
-      {/* distance fades — top vanishing point + bottom exit */}
+      {/* distance fades — keep the vanishing-point feel */}
       <div
         className="absolute inset-x-0 top-0 h-1/3 pointer-events-none"
         style={{ background: 'linear-gradient(180deg,#05080f,transparent)' }}

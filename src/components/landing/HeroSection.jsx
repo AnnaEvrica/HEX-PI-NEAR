@@ -185,23 +185,14 @@ export default function HeroSection({ onAsteriskHover }) {
               <span className="text-foreground">elevate</span><span className="text-foreground"> your thinking</span>
             </span>
 
-            {/* Two boxes aligned under the "elevate your thinking" line:
-                 left — Cognitive distortions in a black & white frame;
-                 right — Experiential bias in a square split orange / PI-US blue. */}
-            <div className="relative mt-[1.8rem] sm:mt-[2.6rem] w-full grid grid-cols-2 gap-4 sm:gap-8 lg:gap-12 max-w-3xl mx-auto">
-              <div className="aspect-square rounded-sm border-2 border-foreground p-3 flex items-center">
-                <p className="text-center text-[0.66rem] sm:text-[0.8rem] md:text-[0.95rem] text-foreground font-light leading-snug">
-                  <span className="font-bold">Cognitive distortions</span> — addressed &amp; cured through objective reasoning and statistical analysis.
-                </p>
-              </div>
-              <div
-                className="relative aspect-square rounded-sm overflow-hidden flex items-center justify-center p-3"
-                style={{ background: 'linear-gradient(to right, #FF6B35 50%, #0d4f57 50%)' }}
-              >
-                <p className="relative z-10 text-center text-white text-[0.66rem] sm:text-[0.8rem] md:text-[0.95rem] font-light leading-snug">
-                  <span className="font-bold">Experiential bias</span> weight — addressed with resonance calibration.
-                </p>
-              </div>
+            {/* Two powerful statements, side by side — no frames, no color. */}
+            <div className="relative mt-[1.8rem] sm:mt-[2.6rem] w-full grid grid-cols-2 gap-4 sm:gap-8 lg:gap-12 max-w-3xl mx-auto items-center">
+              <p className="text-center text-[0.72rem] sm:text-[0.9rem] md:text-[1.05rem] text-foreground font-bold leading-snug">
+                Cognitive distortions — addressed &amp; cured through objective reasoning and statistical analysis.
+              </p>
+              <p className="text-center text-[0.72rem] sm:text-[0.9rem] md:text-[1.05rem] text-foreground font-bold leading-snug sm:border-l sm:border-border/50 sm:pl-6">
+                Experiential bias weight — addressed with resonance calibration.
+              </p>
             </div>
 
             {/* The disclaimer, reimagined as a Star-Wars-style opening crawl. */}
