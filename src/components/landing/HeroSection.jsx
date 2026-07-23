@@ -114,7 +114,7 @@ export default function HeroSection({ onAsteriskHover }) {
             <ResonanceMotif />
           </div>
 
-          <div className="relative flex flex-col">
+          <div className="relative flex flex-col gap-[0.6rem] sm:gap-[1rem]">
             {/* Row 1 — "The" · [HEX6-BLE] (same font/size, soft white glow) */}
             <div className="flex items-baseline justify-between gap-4">
               <motion.h2
@@ -168,13 +168,13 @@ export default function HeroSection({ onAsteriskHover }) {
             </div>
           </div>
 
-          <div className="relative mt-[1.90rem] sm:mt-[2.88rem] flex items-baseline justify-between text-foreground/80 text-[0.7rem] sm:text-[1.3rem] md:text-[1.75rem] font-light tracking-[0.05em]">
+          <div className="relative mt-[2.19rem] sm:mt-[3.31rem] flex items-baseline justify-between text-foreground/80 text-[0.7rem] sm:text-[1.3rem] md:text-[1.75rem] font-light tracking-[0.05em]">
             <span className="whitespace-nowrap">Probabilistic Intelligence</span>
             <span className="font-bold text-[#0d4f57] whitespace-nowrap">[PI]</span>
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-[30rem] mx-auto pt-[2.53rem]">
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-[30rem] mx-auto pt-[2.91rem]">
           <button
             onClick={() => navigate('/discover')}
             className="flex-1 inline-flex items-center justify-center px-6 py-3 sm:py-4 rounded-sm border-2 border-accent bg-white text-black font-medium hover:bg-accent/10 transition-all text-sm sm:text-base md:text-lg shadow-[0_0_14px_rgba(255,255,255,0.2)]"
