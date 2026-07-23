@@ -3,6 +3,8 @@ import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import SignaturePatternBackground from '@/components/landing/SignaturePatternBackground';
+import CognitiveDistortionMotif from '@/components/landing/CognitiveDistortionMotif';
+import ResonanceCalibrationMotif from '@/components/landing/ResonanceCalibrationMotif';
 
 const POOL = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ∑∫π∞≈±∇√∂λμ';
 
@@ -173,10 +175,12 @@ export default function HeroSection({ onAsteriskHover }) {
             <span className="font-bold text-[#0d4f57] whitespace-nowrap">[PI]</span>
           </div>
 
-          <div className="relative mt-[1.9rem] sm:mt-[2.6rem] flex justify-center">
-            <span className="text-accent text-[0.95rem] sm:text-[1.2rem] md:text-[1.55rem] font-semibold uppercase tracking-[0.2em] whitespace-nowrap" style={{ textShadow: '0 0 18px rgba(255,107,53,0.5), 0 1px 2px rgba(0,0,0,0.45)' }}>
-              Elevate your thinking
+          <div className="relative mt-[3.4rem] sm:mt-[5rem] flex items-center justify-center gap-3 sm:gap-8 lg:gap-12">
+            <div className="hidden sm:block w-28 lg:w-44 opacity-90"><CognitiveDistortionMotif /></div>
+            <span className="text-accent font-serif italic font-light text-[1.05rem] sm:text-[1.45rem] md:text-[1.85rem] tracking-wide whitespace-nowrap" style={{ textShadow: '0 0 18px rgba(255,107,53,0.5), 0 1px 2px rgba(0,0,0,0.45)' }}>
+              Time to elevate your thinking
             </span>
+            <div className="hidden sm:block w-28 lg:w-44 opacity-90"><ResonanceCalibrationMotif /></div>
           </div>
         </div>
 
