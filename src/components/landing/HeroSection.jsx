@@ -180,7 +180,7 @@ export default function HeroSection({ onAsteriskHover }) {
             <span className="font-bold text-[#0d4f57] whitespace-nowrap">[PI]</span>
           </div>
 
-          <div className="relative mt-[15rem] sm:mt-[16.5rem] flex flex-col items-center">
+          <div className="relative mt-[3.5rem] sm:mt-[5rem] flex flex-col items-center">
             {/* Manifesto headline */}
             <motion.div
               className="w-full max-w-3xl mx-auto text-center"
@@ -188,11 +188,11 @@ export default function HeroSection({ onAsteriskHover }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7 }}
             >
-              <h3 className="text-[2rem] sm:text-[3rem] md:text-[3.75rem] lg:text-[4.5rem] leading-[0.95] font-bold tracking-tight" style={{ textShadow: '0 0 14px rgba(255,255,255,0.25), 0 2px 18px rgba(0,0,0,0.45)' }}>
+              <h3 className="text-[1.75rem] sm:text-[3rem] md:text-[3.75rem] lg:text-[4.5rem] leading-[1.05] font-bold tracking-tight" style={{ textShadow: '0 0 14px rgba(255,255,255,0.25), 0 2px 18px rgba(0,0,0,0.45)' }}>
                 <span className="text-white">Most models </span>
                 <span className="text-[#888888] line-through decoration-[#888888]">guess.</span>
               </h3>
-              <h3 className="text-[2rem] sm:text-[3rem] md:text-[3.75rem] lg:text-[4.5rem] leading-[0.95] font-bold tracking-tight" style={{ textShadow: '0 0 14px rgba(255,255,255,0.25), 0 2px 18px rgba(0,0,0,0.45)' }}>
+              <h3 className="text-[1.75rem] sm:text-[3rem] md:text-[3.75rem] lg:text-[4.5rem] leading-[1.05] font-bold tracking-tight" style={{ textShadow: '0 0 14px rgba(255,255,255,0.25), 0 2px 18px rgba(0,0,0,0.45)' }}>
                 <span className="text-white">This one proves </span>
                 <span className="text-[#ff8c42]">why.</span>
               </h3>
