@@ -181,25 +181,20 @@ export default function HeroSection({ onAsteriskHover }) {
           </div>
 
           <div className="relative mt-[3.5rem] sm:mt-[5rem] flex flex-col items-center">
-            {/* Manifesto headline */}
+            {/* Manifesto — one value-driven invitation */}
             <motion.div
               className="w-full max-w-3xl mx-auto text-center"
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7 }}
             >
-              <h3 className="text-[1.75rem] sm:text-[3rem] md:text-[3.75rem] lg:text-[4.5rem] leading-[1.05] font-bold tracking-tight" style={{ textShadow: '0 0 14px rgba(255,255,255,0.25), 0 2px 18px rgba(0,0,0,0.45)' }}>
-                <span className="text-white">Most models </span>
-                <span className="text-[#888888] line-through decoration-[#888888]">guess.</span>
+              <h3 className="text-[1.5rem] sm:text-[2.25rem] md:text-[2.75rem] lg:text-[3.25rem] leading-[1.15] font-bold tracking-tight" style={{ textShadow: '0 0 14px rgba(255,255,255,0.25), 0 2px 18px rgba(0,0,0,0.45)' }}>
+                <span className="text-white">The Model unlocks the </span>
+                <span className="text-[#ff8c42]">informational value</span>
+                <span className="text-white"> hidden in any question — </span>
+                <span className="text-[#ff8c42]">enter</span>
+                <span className="text-white"> and let it reveal the structure beneath.</span>
               </h3>
-              <h3 className="text-[1.75rem] sm:text-[3rem] md:text-[3.75rem] lg:text-[4.5rem] leading-[1.05] font-bold tracking-tight" style={{ textShadow: '0 0 14px rgba(255,255,255,0.25), 0 2px 18px rgba(0,0,0,0.45)' }}>
-                <span className="text-white">This one proves </span>
-                <span className="text-[#ff8c42]">why.</span>
-              </h3>
-              <p className="mt-6 sm:mt-8 text-foreground/70 text-sm sm:text-lg md:text-xl font-light leading-snug">
-                Probability tells you what's likely. Value tells you what matters.<br className="hidden sm:block" />
-                This engine runs both — and shows its reasoning.
-              </p>
             </motion.div>
 
             {/* 3D radial wave field with identified signal points — circular ripple overlay on top. */}
