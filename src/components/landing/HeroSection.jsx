@@ -181,33 +181,52 @@ export default function HeroSection({ onAsteriskHover }) {
           </div>
 
           <div className="relative mt-[15rem] sm:mt-[16.5rem] flex flex-col items-center">
-            <div className="w-full max-w-3xl mx-auto px-2">
-              <h3 className="text-[1.5rem] sm:text-[2rem] md:text-[2.75rem] font-bold tracking-tight text-foreground text-center mb-6 sm:mb-8" style={{ textShadow: '0 0 14px rgba(255,255,255,0.3), 0 2px 18px rgba(0,0,0,0.45)' }}>
-                Use Cases
+            {/* Manifesto headline */}
+            <motion.div
+              className="w-full max-w-3xl mx-auto text-center"
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7 }}
+            >
+              <h3 className="text-[2rem] sm:text-[3rem] md:text-[3.75rem] lg:text-[4.5rem] leading-[0.95] font-bold tracking-tight" style={{ textShadow: '0 0 14px rgba(255,255,255,0.25), 0 2px 18px rgba(0,0,0,0.45)' }}>
+                <span className="text-white">Most models </span>
+                <span className="text-[#888888] line-through decoration-[#888888]">guess.</span>
               </h3>
-              <div className="space-y-4 sm:space-y-5">
-                <div className="flex flex-col sm:flex-row gap-1 sm:gap-5 sm:items-baseline">
-                  <span className="text-[#A0420C] font-bold text-sm sm:text-base md:text-lg tracking-tight sm:w-52 shrink-0">Statistical Analysis</span>
-                  <span className="text-foreground/85 text-sm sm:text-base md:text-lg font-light leading-snug">Learning probability through "prediction" — testable, falsifiable, and grounded in real outcome distributions.</span>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-1 sm:gap-5 sm:items-baseline">
-                  <span className="text-[#A0420C] font-bold text-sm sm:text-base md:text-lg tracking-tight sm:w-52 shrink-0">Deepened Comprehension</span>
-                  <span className="text-foreground/85 text-sm sm:text-base md:text-lg font-light leading-snug">Reading the signals behind the moment and surfacing the contextual value others miss.</span>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-1 sm:gap-5 sm:items-baseline">
-                  <span className="text-[#A0420C] font-bold text-sm sm:text-base md:text-lg tracking-tight sm:w-52 shrink-0">Greater Objectivism</span>
-                  <span className="text-foreground/85 text-sm sm:text-base md:text-lg font-light leading-snug">Stripping distortion from interpretation — letting structure lead, not narrative.</span>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-1 sm:gap-5 sm:items-baseline">
-                  <span className="text-[#A0420C] font-bold text-sm sm:text-base md:text-lg tracking-tight sm:w-52 shrink-0">Accuracy &amp; Value</span>
-                  <span className="text-foreground/85 text-sm sm:text-base md:text-lg font-light leading-snug">Sharper answers — more precise, more useful, and more honest about where the weight actually sits.</span>
-                </div>
-              </div>
-            </div>
+              <h3 className="text-[2rem] sm:text-[3rem] md:text-[3.75rem] lg:text-[4.5rem] leading-[0.95] font-bold tracking-tight" style={{ textShadow: '0 0 14px rgba(255,255,255,0.25), 0 2px 18px rgba(0,0,0,0.45)' }}>
+                <span className="text-white">This one proves </span>
+                <span className="text-[#ff8c42]">why.</span>
+              </h3>
+              <p className="mt-6 sm:mt-8 text-foreground/70 text-sm sm:text-lg md:text-xl font-light leading-snug">
+                Probability tells you what's likely. Value tells you what matters.<br className="hidden sm:block" />
+                This engine runs both — and shows its reasoning.
+              </p>
+            </motion.div>
 
             {/* 3D radial wave field with identified signal points — circular ripple overlay on top. */}
-            <div className="relative mt-[3.25rem] sm:mt-[4.75rem] w-full">
+            <div className="relative mt-[2.5rem] sm:mt-[3.5rem] w-full">
               <WaveSignal3D />
+            </div>
+
+            {/* Evidence — why it's different */}
+            <div className="relative mt-[2.5rem] sm:mt-[3.5rem] w-full max-w-3xl mx-auto px-2">
+              <div className="space-y-4 sm:space-y-5">
+                <div className="flex flex-col sm:flex-row gap-1 sm:gap-5 sm:items-baseline">
+                  <span className="text-white font-bold text-sm sm:text-base md:text-lg tracking-tight sm:w-52 shrink-0">Statistical Analysis</span>
+                  <span className="text-foreground/70 text-sm sm:text-base md:text-lg font-light leading-snug">Learning probability through "prediction" — testable, falsifiable, and grounded in real outcome distributions.</span>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-1 sm:gap-5 sm:items-baseline">
+                  <span className="text-white font-bold text-sm sm:text-base md:text-lg tracking-tight sm:w-52 shrink-0">Deepened Comprehension</span>
+                  <span className="text-foreground/70 text-sm sm:text-base md:text-lg font-light leading-snug">Reading the signals behind the moment and surfacing the contextual value others miss.</span>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-1 sm:gap-5 sm:items-baseline">
+                  <span className="text-white font-bold text-sm sm:text-base md:text-lg tracking-tight sm:w-52 shrink-0">Greater Objectivism</span>
+                  <span className="text-foreground/70 text-sm sm:text-base md:text-lg font-light leading-snug">Stripping distortion from interpretation — letting structure lead, not narrative.</span>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-1 sm:gap-5 sm:items-baseline">
+                  <span className="text-white font-bold text-sm sm:text-base md:text-lg tracking-tight sm:w-52 shrink-0">Accuracy &amp; Value</span>
+                  <span className="text-foreground/70 text-sm sm:text-base md:text-lg font-light leading-snug">Sharper answers — more precise, more useful, and more honest about where the weight actually sits.</span>
+                </div>
+              </div>
             </div>
 
             {/* The disclaimer — simple black-on-white, filling the rectangle. */}
