@@ -188,12 +188,8 @@ export default function HeroSection({ onAsteriskHover }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7 }}
             >
-              <h3 className="text-[1.5rem] sm:text-[2.25rem] md:text-[2.75rem] lg:text-[3.25rem] leading-[1.15] font-bold tracking-tight" style={{ textShadow: '0 0 14px rgba(255,255,255,0.25), 0 2px 18px rgba(0,0,0,0.45)' }}>
-                <span className="text-white">The Model unlocks the </span>
-                <span className="text-[#ff8c42]">informational value</span>
-                <span className="text-white"> hidden in any question — </span>
-                <span className="text-[#ff8c42]">enter</span>
-                <span className="text-white"> and let it reveal the structure beneath.</span>
+              <h3 className="text-balance text-[1.5rem] sm:text-[2.25rem] md:text-[2.75rem] lg:text-[3.25rem] leading-[1.2] font-medium tracking-tight text-foreground/65 mx-auto max-w-2xl">
+                The Model unlocks the informational value hidden in any question — enter and let it reveal the structure beneath.
               </h3>
             </motion.div>
 
