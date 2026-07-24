@@ -58,7 +58,7 @@ function Step1SystemFraming({ onContinue }) {
           </li>
           <li className="flex gap-3">
             <span className="text-accent font-bold">•</span>
-            <span>You are solely responsible for all decisions and financial outcomes</span>
+            <span>You are solely responsible for how you interpret and apply any output</span>
           </li>
         </ul>
       </div>
@@ -112,7 +112,7 @@ function Step2RiskAcknowledgment({ onContinue }) {
           },
           {
             key: 'bearLoss',
-            label: 'I can bear financial loss without material hardship',
+            label: 'I understand model outputs are experimental and I apply them at my own discretion',
           },
         ].map(({ key, label }) => (
           <label
@@ -233,21 +233,21 @@ function Step4LegalAcceptance({ onContinue }) {
         <section className="space-y-2">
           <h3 className="font-bold">System Definition</h3>
           <p className="text-secondary leading-relaxed">
-            HEX6 BLE is a probabilistic computational system that analyzes market data to generate outcome distributions and probability-weighted exposure recommendations. It is NOT an investment advisor, broker, fiduciary, or financial institution.
+            HEX6 BLE is an experimental Probabilistic Intelligence model that generates probabilistic, informational outputs to support enhanced reasoning. It is NOT an investment advisor, broker, fiduciary, or financial institution.
           </p>
         </section>
 
         <section className="space-y-2 border-t border-border pt-4">
           <h3 className="font-bold">No Advisory or Predictive Services</h3>
           <p className="text-secondary leading-relaxed">
-            All outputs are informational and probabilistic only. HEX6 does not predict markets, provide investment recommendations, financial advice, or portfolio management services. You are solely responsible for all financial decisions and outcomes.
+            All outputs are informational and probabilistic only. HEX6 does not predict markets, provide investment recommendations, financial advice, or portfolio management services. You are solely responsible for how you interpret and apply any output.
           </p>
         </section>
 
         <section className="space-y-2 border-t border-border pt-4">
           <h3 className="font-bold">Risk Acknowledgment</h3>
           <p className="text-secondary leading-relaxed">
-            Model outputs may be incorrect or become outdated. Market conditions change rapidly. Historical performance does not guarantee future results. All investments carry substantial risk of loss. You assume all financial risk.
+            HEX6 BLE is an experimental Probabilistic Intelligence model. Outputs may be incorrect or become outdated. Conditions change rapidly and historical patterns do not guarantee future results. The goal is maximum value to you through enhanced reasoning — you apply any output at your own discretion.
           </p>
         </section>
 
@@ -268,7 +268,7 @@ function Step4LegalAcceptance({ onContinue }) {
         <section className="space-y-2 border-t border-border pt-4">
           <h3 className="font-bold">Limitation of Liability</h3>
           <p className="text-secondary leading-relaxed">
-            To the fullest extent permitted by law, Evrica Technologies Inc. is not liable for any indirect, incidental, special, or consequential damages, including loss of profits or capital.
+            To the fullest extent permitted by law, Evrica Technologies Inc. is not liable for any indirect, incidental, special, or consequential damages arising from use of this experimental model.
           </p>
         </section>
       </div>

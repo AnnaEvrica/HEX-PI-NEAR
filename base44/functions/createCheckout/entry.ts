@@ -36,6 +36,28 @@ Deno.serve(async (req) => {
         const stripeSubs = await stripe.subscriptions.list({ customer: customers.data[0].id, limit: 50 });
         const liveStripe = stripeSubs.data.find((s) => s.status && s.status !== 'canceled' && s.status !== 'incomplete');
         if (liveStripe) {
+          // Self-heal: the webhook may not have written the DB record yet (e.g. it
+          // isn't registered, or is lagging). Write it here so getSubscriptionStatus
+          // finds an active/trialing record immediately and the gate lets the user in
+          // instead of looping back to the paywall.
+          try {
+            const trialEnd = liveStripe.trial_end ? new Date(liveStripe.trial_end * 1000).toISOString() : null;
+            const periodEnd = liveStripe.current_period_end ? new Date(liveStripe.current_period_end * 1000).toISOString() : null;
+            const byEmail = existing.find((s) => s.user_email === user.email);
+            const payload = {
+              stripe_customer_id: customers.data[0].id,
+              stripe_subscription_id: liveStripe.id,
+              status: liveStripe.status,
+              current_period_end: periodEnd,
+              trial_end: trialEnd,
+              cancel_at_period_end: liveStripe.cancel_at_period_end || false,
+            };
+            if (byEmail) {
+              await base44.asServiceRole.entities.Subscription.update(byEmail.id, payload);
+            } else {
+              await base44.asServiceRole.entities.Subscription.create({ user_email: user.email, ...payload });
+            }
+          } catch (_e) { /* non-blocking — live status still returned */ }
           return Response.json({ url: null, already_subscribed: true });
         }
       }

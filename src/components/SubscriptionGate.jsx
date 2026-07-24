@@ -76,7 +76,16 @@ export default function SubscriptionGate({ children }) {
         return;
       }
       if (res.data?.already_subscribed) {
-        const d = await fetchStatus();
+        // createCheckout self-healed the DB record; poll briefly for the
+        // active/trialing status so the user lands in the app instead of the paywall.
+        let d = await fetchStatus();
+        for (let i = 0; i < 4 && !(d && (d.status === 'trialing' || d.status === 'active')); i++) {
+          await new Promise((r) => setTimeout(r, 1500));
+          try { d = await fetchStatus(); } catch { /* tolerate transient failure */ }
+        }
+        if (d && (d.status === 'trialing' || d.status === 'active')) {
+          sessionStorage.removeItem('hex6_checkout_pending');
+        }
         setSub(d);
         return;
       }

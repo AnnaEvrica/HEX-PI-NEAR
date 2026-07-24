@@ -77,7 +77,7 @@ export default function Landing() {
 
             <section className="space-y-3">
               <h3 className="font-bold text-foreground text-lg">2. Service Definition</h3>
-              <p>HEX6 BLE is a probabilistic intelligence platform that analyzes market conditions, models outcome distributions, and generates probabilistic exposure recommendations. The Service is provided for informational and research purposes only and does NOT constitute investment advice, financial advisory services, or portfolio management.</p>
+              <p>HEX6 BLE is an experimental Probabilistic Intelligence model that supports enhanced reasoning through probabilistic, informational outputs. The Service is provided for informational and exploratory purposes only and does NOT constitute investment advice, financial advisory services, or portfolio management.</p>
             </section>
 
             <section className="space-y-3">
@@ -86,7 +86,7 @@ export default function Landing() {
               <ul className="list-disc list-inside space-y-2 ml-4">
                 <li>HEX6 BLE is not a licensed investment advisor, broker-dealer, or financial institution</li>
                 <li>All outputs are probabilistic models, not forecasts or recommendations</li>
-                <li>You are solely responsible for all investment decisions and financial outcomes</li>
+                <li>You are solely responsible for how you interpret and apply any output</li>
                 <li>You should not rely on HEX6 BLE as a substitute for professional financial advice</li>
                 <li>You should consult with a licensed financial advisor before making investment decisions</li>
               </ul>
@@ -94,7 +94,7 @@ export default function Landing() {
 
             <section className="space-y-3">
               <h3 className="font-bold text-foreground text-lg">4. Risk Acknowledgment</h3>
-              <p>All investments carry substantial risk, including potential loss of principal. Past performance does not guarantee future results. Market conditions change rapidly, and HEX6 BLE outputs may become outdated. You assume full responsibility for all financial losses.</p>
+              <p>HEX6 BLE is an experimental Probabilistic Intelligence model. Outputs are probabilistic and informational, not predictions or guarantees. Past patterns do not guarantee future results, and conditions change rapidly so outputs may become outdated. You apply any output at your own discretion.</p>
             </section>
 
             <section className="space-y-3">
@@ -111,7 +111,7 @@ export default function Landing() {
 
             <section className="space-y-3">
               <h3 className="font-bold text-foreground text-lg">6. Limitation of Liability</h3>
-              <p>To the fullest extent permitted by law, Evrica Technologies Inc. shall not be liable for any indirect, incidental, special, or consequential damages, including loss of profits, data, or business opportunity, arising from your use of the Service, even if advised of the possibility of such damages.</p>
+              <p>To the fullest extent permitted by law, Evrica Technologies Inc. shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of this experimental model, even if advised of the possibility of such damages.</p>
             </section>
 
             <section className="space-y-3">
@@ -230,7 +230,7 @@ export default function Landing() {
           <div className="space-y-6 text-sm text-secondary">
             <section className="space-y-3">
               <h3 className="font-bold text-foreground text-lg">1. Important Risk Disclosures</h3>
-              <p>Trading and investing involve substantial risk of loss of capital. Past performance is not indicative of future results. Market conditions change rapidly and unpredictably.</p>
+              <p>HEX6 BLE is an experimental Probabilistic Intelligence model. Its goal is to provide maximum value to you through enhanced reasoning — not to predict or guarantee outcomes. Past patterns are not indicative of future results, and conditions change rapidly.</p>
             </section>
 
             <section className="space-y-3">
@@ -274,12 +274,12 @@ export default function Landing() {
 
             <section className="space-y-3">
               <h3 className="font-bold text-foreground text-lg">6. Leverage and Margin Risks</h3>
-              <p>Trading with leverage or margin amplifies both gains and losses. You may lose more than your initial investment. Margin calls can force liquidation of positions at unfavorable prices.</p>
+              <p>HEX6 BLE does not execute trades or manage capital. Any trading activity you undertake is entirely independent of this Service and at your own direction.</p>
             </section>
 
             <section className="space-y-3">
               <h3 className="font-bold text-foreground text-lg">7. Technology Risks</h3>
-              <p>The Service may experience downtime, connectivity issues, or system failures. We are not liable for losses resulting from technical failures, hacking, or unavailability of the Service.</p>
+              <p>The Service may experience downtime, connectivity issues, or system failures. We are not liable for disruptions resulting from technical failures or unavailability of the Service.</p>
             </section>
 
             <section className="space-y-3">
