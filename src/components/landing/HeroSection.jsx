@@ -181,9 +181,29 @@ export default function HeroSection({ onAsteriskHover }) {
           </div>
 
           <div className="relative mt-[15rem] sm:mt-[16.5rem] flex flex-col items-center">
-            <span className="text-[2.21rem] sm:text-[2.975rem] md:text-[4.165rem] lg:text-[6.25rem] xl:text-[6.545rem] leading-[0.9] font-bold tracking-tight text-center whitespace-nowrap" style={{ textShadow: '0 0 14px rgba(255,255,255,0.3), 0 2px 18px rgba(0,0,0,0.45)' }}>
-              <span className="text-foreground">elevate</span><span className="text-foreground"> your thinking</span>
-            </span>
+            <div className="w-full max-w-3xl mx-auto px-2">
+              <h3 className="text-[1.5rem] sm:text-[2rem] md:text-[2.75rem] font-bold tracking-tight text-foreground text-center mb-6 sm:mb-8" style={{ textShadow: '0 0 14px rgba(255,255,255,0.3), 0 2px 18px rgba(0,0,0,0.45)' }}>
+                Use Cases
+              </h3>
+              <div className="space-y-4 sm:space-y-5">
+                <div className="flex flex-col sm:flex-row gap-1 sm:gap-5 sm:items-baseline">
+                  <span className="text-[#A0420C] font-bold text-sm sm:text-base md:text-lg tracking-tight sm:w-52 shrink-0">Statistical Analysis</span>
+                  <span className="text-foreground/85 text-sm sm:text-base md:text-lg font-light leading-snug">Learning probability through "prediction" — testable, falsifiable, and grounded in real outcome distributions.</span>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-1 sm:gap-5 sm:items-baseline">
+                  <span className="text-[#A0420C] font-bold text-sm sm:text-base md:text-lg tracking-tight sm:w-52 shrink-0">Deepened Comprehension</span>
+                  <span className="text-foreground/85 text-sm sm:text-base md:text-lg font-light leading-snug">Reading the signals behind the moment and surfacing the contextual value others miss.</span>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-1 sm:gap-5 sm:items-baseline">
+                  <span className="text-[#A0420C] font-bold text-sm sm:text-base md:text-lg tracking-tight sm:w-52 shrink-0">Greater Objectivism</span>
+                  <span className="text-foreground/85 text-sm sm:text-base md:text-lg font-light leading-snug">Stripping distortion from interpretation — letting structure lead, not narrative.</span>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-1 sm:gap-5 sm:items-baseline">
+                  <span className="text-[#A0420C] font-bold text-sm sm:text-base md:text-lg tracking-tight sm:w-52 shrink-0">Accuracy &amp; Value</span>
+                  <span className="text-foreground/85 text-sm sm:text-base md:text-lg font-light leading-snug">Sharper answers — more precise, more useful, and more honest about where the weight actually sits.</span>
+                </div>
+              </div>
+            </div>
 
             {/* 3D radial wave field with identified signal points — circular ripple overlay on top. */}
             <div className="relative mt-[3.25rem] sm:mt-[4.75rem] w-full">

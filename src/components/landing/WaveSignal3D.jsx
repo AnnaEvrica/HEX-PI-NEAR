@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { motion } from 'framer-motion';
 
@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 // that overlaps on top."
 export default function WaveSignal3D() {
   const mountRef = useRef(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -84,6 +85,7 @@ export default function WaveSignal3D() {
 
     let raf;
     const clock = new THREE.Clock();
+    let firstFrame = true;
     const animate = () => {
       const t = clock.getElapsedTime();
       for (let i = 0; i < posAttr.count; i++) {
@@ -100,6 +102,7 @@ export default function WaveSignal3D() {
       }
       grid.rotation.y = t * 0.06;
       renderer.render(scene, camera);
+      if (firstFrame) { firstFrame = false; setReady(true); }
       raf = requestAnimationFrame(animate);
     };
     animate();
@@ -127,7 +130,7 @@ export default function WaveSignal3D() {
   }, []);
 
   return (
-    <div className="relative w-full h-[240px] sm:h-[300px] md:h-[340px] pointer-events-none">
+    <div className="relative w-full h-[240px] sm:h-[300px] md:h-[340px] pointer-events-none" style={{ opacity: ready ? 1 : 0, transition: 'opacity 0.7s ease-out' }}>
       <div ref={mountRef} className="absolute inset-0" />
       {/* Circular ripple animation overlapping on top, aligned to the radial center */}
       <svg viewBox="0 0 400 200" className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid meet">
