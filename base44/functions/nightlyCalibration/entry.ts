@@ -53,102 +53,56 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
-    // Pull recent Output records (last 1000)
-    const outputs = await base44.asServiceRole.entities.Output.list('-timestamp', 1000).catch(() => []);
-
-    if (!outputs || outputs.length === 0) {
-      await base44.asServiceRole.entities.CalibrationScore.create({
-        score_date: new Date().toISOString().split('T')[0],
-        ticker: 'GLOBAL',
-        predictions_evaluated: 0,
-        directional_accuracy: 0,
-        exposure_correlation: 0,
-        avg_realized_return: 0,
-        calibration_grade: 'INSUFFICIENT_DATA',
-        notes: 'No Output records available to score.',
-      });
-      return Response.json({ ok: true, message: 'No outputs to score.' });
-    }
-
-    // Group outputs by brain_id
-    const byBrain = {};
-    for (const o of outputs) {
-      const b = o.brain_id || 'UNKNOWN';
-      if (!byBrain[b]) byBrain[b] = [];
-      byBrain[b].push(o);
-    }
-
-    // Cache series state arrays so we don't re-fetch per output
-    const seriesCache = {};
-    async function getSeriesStates(seriesId) {
-      if (seriesCache[seriesId] !== undefined) return seriesCache[seriesId];
-      const s = await base44.asServiceRole.entities.Series.filter({ series_id: seriesId }).catch(() => []);
-      seriesCache[seriesId] = (s && s.length > 0) ? (s[0].states || []) : [];
-      return seriesCache[seriesId];
-    }
-
+    // ── Live-engine calibration (the real learning loop) ──
+    // The engine that fires in chat writes a CognitiveState per cycle with a
+    // walk-forward `forward_accuracy` — the out-of-sample directional hit rate
+    // on the held-out tail of the analyzed series. That is the honest measure
+    // of live accuracy. Grade from it, grouped by ticker extracted from the
+    // user query, plus a GLOBAL aggregate. This closes the loop that was
+    // emitting empty INSUFFICIENT_DATA rows every night.
+    const TICKER_RE = /\b(BTC|ETH|SOL|DOGE|XRP|ADA|MATIC|SPY|QQQ|TSLA|AAPL|MSFT|NVDA|GOOG|GOOGL|AMZN|META)\b/i;
     const today = new Date().toISOString().split('T')[0];
     const results = [];
 
-    for (const brainId in byBrain) {
-      const records = byBrain[brainId];
-      let hits = 0, total = 0;
-      const expectedReturns = [];
-      const realizedDirs = [];
+    const liveStates = await base44.asServiceRole.entities.CognitiveState
+      .list('-created_date', 500).catch(() => []);
+    const graded = (liveStates || []).filter((s) => s.forward_accuracy != null);
 
-      for (const o of records) {
-        const states = await getSeriesStates(o.series_id);
-        if (!states || states.length === 0) continue;
-
-        // Find the index of current_state and check the next state
-        const idx = states.lastIndexOf(o.current_state);
-        if (idx < 0 || idx >= states.length - 1) continue;
-        const nextState = states[idx + 1];
-        const realizedDir = directionOfState(nextState);
-
-        if (o.direction && o.direction !== 'UNKNOWN' && realizedDir !== 'UNKNOWN') {
-          total++;
-          if (o.direction === realizedDir) hits++;
-          expectedReturns.push(o.expected_return || 0);
-          realizedDirs.push(realizedDir === 'UP' ? 1 : realizedDir === 'DOWN' ? -1 : 0);
-        }
+    const byTicker = { GLOBAL: [] };
+    for (const s of graded) {
+      byTicker.GLOBAL.push(s);
+      const m = (s.query || '').match(TICKER_RE);
+      if (m) {
+        const t = m[1].toUpperCase();
+        (byTicker[t] = byTicker[t] || []).push(s);
       }
+    }
 
-      const dirAcc = total > 0 ? hits / total : 0;
-      const expCorr = pearson(expectedReturns, realizedDirs);
+    for (const ticker of Object.keys(byTicker)) {
+      const rows = byTicker[ticker];
+      const total = rows.length;
+      if (total === 0) continue;
+      const dirAcc = rows.reduce((t, s) => t + s.forward_accuracy, 0) / total;
+      const conf = rows.reduce((t, s) => t + (s.confidence || 0), 0) / total;
       const grade = total < 5 ? 'INSUFFICIENT_DATA' : gradeFromAccuracy(dirAcc);
-
       const scoreData = {
         score_date: today,
-        ticker: brainId,
+        ticker,
         predictions_evaluated: total,
         directional_accuracy: parseFloat(dirAcc.toFixed(4)),
-        exposure_correlation: parseFloat(expCorr.toFixed(4)),
+        exposure_correlation: 0,
         avg_realized_return: 0,
         calibration_grade: grade,
-        notes: `Brain ${brainId}: ${total} predictions scored. Directional accuracy ${(dirAcc * 100).toFixed(1)}%.`,
+        notes: `Live engine: ${total} out-of-sample cycles, directional accuracy ${(dirAcc * 100).toFixed(1)}%, avg confidence ${conf.toFixed(2)}.`,
       };
-
       await base44.asServiceRole.entities.CalibrationScore.create(scoreData);
       results.push(scoreData);
     }
 
-    // Global aggregate
-    const scored = results.filter(r => r.calibration_grade !== 'INSUFFICIENT_DATA');
-    const globalAcc = scored.length > 0 ? scored.reduce((s, r) => s + r.directional_accuracy, 0) / scored.length : 0;
-    const globalEval = results.reduce((s, r) => s + r.predictions_evaluated, 0);
-
-    const globalGrade = globalEval < 10 ? 'INSUFFICIENT_DATA' : gradeFromAccuracy(globalAcc);
-    await base44.asServiceRole.entities.CalibrationScore.create({
-      score_date: today,
-      ticker: 'GLOBAL',
-      predictions_evaluated: globalEval,
-      directional_accuracy: parseFloat(globalAcc.toFixed(4)),
-      exposure_correlation: 0,
-      avg_realized_return: 0,
-      calibration_grade: globalGrade,
-      notes: `Multi-brain calibration across ${results.length} brains, ${globalEval} total predictions.`,
-    });
+    const globalRow = results.find((r) => r.ticker === 'GLOBAL') || { predictions_evaluated: 0, directional_accuracy: 0, calibration_grade: 'INSUFFICIENT_DATA' };
+    const globalGrade = globalRow.calibration_grade;
+    const globalEval = globalRow.predictions_evaluated;
+    const globalAcc = globalRow.directional_accuracy;
 
     // Per-user memory: derive a calibration-aware state from each user's recent
     // cognitive cycles and store it on their UserConversationMemory so The Model
