@@ -209,14 +209,22 @@ export function runReasonLayer(returns, riskAversion = 2.5, friction = 0.0035, w
   // riskAversion divisor: HEX6-BLE commits the full Kelly fraction and learns
   // from realized outcomes nightly. riskAversion is retained in the signature
   // for caller compatibility but no longer scales the bet.
-  const tCrit = tPpf(0.95, nEff - 1);
-  const muLb = mu - tCrit * (sigma / Math.sqrt(nEff)) - adaptiveFriction;
+  // Honesty gate = adaptive friction alone (the share of noise the evidence
+  // has not yet earned off). No fixed t-hurdle: Kelly self-sizes the bet to the
+  // edge, friction keeps thin evidence honest (≈ full σ → SILENCE) while
+  // letting earned edges through. One principle, not three stacked conservatisms.
+  const muLb = mu - adaptiveFriction;
   let exposure = 0;
   if (muLb > 0) exposure = Math.min(Math.max(mu / (sigma * sigma), 0), 1);
-  const regime = exposure > 0.6 ? 'BULL' : exposure > 0.3 ? 'LATERAL' : mu < 0 ? 'BEAR' : 'SILENCE';
   const markov = markovEdge(returns, priorMarkov?.counts || null, priorMarkov?.stats || null);
   const motif = adaptive137Score(returns);
   const basin = classifyBasin(markov.currentState, mu, sigma);
+  // Regime read from the 6-bit → 64-petal basin (petal-native), not exposure
+  // thresholds. The bet stays weighted Kelly; the label is the state you're in.
+  const regime = basin === 'laminar_growth' || basin === 'euphoria' ? 'BULL'
+    : basin === 'turbulent_drawdown' || basin === 'capitulation' ? 'BEAR'
+    : basin === 'chaotic_transition' ? 'VOLATILE'
+    : 'SILENCE';
   let blendedExposure = exposure;
   if (markov.transitionConfidence > 0.3 && markov.sigma > 0) {
     // Markov contribution also sized at full Kelly (μ_M/σ_M²), no fractional divisor.
