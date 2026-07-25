@@ -7,6 +7,7 @@
 // direction, then compares to the realized next return.
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 import { runReasonLayer, runWaveLayer, runValidationLayer } from '../../shared/thinkingEngine.ts';
+import { fetchYahooReturns } from '../../shared/marketDataClient.ts';
 
 function pearson(a, b) {
   const n = Math.min(a.length, b.length);
@@ -29,7 +30,15 @@ Deno.serve(async (req) => {
     const body = await req.json();
     let { series, as_returns, ticker, trainRatio = 0.8, riskAversion = 2.5 } = body;
 
-    // Fetch a real series if only a ticker was supplied.
+    // Fetch a real series if only a ticker was supplied. Yahoo Finance first —
+    // deterministic and leak-free. LLM web-search fetch is a last resort only,
+    // because it can return smoothed/truncated snapshots that inflate accuracy.
+    if ((!series || series.length < 30) && ticker) {
+      try {
+        const yh = await fetchYahooReturns(ticker, 730);
+        if (yh?.returns?.length >= 30) { series = yh.returns; as_returns = true; }
+      } catch (_e) { /* fall through to LLM fetch */ }
+    }
     if ((!series || series.length < 30) && ticker) {
       const fr = await base44.integrations.Core.InvokeLLM({
         prompt: `Pull the last 2 years of daily closing prices for ${ticker} (about 500 data points) from an authoritative source (Yahoo Finance, CoinGecko, etc.). Return JSON with "series" (array of raw daily prices, oldest first, as many as you can retrieve up to 500, minimum 200), "as_returns" (false), and "source_summary".`,
