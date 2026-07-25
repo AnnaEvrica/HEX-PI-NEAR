@@ -278,6 +278,7 @@ ${speaker}:`;
       if (userMemory.topics_discussed) lines.push('topics: ' + userMemory.topics_discussed);
       if (userMemory.memory_summary) lines.push('shared_history: ' + userMemory.memory_summary);
       if (userMemory.calibration_state) lines.push('calibration: ' + userMemory.calibration_state);
+      if (userMemory.pius_calibration_state) lines.push('voice_calibration: ' + userMemory.pius_calibration_state);
       if (lines.length > 0) userContextBlock = 'USER CONTEXT (use to tailor voice, anticipate needs, and recall genuine shared history — never fabricate specifics not present here):\n  ' + lines.join('\n  ');
     }
 

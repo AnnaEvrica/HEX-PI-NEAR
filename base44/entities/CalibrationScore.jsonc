@@ -7,9 +7,18 @@
       "format": "date",
       "description": "Date this calibration was computed for"
     },
+    "operator": {
+      "type": "string",
+      "enum": [
+        "HEX6_BLE",
+        "PI_US"
+      ],
+      "default": "HEX6_BLE",
+      "description": "Which operator this calibration scores \u2014 HEX6-BLE (probability/directional) or PI-US (resonance/value)"
+    },
     "ticker": {
       "type": "string",
-      "description": "Ticker scored (or 'GLOBAL' for aggregate)"
+      "description": "Ticker scored (or 'GLOBAL' for aggregate, or 'PI-US' for the PI-US operator rollup)"
     },
     "predictions_evaluated": {
       "type": "number",
@@ -17,11 +26,19 @@
     },
     "directional_accuracy": {
       "type": "number",
-      "description": "Pct of times engine direction (mu sign) matched realized return sign (0-1)"
+      "description": "HEX6-BLE: pct of times engine direction (mu sign) matched realized return sign (0-1). Null for PI-US rows."
     },
     "exposure_correlation": {
       "type": "number",
-      "description": "Pearson correlation between recommended exposure and realized returns"
+      "description": "HEX6-BLE: Pearson(probability, forward_accuracy) \u2014 does a bigger Kelly bet track better cycles. PI-US: legacy alias, see value_correlation."
+    },
+    "resonance_correlation": {
+      "type": "number",
+      "description": "PI-US: Pearson(resonance, forward_accuracy) \u2014 does the wave's resonance discriminate good probability cycles from bad"
+    },
+    "value_correlation": {
+      "type": "number",
+      "description": "PI-US: Pascal value (support) correlation with forward_accuracy \u2014 does structural support rank realized quality"
     },
     "avg_realized_return": {
       "type": "number",
