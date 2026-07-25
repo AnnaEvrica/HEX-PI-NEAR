@@ -1,10 +1,8 @@
-// HEX6-BLE Nightly Calibration — grades the PROBABILITY operator only.
-// HEX6-BLE acts on probability (full-Kelly exposure). This job grades its
-// directional accuracy (forward_accuracy on the held-out tail) and whether
-// its probability magnitude discriminates good cycles from bad. Writes one
-// CalibrationScore per ticker + GLOBAL, tagged operator=HEX6_BLE, and evolves
-// the per-user calibration_state + triage_profile so The Model's probability
-// reads adapt nightly. PI-US (resonance/value) has its OWN job — no overlap.
+// Nightly Calibration Scorer (v2 — multi-brain)
+// Scores predictions stored in the Output entity, grouped by brain_id.
+// For each output, fetches the next state in its Series (after the prediction's current_state)
+// and compares predicted direction vs realized direction.
+// Writes one CalibrationScore row per brain + a GLOBAL aggregate.
 
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
@@ -14,7 +12,11 @@ function pearson(a, b) {
   const ma = a.reduce((s, x) => s + x, 0) / n;
   const mb = b.reduce((s, x) => s + x, 0) / n;
   let num = 0, da = 0, db = 0;
-  for (let i = 0; i < n; i++) { num += (a[i] - ma) * (b[i] - mb); da += (a[i] - ma) ** 2; db += (b[i] - mb) ** 2; }
+  for (let i = 0; i < n; i++) {
+    num += (a[i] - ma) * (b[i] - mb);
+    da += (a[i] - ma) ** 2;
+    db += (b[i] - mb) ** 2;
+  }
   return (da === 0 || db === 0) ? 0 : num / Math.sqrt(da * db);
 }
 
@@ -36,80 +38,140 @@ function topCues(freq, n) {
   return Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, n).map((e) => e[0]);
 }
 
+// Direction implied by the realized state transition (state-bit popularity):
+// If majority of bits in state_t+1 are 1 → UP, else DOWN. FLAT if exactly 3.
+function directionOfState(state) {
+  if (state === null || state === undefined) return 'UNKNOWN';
+  let ones = 0;
+  for (let b = 0; b < 6; b++) if ((state >> b) & 1) ones++;
+  if (ones > 3) return 'UP';
+  if (ones < 3) return 'DOWN';
+  return 'FLAT';
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const TICKER_RE = /\b(BTC|ETH|SOL|DOGE|XRP|ADA|MATIC|SPY|QQQ|TSLA|AAPL|MSFT|NVDA|GOOG|GOOGL|AMZN|META)\b/i;
+
+    // Pull recent Output records (last 1000)
+    const outputs = await base44.asServiceRole.entities.Output.list('-timestamp', 1000).catch(() => []);
+
+    if (!outputs || outputs.length === 0) {
+      await base44.asServiceRole.entities.CalibrationScore.create({
+        score_date: new Date().toISOString().split('T')[0],
+        ticker: 'GLOBAL',
+        predictions_evaluated: 0,
+        directional_accuracy: 0,
+        exposure_correlation: 0,
+        avg_realized_return: 0,
+        calibration_grade: 'INSUFFICIENT_DATA',
+        notes: 'No Output records available to score.',
+      });
+      return Response.json({ ok: true, message: 'No outputs to score.' });
+    }
+
+    // Group outputs by brain_id
+    const byBrain = {};
+    for (const o of outputs) {
+      const b = o.brain_id || 'UNKNOWN';
+      if (!byBrain[b]) byBrain[b] = [];
+      byBrain[b].push(o);
+    }
+
+    // Cache series state arrays so we don't re-fetch per output
+    const seriesCache = {};
+    async function getSeriesStates(seriesId) {
+      if (seriesCache[seriesId] !== undefined) return seriesCache[seriesId];
+      const s = await base44.asServiceRole.entities.Series.filter({ series_id: seriesId }).catch(() => []);
+      seriesCache[seriesId] = (s && s.length > 0) ? (s[0].states || []) : [];
+      return seriesCache[seriesId];
+    }
+
     const today = new Date().toISOString().split('T')[0];
     const results = [];
 
-    const liveStates = await base44.asServiceRole.entities.CognitiveState
-      .list('-created_date', 500).catch(() => []);
-    const graded = (liveStates || []).filter((s) => s.forward_accuracy != null);
+    for (const brainId in byBrain) {
+      const records = byBrain[brainId];
+      let hits = 0, total = 0;
+      const expectedReturns = [];
+      const realizedDirs = [];
 
-    const byTicker = { GLOBAL: [] };
-    for (const s of graded) {
-      byTicker.GLOBAL.push(s);
-      const m = (s.query || '').match(TICKER_RE);
-      if (m) {
-        const t = m[1].toUpperCase();
-        (byTicker[t] = byTicker[t] || []).push(s);
+      for (const o of records) {
+        const states = await getSeriesStates(o.series_id);
+        if (!states || states.length === 0) continue;
+
+        // Find the index of current_state and check the next state
+        const idx = states.lastIndexOf(o.current_state);
+        if (idx < 0 || idx >= states.length - 1) continue;
+        const nextState = states[idx + 1];
+        const realizedDir = directionOfState(nextState);
+
+        if (o.direction && o.direction !== 'UNKNOWN' && realizedDir !== 'UNKNOWN') {
+          total++;
+          if (o.direction === realizedDir) hits++;
+          expectedReturns.push(o.expected_return || 0);
+          realizedDirs.push(realizedDir === 'UP' ? 1 : realizedDir === 'DOWN' ? -1 : 0);
+        }
       }
-    }
 
-    for (const ticker of Object.keys(byTicker)) {
-      const rows = byTicker[ticker];
-      const total = rows.length;
-      if (total === 0) continue;
-      const dirAcc = rows.reduce((t, s) => t + s.forward_accuracy, 0) / total;
-      // Probability-tier discrimination: does a bigger Kelly bet (probability)
-      // correspond to higher realized directional accuracy?
-      const probCorr = pearson(
-        rows.map((s) => s.probability || 0),
-        rows.map((s) => s.forward_accuracy || 0)
-      );
-      const sorted = [...rows].sort((a, b) => (a.probability || 0) - (b.probability || 0));
-      const half = Math.floor(sorted.length / 2);
-      const low = sorted.slice(0, half), high = sorted.slice(half);
-      const highAcc = high.length ? high.reduce((t, s) => t + s.forward_accuracy, 0) / high.length : null;
-      const lowAcc = low.length ? low.reduce((t, s) => t + s.forward_accuracy, 0) / low.length : null;
-      const avgProb = rows.reduce((t, s) => t + (s.probability || 0), 0) / total;
+      const dirAcc = total > 0 ? hits / total : 0;
+      const expCorr = pearson(expectedReturns, realizedDirs);
       const grade = total < 5 ? 'INSUFFICIENT_DATA' : gradeFromAccuracy(dirAcc);
+
       const scoreData = {
         score_date: today,
-        operator: 'HEX6_BLE',
-        ticker,
+        ticker: brainId,
         predictions_evaluated: total,
         directional_accuracy: parseFloat(dirAcc.toFixed(4)),
-        exposure_correlation: parseFloat(probCorr.toFixed(4)),
+        exposure_correlation: parseFloat(expCorr.toFixed(4)),
         avg_realized_return: 0,
         calibration_grade: grade,
-        notes: `HEX6-BLE: ${total} out-of-sample cycles, directional accuracy ${(dirAcc * 100).toFixed(1)}%, avg probability ${avgProb.toFixed(2)}, prob-accuracy corr ${probCorr.toFixed(2)} (high-prob ${highAcc != null ? (highAcc * 100).toFixed(0) + '%' : 'n/a'} vs low-prob ${lowAcc != null ? (lowAcc * 100).toFixed(0) + '%' : 'n/a'}).`,
+        notes: `Brain ${brainId}: ${total} predictions scored. Directional accuracy ${(dirAcc * 100).toFixed(1)}%.`,
       };
+
       await base44.asServiceRole.entities.CalibrationScore.create(scoreData);
       results.push(scoreData);
     }
 
-    const globalRow = results.find((r) => r.ticker === 'GLOBAL') || { predictions_evaluated: 0, directional_accuracy: 0, calibration_grade: 'INSUFFICIENT_DATA' };
+    // Global aggregate
+    const scored = results.filter(r => r.calibration_grade !== 'INSUFFICIENT_DATA');
+    const globalAcc = scored.length > 0 ? scored.reduce((s, r) => s + r.directional_accuracy, 0) / scored.length : 0;
+    const globalEval = results.reduce((s, r) => s + r.predictions_evaluated, 0);
 
-    // Per-user HEX6-BLE calibration state + triage profile (probability engine).
+    const globalGrade = globalEval < 10 ? 'INSUFFICIENT_DATA' : gradeFromAccuracy(globalAcc);
+    await base44.asServiceRole.entities.CalibrationScore.create({
+      score_date: today,
+      ticker: 'GLOBAL',
+      predictions_evaluated: globalEval,
+      directional_accuracy: parseFloat(globalAcc.toFixed(4)),
+      exposure_correlation: 0,
+      avg_realized_return: 0,
+      calibration_grade: globalGrade,
+      notes: `Multi-brain calibration across ${results.length} brains, ${globalEval} total predictions.`,
+    });
+
+    // Per-user memory: derive a calibration-aware state from each user's recent
+    // cognitive cycles and store it on their UserConversationMemory so The Model
+    // can adapt voice and steering to their tracked pattern.
     try {
       const states = await base44.asServiceRole.entities.CognitiveState.list('-created_date', 500).catch(() => []);
       const byUser = {};
       for (const s of (states || [])) {
         if (!s.user_email) continue;
-        (byUser[s.user_email] = byUser[s.user_email] || []).push(s);
+        if (!byUser[s.user_email]) byUser[s.user_email] = [];
+        byUser[s.user_email].push(s);
       }
       for (const email of Object.keys(byUser)) {
         const cycles = byUser[email];
-        const graded2 = cycles.filter((c) => c.forward_accuracy != null);
-        const acc = graded2.length ? graded2.reduce((t, c) => t + c.forward_accuracy, 0) / graded2.length : 0;
-        const avgProb = cycles.reduce((t, c) => t + (c.probability || 0), 0) / cycles.length;
+        const conf = cycles.reduce((t, c) => t + (c.confidence || 0), 0) / cycles.length;
         const dirs = { UP: 0, DOWN: 0, FLAT: 0 };
         for (const c of cycles) if (c.predicted_direction) dirs[c.predicted_direction] = (dirs[c.predicted_direction] || 0) + 1;
         const lean = dirs.UP > dirs.DOWN ? 'UP' : dirs.DOWN > dirs.UP ? 'DOWN' : 'flat';
-        const calibrationState = `Probability engine grade ${globalRow.calibration_grade}; ${graded2.length} graded cycles, directional accuracy ${(acc * 100).toFixed(0)}%, avg probability ${avgProb.toFixed(2)}, lean ${lean}.`;
+        const calibrationState = `Engine calibration grade ${globalGrade}; ${cycles.length} recent cycles, avg confidence ${conf.toFixed(2)}, lean ${lean}.`;
 
+        // Vocabulary adaptation: split this user's past queries by whether the
+        // engine actually ran (probability != null) and keep the most frequent
+        // distinctive tokens as triage cues for the hybrid classifier.
         const aFreq = {}, cFreq = {};
         for (const c of cycles) {
           const isAnalytical = c.probability != null;
@@ -130,14 +192,13 @@ Deno.serve(async (req) => {
 
     return Response.json({
       ok: true,
-      operator: 'HEX6_BLE',
       brainsScored: results.length,
-      totalPredictions: globalRow.predictions_evaluated,
-      globalAccuracy: globalRow.directional_accuracy,
+      totalPredictions: globalEval,
+      globalAccuracy: globalAcc,
       results,
     });
   } catch (error) {
-    console.error('HEX6-BLE calibration error:', error);
+    console.error('Calibration error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });

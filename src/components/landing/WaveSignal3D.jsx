@@ -25,12 +25,12 @@ export default function WaveSignal3D() {
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setClearColor(0x000000, 0);
     mount.appendChild(renderer.domElement);
 
     // --- Wave grid (line segments that we displace each frame) ---
-    const N = 36;
+    const N = 48;
     const SIZE = 40;
     const STEP = SIZE / (N - 1);
     const verts = [];
@@ -83,15 +83,11 @@ export default function WaveSignal3D() {
       Math.sin(Math.sqrt(x * x + z * z) * 0.55 - t * 1.6) * 1.25 *
       Math.exp(-Math.sqrt(x * x + z * z) * 0.035);
 
-    let raf = null;
-    let visible = true;
+    let raf;
     const clock = new THREE.Clock();
-    let elapsed = 0;
     let firstFrame = true;
     const animate = () => {
-      if (!visible) { raf = null; return; }
-      elapsed += clock.getDelta();
-      const t = elapsed;
+      const t = clock.getElapsedTime();
       for (let i = 0; i < posAttr.count; i++) {
         const x = posAttr.getX(i);
         const z = posAttr.getZ(i);
@@ -109,16 +105,7 @@ export default function WaveSignal3D() {
       if (firstFrame) { firstFrame = false; setReady(true); }
       raf = requestAnimationFrame(animate);
     };
-    raf = requestAnimationFrame(animate);
-
-    // Pause the render loop when the field scrolls off-screen so it stops
-    // consuming CPU/GPU while invisible; resume instantly on return.
-    const io = new IntersectionObserver((entries) => {
-      visible = entries[0].isIntersecting;
-      if (visible && raf === null) raf = requestAnimationFrame(animate);
-      else if (!visible && raf !== null) { cancelAnimationFrame(raf); raf = null; }
-    }, { threshold: 0 });
-    io.observe(mount);
+    animate();
 
     const onResize = () => {
       const w = mount.clientWidth || 600;
@@ -130,8 +117,7 @@ export default function WaveSignal3D() {
     window.addEventListener('resize', onResize);
 
     return () => {
-      if (raf) cancelAnimationFrame(raf);
-      io.disconnect();
+      cancelAnimationFrame(raf);
       window.removeEventListener('resize', onResize);
       gridGeo.dispose();
       sphereGeo.dispose();

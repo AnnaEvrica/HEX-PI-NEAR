@@ -4,7 +4,6 @@
  * Mints one EGTS receipt per backtest run for auditability.
  */
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
-import { fetchYahooReturns } from '../../shared/marketDataClient.ts';
 
 // ── Statistical helpers ──────────────────────────────────────────────────────
 
@@ -45,12 +44,58 @@ function tPpf(p, df) {
   return x;
 }
 
-// ── HEX6 BLE Engine ───────────────────────────────────────────────────────────
-// Uses the LIVE shared runReasonLayer (multi-resolution hive + adaptive
-// contingency-weighted friction + Markov + motif) so the backtest measures
-// the same engine that runs in production. The blendedExposure output is the
-// sized position the engine actually recommends.
-import { runReasonLayer } from '../../shared/thinkingEngine.ts';
+// ── HEX6 BLE Engine (inline, no local imports) ───────────────────────────────
+
+class Hex6BLEEngine {
+  constructor(window = 6, riskAversion = 2.5, frictionBps = 35) {
+    this.window = window;
+    this.riskAversion = riskAversion;
+    this.friction = frictionBps / 10000;
+    this.hive = {};
+  }
+
+  encodeState(returns) {
+    return parseInt(returns.slice(-this.window).map(r => r > 0 ? '1' : '0').join(''), 2);
+  }
+
+  trainHive(assetReturns) {
+    for (let i = this.window; i < assetReturns.length; i++) {
+      const state = this.encodeState(assetReturns.slice(i - this.window, i));
+      const target = assetReturns[i];
+      if (!this.hive[state]) this.hive[state] = [];
+      this.hive[state].push(target);
+    }
+  }
+
+  getStateDistribution(currentReturns) {
+    const state = this.encodeState(currentReturns.slice(-this.window));
+    const dist = this.hive[state];
+    if (!dist || dist.length < 3) return [0, 1e-6, 0];
+    return [mean(dist), stdDev(dist), dist.length];
+  }
+
+  calculateExposureField(mu, sigma, n) {
+    if (sigma === 0 || n < 3) return 0;
+    const tCrit = tPpf(0.95, n - 1);
+    const muLb = mu - tCrit * (sigma / Math.sqrt(n)) - this.friction;
+    if (muLb <= 0) return 0;
+    return Math.min(Math.max((muLb / sigma ** 2) / this.riskAversion, 0), 1);
+  }
+
+  allocate(assetData) {
+    const exposures = {};
+    let totalExp = 0;
+    for (const [asset, returns] of Object.entries(assetData)) {
+      const [mu, sig, n] = this.getStateDistribution(returns);
+      const exp = this.calculateExposureField(mu, sig, n);
+      exposures[asset] = exp;
+      totalExp += exp;
+    }
+    if (totalExp > 1) for (const k of Object.keys(exposures)) exposures[k] /= totalExp;
+    const cash = 1 - Object.values(exposures).reduce((a, b) => a + b, 0);
+    return { exposures, cash, totalExp: Math.min(totalExp, 1) };
+  }
+}
 
 // ── Backtest logic ────────────────────────────────────────────────────────────
 
@@ -64,19 +109,15 @@ function runBacktest({ returnsMap, trainWindow = 120, stepDays = 21, riskAversio
   const weightHistory = [];
 
   for (let i = trainWindow; i < minLen - 1; i += stepDays) {
-    // Run the LIVE engine on each asset's full prefix up to i. blendedExposure
-    // is the sized position; when evidence is thin the engine honestly returns
-    // 0 (SILENCE), so the portfolio holds cash until a real edge appears.
-    const exposures = {};
-    let totalExp = 0;
+    const engine = new Hex6BLEEngine(6, riskAversion, frictionBps);
     for (const asset of assets) {
-      const r = runReasonLayer(returnsMap[asset].slice(0, i), riskAversion);
-      const exp = r.blendedExposure || 0;
-      exposures[asset] = exp;
-      totalExp += exp;
+      engine.trainHive(returnsMap[asset].slice(0, i));
     }
-    if (totalExp > 1) for (const k of Object.keys(exposures)) exposures[k] /= totalExp;
-    const cash = 1 - Object.values(exposures).reduce((a, b) => a + b, 0);
+    const assetData = {};
+    for (const asset of assets) {
+      assetData[asset] = returnsMap[asset].slice(i - 30, i);
+    }
+    const { exposures, cash } = engine.allocate(assetData);
     const step = Math.min(stepDays, minLen - 1 - i);
     let periodReturn = 0;
     for (const asset of assets) {
@@ -125,23 +166,10 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
-    let { returnsMap, benchmarkReturns, riskAversion = 2.5, frictionBps = 35, label = 'BACKTEST', tickers, lookbackDays = 730 } = body;
-
-    // If tickers are supplied instead of a precomputed returnsMap, fetch real
-    // Yahoo daily returns so the backtest runs on actual market data (leak-free,
-    // reproducible) rather than externally-supplied series.
-    if ((!returnsMap || Object.keys(returnsMap).length === 0) && Array.isArray(tickers) && tickers.length > 0) {
-      returnsMap = {};
-      await Promise.all(tickers.map(async (t) => {
-        try {
-          const md = await fetchYahooReturns(t, lookbackDays);
-          if (md.returns && md.returns.length > 30) returnsMap[t] = md.returns;
-        } catch (e) { /* skip failed ticker */ }
-      }));
-    }
+    const { returnsMap, benchmarkReturns, riskAversion = 2.5, frictionBps = 35, label = 'BACKTEST' } = body;
 
     if (!returnsMap || Object.keys(returnsMap).length === 0) {
-      return Response.json({ error: 'returnsMap or tickers required' }, { status: 400 });
+      return Response.json({ error: 'returnsMap required' }, { status: 400 });
     }
 
     const result = runBacktest({ returnsMap, riskAversion, frictionBps });

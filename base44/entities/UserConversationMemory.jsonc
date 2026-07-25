@@ -24,11 +24,7 @@
     },
     "calibration_state": {
       "type": "string",
-      "description": "HEX6-BLE per-user nightly calibration digest (probability engine grade, graded cycle count, avg probability, dominant lean) written by the HEX6-BLE nightly calibration job"
-    },
-    "pius_calibration_state": {
-      "type": "string",
-      "description": "PI-US per-user nightly calibration digest (tonal read-quality discrimination) written by the PI-US nightly calibration job; feeds The Model's voice register"
+      "description": "Per-user nightly calibration digest (engine grade, cycle count, avg confidence, dominant lean) written by the nightly calibration job"
     },
     "triage_profile": {
       "type": "string",

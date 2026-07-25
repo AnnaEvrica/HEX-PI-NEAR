@@ -203,24 +203,17 @@ export function runReasonLayer(returns, riskAversion = 2.5, friction = 0.0035, w
   // (uncertainty × evidence × resolution) directly within the reason layer.
   const evidenceWeight = Math.min(1, nEff / 30) * (resolution / 7);
   const adaptiveFriction = sigma * (1 - evidenceWeight);
-  // FULL KELLY: the bet is sized at f* = μ/σ² on the best prediction (μ),
-  // gated only by the honesty hurdle (muLb > 0 — the edge must clear its own
-  // noise band + contingency friction before any bet is placed). No fractional
-  // riskAversion divisor: HEX6-BLE commits the full Kelly fraction and learns
-  // from realized outcomes nightly. riskAversion is retained in the signature
-  // for caller compatibility but no longer scales the bet.
   const tCrit = tPpf(0.95, nEff - 1);
   const muLb = mu - tCrit * (sigma / Math.sqrt(nEff)) - adaptiveFriction;
   let exposure = 0;
-  if (muLb > 0) exposure = Math.min(Math.max(mu / (sigma * sigma), 0), 1);
+  if (muLb > 0) exposure = Math.min(Math.max((muLb / sigma ** 2) / riskAversion, 0), 1);
+  const regime = exposure > 0.6 ? 'BULL' : exposure > 0.3 ? 'LATERAL' : mu < 0 ? 'BEAR' : 'SILENCE';
   const markov = markovEdge(returns, priorMarkov?.counts || null, priorMarkov?.stats || null);
   const motif = adaptive137Score(returns);
   const basin = classifyBasin(markov.currentState, mu, sigma);
-  const regime = exposure > 0.6 ? 'BULL' : exposure > 0.3 ? 'LATERAL' : mu < 0 ? 'BEAR' : 'SILENCE';
   let blendedExposure = exposure;
   if (markov.transitionConfidence > 0.3 && markov.sigma > 0) {
-    // Markov contribution also sized at full Kelly (μ_M/σ_M²), no fractional divisor.
-    const markovExposure = Math.min(Math.max(markov.mu / (markov.sigma * markov.sigma), 0), 1);
+    const markovExposure = Math.min(Math.max((markov.mu / (markov.sigma * markov.sigma)) / riskAversion, 0), 1);
     blendedExposure = Math.min(Math.max(0.7 * exposure + 0.2 * markovExposure + 0.1 * Math.max(0, motif.score), 0), 1);
   }
   return {
@@ -580,15 +573,11 @@ export function buildThinkingState(reason, wave, validation, isPiUS, returns = n
   const forward = returns ? runForwardTest(returns) : { tested: false, directionalAccuracy: null, friction: null };
   if (!isPiUS) {
     const dir = validation.identifiedDirection;
-    // HEX6-BLE acts on PROBABILITY (Kelly-sized exposure), never on Pascal
-    // value. Its confidence is the bet itself — the Kelly fraction the edge
-    // earned — not the fused Pascal support (that is PI-US's separate domain).
-    const hexConfidence = Math.min(1, Math.abs(reason.blendedExposure || reason.exposure || 0));
     const decision = {
       primary_conclusion: reason.regime === 'INSUFFICIENT_DATA'
         ? 'No reliable structural conclusion: insufficient data.'
         : `The structure favors ${dir.toLowerCase()} continuation; probability supports ${topology.possibility.toLowerCase()} engagement.`,
-      confidence: qual3(hexConfidence, 0.5, 0.25),
+      confidence: qual3(validation.confidence, 0.5, 0.25),
       why: `Topology: ${topology.possibility} possibility, ${topology.regime} regime, uncertainty ${topology.uncertainty}.`,
     };
     return { isPiUS: false, topology, forward, decision };
