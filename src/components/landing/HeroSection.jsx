@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
 import SignaturePatternBackground from '@/components/landing/SignaturePatternBackground';
 import BrainVideo from '@/components/landing/BrainVideo';
 import WaveSignal3D from '@/components/landing/WaveSignal3D';
@@ -91,6 +92,13 @@ function ResonanceMotif() {
 
 export default function HeroSection({ onAsteriskHover }) {
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const handleEnter = () => {
+    // Already logged in (token persisted across browser restarts) → go straight in.
+    if (user) { navigate('/app'); return; }
+    base44.auth.loginWithProvider('google', '/app');
+  };
 
   return (
     <section className="relative w-full overflow-hidden pt-10 sm:pt-14 md:pt-20 pb-10 sm:pb-16">
@@ -237,7 +245,7 @@ export default function HeroSection({ onAsteriskHover }) {
             Discover
           </button>
           <button
-            onClick={() => base44.auth.loginWithProvider('google', '/app')}
+            onClick={handleEnter}
             className="flex-1 inline-flex items-center justify-center px-6 py-3 sm:py-4 rounded-sm bg-accent text-accent-foreground border-2 border-white font-medium hover:bg-accent/90 transition-all text-sm sm:text-base md:text-lg shadow-lg shadow-accent/25"
             style={{ boxShadow: '0 2px 18px rgba(0,0,0,0.35), 0 0 16px rgba(255,255,255,0.25), 0 0 24px rgba(255,106,0,0.15)' }}
           >
