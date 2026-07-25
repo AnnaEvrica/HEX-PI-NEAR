@@ -1,10 +1,11 @@
 import { motion } from 'framer-motion';
-import { useMemo } from 'react';
+import { useMemo, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import SignaturePatternBackground from '@/components/landing/SignaturePatternBackground';
 import BrainVideo from '@/components/landing/BrainVideo';
-import WaveSignal3D from '@/components/landing/WaveSignal3D';
+// Lazy-loaded so the three.js bundle is split out of the initial page load.
+const WaveSignal3D = lazy(() => import('@/components/landing/WaveSignal3D'));
 
 const POOL = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ∑∫π∞≈±∇√∂λμ';
 
@@ -194,8 +195,10 @@ export default function HeroSection({ onAsteriskHover }) {
             </motion.div>
 
             {/* 3D radial wave field with identified signal points — circular ripple overlay on top. */}
-            <div className="relative mt-[2.5rem] sm:mt-[3.5rem] w-full">
-              <WaveSignal3D />
+            <div className="relative mt-[2.5rem] sm:mt-[3.5rem] w-full min-h-[240px] sm:min-h-[300px] md:min-h-[340px]">
+              <Suspense fallback={null}>
+                <WaveSignal3D />
+              </Suspense>
             </div>
 
             {/* Evidence — why it's different */}

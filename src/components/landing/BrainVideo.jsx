@@ -20,7 +20,7 @@ export default function BrainVideo() {
     <video
       ref={ref}
       src="https://media.base44.com/videos/public/69eef3d514386627566a9bf6/570ff9804_Brain_Hero_Video.mp4"
-      autoPlay loop muted playsInline preload="auto"
+      autoPlay loop muted playsInline preload="metadata"
       className="w-full max-w-[22rem] sm:max-w-[30rem] lg:max-w-[40rem] rounded-lg shadow-[0_0_40px_rgba(255,255,255,0.12),0_14px_40px_rgba(0,0,0,0.5)] ring-1 ring-white/20"
     />
   );
