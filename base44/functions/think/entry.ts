@@ -233,7 +233,10 @@ ${speaker}:`;
       const wave = runWaveLayer(returns);
       const validation = runValidationLayer(reason, wave);
       const tone = toneDescriptor(validation);
-      thinkingState = buildThinkingState(reason, wave, validation, true, returns);
+      // HEX6-BLE runs its OWN decision on probability (Kelly) — PI-US no longer
+      // gates the bet. PI-US still supplies the voice register (tone) from its
+      // resonance/value below; the two operators are cleanly separated.
+      thinkingState = buildThinkingState(reason, wave, validation, false, returns);
       voice = selectVoice(tone);
       interpretationPacket = buildInterpretationPacket({ reason, wave, validation, thinkingMode: mode, query: message.slice(0, 500), contextNodeIds: [] });
       ranEngine = true;

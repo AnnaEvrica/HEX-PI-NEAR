@@ -573,11 +573,15 @@ export function buildThinkingState(reason, wave, validation, isPiUS, returns = n
   const forward = returns ? runForwardTest(returns) : { tested: false, directionalAccuracy: null, friction: null };
   if (!isPiUS) {
     const dir = validation.identifiedDirection;
+    // HEX6-BLE acts on PROBABILITY (Kelly-sized exposure), never on Pascal
+    // value. Its confidence is the bet itself — the Kelly fraction the edge
+    // earned — not the fused Pascal support (that is PI-US's separate domain).
+    const hexConfidence = Math.min(1, Math.abs(reason.blendedExposure || reason.exposure || 0));
     const decision = {
       primary_conclusion: reason.regime === 'INSUFFICIENT_DATA'
         ? 'No reliable structural conclusion: insufficient data.'
         : `The structure favors ${dir.toLowerCase()} continuation; probability supports ${topology.possibility.toLowerCase()} engagement.`,
-      confidence: qual3(validation.confidence, 0.5, 0.25),
+      confidence: qual3(hexConfidence, 0.5, 0.25),
       why: `Topology: ${topology.possibility} possibility, ${topology.regime} regime, uncertainty ${topology.uncertainty}.`,
     };
     return { isPiUS: false, topology, forward, decision };
