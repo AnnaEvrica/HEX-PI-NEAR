@@ -1,17 +1,20 @@
-// multiAssetWalkForward — end-to-end walk-forward backtest of the ENTIRE
-// HEX6-BLE / PI-US process (Reason → Wave → Validation = the "new and final
-// layers") across a diverse basket of real assets, not just BTC.
+// multiAssetWalkForward — end-to-end walk-forward backtest that treats the
+// two operators as SEPARATE modules, the way the architecture intends:
 //
-// Deterministic by design: real daily returns are pulled straight from Yahoo
-// Finance (no LLM fetch, no web-search credits — the non-determinism that
-// previously made walk-forward accuracy vary run-to-run is removed). The same
-// pinned series is scored every time, so the accuracy numbers are comparable
-// across scenarios and across runs.
+//   HEX6-BLE  → PROBABILITY (the directional / structural prediction).
+//               Direction is called from the Reason layer (reason.mu) only.
+//               Probability = |blendedExposure| (HEX6-BLE's confidence in the lean).
 //
-// For each out-of-sample step it trains on the expanding prefix, runs the full
-// Reason + Wave + Validation stack, and records the Validation layer's
-// identified direction (the final-layer output), probability, support (Pascal
-// value), and confidence — then compares to the realized next return.
+//   PI-US     → VALUE via RESONANCE (wave.resonance) — it does NOT call
+//               direction. We measure whether resonance discriminates good
+//               trades (value calibration + resonance-tier accuracy) and
+//               whether dual-operator AGREEMENT (high prob AND high resonance)
+//               sharpens the read. Pascal's fused "support" is reported only
+//               as a diagnostic, never as the directional predictor.
+//
+// Deterministic: real daily returns pulled straight from Yahoo Finance (no
+// LLM fetch, no web-search credits) so the pinned series is scored identically
+// every run — comparable across scenarios and across runs.
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { runReasonLayer, runWaveLayer, runValidationLayer } from '../../shared/thinkingEngine.ts';
 import { fetchYahooReturns } from '../../shared/marketDataClient.ts';
@@ -43,6 +46,16 @@ const DEFAULT_BASKET = [
   { ticker: 'UUP',  class: 'fx' },             // US dollar index
 ];
 
+function tierAccuracy(rows, sortByField, highSide) {
+  const sorted = [...rows].sort((a, b) => a[sortByField] - b[sortByField]);
+  const half = Math.floor(sorted.length / 2);
+  const low = sorted.slice(0, half).filter(p => p.actualDir !== 0);
+  const high = sorted.slice(half).filter(p => p.actualDir !== 0);
+  const lowAcc = low.length ? low.filter(p => p.predictedDir === p.actualDir).length / low.length : null;
+  const highAcc = high.length ? high.filter(p => p.predictedDir === p.actualDir).length / high.length : null;
+  return { lowAcc, highAcc };
+}
+
 async function scoreOne(ticker, assetClass, lookbackDays, trainRatio, riskAversion) {
   const md = await fetchYahooReturns(ticker, lookbackDays);
   const returns = md.returns;
@@ -55,16 +68,22 @@ async function scoreOne(ticker, assetClass, lookbackDays, trainRatio, riskAversi
   const preds = [];
   for (let i = 0; i < test.length; i++) {
     const window = returns.slice(0, split + i);
+    // --- HEX6-BLE: probability + direction ---
     const reason = runReasonLayer(window, riskAversion);
+    // --- PI-US: resonance-based value (no direction) ---
     const wave = runWaveLayer(window);
+    // Pascal validation computed for diagnostic only (support/confidence),
+    // never used to call direction.
     const validation = runValidationLayer(reason, wave);
-    const dir = validation.identifiedDirection;
-    const predictedDir = dir === 'UP' ? 1 : dir === 'DOWN' ? -1 : 0;
+
+    const predictedDir = reason.mu > 0 ? 1 : reason.mu < 0 ? -1 : 0;       // HEX6-BLE only
     const actualDir = test[i] > 0 ? 1 : test[i] < 0 ? -1 : 0;
+    const probability = Math.min(1, Math.abs(reason.blendedExposure || reason.exposure || 0)); // HEX6-BLE
+    const resonance = wave.resonance || 0;                                   // PI-US value
+
     preds.push({
-      probability: validation.probability,
-      value: validation.support,
-      confidence: validation.confidence,
+      probability, resonance,
+      pascalSupport: validation.support,
       predictedDir, actualDir, realized: test[i],
     });
   }
@@ -72,51 +91,57 @@ async function scoreOne(ticker, assetClass, lookbackDays, trainRatio, riskAversi
   const valid = preds.filter(p => p.predictedDir !== 0 && p.actualDir !== 0);
   const directionalAccuracy = valid.length ? valid.filter(p => p.predictedDir === p.actualDir).length / valid.length : null;
 
-  const probs = preds.map(p => p.probability);
-  const vals = preds.map(p => p.value);
-  const rets = preds.map(p => p.realized);
-  const probabilityCalibration = pearson(probs, rets);
-  const valueCalibration = pearson(vals, rets);
+  // --- HEX6-BLE probability calibration ---
+  const probabilityCalibration = pearson(preds.map(p => p.probability), preds.map(p => p.realized));
+  const probTier = tierAccuracy(preds, 'probability');
+  const probabilityEdge = (probTier.highAcc != null && probTier.lowAcc != null) ? probTier.highAcc - probTier.lowAcc : null;
 
-  // Final-layer discrimination: does high Pascal support select better trades?
-  const byVal = [...preds].sort((a, b) => a.value - b.value);
-  const half = Math.floor(preds.length / 2);
-  const lowVal = byVal.slice(0, half).filter(p => p.actualDir !== 0);
-  const highVal = byVal.slice(half).filter(p => p.actualDir !== 0);
-  const highValueAccuracy = highVal.length ? highVal.filter(p => p.predictedDir === p.actualDir).length / highVal.length : null;
-  const lowValueAccuracy = lowVal.length ? lowVal.filter(p => p.predictedDir === p.actualDir).length / lowVal.length : null;
+  // --- PI-US resonance (value) calibration ---
+  const resonanceCalibration = pearson(preds.map(p => p.resonance), preds.map(p => p.realized));
+  const resTier = tierAccuracy(preds, 'resonance');
+  const resonanceEdge = (resTier.highAcc != null && resTier.lowAcc != null) ? resTier.highAcc - resTier.lowAcc : null;
 
-  // Confidence tier discrimination.
-  const byConf = [...preds].sort((a, b) => a.confidence - b.confidence);
-  const lowConf = byConf.slice(0, half).filter(p => p.actualDir !== 0);
-  const highConf = byConf.slice(half).filter(p => p.actualDir !== 0);
-  const highConfAcc = highConf.length ? highConf.filter(p => p.predictedDir === p.actualDir).length / highConf.length : null;
-  const lowConfAcc = lowConf.length ? lowConf.filter(p => p.predictedDir === p.actualDir).length / lowConf.length : null;
-
-  // Only-act-when-supported filter: accuracy on high-support calls vs baseline.
-  const supportThreshold = 0.05;
-  const supported = valid.filter(p => p.value >= supportThreshold);
-  const supportedAccuracy = supported.length ? supported.filter(p => p.predictedDir === p.actualDir).length / supported.length : null;
+  // --- Dual-operator agreement: high prob AND high resonance vs baseline ---
+  const medProb = median(preds.map(p => p.probability));
+  const medRes = median(preds.map(p => p.resonance));
+  const agreed = valid.filter(p => p.probability >= medProb && p.resonance >= medRes);
+  const agreedAccuracy = agreed.length ? agreed.filter(p => p.predictedDir === p.actualDir).length / agreed.length : null;
+  const conflicted = valid.filter(p => (p.probability >= medProb && p.resonance < medRes) || (p.probability < medProb && p.resonance >= medRes));
+  const conflictedAccuracy = conflicted.length ? conflicted.filter(p => p.predictedDir === p.actualDir).length / conflicted.length : null;
 
   return {
     ticker, assetClass,
     dataPoints: returns.length,
     trainSize: split,
     testSize: test.length,
+    // HEX6-BLE module
     directionalAccuracy: r2(directionalAccuracy),
     friction: directionalAccuracy !== null ? r2(1 - directionalAccuracy) : null,
     probabilityCalibration: r2(probabilityCalibration),
-    valueCalibration: r2(valueCalibration),
-    highValueAccuracy: r2(highValueAccuracy),
-    lowValueAccuracy: r2(lowValueAccuracy),
-    valueEdge: (highValueAccuracy != null && lowValueAccuracy != null) ? r2(highValueAccuracy - lowValueAccuracy) : null,
-    highConfidenceAccuracy: r2(highConfAcc),
-    lowConfidenceAccuracy: r2(lowConfAcc),
-    supportedAccuracy: r2(supportedAccuracy),
-    supportedCount: supported.length,
-    avgConfidence: r2(mean(preds.map(p => p.confidence))),
+    highProbabilityAccuracy: r2(probTier.highAcc),
+    lowProbabilityAccuracy: r2(probTier.lowAcc),
+    probabilityEdge: r2(probabilityEdge),
+    // PI-US module
+    resonanceCalibration: r2(resonanceCalibration),
+    highResonanceAccuracy: r2(resTier.highAcc),
+    lowResonanceAccuracy: r2(resTier.lowAcc),
+    resonanceValueEdge: r2(resonanceEdge),
+    // Dual-operator
+    agreedAccuracy: r2(agreedAccuracy),
+    agreedCount: agreed.length,
+    conflictedAccuracy: r2(conflictedAccuracy),
+    conflictedCount: conflicted.length,
+    avgProbability: r2(mean(preds.map(p => p.probability))),
+    avgResonance: r2(mean(preds.map(p => p.resonance))),
     latestPrice: md.latestPrice,
   };
+}
+
+function median(arr) {
+  if (!arr.length) return 0;
+  const s = [...arr].sort((a, b) => a - b);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
 }
 
 Deno.serve(async (req) => {
@@ -143,21 +168,23 @@ Deno.serve(async (req) => {
     const clean = results.filter(r => r.directionalAccuracy != null);
     const beat = clean.filter(r => r.directionalAccuracy > 0.5).length;
     const meanAcc = clean.length ? clean.reduce((s, r) => s + r.directionalAccuracy, 0) / clean.length : 0;
-    const meanValCal = clean.length ? clean.reduce((s, r) => s + (r.valueCalibration || 0), 0) / clean.length : 0;
     const meanProbCal = clean.length ? clean.reduce((s, r) => s + (r.probabilityCalibration || 0), 0) / clean.length : 0;
-    const positiveValueEdge = clean.filter(r => r.valueEdge != null && r.valueEdge > 0).length;
+    const meanResCal = clean.length ? clean.reduce((s, r) => s + (r.resonanceCalibration || 0), 0) / clean.length : 0;
+    const positiveResonanceEdge = clean.filter(r => r.resonanceValueEdge != null && r.resonanceValueEdge > 0).length;
+    const agreedBeats = clean.filter(r => r.agreedAccuracy != null && r.directionalAccuracy != null && r.agreedAccuracy > r.directionalAccuracy).length;
 
     return Response.json({
       version: '5.5',
-      description: 'End-to-end Reason→Wave→Validation walk-forward across asset classes (Yahoo-pinned series, deterministic).',
+      architecture: 'HEX6-BLE (probability/direction) + PI-US (resonance value) measured as separate modules.',
       trainRatio, riskAversion, lookbackDays,
       summary: {
         assetsScored: clean.length,
         assetsBeatingCoin: beat,
         meanDirectionalAccuracy: r2(meanAcc),
-        meanValueCalibration: r2(meanValCal),
-        meanProbabilityCalibration: r2(meanProbCal),
-        assetsWithPositiveValueEdge: positiveValueEdge,
+        meanProbabilityCalibration_HEX6: r2(meanProbCal),
+        meanResonanceCalibration_PIUS: r2(meanResCal),
+        assetsWithPositiveResonanceEdge: positiveResonanceEdge,
+        assetsWhereAgreementBeatsBaseline: agreedBeats,
       },
       results,
       timestamp: new Date().toISOString(),
