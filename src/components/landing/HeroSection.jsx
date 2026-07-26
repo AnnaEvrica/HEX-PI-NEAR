@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import SignaturePatternBackground from '@/components/landing/SignaturePatternBackground';
-import BrainVideo from '@/components/landing/BrainVideo';
 import WaveSignal3D from '@/components/landing/WaveSignal3D';
 
 const POOL = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ∑∫π∞≈±∇√∂λμ';
@@ -111,13 +110,8 @@ export default function HeroSection({ onAsteriskHover }) {
         transition={{ duration: 0.8 }}
         style={{ textShadow: '0 0 10px rgba(255,255,255,0.25), 0 1px 3px rgba(0,0,0,0.45)' }}
       >
-        {/* The Model — dual-hemisphere brain video, the main event */}
-        <div className="relative mt-[1.6rem] sm:mt-[2.4rem] flex justify-center">
-          <BrainVideo />
-        </div>
-
-        {/* Title block — two balanced rows: headline word (left) · system label (right) */}
-        <div className="relative mt-[3.16rem] sm:mt-[4.43rem]">
+        {/* Title block — the headline */}
+        <div className="relative mt-[1rem] sm:mt-[1.5rem]">
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <ProbabilityMotif />
             <ResonanceMotif />
@@ -135,15 +129,6 @@ export default function HeroSection({ onAsteriskHover }) {
               >
                 The
               </motion.h2>
-              <motion.span
-                className="text-white/75 font-bold tracking-tight text-[1.25rem] sm:text-[1.67rem] md:text-[2.33rem] lg:text-[3.5rem] xl:text-[3.67rem] leading-[0.9] whitespace-nowrap"
-                style={{ textShadow: '0 0 24px rgba(255,255,255,0.55), 0 1px 0 rgba(255,255,255,0.25), 0 2px 14px rgba(0,0,0,0.65)' }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.2 }}
-              >
-                <span className="text-white/75">[</span><span className="text-[#f4f1dd]/75">HEX6</span><span className="text-white/75">-BLE]</span>
-              </motion.span>
             </div>
 
             {/* Row 2 — "Model*" · [BLE: Binaureal Linguistic Engine] (balanced) */}
@@ -165,15 +150,6 @@ export default function HeroSection({ onAsteriskHover }) {
                   *
                 </span>
               </motion.h2>
-              <motion.span
-                className="text-white/60 font-semibold tracking-tight text-[0.625rem] sm:text-[0.83rem] md:text-[1.17rem] lg:text-[1.75rem] xl:text-[1.83rem] leading-tight min-w-0 text-right whitespace-normal sm:whitespace-nowrap"
-                style={{ textShadow: '0 0 16px rgba(255,255,255,0.4), 0 1px 0 rgba(255,255,255,0.2), 0 2px 10px rgba(0,0,0,0.6)' }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.28 }}
-              >
-                [BLE: Binaureal Linguistic Engine]
-              </motion.span>
             </div>
           </div>
 
@@ -183,16 +159,25 @@ export default function HeroSection({ onAsteriskHover }) {
           </div>
 
           <div className="relative mt-[3.5rem] sm:mt-[5rem] flex flex-col items-center">
-            {/* Manifesto — one value-driven invitation */}
+            {/* Descriptor lines — [HEX6-BLE] / [BLE: Binaureal Linguistic Engine] */}
             <motion.div
-              className="w-full max-w-3xl mx-auto text-center"
+              className="flex flex-col items-center gap-[0.5rem] sm:gap-[0.85rem]"
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7 }}
             >
-              <h3 className="text-balance text-[1.5rem] sm:text-[2.25rem] md:text-[2.75rem] lg:text-[3.25rem] leading-[1.2] font-medium tracking-tight text-foreground/65 mx-auto max-w-2xl">
-                The Model unlocks the informational value hidden in any question — enter and let it reveal the structure beneath.
-              </h3>
+              <span
+                className="font-bold tracking-tight text-[1.25rem] sm:text-[1.67rem] md:text-[2.33rem] lg:text-[3.5rem] xl:text-[3.67rem] leading-[0.9] whitespace-nowrap"
+                style={{ textShadow: '0 0 24px rgba(255,255,255,0.55), 0 1px 0 rgba(255,255,255,0.25), 0 2px 14px rgba(0,0,0,0.65)' }}
+              >
+                <span className="text-white/75">[</span><span className="text-accent">HEX6</span><span className="text-white/75">-BLE]</span>
+              </span>
+              <span
+                className="font-semibold tracking-tight text-[0.625rem] sm:text-[0.83rem] md:text-[1.17rem] lg:text-[1.75rem] xl:text-[1.83rem] leading-tight whitespace-normal sm:whitespace-nowrap text-center"
+                style={{ textShadow: '0 0 16px rgba(255,255,255,0.4), 0 1px 0 rgba(255,255,255,0.2), 0 2px 10px rgba(0,0,0,0.6)' }}
+              >
+                <span className="text-white/60">[</span><span className="text-accent">BLE</span><span className="text-white/60">: Binaureal Linguistic Engine]</span>
+              </span>
             </motion.div>
 
             {/* 3D radial wave field with identified signal points — circular ripple overlay on top. */}
