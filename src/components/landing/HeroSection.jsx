@@ -111,12 +111,6 @@ export default function HeroSection({ onAsteriskHover }) {
         transition={{ duration: 0.8 }}
         style={{ textShadow: '0 0 10px rgba(255,255,255,0.25), 0 1px 3px rgba(0,0,0,0.45)' }}
       >
-        <div className="flex justify-start mt-[1.58rem] sm:mt-[2.21rem]">
-          <span className="text-xs sm:text-sm uppercase tracking-[0.12em] text-foreground/80 font-light whitespace-nowrap">
-            Welcome to
-          </span>
-        </div>
-
         {/* The Model — dual-hemisphere brain video, the main event */}
         <div className="relative mt-[1.6rem] sm:mt-[2.4rem] flex justify-center">
           <BrainVideo />
