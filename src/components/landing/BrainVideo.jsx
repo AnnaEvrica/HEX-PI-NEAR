@@ -32,7 +32,7 @@ export default function BrainVideo() {
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = 1;
       canvas.width = Math.max(1, Math.floor(rect.width * dpr));
       canvas.height = Math.max(1, Math.floor(rect.height * dpr));
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -64,23 +64,27 @@ export default function BrainVideo() {
     };
     raf = requestAnimationFrame(draw);
 
-    const ro = new ResizeObserver(resize);
+    let rafResize = null;
+    const ro = new ResizeObserver(() => {
+      if (rafResize) cancelAnimationFrame(rafResize);
+      rafResize = requestAnimationFrame(resize);
+    });
     ro.observe(canvas);
-    return () => { cancelAnimationFrame(raf); ro.disconnect(); };
+    return () => { cancelAnimationFrame(raf); if (rafResize) cancelAnimationFrame(rafResize); ro.disconnect(); };
   }, []);
 
   return (
-    <div className="relative w-full max-w-[22rem] sm:max-w-[30rem] lg:max-w-[40rem]">
+    <div className="relative w-full max-w-[22rem] sm:max-w-[30rem] lg:max-w-[40rem] overflow-hidden rounded-lg bg-black shadow-[0_0_40px_rgba(255,255,255,0.12),0_14px_40px_rgba(0,0,0,0.5)] ring-1 ring-white/20">
       <video
         ref={ref}
         src="https://media.base44.com/videos/public/69eef3d514386627566a9bf6/570ff9804_Brain_Hero_Video.mp4"
         autoPlay loop muted playsInline preload="auto"
-        className="w-full rounded-lg shadow-[0_0_40px_rgba(255,255,255,0.12),0_14px_40px_rgba(0,0,0,0.5)] ring-1 ring-white/20 grayscale contrast-125"
+        className="block w-full h-full object-cover grayscale contrast-125"
       />
       <canvas
         ref={canvasRef}
         aria-hidden="true"
-        className="absolute inset-0 w-full h-full rounded-lg mix-blend-screen pointer-events-none"
+        className="absolute inset-0 w-full h-full mix-blend-screen pointer-events-none will-change-transform"
       />
     </div>
   );
