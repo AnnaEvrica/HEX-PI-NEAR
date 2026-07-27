@@ -271,7 +271,7 @@ export default function HEX6ChatInterface() {
 
     // Read the latest input value — fall back to the DOM if React state is stale
     // (can happen right after dictation when state hasn't flushed yet).
-    const textareaEl = document.querySelector('textarea[placeholder="What are you refusing to see?"]');
+    const textareaEl = document.querySelector('textarea[placeholder="Ask anything..."]');
     const liveValue = (textareaEl?.value ?? input).trim();
 
     if (!liveValue && !uploadedImage) {
@@ -709,7 +709,7 @@ export default function HEX6ChatInterface() {
                   handleSendMessage();
                 }
               }}
-              placeholder="What are you refusing to see?"
+              placeholder="Ask anything..."
               rows={1}
               className="flex-1 px-2 md:px-4 py-2 rounded-sm border border-border bg-background text-foreground placeholder-secondary text-sm md:text-base focus:outline-none focus:border-accent resize-none max-h-32 overflow-y-auto"
               style={{ minHeight: '44px' }}
