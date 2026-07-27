@@ -195,7 +195,9 @@ export default function HeroSection({ onAsteriskHover }) {
               >
                 <span className="text-white/60">[</span><span className="text-accent">BLE</span><span className="text-white/60">: Binaureal Linguistic Engine]</span>
               </span>
-              <p className="mt-4 max-w-2xl text-center text-foreground/60 text-xs sm:text-sm md:text-base font-light leading-relaxed">
+              <p className="relative mt-4 max-w-2xl text-center text-white/90 text-xs sm:text-sm md:text-base font-light leading-relaxed px-6 py-3 rounded-full">
+                <span className="absolute inset-0 -z-10 rounded-full bg-white/8 blur-2xl" aria-hidden="true" />
+                <span className="absolute inset-0 -z-10 rounded-full bg-white/5" aria-hidden="true" />
                 The Signal (HEX6-BLE PI-US v5.5) is an experimental probabilistic intelligence layer that sits on top of existing LLMs, replacing purely token-probability-driven inference with external semantic state estimation and probabilistic decision optimization to produce more reliable reasoning without retraining foundation models. <span className="text-accent font-medium">Live in beta testing.</span>
               </p>
             </motion.div>
