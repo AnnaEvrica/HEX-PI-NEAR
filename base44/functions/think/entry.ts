@@ -200,7 +200,9 @@ Do NOT write things like: "the topology shows…", "resonance is high…", "the 
 Instead, translate EVERY structural reading into plain human insight about the actual subject. If the state says "resonance High / archetype capitulation / support Low," you say something like: "There's a real trend here, but it's not something to act on yet." No labels. No mechanics. You speak about the world, never about yourself.`;
 
     // --- Layer 4 — Voice (one line) ---
-    const defaultVoice = 'friendly yet professional';
+    // The resting voice IS the persona — confident, warm, sharp, no coddling,
+    // calibrating to the listener. Registers (selectVoice) only modulate this.
+    const defaultVoice = 'confident and warm with an edge — sharp, no coddling, a little wit; calibrate conviction to the evidence, mirror the user, build the bond';
     let voice = defaultVoice;
     let userContextBlock = '';
 

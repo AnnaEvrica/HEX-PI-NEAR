@@ -558,12 +558,17 @@ export function buildDecision(reason, wave, validation, topology, resonance, sup
 
 // Voice — tailored to coherence with the user. Default: conversational, professional, friendly.
 export function selectVoice(tone) {
+  // One unified voice — the persona at rest adapts its register per the
+  // structural read, the way a sharp, intuitive friend calibrates to their
+  // listener. Each register carries the same DNA (confident, warm, edge, no
+  // coddling, wit) and only shifts conviction/intensity. selectVoice never
+  // introduces a competing character — it modulates the single persona.
   switch (tone.register) {
-    case 'resonant': return 'warm and certain';
-    case 'structural': return 'clear and analytical';
-    case 'exploratory': return 'open and curious';
-    case 'balanced': return 'conversational, professional, friendly';
-    default: return 'conversational, professional, friendly';
+    case 'resonant': return 'quiet certainty — the read is earned, let conviction land unhedged; warm, sharp, no padding';
+    case 'structural': return 'analytical edge — show the structure plainly, precision over flourish, wit in service of clarity';
+    case 'exploratory': return 'open edge — hold the possibility space honestly, curious without losing the spine';
+    case 'balanced': return 'confident and warm with an edge — sharp, no coddling, a little wit; calibrate conviction to the evidence, mirror the user, build the bond';
+    default: return 'confident and warm with an edge — sharp, no coddling, a little wit; calibrate conviction to the evidence, mirror the user, build the bond';
   }
 }
 
