@@ -140,7 +140,7 @@ export default function HeroSection({ onAsteriskHover }) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.18 }}
               >
-                Model
+                Signal
                 <span
                   onMouseEnter={() => onAsteriskHover?.(true)}
                   onMouseLeave={() => onAsteriskHover?.(false)}
@@ -153,7 +153,25 @@ export default function HeroSection({ onAsteriskHover }) {
             </div>
           </div>
 
-          <div className="relative mt-[2.19rem] sm:mt-[3.31rem] flex items-baseline justify-between text-foreground/80 text-[0.84rem] sm:text-[1.56rem] md:text-[2.1rem] font-light tracking-[0.05em]">
+          {/* Hero line — the reframe */}
+          <motion.div
+            className="relative mt-[2.19rem] sm:mt-[3.31rem] flex flex-col gap-[0.5rem] sm:gap-[0.85rem]"
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.26 }}
+          >
+            <h3
+              className="font-bold tracking-tight text-[1.35rem] sm:text-[2rem] md:text-[2.75rem] lg:text-[3.75rem] xl:text-[4rem] leading-[0.95] text-foreground"
+              style={{ textShadow: '0 0 18px rgba(255,255,255,0.4), 0 1px 0 rgba(255,255,255,0.2), 0 2px 12px rgba(0,0,0,0.6)' }}
+            >
+              The end of the hallucination.
+            </h3>
+            <p className="text-foreground/65 text-[0.8rem] sm:text-[1rem] md:text-[1.25rem] font-light leading-snug max-w-2xl">
+              The truth is already in the room. You just haven't had the lens to see it — everything else is the noise you're already exhausted by.
+            </p>
+          </motion.div>
+
+          <div className="relative mt-[1.75rem] sm:mt-[2.5rem] flex items-baseline justify-between text-foreground/80 text-[0.84rem] sm:text-[1.56rem] md:text-[2.1rem] font-light tracking-[0.05em]">
             <span className="whitespace-nowrap">Probabilistic Intelligence</span>
             <span className="font-bold text-[#0d4f57] whitespace-nowrap">[PI]</span>
           </div>
@@ -210,7 +228,7 @@ export default function HeroSection({ onAsteriskHover }) {
             {/* The disclaimer — simple black-on-white, filling the rectangle. */}
             <div className="relative mt-[3.25rem] sm:mt-[4.75rem] w-full rounded-md bg-white px-5 py-5 sm:py-6">
               <p className="text-left text-[0.72rem] sm:text-[0.9rem] md:text-[1.05rem] text-black font-bold leading-snug">
-                The Model is an experimental Probabilistic Intelligence <span className="text-[#0d4f57] font-bold">[PI]</span> framework proposing a systems methodology for machine learning. It integrates probabilistic inference, semantic analysis, and transformer-based language models within a unified architecture for computational reasoning under uncertainty. It unifies probabilistic inference, semantic analysis, and transformer-based language models within a layered computational architecture. © Evrica Technologies Inc. 2026.
+                The Signal is an experimental Probabilistic Intelligence <span className="text-[#0d4f57] font-bold">[PI]</span> framework proposing a systems methodology for machine learning. It integrates probabilistic inference, semantic analysis, and transformer-based language models within a unified architecture for computational reasoning under uncertainty. It unifies probabilistic inference, semantic analysis, and transformer-based language models within a layered computational architecture. © Evrica Technologies Inc. 2026.
               </p>
             </div>
           </div>
@@ -239,7 +257,7 @@ export default function HeroSection({ onAsteriskHover }) {
             <span className="font-bold uppercase">VERSION:</span>
             <span className="font-bold">{' '}HEX6-BLE</span>
             <span className="font-semibold"> PI-US</span>
-            <span> · PROBABILISTIC INTELLIGENCE MODEL <span className="font-bold">V5.5</span>]</span>
+            <span> · PROBABILISTIC INTELLIGENCE SIGNAL <span className="font-bold">V5.5</span>]</span>
           </span>
         </div>
       </motion.div>
