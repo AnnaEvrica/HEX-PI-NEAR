@@ -1,16 +1,21 @@
-// Cognition Calibration Scorer — closes the loop for the PI-US / unified engine.
-// Scores the CognitiveState records produced by `think` (which already carry a
-// realized, out-of-sample walk-forward directional accuracy on the held-out tail
-// of each input series). Rolls them up into one CalibrationScore row per day.
+// Cognition Calibration Scorer — closes the loop for the PI-US value layer.
 //
-// This is self-contained (DB-only — no external market fetch), so it cannot hit
-// the CONNECT_TIMEOUT issues that affect outward-calling syncs.
+// ACCOUNTABILITY SPLIT (do not cross the hemispheres):
+//   HEX6-BLE (reason)  OWNS direction  → graded on directional accuracy elsewhere
+//                                          (nightlyCalibration, per brain_id).
+//   PI-US (wave+value) OWNS value       → graded HERE on support calibration:
+//     does higher Pascal support rank higher realized directional quality?
 //
-// Metrics:
-//   predictions_evaluated — total held-out predictions across runs
-//   directional_accuracy  — accuracy weighted by each run's forward_count
-//   exposure_correlation — Pearson(support, forward_accuracy) across runs
-//                           (does Pascal's support rank realized quality?)
+// The `forward_accuracy` on each CognitiveState comes from runForwardTest, which
+// calls runReasonLayer only — so that number is HEX6-BLE's directional hit-rate,
+// NOT PI-US's. Grading PI-US on it was a category error that always landed near
+// coin-flip (a D) because PI-US never predicted direction in the first place.
+//
+// This scorer now grades PI-US on exposure_correlation = Pearson(support,
+// forward_accuracy): when PI-US says support is high, does accuracy actually go
+// up? directional_accuracy is kept in the record as a HEX6-BLE reference only.
+//
+// Self-contained (DB-only — no external market fetch).
 
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.39';
 
@@ -24,11 +29,14 @@ function pearson(a, b) {
   return (da === 0 || db === 0) ? 0 : num / Math.sqrt(da * db);
 }
 
-function gradeFromAccuracy(acc) {
-  if (acc >= 0.75) return 'A';
-  if (acc >= 0.65) return 'B';
-  if (acc >= 0.55) return 'C';
-  if (acc >= 0.45) return 'D';
+// Grade PI-US on its actual job — value calibration: how well does Pascal
+// support rank realized directional quality? Pearson(support, forward_accuracy).
+// A negative correlation (high support → low accuracy) is an F (anti-calibration).
+function gradeFromCalibration(corr) {
+  if (corr >= 0.50) return 'A';
+  if (corr >= 0.35) return 'B';
+  if (corr >= 0.20) return 'C';
+  if (corr >= 0.10) return 'D';
   return 'F';
 }
 
@@ -73,9 +81,11 @@ Deno.serve(async (req) => {
     const dirAcc = totalPred > 0 ? totalCorrect / totalPred : 0;
     const supCorr = pearson(supports, accs);
     const bucketAcc = (bk) => bk.n > 0 ? +(bk.c / bk.n).toFixed(3) : null;
-    const grade = totalPred < 10 ? 'INSUFFICIENT_DATA' : gradeFromAccuracy(dirAcc);
+    // PI-US is graded on VALUE calibration (support → realized quality), not
+    // direction. dirAcc is HEX6-BLE's directional hit-rate, kept as reference.
+    const grade = totalPred < 10 ? 'INSUFFICIENT_DATA' : gradeFromCalibration(supCorr);
 
-    const notes = `PI-US cognition across ${runs.length} runs, ${totalPred} held-out predictions. Directional accuracy ${(dirAcc * 100).toFixed(1)}%. Support-calibration corr ${supCorr.toFixed(2)} (high-support ${bucketAcc(buckets.high)}, mid ${bucketAcc(buckets.mid)}, low ${bucketAcc(buckets.low)}).`;
+    const notes = `PI-US value calibration across ${runs.length} runs, ${totalPred} held-out predictions. Support→quality correlation ${supCorr.toFixed(2)} (grade ${grade}): higher Pascal support ranks higher realized directional accuracy. HEX6-BLE directional accuracy (reference, not PI-US's job): ${(dirAcc * 100).toFixed(1)}%. Support buckets — high ${bucketAcc(buckets.high)}, mid ${bucketAcc(buckets.mid)}, low ${bucketAcc(buckets.low)}.`;
 
     await base44.asServiceRole.entities.CalibrationScore.create({
       score_date: today,
