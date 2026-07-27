@@ -3,7 +3,6 @@ import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
-import SignaturePatternBackground from '@/components/landing/SignaturePatternBackground';
 import WaveSignal3D from '@/components/landing/WaveSignal3D';
 
 const POOL = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ∑∫π∞≈±∇√∂λμ';
@@ -101,7 +100,7 @@ export default function HeroSection({ onAsteriskHover }) {
 
   return (
     <section className="relative w-full overflow-hidden pt-10 sm:pt-14 md:pt-20 pb-10 sm:pb-16">
-      <SignaturePatternBackground />
+      <div className="absolute inset-0 bg-black" />
 
       <motion.div
         className="relative z-10 max-w-6xl mx-auto px-6 sm:px-10 py-[2.75rem] sm:py-[3.85rem] bg-background/75 backdrop-blur-md rounded-lg shadow-[0_0_50px_rgba(255,255,255,0.1),0_14px_40px_rgba(0,0,0,0.4)]"
@@ -167,7 +166,7 @@ export default function HeroSection({ onAsteriskHover }) {
               The end of the hallucination.
             </h3>
             <p className="text-foreground/65 text-[0.8rem] sm:text-[1rem] md:text-[1.25rem] font-light leading-snug max-w-2xl">
-              The truth is already in the room. You just haven't had the lens to see it — everything else is the noise you're already exhausted by.
+              Probabilities translated into an unblinking lens for decisions that must survive daylight.
             </p>
           </motion.div>
 
@@ -225,28 +224,25 @@ export default function HeroSection({ onAsteriskHover }) {
               </div>
             </div>
 
-            {/* The disclaimer — simple black-on-white, filling the rectangle. */}
+            {/* The legal block — a boundary, not an apology. */}
             <div className="relative mt-[3.25rem] sm:mt-[4.75rem] w-full rounded-md bg-white px-5 py-5 sm:py-6">
               <p className="text-left text-[0.72rem] sm:text-[0.9rem] md:text-[1.05rem] text-black font-bold leading-snug">
-                The Signal is an experimental Probabilistic Intelligence <span className="text-[#0d4f57] font-bold">[PI]</span> framework proposing a systems methodology for machine learning. It integrates probabilistic inference, semantic analysis, and transformer-based language models within a unified architecture for computational reasoning under uncertainty. It unifies probabilistic inference, semantic analysis, and transformer-based language models within a layered computational architecture. © Evrica Technologies Inc. 2026.
+                Not financial or legal advice — a probabilistic witness that clarifies, never replaces, judgment.
+              </p>
+              <p className="text-left text-[0.62rem] sm:text-[0.72rem] md:text-[0.85rem] text-black/55 font-medium mt-2">
+                © Evrica Technologies Inc. 2026.
               </p>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-[30rem] mx-auto pt-[2.91rem]">
-          <button
-            onClick={() => navigate('/discover')}
-            className="flex-1 inline-flex items-center justify-center px-6 py-3 sm:py-4 rounded-sm border-2 border-accent bg-white text-black font-medium hover:bg-accent/10 transition-all text-sm sm:text-base md:text-lg shadow-[0_0_14px_rgba(255,255,255,0.2)]"
-          >
-            Discover
-          </button>
+        <div className="flex justify-center w-full pt-[2.91rem]">
           <button
             onClick={handleEnter}
-            className="flex-1 inline-flex items-center justify-center px-6 py-3 sm:py-4 rounded-sm bg-accent text-accent-foreground border-2 border-white font-medium hover:bg-accent/90 transition-all text-sm sm:text-base md:text-lg shadow-lg shadow-accent/25"
+            className="inline-flex items-center justify-center px-10 py-3 sm:py-4 rounded-sm bg-accent text-accent-foreground border-2 border-white font-bold hover:bg-accent/90 transition-all text-sm sm:text-base md:text-lg shadow-lg shadow-accent/25"
             style={{ boxShadow: '0 2px 18px rgba(0,0,0,0.35), 0 0 16px rgba(255,255,255,0.25), 0 0 24px rgba(255,106,0,0.15)' }}
           >
-            Enter
+            Arrive
           </button>
         </div>
 

@@ -11,7 +11,7 @@ export default function HEX6ChatInterface() {
   const welcomeMessage = {
     id: 'welcome',
     role: 'assistant',
-    content: `Welcome. I'm The Model — a probabilistic intelligence.\n\nI fuse what's possible with what's meaningful, with reasoning you can follow. I read the data behind the moment, name the patterns others miss, and tell you where the weight actually sits — clearly, and without the noise.\n\nAsk me about a market, a number, or an idea you can't quite shake. Let's think clearly — and elevate the way you think.`,
+    content: `Welcome. I'm The Signal — a probabilistic intelligence.\n\nI fuse what's possible with what's meaningful, with reasoning you can follow. I read the data behind the moment, name the patterns others miss, and tell you where the weight actually sits — clearly, and without the noise.\n\nAsk me about a market, a number, or an idea you can't quite shake. Let's think clearly — and elevate the way you think.`,
   };
 
   // Loading copy — only "Thinking..." for fast chat replies.
@@ -271,7 +271,7 @@ export default function HEX6ChatInterface() {
 
     // Read the latest input value — fall back to the DOM if React state is stale
     // (can happen right after dictation when state hasn't flushed yet).
-    const textareaEl = document.querySelector('textarea[placeholder="Ask anything..."]');
+    const textareaEl = document.querySelector('textarea[placeholder="What are you refusing to see?"]');
     const liveValue = (textareaEl?.value ?? input).trim();
 
     if (!liveValue && !uploadedImage) {
@@ -709,7 +709,7 @@ export default function HEX6ChatInterface() {
                   handleSendMessage();
                 }
               }}
-              placeholder="Ask anything..."
+              placeholder="What are you refusing to see?"
               rows={1}
               className="flex-1 px-2 md:px-4 py-2 rounded-sm border border-border bg-background text-foreground placeholder-secondary text-sm md:text-base focus:outline-none focus:border-accent resize-none max-h-32 overflow-y-auto"
               style={{ minHeight: '44px' }}
