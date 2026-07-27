@@ -62,7 +62,7 @@ Deno.serve(async (req) => {
       return Response.json({ ok: true, message: 'No cognition runs to score yet.' });
     }
 
-    let totalPred = 0, totalCorrect = 0;
+    let totalPred = 0;
     const supports = [], accs = [];
     const buckets = { high: { n: 0, c: 0 }, mid: { n: 0, c: 0 }, low: { n: 0, c: 0 } };
 
@@ -70,7 +70,6 @@ Deno.serve(async (req) => {
       const cnt = r.forward_count || 0;
       const acc = r.forward_accuracy || 0;
       totalPred += cnt;
-      totalCorrect += acc * cnt;
       supports.push(r.value || 0); // support is stored in the `value` field
       accs.push(acc);
       const b = (r.value || 0) > 0.05 ? 'high' : (r.value || 0) > 0.01 ? 'mid' : 'low';
@@ -78,20 +77,20 @@ Deno.serve(async (req) => {
       buckets[b].c += acc * cnt;
     }
 
-    const dirAcc = totalPred > 0 ? totalCorrect / totalPred : 0;
     const supCorr = pearson(supports, accs);
     const bucketAcc = (bk) => bk.n > 0 ? +(bk.c / bk.n).toFixed(3) : null;
     // PI-US is graded on VALUE calibration (support → realized quality), not
-    // direction. dirAcc is HEX6-BLE's directional hit-rate, kept as reference.
+    // direction. Directional accuracy is HEX6-BLE's domain, validated by the
+    // dedicated walkForwardAccuracy backtest (full pipeline) — never this scorer.
     const grade = totalPred < 10 ? 'INSUFFICIENT_DATA' : gradeFromCalibration(supCorr);
 
-    const notes = `PI-US value calibration across ${runs.length} runs, ${totalPred} held-out predictions. Support→quality correlation ${supCorr.toFixed(2)} (grade ${grade}): higher Pascal support ranks higher realized directional accuracy. HEX6-BLE directional accuracy (reference, not PI-US's job): ${(dirAcc * 100).toFixed(1)}%. Support buckets — high ${bucketAcc(buckets.high)}, mid ${bucketAcc(buckets.mid)}, low ${bucketAcc(buckets.low)}.`;
+    const notes = `PI-US value calibration across ${runs.length} runs, ${totalPred} held-out predictions. Support→quality correlation ${supCorr.toFixed(2)} (grade ${grade}): higher Pascal support ranks higher realized directional quality. Support buckets — high ${bucketAcc(buckets.high)}, mid ${bucketAcc(buckets.mid)}, low ${bucketAcc(buckets.low)}. Directional accuracy is HEX6-BLE's domain (walkForwardAccuracy), not measured here.`;
 
     await base44.asServiceRole.entities.CalibrationScore.create({
       score_date: today,
       ticker: 'PI-US',
       predictions_evaluated: totalPred,
-      directional_accuracy: parseFloat(dirAcc.toFixed(4)),
+      directional_accuracy: 0,
       exposure_correlation: parseFloat(supCorr.toFixed(4)),
       avg_realized_return: 0,
       calibration_grade: grade,
@@ -102,7 +101,6 @@ Deno.serve(async (req) => {
       ok: true,
       runs_scored: runs.length,
       predictions_evaluated: totalPred,
-      directional_accuracy: parseFloat(dirAcc.toFixed(4)),
       support_correlation: parseFloat(supCorr.toFixed(4)),
       calibration_grade: grade,
     });
