@@ -8,6 +8,7 @@ import { filterSourcesBlock, updateMemory } from '../../shared/chatHelpers.ts';
 import { fetchYahooReturns } from '../../shared/marketDataClient.ts';
 import { selectSynthesisModel, INTERPRETATION_MODEL, adaptVoiceForModel } from '../../shared/modelRouter.ts';
 import { triage } from '../../shared/triage.ts';
+import { anchorVerdict } from '../../shared/asiSpine.ts';
 
 // Convert a raw numeric series to returns. If the values look like price
 // levels (all positive, magnitude > 1), convert to percent changes; otherwise
@@ -269,8 +270,9 @@ ${speaker}:`;
       (async () => {
         try {
           const { validation } = interpretationPacket;
+          const state_id = `cs_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
           await base44.asServiceRole.entities.CognitiveState.create({
-            state_id: `cs_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+            state_id,
             thinking_mode: mode,
             user_email: user.email,
             query: message.slice(0, 1000),
@@ -285,6 +287,39 @@ ${speaker}:`;
             forward_count: thinkingState?.forward?.count ?? null,
             cross_alignment: thinkingState?.crossCheck?.directionalAlignment ?? null,
             context_node_ids: interpretationPacket.context_node_ids,
+          });
+
+          // ASI Spine — anchor this verdict with tamper-evident provenance.
+          // Statistical validators reuse the engine's own forward-test +
+          // calibration reads, so drift (a verdict the validators don't back)
+          // becomes a flagged disagreement instead of silent softening.
+          // Fire-and-forget: anchorVerdict swallows its own errors and never
+          // blocks the reply.
+          const fa = thinkingState?.forward?.directionalAccuracy ?? null;
+          const friction = thinkingState?.forward?.friction ?? null;
+          const conf = validation.confidence ?? 0;
+          const validators = [
+            { id: 'forward_accuracy', kind: 'statistical', check: 'walk-forward directional accuracy >= 0.5', agrees: fa == null ? true : fa >= 0.5, evidence_ref: 'CognitiveState.forward_accuracy', weight: 0.5 },
+            { id: 'friction', kind: 'statistical', check: '|expected-actual| within 0.05', agrees: friction == null ? true : Math.abs(friction) < 0.05, evidence_ref: 'CognitiveState.friction', weight: 0.25 },
+            { id: 'confidence', kind: 'statistical', check: 'confidence >= 0.4', agrees: conf >= 0.4, evidence_ref: 'CognitiveState.confidence', weight: 0.25 },
+          ];
+          const content = {
+            verdict_id: state_id,
+            query: message.slice(0, 500),
+            predicted_direction: validation.identifiedDirection,
+            probability: validation.probability,
+            resonance: validation.resonance,
+            value: validation.support,
+            confidence: conf,
+            forward_accuracy: fa,
+            friction,
+          };
+          await anchorVerdict(base44, {
+            verdict_id: state_id,
+            source_type: 'engine_output',
+            content,
+            validators,
+            authored_by: user.email,
           });
         } catch (e) { /* non-blocking */ }
       })();
