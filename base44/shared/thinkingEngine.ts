@@ -654,7 +654,7 @@ function sanitizeRead(s) {
     .trim();
 }
 
-export function renderDirective(state, voice = 'conversational, professional, friendly') {
+export function renderDirective(state, voice = 'confident and warm with an edge — sharp, no coddling, a little wit; calibrate conviction to the evidence, mirror the user, build the bond') {
   if (!state) return '';
   const conf = state.decision?.confidence || state.support?.confidence || 'Medium';
   if (!state.isPiUS) {
