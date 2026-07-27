@@ -163,7 +163,7 @@ export default function HeroSection({ onAsteriskHover }) {
               className="font-bold tracking-tight text-[1.35rem] sm:text-[2rem] md:text-[2.75rem] lg:text-[3.75rem] xl:text-[4rem] leading-[0.95] text-foreground"
               style={{ textShadow: '0 0 18px rgba(255,255,255,0.4), 0 1px 0 rgba(255,255,255,0.2), 0 2px 12px rgba(0,0,0,0.6)' }}
             >
-              The end of the hallucination.
+              clarity only <span className="text-accent">truth</span> can provide.
             </h3>
             <p className="text-foreground/65 text-[0.8rem] sm:text-[1rem] md:text-[1.25rem] font-light leading-snug max-w-2xl">
               Probabilities translated into an unblinking lens for decisions that must survive daylight.
@@ -195,6 +195,9 @@ export default function HeroSection({ onAsteriskHover }) {
               >
                 <span className="text-white/60">[</span><span className="text-accent">BLE</span><span className="text-white/60">: Binaureal Linguistic Engine]</span>
               </span>
+              <p className="mt-4 max-w-2xl text-center text-foreground/60 text-xs sm:text-sm md:text-base font-light leading-relaxed">
+                The Signal (HEX6-BLE PI-US v5.5) is an experimental probabilistic intelligence layer that sits on top of existing LLMs, replacing purely token-probability-driven inference with external semantic state estimation and probabilistic decision optimization to produce more reliable reasoning without retraining foundation models. <span className="text-accent font-medium">Live in beta testing.</span>
+              </p>
             </motion.div>
 
             {/* 3D radial wave field with identified signal points — circular ripple overlay on top. */}
