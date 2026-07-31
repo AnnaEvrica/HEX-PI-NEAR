@@ -99,53 +99,39 @@ export default function HeroSection({ onAsteriskHover }) {
   };
 
   return (
-    <section className="relative w-full overflow-hidden pt-10 sm:pt-14 md:pt-20 pb-10 sm:pb-16">
+    <section className="relative w-full overflow-hidden pt-6 sm:pt-10 md:pt-14 pb-6 sm:pb-10">
       <div className="absolute inset-0 bg-black" />
 
       <motion.div
-        className="relative z-10 max-w-6xl mx-auto px-6 sm:px-10 py-[2.75rem] sm:py-[3.85rem] bg-background/75 backdrop-blur-md rounded-lg shadow-[0_0_50px_rgba(255,255,255,0.1),0_14px_40px_rgba(0,0,0,0.4)]"
+        className="relative z-10 max-w-6xl mx-auto px-5 sm:px-10 py-9 sm:py-12 md:py-16 bg-background/75 backdrop-blur-md rounded-lg shadow-[0_0_50px_rgba(255,255,255,0.1),0_14px_40px_rgba(0,0,0,0.4)]"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         style={{ textShadow: '0 0 10px rgba(255,255,255,0.25), 0 1px 3px rgba(0,0,0,0.45)' }}
       >
         {/* Title block — the headline */}
-        <div className="relative mt-[1rem] sm:mt-[1.5rem]">
+        <div className="relative">
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <ProbabilityMotif />
             <ResonanceMotif />
           </div>
 
           <div className="relative flex flex-col items-center text-center gap-[0.6rem] sm:gap-[1rem]">
-            {/* Two-line [HEX6-BLE] title at the original headline scale */}
-            <div className="flex items-baseline justify-center gap-4">
-              <motion.h2
-                className="text-[3.75rem] sm:text-[5rem] md:text-[7rem] lg:text-[10.5rem] xl:text-[11rem] leading-[0.9] font-bold tracking-tight text-foreground"
-                style={{ textShadow: '0 0 14px rgba(255,255,255,0.3), 0 2px 18px rgba(0,0,0,0.45)' }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.1 }}
-              >
-                [<span className="text-accent">HEX6</span>
-              </motion.h2>
-            </div>
-
-            <div className="flex items-baseline justify-center gap-4">
-              <motion.h2
-                className="text-[3.75rem] sm:text-[5rem] md:text-[7rem] lg:text-[10.5rem] xl:text-[11rem] leading-[0.9] font-bold tracking-tight text-foreground"
-                style={{ textShadow: '0 0 14px rgba(255,255,255,0.3), 0 2px 18px rgba(0,0,0,0.45)' }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.18 }}
-              >
-                -BLE]
-              </motion.h2>
-            </div>
+            {/* Single-line wordmark scales fluidly from phone to desktop. */}
+            <motion.h2
+              className="w-full whitespace-nowrap text-center text-[clamp(2.65rem,14vw,10rem)] leading-[0.9] font-bold tracking-[-0.055em] text-foreground"
+              style={{ textShadow: '0 0 14px rgba(255,255,255,0.3), 0 2px 18px rgba(0,0,0,0.45)' }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.1 }}
+            >
+              [<span className="text-accent">HEX6</span>-BLE]
+            </motion.h2>
           </div>
 
           {/* Hero line — the reframe */}
           <motion.div
-            className="relative mt-[2.19rem] sm:mt-[3.31rem] flex flex-col items-center text-center gap-[0.5rem] sm:gap-[0.85rem]"
+            className="relative mt-7 sm:mt-10 flex flex-col items-center text-center gap-2 sm:gap-3"
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.26 }}
