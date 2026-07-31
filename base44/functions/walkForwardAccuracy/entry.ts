@@ -5,8 +5,9 @@
 // For each out-of-sample step it trains on the expanding prefix, runs the full
 // Reason + Wave + Validation layers, records predicted probability / value /
 // direction, then compares to the realized next return.
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.41';
 import { runReasonLayer, runWaveLayer, runValidationLayer } from '../../shared/thinkingEngine.ts';
+import { fetchYahooReturns } from '../../shared/marketDataClient.ts';
 
 function pearson(a, b) {
   const n = Math.min(a.length, b.length);
@@ -20,32 +21,20 @@ function pearson(a, b) {
 const mean = (a) => a.length ? a.reduce((s, x) => s + x, 0) / a.length : 0;
 const r2 = (x, d = 4) => x === null || x === undefined ? null : Number(x.toFixed(d));
 
-Deno.serve(async (req) => {
+export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
-    let { series, as_returns, ticker, trainRatio = 0.8, riskAversion = 2.5 } = body;
+    let { series, as_returns, ticker, trainRatio = 0.8, riskAversion = 2.5, reasonOnly = false } = body;
 
-    // Fetch a real series if only a ticker was supplied.
+    // Fetch real daily returns directly; no LLM retrieval or integration credits.
     if ((!series || series.length < 30) && ticker) {
-      const fr = await base44.integrations.Core.InvokeLLM({
-        prompt: `Pull the last 2 years of daily closing prices for ${ticker} (about 500 data points) from an authoritative source (Yahoo Finance, CoinGecko, etc.). Return JSON with "series" (array of raw daily prices, oldest first, as many as you can retrieve up to 500, minimum 200), "as_returns" (false), and "source_summary".`,
-        model: 'gemini_3_flash',
-        add_context_from_internet: true,
-        response_json_schema: {
-          type: 'object',
-          properties: {
-            series: { type: 'array', items: { type: 'number' } },
-            as_returns: { type: 'boolean' },
-            source_summary: { type: 'string' },
-          },
-          required: ['series'],
-        },
-      }).catch(() => null);
-      if (fr?.series && fr.series.length >= 30) { series = fr.series; as_returns = (fr.as_returns === true); }
+      const market = await fetchYahooReturns(ticker, 730);
+      series = market.returns;
+      as_returns = true;
     }
 
     if (!series || series.length < 30) {
@@ -69,10 +58,14 @@ Deno.serve(async (req) => {
     for (let i = 0; i < test.length; i++) {
       const window = returns.slice(0, split + i);
       const reason = runReasonLayer(window, riskAversion);
-      const wave = runWaveLayer(window);
-      const validation = runValidationLayer(reason, wave);
       const predictedDir = reason.mu > 0 ? 1 : reason.mu < 0 ? -1 : 0;
       const actualDir = test[i] > 0 ? 1 : test[i] < 0 ? -1 : 0;
+      if (reasonOnly) {
+        preds.push({ predictedDir, actualDir, realized: test[i] });
+        continue;
+      }
+      const wave = runWaveLayer(window);
+      const validation = runValidationLayer(reason, wave);
       preds.push({
         probability: validation.probability,
         value: validation.support,
@@ -83,6 +76,23 @@ Deno.serve(async (req) => {
 
     const valid = preds.filter(p => p.predictedDir !== 0 && p.actualDir !== 0);
     const directionalAccuracy = valid.length ? valid.filter(p => p.predictedDir === p.actualDir).length / valid.length : null;
+
+    if (reasonOnly) {
+      const eligible = preds.filter(p => p.actualDir !== 0);
+      return Response.json({
+        ticker: ticker || 'SUPPLIED',
+        mode: 'HEX6_BLE_REASON_ONLY',
+        piUsUsed: false,
+        seriesLength: returns.length,
+        trainSize: split,
+        testSize: test.length,
+        predictionsEvaluated: valid.length,
+        abstentions: eligible.length - valid.length,
+        coverage: r2(eligible.length ? valid.length / eligible.length : 0),
+        directionalAccuracy: r2(directionalAccuracy),
+        timestamp: new Date().toISOString(),
+      });
+    }
 
     const probs = preds.map(p => p.probability);
     const vals = preds.map(p => p.value);
@@ -129,4 +139,4 @@ Deno.serve(async (req) => {
   } catch (e) {
     return Response.json({ error: e.message }, { status: 500 });
   }
-});
+}
