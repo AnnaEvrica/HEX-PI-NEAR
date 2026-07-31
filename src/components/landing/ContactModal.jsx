@@ -25,7 +25,7 @@ export default function ContactModal({ onClose }) {
       <div className="bg-card border border-border rounded-lg max-w-lg w-full max-h-[85vh] flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
           <h2 className="text-lg font-bold flex items-center gap-2">
-            <Mail className="w-5 h-5 text-accent" /> General Inquiry
+            <Mail className="w-5 h-5 text-foreground" /> General Inquiry
           </h2>
           <button onClick={onClose} className="p-1 hover:bg-muted rounded transition-colors" style={{ minWidth: 'auto', minHeight: 'auto' }}>
             <X className="w-5 h-5" />
@@ -40,7 +40,7 @@ export default function ContactModal({ onClose }) {
           <input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Subject" className="w-full px-3 py-2 rounded-sm border border-border bg-background text-sm" />
           <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Message" rows={4} className="w-full px-3 py-2 rounded-sm border border-border bg-background text-sm resize-none" />
           <div className="flex justify-end">
-            <button type="submit" className="px-4 py-2 rounded-sm bg-accent text-accent-foreground font-medium text-sm hover:bg-accent/90 transition-colors" style={{ minWidth: 'auto', minHeight: 'auto' }}>
+            <button type="submit" className="px-4 py-2 rounded-sm bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors" style={{ minWidth: 'auto', minHeight: 'auto' }}>
               Send Inquiry
             </button>
           </div>

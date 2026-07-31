@@ -52,7 +52,7 @@ export default function WaveSignal3D() {
     gridGeo.setIndex(indices);
     const grid = new THREE.LineSegments(
       gridGeo,
-      new THREE.LineBasicMaterial({ color: 0xFF6B35, transparent: true, opacity: 0.5 })
+      new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.32 })
     );
     scene.add(grid);
     const posAttr = gridGeo.attributes.position;
@@ -65,7 +65,7 @@ export default function WaveSignal3D() {
     const sphereMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
     const ringGeo = new THREE.RingGeometry(0.6, 0.78, 32);
     const ringMat = new THREE.MeshBasicMaterial({
-      color: 0xFF6B35, transparent: true, opacity: 0.55, side: THREE.DoubleSide,
+      color: 0xffffff, transparent: true, opacity: 0.4, side: THREE.DoubleSide,
     });
     const signals = signalCoords.map(([x, z]) => {
       const mesh = new THREE.Mesh(sphereGeo, sphereMat);
@@ -137,7 +137,7 @@ export default function WaveSignal3D() {
         {[0, 1, 2, 3].map((i) => (
           <motion.circle
             key={i}
-            cx="200" cy="100" fill="none" stroke="#FF6B35" strokeWidth="1.2"
+            cx="200" cy="100" fill="none" stroke="#ffffff" strokeWidth="1.2"
             initial={{ r: 4, opacity: 0.5 }}
             animate={{ r: [4, 120], opacity: [0.5, 0] }}
             transition={{ duration: 3.2, repeat: Infinity, delay: i * 0.8, ease: 'easeOut' }}

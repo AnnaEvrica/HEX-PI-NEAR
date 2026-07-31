@@ -50,7 +50,7 @@ export default function SearchOverlay({ onClose }) {
     <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center p-4 pt-20" onClick={onClose}>
       <div className="bg-card border border-border rounded-lg max-w-xl w-full flex flex-col" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
-          <Search className="w-5 h-5 text-accent" />
+          <Search className="w-5 h-5 text-foreground" />
           <input
             autoFocus
             value={q}
@@ -71,7 +71,7 @@ export default function SearchOverlay({ onClose }) {
             <button
               key={item.target}
               onClick={() => go(item.target)}
-              className="w-full text-left px-4 py-3 hover:bg-muted transition-colors border-b border-border/50 last:border-0"
+              className="w-full text-center px-4 py-3 hover:bg-muted transition-colors border-b border-border/50 last:border-0"
               style={{ minWidth: 'auto', minHeight: 'auto' }}
             >
               <p className="text-sm font-medium">{item.title}</p>

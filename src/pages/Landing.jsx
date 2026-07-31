@@ -20,9 +20,9 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-5 pb-3 sm:py-4 flex items-center justify-between">
           <a href="https://evrica.tech" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 sm:gap-3">
             <img src="https://media.base44.com/images/public/69eef3d514386627566a9bf6/a8d57d01f_evrica-logo.png" alt="Evrica" className="h-7 sm:h-8 w-7 sm:w-8 object-contain rounded-sm" />
-            <div className="flex flex-col items-start gap-[0.25rem] sm:gap-[0.4rem] leading-tight">
-              <span className="text-[0.58rem] sm:text-[0.62rem] text-[#0a1929]/60 font-normal tracking-[0.04em] sm:tracking-[0.16em] sm:uppercase">Developed by</span>
-              <span className="text-[0.62rem] sm:text-[0.7rem] text-[#0a1929] font-medium tracking-[0.04em] sm:tracking-[0.16em] sm:uppercase">Evrica Technologies Inc.</span>
+            <div className="flex flex-col items-center text-center gap-[0.25rem] sm:gap-[0.4rem] leading-tight">
+              <span className="text-[0.58rem] sm:text-[0.62rem] text-foreground/60 font-normal tracking-[0.04em] sm:tracking-[0.16em] sm:uppercase">Developed by</span>
+              <span className="text-[0.62rem] sm:text-[0.7rem] text-foreground font-medium tracking-[0.04em] sm:tracking-[0.16em] sm:uppercase">Evrica Technologies Inc.</span>
             </div>
           </a>
           <div className="flex items-center gap-2 sm:gap-3">
@@ -51,8 +51,8 @@ export default function Landing() {
 
       {/* Footer */}
       <footer className="border-t border-border py-8 sm:py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col gap-4 sm:gap-6">
-          <div className="flex gap-6 sm:gap-8 flex-wrap justify-start text-xs text-secondary">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col items-center text-center gap-4 sm:gap-6">
+          <div className="flex gap-6 sm:gap-8 flex-wrap justify-center text-center text-xs text-secondary">
             <button onClick={() => setOpenPolicy('terms')} className="hover:text-foreground transition-colors">
               Terms of Service
             </button>
