@@ -117,7 +117,7 @@ export default function HeroSection({ onAsteriskHover }) {
           </div>
 
           <div className="relative flex flex-col gap-[0.6rem] sm:gap-[1rem]">
-            {/* Row 1 — "The" · [HEX6-BLE] (same font/size, soft white glow) */}
+            {/* Two-line [HEX6-BLE] title at the original headline scale */}
             <div className="flex items-baseline justify-between gap-4">
               <motion.h2
                 className="text-[3.75rem] sm:text-[5rem] md:text-[7rem] lg:text-[10.5rem] xl:text-[11rem] leading-[0.9] font-bold tracking-tight text-foreground"
@@ -126,11 +126,10 @@ export default function HeroSection({ onAsteriskHover }) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.1 }}
               >
-                The
+                [<span className="text-accent">HEX6</span>
               </motion.h2>
             </div>
 
-            {/* Row 2 — "Model*" · [BLE: Binaureal Linguistic Engine] (balanced) */}
             <div className="flex items-baseline justify-between gap-4">
               <motion.h2
                 className="text-[3.75rem] sm:text-[5rem] md:text-[7rem] lg:text-[10.5rem] xl:text-[11rem] leading-[0.9] font-bold tracking-tight text-foreground"
@@ -139,15 +138,7 @@ export default function HeroSection({ onAsteriskHover }) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.18 }}
               >
-                Signal
-                <span
-                  onMouseEnter={() => onAsteriskHover?.(true)}
-                  onMouseLeave={() => onAsteriskHover?.(false)}
-                  className="ml-1 text-accent align-super cursor-pointer transition-transform duration-200 hover:scale-125"
-                  style={{ fontSize: '0.38em' }}
-                >
-                  *
-                </span>
+                -BLE]
               </motion.h2>
             </div>
           </div>
@@ -176,19 +167,13 @@ export default function HeroSection({ onAsteriskHover }) {
           </div>
 
           <div className="relative mt-[3.5rem] sm:mt-[5rem] flex flex-col items-center">
-            {/* Descriptor lines — [HEX6-BLE] / [BLE: Binaureal Linguistic Engine] */}
+            {/* Descriptor line — [BLE: Binaureal Linguistic Engine] */}
             <motion.div
               className="flex flex-col items-center gap-[0.5rem] sm:gap-[0.85rem]"
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7 }}
             >
-              <span
-                className="font-bold tracking-tight text-[1.25rem] sm:text-[1.67rem] md:text-[2.33rem] lg:text-[3.5rem] xl:text-[3.67rem] leading-[0.9] whitespace-nowrap"
-                style={{ textShadow: '0 0 24px rgba(255,255,255,0.55), 0 1px 0 rgba(255,255,255,0.25), 0 2px 14px rgba(0,0,0,0.65)' }}
-              >
-                <span className="text-white/75">[</span><span className="text-accent">HEX6</span><span className="text-white/75">-BLE]</span>
-              </span>
               <span
                 className="font-semibold tracking-tight text-[0.625rem] sm:text-[0.83rem] md:text-[1.17rem] lg:text-[1.75rem] xl:text-[1.83rem] leading-tight whitespace-normal sm:whitespace-nowrap text-center"
                 style={{ textShadow: '0 0 16px rgba(255,255,255,0.4), 0 1px 0 rgba(255,255,255,0.2), 0 2px 10px rgba(0,0,0,0.6)' }}
