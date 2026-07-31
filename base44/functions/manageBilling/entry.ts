@@ -1,7 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 import Stripe from 'npm:stripe@17.3.0';
 
-Deno.serve(async (req) => {
+export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
     const origin = body?.origin || new URL(req.url).origin;
     const session = await stripe.billingPortal.sessions.create({
       customer: sub.stripe_customer_id,
-      return_url: `${origin}/`,
+      return_url: `${origin}/app?billing=return`,
       configuration: configId,
     });
 
@@ -53,4 +53,4 @@ Deno.serve(async (req) => {
       : error.message;
     return Response.json({ error: msg }, { status: 200 });
   }
-});
+}

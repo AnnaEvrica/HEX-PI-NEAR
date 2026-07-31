@@ -1,9 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 import Stripe from 'npm:stripe@17.3.0';
+import { findStripeCustomerSubscription, isAccessAllowed, isTransitionalStatus, pickBestSubscription, subscriptionAction } from '../../shared/subscriptionState.ts';
 
-const PRIORITY = ['active', 'trialing', 'past_due', 'unpaid', 'incomplete', 'canceled'];
 const STALE_MS = 60 * 60 * 1000; // 1h — trust the webhook-maintained DB record within this window
-const TRANSITIONAL = new Set(['past_due', 'unpaid', 'incomplete']);
 
 // Best-effort pricing for the paywall; null on any failure (never blocks the response).
 async function fetchPricing(secretKey, priceId) {
@@ -18,7 +17,7 @@ async function fetchPricing(secretKey, priceId) {
   return null;
 }
 
-Deno.serve(async (req) => {
+export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
@@ -34,13 +33,12 @@ Deno.serve(async (req) => {
 
     // --- Existing record: at most ONE Stripe call, usually zero. ---
     if (subs && subs.length > 0) {
-      subs.sort((a, b) => PRIORITY.indexOf(a.status) - PRIORITY.indexOf(b.status));
-      let s = subs[0];
+      let s = pickBestSubscription(subs);
 
       // Only hit Stripe when the record is stale or in a transitional state that
       // can shift without a clean webhook event. Active/trialing + fresh → trust DB.
       const fresh = s.updated_date && (Date.now() - new Date(s.updated_date).getTime() < STALE_MS);
-      const needsSync = secretKey && s.stripe_subscription_id && (!fresh || TRANSITIONAL.has(s.status));
+      const needsSync = secretKey && s.stripe_subscription_id && (!fresh || isTransitionalStatus(s.status));
       if (needsSync) {
         try {
           const stripe = new Stripe(secretKey);
@@ -56,14 +54,16 @@ Deno.serve(async (req) => {
       }
 
       // Active/trialing users never see the paywall → skip pricing entirely (zero extra calls).
-      const isActiveLike = s.status === 'active' || s.status === 'trialing';
+      const accessAllowed = isAccessAllowed(s.status);
       return Response.json({
         has_subscription: true,
         status: s.status,
+        action: subscriptionAction(s.status),
+        access_allowed: accessAllowed,
         trial_end: s.trial_end,
         current_period_end: s.current_period_end,
         cancel_at_period_end: s.cancel_at_period_end,
-        pricing: isActiveLike ? null : await fetchPricing(secretKey, priceId),
+        pricing: accessAllowed ? null : await fetchPricing(secretKey, priceId),
       });
     }
 
@@ -73,12 +73,8 @@ Deno.serve(async (req) => {
     if (secretKey) {
       try {
         const stripe = new Stripe(secretKey);
-        const customers = await stripe.customers.list({ email: user.email, limit: 1, expand: ['data.subscriptions'] });
-        if (customers.data.length > 0) {
-          const customer = customers.data[0];
-          const liveSubs = (customer.subscriptions?.data || []).filter((x) => x.status && x.status !== 'canceled');
-          if (liveSubs.length > 0) {
-            const ss = liveSubs[0];
+        const { customer, subscription: ss } = await findStripeCustomerSubscription(stripe, user.email);
+        if (customer && ss) {
             const trialEnd = ss.trial_end ? new Date(ss.trial_end * 1000).toISOString() : null;
             const periodEnd = ss.current_period_end ? new Date(ss.current_period_end * 1000).toISOString() : null;
             try {
@@ -92,16 +88,16 @@ Deno.serve(async (req) => {
                 cancel_at_period_end: ss.cancel_at_period_end || false,
               });
             } catch (_e) { /* duplicate/race — live status still returned */ }
-            return Response.json({ has_subscription: true, status: ss.status, trial_end: trialEnd, current_period_end: periodEnd, cancel_at_period_end: ss.cancel_at_period_end || false, pricing: null });
-          }
+            const accessAllowed = isAccessAllowed(ss.status);
+            return Response.json({ has_subscription: true, status: ss.status, action: subscriptionAction(ss.status), access_allowed: accessAllowed, trial_end: trialEnd, current_period_end: periodEnd, cancel_at_period_end: ss.cancel_at_period_end || false, pricing: accessAllowed ? null : await fetchPricing(secretKey, priceId) });
         }
       } catch (_e) { /* Stripe unreachable — fall through to paywall */ }
     }
 
     // True new user → paywall. Pricing is the single call here.
-    return Response.json({ has_subscription: false, pricing: await fetchPricing(secretKey, priceId) });
+    return Response.json({ has_subscription: false, status: null, action: 'checkout', access_allowed: false, pricing: await fetchPricing(secretKey, priceId) });
   } catch (error) {
     // 200 + error payload so the SubscriptionGate can surface the real cause.
     return Response.json({ error: error.message }, { status: 200 });
   }
-});
+}

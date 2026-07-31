@@ -21,15 +21,18 @@ export default function SubscriptionGate({ children }) {
     (async () => {
       try {
         const urlParams = new URLSearchParams(window.location.search);
-        const justCheckedOut = urlParams.get('checkout') === 'success';
-        if (urlParams.get('checkout')) window.history.replaceState({}, '', '/app');
+        const checkoutResult = urlParams.get('checkout');
+        const billingReturn = urlParams.get('billing') === 'return';
+        const justCheckedOut = checkoutResult === 'success';
+        if (checkoutResult === 'cancel') sessionStorage.removeItem('hex6_checkout_pending');
+        if (checkoutResult || billingReturn) window.history.replaceState({}, '', '/app');
 
         // If a checkout was initiated in this session, the user may reload BEFORE Stripe
         // redirects back (slow connection / drop). Without this guard the paywall re-shows
         // and a second "Start Free Trial" click would mint a second checkout → double charge.
         const pendingTs = sessionStorage.getItem('hex6_checkout_pending');
-        const pendingRecent = pendingTs && (Date.now() - Number(pendingTs) < 10 * 60 * 1000);
-        const pollForActive = justCheckedOut || pendingRecent;
+        const pendingRecent = checkoutResult !== 'cancel' && pendingTs && (Date.now() - Number(pendingTs) < 10 * 60 * 1000);
+        const pollForActive = justCheckedOut || billingReturn || pendingRecent;
 
         let data = await fetchStatus();
         // Webhook may lag the redirect by a second or two — retry briefly on success return.
@@ -73,6 +76,11 @@ export default function SubscriptionGate({ children }) {
         // polls for the active sub instead of re-offering the trial button.
         sessionStorage.setItem('hex6_checkout_pending', Date.now().toString());
         window.location.href = res.data.url;
+        return;
+      }
+      if (res.data?.requires_billing_update) {
+        setSub((current) => ({ ...current, status: res.data.status, action: 'billing', access_allowed: false }));
+        setError('Your subscription needs a billing update before access can resume.');
         return;
       }
       if (res.data?.already_subscribed) {
@@ -124,8 +132,11 @@ export default function SubscriptionGate({ children }) {
     );
   }
 
-  const isActive = sub && (sub.status === 'trialing' || sub.status === 'active');
+  const isActive = sub && (sub.access_allowed === true || sub.status === 'trialing' || sub.status === 'active');
   if (isActive) return children;
+
+  const needsBilling = sub?.action === 'billing' || ['past_due', 'unpaid', 'paused', 'incomplete'].includes(sub?.status);
+  const isRestart = ['canceled', 'incomplete_expired'].includes(sub?.status);
 
   const pricing = sub?.pricing || null;
   const priceLabel = pricing
@@ -184,7 +195,7 @@ export default function SubscriptionGate({ children }) {
         )}
 
         <button
-          onClick={handleStartTrial}
+          onClick={needsBilling ? handleManageBilling : handleStartTrial}
           disabled={actionLoading}
           className="w-full px-6 py-3 rounded-sm bg-accent text-accent-foreground font-medium hover:bg-accent/90 transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
         >
@@ -192,12 +203,12 @@ export default function SubscriptionGate({ children }) {
             <Loader2 className="w-4 h-4 animate-spin" />
           ) : (
             <>
-              Start Free Trial <ArrowRight className="w-4 h-4" />
+              {needsBilling ? 'Update Billing' : isRestart ? 'Restart Subscription' : 'Start Free Trial'} <ArrowRight className="w-4 h-4" />
             </>
           )}
         </button>
 
-        {sub && (sub.status === 'canceled' || sub.status === 'past_due' || sub.status === 'unpaid') && (
+        {sub?.status === 'canceled' && (
           <button
             onClick={handleManageBilling}
             disabled={actionLoading}
