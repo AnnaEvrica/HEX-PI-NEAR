@@ -142,12 +142,12 @@ export default function HeroSection({ onAsteriskHover }) {
             >
               clarity only <span className="text-foreground">truth</span> can provide.
             </h3>
-            <p className="text-foreground/65 text-[0.8rem] sm:text-[1rem] md:text-[1.25rem] font-light leading-snug max-w-2xl text-center">
+            <p className="text-foreground/85 text-[0.8rem] sm:text-[1rem] md:text-[1.25rem] font-light leading-snug max-w-2xl text-center">
               Probabilities translated into an unblinking lens for decisions that must survive daylight.
             </p>
           </motion.div>
 
-          <div className="relative mt-[1.75rem] sm:mt-[2.5rem] flex flex-col items-center justify-center gap-2 text-center text-foreground/80 text-[0.84rem] sm:text-[1.56rem] md:text-[2.1rem] font-light tracking-[0.05em]">
+          <div className="relative mt-[1.75rem] sm:mt-[2.5rem] flex flex-col items-center justify-center gap-2 text-center text-foreground text-[0.84rem] sm:text-[1.56rem] md:text-[2.1rem] font-light tracking-[0.05em]">
             <span className="whitespace-nowrap">Probabilistic Intelligence</span>
             <span className="font-bold text-foreground whitespace-nowrap">[PI]</span>
           </div>
@@ -162,13 +162,13 @@ export default function HeroSection({ onAsteriskHover }) {
             >
               <span
                 className="font-semibold tracking-tight text-[0.625rem] sm:text-[0.83rem] md:text-[1.17rem] lg:text-[1.75rem] xl:text-[1.83rem] leading-tight whitespace-normal sm:whitespace-nowrap text-center"
-                style={{ textShadow: '0 0 16px rgba(255,255,255,0.4), 0 1px 0 rgba(255,255,255,0.2), 0 2px 10px rgba(0,0,0,0.6)' }}
+                style={{ textShadow: '0 1px 2px rgba(255,255,255,0.35), 0 2px 8px rgba(0,0,0,0.2)' }}
               >
-                <span className="text-white/60">[</span><span className="text-white">BLE</span><span className="text-white/60">: Binaureal Linguistic Engine]</span>
+                <span className="text-foreground/70">[</span><span className="text-foreground">BLE</span><span className="text-foreground/70">: Binaureal Linguistic Engine]</span>
               </span>
-              <p className="relative mt-4 max-w-2xl text-center text-white/90 text-xs sm:text-sm md:text-base font-light leading-relaxed px-6 py-3 rounded-full">
-                <span className="absolute inset-0 -z-10 rounded-full bg-white/8 blur-2xl" aria-hidden="true" />
-                <span className="absolute inset-0 -z-10 rounded-full bg-white/5" aria-hidden="true" />
+              <p className="relative mt-4 max-w-2xl text-center text-foreground/85 text-xs sm:text-sm md:text-base font-normal leading-relaxed px-6 py-3 rounded-full">
+                <span className="absolute inset-0 -z-10 rounded-full bg-black/5 blur-2xl" aria-hidden="true" />
+                <span className="absolute inset-0 -z-10 rounded-full bg-white/15" aria-hidden="true" />
                 The Signal (HEX6-BLE PI-US v5.5) is an experimental probabilistic intelligence layer that sits on top of existing LLMs, replacing purely token-probability-driven inference with external semantic state estimation and probabilistic decision optimization to produce more reliable reasoning without retraining foundation models. <span className="text-foreground font-medium">Live in beta testing.</span>
               </p>
             </motion.div>
@@ -183,19 +183,19 @@ export default function HeroSection({ onAsteriskHover }) {
               <div className="space-y-4 sm:space-y-5">
                 <div className="flex flex-col items-center justify-center gap-1 sm:gap-2 text-center">
                   <span className="text-foreground font-bold text-sm sm:text-base md:text-lg tracking-tight">Statistical Analysis</span>
-                  <span className="text-foreground/70 text-sm sm:text-base md:text-lg font-light leading-snug">Learning probability through "prediction" — testable, falsifiable, and grounded in real outcome distributions.</span>
+                  <span className="text-foreground/85 text-sm sm:text-base md:text-lg font-normal leading-snug">Learning probability through "prediction" — testable, falsifiable, and grounded in real outcome distributions.</span>
                 </div>
                 <div className="flex flex-col items-center justify-center gap-1 sm:gap-2 text-center">
                   <span className="text-foreground font-bold text-sm sm:text-base md:text-lg tracking-tight">Deepened Comprehension</span>
-                  <span className="text-foreground/70 text-sm sm:text-base md:text-lg font-light leading-snug">Reading the signals behind the moment and surfacing the contextual value others miss.</span>
+                  <span className="text-foreground/85 text-sm sm:text-base md:text-lg font-normal leading-snug">Reading the signals behind the moment and surfacing the contextual value others miss.</span>
                 </div>
                 <div className="flex flex-col items-center justify-center gap-1 sm:gap-2 text-center">
                   <span className="text-foreground font-bold text-sm sm:text-base md:text-lg tracking-tight">Greater Objectivism</span>
-                  <span className="text-foreground/70 text-sm sm:text-base md:text-lg font-light leading-snug">Stripping distortion from interpretation — letting structure lead, not narrative.</span>
+                  <span className="text-foreground/85 text-sm sm:text-base md:text-lg font-normal leading-snug">Stripping distortion from interpretation — letting structure lead, not narrative.</span>
                 </div>
                 <div className="flex flex-col items-center justify-center gap-1 sm:gap-2 text-center">
                   <span className="text-foreground font-bold text-sm sm:text-base md:text-lg tracking-tight">Accuracy &amp; Value</span>
-                  <span className="text-foreground/70 text-sm sm:text-base md:text-lg font-light leading-snug">Sharper answers — more precise, more useful, and more honest about where the weight actually sits.</span>
+                  <span className="text-foreground/85 text-sm sm:text-base md:text-lg font-normal leading-snug">Sharper answers — more precise, more useful, and more honest about where the weight actually sits.</span>
                 </div>
               </div>
             </div>
