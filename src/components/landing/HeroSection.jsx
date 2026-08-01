@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
-import WaveSignal3D from '@/components/landing/WaveSignal3D';
+
 
 const POOL = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ∑∫π∞≈±∇√∂λμ';
 
@@ -129,76 +129,26 @@ export default function HeroSection({ onAsteriskHover }) {
             </motion.h2>
           </div>
 
-          {/* Hero line — the reframe */}
-          <motion.div
-            className="relative mt-12 sm:mt-16 lg:mt-20 flex flex-col items-center text-center gap-5 sm:gap-6"
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.26 }}
-          >
-            <h3
-              className="font-bold tracking-tight text-[1.35rem] sm:text-[2rem] md:text-[2.75rem] lg:text-[3.75rem] xl:text-[4rem] leading-[0.95] text-foreground"
-              style={{ textShadow: '0 0 18px rgba(255,255,255,0.4), 0 1px 0 rgba(255,255,255,0.2), 0 2px 12px rgba(0,0,0,0.6)' }}
-            >
-              clarity only <span className="text-foreground">truth</span> can provide.
-            </h3>
-            <p className="text-foreground/85 text-[0.8rem] sm:text-[1rem] md:text-[1.25rem] font-light leading-relaxed max-w-2xl text-center">
-              Probabilities translated into an unblinking lens for decisions that must survive daylight.
-            </p>
-          </motion.div>
-
-          <div className="relative mt-12 sm:mt-16 lg:mt-20 flex flex-col items-center justify-center gap-4 sm:gap-5 text-center text-foreground text-[0.84rem] sm:text-[1.56rem] md:text-[2.1rem] font-light tracking-[0.05em]">
-            <span className="whitespace-nowrap">Probabilistic Intelligence</span>
-            <span className="font-bold text-foreground whitespace-nowrap">[PI]</span>
-          </div>
-
-          <div className="relative mt-20 sm:mt-28 lg:mt-32 flex flex-col items-center">
-            {/* Descriptor line — [BLE: Binaureal Linguistic Engine] */}
+          <div className="relative mt-16 sm:mt-24 flex flex-col items-center text-center">
             <motion.div
-              className="flex flex-col items-center gap-4 sm:gap-6"
+              className="flex flex-col items-center gap-5 sm:gap-6"
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7 }}
+              transition={{ duration: 0.7, delay: 0.2 }}
             >
               <span
-                className="font-semibold tracking-tight text-[0.625rem] sm:text-[0.83rem] md:text-[1.17rem] lg:text-[1.75rem] xl:text-[1.83rem] leading-tight whitespace-normal sm:whitespace-nowrap text-center"
+                className="font-semibold tracking-tight text-[0.8rem] sm:text-[1rem] md:text-[1.35rem] leading-tight text-center"
                 style={{ textShadow: '0 1px 2px rgba(255,255,255,0.35), 0 2px 8px rgba(0,0,0,0.2)' }}
               >
                 <span className="text-foreground/70">[</span><span className="text-foreground">BLE</span><span className="text-foreground/70">: Binaureal Linguistic Engine]</span>
               </span>
-              <p className="relative mt-8 sm:mt-10 max-w-2xl text-center text-foreground/85 text-xs sm:text-sm md:text-base font-normal leading-[1.8] px-6 py-4 rounded-full">
-                <span className="absolute inset-0 -z-10 rounded-full bg-black/5 blur-2xl" aria-hidden="true" />
-                <span className="absolute inset-0 -z-10 rounded-full bg-white/15" aria-hidden="true" />
-                The Signal (HEX6-BLE PI-US v5.5) is an experimental probabilistic intelligence layer that sits on top of existing LLMs, replacing purely token-probability-driven inference with external semantic state estimation and probabilistic decision optimization to produce more reliable reasoning without retraining foundation models. <span className="text-foreground font-medium">Live in beta testing.</span>
+              <p className="text-foreground text-base sm:text-xl md:text-2xl font-semibold leading-relaxed">
+                Experimental LLM in beta testing
+              </p>
+              <p className="text-foreground/85 text-sm sm:text-lg md:text-xl font-normal leading-relaxed">
+                Never validating. Focuses on finding truth.
               </p>
             </motion.div>
-
-            {/* 3D radial wave field with identified signal points — circular ripple overlay on top. */}
-            <div className="relative mt-16 sm:mt-20 lg:mt-24 w-full">
-              <WaveSignal3D />
-            </div>
-
-            {/* Evidence — why it's different */}
-            <div className="relative mt-16 sm:mt-20 lg:mt-24 w-full max-w-3xl mx-auto px-2">
-              <div className="space-y-10 sm:space-y-14 lg:space-y-16">
-                <div className="flex flex-col items-center justify-center gap-2 sm:gap-3 text-center">
-                  <span className="text-foreground font-bold text-sm sm:text-base md:text-lg tracking-tight">Statistical Analysis</span>
-                  <span className="text-foreground/85 text-sm sm:text-base md:text-lg font-normal leading-relaxed">Learning probability through "prediction" — testable, falsifiable, and grounded in real outcome distributions.</span>
-                </div>
-                <div className="flex flex-col items-center justify-center gap-2 sm:gap-3 text-center">
-                  <span className="text-foreground font-bold text-sm sm:text-base md:text-lg tracking-tight">Deepened Comprehension</span>
-                  <span className="text-foreground/85 text-sm sm:text-base md:text-lg font-normal leading-relaxed">Reading the signals behind the moment and surfacing the contextual value others miss.</span>
-                </div>
-                <div className="flex flex-col items-center justify-center gap-2 sm:gap-3 text-center">
-                  <span className="text-foreground font-bold text-sm sm:text-base md:text-lg tracking-tight">Greater Objectivism</span>
-                  <span className="text-foreground/85 text-sm sm:text-base md:text-lg font-normal leading-relaxed">Stripping distortion from interpretation — letting structure lead, not narrative.</span>
-                </div>
-                <div className="flex flex-col items-center justify-center gap-2 sm:gap-3 text-center">
-                  <span className="text-foreground font-bold text-sm sm:text-base md:text-lg tracking-tight">Accuracy &amp; Value</span>
-                  <span className="text-foreground/85 text-sm sm:text-base md:text-lg font-normal leading-relaxed">Sharper answers — more precise, more useful, and more honest about where the weight actually sits.</span>
-                </div>
-              </div>
-            </div>
 
             {/* The legal block — a boundary, not an apology. */}
             <div className="relative mt-16 sm:mt-20 lg:mt-24 w-full rounded-md bg-white px-5 py-5 sm:py-6">
