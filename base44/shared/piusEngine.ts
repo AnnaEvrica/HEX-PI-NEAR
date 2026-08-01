@@ -130,7 +130,8 @@ export function calibrate(hex6Output: Hex6Output, resonance?: ResonanceSignature
   return { register, well_supported: wellSupported, directive };
 }
 
-// Convenience: calibrate tone across multiple HEX6-BLE outputs at once.
-export function calibrateBatch(hex6Outputs: Hex6Output[], resonance?: ResonanceSignature | null): PiUsResult[] {
-  return hex6Outputs.map((o) => calibrate(o, resonance));
+// Convenience: calibrate tone across multiple HEX6-BLE outputs at once,
+// returning one directive per input in the same order.
+export function calibrateBatch(hex6Outputs: Hex6Output[]): PiUsResult[] {
+  return hex6Outputs.map((o) => calibrate(o));
 }
