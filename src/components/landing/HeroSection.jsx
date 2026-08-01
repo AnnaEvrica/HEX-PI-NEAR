@@ -131,7 +131,7 @@ export default function HeroSection({ onAsteriskHover }) {
 
           {/* Hero line — the reframe */}
           <motion.div
-            className="relative mt-7 sm:mt-10 flex flex-col items-center text-center gap-2 sm:gap-3"
+            className="relative mt-10 sm:mt-14 flex flex-col items-center text-center gap-4 sm:gap-5"
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.26 }}
@@ -142,20 +142,20 @@ export default function HeroSection({ onAsteriskHover }) {
             >
               clarity only <span className="text-foreground">truth</span> can provide.
             </h3>
-            <p className="text-foreground/85 text-[0.8rem] sm:text-[1rem] md:text-[1.25rem] font-light leading-snug max-w-2xl text-center">
+            <p className="text-foreground/85 text-[0.8rem] sm:text-[1rem] md:text-[1.25rem] font-light leading-relaxed max-w-2xl text-center">
               Probabilities translated into an unblinking lens for decisions that must survive daylight.
             </p>
           </motion.div>
 
-          <div className="relative mt-[1.75rem] sm:mt-[2.5rem] flex flex-col items-center justify-center gap-2 text-center text-foreground text-[0.84rem] sm:text-[1.56rem] md:text-[2.1rem] font-light tracking-[0.05em]">
+          <div className="relative mt-10 sm:mt-14 flex flex-col items-center justify-center gap-3 sm:gap-4 text-center text-foreground text-[0.84rem] sm:text-[1.56rem] md:text-[2.1rem] font-light tracking-[0.05em]">
             <span className="whitespace-nowrap">Probabilistic Intelligence</span>
             <span className="font-bold text-foreground whitespace-nowrap">[PI]</span>
           </div>
 
-          <div className="relative mt-[3.5rem] sm:mt-[5rem] flex flex-col items-center">
+          <div className="relative mt-16 sm:mt-24 flex flex-col items-center">
             {/* Descriptor line — [BLE: Binaureal Linguistic Engine] */}
             <motion.div
-              className="flex flex-col items-center gap-[0.5rem] sm:gap-[0.85rem]"
+              className="flex flex-col items-center gap-3 sm:gap-4"
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7 }}
@@ -166,7 +166,7 @@ export default function HeroSection({ onAsteriskHover }) {
               >
                 <span className="text-foreground/70">[</span><span className="text-foreground">BLE</span><span className="text-foreground/70">: Binaureal Linguistic Engine]</span>
               </span>
-              <p className="relative mt-4 max-w-2xl text-center text-foreground/85 text-xs sm:text-sm md:text-base font-normal leading-relaxed px-6 py-3 rounded-full">
+              <p className="relative mt-6 sm:mt-8 max-w-2xl text-center text-foreground/85 text-xs sm:text-sm md:text-base font-normal leading-[1.8] px-6 py-4 rounded-full">
                 <span className="absolute inset-0 -z-10 rounded-full bg-black/5 blur-2xl" aria-hidden="true" />
                 <span className="absolute inset-0 -z-10 rounded-full bg-white/15" aria-hidden="true" />
                 The Signal (HEX6-BLE PI-US v5.5) is an experimental probabilistic intelligence layer that sits on top of existing LLMs, replacing purely token-probability-driven inference with external semantic state estimation and probabilistic decision optimization to produce more reliable reasoning without retraining foundation models. <span className="text-foreground font-medium">Live in beta testing.</span>
@@ -174,28 +174,28 @@ export default function HeroSection({ onAsteriskHover }) {
             </motion.div>
 
             {/* 3D radial wave field with identified signal points — circular ripple overlay on top. */}
-            <div className="relative mt-[2.5rem] sm:mt-[3.5rem] w-full">
+            <div className="relative mt-12 sm:mt-16 w-full">
               <WaveSignal3D />
             </div>
 
             {/* Evidence — why it's different */}
-            <div className="relative mt-[2.5rem] sm:mt-[3.5rem] w-full max-w-3xl mx-auto px-2">
-              <div className="space-y-4 sm:space-y-5">
-                <div className="flex flex-col items-center justify-center gap-1 sm:gap-2 text-center">
+            <div className="relative mt-12 sm:mt-16 w-full max-w-3xl mx-auto px-2">
+              <div className="space-y-8 sm:space-y-10">
+                <div className="flex flex-col items-center justify-center gap-2 sm:gap-3 text-center">
                   <span className="text-foreground font-bold text-sm sm:text-base md:text-lg tracking-tight">Statistical Analysis</span>
-                  <span className="text-foreground/85 text-sm sm:text-base md:text-lg font-normal leading-snug">Learning probability through "prediction" — testable, falsifiable, and grounded in real outcome distributions.</span>
+                  <span className="text-foreground/85 text-sm sm:text-base md:text-lg font-normal leading-relaxed">Learning probability through "prediction" — testable, falsifiable, and grounded in real outcome distributions.</span>
                 </div>
-                <div className="flex flex-col items-center justify-center gap-1 sm:gap-2 text-center">
+                <div className="flex flex-col items-center justify-center gap-2 sm:gap-3 text-center">
                   <span className="text-foreground font-bold text-sm sm:text-base md:text-lg tracking-tight">Deepened Comprehension</span>
-                  <span className="text-foreground/85 text-sm sm:text-base md:text-lg font-normal leading-snug">Reading the signals behind the moment and surfacing the contextual value others miss.</span>
+                  <span className="text-foreground/85 text-sm sm:text-base md:text-lg font-normal leading-relaxed">Reading the signals behind the moment and surfacing the contextual value others miss.</span>
                 </div>
-                <div className="flex flex-col items-center justify-center gap-1 sm:gap-2 text-center">
+                <div className="flex flex-col items-center justify-center gap-2 sm:gap-3 text-center">
                   <span className="text-foreground font-bold text-sm sm:text-base md:text-lg tracking-tight">Greater Objectivism</span>
-                  <span className="text-foreground/85 text-sm sm:text-base md:text-lg font-normal leading-snug">Stripping distortion from interpretation — letting structure lead, not narrative.</span>
+                  <span className="text-foreground/85 text-sm sm:text-base md:text-lg font-normal leading-relaxed">Stripping distortion from interpretation — letting structure lead, not narrative.</span>
                 </div>
-                <div className="flex flex-col items-center justify-center gap-1 sm:gap-2 text-center">
+                <div className="flex flex-col items-center justify-center gap-2 sm:gap-3 text-center">
                   <span className="text-foreground font-bold text-sm sm:text-base md:text-lg tracking-tight">Accuracy &amp; Value</span>
-                  <span className="text-foreground/85 text-sm sm:text-base md:text-lg font-normal leading-snug">Sharper answers — more precise, more useful, and more honest about where the weight actually sits.</span>
+                  <span className="text-foreground/85 text-sm sm:text-base md:text-lg font-normal leading-relaxed">Sharper answers — more precise, more useful, and more honest about where the weight actually sits.</span>
                 </div>
               </div>
             </div>
@@ -205,7 +205,7 @@ export default function HeroSection({ onAsteriskHover }) {
               <p className="text-center text-[0.72rem] sm:text-[0.9rem] md:text-[1.05rem] text-black font-bold leading-snug">
                 Not financial or legal advice — a probabilistic witness that clarifies, never replaces, judgment.
               </p>
-              <p className="text-center text-[0.62rem] sm:text-[0.72rem] md:text-[0.85rem] text-black/55 font-medium mt-2">
+              <p className="text-center text-[0.62rem] sm:text-[0.72rem] md:text-[0.85rem] text-black/55 font-medium mt-3">
                 © Evrica Technologies Inc. 2026.
               </p>
             </div>
