@@ -221,6 +221,25 @@ export function runReasonLayer(returns, riskAversion = 2.5, friction = 0.0035, w
   if (bin.length < 3) {
     return { mu:0, sigma:0, exposure:0, blendedExposure:0, stateKey, stateBits, n:bin.length, nEff:0, regime:'INSUFFICIENT_DATA', basin:'undefined', lambda:LAMBDA, resolution, markov:{mu:0,sigma:0,n:0,confidence:0}, motif:{score:0,isActive:false} };
   }
+  // Hypercube smoothing — the 64 I-Ching states form a Boolean hypercube
+  // graph where each state's 1-bit-flip neighbors are its adjacent petals on
+  // the unfolding rose. Blend neighbor observations into the bin at a decay
+  // weight so the exact state dominates but sparse states borrow structural
+  // strength from their neighbors. This STRIPS high-frequency noise (a single
+  // sparse state's outlier transition is averaged toward its neighbors) while
+  // ENHANCING accuracy (the smooth underlying transition structure is reinforced
+  // across the rose). As data accumulates, the exact state's weight grows
+  // relative to neighbors — the rose unfolds, each petal standing on its own.
+  const NEIGHBOR_DECAY = 0.35;
+  if (resolution > 0) {
+    const ck = stateKey & ((1 << resolution) - 1);
+    for (let bit = 0; bit < resolution; bit++) {
+      const nkey = ck ^ (1 << bit);
+      for (const o of (hives[resolution][nkey] || [])) {
+        bin.push({ value: o.value, weight: o.weight * NEIGHBOR_DECAY });
+      }
+    }
+  }
   const values = bin.map(o => o.value);
   const weights = bin.map(o => o.weight);
   const wSum = weights.reduce((s, w) => s + w, 0);
