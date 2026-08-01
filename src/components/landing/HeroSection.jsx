@@ -153,13 +153,13 @@ export default function HeroSection({ onAsteriskHover }) {
 
             <div className="relative mt-10 sm:mt-14 w-full rounded-md bg-white px-5 py-5 sm:py-6 flex flex-wrap items-center justify-center gap-4 sm:gap-6">
               <p className="text-sm sm:text-lg md:text-xl text-black font-mono font-semibold leading-snug">
-                Experimental LLM in beta testing
+                Experimental LLM in testing
               </p>
               <button
                 onClick={handleEnter}
                 className="inline-flex items-center justify-center px-6 py-2 sm:py-3 rounded-sm bg-primary text-primary-foreground border-2 border-foreground font-bold hover:bg-primary/90 transition-colors text-sm sm:text-base whitespace-nowrap"
               >
-                Request Access
+                Join Beta
               </button>
             </div>
 
