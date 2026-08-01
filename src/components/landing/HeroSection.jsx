@@ -151,10 +151,16 @@ export default function HeroSection({ onAsteriskHover }) {
               </p>
             </motion.div>
 
-            <div className="relative mt-10 sm:mt-14 w-full rounded-md bg-white px-5 py-5 sm:py-6">
-              <p className="text-center text-sm sm:text-lg md:text-xl text-black font-mono font-semibold leading-snug">
+            <div className="relative mt-10 sm:mt-14 w-full rounded-md bg-white px-5 py-5 sm:py-6 flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+              <p className="text-sm sm:text-lg md:text-xl text-black font-mono font-semibold leading-snug">
                 Experimental LLM in beta testing
               </p>
+              <button
+                onClick={handleEnter}
+                className="inline-flex items-center justify-center px-6 py-2 sm:py-3 rounded-sm bg-primary text-primary-foreground border-2 border-foreground font-bold hover:bg-primary/90 transition-colors text-sm sm:text-base whitespace-nowrap"
+              >
+                Request Access
+              </button>
             </div>
 
             <div className="mt-8 sm:mt-10 max-w-4xl px-2">
@@ -168,26 +174,7 @@ export default function HeroSection({ onAsteriskHover }) {
           </div>
         </div>
 
-        <div className="flex justify-center w-full pt-16 sm:pt-20">
-          <button
-            onClick={handleEnter}
-            className="inline-flex items-center justify-center px-10 py-3 sm:py-4 rounded-sm bg-primary text-primary-foreground border-2 border-foreground font-bold hover:bg-primary/90 transition-colors text-sm sm:text-base md:text-lg shadow-lg"
-            style={{ boxShadow: '0 2px 18px rgba(0,0,0,0.35), 0 0 16px rgba(255,255,255,0.25)' }}
-          >
-            Arrive
-          </button>
-        </div>
 
-        {/* Version line — multi-colored segments */}
-        <div className="flex justify-center">
-          <span className="font-semibold tracking-tight mt-[1.27rem] text-xs sm:text-sm text-secondary" style={{ textShadow: 'none' }}>
-            <span>[</span>
-            <span className="font-bold uppercase">VERSION:</span>
-            <span className="font-bold">{' '}HEX6-BLE</span>
-            <span className="font-semibold"> PI-US</span>
-            <span> · PROBABILISTIC INTELLIGENCE SIGNAL <span className="font-bold">V5.5</span>]</span>
-          </span>
-        </div>
       </motion.div>
     </section>
   );
