@@ -9,6 +9,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.41';
 import { runReasonLayer, runWaveLayer, runValidationLayer } from '../../shared/thinkingEngine.ts';
 import { fetchYahooReturns, fetchWeatherReturns } from '../../shared/marketDataClient.ts';
 import { fitScope, zeroShot } from '../../shared/zeroScope.ts';
+import { GeneticRiskEngine } from '../../shared/geneticRiskEngine.ts';
 
 function pearson(a, b) {
   const n = Math.min(a.length, b.length);
@@ -66,18 +67,26 @@ export default async function(req) {
     // and pair its mu with the realized return at j. No look-ahead.
     const calibPairs = [];
     const magCalibPairs = [];
+    const geneticEngine = new GeneticRiskEngine();
     if (reasonOnly) {
       for (let j = 20; j < split; j++) {
-        const r = runReasonLayer(returns.slice(0, j), riskAversion);
+        const r = runReasonLayer(returns.slice(0, j), riskAversion, 0.0035, 6, null, null, geneticEngine);
         calibPairs.push({ predictedMu: r.mu, realized: returns[j] });
         magCalibPairs.push({ predictedMu: r.sigma, realized: Math.abs(returns[j]) });
+        if (r.hexagramState !== null && r.hexagramState !== undefined) {
+          geneticEngine.recordVisit(r.hexagramState, r.muLb || 0, r.sigma || 0, returns[j]);
+        }
       }
     }
 
     const preds = [];
+    const dnaRas = [];
     for (let i = 0; i < test.length; i++) {
       const window = returns.slice(0, split + i);
-      const reason = runReasonLayer(window, riskAversion);
+      const reason = runReasonLayer(window, riskAversion, 0.0035, 6, null, null, geneticEngine);
+      if (reason.hexagramState !== null && reason.hexagramState !== undefined) {
+        dnaRas.push(geneticEngine.getDominantRA(reason.hexagramState));
+      }
       const predictedDir = reason.mu > 0 ? 1 : reason.mu < 0 ? -1 : 0;
       const actualDir = test[i] > 0 ? 1 : test[i] < 0 ? -1 : 0;
       if (reasonOnly) {
@@ -85,9 +94,13 @@ export default async function(req) {
         const magScope = fitScope(magCalibPairs);
         const calibratedMu = zeroShot(reason.mu, scope);
         const calibratedMag = zeroShot(reason.sigma, magScope);
-        preds.push({ predictedDir, actualDir, realized: test[i], predictedMu: reason.mu, predictedSigma: reason.sigma, calibratedMu, calibratedMag });
+        const dnaRa = reason.hexagramState !== null && reason.hexagramState !== undefined ? geneticEngine.getDominantRA(reason.hexagramState) : riskAversion;
+        preds.push({ predictedDir, actualDir, realized: test[i], predictedMu: reason.mu, predictedSigma: reason.sigma, calibratedMu, calibratedMag, muLb: reason.muLb || 0, dnaRa });
         calibPairs.push({ predictedMu: reason.mu, realized: test[i] });
         magCalibPairs.push({ predictedMu: reason.sigma, realized: Math.abs(test[i]) });
+        if (reason.hexagramState !== null && reason.hexagramState !== undefined) {
+          geneticEngine.recordVisit(reason.hexagramState, reason.muLb || 0, reason.sigma || 0, test[i]);
+        }
         continue;
       }
       const wave = runWaveLayer(window);
@@ -126,6 +139,29 @@ export default async function(req) {
       // Scope-calibrated point + magnitude accuracy.
       const calibratedMae = mean(preds.map(p => Math.abs(p.calibratedMu - p.realized)));
       const calibratedMagnitudeMae = mean(preds.map(p => Math.abs(p.calibratedMag - Math.abs(p.realized))));
+      // Portfolio metrics: genetic RA vs fixed baseline RA. The genetic engine
+      // changes bet SIZE per hexagram, not direction — so the impact shows up
+      // in Sharpe/drawdown, not directional accuracy.
+      const sharpe = (rets) => {
+        if (rets.length < 3) return 0;
+        const m = rets.reduce((s, x) => s + x, 0) / rets.length;
+        const v = rets.reduce((s, x) => s + (x - m) ** 2, 0) / rets.length;
+        const sd = Math.sqrt(v);
+        return sd < 1e-8 ? 0 : (m / sd) * Math.sqrt(252);
+      };
+      const maxDd = (rets) => {
+        let cum = 1, peak = 1, mdd = 0;
+        for (const r of rets) { cum *= (1 + r); peak = Math.max(peak, cum); mdd = Math.min(mdd, cum / peak - 1); }
+        return mdd;
+      };
+      const geneticRets = preds.map(p => {
+        const exp = p.predictedSigma > 1e-8 ? Math.min(1, Math.max(0, (p.muLb / (p.predictedSigma * p.predictedSigma)) / (p.dnaRa || 2.5))) : 0;
+        return exp * p.realized;
+      });
+      const baselineRets = preds.map(p => {
+        const exp = p.predictedSigma > 1e-8 ? Math.min(1, Math.max(0, (p.muLb / (p.predictedSigma * p.predictedSigma)) / riskAversion)) : 0;
+        return exp * p.realized;
+      });
       return Response.json({
         ticker: ticker || 'SUPPLIED',
         mode: 'HEX6_BLE_REASON_ONLY',
@@ -140,12 +176,17 @@ export default async function(req) {
         upPredictions: upPreds.length,
         downPredictions: downPreds.length,
         avgRatio: r2(mean(ratios)),
+        avgDnaRa: r2(dnaRas.length ? mean(dnaRas) : 2.5),
         highRatioAccuracy: r2(highRatioAccuracy),
         lowRatioAccuracy: r2(lowRatioAccuracy),
         gatedCoverage: r2((highRatio.length + lowRatio.length) > 0 ? highRatio.length / (highRatio.length + lowRatio.length) : 0),
         magnitudeCalibration: r2(magnitudeCalibration),
         calibratedMae: r2(calibratedMae, 6),
         calibratedMagnitudeMae: r2(calibratedMagnitudeMae, 6),
+        geneticSharpe: r2(sharpe(geneticRets), 2),
+        baselineSharpe: r2(sharpe(baselineRets), 2),
+        geneticMdd: r2(maxDd(geneticRets), 2),
+        baselineMdd: r2(maxDd(baselineRets), 2),
         timestamp: new Date().toISOString(),
       });
     }

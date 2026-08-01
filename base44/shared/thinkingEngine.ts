@@ -163,9 +163,16 @@ function classifyRegime(returns, index, lookback = 20) {
   return 'RANGE';
 }
 
-export function runReasonLayer(returns, riskAversion = 2.5, friction = 0.0035, windowSize = 6, refReturns = null, priorMarkov = null) {
+export function runReasonLayer(returns, riskAversion = 2.5, friction = 0.0035, windowSize = 6, refReturns = null, priorMarkov = null, geneticEngine = null) {
   const LAMBDA = adaptiveLambda(returns.length);
   const currentRegime = classifyRegime(returns, returns.length - 1);
+  // Genetic risk aversion: if a genetic engine is provided, use the dominant
+  // gene for the current I-Ching hexagram state instead of the fixed default.
+  const hexagramState = encodeState6(returns.slice(-windowSize));
+  let effectiveRA = riskAversion;
+  if (geneticEngine && hexagramState !== null) {
+    effectiveRA = geneticEngine.getDominantRA(hexagramState);
+  }
   // Multi-resolution hive — resolution adapts to available evidence, with no
   // fixed minimum length. The 7-bit state is pooled at several bit-widths
   // (keeping the most recent bits: corr + recent momentum), and we resolve at
@@ -219,7 +226,7 @@ export function runReasonLayer(returns, riskAversion = 2.5, friction = 0.0035, w
     if (candidates.length >= 3) { bin = candidates; resolution = L; break; }
   }
   if (bin.length < 3) {
-    return { mu:0, sigma:0, exposure:0, blendedExposure:0, stateKey, stateBits, n:bin.length, nEff:0, regime:'INSUFFICIENT_DATA', basin:'undefined', lambda:LAMBDA, resolution, markov:{mu:0,sigma:0,n:0,confidence:0}, motif:{score:0,isActive:false} };
+    return { mu:0, sigma:0, exposure:0, blendedExposure:0, stateKey, stateBits, n:bin.length, nEff:0, regime:'INSUFFICIENT_DATA', basin:'undefined', lambda:LAMBDA, resolution, markov:{mu:0,sigma:0,n:0,confidence:0}, motif:{score:0,isActive:false}, muLb:0, hexagramState, effectiveRA };
   }
   // Hypercube smoothing — the 64 I-Ching states form a Boolean hypercube
   // graph where each state's 1-bit-flip neighbors are its adjacent petals on
@@ -259,14 +266,14 @@ export function runReasonLayer(returns, riskAversion = 2.5, friction = 0.0035, w
   const tCrit = tPpf(0.95, nEff - 1);
   const muLb = mu - tCrit * (sigma / Math.sqrt(nEff)) - adaptiveFriction;
   let exposure = 0;
-  if (muLb > 0) exposure = Math.min(Math.max((muLb / sigma ** 2) / riskAversion, 0), 1);
+  if (muLb > 0) exposure = Math.min(Math.max((muLb / sigma ** 2) / effectiveRA, 0), 1);
   const regime = exposure > 0.6 ? 'BULL' : exposure > 0.3 ? 'LATERAL' : mu < 0 ? 'BEAR' : 'SILENCE';
   const markov = markovEdge(returns, priorMarkov?.counts || null, priorMarkov?.stats || null);
   const motif = adaptive137Score(returns);
   const basin = classifyBasin(markov.currentState, mu, sigma);
   let blendedExposure = exposure;
   if (markov.transitionConfidence > 0.3 && markov.sigma > 0) {
-    const markovExposure = Math.min(Math.max((markov.mu / (markov.sigma * markov.sigma)) / riskAversion, 0), 1);
+    const markovExposure = Math.min(Math.max((markov.mu / (markov.sigma * markov.sigma)) / effectiveRA, 0), 1);
     blendedExposure = Math.min(Math.max(0.7 * exposure + 0.2 * markovExposure + 0.1 * Math.max(0, motif.score), 0), 1);
   }
   return {
@@ -275,6 +282,7 @@ export function runReasonLayer(returns, riskAversion = 2.5, friction = 0.0035, w
     stateKey, stateBits, n: bin.length, nEff, regime, basin, lambda: LAMBDA, resolution,
     markov: { mu: parseFloat(markov.mu.toFixed(6)), sigma: parseFloat(markov.sigma.toFixed(6)), n: markov.n, confidence: parseFloat(markov.transitionConfidence.toFixed(3)) },
     motif: { score: parseFloat(motif.score.toFixed(4)), isActive: motif.isMotifNow },
+    muLb: parseFloat(muLb.toFixed(6)), hexagramState, effectiveRA: parseFloat(effectiveRA.toFixed(4)),
   };
 }
 
