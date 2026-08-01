@@ -157,7 +157,7 @@ export default function HeroSection({ onAsteriskHover }) {
               </p>
               <button
                 onClick={handleEnter}
-                className="inline-flex items-center justify-center px-6 py-2 sm:py-3 rounded-sm bg-primary text-primary-foreground border-2 border-foreground font-bold hover:bg-primary/90 transition-colors text-sm sm:text-base whitespace-nowrap"
+                className="inline-flex items-center justify-center px-6 py-2 sm:py-3 rounded-sm bg-primary text-primary-foreground border-2 border-accent font-bold hover:bg-primary/90 transition-colors text-sm sm:text-base tracking-[0.18em] uppercase whitespace-nowrap"
               >
                 Join Beta
               </button>
