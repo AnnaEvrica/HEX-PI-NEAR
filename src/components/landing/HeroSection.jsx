@@ -153,7 +153,7 @@ export default function HeroSection({ onAsteriskHover }) {
             {/* The legal block — a boundary, not an apology. */}
             <div className="relative mt-16 sm:mt-20 lg:mt-24 w-full rounded-md bg-white px-5 py-5 sm:py-6">
               <p className="text-center text-[0.72rem] sm:text-[0.9rem] md:text-[1.05rem] text-black font-bold leading-snug">
-                Not financial or legal advice — a probabilistic witness that clarifies, never replaces, judgment.
+                HEX6-BLE is an experimental probabilistic reasoning system. Its outputs are informational, may be uncertain or incorrect, and do not constitute financial, legal, medical, or other professional advice. Verify important decisions using independent evidence and qualified professionals.
               </p>
               <p className="text-center text-[0.62rem] sm:text-[0.72rem] md:text-[0.85rem] text-black/55 font-medium mt-3">
                 © Evrica Technologies Inc. 2026.
