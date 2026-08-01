@@ -132,8 +132,26 @@ function classifyBasin(stateKey6, mu, sigma) {
   return 'neutral_flow';
 }
 
+// Regime detector — classifies the market state at each bar using rolling
+// positive-return ratio. Three regimes: UP, DOWN, RANGE. The engine weights
+// same-regime historical bars more heavily (1.0 vs 0.35) so its transition
+// statistics track the CURRENT regime instead of averaging across conflicting
+// regimes. This is what makes the edge regime-conditional: when the market
+// shifts from bull to bear, the engine stops diluting its read with bull-regime
+// transitions. Applied at the hive level (the primary 0.7-weight predictor).
+function classifyRegime(returns, index, lookback = 20) {
+  if (index < 3) return 'RANGE';
+  const lb = Math.min(lookback, index + 1);
+  const window = returns.slice(index - lb + 1, index + 1);
+  const posRatio = window.filter(r => r > 0).length / window.length;
+  if (posRatio >= 0.6) return 'UP';
+  if (posRatio <= 0.4) return 'DOWN';
+  return 'RANGE';
+}
+
 export function runReasonLayer(returns, riskAversion = 2.5, friction = 0.0035, windowSize = 6, refReturns = null, priorMarkov = null) {
   const LAMBDA = adaptiveLambda(returns.length);
+  const currentRegime = classifyRegime(returns, returns.length - 1);
   // Multi-resolution hive — resolution adapts to available evidence, with no
   // fixed minimum length. The 7-bit state is pooled at several bit-widths
   // (keeping the most recent bits: corr + recent momentum), and we resolve at
@@ -158,7 +176,9 @@ export function runReasonLayer(returns, riskAversion = 2.5, friction = 0.0035, w
     }
     const key = (momentumBits << 1) | corrBit;
     const age = returns.length - 1 - i;
-    const weight = Math.pow(LAMBDA, age);
+    const barRegime = classifyRegime(returns, i);
+    const regimeWeight = barRegime === currentRegime ? 1.0 : 0.35;
+    const weight = Math.pow(LAMBDA, age) * regimeWeight;
     for (const L of LEVELS) {
       const ck = key & ((1 << L) - 1);
       if (!hives[L][ck]) hives[L][ck] = [];
