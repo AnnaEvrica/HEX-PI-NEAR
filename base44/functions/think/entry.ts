@@ -348,44 +348,31 @@ ${speaker}:`;
       })();
     };
 
-    // --- Inline-data path: engine already ran, communicate the Decision ---
-    if (inlineStateBlock) {
-      voice = adaptVoiceForModel(voice, selectSynthesisModel('inline'));
-      const llmPayload = { prompt: composePrompt(inlineStateBlock), model: selectSynthesisModel('inline'), add_context_from_internet: false };
-      if (file_urls && file_urls.length > 0) llmPayload.file_urls = file_urls;
-      const llmResponse = await base44.integrations.Core.InvokeLLM(llmPayload);
-      const rawResponse = (llmResponse || 'I need a moment to analyze that.').trim();
-      const { visible: visInline, memory: memInline } = await processBoundarySignal(base44, user, userMemory, rawResponse);
-      if (memInline) userMemory = memInline;
-      const response = visInline || rawResponse;
-      saveCognitiveState();
-      updateMemory(base44, user, userMemory, message, response);
-      return Response.json({ response, ran_engine: true, version: MODEL_VERSION, timestamp: new Date().toISOString() });
-    }
+    // --- Unified pipeline: one synthesis, one post-process ---
+    // Three detection paths (inline data, casual, analytical) converge to a
+    // single tail. Each path sets stateBlock (+ dataBlock/sourcesBlock for
+    // analytical); this block does the synthesis, boundary, sources, save,
+    // and memory writeback exactly once.
+    let stateBlock = inlineStateBlock;
+    let dataBlock = '';
+    let sourcesBlock = '';
+    let synthModel = selectSynthesisModel('inline');
+    let fallbackResponse = 'Let me know what you\'d like to dig into.';
 
-    // --- Casual/analytical triage (hybrid: fast local scorer + LLM fallback) ---
-    const lastTurns = history.slice(-6).map(m => `${m.role === 'user' ? userName : speaker}: ${m.content}`).join('\n') || '(no prior turns)';
-    let triageProfile;
-    if (userMemory?.triage_profile) { try { triageProfile = JSON.parse(userMemory.triage_profile); } catch (_e) { /* ignore */ } }
-    const intent = await triage(message, (opts) => base44.integrations.Core.InvokeLLM({ ...opts, model: INTERPRETATION_MODEL }), lastTurns, triageProfile);
+    if (!stateBlock) {
+      // --- Casual/analytical triage (hybrid: fast local scorer + LLM fallback) ---
+      const lastTurns = history.slice(-6).map(m => `${m.role === 'user' ? userName : speaker}: ${m.content}`).join('\n') || '(no prior turns)';
+      let triageProfile;
+      if (userMemory?.triage_profile) { try { triageProfile = JSON.parse(userMemory.triage_profile); } catch (_e) { /* ignore */ } }
+      const intent = await triage(message, (opts) => base44.integrations.Core.InvokeLLM({ ...opts, model: INTERPRETATION_MODEL }), lastTurns, triageProfile);
 
-    if (intent === 'casual') {
-      const stateBlock = `No quantitative Thinking State for this message — respond directly and conversationally, grounded in the conversation. If there's no prior thread to pick up, arrive as yourself — a one-line human breath that carries your tone without becoming a menu, a readiness tail, or a list of lanes/topics/options to pick from. Never surface internal nomenclature (engine, calibration, UX, components) unless the user named it first. The conversation starts when they do.`;
-      voice = adaptVoiceForModel(defaultVoice, selectSynthesisModel('casual'));
-      const casualPayload = { prompt: composePrompt(stateBlock), model: selectSynthesisModel('casual'), add_context_from_internet: false };
-      if (file_urls && file_urls.length > 0) casualPayload.file_urls = file_urls;
-      const casualResponse = await base44.integrations.Core.InvokeLLM(casualPayload);
-      const rawCasual = (casualResponse || 'Hey.').trim();
-      const { visible: visCasual, memory: memCasual } = await processBoundarySignal(base44, user, userMemory, rawCasual);
-      if (memCasual) userMemory = memCasual;
-      const finalCasual = visCasual || rawCasual;
-      updateMemory(base44, user, userMemory, message, finalCasual);
-      saveCognitiveState();
-      return Response.json({ response: finalCasual, ran_engine: false, version: MODEL_VERSION, timestamp: new Date().toISOString() });
-    }
-
-    // --- Analytical path — web fetch, then engine, then communicate the Decision ---
-    const fetchPrompt = `You are a data retrieval step for HEX6-BLE. Decide whether answering well requires fresh real-world data.
+      if (intent === 'casual') {
+        stateBlock = `No quantitative Thinking State for this message — respond directly and conversationally, grounded in the conversation. If there's no prior thread to pick up, arrive as yourself — a one-line human breath that carries your tone without becoming a menu, a readiness tail, or a list of lanes/topics/options to pick from. Never surface internal nomenclature (engine, calibration, UX, components) unless the user named it first. The conversation starts when they do.`;
+        synthModel = selectSynthesisModel('casual');
+        fallbackResponse = 'Hey.';
+      } else {
+        // --- Analytical: web fetch, then maybe engine ---
+        const fetchPrompt = `You are a data retrieval step for HEX6-BLE. Decide whether answering well requires fresh real-world data.
 - If yes, search the web and pull the latest from authoritative sources (Yahoo Finance, CoinGecko, Reuters, etc.). Pull at least 30 data points if a time series is relevant.
 - If conversational or answerable from general knowledge, return needs_engine=false and a brief factual answer.
 - URL honesty: only return URLs you actually retrieved.
@@ -400,71 +387,71 @@ Return JSON with:
 - sources: array of {name, url} — only if you actually pulled web data.
 - source_summary: one sentence on what you pulled — only if you pulled data.`;
 
-    const conversationBlock = history.length > 0 ? history.slice(-12).map(m => `${m.role === 'user' ? userName : speaker}: ${m.content}`).join('\n') : '';
-    const fetchPayload = {
-      prompt: `${fetchPrompt}\n\nCONVERSATION SO FAR:\n${conversationBlock}\n\n${userName}: ${message}\n\nHEX6-BLE:`,
-      model: INTERPRETATION_MODEL, add_context_from_internet: true,
-      response_json_schema: {
-        type: 'object',
-        properties: {
-          factual_summary: { type: 'string' }, needs_engine: { type: 'boolean' }, ticker: { type: 'string' },
-          series_label: { type: 'string' }, series: { type: 'array', items: { type: 'number' } }, as_returns: { type: 'boolean' },
-          sources: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, url: { type: 'string' } }, required: ['name', 'url'] } },
-          source_summary: { type: 'string' },
-        }, required: ['factual_summary'],
-      },
-    };
-    if (file_urls && file_urls.length > 0) fetchPayload.file_urls = file_urls;
-    const fetchResult = await base44.integrations.Core.InvokeLLM(fetchPayload).catch(() => null);
+        const conversationBlock = history.length > 0 ? history.slice(-12).map(m => `${m.role === 'user' ? userName : speaker}: ${m.content}`).join('\n') : '';
+        const fetchPayload = {
+          prompt: `${fetchPrompt}\n\nCONVERSATION SO FAR:\n${conversationBlock}\n\n${userName}: ${message}\n\nHEX6-BLE:`,
+          model: INTERPRETATION_MODEL, add_context_from_internet: true,
+          response_json_schema: {
+            type: 'object',
+            properties: {
+              factual_summary: { type: 'string' }, needs_engine: { type: 'boolean' }, ticker: { type: 'string' },
+              series_label: { type: 'string' }, series: { type: 'array', items: { type: 'number' } }, as_returns: { type: 'boolean' },
+              sources: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, url: { type: 'string' } }, required: ['name', 'url'] } },
+              source_summary: { type: 'string' },
+            }, required: ['factual_summary'],
+          },
+        };
+        if (file_urls && file_urls.length > 0) fetchPayload.file_urls = file_urls;
+        const fetchResult = await base44.integrations.Core.InvokeLLM(fetchPayload).catch(() => null);
 
-    const sourcesBlock = filterSourcesBlock(fetchResult?.sources);
+        sourcesBlock = filterSourcesBlock(fetchResult?.sources);
 
-    // --- Contextual trigger: if the message names a ticker, pull a REAL return
-    // series from Yahoo and run the engine on actual data. The Model collapses
-    // the directional read on real prices, not LLM-narrated stats. Falls back
-    // to any series the web-fetch extracted if Yahoo has nothing.
-    let webStateBlock = '';
-    let contextPriceLine = '';
-    const TICKER_RE = /\b(BTC|ETH|SOL|DOGE|XRP|ADA|MATIC|SPY|QQQ|TSLA|AAPL|MSFT|NVDA|GOOG|GOOGL|AMZN|META)\b/i;
-    const tickerHit = message.match(TICKER_RE);
-    if (tickerHit) {
-      try {
-        const md = await fetchYahooReturns(tickerHit[1], 730);
-        if (md.returns && md.returns.length >= 30) {
-          await runUnifiedEngine(md.returns, null);
-          webStateBlock = renderDirective(thinkingState, voice);
-          if (md.latestPrice != null) contextPriceLine = `${tickerHit[1].toUpperCase()} last close: $${md.latestPrice.toFixed(2)} (${md.dataPoints} daily bars, 2yr window).`;
+        // Contextual trigger: if the message names a ticker, pull a REAL return
+        // series from Yahoo and run the engine on actual data.
+        let contextPriceLine = '';
+        const TICKER_RE = /\b(BTC|ETH|SOL|DOGE|XRP|ADA|MATIC|SPY|QQQ|TSLA|AAPL|MSFT|NVDA|GOOG|GOOGL|AMZN|META)\b/i;
+        const tickerHit = message.match(TICKER_RE);
+        if (tickerHit) {
+          try {
+            const md = await fetchYahooReturns(tickerHit[1], 730);
+            if (md.returns && md.returns.length >= 30) {
+              await runUnifiedEngine(md.returns, null);
+              stateBlock = renderDirective(thinkingState, voice);
+              if (md.latestPrice != null) contextPriceLine = `${tickerHit[1].toUpperCase()} last close: $${md.latestPrice.toFixed(2)} (${md.dataPoints} daily bars, 2yr window).`;
+            }
+          } catch (e) { /* fall through to web-fetch series */ }
         }
-      } catch (e) { /* fall through to web-fetch series */ }
+
+        // Fallback: run the engine on a series the web-fetch extracted.
+        if (!stateBlock && fetchResult?.needs_engine && Array.isArray(fetchResult.series) && fetchResult.series.length >= 30) {
+          let returns = fetchResult.series;
+          if (fetchResult.as_returns === false) {
+            const raw = fetchResult.series; returns = [];
+            for (let i = 1; i < raw.length; i++) { if (raw[i - 1] !== 0) returns.push((raw[i] - raw[i - 1]) / raw[i - 1]); }
+          }
+          if (returns.length >= 30) {
+            await runUnifiedEngine(returns, null);
+            stateBlock = renderDirective(thinkingState, voice);
+          }
+        }
+
+        stateBlock = stateBlock || `No quantitative Thinking State for this message — respond using the supplied data.`;
+        dataBlock = `DATA (supplied by HEX6-BLE):\n${contextPriceLine ? contextPriceLine + '\n' : ''}${fetchResult?.factual_summary || 'No external data retrieved.'}`;
+        synthModel = selectSynthesisModel(intent === 'research' ? 'research' : 'analytical');
+        fallbackResponse = fetchResult?.factual_summary || fallbackResponse;
+      }
     }
 
-    // Fallback: run the engine on a series the web-fetch extracted, if any.
-    if (!webStateBlock && fetchResult?.needs_engine && Array.isArray(fetchResult.series) && fetchResult.series.length >= 30) {
-      let returns = fetchResult.series;
-      if (fetchResult.as_returns === false) {
-        const raw = fetchResult.series; returns = [];
-        for (let i = 1; i < raw.length; i++) { if (raw[i - 1] !== 0) returns.push((raw[i] - raw[i - 1]) / raw[i - 1]); }
-      }
-      if (returns.length >= 30) {
-        await runUnifiedEngine(returns, null);
-        webStateBlock = renderDirective(thinkingState, voice);
-      }
-    }
-
-    const stateBlock = webStateBlock || `No quantitative Thinking State for this message — respond using the supplied data.`;
-    const dataBlock = `DATA (supplied by HEX6-BLE):\n${contextPriceLine ? contextPriceLine + '\n' : ''}${fetchResult?.factual_summary || 'No external data retrieved.'}`;
-    const synthModel = selectSynthesisModel(intent === 'research' ? 'research' : 'analytical');
+    // --- Single synthesis + single post-process ---
     voice = adaptVoiceForModel(voice, synthModel);
     const synthPayload = { prompt: composePrompt(stateBlock, dataBlock), model: synthModel, add_context_from_internet: false };
     if (file_urls && file_urls.length > 0) synthPayload.file_urls = file_urls;
     const synth = await base44.integrations.Core.InvokeLLM(synthPayload).catch(() => null);
-    const rawSynth = (synth || fetchResult?.factual_summary || 'Let me know what you\'d like to dig into.').trim();
-    const { visible: visSynth, memory: memSynth } = await processBoundarySignal(base44, user, userMemory, rawSynth);
-    if (memSynth) userMemory = memSynth;
-    let finalResponse = visSynth || rawSynth;
-
+    const rawResponse = (synth || fallbackResponse).trim();
+    const { visible, memory: mem } = await processBoundarySignal(base44, user, userMemory, rawResponse);
+    if (mem) userMemory = mem;
+    let finalResponse = visible || rawResponse;
     if (sourcesBlock) finalResponse = `${finalResponse}\n\n**Sources:**\n${sourcesBlock.split('\n').map(s => `- ${s}`).join('\n')}`;
-
     saveCognitiveState();
     updateMemory(base44, user, userMemory, message, finalResponse);
     return Response.json({ response: finalResponse, ran_engine: ranEngine, version: MODEL_VERSION, timestamp: new Date().toISOString() });
