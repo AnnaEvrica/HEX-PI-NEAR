@@ -52,7 +52,14 @@ export function triageLocal(message: string, profile?: TriageProfile): TriageInt
   // Market cue present → analytical.
   if (MARKET_CUE_RE.test(msg)) return 'analytical';
 
-  return null; // ambiguous → defer to the LLM (The Model's reasoning)
+  // Default to casual — conversational, philosophical, and life questions
+  // don't need fresh data or the engine. This eliminates the LLM triage
+  // round-trip for the conversational majority (existential, pushback,
+  // follow-ups), saving ~5-10s latency and one LLM credit per turn. Rare
+  // analytical-without-cue questions ("should I buy gold?") are still handled
+  // by the synthesis LLM from general knowledge; the user can always name a
+  // ticker to trigger the data-driven path.
+  return 'casual';
 }
 
 export async function triage(
