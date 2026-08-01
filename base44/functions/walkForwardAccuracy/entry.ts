@@ -76,6 +76,13 @@ export default async function(req) {
 
     const valid = preds.filter(p => p.predictedDir !== 0 && p.actualDir !== 0);
     const directionalAccuracy = valid.length ? valid.filter(p => p.predictedDir === p.actualDir).length / valid.length : null;
+    // Per-direction separation: each direction evaluated on its own, no pooling.
+    // The hypercube operates within the asset's own space-time; UP and DOWN calls
+    // are scored independently to reveal asymmetric edge.
+    const upPreds = valid.filter(p => p.predictedDir === 1);
+    const downPreds = valid.filter(p => p.predictedDir === -1);
+    const upAccuracy = upPreds.length ? upPreds.filter(p => p.actualDir === 1).length / upPreds.length : null;
+    const downAccuracy = downPreds.length ? downPreds.filter(p => p.actualDir === -1).length / downPreds.length : null;
 
     if (reasonOnly) {
       const eligible = preds.filter(p => p.actualDir !== 0);
@@ -90,8 +97,12 @@ export default async function(req) {
         abstentions: eligible.length - valid.length,
         coverage: r2(eligible.length ? valid.length / eligible.length : 0),
         directionalAccuracy: r2(directionalAccuracy),
+        upAccuracy: r2(upAccuracy),
+        downAccuracy: r2(downAccuracy),
+        upPredictions: upPreds.length,
+        downPredictions: downPreds.length,
         timestamp: new Date().toISOString(),
-      });
+        });
     }
 
     const probs = preds.map(p => p.probability);
@@ -124,6 +135,10 @@ export default async function(req) {
       trainSize: split,
       testSize: test.length,
       directionalAccuracy: r2(directionalAccuracy),
+      upAccuracy: r2(upAccuracy),
+      downAccuracy: r2(downAccuracy),
+      upPredictions: upPreds.length,
+      downPredictions: downPreds.length,
       probabilityCalibration: r2(probabilityCalibration),
       valueCalibration: r2(valueCalibration),
       highValueAccuracy: r2(highValueAccuracy),
