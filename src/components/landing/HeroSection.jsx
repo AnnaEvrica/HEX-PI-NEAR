@@ -131,31 +131,33 @@ export default function HeroSection({ onAsteriskHover }) {
 
           <div className="relative mt-16 sm:mt-24 flex flex-col items-center text-center">
             <motion.div
-              className="flex flex-col items-center gap-5 sm:gap-6"
+              className="flex flex-col items-center gap-6 sm:gap-8 w-full"
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.2 }}
             >
               <span
-                className="font-semibold tracking-tight text-[0.8rem] sm:text-[1rem] md:text-[1.35rem] leading-tight text-center"
+                className="w-full whitespace-nowrap font-semibold tracking-[-0.035em] text-[clamp(1rem,5vw,4.5rem)] leading-none text-center"
                 style={{ textShadow: '0 1px 2px rgba(255,255,255,0.35), 0 2px 8px rgba(0,0,0,0.2)' }}
               >
                 <span className="text-foreground/70">[</span><span className="text-foreground">BLE</span><span className="text-foreground/70">: Binaureal Linguistic Engine]</span>
               </span>
-              <p className="text-foreground text-base sm:text-xl md:text-2xl font-semibold leading-relaxed">
-                Experimental LLM in beta testing
-              </p>
-              <p className="text-foreground/85 text-sm sm:text-lg md:text-xl font-normal leading-relaxed">
+              <p className="whitespace-nowrap text-foreground/85 text-[clamp(0.72rem,2.1vw,1.35rem)] font-normal leading-relaxed">
                 Never validating. Focuses on finding truth.
               </p>
             </motion.div>
 
-            {/* The legal block — a boundary, not an apology. */}
-            <div className="relative mt-16 sm:mt-20 lg:mt-24 w-full rounded-md bg-white px-5 py-5 sm:py-6">
-              <p className="text-center text-[0.72rem] sm:text-[0.9rem] md:text-[1.05rem] text-black font-bold leading-snug">
+            <div className="relative mt-10 sm:mt-14 w-full rounded-md bg-white px-5 py-5 sm:py-6">
+              <p className="text-center text-sm sm:text-lg md:text-xl text-black font-mono font-semibold leading-snug">
+                Experimental LLM in beta testing:
+              </p>
+            </div>
+
+            <div className="mt-8 sm:mt-10 max-w-4xl px-2">
+              <p className="text-center text-[0.68rem] sm:text-[0.8rem] md:text-[0.9rem] text-foreground/55 font-medium leading-relaxed">
                 HEX6-BLE is an experimental probabilistic reasoning system. Its outputs are informational, may be uncertain or incorrect, and do not constitute financial, legal, medical, or other professional advice. Verify important decisions using independent evidence and qualified professionals.
               </p>
-              <p className="text-center text-[0.62rem] sm:text-[0.72rem] md:text-[0.85rem] text-black/55 font-medium mt-3">
+              <p className="text-center text-[0.62rem] sm:text-[0.72rem] md:text-[0.8rem] text-foreground/40 font-medium mt-3">
                 © Evrica Technologies Inc. 2026.
               </p>
             </div>
