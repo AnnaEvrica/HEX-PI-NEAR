@@ -37,6 +37,47 @@ export const TRAINED_TABLES: Record<string, { up: number[]; down: number[] }> = 
 export const K_RATIO = 0.15;
 export const CONFIDENCE_CUTOFF_DEFAULT = 0.3; // matches the validated "+confidence" setting
 
+// --- Live-precision recalibration (the "live-precision half") ---
+// The frozen tables give a STRUCTURAL prior. Live predictions resolve over
+// time (CognitiveState.resolved_outcome), and that resolution stream is the
+// ground-truth signal for whether the engine's conviction threshold is
+// calibrated for THIS domain in the current regime.
+//
+// recalibrateConfidence takes the rolling live-precision record (resolved
+// high-conviction predictions: hits / total) and returns an ADAPTIVE cutoff:
+//   - Live precision strong (>= 0.60): the engine is well-calibrated → relax
+//     the cutoff slightly (0.25) so more predictions qualify as high-conviction,
+//     capturing more of a real edge.
+//   - Live precision weak (< 0.55): the engine is over-claiming → tighten the
+//     cutoff (0.40) so fewer, better predictions carry conviction.
+//   - Insufficient data (< 30 resolved): return the default — no recalibration
+//     until the sample is meaningful.
+//
+// This is the mechanism that makes the engine "recalibrate for accuracy of
+// number of predictions in time" — the cutoff tracks the live precision curve
+// as predictions accumulate, so conviction stays honest through regime shifts.
+export const LIVE_PRECISION_MIN_SAMPLE = 30;
+export const CONFIDENCE_RELAXED = 0.25;
+export const CONFIDENCE_TIGHTENED = 0.40;
+
+export interface LivePrecisionRecord {
+  resolved_predictions: number; // total high-conviction predictions with known outcomes
+  hits: number;                 // directional hits among them
+}
+
+export function recalibrateConfidence(
+  livePrecision: LivePrecisionRecord | null,
+  defaultCutoff: number = CONFIDENCE_CUTOFF_DEFAULT
+): number {
+  if (!livePrecision || livePrecision.resolved_predictions < LIVE_PRECISION_MIN_SAMPLE) {
+    return defaultCutoff;
+  }
+  const liveAcc = livePrecision.hits / livePrecision.resolved_predictions;
+  if (liveAcc >= 0.60) return CONFIDENCE_RELAXED;
+  if (liveAcc < 0.55) return CONFIDENCE_TIGHTENED;
+  return defaultCutoff;
+}
+
 export interface Hex6Output {
   domain: string;
   state: number;
@@ -97,21 +138,26 @@ function domainStats(domain: string) {
 }
 
 // Core prediction call. state: int 0-63.
+// `livePrecision` (optional) is the rolling resolved-prediction record for this
+// domain, used to ADAPT the conviction cutoff through time. When supplied,
+// conviction calibration tracks live accuracy — the "live-precision half."
+// When omitted, the default (frozen) cutoff is used.
 export function predictFromState(
   domain: string,
   state: number,
-  confidenceCutoff: number = CONFIDENCE_CUTOFF_DEFAULT
+  confidenceCutoff: number = CONFIDENCE_CUTOFF_DEFAULT,
+  livePrecision: LivePrecisionRecord | null = null
 ): Hex6Output {
   const { up, down, baseRate, k } = domainStats(domain);
   const nObs = up[state] + down[state];
   const p = shrunkPUp(up[state], down[state], baseRate, k);
   const entropy = binaryEntropy(p);
   const personalCall = Math.abs(p - 0.5) * 2; // conviction, embedding entropy implicitly
-  // NOTE: without a live calibration pass (streaming outcome data to check
-  // precision against), confidence here uses personal_call alone — the
-  // validated version additionally balances this against a causally-tracked
-  // precision record. The live-precision half accumulates over time via the
-  // existing CognitiveState outcome-resolution flow; not meaningful to freeze.
+  // Adaptive cutoff: if live precision has accumulated, conviction calibration
+  // tracks it — relaxing when the engine is well-calibrated, tightening when it
+  // over-claims. This is the causally-tracked precision record the validated
+  // version balances personal_call against.
+  const adaptiveCutoff = recalibrateConfidence(livePrecision, confidenceCutoff);
   return {
     domain,
     state,
@@ -120,7 +166,7 @@ export function predictFromState(
     entropy: round(entropy),
     personal_call_strength: round(personalCall),
     n_observations_this_state: nObs,
-    high_conviction: personalCall >= confidenceCutoff,
+    high_conviction: personalCall >= adaptiveCutoff,
     domain_base_rate: round(baseRate),
   };
 }
