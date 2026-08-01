@@ -142,6 +142,7 @@ export default async function(req) {
         avgRatio: r2(mean(ratios)),
         highRatioAccuracy: r2(highRatioAccuracy),
         lowRatioAccuracy: r2(lowRatioAccuracy),
+        gatedCoverage: r2((highRatio.length + lowRatio.length) > 0 ? highRatio.length / (highRatio.length + lowRatio.length) : 0),
         magnitudeCalibration: r2(magnitudeCalibration),
         calibratedMae: r2(calibratedMae, 6),
         calibratedMagnitudeMae: r2(calibratedMagnitudeMae, 6),

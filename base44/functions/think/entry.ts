@@ -9,6 +9,7 @@ import { fetchYahooReturns } from '../../shared/marketDataClient.ts';
 import { selectSynthesisModel, INTERPRETATION_MODEL, adaptVoiceForModel } from '../../shared/modelRouter.ts';
 import { triage } from '../../shared/triage.ts';
 import { anchorVerdict } from '../../shared/asiSpine.ts';
+import { computeGateState, applyGate } from '../../shared/adaptiveGate.ts';
 
 // Convert a raw numeric series to returns. If the values look like price
 // levels (all positive, magnitude > 1), convert to percent changes; otherwise
@@ -233,6 +234,7 @@ ${speaker}:`;
     let thinkingState = null;
     let interpretationPacket = null;
     let ranEngine = false;
+    let gateResult = null;
 
     const runUnifiedEngine = async (returns, refSeries = null) => {
       const reason = runReasonLayer(returns, riskAversion, 0.0035, 6, refSeries, null);
@@ -240,10 +242,26 @@ ${speaker}:`;
       const validation = runValidationLayer(reason, wave);
       const tone = toneDescriptor(validation);
       thinkingState = buildThinkingState(reason, wave, validation, true, returns);
+      // Adaptive gate: learn from the recent walk-forward track record whether
+      // the engine has edge on THIS asset. Only commit directional calls when
+      // the gate opens; otherwise the directive expresses SILENCE.
+      const gateState = computeGateState(returns);
+      gateResult = applyGate(reason.mu, reason.sigma, gateState);
       voice = selectVoice(tone);
       interpretationPacket = buildInterpretationPacket({ reason, wave, validation, thinkingMode: mode, query: message.slice(0, 500), contextNodeIds: [] });
       ranEngine = true;
       return { reason, wave, validation, tone };
+    };
+
+    // Render the directive, gated: if the adaptive gate abstains (no edge on
+    // this asset, or ratio too low), express SILENCE instead of a directional
+    // call. This is the test step — the engine only commits what it has earned.
+    const renderGatedDirective = (state, v) => {
+      const directive = renderDirective(state, v);
+      if (gateResult && !gateResult.commit) {
+        return `(Embody this read — never describe it, the engine, labels, "status," "goals," or the process.) The signal is quiet — no directional call worth committing to here. Conviction: Low. Speak in a ${v} register. Answer only about the actual subject in plain English.`;
+      }
+      return directive;
     };
 
     // Inline numeric data in the message → run the engine immediately.
@@ -259,7 +277,7 @@ ${speaker}:`;
       }
       const tickerMatch = message.match(/\b(BTC|ETH|SPY|QQQ|TSLA|AAPL|MSFT|NVDA|GOOG|AMZN|META|SOL|DOGE|XRP|ADA|MATIC)\b/i) || message.match(/\b([A-Z]{2,5})\b/);
       await runUnifiedEngine(primarySeries, refSeries);
-      inlineStateBlock = renderDirective(thinkingState, voice);
+      inlineStateBlock = renderGatedDirective(thinkingState, voice);
     }
 
     // --- Memory fetch (for writeback after responding) ---
@@ -416,7 +434,7 @@ Return JSON with:
             const md = await fetchYahooReturns(tickerHit[1], 730);
             if (md.returns && md.returns.length >= 30) {
               await runUnifiedEngine(md.returns, null);
-              stateBlock = renderDirective(thinkingState, voice);
+              stateBlock = renderGatedDirective(thinkingState, voice);
               if (md.latestPrice != null) contextPriceLine = `${tickerHit[1].toUpperCase()} last close: $${md.latestPrice.toFixed(2)} (${md.dataPoints} daily bars, 2yr window).`;
             }
           } catch (e) { /* fall through to web-fetch series */ }
@@ -431,7 +449,7 @@ Return JSON with:
           }
           if (returns.length >= 30) {
             await runUnifiedEngine(returns, null);
-            stateBlock = renderDirective(thinkingState, voice);
+            stateBlock = renderGatedDirective(thinkingState, voice);
           }
         }
 
