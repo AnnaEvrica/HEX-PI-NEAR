@@ -184,6 +184,107 @@ export function predictFromSequence(
   return result;
 }
 
+// ===========================================================================
+// MAGNITUDE-AWARE ENCODING — the crypto fix.
+//
+// The direction-only encoding discards magnitude: a 0.1% wiggle and a 15%
+// explosion both become "1." Crypto's real structure lives in magnitude (fat
+// tails, volatility clustering, regime bursts). This encoding captures BOTH
+// direction AND relative weight, where "big" vs "small" is measured against
+// the series's OWN rolling context — the contextual meaning of each data point.
+// A 5% BTC move during low-vol is "big"; the same move during high-vol is
+// "small." The threshold self-calibrates to the current regime.
+//
+// Encoding: 3 transitions × 2 bits (direction + magnitude) = 6 bits, 64 states.
+// Halves temporal depth vs direction-only (3 vs 6 transitions) but doubles
+// information per transition — the right trade for magnitude-rich series.
+// ===========================================================================
+
+export interface MagnitudeTable { up: number[]; down: number[]; }
+
+// Encode the last 3 returns as 6 magnitude-aware bits, using the 30 prior
+// returns as the contextual magnitude baseline (rolling median absolute return).
+export function returnsToMagnitudeBits(returns: number[]): { bits: number[]; medianMag: number } {
+  if (returns.length < 33) throw new Error('Need at least 33 returns for magnitude encoding (30 context + 3 state).');
+  const contextAbs = returns.slice(-33, -3).map(r => Math.abs(r)).sort((a, b) => a - b);
+  const medianMag = contextAbs[Math.floor(contextAbs.length / 2)] || 0.001;
+  const last3 = returns.slice(-3);
+  const bits: number[] = [];
+  for (const r of last3) {
+    bits.push(r > 0 ? 1 : 0);                        // direction bit
+    bits.push(Math.abs(r) >= medianMag ? 1 : 0);     // magnitude bit (contextual)
+  }
+  return { bits, medianMag };
+}
+
+// Build a magnitude-encoded transition table from a raw return series.
+// Walks the series with a rolling context window, encodes each 3-transition
+// window into a 6-bit magnitude state, and counts the up/down outcome that
+// followed. Returns {up, down} in the same format as TRAINED_TABLES.
+export function buildMagnitudeTable(returns: number[]): MagnitudeTable {
+  const up = new Array(64).fill(0);
+  const down = new Array(64).fill(0);
+  for (let i = 33; i < returns.length; i++) {
+    const contextAbs = returns.slice(i - 33, i - 3).map(r => Math.abs(r)).sort((a, b) => a - b);
+    const medianMag = contextAbs[Math.floor(contextAbs.length / 2)] || 0.001;
+    let state = 0;
+    for (let j = i - 3; j < i; j++) {
+      const r = returns[j];
+      const dirBit = r > 0 ? 1 : 0;
+      const magBit = Math.abs(r) >= medianMag ? 1 : 0;
+      state = state * 4 + (dirBit * 2 + magBit);
+    }
+    if (returns[i] > 0) up[state]++;
+    else down[state]++;
+  }
+  return { up, down };
+}
+
+// Predict the next outcome using a magnitude-encoded table built from the
+// training window of the SAME series — walk-forward honest. The table is
+// built from returns[0..n-4], the state from returns[n-3..n-1], and we
+// predict returns[n] (the next unseen outcome). No frozen table needed;
+// the table is freshly built from the series's own history each call.
+export function predictFromMagnitudeSequence(
+  returns: number[],
+  confidenceCutoff: number = CONFIDENCE_CUTOFF_DEFAULT,
+  livePrecision: LivePrecisionRecord | null = null
+): Hex6Output & { medianMag: number } {
+  if (returns.length < 34) throw new Error('Need at least 34 returns for magnitude prediction.');
+  // Build the table from everything BEFORE the current 3-transition state window.
+  const trainingReturns = returns.slice(0, -3);
+  const table = buildMagnitudeTable(trainingReturns);
+  const upSum = table.up.reduce((s, x) => s + x, 0);
+  const downSum = table.down.reduce((s, x) => s + x, 0);
+  const baseRate = upSum / Math.max(1, upSum + downSum);
+  let nStatesSeen = 0;
+  for (let i = 0; i < 64; i++) if (table.up[i] + table.down[i] > 0) nStatesSeen++;
+  nStatesSeen = Math.max(1, nStatesSeen);
+  const totalN = upSum + downSum;
+  const k = Math.max(1, K_RATIO * (totalN / nStatesSeen));
+  // Encode the current state from the last 3 returns (with their own context median).
+  const { bits, medianMag } = returnsToMagnitudeBits(returns);
+  const state = encodeState(bits);
+  const nObs = table.up[state] + table.down[state];
+  const p = shrunkPUp(table.up[state], table.down[state], baseRate, k);
+  const entropy = binaryEntropy(p);
+  const personalCall = Math.abs(p - 0.5) * 2;
+  const adaptiveCutoff = recalibrateConfidence(livePrecision, confidenceCutoff);
+  return {
+    domain: 'MAGNITUDE',
+    state,
+    p_up: round(p),
+    predicted_direction: p > 0.5 ? 'UP' : 'DOWN',
+    entropy: round(entropy),
+    personal_call_strength: round(personalCall),
+    n_observations_this_state: nObs,
+    high_conviction: personalCall >= adaptiveCutoff,
+    domain_base_rate: round(baseRate),
+    encoded_from_bits: bits,
+    medianMag,
+  };
+}
+
 function round(x: number): number {
   return Math.round(x * 10000) / 10000;
 }
