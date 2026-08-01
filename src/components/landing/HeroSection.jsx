@@ -144,7 +144,10 @@ export default function HeroSection({ onAsteriskHover }) {
               </span>
               <p className="whitespace-nowrap flex items-baseline justify-center gap-3 sm:gap-5 leading-none">
                 <span className="line-through decoration-accent decoration-[3px] text-foreground/30 text-[clamp(1rem,3.2vw,2rem)] font-light uppercase tracking-[0.22em]">Validation</span>
-                <span className="text-foreground text-[clamp(2rem,7vw,4.5rem)] font-extrabold uppercase tracking-[-0.04em]">Truth</span>
+                <span className="flex flex-col items-center leading-none">
+                  <span className="text-foreground text-[clamp(2rem,7vw,4.5rem)] font-extrabold uppercase tracking-[-0.04em]">Truth</span>
+                  <span className="mt-2 text-[clamp(0.55rem,1.1vw,0.72rem)] font-medium uppercase tracking-[0.3em] text-foreground/45">probabilistic intelligence [PI]</span>
+                </span>
               </p>
             </motion.div>
 
