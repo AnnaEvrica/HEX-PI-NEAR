@@ -65,10 +65,12 @@ export default async function(req) {
     // zeroing history. For each bar j, run the engine on returns[0..j-1]
     // and pair its mu with the realized return at j. No look-ahead.
     const calibPairs = [];
+    const magCalibPairs = [];
     if (reasonOnly) {
       for (let j = 20; j < split; j++) {
         const r = runReasonLayer(returns.slice(0, j), riskAversion);
         calibPairs.push({ predictedMu: r.mu, realized: returns[j] });
+        magCalibPairs.push({ predictedMu: r.sigma, realized: Math.abs(returns[j]) });
       }
     }
 
@@ -81,10 +83,13 @@ export default async function(req) {
       if (reasonOnly) {
         // Scope calibration: zero the crosshairs on past prediction-vs-reality.
         const scope = fitScope(calibPairs);
+        const magScope = fitScope(magCalibPairs);
         const calibratedMu = zeroShot(reason.mu, scope);
         const calibratedDir = calibratedMu > 0 ? 1 : calibratedMu < 0 ? -1 : 0;
-        preds.push({ predictedDir, actualDir, realized: test[i], predictedMu: reason.mu, predictedSigma: reason.sigma, calibratedMu, calibratedDir, scopeBeta: scope?.beta ?? null, scopeR2: scope?.inSampleR2 ?? null });
+        const calibratedMag = zeroShot(reason.sigma, magScope);
+        preds.push({ predictedDir, actualDir, realized: test[i], predictedMu: reason.mu, predictedSigma: reason.sigma, calibratedMu, calibratedDir, scopeBeta: scope?.beta ?? null, scopeR2: scope?.inSampleR2 ?? null, calibratedMag, magScopeBeta: magScope?.beta ?? null, magScopeR2: magScope?.inSampleR2 ?? null });
         calibPairs.push({ predictedMu: reason.mu, realized: test[i] });
+        magCalibPairs.push({ predictedMu: reason.sigma, realized: Math.abs(test[i]) });
         continue;
       }
       const wave = runWaveLayer(window);
@@ -132,6 +137,15 @@ export default async function(req) {
       const calRmse = Math.sqrt(mean(preds.map(p => (p.calibratedMu - p.realized) ** 2)));
       const calValid = preds.filter(p => p.calibratedDir !== 0 && p.actualDir !== 0);
       const calDirAccuracy = calValid.length ? calValid.filter(p => p.calibratedDir === p.actualDir).length / calValid.length : null;
+      // Magnitude forecast: does the hexagram's sigma predict |realized return|?
+      // Volatility clustering means sigma should carry real magnitude signal.
+      const absRets = preds.map(p => Math.abs(p.realized));
+      const sigmas = preds.map(p => p.predictedSigma);
+      const magnitudeCalibration = pearson(sigmas, absRets);
+      const magnitudeMae = mean(preds.map(p => Math.abs(p.predictedSigma - Math.abs(p.realized))));
+      const calMags = preds.map(p => p.calibratedMag);
+      const calMagCalibration = pearson(calMags, absRets);
+      const calMagMae = mean(preds.map(p => Math.abs(p.calibratedMag - Math.abs(p.realized))));
       return Response.json({
         ticker: ticker || 'SUPPLIED',
         mode: 'HEX6_BLE_REASON_ONLY',
@@ -159,6 +173,12 @@ export default async function(req) {
         calibratedDirAccuracy: r2(calDirAccuracy),
         avgScopeBeta: r2(mean(preds.map(p => p.scopeBeta ?? 0))),
         avgScopeR2: r2(mean(preds.map(p => p.scopeR2 ?? 0))),
+        magnitudeCalibration: r2(magnitudeCalibration),
+        magnitudeMae: r2(magnitudeMae, 6),
+        calibratedMagnitudeCalibration: r2(calMagCalibration),
+        calibratedMagnitudeMae: r2(calMagMae, 6),
+        avgMagScopeBeta: r2(mean(preds.map(p => p.magScopeBeta ?? 0))),
+        avgMagScopeR2: r2(mean(preds.map(p => p.magScopeR2 ?? 0))),
         timestamp: new Date().toISOString(),
         });
     }
