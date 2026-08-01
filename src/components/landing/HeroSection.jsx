@@ -142,14 +142,14 @@ export default function HeroSection({ onAsteriskHover }) {
               >
                 <span className="text-foreground/70">[</span><span className="text-foreground">BLE</span><span className="text-foreground/70">: Binaureal Linguistic Engine]</span>
               </span>
-              <p className="whitespace-nowrap text-foreground/85 text-[clamp(0.72rem,2.1vw,1.35rem)] font-normal leading-relaxed">
-                Never validating. Focuses on finding truth.
+              <p className="whitespace-nowrap text-foreground text-[clamp(0.85rem,2.6vw,1.65rem)] font-medium leading-relaxed tracking-tight">
+                <span className="line-through decoration-accent decoration-2 text-foreground/55">Validation</span>{' '}<span className="font-semibold">truth</span>
               </p>
             </motion.div>
 
             <div className="relative mt-10 sm:mt-14 w-full rounded-md bg-white px-5 py-5 sm:py-6">
               <p className="text-center text-sm sm:text-lg md:text-xl text-black font-mono font-semibold leading-snug">
-                Experimental LLM in beta testing:
+                Experimental LLM in beta testing
               </p>
             </div>
 
