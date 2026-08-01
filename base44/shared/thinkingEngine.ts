@@ -139,6 +139,20 @@ function classifyBasin(stateKey6, mu, sigma) {
 // regimes. This is what makes the edge regime-conditional: when the market
 // shifts from bull to bear, the engine stops diluting its read with bull-regime
 // transitions. Applied at the hive level (the primary 0.7-weight predictor).
+// Regime affinity — surrounding pools. Each prediction draws from ALL three
+// regime pools, weighted by how close each pool's regime is to the current one.
+// RANGE is the bridge: when the market is in RANGE, both UP and DOWN history
+// stay relevant (0.7). When firmly UP, DOWN history is nearly excluded (0.2)
+// and RANGE history is a secondary pool (0.6). This is the "market stages as
+// weighted calibration points" — the directional lean (UP/DOWN) comes from the
+// core state encoding; the regime pools calibrate HOW MUCH each historical
+// transition contributes to the conviction, not the direction itself.
+const REGIME_AFFINITY = {
+  UP:    { UP: 1.0, RANGE: 0.6, DOWN: 0.2 },
+  RANGE: { UP: 0.7, RANGE: 1.0, DOWN: 0.7 },
+  DOWN:  { UP: 0.2, RANGE: 0.6, DOWN: 1.0 },
+};
+
 function classifyRegime(returns, index, lookback = 20) {
   if (index < 3) return 'RANGE';
   const lb = Math.min(lookback, index + 1);
@@ -177,7 +191,7 @@ export function runReasonLayer(returns, riskAversion = 2.5, friction = 0.0035, w
     const key = (momentumBits << 1) | corrBit;
     const age = returns.length - 1 - i;
     const barRegime = classifyRegime(returns, i);
-    const regimeWeight = barRegime === currentRegime ? 1.0 : 0.35;
+    const regimeWeight = REGIME_AFFINITY[currentRegime][barRegime];
     const weight = Math.pow(LAMBDA, age) * regimeWeight;
     for (const L of LEVELS) {
       const ck = key & ((1 << L) - 1);
