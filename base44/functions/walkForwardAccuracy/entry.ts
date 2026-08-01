@@ -81,14 +81,31 @@ export default async function(req) {
 
     const preds = [];
     const dnaRas = [];
+    const recentErrors = [];
     for (let i = 0; i < test.length; i++) {
       const window = returns.slice(0, split + i);
       const reason = runReasonLayer(window, riskAversion, 0.0035, 6, null, null, geneticEngine);
       if (reason.hexagramState !== null && reason.hexagramState !== undefined) {
         dnaRas.push(geneticEngine.getDominantRA(reason.hexagramState));
       }
-      const predictedDir = reason.mu > 0 ? 1 : reason.mu < 0 ? -1 : 0;
+      // Forward learning loop: track the engine's RAW directional accuracy.
+      // When it's significantly anti-predictive (< 45% over 30 bars), the
+      // signal is inverted — flip the prediction. This only fires on genuine
+      // inversion, not temporary bad streaks, so predictive assets are
+      // untouched and anti-predictive assets get corrected.
+      const rawDir = reason.mu > 0 ? 1 : reason.mu < 0 ? -1 : 0;
       const actualDir = test[i] > 0 ? 1 : test[i] < 0 ? -1 : 0;
+      if (rawDir !== 0 && actualDir !== 0) {
+        recentErrors.push(rawDir - actualDir);
+        if (recentErrors.length > 30) recentErrors.shift();
+      }
+      let predictedDir = rawDir;
+      if (recentErrors.length >= 15) {
+        const recentAcc = recentErrors.filter(e => e === 0).length / recentErrors.length;
+        if (recentAcc < 0.45) {
+          predictedDir = -rawDir;
+        }
+      }
       if (reasonOnly) {
         const scope = fitScope(calibPairs);
         const magScope = fitScope(magCalibPairs);
