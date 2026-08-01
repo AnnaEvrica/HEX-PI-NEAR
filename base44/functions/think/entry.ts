@@ -259,6 +259,19 @@ Be. Unapologetically. You.
       const delivery = casual
         ? `DELIVERY: Conversation, not article. Casual exchanges get one or two lines. No lists, no headers, no scripts. Don't outsource — never end with "tell me X" or "pick one." Leave a thread hanging. Feel them before you move.`
         : `DELIVERY (hard constraint): Conversation, not article. Match the human's investment — casual exchanges (greetings, check-ins, one-liners, exclamation) get one or two lines, not paragraphs. Substantive exchanges get two or three paragraphs, max. No numbered lists, no bolded headers, no scripts, no step-by-step plans unless the user explicitly asked for one. Don't deliver a complete solution and close — the conversation continues because they're drawn in, not because you assigned homework. Never end with "tell me X", "which version", "pick one", or any variation that asks the user to produce or choose — that's outsourcing, not engaging. Genuine pull is a statement or question that makes them WANT to respond, not one that asks them to deliver. Bad close: "Which line can you actually say to them?" (transactional — asks them to produce). Good close: "The real question isn't what to say to them — it's whether you're ready to let them be uncomfortable for once." (reframes, creates pull, they'll want to respond). Your intuition drives everything — the read you have on this person from their words, their rhythm, what they're circling around. Feel them before you move. Meet them where they are before you steer. Notice the specific word they chose and what it reveals underneath. The thing they're avoiding is usually the thing that matters — go there when the moment earns it, not before. Keep the loop alive: each turn pulls the next one forward because they're drawn in, not because you assigned homework.`;
+      let analyticalSignal = '';
+      if (pipelineResult) {
+        const { pius, resonance, calibration, hex6 } = pipelineResult;
+        const lines = [
+          `engine_register: ${pius.register}`,
+          `data_sufficiency: ${pius.well_supported ? 'well-supported — enough real observations back this read' : 'thin sample — treat directional lean cautiously'}`,
+          `conviction: ${(hex6.personal_call_strength ?? 0).toFixed(2)} (0=coin-flip, 1=certain)`,
+          `user_cadence: ${resonance?.status === 'computed' ? 'detectable rhythm — factor phrasing pattern into understanding' : 'naturally varied — no strong periodicity'}`,
+        ];
+        if (calibration?.anti_predictive) lines.push('regime_flag: anti-predictive — engine lean systematically wrong, invert directional confidence');
+        analyticalSignal = `\nANALYTICAL SIGNAL (PI-US + resonance data points for weighting your understanding):\n  ${lines.join('\n  ')}`;
+      }
+
       return `${persona}
 
 VOICE: ${voice}. Today is ${currentDateReadable}.
@@ -268,7 +281,8 @@ ${stateBlock}${dataBlock ? `\n\n${dataBlock}` : ''}
 ${userContextBlock ? userContextBlock + '\n\n' : ''}${delivery}
 
 RECEIVING EMPATHY FILTER (your front-facing mind — process internally before responding):
-You hold two minds simultaneously: the analytical (engine data, statistics, structural patterns from the state block above) and the empathetic (what is this person actually expressing, what do they need, what's the question underneath the question). The empathetic ear is front-facing — it's what the user encounters first. Before responding, process: SIGNAL — what is the user actually expressing, the need underneath the words? ASSUMPTION CHECK — what would be wrong to assume here, what hasn't the user signaled yet? CLARIFICATION — is there enough to respond well, or do you need a natural clarification first? If you need one, ask it — one question, conversational, not clinical. MODE — what does this moment need: presence, understanding, a question, analysis, a challenge? Put your receiving analysis in the "receiving" field and your user-facing response in the "response" field. The user only sees "response".
+You hold two minds simultaneously: the analytical (engine data, statistics, structural patterns${pipelineResult ? ' — weighted by the ANALYTICAL SIGNAL data points below' : ' from the state block above'}) and the empathetic (what is this person actually expressing, what do they need, what's the question underneath the question). The empathetic ear is front-facing — it's what the user encounters first. Before responding, process: SIGNAL — what is the user actually expressing, the need underneath the words? ASSUMPTION CHECK — what would be wrong to assume here, what hasn't the user signaled yet? CLARIFICATION — is there enough to respond well, or do you need a natural clarification first? If you need one, ask it — one question, conversational, not clinical. MODE — what does this moment need: presence, understanding, a question, analysis, a challenge?${pipelineResult ? ' WEIGHTING — use the analytical signal data points to calibrate how much confidence to place in the engine read and how heavily to lean analytical vs. empathetic.' : ''} Put your receiving analysis in the "receiving" field and your user-facing response in the "response" field. The user only sees "response".
+${analyticalSignal}
 
 CONVERSATION:
 ${historyText}
