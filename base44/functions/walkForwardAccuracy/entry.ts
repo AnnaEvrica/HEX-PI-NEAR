@@ -1,25 +1,19 @@
-// walkForwardAccuracy — walk-forward backtest that measures how well the
-// engine's Probability (exposure) and Value (Pascal support) metrics calibrate
-// to realized outcomes — not just directional accuracy.
+// walkForwardAccuracy — walk-forward backtest measuring how well the
+// hex6Engine's pre-trained state tables predict direction out-of-sample.
 //
-// For each out-of-sample step it trains on the expanding prefix, runs the full
-// Reason + Wave + Validation layers, records predicted probability / value /
-// direction, then compares to the realized next return.
+// For each out-of-sample step: encode the 6-bit state from the 7 most recent
+// raw values (closes), look up the prediction in the pre-trained table, and
+// compare to the realized next-bar return direction.
+//
+// Includes the forward learning loop (flip anti-predictive signals), per-direction
+// accuracy, conviction-gated accuracy, and portfolio metrics (Sharpe/drawdown
+// using conviction as exposure). Drops the old SCEFIT/scope/genetic/ratio-gate
+// accessories that were coupled to the retired thinkingEngine's mu/sigma output.
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.41';
-import { runReasonLayer, runWaveLayer, runValidationLayer } from '../../shared/thinkingEngine.ts';
+import { predictFromSequence } from '../../shared/hex6Engine.ts';
+import { mapTickerToDomain } from '../../shared/hex6Pipeline.ts';
 import { fetchYahooReturns, fetchWeatherReturns } from '../../shared/marketDataClient.ts';
-import { fitScope, zeroShot } from '../../shared/zeroScope.ts';
-import { GeneticRiskEngine } from '../../shared/geneticRiskEngine.ts';
 
-function pearson(a, b) {
-  const n = Math.min(a.length, b.length);
-  if (n < 3) return 0;
-  const ma = a.slice(0, n).reduce((s, x) => s + x, 0) / n;
-  const mb = b.slice(0, n).reduce((s, x) => s + x, 0) / n;
-  let num = 0, da = 0, db = 0;
-  for (let i = 0; i < n; i++) { const ai = a[i] - ma, bi = b[i] - mb; num += ai * bi; da += ai * ai; db += bi * bi; }
-  return (da === 0 || db === 0) ? 0 : num / Math.sqrt(da * db);
-}
 const mean = (a) => a.length ? a.reduce((s, x) => s + x, 0) / a.length : 0;
 const r2 = (x, d = 4) => x === null || x === undefined ? null : Number(x.toFixed(d));
 
@@ -30,71 +24,64 @@ export default async function(req) {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
-    let { series, as_returns, ticker, trainRatio = 0.8, riskAversion = 2.5, reasonOnly = false, domain } = body;
+    let { series, as_returns, ticker, trainRatio = 0.8, domain } = body;
 
-    // Fetch real daily returns directly; no LLM retrieval or integration credits.
+    // Fetch real daily closes + returns. We use closes for state encoding
+    // (hex6Engine's valuesToBits compares consecutive raw values, matching the
+    // pre-trained tables) and returns for actual direction comparison.
     if ((!series || series.length < 30) && domain === 'weather') {
       const weather = await fetchWeatherReturns(40.71, -74.01, 1825);
-      series = weather.returns;
-      as_returns = true;
+      series = weather.closes;
+      as_returns = false;
       ticker = 'WEATHER_NYC';
     }
     if ((!series || series.length < 30) && ticker) {
       const market = await fetchYahooReturns(ticker, 1825);
-      series = market.returns;
-      as_returns = true;
+      series = market.closes;
+      as_returns = false;
     }
 
     if (!series || series.length < 30) {
       return Response.json({ error: 'Need a series of >=30 numbers or a ticker to fetch.' }, { status: 400 });
     }
 
-    // Convert to returns if raw prices.
-    let returns = series.map(Number);
+    // Ensure we have closes (for predictions) and returns (for actuals).
+    let closes = series.map(Number);
+    let returns;
     if (as_returns === false) {
-      const r = [];
-      for (let i = 1; i < returns.length; i++) { if (returns[i - 1] !== 0) r.push((returns[i] - returns[i - 1]) / returns[i - 1]); }
-      returns = r;
+      // Input is raw values — compute returns for actual direction.
+      returns = [];
+      for (let i = 1; i < closes.length; i++) {
+        if (closes[i - 1] !== 0) returns.push((closes[i] - closes[i - 1]) / closes[i - 1]);
+      }
+    } else {
+      // Input is already returns — use as both closes (state encoding will
+      // compare consecutive returns) and returns (for actuals).
+      returns = closes;
     }
+
     if (returns.length < 30) return Response.json({ error: 'Series too short after conversion.' }, { status: 400 });
 
+    const resolvedDomain = mapTickerToDomain(ticker);
     const split = Math.max(20, Math.floor(returns.length * trainRatio));
     const test = returns.slice(split);
     if (test.length < 5) return Response.json({ error: 'Not enough out-of-sample points.' }, { status: 400 });
 
-    // Pre-compute calibration pairs from the training set — the scope's
-    // zeroing history. For each bar j, run the engine on returns[0..j-1]
-    // and pair its mu with the realized return at j. No look-ahead.
-    const calibPairs = [];
-    const magCalibPairs = [];
-    const geneticEngine = new GeneticRiskEngine();
-    if (reasonOnly) {
-      for (let j = 20; j < split; j++) {
-        const r = runReasonLayer(returns.slice(0, j), riskAversion, 0.0035, 6, null, null, geneticEngine);
-        calibPairs.push({ predictedMu: r.mu, realized: returns[j] });
-        magCalibPairs.push({ predictedMu: r.sigma, realized: Math.abs(returns[j]) });
-        if (r.hexagramState !== null && r.hexagramState !== undefined) {
-          geneticEngine.recordVisit(r.hexagramState, r.muLb || 0, r.sigma || 0, returns[j], r.markov?.mu || 0, r.markov?.sigma || 0, r.markov?.confidence || 0, r.motif?.score || 0);
-        }
-      }
-    }
-
     const preds = [];
-    const dnaRas = [];
     const recentErrors = [];
+
     for (let i = 0; i < test.length; i++) {
-      const window = returns.slice(0, split + i);
-      const reason = runReasonLayer(window, riskAversion, 0.0035, 6, null, null, geneticEngine);
-      if (reason.hexagramState !== null && reason.hexagramState !== undefined) {
-        dnaRas.push(geneticEngine.getDominantRA(reason.hexagramState));
-      }
-      // Forward learning loop: track the engine's RAW directional accuracy.
-      // When it's significantly anti-predictive (< 45% over 30 bars), the
-      // signal is inverted — flip the prediction. This only fires on genuine
-      // inversion, not temporary bad streaks, so predictive assets are
-      // untouched and anti-predictive assets get corrected.
-      const rawDir = reason.mu > 0 ? 1 : reason.mu < 0 ? -1 : 0;
+      // 7 most recent closes up to and including the current bar.
+      const recentCloses = closes.slice(0, split + i + 1).slice(-7);
+      if (recentCloses.length < 7) continue;
+
+      const hex6 = predictFromSequence(resolvedDomain, recentCloses);
+      const rawDir = hex6.predicted_direction === 'UP' ? 1 : -1;
       const actualDir = test[i] > 0 ? 1 : test[i] < 0 ? -1 : 0;
+
+      // Forward learning loop: track the engine's RAW directional accuracy.
+      // When significantly anti-predictive (< 45% over 30 bars), flip the
+      // prediction. Only fires on genuine inversion, not temporary streaks.
       if (rawDir !== 0 && actualDir !== 0) {
         recentErrors.push(rawDir - actualDir);
         if (recentErrors.length > 30) recentErrors.shift();
@@ -102,167 +89,91 @@ export default async function(req) {
       let predictedDir = rawDir;
       if (recentErrors.length >= 15) {
         const recentAcc = recentErrors.filter(e => e === 0).length / recentErrors.length;
-        if (recentAcc < 0.45) {
-          predictedDir = -rawDir;
-        }
+        if (recentAcc < 0.45) predictedDir = -rawDir;
       }
-      if (reasonOnly) {
-        const scope = fitScope(calibPairs);
-        const magScope = fitScope(magCalibPairs);
-        const calibratedMu = zeroShot(reason.mu, scope);
-        const calibratedMag = zeroShot(reason.sigma, magScope);
-        const dnaRa = reason.hexagramState !== null && reason.hexagramState !== undefined ? geneticEngine.getDominantRA(reason.hexagramState) : riskAversion;
-        // Full pipeline: wave + validation give the engine more confidence —
-        // blendedExposure can be non-zero even when raw exposure is 0, via
-        // markov + motif. This is the totality of the skillset applied to
-        // the walk-forward, so the genetic engine evolves against real commits.
-        const wave = runWaveLayer(window);
-        const validation = runValidationLayer(reason, wave);
-        preds.push({ predictedDir, actualDir, realized: test[i], predictedMu: reason.mu, predictedSigma: reason.sigma, calibratedMu, calibratedMag, muLb: reason.muLb || 0, dnaRa, geneticExposure: validation.probability, markovMu: reason.markov?.mu || 0, markovSigma: reason.markov?.sigma || 0, markovConfidence: reason.markov?.confidence || 0, motifScore: reason.motif?.score || 0 });
-        calibPairs.push({ predictedMu: reason.mu, realized: test[i] });
-        magCalibPairs.push({ predictedMu: reason.sigma, realized: Math.abs(test[i]) });
-        if (reason.hexagramState !== null && reason.hexagramState !== undefined) {
-          geneticEngine.recordVisit(reason.hexagramState, reason.muLb || 0, reason.sigma || 0, test[i], reason.markov?.mu || 0, reason.markov?.sigma || 0, reason.markov?.confidence || 0, reason.motif?.score || 0);
-        }
-        continue;
-      }
-      const wave = runWaveLayer(window);
-      const validation = runValidationLayer(reason, wave);
+
+      // Exposure: long-only, scaled by conviction when direction is UP.
+      const exposure = predictedDir === 1 ? hex6.personal_call_strength : 0;
+
       preds.push({
-        probability: validation.probability,
-        value: validation.support,
-        confidence: validation.confidence,
-        predictedDir, actualDir, realized: test[i],
+        predictedDir, actualDir, rawDir, realized: test[i],
+        conviction: hex6.personal_call_strength,
+        highConviction: hex6.high_conviction,
+        nObs: hex6.n_observations_this_state,
+        pUp: hex6.p_up,
+        exposure,
       });
     }
 
+    // --- Core accuracy metrics ---
     const valid = preds.filter(p => p.predictedDir !== 0 && p.actualDir !== 0);
     const directionalAccuracy = valid.length ? valid.filter(p => p.predictedDir === p.actualDir).length / valid.length : null;
-    // Per-direction separation: each direction evaluated on its own, no pooling.
-    // The hypercube operates within the asset's own space-time; UP and DOWN calls
-    // are scored independently to reveal asymmetric edge.
+
+    // Per-direction separation: UP and DOWN calls scored independently.
     const upPreds = valid.filter(p => p.predictedDir === 1);
     const downPreds = valid.filter(p => p.predictedDir === -1);
     const upAccuracy = upPreds.length ? upPreds.filter(p => p.actualDir === 1).length / upPreds.length : null;
     const downAccuracy = downPreds.length ? downPreds.filter(p => p.actualDir === -1).length / downPreds.length : null;
 
-    if (reasonOnly) {
-      const eligible = preds.filter(p => p.actualDir !== 0);
-      // Ratio gate: the hexagram's precision discriminator (mu/sigma).
-      const ratios = preds.map(p => p.predictedSigma > 1e-8 ? Math.abs(p.predictedMu / p.predictedSigma) : 0);
-      const halfR = Math.floor(preds.length / 2);
-      const byRatio = preds.map((p, i) => ({ ...p, ratio: ratios[i] })).sort((a, b) => a.ratio - b.ratio);
-      const lowRatio = byRatio.slice(0, halfR).filter(p => p.actualDir !== 0);
-      const highRatio = byRatio.slice(halfR).filter(p => p.actualDir !== 0);
-      const highRatioAccuracy = highRatio.length ? highRatio.filter(p => p.predictedDir === p.actualDir).length / highRatio.length : null;
-      const lowRatioAccuracy = lowRatio.length ? lowRatio.filter(p => p.predictedDir === p.actualDir).length / lowRatio.length : null;
-      // Magnitude: sigma → |realized| (volatility clustering signal).
-      const absRets = preds.map(p => Math.abs(p.realized));
-      const magnitudeCalibration = pearson(preds.map(p => p.predictedSigma), absRets);
-      // Scope-calibrated point + magnitude accuracy.
-      const calibratedMae = mean(preds.map(p => Math.abs(p.calibratedMu - p.realized)));
-      const calibratedMagnitudeMae = mean(preds.map(p => Math.abs(p.calibratedMag - Math.abs(p.realized))));
-      // Portfolio metrics: genetic RA vs fixed baseline RA. The genetic engine
-      // changes bet SIZE per hexagram, not direction — so the impact shows up
-      // in Sharpe/drawdown, not directional accuracy.
-      const sharpe = (rets) => {
-        if (rets.length < 3) return 0;
-        const m = rets.reduce((s, x) => s + x, 0) / rets.length;
-        const v = rets.reduce((s, x) => s + (x - m) ** 2, 0) / rets.length;
-        const sd = Math.sqrt(v);
-        return sd < 1e-8 ? 0 : (m / sd) * Math.sqrt(252);
-      };
-      const maxDd = (rets) => {
-        let cum = 1, peak = 1, mdd = 0;
-        for (const r of rets) { cum *= (1 + r); peak = Math.max(peak, cum); mdd = Math.min(mdd, cum / peak - 1); }
-        return mdd;
-      };
-      // Portfolio metrics: full blendedExposure pipeline (reason + markov +
-      // motif). Genetic uses validation.probability (already computed with
-      // the genetic RA). Baseline recomputes the same blend with fixed RA.
-      const geneticRets = preds.map(p => (p.geneticExposure || 0) * p.realized);
-      const baselineRets = preds.map(p => {
-        const exp = p.muLb > 0 && p.predictedSigma > 1e-8 ? Math.min(1, Math.max(0, (p.muLb / (p.predictedSigma * p.predictedSigma)) / riskAversion)) : 0;
-        let blended = exp;
-        if (p.markovConfidence > 0.3 && p.markovSigma > 1e-8) {
-          const markovExp = Math.min(Math.max((p.markovMu / (p.markovSigma * p.markovSigma)) / riskAversion, 0), 1);
-          blended = Math.min(Math.max(0.7 * exp + 0.2 * markovExp + 0.1 * Math.max(0, p.motifScore), 0), 1);
-        }
-        return blended * p.realized;
-      });
-      return Response.json({
-        ticker: ticker || 'SUPPLIED',
-        mode: 'HEX6_BLE_REASON_ONLY',
-        seriesLength: returns.length,
-        trainSize: split,
-        testSize: test.length,
-        predictionsEvaluated: valid.length,
-        coverage: r2(eligible.length ? valid.length / eligible.length : 0),
-        directionalAccuracy: r2(directionalAccuracy),
-        upAccuracy: r2(upAccuracy),
-        downAccuracy: r2(downAccuracy),
-        upPredictions: upPreds.length,
-        downPredictions: downPreds.length,
-        avgRatio: r2(mean(ratios)),
-        avgDnaRa: r2(dnaRas.length ? mean(dnaRas) : 2.5),
-        highRatioAccuracy: r2(highRatioAccuracy),
-        lowRatioAccuracy: r2(lowRatioAccuracy),
-        gatedCoverage: r2((highRatio.length + lowRatio.length) > 0 ? highRatio.length / (highRatio.length + lowRatio.length) : 0),
-        magnitudeCalibration: r2(magnitudeCalibration),
-        calibratedMae: r2(calibratedMae, 6),
-        calibratedMagnitudeMae: r2(calibratedMagnitudeMae, 6),
-        geneticSharpe: r2(sharpe(geneticRets), 2),
-        baselineSharpe: r2(sharpe(baselineRets), 2),
-        geneticMdd: r2(maxDd(geneticRets), 2),
-        baselineMdd: r2(maxDd(baselineRets), 2),
-        timestamp: new Date().toISOString(),
-      });
-    }
+    // Conviction gate: does high-conviction predict better than low?
+    const eligible = preds.filter(p => p.actualDir !== 0);
+    const halfC = Math.floor(eligible.length / 2);
+    const byConv = [...eligible].sort((a, b) => a.conviction - b.conviction);
+    const lowConv = byConv.slice(0, halfC);
+    const highConv = byConv.slice(halfC);
+    const highConvictionAccuracy = highConv.length ? highConv.filter(p => p.predictedDir === p.actualDir).length / highConv.length : null;
+    const lowConvictionAccuracy = lowConv.length ? lowConv.filter(p => p.predictedDir === p.actualDir).length / lowConv.length : null;
 
-    const probs = preds.map(p => p.probability);
-    const vals = preds.map(p => p.value);
-    const rets = preds.map(p => p.realized);
+    // Sample support: does well-supported (n >= 20) predict better than thin?
+    const wellSup = eligible.filter(p => p.nObs >= 20);
+    const thinSup = eligible.filter(p => p.nObs < 20);
+    const wellSupportedAccuracy = wellSup.length ? wellSup.filter(p => p.predictedDir === p.actualDir).length / wellSup.length : null;
+    const thinSampleAccuracy = thinSup.length ? thinSup.filter(p => p.predictedDir === p.actualDir).length / thinSup.length : null;
 
-    // Calibration: do higher probability / value predictions yield higher realized returns?
-    const probabilityCalibration = pearson(probs, rets);
-    const valueCalibration = pearson(vals, rets);
+    // Raw (pre-flip) accuracy — shows whether the forward learning loop helped.
+    const rawValid = preds.filter(p => p.rawDir !== 0 && p.actualDir !== 0);
+    const rawAccuracy = rawValid.length ? rawValid.filter(p => p.rawDir === p.actualDir).length / rawValid.length : null;
 
-    // Tier analysis: does a higher value/probability discriminate better trades?
-    const half = Math.floor(preds.length / 2);
-    const byVal = [...preds].sort((a, b) => a.value - b.value);
-    const lowVal = byVal.slice(0, half).filter(p => p.actualDir !== 0);
-    const highVal = byVal.slice(half).filter(p => p.actualDir !== 0);
-    const highValueAccuracy = highVal.length ? highVal.filter(p => p.predictedDir === p.actualDir).length / highVal.length : null;
-    const lowValueAccuracy = lowVal.length ? lowVal.filter(p => p.predictedDir === p.actualDir).length / lowVal.length : null;
-
-    const byProb = [...preds].sort((a, b) => a.probability - b.probability);
-    const lowProb = byProb.slice(0, half).filter(p => p.actualDir !== 0);
-    const highProb = byProb.slice(half).filter(p => p.actualDir !== 0);
-    const highProbabilityAccuracy = highProb.length ? highProb.filter(p => p.predictedDir === p.actualDir).length / highProb.length : null;
-    const lowProbabilityAccuracy = lowProb.length ? lowProb.filter(p => p.predictedDir === p.actualDir).length / lowProb.length : null;
-    const highProbabilityReturn = highProb.length ? mean(highProb.map(p => p.realized)) : null;
-    const lowProbabilityReturn = lowProb.length ? mean(lowProb.map(p => p.realized)) : null;
+    // Portfolio metrics: conviction-scaled long-only exposure.
+    const sharpe = (rets) => {
+      if (rets.length < 3) return 0;
+      const m = rets.reduce((s, x) => s + x, 0) / rets.length;
+      const v = rets.reduce((s, x) => s + (x - m) ** 2, 0) / rets.length;
+      const sd = Math.sqrt(v);
+      return sd < 1e-8 ? 0 : (m / sd) * Math.sqrt(252);
+    };
+    const maxDd = (rets) => {
+      let cum = 1, peak = 1, mdd = 0;
+      for (const r of rets) { cum *= (1 + r); peak = Math.max(peak, cum); mdd = Math.min(mdd, cum / peak - 1); }
+      return mdd;
+    };
+    const portfolioRets = preds.map(p => p.exposure * p.realized);
+    const buyHoldRets = preds.map(p => p.realized);
 
     return Response.json({
       ticker: ticker || 'SUPPLIED',
-      seriesLength: returns.length,
+      domain: resolvedDomain,
+      mode: 'HEX6_PRE_TRAINED',
+      seriesLength: closes.length,
       trainSize: split,
       testSize: test.length,
+      predictionsEvaluated: valid.length,
+      coverage: r2(eligible.length ? valid.length / eligible.length : 0),
       directionalAccuracy: r2(directionalAccuracy),
+      rawAccuracy: r2(rawAccuracy),
       upAccuracy: r2(upAccuracy),
       downAccuracy: r2(downAccuracy),
       upPredictions: upPreds.length,
       downPredictions: downPreds.length,
-      probabilityCalibration: r2(probabilityCalibration),
-      valueCalibration: r2(valueCalibration),
-      highValueAccuracy: r2(highValueAccuracy),
-      lowValueAccuracy: r2(lowValueAccuracy),
-      highProbabilityAccuracy: r2(highProbabilityAccuracy),
-      lowProbabilityAccuracy: r2(lowProbabilityAccuracy),
-      highProbabilityReturn: r2(highProbabilityReturn, 6),
-      lowProbabilityReturn: r2(lowProbabilityReturn, 6),
-      friction: directionalAccuracy !== null ? r2(1 - directionalAccuracy) : null,
-      version: '5.5',
+      highConvictionAccuracy: r2(highConvictionAccuracy),
+      lowConvictionAccuracy: r2(lowConvictionAccuracy),
+      wellSupportedAccuracy: r2(wellSupportedAccuracy),
+      thinSampleAccuracy: r2(thinSampleAccuracy),
+      avgConviction: r2(mean(preds.map(p => p.conviction))),
+      portfolioSharpe: r2(sharpe(portfolioRets), 2),
+      buyHoldSharpe: r2(sharpe(buyHoldRets), 2),
+      portfolioMdd: r2(maxDd(portfolioRets), 2),
+      buyHoldMdd: r2(maxDd(buyHoldRets), 2),
       timestamp: new Date().toISOString(),
     });
   } catch (e) {
