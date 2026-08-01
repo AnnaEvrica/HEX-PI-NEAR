@@ -143,7 +143,7 @@ export default function HeroSection({ onAsteriskHover }) {
                 <span className="text-foreground/70">[</span><span className="text-foreground">BLE</span><span className="text-foreground/70">: Binaureal Linguistic Engine]</span>
               </span>
               <p className="whitespace-nowrap text-foreground text-[clamp(0.85rem,2.6vw,1.65rem)] font-medium leading-relaxed tracking-tight">
-                <span className="line-through decoration-accent decoration-2 text-foreground/55">Validation</span>{' '}<span className="font-semibold">truth</span>
+                <span className="line-through decoration-accent decoration-2 text-foreground/55 uppercase tracking-[0.1em] font-bold">Validation</span>{' '}<span className="font-bold uppercase tracking-[0.1em]">Truth</span>
               </p>
             </motion.div>
 
