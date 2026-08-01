@@ -104,7 +104,7 @@ export default function Discover() {
         </div>
       </nav>
 
-      {/* Mirror — HEX6-BLE & PI-US, two lenses on one mind */}
+      {/* Mirror — HEX6-BLE, two lenses on one mind */}
       <div id="mirror"><MirrorSection /></div>
 
       {/* Invitation — see it for yourself */}
