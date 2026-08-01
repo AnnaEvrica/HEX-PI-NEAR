@@ -74,7 +74,7 @@ export default async function(req) {
         calibPairs.push({ predictedMu: r.mu, realized: returns[j] });
         magCalibPairs.push({ predictedMu: r.sigma, realized: Math.abs(returns[j]) });
         if (r.hexagramState !== null && r.hexagramState !== undefined) {
-          geneticEngine.recordVisit(r.hexagramState, r.muLb || 0, r.sigma || 0, returns[j]);
+          geneticEngine.recordVisit(r.hexagramState, r.muLb || 0, r.sigma || 0, returns[j], r.markov?.mu || 0, r.markov?.sigma || 0, r.markov?.confidence || 0, r.motif?.score || 0);
         }
       }
     }
@@ -95,11 +95,17 @@ export default async function(req) {
         const calibratedMu = zeroShot(reason.mu, scope);
         const calibratedMag = zeroShot(reason.sigma, magScope);
         const dnaRa = reason.hexagramState !== null && reason.hexagramState !== undefined ? geneticEngine.getDominantRA(reason.hexagramState) : riskAversion;
-        preds.push({ predictedDir, actualDir, realized: test[i], predictedMu: reason.mu, predictedSigma: reason.sigma, calibratedMu, calibratedMag, muLb: reason.muLb || 0, dnaRa });
+        // Full pipeline: wave + validation give the engine more confidence —
+        // blendedExposure can be non-zero even when raw exposure is 0, via
+        // markov + motif. This is the totality of the skillset applied to
+        // the walk-forward, so the genetic engine evolves against real commits.
+        const wave = runWaveLayer(window);
+        const validation = runValidationLayer(reason, wave);
+        preds.push({ predictedDir, actualDir, realized: test[i], predictedMu: reason.mu, predictedSigma: reason.sigma, calibratedMu, calibratedMag, muLb: reason.muLb || 0, dnaRa, geneticExposure: validation.probability, markovMu: reason.markov?.mu || 0, markovSigma: reason.markov?.sigma || 0, markovConfidence: reason.markov?.confidence || 0, motifScore: reason.motif?.score || 0 });
         calibPairs.push({ predictedMu: reason.mu, realized: test[i] });
         magCalibPairs.push({ predictedMu: reason.sigma, realized: Math.abs(test[i]) });
         if (reason.hexagramState !== null && reason.hexagramState !== undefined) {
-          geneticEngine.recordVisit(reason.hexagramState, reason.muLb || 0, reason.sigma || 0, test[i]);
+          geneticEngine.recordVisit(reason.hexagramState, reason.muLb || 0, reason.sigma || 0, test[i], reason.markov?.mu || 0, reason.markov?.sigma || 0, reason.markov?.confidence || 0, reason.motif?.score || 0);
         }
         continue;
       }
@@ -154,13 +160,18 @@ export default async function(req) {
         for (const r of rets) { cum *= (1 + r); peak = Math.max(peak, cum); mdd = Math.min(mdd, cum / peak - 1); }
         return mdd;
       };
-      const geneticRets = preds.map(p => {
-        const exp = p.predictedSigma > 1e-8 ? Math.min(1, Math.max(0, (p.muLb / (p.predictedSigma * p.predictedSigma)) / (p.dnaRa || 2.5))) : 0;
-        return exp * p.realized;
-      });
+      // Portfolio metrics: full blendedExposure pipeline (reason + markov +
+      // motif). Genetic uses validation.probability (already computed with
+      // the genetic RA). Baseline recomputes the same blend with fixed RA.
+      const geneticRets = preds.map(p => (p.geneticExposure || 0) * p.realized);
       const baselineRets = preds.map(p => {
-        const exp = p.predictedSigma > 1e-8 ? Math.min(1, Math.max(0, (p.muLb / (p.predictedSigma * p.predictedSigma)) / riskAversion)) : 0;
-        return exp * p.realized;
+        const exp = p.muLb > 0 && p.predictedSigma > 1e-8 ? Math.min(1, Math.max(0, (p.muLb / (p.predictedSigma * p.predictedSigma)) / riskAversion)) : 0;
+        let blended = exp;
+        if (p.markovConfidence > 0.3 && p.markovSigma > 1e-8) {
+          const markovExp = Math.min(Math.max((p.markovMu / (p.markovSigma * p.markovSigma)) / riskAversion, 0), 1);
+          blended = Math.min(Math.max(0.7 * exp + 0.2 * markovExp + 0.1 * Math.max(0, p.motifScore), 0), 1);
+        }
+        return blended * p.realized;
       });
       return Response.json({
         ticker: ticker || 'SUPPLIED',

@@ -7,13 +7,11 @@
 // through a genetic algorithm: genes that produce better risk-adjusted
 // returns in a given hexagram survive and mutate.
 //
-// When the engine is in hexagram state X, the dominant gene from population X
-// becomes the live risk aversion. This replaces the fixed 2.5 (fractional
-// Kelly) with an evolved, state-specific bet size.
-//
-// Each hexagram develops its own evolutionary lineage: fear hexagrams evolve
-// cautious genes, growth hexagrams evolve aggressive genes, threshold
-// hexagrams evolve patient genes. The I-Ching's 64 states are the ecosystems.
+// The fitness function uses the FULL engine pipeline (blendedExposure =
+// reason + markov + motif), not just raw muLb/sigma². This is the totality
+// of the skillset: the genetic engine evolves RAs that optimize the same
+// blended exposure the engine actually commits with, so genes that earn
+// their keep in the live pipeline survive.
 // ===========================================================================
 
 const POP_SIZE = 12;
@@ -25,6 +23,10 @@ interface Visit {
   muLb: number;
   sigma: number;
   actualReturn: number;
+  markovMu: number;
+  markovSigma: number;
+  markovConfidence: number;
+  motifScore: number;
 }
 
 export class GeneticRiskEngine {
@@ -44,8 +46,6 @@ export class GeneticRiskEngine {
     }
   }
 
-  // Get the dominant (top-3 average) risk aversion for a hexagram state.
-  // Falls back to 2.5 (fractional Kelly) until enough visits accumulate.
   getDominantRA(hexagramState: number): number {
     if (hexagramState < 0 || hexagramState > 63) return 2.5;
     const mem = this.memory[hexagramState];
@@ -57,11 +57,13 @@ export class GeneticRiskEngine {
     return top3.reduce((s, x) => s + x, 0) / 3;
   }
 
-  // Record a visit to hexagram state with the engine's output and actual return.
-  // Triggers evolution every EVOLUTION_FREQ bars.
-  recordVisit(hexagramState: number, muLb: number, sigma: number, actualReturn: number): void {
+  recordVisit(
+    hexagramState: number,
+    muLb: number, sigma: number, actualReturn: number,
+    markovMu = 0, markovSigma = 0, markovConfidence = 0, motifScore = 0,
+  ): void {
     if (hexagramState < 0 || hexagramState > 63) return;
-    this.memory[hexagramState].push({ muLb, sigma, actualReturn });
+    this.memory[hexagramState].push({ muLb, sigma, actualReturn, markovMu, markovSigma, markovConfidence, motifScore });
     if (this.memory[hexagramState].length > 252) {
       this.memory[hexagramState] = this.memory[hexagramState].slice(-252);
     }
@@ -87,14 +89,21 @@ export class GeneticRiskEngine {
     }
   }
 
-  // Fitness = Sharpe ratio - max drawdown penalty.
-  // Simulates what would have happened if we used this RA for all visits
-  // to this hexagram: exposure = clip(muLb / sigma² / RA, 0, 1).
+  // Fitness = Sharpe - drawdown penalty, using the FULL blendedExposure
+  // pipeline (reason + markov + motif). This is the same formula the engine
+  // uses to commit — so genes evolve against the real exposure, not a raw
+  // sub-slice of it.
   private evaluateFitness(ra: number, mem: Visit[]): number {
     const rets = mem.map(m => {
-      if (m.sigma < 1e-8) return 0;
-      const exposure = Math.min(1, Math.max(0, (m.muLb / (m.sigma * m.sigma)) / ra));
-      return exposure * m.actualReturn;
+      const exp = m.muLb > 0 && m.sigma > 1e-8
+        ? Math.min(1, Math.max(0, (m.muLb / (m.sigma * m.sigma)) / ra))
+        : 0;
+      let blended = exp;
+      if (m.markovConfidence > 0.3 && m.markovSigma > 1e-8) {
+        const markovExp = Math.min(Math.max((m.markovMu / (m.markovSigma * m.markovSigma)) / ra, 0), 1);
+        blended = Math.min(Math.max(0.7 * exp + 0.2 * markovExp + 0.1 * Math.max(0, m.motifScore), 0), 1);
+      }
+      return blended * m.actualReturn;
     });
     const n = rets.length;
     const mean = rets.reduce((s, x) => s + x, 0) / n;
