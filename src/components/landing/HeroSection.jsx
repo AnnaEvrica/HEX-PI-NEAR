@@ -103,7 +103,7 @@ export default function HeroSection({ onAsteriskHover }) {
       <div className="absolute inset-0 bg-black" />
 
       <motion.div
-        className="relative z-10 max-w-6xl mx-auto px-5 sm:px-10 py-9 sm:py-12 md:py-16 bg-background/75 backdrop-blur-md rounded-lg shadow-[0_0_50px_rgba(255,255,255,0.1),0_14px_40px_rgba(0,0,0,0.4)]"
+        className="relative z-10 max-w-6xl mx-auto px-5 sm:px-10 py-12 sm:py-16 md:py-20 bg-background/75 backdrop-blur-md rounded-lg shadow-[0_0_50px_rgba(255,255,255,0.1),0_14px_40px_rgba(0,0,0,0.4)]"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
@@ -131,7 +131,7 @@ export default function HeroSection({ onAsteriskHover }) {
 
           {/* Hero line — the reframe */}
           <motion.div
-            className="relative mt-10 sm:mt-14 flex flex-col items-center text-center gap-4 sm:gap-5"
+            className="relative mt-12 sm:mt-16 lg:mt-20 flex flex-col items-center text-center gap-5 sm:gap-6"
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.26 }}
@@ -147,15 +147,15 @@ export default function HeroSection({ onAsteriskHover }) {
             </p>
           </motion.div>
 
-          <div className="relative mt-10 sm:mt-14 flex flex-col items-center justify-center gap-3 sm:gap-4 text-center text-foreground text-[0.84rem] sm:text-[1.56rem] md:text-[2.1rem] font-light tracking-[0.05em]">
+          <div className="relative mt-12 sm:mt-16 lg:mt-20 flex flex-col items-center justify-center gap-4 sm:gap-5 text-center text-foreground text-[0.84rem] sm:text-[1.56rem] md:text-[2.1rem] font-light tracking-[0.05em]">
             <span className="whitespace-nowrap">Probabilistic Intelligence</span>
             <span className="font-bold text-foreground whitespace-nowrap">[PI]</span>
           </div>
 
-          <div className="relative mt-16 sm:mt-24 flex flex-col items-center">
+          <div className="relative mt-20 sm:mt-28 lg:mt-32 flex flex-col items-center">
             {/* Descriptor line — [BLE: Binaureal Linguistic Engine] */}
             <motion.div
-              className="flex flex-col items-center gap-3 sm:gap-4"
+              className="flex flex-col items-center gap-4 sm:gap-6"
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7 }}
@@ -166,7 +166,7 @@ export default function HeroSection({ onAsteriskHover }) {
               >
                 <span className="text-foreground/70">[</span><span className="text-foreground">BLE</span><span className="text-foreground/70">: Binaureal Linguistic Engine]</span>
               </span>
-              <p className="relative mt-6 sm:mt-8 max-w-2xl text-center text-foreground/85 text-xs sm:text-sm md:text-base font-normal leading-[1.8] px-6 py-4 rounded-full">
+              <p className="relative mt-8 sm:mt-10 max-w-2xl text-center text-foreground/85 text-xs sm:text-sm md:text-base font-normal leading-[1.8] px-6 py-4 rounded-full">
                 <span className="absolute inset-0 -z-10 rounded-full bg-black/5 blur-2xl" aria-hidden="true" />
                 <span className="absolute inset-0 -z-10 rounded-full bg-white/15" aria-hidden="true" />
                 The Signal (HEX6-BLE PI-US v5.5) is an experimental probabilistic intelligence layer that sits on top of existing LLMs, replacing purely token-probability-driven inference with external semantic state estimation and probabilistic decision optimization to produce more reliable reasoning without retraining foundation models. <span className="text-foreground font-medium">Live in beta testing.</span>
@@ -174,13 +174,13 @@ export default function HeroSection({ onAsteriskHover }) {
             </motion.div>
 
             {/* 3D radial wave field with identified signal points — circular ripple overlay on top. */}
-            <div className="relative mt-12 sm:mt-16 w-full">
+            <div className="relative mt-16 sm:mt-20 lg:mt-24 w-full">
               <WaveSignal3D />
             </div>
 
             {/* Evidence — why it's different */}
-            <div className="relative mt-12 sm:mt-16 w-full max-w-3xl mx-auto px-2">
-              <div className="space-y-8 sm:space-y-10">
+            <div className="relative mt-16 sm:mt-20 lg:mt-24 w-full max-w-3xl mx-auto px-2">
+              <div className="space-y-10 sm:space-y-14 lg:space-y-16">
                 <div className="flex flex-col items-center justify-center gap-2 sm:gap-3 text-center">
                   <span className="text-foreground font-bold text-sm sm:text-base md:text-lg tracking-tight">Statistical Analysis</span>
                   <span className="text-foreground/85 text-sm sm:text-base md:text-lg font-normal leading-relaxed">Learning probability through "prediction" — testable, falsifiable, and grounded in real outcome distributions.</span>
@@ -201,7 +201,7 @@ export default function HeroSection({ onAsteriskHover }) {
             </div>
 
             {/* The legal block — a boundary, not an apology. */}
-            <div className="relative mt-[3.25rem] sm:mt-[4.75rem] w-full rounded-md bg-white px-5 py-5 sm:py-6">
+            <div className="relative mt-16 sm:mt-20 lg:mt-24 w-full rounded-md bg-white px-5 py-5 sm:py-6">
               <p className="text-center text-[0.72rem] sm:text-[0.9rem] md:text-[1.05rem] text-black font-bold leading-snug">
                 Not financial or legal advice — a probabilistic witness that clarifies, never replaces, judgment.
               </p>
@@ -212,7 +212,7 @@ export default function HeroSection({ onAsteriskHover }) {
           </div>
         </div>
 
-        <div className="flex justify-center w-full pt-[2.91rem]">
+        <div className="flex justify-center w-full pt-16 sm:pt-20">
           <button
             onClick={handleEnter}
             className="inline-flex items-center justify-center px-10 py-3 sm:py-4 rounded-sm bg-primary text-primary-foreground border-2 border-foreground font-bold hover:bg-primary/90 transition-colors text-sm sm:text-base md:text-lg shadow-lg"

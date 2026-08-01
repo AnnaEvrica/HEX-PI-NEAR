@@ -11,7 +11,7 @@ export default function Landing() {
   const [footerLit, setFooterLit] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="h-screen overflow-x-hidden overflow-y-auto overscroll-y-contain scroll-smooth bg-background text-foreground">
       {/* Nav */}
       <nav
         className="sticky top-0 z-50 bg-background border-b border-border"
