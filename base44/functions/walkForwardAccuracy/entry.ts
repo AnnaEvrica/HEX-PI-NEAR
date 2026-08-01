@@ -34,13 +34,13 @@ export default async function(req) {
 
     // Fetch real daily returns directly; no LLM retrieval or integration credits.
     if ((!series || series.length < 30) && domain === 'weather') {
-      const weather = await fetchWeatherReturns();
+      const weather = await fetchWeatherReturns(40.71, -74.01, 1825);
       series = weather.returns;
       as_returns = true;
       ticker = 'WEATHER_NYC';
     }
     if ((!series || series.length < 30) && ticker) {
-      const market = await fetchYahooReturns(ticker, 730);
+      const market = await fetchYahooReturns(ticker, 1825);
       series = market.returns;
       as_returns = true;
     }

@@ -431,7 +431,7 @@ Return JSON with:
         const tickerHit = message.match(TICKER_RE);
         if (tickerHit) {
           try {
-            const md = await fetchYahooReturns(tickerHit[1], 730);
+            const md = await fetchYahooReturns(tickerHit[1], 1825);
             if (md.returns && md.returns.length >= 30) {
               await runUnifiedEngine(md.returns, null);
               stateBlock = renderGatedDirective(thinkingState, voice);
