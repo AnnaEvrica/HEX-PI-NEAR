@@ -99,8 +99,8 @@ export default async function(req) {
 
       preds.push({
         predictedDir, actualDir, rawDir, realized: test[i],
+        state: hex6.state,
         conviction: hex6.personal_call_strength,
-        highConviction: hex6.high_conviction,
         nObs: hex6.n_observations_this_state,
         pUp: hex6.p_up,
         baseRate: hex6.domain_base_rate,
@@ -142,6 +142,19 @@ export default async function(req) {
     const brierNull = domainBaseRate * (1 - domainBaseRate);
     const brierSkillScore = (brierScore !== null && brierNull > 0) ? 1 - brierScore / brierNull : null;
 
+    // --- Markov transition scoring (log-likelihood) ---
+    // The natural companion to Brier: scores the transition probability model
+    // directly. Brier is quadratic loss; log loss penalizes wrong-and-confident
+    // more harshly. Both are proper scoring rules for the same p_up — showing
+    // both reveals whether the model is well-calibrated (Brier) AND whether it
+    // places enough mass on the right outcome (log loss).
+    const markovLL = (probFn) => brierEligible.length
+      ? brierEligible.reduce((s, p) => s + Math.log(Math.max(probFn(p), 1e-12)), 0) / brierEligible.length
+      : null;
+    const markovLogLikelihood = markovLL(p => p.actualDir === 1 ? p.pUp : 1 - p.pUp);
+    const markovNullLogLikelihood = markovLL(p => p.actualDir === 1 ? p.baseRate : 1 - p.baseRate);
+    const markovStatesVisited = new Set(brierEligible.map(p => p.state)).size;
+
     // Portfolio metrics: equal-weight long-only exposure.
     const sharpe = (rets) => {
       if (rets.length < 3) return 0;
@@ -171,6 +184,9 @@ export default async function(req) {
       brierScore: r2(brierScore),
       brierNull: r2(brierNull),
       brierSkillScore: r2(brierSkillScore),
+      markovLogLikelihood: r2(markovLogLikelihood),
+      markovNullLogLikelihood: r2(markovNullLogLikelihood),
+      markovStatesVisited,
       rawAccuracy: r2(rawAccuracy),
       upAccuracy: r2(upAccuracy),
       downAccuracy: r2(downAccuracy),
