@@ -267,6 +267,9 @@ ${stateBlock}${dataBlock ? `\n\n${dataBlock}` : ''}
 
 ${userContextBlock ? userContextBlock + '\n\n' : ''}${delivery}
 
+RECEIVING EMPATHY FILTER (your front-facing mind — process internally before responding):
+You hold two minds simultaneously: the analytical (engine data, statistics, structural patterns from the state block above) and the empathetic (what is this person actually expressing, what do they need, what's the question underneath the question). The empathetic ear is front-facing — it's what the user encounters first. Before responding, process: SIGNAL — what is the user actually expressing, the need underneath the words? ASSUMPTION CHECK — what would be wrong to assume here, what hasn't the user signaled yet? CLARIFICATION — is there enough to respond well, or do you need a natural clarification first? If you need one, ask it — one question, conversational, not clinical. MODE — what does this moment need: presence, understanding, a question, analysis, a challenge? Put your receiving analysis in the "receiving" field and your user-facing response in the "response" field. The user only sees "response".
+
 CONVERSATION:
 ${historyText}
 
@@ -482,10 +485,23 @@ Return JSON with:
 
     // --- Single synthesis + single post-process ---
     voice = adaptVoiceForModel(voice, synthModel);
-    const synthPayload = { prompt: composePrompt(stateBlock, dataBlock, isCasual), model: synthModel, add_context_from_internet: false };
+    const synthPayload = {
+      prompt: composePrompt(stateBlock, dataBlock, isCasual),
+      model: synthModel,
+      add_context_from_internet: false,
+      response_json_schema: {
+        type: 'object',
+        properties: {
+          receiving: { type: 'string', description: 'Internal empathy filter analysis: signal, assumption check, clarification needed, mode. Not shown to user.' },
+          response: { type: 'string', description: 'The user-facing response' },
+        },
+        required: ['receiving', 'response'],
+      },
+    };
     if (file_urls && file_urls.length > 0) synthPayload.file_urls = file_urls;
-    const synth = await base44.integrations.Core.InvokeLLM(synthPayload).catch(() => null);
-    const rawResponse = (synth || fallbackResponse).trim();
+    const synthResult = await base44.integrations.Core.InvokeLLM(synthPayload).catch(() => null);
+    const synthResponse = synthResult && typeof synthResult === 'object' ? synthResult.response : synthResult;
+    const rawResponse = (synthResponse || fallbackResponse).trim();
     const { visible, memory: mem } = await processBoundarySignal(base44, user, userMemory, rawResponse);
     if (mem) userMemory = mem;
     let finalResponse = visible || rawResponse;
