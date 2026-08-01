@@ -131,7 +131,7 @@ export default function HeroSection({ onAsteriskHover }) {
 
           <div className="relative mt-16 sm:mt-24 flex flex-col items-center text-center">
             <motion.div
-              className="flex flex-col items-center gap-6 sm:gap-8 w-full"
+              className="flex flex-col items-center gap-10 sm:gap-14 w-full"
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.2 }}
@@ -146,7 +146,7 @@ export default function HeroSection({ onAsteriskHover }) {
                 <span className="line-through decoration-accent decoration-[3px] text-foreground/30 text-[clamp(1rem,3.2vw,2rem)] font-light uppercase tracking-[0.22em]">Validation</span>
                 <span className="flex flex-col items-center leading-none">
                   <span className="text-foreground text-[clamp(2rem,7vw,4.5rem)] font-extrabold uppercase tracking-[-0.04em]">Truth</span>
-                  <span className="mt-2 text-[clamp(0.55rem,1.1vw,0.72rem)] font-medium uppercase tracking-[0.3em] text-foreground/45">probabilistic intelligence [PI]</span>
+                  <span className="mt-[0.6rem] block w-full text-justify text-[clamp(0.55rem,1.1vw,0.72rem)] font-medium uppercase text-foreground/45" style={{ textAlignLast: 'justify' }}>probabilistic intelligence [PI]</span>
                 </span>
               </p>
             </motion.div>
