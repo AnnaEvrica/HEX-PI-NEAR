@@ -61,7 +61,7 @@ export default async function(req) {
       const predictedDir = reason.mu > 0 ? 1 : reason.mu < 0 ? -1 : 0;
       const actualDir = test[i] > 0 ? 1 : test[i] < 0 ? -1 : 0;
       if (reasonOnly) {
-        preds.push({ predictedDir, actualDir, realized: test[i] });
+        preds.push({ predictedDir, actualDir, realized: test[i], predictedMu: reason.mu, predictedSigma: reason.sigma });
         continue;
       }
       const wave = runWaveLayer(window);
@@ -86,6 +86,21 @@ export default async function(req) {
 
     if (reasonOnly) {
       const eligible = preds.filter(p => p.actualDir !== 0);
+      // Numerical precision: does the cast hexagram's mu predict the actual next number?
+      const mus = preds.map(p => p.predictedMu);
+      const rets = preds.map(p => p.realized);
+      const returnCalibration = pearson(mus, rets);
+      const mae = mean(preds.map(p => Math.abs(p.predictedMu - p.realized)));
+      const rmse = Math.sqrt(mean(preds.map(p => (p.predictedMu - p.realized) ** 2)));
+      // Ratio discrimination: mu/sigma is the hexagram's precision metric.
+      // High-ratio hexagrams carry signal; low-ratio carry noise.
+      const ratios = preds.map(p => p.predictedSigma > 1e-8 ? Math.abs(p.predictedMu / p.predictedSigma) : 0);
+      const halfR = Math.floor(preds.length / 2);
+      const byRatio = preds.map((p, i) => ({ ...p, ratio: ratios[i] })).sort((a, b) => a.ratio - b.ratio);
+      const lowRatio = byRatio.slice(0, halfR).filter(p => p.actualDir !== 0);
+      const highRatio = byRatio.slice(halfR).filter(p => p.actualDir !== 0);
+      const highRatioAccuracy = highRatio.length ? highRatio.filter(p => p.predictedDir === p.actualDir).length / highRatio.length : null;
+      const lowRatioAccuracy = lowRatio.length ? lowRatio.filter(p => p.predictedDir === p.actualDir).length / lowRatio.length : null;
       return Response.json({
         ticker: ticker || 'SUPPLIED',
         mode: 'HEX6_BLE_REASON_ONLY',
@@ -101,6 +116,12 @@ export default async function(req) {
         downAccuracy: r2(downAccuracy),
         upPredictions: upPreds.length,
         downPredictions: downPreds.length,
+        returnCalibration: r2(returnCalibration),
+        mae: r2(mae, 6),
+        rmse: r2(rmse, 6),
+        avgRatio: r2(mean(ratios)),
+        highRatioAccuracy: r2(highRatioAccuracy),
+        lowRatioAccuracy: r2(lowRatioAccuracy),
         timestamp: new Date().toISOString(),
         });
     }
