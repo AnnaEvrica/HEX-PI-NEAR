@@ -101,6 +101,7 @@ export default async function(req) {
         highConviction: hex6.high_conviction,
         nObs: hex6.n_observations_this_state,
         pUp: hex6.p_up,
+        baseRate: hex6.domain_base_rate,
         exposure,
       });
     }
@@ -134,6 +135,27 @@ export default async function(req) {
     const rawValid = preds.filter(p => p.rawDir !== 0 && p.actualDir !== 0);
     const rawAccuracy = rawValid.length ? rawValid.filter(p => p.rawDir === p.actualDir).length / rawValid.length : null;
 
+    // --- Brier score (base-rate corrected) ---
+    // The honest null is p*(1-p) using the domain's OWN base rate, not 0.25.
+    // BTC's base rate is ~0.598, so its null is 0.241 — a Brier of 0.235 looks
+    // like skill against 0.25 but is noise against 0.241.
+    const brierEligible = preds.filter(p => p.actualDir !== 0);
+    const brierScore = brierEligible.length
+      ? brierEligible.reduce((s, p) => s + Math.pow(p.pUp - (p.actualDir === 1 ? 1 : 0), 2), 0) / brierEligible.length
+      : null;
+    const domainBaseRate = brierEligible.length ? brierEligible[0].baseRate : 0.5;
+    const brierNull = domainBaseRate * (1 - domainBaseRate);
+    const brierSkillScore = (brierScore !== null && brierNull > 0) ? 1 - brierScore / brierNull : null;
+
+    // --- Domain-aware confidence gate ---
+    // Per the README: high_conviction gating HELPS BTC, HORSE_RACING, WEATHER
+    // but HURTS NFL (unfiltered baseline is the best signal there).
+    const GATED_DOMAINS = ['BTC', 'HORSE_RACING', 'WEATHER'];
+    const gated = GATED_DOMAINS.includes(resolvedDomain)
+      ? valid.filter(p => p.highConviction)
+      : valid;
+    const domainGatedAccuracy = gated.length ? gated.filter(p => p.predictedDir === p.actualDir).length / gated.length : null;
+
     // Portfolio metrics: conviction-scaled long-only exposure.
     const sharpe = (rets) => {
       if (rets.length < 3) return 0;
@@ -160,6 +182,12 @@ export default async function(req) {
       predictionsEvaluated: valid.length,
       coverage: r2(eligible.length ? valid.length / eligible.length : 0),
       directionalAccuracy: r2(directionalAccuracy),
+      domainGatedAccuracy: r2(domainGatedAccuracy),
+      domainGatedCount: gated.length,
+      domainGatedCoverage: r2(eligible.length ? gated.length / eligible.length : 0),
+      brierScore: r2(brierScore),
+      brierNull: r2(brierNull),
+      brierSkillScore: r2(brierSkillScore),
       rawAccuracy: r2(rawAccuracy),
       upAccuracy: r2(upAccuracy),
       downAccuracy: r2(downAccuracy),
