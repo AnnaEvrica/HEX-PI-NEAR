@@ -81,13 +81,11 @@ export default async function(req) {
       const predictedDir = reason.mu > 0 ? 1 : reason.mu < 0 ? -1 : 0;
       const actualDir = test[i] > 0 ? 1 : test[i] < 0 ? -1 : 0;
       if (reasonOnly) {
-        // Scope calibration: zero the crosshairs on past prediction-vs-reality.
         const scope = fitScope(calibPairs);
         const magScope = fitScope(magCalibPairs);
         const calibratedMu = zeroShot(reason.mu, scope);
-        const calibratedDir = calibratedMu > 0 ? 1 : calibratedMu < 0 ? -1 : 0;
         const calibratedMag = zeroShot(reason.sigma, magScope);
-        preds.push({ predictedDir, actualDir, realized: test[i], predictedMu: reason.mu, predictedSigma: reason.sigma, calibratedMu, calibratedDir, scopeBeta: scope?.beta ?? null, scopeR2: scope?.inSampleR2 ?? null, calibratedMag, magScopeBeta: magScope?.beta ?? null, magScopeR2: magScope?.inSampleR2 ?? null });
+        preds.push({ predictedDir, actualDir, realized: test[i], predictedMu: reason.mu, predictedSigma: reason.sigma, calibratedMu, calibratedMag });
         calibPairs.push({ predictedMu: reason.mu, realized: test[i] });
         magCalibPairs.push({ predictedMu: reason.sigma, realized: Math.abs(test[i]) });
         continue;
@@ -114,14 +112,7 @@ export default async function(req) {
 
     if (reasonOnly) {
       const eligible = preds.filter(p => p.actualDir !== 0);
-      // Numerical precision: does the cast hexagram's mu predict the actual next number?
-      const mus = preds.map(p => p.predictedMu);
-      const rets = preds.map(p => p.realized);
-      const returnCalibration = pearson(mus, rets);
-      const mae = mean(preds.map(p => Math.abs(p.predictedMu - p.realized)));
-      const rmse = Math.sqrt(mean(preds.map(p => (p.predictedMu - p.realized) ** 2)));
-      // Ratio discrimination: mu/sigma is the hexagram's precision metric.
-      // High-ratio hexagrams carry signal; low-ratio carry noise.
+      // Ratio gate: the hexagram's precision discriminator (mu/sigma).
       const ratios = preds.map(p => p.predictedSigma > 1e-8 ? Math.abs(p.predictedMu / p.predictedSigma) : 0);
       const halfR = Math.floor(preds.length / 2);
       const byRatio = preds.map((p, i) => ({ ...p, ratio: ratios[i] })).sort((a, b) => a.ratio - b.ratio);
@@ -129,58 +120,33 @@ export default async function(req) {
       const highRatio = byRatio.slice(halfR).filter(p => p.actualDir !== 0);
       const highRatioAccuracy = highRatio.length ? highRatio.filter(p => p.predictedDir === p.actualDir).length / highRatio.length : null;
       const lowRatioAccuracy = lowRatio.length ? lowRatio.filter(p => p.predictedDir === p.actualDir).length / lowRatio.length : null;
-      // Scope-calibrated precision: does zeroing the crosshairs improve
-      // numerical accuracy and return calibration?
-      const calMus = preds.map(p => p.calibratedMu);
-      const calReturnCalibration = pearson(calMus, rets);
-      const calMae = mean(preds.map(p => Math.abs(p.calibratedMu - p.realized)));
-      const calRmse = Math.sqrt(mean(preds.map(p => (p.calibratedMu - p.realized) ** 2)));
-      const calValid = preds.filter(p => p.calibratedDir !== 0 && p.actualDir !== 0);
-      const calDirAccuracy = calValid.length ? calValid.filter(p => p.calibratedDir === p.actualDir).length / calValid.length : null;
-      // Magnitude forecast: does the hexagram's sigma predict |realized return|?
-      // Volatility clustering means sigma should carry real magnitude signal.
+      // Magnitude: sigma → |realized| (volatility clustering signal).
       const absRets = preds.map(p => Math.abs(p.realized));
-      const sigmas = preds.map(p => p.predictedSigma);
-      const magnitudeCalibration = pearson(sigmas, absRets);
-      const magnitudeMae = mean(preds.map(p => Math.abs(p.predictedSigma - Math.abs(p.realized))));
-      const calMags = preds.map(p => p.calibratedMag);
-      const calMagCalibration = pearson(calMags, absRets);
-      const calMagMae = mean(preds.map(p => Math.abs(p.calibratedMag - Math.abs(p.realized))));
+      const magnitudeCalibration = pearson(preds.map(p => p.predictedSigma), absRets);
+      // Scope-calibrated point + magnitude accuracy.
+      const calibratedMae = mean(preds.map(p => Math.abs(p.calibratedMu - p.realized)));
+      const calibratedMagnitudeMae = mean(preds.map(p => Math.abs(p.calibratedMag - Math.abs(p.realized))));
       return Response.json({
         ticker: ticker || 'SUPPLIED',
         mode: 'HEX6_BLE_REASON_ONLY',
-        piUsUsed: false,
         seriesLength: returns.length,
         trainSize: split,
         testSize: test.length,
         predictionsEvaluated: valid.length,
-        abstentions: eligible.length - valid.length,
         coverage: r2(eligible.length ? valid.length / eligible.length : 0),
         directionalAccuracy: r2(directionalAccuracy),
         upAccuracy: r2(upAccuracy),
         downAccuracy: r2(downAccuracy),
         upPredictions: upPreds.length,
         downPredictions: downPreds.length,
-        returnCalibration: r2(returnCalibration),
-        mae: r2(mae, 6),
-        rmse: r2(rmse, 6),
         avgRatio: r2(mean(ratios)),
         highRatioAccuracy: r2(highRatioAccuracy),
         lowRatioAccuracy: r2(lowRatioAccuracy),
-        calibratedReturnCalibration: r2(calReturnCalibration),
-        calibratedMae: r2(calMae, 6),
-        calibratedRmse: r2(calRmse, 6),
-        calibratedDirAccuracy: r2(calDirAccuracy),
-        avgScopeBeta: r2(mean(preds.map(p => p.scopeBeta ?? 0))),
-        avgScopeR2: r2(mean(preds.map(p => p.scopeR2 ?? 0))),
         magnitudeCalibration: r2(magnitudeCalibration),
-        magnitudeMae: r2(magnitudeMae, 6),
-        calibratedMagnitudeCalibration: r2(calMagCalibration),
-        calibratedMagnitudeMae: r2(calMagMae, 6),
-        avgMagScopeBeta: r2(mean(preds.map(p => p.magScopeBeta ?? 0))),
-        avgMagScopeR2: r2(mean(preds.map(p => p.magScopeR2 ?? 0))),
+        calibratedMae: r2(calibratedMae, 6),
+        calibratedMagnitudeMae: r2(calibratedMagnitudeMae, 6),
         timestamp: new Date().toISOString(),
-        });
+      });
     }
 
     const probs = preds.map(p => p.probability);
