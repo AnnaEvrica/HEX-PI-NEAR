@@ -7,7 +7,8 @@
 // direction, then compares to the realized next return.
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.41';
 import { runReasonLayer, runWaveLayer, runValidationLayer } from '../../shared/thinkingEngine.ts';
-import { fetchYahooReturns } from '../../shared/marketDataClient.ts';
+import { fetchYahooReturns, fetchWeatherReturns } from '../../shared/marketDataClient.ts';
+import { fitScope, zeroShot } from '../../shared/zeroScope.ts';
 
 function pearson(a, b) {
   const n = Math.min(a.length, b.length);
@@ -28,9 +29,15 @@ export default async function(req) {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
-    let { series, as_returns, ticker, trainRatio = 0.8, riskAversion = 2.5, reasonOnly = false } = body;
+    let { series, as_returns, ticker, trainRatio = 0.8, riskAversion = 2.5, reasonOnly = false, domain } = body;
 
     // Fetch real daily returns directly; no LLM retrieval or integration credits.
+    if ((!series || series.length < 30) && domain === 'weather') {
+      const weather = await fetchWeatherReturns();
+      series = weather.returns;
+      as_returns = true;
+      ticker = 'WEATHER_NYC';
+    }
     if ((!series || series.length < 30) && ticker) {
       const market = await fetchYahooReturns(ticker, 730);
       series = market.returns;
@@ -54,6 +61,17 @@ export default async function(req) {
     const test = returns.slice(split);
     if (test.length < 5) return Response.json({ error: 'Not enough out-of-sample points.' }, { status: 400 });
 
+    // Pre-compute calibration pairs from the training set — the scope's
+    // zeroing history. For each bar j, run the engine on returns[0..j-1]
+    // and pair its mu with the realized return at j. No look-ahead.
+    const calibPairs = [];
+    if (reasonOnly) {
+      for (let j = 20; j < split; j++) {
+        const r = runReasonLayer(returns.slice(0, j), riskAversion);
+        calibPairs.push({ predictedMu: r.mu, realized: returns[j] });
+      }
+    }
+
     const preds = [];
     for (let i = 0; i < test.length; i++) {
       const window = returns.slice(0, split + i);
@@ -61,7 +79,12 @@ export default async function(req) {
       const predictedDir = reason.mu > 0 ? 1 : reason.mu < 0 ? -1 : 0;
       const actualDir = test[i] > 0 ? 1 : test[i] < 0 ? -1 : 0;
       if (reasonOnly) {
-        preds.push({ predictedDir, actualDir, realized: test[i], predictedMu: reason.mu, predictedSigma: reason.sigma });
+        // Scope calibration: zero the crosshairs on past prediction-vs-reality.
+        const scope = fitScope(calibPairs);
+        const calibratedMu = zeroShot(reason.mu, scope);
+        const calibratedDir = calibratedMu > 0 ? 1 : calibratedMu < 0 ? -1 : 0;
+        preds.push({ predictedDir, actualDir, realized: test[i], predictedMu: reason.mu, predictedSigma: reason.sigma, calibratedMu, calibratedDir, scopeBeta: scope?.beta ?? null, scopeR2: scope?.inSampleR2 ?? null });
+        calibPairs.push({ predictedMu: reason.mu, realized: test[i] });
         continue;
       }
       const wave = runWaveLayer(window);
@@ -101,6 +124,14 @@ export default async function(req) {
       const highRatio = byRatio.slice(halfR).filter(p => p.actualDir !== 0);
       const highRatioAccuracy = highRatio.length ? highRatio.filter(p => p.predictedDir === p.actualDir).length / highRatio.length : null;
       const lowRatioAccuracy = lowRatio.length ? lowRatio.filter(p => p.predictedDir === p.actualDir).length / lowRatio.length : null;
+      // Scope-calibrated precision: does zeroing the crosshairs improve
+      // numerical accuracy and return calibration?
+      const calMus = preds.map(p => p.calibratedMu);
+      const calReturnCalibration = pearson(calMus, rets);
+      const calMae = mean(preds.map(p => Math.abs(p.calibratedMu - p.realized)));
+      const calRmse = Math.sqrt(mean(preds.map(p => (p.calibratedMu - p.realized) ** 2)));
+      const calValid = preds.filter(p => p.calibratedDir !== 0 && p.actualDir !== 0);
+      const calDirAccuracy = calValid.length ? calValid.filter(p => p.calibratedDir === p.actualDir).length / calValid.length : null;
       return Response.json({
         ticker: ticker || 'SUPPLIED',
         mode: 'HEX6_BLE_REASON_ONLY',
@@ -122,6 +153,12 @@ export default async function(req) {
         avgRatio: r2(mean(ratios)),
         highRatioAccuracy: r2(highRatioAccuracy),
         lowRatioAccuracy: r2(lowRatioAccuracy),
+        calibratedReturnCalibration: r2(calReturnCalibration),
+        calibratedMae: r2(calMae, 6),
+        calibratedRmse: r2(calRmse, 6),
+        calibratedDirAccuracy: r2(calDirAccuracy),
+        avgScopeBeta: r2(mean(preds.map(p => p.scopeBeta ?? 0))),
+        avgScopeR2: r2(mean(preds.map(p => p.scopeR2 ?? 0))),
         timestamp: new Date().toISOString(),
         });
     }

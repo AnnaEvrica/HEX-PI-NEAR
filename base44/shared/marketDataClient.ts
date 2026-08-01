@@ -48,3 +48,32 @@ export async function fetchYahooReturns(rawTicker: string, lookbackDays = 730) {
     dataPoints: closes.length,
   };
 }
+
+/**
+ * Fetch daily max temperatures from Open-Meteo and compute day-over-day
+ * changes (the "returns" of temperature). Tests the engine on a non-financial
+ * domain — weather is a physical signal with real cyclicality.
+ */
+export async function fetchWeatherReturns(lat = 40.71, lon = -74.01, days = 730) {
+  const endDate = new Date();
+  const startDate = new Date(endDate.getTime() - days * 86400000);
+  const fmt = (d: Date) => d.toISOString().slice(0, 10);
+  const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${fmt(startDate)}&end_date=${fmt(endDate)}&daily=temperature_2m_max&timezone=auto`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Open-Meteo error: ${res.status}`);
+  const json = await res.json();
+  const temps: number[] = (json?.daily?.temperature_2m_max || []).filter(
+    (t: number | null) => t !== null && t !== undefined,
+  ) as number[];
+  const returns: number[] = [];
+  for (let i = 1; i < temps.length; i++) {
+    returns.push(temps[i] - temps[i - 1]);
+  }
+  return {
+    ticker: 'WEATHER_NYC',
+    closes: temps,
+    returns,
+    latestPrice: temps[temps.length - 1] ?? null,
+    dataPoints: temps.length,
+  };
+}
