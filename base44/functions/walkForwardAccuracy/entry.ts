@@ -5,10 +5,11 @@
 // raw values (closes), look up the prediction in the pre-trained table, and
 // compare to the realized next-bar return direction.
 //
-// Includes the forward learning loop (flip anti-predictive signals), per-direction
-// accuracy, conviction-gated accuracy, and portfolio metrics (Sharpe/drawdown
-// using conviction as exposure). Drops the old SCEFIT/scope/genetic/ratio-gate
-// accessories that were coupled to the retired thinkingEngine's mu/sigma output.
+// Includes the forward learning loop (calibration via predicted-vs-received
+// directional outcome — flips anti-predictive signals), per-direction accuracy,
+// Brier skill score (base-rate corrected), and portfolio metrics (equal-weight
+// long-only exposure). Confidence is calibration-only inside the learning loop,
+// NOT a gating or weighting layer on the final decision.
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.41';
 import { predictFromSequence } from '../../shared/hex6Engine.ts';
 import { mapTickerToDomain } from '../../shared/hex6Pipeline.ts';
@@ -92,8 +93,9 @@ export default async function(req) {
         if (recentAcc < 0.45) predictedDir = -rawDir;
       }
 
-      // Exposure: long-only, scaled by conviction when direction is UP.
-      const exposure = predictedDir === 1 ? hex6.personal_call_strength : 0;
+      // Exposure: equal-weight long-only (confidence is calibration-only,
+      // not a weighting layer on the decision).
+      const exposure = predictedDir === 1 ? 1 : 0;
 
       preds.push({
         predictedDir, actualDir, rawDir, realized: test[i],
@@ -116,14 +118,7 @@ export default async function(req) {
     const upAccuracy = upPreds.length ? upPreds.filter(p => p.actualDir === 1).length / upPreds.length : null;
     const downAccuracy = downPreds.length ? downPreds.filter(p => p.actualDir === -1).length / downPreds.length : null;
 
-    // Conviction gate: does high-conviction predict better than low?
     const eligible = preds.filter(p => p.actualDir !== 0);
-    const halfC = Math.floor(eligible.length / 2);
-    const byConv = [...eligible].sort((a, b) => a.conviction - b.conviction);
-    const lowConv = byConv.slice(0, halfC);
-    const highConv = byConv.slice(halfC);
-    const highConvictionAccuracy = highConv.length ? highConv.filter(p => p.predictedDir === p.actualDir).length / highConv.length : null;
-    const lowConvictionAccuracy = lowConv.length ? lowConv.filter(p => p.predictedDir === p.actualDir).length / lowConv.length : null;
 
     // Sample support: does well-supported (n >= 20) predict better than thin?
     const wellSup = eligible.filter(p => p.nObs >= 20);
@@ -147,16 +142,7 @@ export default async function(req) {
     const brierNull = domainBaseRate * (1 - domainBaseRate);
     const brierSkillScore = (brierScore !== null && brierNull > 0) ? 1 - brierScore / brierNull : null;
 
-    // --- Domain-aware confidence gate ---
-    // Per the README: high_conviction gating HELPS BTC, HORSE_RACING, WEATHER
-    // but HURTS NFL (unfiltered baseline is the best signal there).
-    const GATED_DOMAINS = ['BTC', 'HORSE_RACING', 'WEATHER'];
-    const gated = GATED_DOMAINS.includes(resolvedDomain)
-      ? valid.filter(p => p.highConviction)
-      : valid;
-    const domainGatedAccuracy = gated.length ? gated.filter(p => p.predictedDir === p.actualDir).length / gated.length : null;
-
-    // Portfolio metrics: conviction-scaled long-only exposure.
+    // Portfolio metrics: equal-weight long-only exposure.
     const sharpe = (rets) => {
       if (rets.length < 3) return 0;
       const m = rets.reduce((s, x) => s + x, 0) / rets.length;
@@ -182,9 +168,6 @@ export default async function(req) {
       predictionsEvaluated: valid.length,
       coverage: r2(eligible.length ? valid.length / eligible.length : 0),
       directionalAccuracy: r2(directionalAccuracy),
-      domainGatedAccuracy: r2(domainGatedAccuracy),
-      domainGatedCount: gated.length,
-      domainGatedCoverage: r2(eligible.length ? gated.length / eligible.length : 0),
       brierScore: r2(brierScore),
       brierNull: r2(brierNull),
       brierSkillScore: r2(brierSkillScore),
@@ -193,8 +176,6 @@ export default async function(req) {
       downAccuracy: r2(downAccuracy),
       upPredictions: upPreds.length,
       downPredictions: downPreds.length,
-      highConvictionAccuracy: r2(highConvictionAccuracy),
-      lowConvictionAccuracy: r2(lowConvictionAccuracy),
       wellSupportedAccuracy: r2(wellSupportedAccuracy),
       thinSampleAccuracy: r2(thinSampleAccuracy),
       avgConviction: r2(mean(preds.map(p => p.conviction))),
