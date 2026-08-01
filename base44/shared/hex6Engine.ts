@@ -63,7 +63,6 @@ export const CONFIDENCE_TIGHTENED = 0.40;
 export interface LivePrecisionRecord {
   resolved_predictions: number; // total high-conviction predictions with known outcomes
   hits: number;                 // directional hits among them
-  recent_errors?: number[];     // directional error signal: +1 = wrongly predicted UP, -1 = wrongly predicted DOWN, 0 = correct
 }
 
 export function recalibrateConfidence(
@@ -77,41 +76,6 @@ export function recalibrateConfidence(
   if (liveAcc >= 0.60) return CONFIDENCE_RELAXED;
   if (liveAcc < 0.55) return CONFIDENCE_TIGHTENED;
   return defaultCutoff;
-}
-
-// ===========================================================================
-// PIVOT — the dance within the geometric state space.
-//
-// When the engine is wrong, it should PIVOT (shift its directional lean based
-// on the error signal), not just DROP MOTIVATION (lower conviction and hedge).
-// Each wrong prediction shifts the probability itself — potentially flipping
-// the prediction — so the engine dances through the state space, recalibrating
-// its lean with each error rather than deflating and retreating.
-//
-// The pivot is an error-driven correction to the structural probability:
-//   - If the engine is systematically wrong predicting UP (positive errors),
-//     push p DOWN — the lean pivots toward DOWN.
-//   - If systematically wrong predicting DOWN (negative errors),
-//     push p UP — the lean pivots toward UP.
-//   - If errors are balanced or the engine is right, the pivot is ~0.
-//
-// This is distinct from the cutoff (which gates conviction LABELING without
-// changing the prediction). The pivot changes the prediction itself.
-// ===========================================================================
-
-export const PIVOT_LEARNING_RATE = 0.15;
-export const PIVOT_WINDOW = 10;
-
-export function computePivotCorrection(
-  recentErrors?: number[],
-  learningRate: number = PIVOT_LEARNING_RATE
-): number {
-  if (!recentErrors || recentErrors.length === 0) return 0;
-  const window = recentErrors.slice(-PIVOT_WINDOW);
-  const errorSum = window.reduce((s, e) => s + e, 0);
-  // Negative of the normalized error signal: systematic UP-errors push p DOWN,
-  // systematic DOWN-errors push p UP. This is the pivot — the lean shifts.
-  return -(errorSum / window.length) * learningRate;
 }
 
 export interface Hex6Output {
@@ -186,15 +150,10 @@ export function predictFromState(
 ): Hex6Output {
   const { up, down, baseRate, k } = domainStats(domain);
   const nObs = up[state] + down[state];
-  const structuralP = shrunkPUp(up[state], down[state], baseRate, k);
-  // PIVOT: shift the lean based on recent directional errors. This is the dance
-  // — each wrong prediction pivots the engine's position in the state space,
-  // potentially flipping the prediction, instead of just lowering conviction.
-  const pivot = computePivotCorrection(livePrecision?.recent_errors);
-  const p = Math.max(0.01, Math.min(0.99, structuralP + pivot));
+  const p = shrunkPUp(up[state], down[state], baseRate, k);
   const entropy = binaryEntropy(p);
   const personalCall = Math.abs(p - 0.5) * 2; // conviction, embedding entropy implicitly
-  // Adaptive cutoff: secondary mechanism — gates conviction labeling.
+  // Adaptive cutoff: gates conviction labeling based on live accuracy.
   const adaptiveCutoff = recalibrateConfidence(livePrecision, confidenceCutoff);
   return {
     domain,
@@ -210,7 +169,6 @@ export function predictFromState(
 }
 
 // Convenience wrapper: raw recent values -> state -> prediction.
-// `livePrecision` threads the error-driven pivot through the direction-only path.
 export function predictFromSequence(
   domain: string,
   recentValues: number[],
