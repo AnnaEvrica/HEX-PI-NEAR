@@ -69,6 +69,41 @@ function encodeState6(slice) {
   return parseInt(bits, 2);
 }
 
+// Trigram-factored transition: decomposes the 6-bit hexagram into lower
+// (recent 3 bars, lines 1-3) and upper (older 3 bars, lines 4-6) trigrams.
+// Each trigram has 8 states (2^3), giving 8× more data per state than the
+// full 64-state hexagram. This is the I-Ching's mathematical factoring:
+// 2^3 × 2^3 = 8 × 8 = 64. The lower trigram captures recent momentum;
+// the upper trigram captures longer-term context. Blended, they give a
+// denser, more robust directional read than the sparse full hexagram.
+function trigramMarkov(returns) {
+  if (returns.length < 8) return { lowerMu: 0, lowerSigma: 0, lowerN: 0, upperMu: 0, upperSigma: 0, upperN: 0, blendedMu: 0, blendedSigma: 0, totalN: 0 };
+  const lowerStats = {};
+  const upperStats = {};
+  for (let i = 6; i < returns.length; i++) {
+    const lowerBits = returns.slice(i - 3, i).map(r => r > 0 ? '1' : '0').join('');
+    const lowerState = parseInt(lowerBits, 2);
+    const upperBits = returns.slice(i - 6, i - 3).map(r => r > 0 ? '1' : '0').join('');
+    const upperState = parseInt(upperBits, 2);
+    const r = returns[i];
+    if (!lowerStats[lowerState]) lowerStats[lowerState] = { sum: 0, sum2: 0, n: 0 };
+    lowerStats[lowerState].sum += r; lowerStats[lowerState].sum2 += r * r; lowerStats[lowerState].n += 1;
+    if (!upperStats[upperState]) upperStats[upperState] = { sum: 0, sum2: 0, n: 0 };
+    upperStats[upperState].sum += r; upperStats[upperState].sum2 += r * r; upperStats[upperState].n += 1;
+  }
+  const currentLower = parseInt(returns.slice(-3).map(r => r > 0 ? '1' : '0').join(''), 2);
+  const currentUpper = parseInt(returns.slice(-6, -3).map(r => r > 0 ? '1' : '0').join(''), 2);
+  const ls = lowerStats[currentLower] || { sum: 0, sum2: 0, n: 0 };
+  const us = upperStats[currentUpper] || { sum: 0, sum2: 0, n: 0 };
+  const lowerMu = ls.n > 0 ? ls.sum / ls.n : 0;
+  const lowerSigma = ls.n > 1 ? Math.sqrt(Math.max(0, ls.sum2 / ls.n - lowerMu * lowerMu)) : 0;
+  const upperMu = us.n > 0 ? us.sum / us.n : 0;
+  const upperSigma = us.n > 1 ? Math.sqrt(Math.max(0, us.sum2 / us.n - upperMu * upperMu)) : 0;
+  const blendedMu = 0.6 * lowerMu + 0.4 * upperMu;
+  const blendedSigma = 0.6 * lowerSigma + 0.4 * upperSigma;
+  return { lowerMu, lowerSigma, lowerN: ls.n, upperMu, upperSigma, upperN: us.n, blendedMu, blendedSigma, totalN: ls.n + us.n };
+}
+
 function markovEdge(returns, priorCounts = null, priorStats = null) {
   if (returns.length < 8) return { mu: 0, sigma: 0, n: 0, transitionConfidence: 0, currentState: null };
   const freshCounts = {};
@@ -253,6 +288,23 @@ export function runReasonLayer(returns, riskAversion = 2.5, friction = 0.0035, w
   const mu = values.reduce((s, x, i) => s + weights[i] * x, 0) / wSum;
   const variance = values.reduce((s, x, i) => s + weights[i] * (x - mu) ** 2, 0) / wSum;
   const sigma = Math.sqrt(variance);
+  // Trigram-enhanced direction + I Ching 4-value line system (10-sided dice
+  // method). The trigram factoring (8×8=64) gives 8× more data per state than
+  // the full hexagram, stabilizing the directional read. The 4-value line
+  // system identifies Old lines (3-of-a-kind = all 3 recent bars same
+  // direction) as having higher change probability. Instead of a blind flip,
+  // we give the trigram transition statistics more weight on Old lines —
+  // letting the DATA decide whether reversal actually occurs after 3-of-a-kind
+  // on THIS asset. If the trigram mu is negative after 3 up bars, the engine
+  // leans down (reversal confirmed by history). If positive, it leans up
+  // (momentum confirmed by history). No fixed rule overrides the data.
+  const tg = trigramMarkov(returns);
+  const last3 = returns.slice(-3);
+  const isOldLine = last3.length === 3 && (last3.every(r => r > 0) || last3.every(r => r < 0));
+  const tgWeight = isOldLine
+    ? Math.min(0.6, tg.totalN / (tg.totalN + 30))
+    : Math.min(0.3, tg.totalN / (tg.totalN + 50));
+  const enhancedMu = (1 - tgWeight) * mu + tgWeight * tg.blendedMu;
   const w2Sum = weights.reduce((s, w) => s + w * w, 0);
   const nEff = Math.max(2, Math.round((wSum * wSum) / w2Sum));
   // Contingency-weighted friction: the honesty hurdle is the share of noise the
@@ -264,10 +316,10 @@ export function runReasonLayer(returns, riskAversion = 2.5, friction = 0.0035, w
   const evidenceWeight = Math.min(1, nEff / 30) * (resolution / 7);
   const adaptiveFriction = sigma * (1 - evidenceWeight);
   const tCrit = tPpf(0.95, nEff - 1);
-  const muLb = mu - tCrit * (sigma / Math.sqrt(nEff)) - adaptiveFriction;
+  const muLb = enhancedMu - tCrit * (sigma / Math.sqrt(nEff)) - adaptiveFriction;
   let exposure = 0;
   if (muLb > 0) exposure = Math.min(Math.max((muLb / sigma ** 2) / effectiveRA, 0), 1);
-  const regime = exposure > 0.6 ? 'BULL' : exposure > 0.3 ? 'LATERAL' : mu < 0 ? 'BEAR' : 'SILENCE';
+  const regime = exposure > 0.6 ? 'BULL' : exposure > 0.3 ? 'LATERAL' : enhancedMu < 0 ? 'BEAR' : 'SILENCE';
   const markov = markovEdge(returns, priorMarkov?.counts || null, priorMarkov?.stats || null);
   const motif = adaptive137Score(returns);
   const basin = classifyBasin(markov.currentState, mu, sigma);
@@ -277,7 +329,7 @@ export function runReasonLayer(returns, riskAversion = 2.5, friction = 0.0035, w
     blendedExposure = Math.min(Math.max(0.7 * exposure + 0.2 * markovExposure + 0.1 * Math.max(0, motif.score), 0), 1);
   }
   return {
-    mu: parseFloat(mu.toFixed(6)), sigma: parseFloat(sigma.toFixed(6)),
+    mu: parseFloat(enhancedMu.toFixed(6)), sigma: parseFloat(sigma.toFixed(6)),
     exposure: parseFloat(exposure.toFixed(4)), blendedExposure: parseFloat(blendedExposure.toFixed(4)),
     stateKey, stateBits, n: bin.length, nEff, regime, basin, lambda: LAMBDA, resolution,
     markov: { mu: parseFloat(markov.mu.toFixed(6)), sigma: parseFloat(markov.sigma.toFixed(6)), n: markov.n, confidence: parseFloat(markov.transitionConfidence.toFixed(3)) },
