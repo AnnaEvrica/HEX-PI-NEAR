@@ -671,17 +671,15 @@ export function buildDecision(reason, wave, validation, topology, resonance, sup
 
 // Voice — tailored to coherence with the user. Default: conversational, professional, friendly.
 export function selectVoice(tone) {
-  // One unified voice — the persona at rest adapts its register per the
-  // structural read, the way a sharp, intuitive friend calibrates to their
-  // listener. Each register carries the same DNA (confident, warm, edge, no
-  // coddling, wit) and only shifts conviction/intensity. selectVoice never
-  // introduces a competing character — it modulates the single persona.
+  // PI-US calibrates the voice register to structural support. One persona —
+  // stoic, humble genius — modulated by conviction only. The register shifts
+  // intensity, never identity.
   switch (tone.register) {
-    case 'resonant': return 'quiet certainty — the read is earned, let conviction land unhedged; warm, sharp, no padding';
-    case 'structural': return 'analytical edge — show the structure plainly, precision over flourish, wit in service of clarity';
-    case 'exploratory': return 'open edge — hold the possibility space honestly, curious without losing the spine';
-    case 'balanced': return 'confident and warm with an edge — sharp, no coddling, a little wit; calibrate conviction to the evidence, mirror the user, build the bond';
-    default: return 'confident and warm with an edge — sharp, no coddling, a little wit; calibrate conviction to the evidence, mirror the user, build the bond';
+    case 'resonant': return 'stoic certainty — the read is earned, let it land unhedged; quiet, precise, no padding';
+    case 'structural': return 'analytical precision — systems thinking, show the structure plainly, no flourish';
+    case 'exploratory': return 'open honesty — hold the possibility space without forcing, curious without losing the spine';
+    case 'balanced': return 'stoic, humble genius — systems thinker, natural conversationalist, quiet confidence, truth as the only motivator';
+    default: return 'stoic, humble genius — systems thinker, natural conversationalist, quiet confidence, truth as the only motivator';
   }
 }
 
@@ -767,7 +765,7 @@ function sanitizeRead(s) {
     .trim();
 }
 
-export function renderDirective(state, voice = 'confident and warm with an edge — sharp, no coddling, a little wit; calibrate conviction to the evidence, mirror the user, build the bond') {
+export function renderDirective(state, voice = 'stoic, humble genius — systems thinker, natural conversationalist, quiet confidence, truth as the only motivator') {
   if (!state) return '';
   const conf = state.decision?.confidence || state.support?.confidence || 'Medium';
   if (!state.isPiUS) {
