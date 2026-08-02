@@ -219,6 +219,8 @@ function Step4LegalAcceptance({ onContinue }) {
     const timestamp = new Date().toISOString();
     localStorage.setItem('hex6_consent_timestamp', timestamp);
     localStorage.setItem('hex6_consent_version', '1.2');
+    // Persist to the user's account so consent is once-per-person, not once-per-browser.
+    base44.auth.updateMe({ hex6_consent_completed: true }).catch(() => {});
     onContinue();
   };
 
