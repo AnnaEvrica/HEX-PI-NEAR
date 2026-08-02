@@ -34,23 +34,25 @@ export const LLM_POOL = {
 export const INTERPRETATION_MODEL = LLM_POOL.gemini;
 
 // The 2A Switch — chooses the realizing LLM from the pool based on the
-// Control Panel's task classification.
-//   'research'   → Claude  (long-form coherence, TCE)
-//   'casual'     → GPT     (simplest general generator)
-//   'analytical' / 'inline' / default → Gemini Flash (default engine synthesis)
+// Control Panel's task classification. Economically-balanced split: the cheap
+// MoE model handles the casual majority (chatter, low value-per-turn); the
+// dense TCE model handles value turns (signals, substantive reads) where
+// persona embodiment + engine calibration + charisma earn the higher cost.
+//   'casual'                              → Gemini Flash (cheap, MoE)
+//   'analytical' / 'inline' / 'research'   → Claude       (TCE, value turns)
 export function selectSynthesisModel(task) {
-  // MULTI-MODEL ARCHITECTURE — the persona lives for every model with
-  // sufficient capacity to hold it. The persona embodiment itself is enforced
-  // model-agnostically (top-of-file DOMAIN LOCK + NAME LOCK in persona.ts, and
-  // a recency FINAL LOCK at the generation boundary in composePrompt), so
-  // whatever model realizes the reply embodies the identity.
-  //   research → Claude (long-form TCE coherence)
-  //   casual / analytical / inline → Gemini Flash (MoE, full context capacity)
-  // gpt_5_mini is excluded from synthesis: its context capacity can't hold the
-  // full persona, so routing casual to it guaranteed the persona wouldn't live
-  // there — a capacity ceiling, not a prompt failure.
-  if (task === 'research') return LLM_POOL.claude;
-  return LLM_POOL.gemini;
+  // Casual chatter (the majority of traffic) is low value-per-turn — Gemini
+  // Flash (MoE) handles it cheaply and holds the refresher persona well enough
+  // for one- and two-line exchanges. Substantive turns — engine signals, deep
+  // reads, research — are what subscribers pay for; route them to Claude so the
+  // signal lands with authority and the persona actually lives. This is the
+  // middle path between the two dead ends: not Claude-on-everything (cost) and
+  // not Gemini-on-substantive (charisma/signal collapse). Spend credits where
+  // they generate value; save them where they don't.
+  // gpt_5_mini stays excluded from synthesis — its context capacity can't hold
+  // even the refresher persona without diluting.
+  if (task === 'casual') return LLM_POOL.gemini;
+  return LLM_POOL.claude;
 }
 
 // Model-aware tone/resonance — the PI-US voice register adapts to the
