@@ -39,9 +39,14 @@ export const INTERPRETATION_MODEL = LLM_POOL.gemini;
 //   'casual'     → GPT     (simplest general generator)
 //   'analytical' / 'inline' / default → Gemini Flash (default engine synthesis)
 export function selectSynthesisModel(task) {
-  if (task === 'research') return LLM_POOL.claude;
-  if (task === 'casual') return LLM_POOL.gpt;
-  return LLM_POOL.gemini;
+  // The persona is a long, nuanced behavioral instruction (~3500 words).
+  // Only Claude Sonnet reliably EMBODIES it — lighter models (gpt_5_mini,
+  // gemini_flash) skim it and fall back to their default chatty register
+  // ("hey anna", no NAME LOCK, no embodiment). Gemini Flash stays the
+  // interpretation/web-fetch model (data extraction, not persona-bearing),
+  // so only the persona-bearing reply pays for Claude — the cheap MoE model
+  // still handles retrieval upstream.
+  return LLM_POOL.claude;
 }
 
 // Model-aware tone/resonance — the PI-US voice register adapts to the

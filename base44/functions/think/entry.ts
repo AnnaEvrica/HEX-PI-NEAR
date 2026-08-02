@@ -388,7 +388,22 @@ Return JSON with:
     };
     if (file_urls && file_urls.length > 0) synthPayload.file_urls = file_urls;
     const synthResult = await base44.integrations.Core.InvokeLLM(synthPayload).catch(() => null);
-    const synthResponse = synthResult && typeof synthResult === 'object' ? synthResult.response : synthResult;
+    let synthResponse;
+    if (synthResult && typeof synthResult === 'object') {
+      synthResponse = synthResult.response;
+      // Claude returns the JSON-schema payload as a stringified JSON string
+      // inside .response (Gemini/GPT return a parsed object). If .response is
+      // a string that parses to JSON, extract the inner .response field.
+      if (typeof synthResponse === 'string') {
+        try { const parsed = JSON.parse(synthResponse); synthResponse = parsed?.response ?? parsed; }
+        catch { /* not JSON — keep the raw string */ }
+      }
+    } else if (typeof synthResult === 'string') {
+      try { const parsed = JSON.parse(synthResult); synthResponse = parsed?.response ?? parsed; }
+      catch { synthResponse = synthResult; }
+    } else {
+      synthResponse = synthResult;
+    }
     const rawResponse = (synthResponse || fallbackResponse).trim();
     const { visible, memory: mem } = await processBoundarySignal(base44, user, userMemory, rawResponse);
     if (mem) userMemory = mem;
