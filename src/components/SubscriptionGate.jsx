@@ -16,6 +16,8 @@ export default function SubscriptionGate({ children }) {
     return res.data;
   };
 
+  const AUTH_ERR = /logged in|unauthorized|401|must be authenticated|authentication required|auth required/i;
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -34,7 +36,24 @@ export default function SubscriptionGate({ children }) {
         const pendingRecent = checkoutResult !== 'cancel' && pendingTs && (Date.now() - Number(pendingTs) < 10 * 60 * 1000);
         const pollForActive = justCheckedOut || billingReturn || pendingRecent;
 
-        let data = await fetchStatus();
+        let data;
+        let lastErr = null;
+        // Retry up to 4× on auth errors — the OAuth redirect can land here before
+        // the token fully propagates to the backend. Bouncing to '/' on a transient
+        // 401 traps the user in a landing-page loop with no paywall (and no price).
+        for (let attempt = 0; attempt < 4; attempt++) {
+          try { data = await fetchStatus(); lastErr = null; break; }
+          catch (e) {
+            lastErr = e;
+            if (AUTH_ERR.test(e?.message || '') && attempt < 3) {
+              await new Promise((r) => setTimeout(r, 1500 * (attempt + 1)));
+              continue;
+            }
+            break;
+          }
+        }
+        if (lastErr) throw lastErr;
+
         // Webhook may lag the redirect by a second or two — retry briefly on success return.
         if (pollForActive) {
           for (let i = 0; i < 6 && !(data && (data.status === 'trialing' || data.status === 'active')); i++) {
@@ -53,14 +72,9 @@ export default function SubscriptionGate({ children }) {
       } catch (e) {
         if (!cancelled) {
           const msg = e?.message || 'Failed to load subscription status';
-          // Auth errors mean the session is invalid — redirect to homepage for re-login
-          // instead of showing a paywall + error combo that loops on "Try again".
-          if (/logged in|unauthorized|401|must be authenticated|authentication required|auth required/i.test(msg)) {
-            sessionStorage.removeItem('hex6_auth_pending');
-            sessionStorage.removeItem('hex6_checkout_pending');
-            window.location.href = '/';
-            return;
-          }
+          // Don't redirect on auth errors — show the paywall (with price) + a
+          // "Try again" button so the user can retry once the token propagates.
+          // The "Back to homepage" link lets them re-login if genuinely logged out.
           setError(msg);
           setLoading(false);
         }
