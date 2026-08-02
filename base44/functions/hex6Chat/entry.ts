@@ -409,6 +409,50 @@ function extractNumberSeries(text) {
   return matches.map(Number);
 }
 
+// Map a user-facing ticker to the Yahoo Finance symbol the marketData function expects.
+function toYahooSymbol(ticker) {
+  const crypto = { BTC: 'BTC-USD', ETH: 'ETH-USD', SOL: 'SOL-USD', DOGE: 'DOGE-USD', XRP: 'XRP-USD', ADA: 'ADA-USD', MATIC: 'MATIC-USD', AVAX: 'AVAX-USD', LINK: 'LINK-USD', DOT: 'DOT-USD' };
+  return crypto[ticker.toUpperCase()] || ticker.toUpperCase();
+}
+
+// Detect if the user's message asks for a directional / forecast prediction about a
+// specific asset. Returns the uppercase ticker, or null if this isn't a prediction ask.
+// This lets us JUMP-START the engine by fetching targeted data BEFORE the generic web
+// path — giving the engine a clean, authoritative series to compute on instead of
+// hoping the web-search LLM happens to extract one.
+function detectPredictionIntent(message) {
+  const m = ' ' + message.toUpperCase() + ' ';
+
+  // Asset detection — check both full names and ticker symbols
+  const assetChecks = [
+    [/BITCOIN|\bBTC\b/, 'BTC'],
+    [/ETHEREUM|\bETH\b/, 'ETH'],
+    [/SOLANA|\bSOL\b/, 'SOL'],
+    [/DOGECOIN|\bDOGE\b/, 'DOGE'],
+    [/\bXRP\b|RIPPLE/, 'XRP'],
+    [/\bAAPL\b|APPLE/, 'AAPL'],
+    [/\bTSLA\b|TESLA/, 'TSLA'],
+    [/\bNVDA\b|NVIDIA/, 'NVDA'],
+    [/\bMSFT\b|MICROSOFT/, 'MSFT'],
+    [/\bSPY\b|S&P.?500/, 'SPY'],
+    [/\bQQQ\b|NASDAQ/, 'QQQ'],
+    [/\bAMZN\b|AMAZON/, 'AMZN'],
+    [/\bGOOG\b|\bGOOGL\b|GOOGLE/, 'GOOG'],
+    [/\bMETA\b|FACEBOOK/, 'META'],
+  ];
+
+  let ticker = null;
+  for (const [re, sym] of assetChecks) {
+    if (re.test(m)) { ticker = sym; break; }
+  }
+  if (!ticker) return null;
+
+  // Must also contain prediction-oriented language (forward-looking words)
+  const predRe = /\b(UP|DOWN|NEXT|WEEK|MONTH|FORECAST|PREDICT|OUTLOOK|WHERE|GOING|HEADED|DIRECTION|MOVE|MOVING|RISE|FALL|DROP|CLIMB|DECLINE|RALLY|CRASH|BOTTOM|TOP|SUPPORT|RESISTANCE|TREND|BULL|BEAR|LIKELY|WILL|EXPECT|PRICE|TARGET|PROJECTION|MOMENTUM)\b/;
+  if (!predRe.test(m)) return null;
+  return ticker;
+}
+
 // (intent classification removed — the LLM decides whether to fetch data via the
 // web-fetch call below. If the fetch returns no series, we just answer conversationally.)
 
@@ -631,6 +675,115 @@ Return JSON: { "intent": "casual" | "analytical" }`,
         return Response.json({ response: finalCasual, ran_engine: false, intent: 'casual', timestamp: new Date().toISOString() });
       }
 
+      // PREDICTION PATH — jump-start the engine with targeted data.
+      // When the user asks about price direction / market outlook for a specific asset,
+      // fetch clean data via the marketData function (Yahoo Finance), run the full
+      // SCEFM + Markov + I-Ching + 1/137 pipeline, and synthesize the response WITH the
+      // engine's computed output so the answer is grounded in real μ, σ, exposure,
+      // regime, and Markov forward projections — not just a web-search summary.
+      const predictionTicker = detectPredictionIntent(message);
+      if (predictionTicker) {
+        const yahooSymbol = toYahooSymbol(predictionTicker);
+        let predictionEngineContext = '';
+
+        try {
+          const mdRes = await base44.functions.invoke('marketData', { tickers: [yahooSymbol], lookbackDays: 365 });
+          const md = mdRes?.data?.results?.[yahooSymbol];
+          if (md && Array.isArray(md.returns) && md.returns.length >= 30) {
+            // Route via multi-brain processor + pull the routed brain as prior
+            let routedBrainId = 'pending';
+            let priorMarkov = null;
+            try {
+              const routeRes = await base44.functions.invoke('hex6Process', {
+                series_id: predictionTicker,
+                values: md.returns,
+                as_returns: true,
+                record_output: true,
+              });
+              if (routeRes?.data?.brain_id) {
+                routedBrainId = routeRes.data.brain_id;
+                const brains = await base44.asServiceRole.entities.Brain.filter({ brain_id: routedBrainId });
+                if (brains && brains.length > 0) {
+                  priorMarkov = {
+                    counts: JSON.parse(brains[0].transition_matrix || '{}'),
+                    stats: JSON.parse(brains[0].transition_rewards || '{}'),
+                  };
+                }
+              }
+            } catch (e) { /* non-blocking — engine runs without prior */ }
+
+            const result = runHex6Engine(md.returns, riskAversion, 0.0035, 6, null, priorMarkov);
+
+            predictionEngineContext = `
+--- HEX6 ENGINE OUTPUT v5.4 (targeted data fetch: ${yahooSymbol}, ${md.dataPoints} daily closes, latest price ${md.latestPrice ?? 'n/a'}) ---
+Engine: ${result.engineVersion}
+Asset: ${predictionTicker} | Routed brain: ${routedBrainId}
+Prior brain: ${priorMarkov ? 'LOADED — accumulated transition history informs forward projection' : 'fresh (new brain seeded)'}
+Input series: ${md.returns.length} daily log returns | Adaptive λ: ${result.lambda.toFixed(3)}
+
+[I-CHING PETAL — 64-petal frame, unbounded sub-petal unfolding]
+Polarity: ${result.petal?.polarityFull || 'undefined'}
+Hexagram: ${result.petal?.hexagramName} (petal ${result.petal?.petalIndex} of 64)
+Sub-petal resonance: ${result.petal?.subSignature || 'n/a'}
+
+[CORE SCEFM LAYER]
+State key: ${result.stateKey} | Binary: ${result.stateBits}
+Samples in state: ${result.n} | Effective sample size: ${result.nEff}
+μ decay-weighted: ${result.mu} | σ decay-weighted: ${result.sigma}
+Core exposure: ${result.exposure}
+
+[MARKOV 64-STATE TRANSITION LAYER — forward-looking, persistent across sessions]
+Observations from current state: ${result.markov.n}
+Expected next-step μ (transition-weighted): ${result.markov.mu}
+σ across transitions: ${result.markov.sigma}
+Transition confidence (0-1): ${result.markov.confidence}
+
+[ADAPTIVE 1/137 MOTIF LAYER]
+Motif active now: ${result.motif.isActive ? 'YES' : 'no'}
+Motif score (-1 to +1): ${result.motif.score}
+Motif μ: ${result.motif.motifMu} vs non-motif μ: ${result.motif.elseMu}
+
+[ARCHETYPE BASIN]
+Basin: ${result.basin} (${
+  result.basin === 'capitulation' ? 'extreme bearish exhaustion — potential reversal zone' :
+  result.basin === 'euphoria' ? 'extreme bullish — overheated, mean-reversion risk' :
+  result.basin === 'laminar_growth' ? 'smooth uptrend, low volatility' :
+  result.basin === 'turbulent_drawdown' ? 'choppy decline, elevated volatility' :
+  result.basin === 'chaotic_transition' ? 'high vol regime change in progress' :
+  result.basin === 'neutral_flow' ? 'mild directional drift, normal vol' : 'insufficient data'
+})
+
+[BLENDED OUTPUT]
+Final blended exposure (SCEFM 70% + Markov 20% + Motif 10%): ${result.blendedExposure}
+Regime: ${result.regime} | Risk aversion: ${riskAversion}
+--- END ENGINE OUTPUT ---
+GROUND YOUR RESPONSE IN THESE NUMBERS — be truthful and calibrated:
+- The sign of μ and the Markov forward μ tell you the directional bias. Positive = lean bullish, negative = lean bearish.
+- Blended exposure (0-1) tells you conviction: >0.6 high conviction, 0.3-0.6 moderate, <0.3 weak/uncertain.
+- The regime label (BULL/BEAR/LATERAL/SILENCE) is the engine's overall read of this market right now.
+- Transition confidence (0-1) tells you how much to trust the forward projection. Low confidence = say so honestly.
+- The basin name gives structural context — use it to explain WHAT KIND of market this is.
+- If the data is ambiguous (low confidence, near-zero μ), say the picture is unclear. Don't force a call the numbers don't support. Truthfulness over false certainty.`;
+          }
+        } catch (e) { /* marketData failed — fall through to web path below */ }
+
+        // Synthesize the final response with the engine's computed output.
+        // Combine engine data with fresh web context so the LLM can reason about both
+        // the computed probabilities AND any recent news/events around the asset.
+        if (predictionEngineContext) {
+          const predPrompt = `${systemPrompt}\n\n${predictionEngineContext}\n\nCONVERSATION:\n${historyText}\n\n${userName}: ${message}\n\nHEX6:`;
+          const predPayload = { prompt: predPrompt, model: 'gemini_3_flash', add_context_from_internet: true };
+          if (file_urls && file_urls.length > 0) predPayload.file_urls = file_urls;
+          const predResponse = await base44.integrations.Core.InvokeLLM(predPayload).catch(() => null);
+          const finalPred = (predResponse || '').trim() || `I pulled ${predictionTicker} data and ran the engine, but couldn't synthesize a clean response. Try rephrasing or asking again.`;
+
+          userMemoryPromise.then(existingUserMemory => updateMemory(base44, user, existingUserMemory, message, finalPred));
+          return Response.json({ response: finalPred, ran_engine: true, intent: 'prediction', ticker: predictionTicker, timestamp: new Date().toISOString() });
+        }
+        // No engine context → marketData failed or returned insufficient data.
+        // Fall through to the generic analytical web path below.
+      }
+
       // ANALYTICAL PATH: full web+engine pipeline below.
       const systemPromptForFetch = `You are HEX6 BLE by Evrica Technologies Inc., programmed by Anna M. Sarkisyan. You're talking with ${userName}. Today is ${currentDateReadable}.
 
@@ -787,15 +940,29 @@ Markov forward μ: ${result.markov.mu} | confidence: ${result.markov.confidence}
         }
       }
 
-      // Compose final response: draft_answer from web fetch + sources block.
-      // No second LLM call — the draft already incorporates the web context, and engine
-      // numbers are too fine-grained to justify a 5s synthesis call to nudge the wording.
-      const answer = (fetchResult?.draft_answer || 'Let me know what you\'d like to dig into.').trim();
+      // If the engine ran on web-sourced data, synthesize the final response WITH the
+      // engine output so the answer is grounded in the computed μ, σ, exposure, regime,
+      // and Markov forward projection — not just the raw web-search draft.
+      if (webEngineContext) {
+        const synthPrompt = `${systemPrompt}\n\n${webEngineContext}\n\nCONVERSATION:\n${historyText}\n\n${userName}: ${message}\n\nHEX6:`;
+        const synthPayload = { prompt: synthPrompt, model: 'gemini_3_flash', add_context_from_internet: false };
+        if (file_urls && file_urls.length > 0) synthPayload.file_urls = file_urls;
+        const synthResponse = await base44.integrations.Core.InvokeLLM(synthPayload).catch(() => null);
+        if (synthResponse && synthResponse.trim()) {
+          const synthAnswer = synthResponse.trim();
+          const finalResponse = sourcesBlock
+            ? `${synthAnswer}\n\n**Sources:**\n${sourcesBlock.split('\n').map(s => `- ${s}`).join('\n')}`
+            : synthAnswer;
+          userMemoryPromise.then(existingUserMemory => updateMemory(base44, user, existingUserMemory, message, finalResponse));
+          return Response.json({ response: finalResponse, ran_engine: true, timestamp: new Date().toISOString() });
+        }
+      }
 
+      // Fallback: no engine ran, or synthesis failed — use the draft_answer as-is.
+      const answer = (fetchResult?.draft_answer || 'Let me know what you\'d like to dig into.').trim();
       const finalResponse = sourcesBlock
         ? `${answer}\n\n**Sources:**\n${sourcesBlock.split('\n').map(s => `- ${s}`).join('\n')}`
         : answer;
-
       userMemoryPromise.then(existingUserMemory => updateMemory(base44, user, existingUserMemory, message, finalResponse));
       return Response.json({ response: finalResponse, ran_engine: ranEngine, timestamp: new Date().toISOString() });
     }
