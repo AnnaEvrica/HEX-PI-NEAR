@@ -415,15 +415,16 @@ function toYahooSymbol(ticker) {
   return crypto[ticker.toUpperCase()] || ticker.toUpperCase();
 }
 
-// Detect if the user's message asks for a directional / forecast prediction about a
-// specific asset. Returns the uppercase ticker, or null if this isn't a prediction ask.
-// This lets us JUMP-START the engine by fetching targeted data BEFORE the generic web
-// path — giving the engine a clean, authoritative series to compute on instead of
-// hoping the web-search LLM happens to extract one.
+// Detect if the user's message asks for a forward-looking prediction. The engine is
+// MARKET-AGNOSTIC — it processes any numerical time series, not just financial markets.
+// Financial tickers get a fast path via the marketData function (verified Yahoo Finance
+// data). Non-market predictions (weather, polls, sports, epidemiology, energy, etc.)
+// return { ticker: null, isPrediction: true } so the web path can pull relevant
+// published data from whatever domain the question is about and run the engine on it.
 function detectPredictionIntent(message) {
   const m = ' ' + message.toUpperCase() + ' ';
 
-  // Asset detection — check both full names and ticker symbols
+  // Asset detection — check both full names and ticker symbols (market fast-path only)
   const assetChecks = [
     [/BITCOIN|\bBTC\b/, 'BTC'],
     [/ETHEREUM|\bETH\b/, 'ETH'],
@@ -445,12 +446,14 @@ function detectPredictionIntent(message) {
   for (const [re, sym] of assetChecks) {
     if (re.test(m)) { ticker = sym; break; }
   }
-  if (!ticker) return null;
 
-  // Must also contain prediction-oriented language (forward-looking words)
+  // Prediction-oriented language (forward-looking words) — works for ANY domain.
+  // "Will it rain next week?" is a prediction the engine can process just as well
+  // as "Will Bitcoin go up?" The engine doesn't care what the numbers represent.
   const predRe = /\b(UP|DOWN|NEXT|WEEK|MONTH|FORECAST|PREDICT|OUTLOOK|WHERE|GOING|HEADED|DIRECTION|MOVE|MOVING|RISE|FALL|DROP|CLIMB|DECLINE|RALLY|CRASH|BOTTOM|TOP|SUPPORT|RESISTANCE|TREND|BULL|BEAR|LIKELY|WILL|EXPECT|PRICE|TARGET|PROJECTION|MOMENTUM)\b/;
-  if (!predRe.test(m)) return null;
-  return ticker;
+  const isPrediction = predRe.test(m);
+
+  return { ticker, isPrediction };
 }
 
 // (intent classification removed — the LLM decides whether to fetch data via the
@@ -681,7 +684,7 @@ Return JSON: { "intent": "casual" | "analytical" }`,
       // SCEFM + Markov + I-Ching + 1/137 pipeline, and synthesize the response WITH the
       // engine's computed output so the answer is grounded in real μ, σ, exposure,
       // regime, and Markov forward projections — not just a web-search summary.
-      const predictionTicker = detectPredictionIntent(message);
+      const { ticker: predictionTicker, isPrediction } = detectPredictionIntent(message);
       if (predictionTicker) {
         const yahooSymbol = toYahooSymbol(predictionTicker);
         let predictionEngineContext = '';
@@ -784,6 +787,11 @@ GROUND YOUR RESPONSE IN THESE NUMBERS — be truthful and calibrated:
         // Fall through to the generic analytical web path below.
       }
 
+      // Non-market prediction (weather, polls, sports, any domain) — the engine is
+      // market-agnostic. Flag this so the web path aggressively pulls relevant published
+      // data and runs the engine on it, instead of just answering from general knowledge.
+      const nonMarketPrediction = isPrediction && !predictionTicker;
+
       // ANALYTICAL PATH: full web+engine pipeline below.
       const systemPromptForFetch = `You are HEX6 BLE by Evrica Technologies Inc., programmed by Anna M. Sarkisyan. You're talking with ${userName}. Today is ${currentDateReadable}.
 
@@ -805,6 +813,9 @@ DECIDE WHETHER TO PULL WEB DATA:
 - If answering well requires fresh real-world data (prices, scores, news, stats, anything time-sensitive), search the web and pull the latest from authoritative sources (Yahoo Finance, CoinGecko, ESPN, FRED, Reuters, etc.). Pull at least 30 data points if a time series is relevant — the engine needs it.
 - If the question is conversational, philosophical, or you can answer from general knowledge, just answer. No fetch needed.
 - URL honesty: only return URLs you actually retrieved. Never fabricate links.
+${nonMarketPrediction ? `
+PREDICTION MODE — the engine is MARKET-AGNOSTIC:
+This is a forward-looking prediction question. The HEX6 engine processes ANY numerical time series — not just financial markets. It does not matter whether the numbers represent stock prices, rainfall, poll percentages, COVID cases, or energy consumption: the engine computes probabilistic projections on whatever series you give it. Pull verified, published data from authoritative sources RELEVANT to this specific question's domain. Extract at least 30 data points as a numerical series, set needs_engine: true, and set series_label to describe what the data represents. Do not default to "no data available" — find the relevant published data for this domain and feed it to the engine.` : ''}
 
 Return JSON with:
 - draft_answer: your reply to the user.
