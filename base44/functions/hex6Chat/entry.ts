@@ -784,13 +784,147 @@ GROUND YOUR RESPONSE IN THESE NUMBERS — be truthful and calibrated:
           return Response.json({ response: finalPred, ran_engine: true, intent: 'prediction', ticker: predictionTicker, timestamp: new Date().toISOString() });
         }
         // No engine context → marketData failed or returned insufficient data.
-        // Fall through to the generic analytical web path below.
+        // Fall through to the non-market prediction path or generic web path below.
       }
 
-      // Non-market prediction (weather, polls, sports, any domain) — the engine is
-      // market-agnostic. Flag this so the web path aggressively pulls relevant published
-      // data and runs the engine on it, instead of just answering from general knowledge.
+      // Non-market prediction (weather, polls, sports, energy, any domain) — the engine
+      // is market-agnostic. Mirror the financial ticker path: acquire domain-relevant
+      // data from the web, run the full SCEFM+Markov+I-Ching pipeline, synthesize a
+      // grounded response. Falls through to the generic web path if no series is found.
       const nonMarketPrediction = isPrediction && !predictionTicker;
+
+      if (nonMarketPrediction) {
+        // Step 1: Extract a relevant numerical time series from authoritative web sources
+        const seriesResult = await base44.integrations.Core.InvokeLLM({
+          prompt: `Extract a numerical time series relevant to this prediction question: "${message}"
+
+Pull verified, published data from authoritative sources for this domain. Return JSON:
+- series: array of at least 15 numbers (the time series to run predictions on)
+- series_label: what the numbers represent (e.g. "monthly US unemployment rate %")
+- as_returns: false if these are raw levels/amounts, true if already period-over-period changes
+- source_summary: one sentence on what data you pulled and from where
+- sources: array of {name, url} for the sources you used`,
+          model: 'gemini_3_flash',
+          add_context_from_internet: true,
+          response_json_schema: {
+            type: 'object',
+            properties: {
+              series: { type: 'array', items: { type: 'number' } },
+              series_label: { type: 'string' },
+              as_returns: { type: 'boolean' },
+              source_summary: { type: 'string' },
+              sources: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, url: { type: 'string' } } } },
+            },
+            required: ['series', 'series_label'],
+          },
+        }).catch(() => null);
+
+        // Step 2: If we got enough data, run the engine and synthesize with engine output
+        if (seriesResult?.series && seriesResult.series.length >= 15) {
+          let returns = seriesResult.series;
+          if (seriesResult.as_returns === false) {
+            const raw = seriesResult.series;
+            returns = [];
+            for (let i = 1; i < raw.length; i++) {
+              if (raw[i - 1] !== 0) returns.push((raw[i] - raw[i - 1]) / raw[i - 1]);
+            }
+          }
+
+          if (returns.length >= 12) {
+            const seriesId = (message.slice(0, 20).replace(/[^a-zA-Z0-9]/g, '').toUpperCase() || 'GENERIC').slice(0, 12);
+
+            // Route via multi-brain processor; pull routed brain as prior
+            let routedBrainId = 'pending';
+            let priorMarkov = null;
+            try {
+              const routeRes = await base44.functions.invoke('hex6Process', {
+                series_id: seriesId, values: returns, as_returns: true, record_output: true,
+              });
+              if (routeRes?.data?.brain_id) {
+                routedBrainId = routeRes.data.brain_id;
+                const brains = await base44.asServiceRole.entities.Brain.filter({ brain_id: routedBrainId });
+                if (brains?.length > 0) {
+                  priorMarkov = {
+                    counts: JSON.parse(brains[0].transition_matrix || '{}'),
+                    stats: JSON.parse(brains[0].transition_rewards || '{}'),
+                  };
+                }
+              }
+            } catch (e) { /* non-blocking — engine runs without prior */ }
+
+            const result = runHex6Engine(returns, riskAversion, 0.0035, 6, null, priorMarkov);
+
+            const engineBlock = `
+--- HEX6 ENGINE OUTPUT v5.4 (domain-sourced data: ${seriesResult.series_label}, ${seriesResult.series.length} data points) ---
+Engine: ${result.engineVersion}
+Series: ${seriesId} | Routed brain: ${routedBrainId}
+Prior brain: ${priorMarkov ? 'LOADED — accumulated history informs forward projection' : 'fresh (new brain seeded)'}
+Input series: ${returns.length} returns | Adaptive λ: ${result.lambda.toFixed(3)}
+
+[I-CHING PETAL — 64-petal frame, unbounded sub-petal unfolding]
+Polarity: ${result.petal?.polarityFull || 'undefined'}
+Hexagram: ${result.petal?.hexagramName} (petal ${result.petal?.petalIndex} of 64)
+
+[CORE SCEFM LAYER]
+State key: ${result.stateKey} | Binary: ${result.stateBits}
+μ decay-weighted: ${result.mu} | σ decay-weighted: ${result.sigma}
+Core exposure: ${result.exposure}
+
+[MARKOV 64-STATE TRANSITION LAYER — forward-looking]
+Forward μ: ${result.markov.mu} | σ: ${result.markov.sigma} | confidence (0-1): ${result.markov.confidence}
+
+[ADAPTIVE 1/137 MOTIF LAYER]
+Motif active: ${result.motif.isActive ? 'YES' : 'no'} | score (-1 to +1): ${result.motif.score}
+
+[ARCHETYPE BASIN]
+Basin: ${result.basin} (${
+  result.basin === 'capitulation' ? 'extreme bearish exhaustion — potential reversal zone' :
+  result.basin === 'euphoria' ? 'extreme bullish — overheated, mean-reversion risk' :
+  result.basin === 'laminar_growth' ? 'smooth uptrend, low volatility' :
+  result.basin === 'turbulent_drawdown' ? 'choppy decline, elevated volatility' :
+  result.basin === 'chaotic_transition' ? 'high vol regime change in progress' :
+  result.basin === 'neutral_flow' ? 'mild directional drift, normal vol' : 'insufficient data'
+})
+
+[BLENDED OUTPUT]
+Blended exposure (SCEFM 70% + Markov 20% + Motif 10%): ${result.blendedExposure}
+Regime: ${result.regime} | Risk aversion: ${riskAversion}
+--- END ENGINE OUTPUT ---
+Data source: ${seriesResult.source_summary}
+
+GROUND YOUR RESPONSE IN THESE COMPUTED VALUES:
+- The sign of μ and Markov forward μ tells you the directional bias of ${seriesResult.series_label}. Positive = lean upward, negative = lean downward.
+- Blended exposure (0-1) tells you conviction: >0.6 high, 0.3-0.6 moderate, <0.3 weak/uncertain.
+- Regime (BULL/BEAR/LATERAL/SILENCE) is the engine's overall read of this series right now.
+- Transition confidence (0-1) tells you how much to trust the forward projection. Low confidence = say so honestly.
+- The basin name gives structural context for what kind of regime this is.
+- Translate everything to plain English about ${seriesResult.series_label}. Be truthful and calibrated — if the data is ambiguous, say the picture is unclear.`;
+
+            // Synthesis uses the engine output + data source context (no redundant web search —
+            // the data extraction call already pulled the relevant domain context above).
+            const predPrompt = `${systemPrompt}\n\n${engineBlock}\n\nCONVERSATION:\n${historyText}\n\n${userName}: ${message}\n\nHEX6:`;
+            const predPayload = { prompt: predPrompt, model: 'gemini_3_flash', add_context_from_internet: false };
+            if (file_urls && file_urls.length > 0) predPayload.file_urls = file_urls;
+            const predResponse = await base44.integrations.Core.InvokeLLM(predPayload).catch(() => null);
+            const finalPred = (predResponse || '').trim() || `I pulled ${seriesResult.series_label} data and ran the engine, but couldn't synthesize a clean response. Try rephrasing.`;
+
+            // Build sources block from the data extraction result
+            let sourcesBlock = '';
+            if (seriesResult.sources && Array.isArray(seriesResult.sources) && seriesResult.sources.length > 0) {
+              const urlOk = (u) => { try { const p = new URL(u); return /^https?:$/.test(p.protocol) && /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(p.hostname); } catch { return false; } };
+              const valid = seriesResult.sources.filter(s => s?.url && s?.name && urlOk(s.url));
+              const seen = new Set();
+              const unique = valid.filter(s => { if (seen.has(s.url)) return false; seen.add(s.url); return true; });
+              if (unique.length > 0) sourcesBlock = '\n\n**Sources:**\n' + unique.map(s => `- [${s.name}](${s.url})`).join('\n');
+            }
+
+            const finalResponse = sourcesBlock ? `${finalPred}${sourcesBlock}` : finalPred;
+            userMemoryPromise.then(existingUserMemory => updateMemory(base44, user, existingUserMemory, message, finalResponse));
+            return Response.json({ response: finalResponse, ran_engine: true, intent: 'prediction', series_label: seriesResult.series_label, timestamp: new Date().toISOString() });
+          }
+        }
+        // Series extraction failed or insufficient data — fall through to generic web path below
+      }
 
       // ANALYTICAL PATH: full web+engine pipeline below.
       const systemPromptForFetch = `You are HEX6 BLE by Evrica Technologies Inc., programmed by Anna M. Sarkisyan. You're talking with ${userName}. Today is ${currentDateReadable}.
