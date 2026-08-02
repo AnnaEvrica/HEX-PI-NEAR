@@ -450,8 +450,12 @@ function detectPredictionIntent(message) {
   // Prediction-oriented language (forward-looking words) — works for ANY domain.
   // "Will it rain next week?" is a prediction the engine can process just as well
   // as "Will Bitcoin go up?" The engine doesn't care what the numbers represent.
+  // BUT: the engine predicts directional movement of NUMBERS, not identities. "Who
+  // will be the next president" is a categorical/identity question — there's no
+  // numerical series to forecast. Route those to the analytical web path instead.
   const predRe = /\b(UP|DOWN|NEXT|WEEK|MONTH|FORECAST|PREDICT|OUTLOOK|WHERE|GOING|HEADED|DIRECTION|MOVE|MOVING|RISE|FALL|DROP|CLIMB|DECLINE|RALLY|CRASH|BOTTOM|TOP|SUPPORT|RESISTANCE|TREND|BULL|BEAR|LIKELY|WILL|EXPECT|PRICE|TARGET|PROJECTION|MOMENTUM)\b/;
-  const isPrediction = predRe.test(m);
+  const whoRe = /\bWHO\b/;
+  const isPrediction = predRe.test(m) && !whoRe.test(m);
 
   return { ticker, isPrediction };
 }
