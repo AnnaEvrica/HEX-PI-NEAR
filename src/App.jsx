@@ -22,20 +22,24 @@ const AppExperience = () => {
   const consentDone = user?.hex6_consent_completed === true || !!localStorage.getItem('hex6_consent_timestamp') || consentCompleted;
 
   useEffect(() => {
-    if (user?.hex6_consent_completed === true) {
-      setConsentCompleted(true);
+    if (user) {
+      sessionStorage.removeItem('hex6_auth_pending');
+      if (user.hex6_consent_completed === true) {
+        setConsentCompleted(true);
+      }
     }
   }, [user]);
 
-  // Post-checkout auth recovery: Stripe's redirect causes a full-page reload
-  // that can briefly lose auth state (token-propagation delay). If we detect
-  // a checkout signal (URL param or sessionStorage flag), retry auth with
-  // backoff instead of bouncing to the landing page — keeps the user in the app.
+  // Post-redirect auth recovery: Stripe checkout and Google OAuth both cause
+  // full-page reloads back to /app that can briefly lose auth state (token-
+  // propagation delay). If we detect a pending signal, retry auth with backoff
+  // instead of bouncing to the landing page — keeps the user in the app.
   useEffect(() => {
     if (!user) {
-      const checkoutSignal = new URLSearchParams(window.location.search).get('checkout') === 'success'
-        || !!sessionStorage.getItem('hex6_checkout_pending');
-      if (checkoutSignal && authRetryCount < 5) {
+      const authPending = new URLSearchParams(window.location.search).get('checkout') === 'success'
+        || !!sessionStorage.getItem('hex6_checkout_pending')
+        || !!sessionStorage.getItem('hex6_auth_pending');
+      if (authPending && authRetryCount < 5) {
         const timer = setTimeout(() => {
           setAuthRetryCount(c => c + 1);
           checkAuth();
@@ -49,9 +53,10 @@ const AppExperience = () => {
     return <UserNotRegisteredError />;
   }
   if (!user) {
-    const checkoutSignal = new URLSearchParams(window.location.search).get('checkout') === 'success'
-      || !!sessionStorage.getItem('hex6_checkout_pending');
-    if (checkoutSignal && authRetryCount < 5) {
+    const authPending = new URLSearchParams(window.location.search).get('checkout') === 'success'
+      || !!sessionStorage.getItem('hex6_checkout_pending')
+      || !!sessionStorage.getItem('hex6_auth_pending');
+    if (authPending && authRetryCount < 5) {
       return (
         <div className="fixed inset-0 flex items-center justify-center bg-background">
           <div className="w-8 h-8 border-4 border-border border-t-accent rounded-full animate-spin"></div>
@@ -59,8 +64,9 @@ const AppExperience = () => {
       );
     }
     // Retries exhausted — clean up and fall through to landing redirect
-    if (checkoutSignal) {
+    if (authPending) {
       sessionStorage.removeItem('hex6_checkout_pending');
+      sessionStorage.removeItem('hex6_auth_pending');
       window.history.replaceState({}, '', '/app');
     }
     return <Navigate to="/" replace />;

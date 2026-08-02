@@ -95,6 +95,10 @@ export default function HeroSection({ onAsteriskHover }) {
   const handleEnter = () => {
     // Already logged in (token persisted across browser restarts) → go straight in.
     if (user) { navigate('/app'); return; }
+    // Mark a pending auth so AppExperience can retry auth (instead of bouncing
+    // to the landing page) when Google OAuth redirects back with a token-
+    // propagation delay.
+    sessionStorage.setItem('hex6_auth_pending', Date.now().toString());
     base44.auth.loginWithProvider('google', '/app');
   };
 
