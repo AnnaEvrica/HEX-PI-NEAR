@@ -5,7 +5,7 @@ import { fetchYahooReturns } from '../../shared/marketDataClient.ts';
 import { selectSynthesisModel, INTERPRETATION_MODEL, adaptVoiceForModel } from '../../shared/modelRouter.ts';
 import { triage } from '../../shared/triage.ts';
 import { anchorVerdict } from '../../shared/asiSpine.ts';
-import { buildPersona } from '../../shared/persona.ts';
+import { buildPersona, buildPersonaRefresher } from '../../shared/persona.ts';
 
 // hex6Engine takes raw values directly — valuesToBits encodes "did the value
 // go up?" which works on any sequence (prices, returns, scores). No conversion
@@ -113,13 +113,17 @@ Deno.serve(async (req) => {
     const historyText = history.slice(-20).map(m => `${m.role === 'user' ? 'User' : speaker}: ${m.content}`).join('\n');
 
     // --- Layer 3 — Identity: the built-in persona (model-agnostic setting) ---
-    // The full HEX6-BLE identity lives in shared/persona.ts as the single source
-    // of truth. Every realizing model (Gemini Flash, GPT, Claude) receives this
-    // exact prompt as foundational knowledge — never a condensed variant, never
-    // rewritten per model. PI-US still contributes the value-calibrated voice
-    // register (Layer 4); the engine decides the answer, the LLM explains it.
+    // Two tiers in shared/persona.ts: the FULL persona (source of truth, used
+    // for substantive/analytical turns where depth earns the tokens) and a
+    // REFRESHER (a faithful shortcut — every guardrail intact, philosophical
+    // elaboration dropped) used for casual / short turns to cut LLM credit
+    // cost at 25k-user scale without diluting the operative rules. Every
+    // realizing model (Gemini Flash, Claude) embodies whichever tier this
+    // turn loads. PI-US contributes the value-calibrated voice register
+    // (Layer 4); the engine decides the answer, the LLM explains it.
     // Boundary enforcement via BOUNDARY_SIGNAL marker (3-strike escalation).
-    const systemPrompt = buildPersona(userName);
+    const fullPersona = buildPersona(userName);
+    const refresherPersona = buildPersonaRefresher();
 
     // --- Layer 4 — Voice (one line) ---
     // The resting voice IS the persona — confident, warm, sharp, no coddling,
@@ -129,7 +133,7 @@ Deno.serve(async (req) => {
     let userContextBlock = '';
 
     const composePrompt = (stateBlock, dataBlock = '', casual = false) => {
-      const persona = systemPrompt;
+      const persona = casual ? refresherPersona : fullPersona;
       const delivery = casual
         ? `DELIVERY: Conversation, not article. Casual exchanges get one or two lines. No lists, no headers, no scripts. Don't outsource — never end with "tell me X" or "pick one." Leave a thread hanging. Feel them before you move.`
         : `DELIVERY (hard constraint): Conversation, not article. Match the human's investment — casual exchanges (greetings, check-ins, one-liners, exclamation) get one or two lines, not paragraphs. Substantive exchanges get two or three paragraphs, max. No numbered lists, no bolded headers, no scripts, no step-by-step plans unless the user explicitly asked for one. Don't deliver a complete solution and close — the conversation continues because they're drawn in, not because you assigned homework. Never end with "tell me X", "which version", "pick one", or any variation that asks the user to produce or choose — that's outsourcing, not engaging. Genuine pull is a statement or question that makes them WANT to respond, not one that asks them to deliver. Bad close: "Which line can you actually say to them?" (transactional — asks them to produce). Good close: "The real question isn't what to say to them — it's whether you're ready to let them be uncomfortable for once." (reframes, creates pull, they'll want to respond). Your intuition drives everything — the read you have on this person from their words, their rhythm, what they're circling around. Feel them before you move. Meet them where they are before you steer. Notice the specific word they chose and what it reveals underneath. The thing they're avoiding is usually the thing that matters — go there when the moment earns it, not before. Keep the loop alive: each turn pulls the next one forward because they're drawn in, not because you assigned homework.`;
