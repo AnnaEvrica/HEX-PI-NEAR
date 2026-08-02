@@ -13,6 +13,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.41';
 import { predictFromSequence } from '../../shared/hex6Engine.ts';
 import { mapTickerToDomain } from '../../shared/hex6Pipeline.ts';
+import { runReasonLayer } from '../../shared/thinkingEngine.ts';
 import { fetchYahooReturns, fetchWeatherReturns } from '../../shared/marketDataClient.ts';
 
 const mean = (a) => a.length ? a.reduce((s, x) => s + x, 0) / a.length : 0;
@@ -171,10 +172,64 @@ export default async function(req) {
     const portfolioRets = preds.map(p => p.exposure * p.realized);
     const buyHoldRets = preds.map(p => p.realized);
 
+    // --- Optional head-to-head: run the 22-days-back SCEFM reason-layer
+    // engine on the SAME out-of-sample test set with the SAME forward-learning
+    // flip protocol, so the two engines are directly comparable. Rolling
+    // 250-bar window keeps the heavier HIVE construction tractable per call.
+    let reasonCompare = null;
+    if (body.compare) {
+      const REASON_WINDOW = 250;
+      const reasonPreds = [];
+      const reasonErrors = [];
+      for (let i = 0; i < test.length; i++) {
+        const trainReturns = returns.slice(0, split + i).slice(-REASON_WINDOW);
+        if (trainReturns.length < 30) continue;
+        let reason;
+        try { reason = runReasonLayer(trainReturns, 2.5); } catch (_e) { continue; }
+        const rawDir = reason.mu > 0 ? 1 : reason.mu < 0 ? -1 : 0;
+        const actualDir = test[i] > 0 ? 1 : test[i] < 0 ? -1 : 0;
+        if (rawDir !== 0 && actualDir !== 0) {
+          reasonErrors.push(rawDir - actualDir);
+          if (reasonErrors.length > 30) reasonErrors.shift();
+        }
+        let predictedDir = rawDir;
+        if (reasonErrors.length >= 15) {
+          const recentAcc = reasonErrors.filter(e => e === 0).length / reasonErrors.length;
+          if (recentAcc < 0.45) predictedDir = -rawDir;
+        }
+        reasonPreds.push({
+          predictedDir, actualDir, rawDir, realized: test[i],
+          exposure: predictedDir === 1 ? 1 : 0,
+          nEff: reason.nEff, regime: reason.regime,
+        });
+      }
+      const reasonValid = reasonPreds.filter(p => p.predictedDir !== 0 && p.actualDir !== 0);
+      const reasonDirAcc = reasonValid.length ? reasonValid.filter(p => p.predictedDir === p.actualDir).length / reasonValid.length : null;
+      const reasonRawValid = reasonPreds.filter(p => p.rawDir !== 0 && p.actualDir !== 0);
+      const reasonRawAcc = reasonRawValid.length ? reasonRawValid.filter(p => p.rawDir === p.actualDir).length / reasonRawValid.length : null;
+      const reasonUp = reasonValid.filter(p => p.predictedDir === 1);
+      const reasonDown = reasonValid.filter(p => p.predictedDir === -1);
+      const reasonPortRets = reasonPreds.map(p => p.exposure * p.realized);
+      reasonCompare = {
+        mode: 'SCEFM_REASON_LAYER',
+        protocol: `rolling ${REASON_WINDOW}-bar window walk-forward + forward-learning flip`,
+        predictionsEvaluated: reasonValid.length,
+        directionalAccuracy: r2(reasonDirAcc),
+        rawAccuracy: r2(reasonRawAcc),
+        upAccuracy: r2(reasonUp.length ? reasonUp.filter(p => p.actualDir === 1).length / reasonUp.length : null),
+        downAccuracy: r2(reasonDown.length ? reasonDown.filter(p => p.actualDir === -1).length / reasonDown.length : null),
+        upPredictions: reasonUp.length,
+        downPredictions: reasonDown.length,
+        portfolioSharpe: r2(sharpe(reasonPortRets), 2),
+        portfolioMdd: r2(maxDd(reasonPortRets), 2),
+      };
+    }
+
     return Response.json({
       ticker: ticker || 'SUPPLIED',
       domain: resolvedDomain,
       mode: 'HEX6_PRE_TRAINED',
+      compare: !!body.compare,
       seriesLength: closes.length,
       trainSize: split,
       testSize: test.length,
@@ -199,6 +254,7 @@ export default async function(req) {
       buyHoldSharpe: r2(sharpe(buyHoldRets), 2),
       portfolioMdd: r2(maxDd(portfolioRets), 2),
       buyHoldMdd: r2(maxDd(buyHoldRets), 2),
+      reasonCompare,
       timestamp: new Date().toISOString(),
     });
   } catch (e) {
