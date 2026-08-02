@@ -92,17 +92,16 @@ export default function HeroSection({ onAsteriskHover }) {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const handleEnter = () => {
-    // Already logged in (token persisted across browser restarts) → go straight in.
-    if (user) { navigate('/app'); return; }
-    // Mark a pending auth so AppExperience can retry auth (instead of bouncing
-    // to the landing page) when Google OAuth redirects back with a token-
-    // propagation delay.
+  // Native <a> link to the platform auth endpoint — no JS redirect, no popup
+  // blocker, no iframe navigation trap. target="_top" breaks out of the builder
+  // preview iframe so Google OAuth can actually load.
+  const authUrl = `/api/apps/auth/login?app_id=${appParams.appId}&from_url=${encodeURIComponent(`${window.location.origin}/app`)}`;
+
+  const handleEnter = (e) => {
+    // Already logged in → client-side navigate, skip the full-page redirect.
+    if (user) { e.preventDefault(); navigate('/app'); return; }
+    // Not logged in → set pending flag, then let the native <a> tag navigate.
     sessionStorage.setItem('hex6_auth_pending', Date.now().toString());
-    // Direct redirect to platform Google OAuth — bypasses SDK's iframe popup
-    // path (which gets silently blocked by browsers, causing "nothing happens").
-    const fromUrl = encodeURIComponent(`${window.location.origin}/app`);
-    window.location.href = `/api/apps/auth/login?app_id=${appParams.appId}&from_url=${fromUrl}`;
   };
 
   return (
@@ -162,12 +161,14 @@ export default function HeroSection({ onAsteriskHover }) {
               <p className="text-sm sm:text-lg md:text-xl text-black font-mono font-semibold leading-snug">
                 Experimental LLM in testing
               </p>
-              <button
+              <a
+                href={authUrl}
+                target="_top"
                 onClick={handleEnter}
                 className="inline-flex items-center justify-center px-6 py-2 sm:py-3 rounded-sm bg-primary text-primary-foreground border-2 border-accent font-bold hover:bg-primary/90 transition-colors text-sm sm:text-base tracking-[0.18em] uppercase whitespace-nowrap"
               >
                 Join Beta
-              </button>
+              </a>
             </div>
 
             <div className="mt-8 sm:mt-10 max-w-4xl px-2">
