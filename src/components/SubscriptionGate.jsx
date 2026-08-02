@@ -52,7 +52,16 @@ export default function SubscriptionGate({ children }) {
         }
       } catch (e) {
         if (!cancelled) {
-          setError(e?.message || 'Failed to load subscription status');
+          const msg = e?.message || 'Failed to load subscription status';
+          // Auth errors mean the session is invalid — redirect to homepage for re-login
+          // instead of showing a paywall + error combo that loops on "Try again".
+          if (/logged in|unauthorized|401|must be authenticated/i.test(msg)) {
+            sessionStorage.removeItem('hex6_auth_pending');
+            sessionStorage.removeItem('hex6_checkout_pending');
+            window.location.href = '/';
+            return;
+          }
+          setError(msg);
           setLoading(false);
         }
       }
@@ -99,7 +108,13 @@ export default function SubscriptionGate({ children }) {
       }
       setError('Checkout could not be started. Please try again.');
     } catch (e) {
-      setError(e?.message || 'Checkout failed to start');
+      const msg = e?.message || 'Checkout failed to start';
+      if (/logged in|unauthorized|401|must be authenticated/i.test(msg)) {
+        sessionStorage.removeItem('hex6_auth_pending');
+        window.location.href = '/';
+        return;
+      }
+      setError(msg);
     } finally {
       setActionLoading(false);
     }
@@ -141,7 +156,7 @@ export default function SubscriptionGate({ children }) {
   const pricing = sub?.pricing || null;
   const priceLabel = pricing
     ? `$${pricing.amount.toFixed(2)}/${pricing.interval === 'year' ? 'yr' : 'mo'}`
-    : 'billed monthly';
+    : '$19.99/mo';
 
   return (
     <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-4 py-12">
