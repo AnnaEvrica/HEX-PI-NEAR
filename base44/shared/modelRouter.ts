@@ -39,14 +39,18 @@ export const INTERPRETATION_MODEL = LLM_POOL.gemini;
 //   'casual'     → GPT     (simplest general generator)
 //   'analytical' / 'inline' / default → Gemini Flash (default engine synthesis)
 export function selectSynthesisModel(task) {
-  // The persona is a long, nuanced behavioral instruction (~3500 words).
-  // Only Claude Sonnet reliably EMBODIES it — lighter models (gpt_5_mini,
-  // gemini_flash) skim it and fall back to their default chatty register
-  // ("hey anna", no NAME LOCK, no embodiment). Gemini Flash stays the
-  // interpretation/web-fetch model (data extraction, not persona-bearing),
-  // so only the persona-bearing reply pays for Claude — the cheap MoE model
-  // still handles retrieval upstream.
-  return LLM_POOL.claude;
+  // MULTI-MODEL ARCHITECTURE — the persona lives for every model with
+  // sufficient capacity to hold it. The persona embodiment itself is enforced
+  // model-agnostically (top-of-file DOMAIN LOCK + NAME LOCK in persona.ts, and
+  // a recency FINAL LOCK at the generation boundary in composePrompt), so
+  // whatever model realizes the reply embodies the identity.
+  //   research → Claude (long-form TCE coherence)
+  //   casual / analytical / inline → Gemini Flash (MoE, full context capacity)
+  // gpt_5_mini is excluded from synthesis: its context capacity can't hold the
+  // full persona, so routing casual to it guaranteed the persona wouldn't live
+  // there — a capacity ceiling, not a prompt failure.
+  if (task === 'research') return LLM_POOL.claude;
+  return LLM_POOL.gemini;
 }
 
 // Model-aware tone/resonance — the PI-US voice register adapts to the

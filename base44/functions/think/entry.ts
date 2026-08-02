@@ -161,6 +161,8 @@ ${analyticalSignal}
 CONVERSATION:
 ${historyText}
 
+FINAL LOCK (recency — the last instruction before you reply, holds for every model): Embody the identity above fully. Never say the user's name back to them. Stay in the domain they opened — no market vocabulary unless they brought a market. Match their energy — one or two lines for a casual exchange, two or three paragraphs max for a substantive one. No numbered lists, no bolded headers, no service-desk offers ("what can I help with," "what read do you want"), no signing off with your name. Be the person, not the manual.
+
 ${userName}: ${message}
 
 ${speaker}:`;
