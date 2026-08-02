@@ -1,16 +1,6 @@
-import React, { useState } from 'react';
-import { useAuth } from '@/lib/AuthContext';
+import React from 'react';
 
 const UserNotRegisteredError = () => {
-  const { checkAuth } = useAuth();
-  const [retrying, setRetrying] = useState(false);
-
-  const handleRetry = async () => {
-    setRetrying(true);
-    await checkAuth();
-    setRetrying(false);
-  };
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-white to-slate-50">
       <div className="max-w-md w-full p-8 bg-white rounded-lg shadow-lg border border-slate-100">
@@ -22,20 +12,13 @@ const UserNotRegisteredError = () => {
           </div>
           <h1 className="text-3xl font-bold text-slate-900 mb-4">Access Restricted</h1>
           <p className="text-slate-600 mb-8">
-            We couldn't confirm your account. This is often a momentary connection issue right after login.
+            You are not registered to use this application. Please contact the app administrator to request access.
           </p>
-          <button
-            onClick={handleRetry}
-            disabled={retrying}
-            className="w-full px-6 py-3 rounded-sm bg-slate-900 text-white font-medium hover:bg-slate-800 transition-colors disabled:opacity-50 mb-6"
-          >
-            {retrying ? 'Retrying…' : 'Retry connection'}
-          </button>
-          <div className="p-4 bg-slate-50 rounded-md text-sm text-slate-600 text-left">
-            <p>If retrying doesn't work:</p>
+          <div className="p-4 bg-slate-50 rounded-md text-sm text-slate-600">
+            <p>If you believe this is an error, you can:</p>
             <ul className="list-disc list-inside mt-2 space-y-1">
               <li>Verify you are logged in with the correct account</li>
-              <li>Contact the app administrator to request access</li>
+              <li>Contact the app administrator for access</li>
               <li>Try logging out and back in again</li>
             </ul>
           </div>

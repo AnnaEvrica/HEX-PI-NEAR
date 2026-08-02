@@ -28,16 +28,6 @@ function gradeFromAccuracy(acc) {
   return 'F';
 }
 
-// Vocabulary tokenization for adaptive triage profiling.
-const STOPWORDS = new Set(['the','and','for','you','your','yours','this','that','with','from','have','has','are','was','were','but','not','can','will','would','could','should','about','into','they','them','their','there','here','just','like','know','think','tell','give','want','need','let','get','got','its','it','is','to','of','a','in','on','at','or','as','be','by','an','my','me','we','he','she','if','so','do','did','does','how','why','when','who','whats','im','ive','really','still','also','than','then','some','any','all','out','our','us','one','two','three','been','being','more','most','much','very','over','under','up','down']);
-function tokenize(s) {
-  if (!s) return [];
-  return (s.toLowerCase().match(/[a-z][a-z0-9]{2,}/g) || []).filter((w) => !STOPWORDS.has(w) && w.length >= 3);
-}
-function topCues(freq, n) {
-  return Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, n).map((e) => e[0]);
-}
-
 // Direction implied by the realized state transition (state-bit popularity):
 // If majority of bits in state_t+1 are 1 → UP, else DOWN. FLAT if exactly 3.
 function directionOfState(state) {
@@ -138,7 +128,6 @@ Deno.serve(async (req) => {
     const globalAcc = scored.length > 0 ? scored.reduce((s, r) => s + r.directional_accuracy, 0) / scored.length : 0;
     const globalEval = results.reduce((s, r) => s + r.predictions_evaluated, 0);
 
-    const globalGrade = globalEval < 10 ? 'INSUFFICIENT_DATA' : gradeFromAccuracy(globalAcc);
     await base44.asServiceRole.entities.CalibrationScore.create({
       score_date: today,
       ticker: 'GLOBAL',
@@ -146,49 +135,9 @@ Deno.serve(async (req) => {
       directional_accuracy: parseFloat(globalAcc.toFixed(4)),
       exposure_correlation: 0,
       avg_realized_return: 0,
-      calibration_grade: globalGrade,
+      calibration_grade: globalEval < 10 ? 'INSUFFICIENT_DATA' : gradeFromAccuracy(globalAcc),
       notes: `Multi-brain calibration across ${results.length} brains, ${globalEval} total predictions.`,
     });
-
-    // Per-user memory: derive a calibration-aware state from each user's recent
-    // cognitive cycles and store it on their UserConversationMemory so The Model
-    // can adapt voice and steering to their tracked pattern.
-    try {
-      const states = await base44.asServiceRole.entities.CognitiveState.list('-created_date', 500).catch(() => []);
-      const byUser = {};
-      for (const s of (states || [])) {
-        if (!s.user_email) continue;
-        if (!byUser[s.user_email]) byUser[s.user_email] = [];
-        byUser[s.user_email].push(s);
-      }
-      for (const email of Object.keys(byUser)) {
-        const cycles = byUser[email];
-        const conf = cycles.reduce((t, c) => t + (c.confidence || 0), 0) / cycles.length;
-        const dirs = { UP: 0, DOWN: 0, FLAT: 0 };
-        for (const c of cycles) if (c.predicted_direction) dirs[c.predicted_direction] = (dirs[c.predicted_direction] || 0) + 1;
-        const lean = dirs.UP > dirs.DOWN ? 'UP' : dirs.DOWN > dirs.UP ? 'DOWN' : 'flat';
-        const calibrationState = `Engine calibration grade ${globalGrade}; ${cycles.length} recent cycles, avg confidence ${conf.toFixed(2)}, lean ${lean}.`;
-
-        // Vocabulary adaptation: split this user's past queries by whether the
-        // engine actually ran (probability != null) and keep the most frequent
-        // distinctive tokens as triage cues for the hybrid classifier.
-        const aFreq = {}, cFreq = {};
-        for (const c of cycles) {
-          const isAnalytical = c.probability != null;
-          for (const t of tokenize(c.query)) {
-            if (isAnalytical) aFreq[t] = (aFreq[t] || 0) + 1; else cFreq[t] = (cFreq[t] || 0) + 1;
-          }
-        }
-        const triageProfile = JSON.stringify({ analytical_cues: topCues(aFreq, 15), casual_cues: topCues(cFreq, 10) });
-
-        const existing = await base44.asServiceRole.entities.UserConversationMemory.filter({ user_email: email }).catch(() => []);
-        if (existing && existing.length > 0) {
-          await base44.asServiceRole.entities.UserConversationMemory.update(existing[0].id, { calibration_state: calibrationState, triage_profile: triageProfile });
-        } else {
-          await base44.asServiceRole.entities.UserConversationMemory.create({ user_email: email, calibration_state: calibrationState, triage_profile: triageProfile, total_conversations: 0 });
-        }
-      }
-    } catch (e) { /* non-blocking */ }
 
     return Response.json({
       ok: true,

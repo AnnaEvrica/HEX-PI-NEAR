@@ -284,32 +284,7 @@ Deno.serve(async (req) => {
     last_error: '',
   });
 
-  // 4. Pull engine run logs since watermark — Base44 only, NO Postgres touched yet.
-  //    Idle cycles (no new outputs) short-circuit here so the 5-min schedule burns
-  //    zero external-DB compute on empty runs. This is the dominant case: most
-  //    5-min ticks have nothing new, and opening a Postgres connection +
-  //    running ensureSchema on every one of them is what pushed the Supabase
-  //    project past its compute-time quota.
-  const watermark = stateRecord.last_synced_timestamp || null;
-  log(`fetching logs since ${watermark || 'beginning'}`);
-  const logs = await buildEngineRunLogs(base44, watermark);
-  log(`fetched ${logs.length} logs`);
-
-  if (!logs || logs.length === 0) {
-    const finished = new Date();
-    await base44.asServiceRole.entities.SyncState.update(stateRecord.id, {
-      status: 'success',
-      last_success_at: finished.toISOString(),
-      rows_last_run: 0,
-      lock_acquired_at: null,
-      last_error: '',
-    });
-    const durationMs = finished - started;
-    log(`success (idle) — 0 new rows in ${durationMs}ms, no Postgres work needed`);
-    return Response.json({ ok: true, rows_synced: 0, idle: true, duration_ms: durationMs });
-  }
-
-  // 5. Read Postgres connection string — only reached when there is actual work.
+  // 4. Read Postgres connection string
   const connStr = Deno.env.get('POSTGRES_CONNECTION_STRING');
   if (!connStr) {
     await base44.asServiceRole.entities.SyncState.update(stateRecord.id, {
@@ -340,7 +315,7 @@ Deno.serve(async (req) => {
   try {
     sql = postgres(connStr, { ssl: 'require', max: 3, idle_timeout: 20, connect_timeout: 30 });
 
-    // 6. Ensure schema — retry once on connect timeout (Neon cold wake)
+    // 5. Ensure schema — retry once on connect timeout (Neon cold wake)
     const withRetry = async (fn) => {
       try { return await fn(); }
       catch (e) {
@@ -353,6 +328,12 @@ Deno.serve(async (req) => {
       }
     };
     await withRetry(() => ensureSchema(sql));
+
+    // 6. Pull engine run logs since watermark
+    const watermark = stateRecord.last_synced_timestamp || null;
+    log(`fetching logs since ${watermark || 'beginning'}`);
+    const logs = await buildEngineRunLogs(base44, watermark);
+    log(`fetched ${logs.length} logs`);
 
     // 7. Upsert each log
     let inserted = 0;

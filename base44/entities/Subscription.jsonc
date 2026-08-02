@@ -22,9 +22,7 @@
         "past_due",
         "canceled",
         "incomplete",
-        "incomplete_expired",
-        "unpaid",
-        "paused"
+        "unpaid"
       ],
       "description": "Subscription status from Stripe"
     },

@@ -1,8 +1,7 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.41';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 import Stripe from 'npm:stripe@17.3.0';
-import { findStripeCustomerSubscription, pickBestSubscription, subscriptionAction } from '../../shared/subscriptionState.ts';
 
-export default async function(req) {
+Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
@@ -23,55 +22,31 @@ export default async function(req) {
     const stripe = new Stripe(secretKey);
 
     // Avoid duplicate subscriptions: check DB first, then Stripe directly (webhook may not have fired).
-    // Block if ANY non-canceled subscription exists (DB) — prevents double checkout when a
-    // prior session left a sub in incomplete/past_due/unpaid state.
     const existing = await base44.asServiceRole.entities.Subscription.filter({ user_email: user.email });
-    const existingSubscription = pickBestSubscription(existing);
-    const existingAction = subscriptionAction(existingSubscription?.status);
-    if (existingSubscription && existingAction === 'access') {
-      return Response.json({ url: null, already_subscribed: true, status: existingSubscription.status });
+    const live = existing.find((s) => s.status === 'trialing' || s.status === 'active');
+    if (live) {
+      return Response.json({ url: null, already_subscribed: true });
     }
-    if (existingSubscription && existingAction === 'billing') {
-      return Response.json({ url: null, requires_billing_update: true, status: existingSubscription.status });
-    }
-    let stripeCustomer = null;
     try {
-      const found = await findStripeCustomerSubscription(stripe, user.email);
-      stripeCustomer = found.customer;
-      const liveStripe = found.subscription;
-      const liveAction = subscriptionAction(liveStripe?.status);
-      if (liveStripe && liveAction !== 'checkout') {
-        const trialEnd = liveStripe.trial_end ? new Date(liveStripe.trial_end * 1000).toISOString() : null;
-        const periodEnd = liveStripe.current_period_end ? new Date(liveStripe.current_period_end * 1000).toISOString() : null;
-        const payload = {
-          stripe_customer_id: stripeCustomer.id,
-          stripe_subscription_id: liveStripe.id,
-          status: liveStripe.status,
-          current_period_end: periodEnd,
-          trial_end: trialEnd,
-          cancel_at_period_end: liveStripe.cancel_at_period_end || false,
-        };
-        if (existingSubscription) {
-          await base44.asServiceRole.entities.Subscription.update(existingSubscription.id, payload);
-        } else {
-          await base44.asServiceRole.entities.Subscription.create({ user_email: user.email, ...payload });
+      const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+      if (customers.data.length > 0) {
+        const stripeSubs = await stripe.subscriptions.list({ customer: customers.data[0].id, limit: 1 });
+        const liveStripe = stripeSubs.data.find((s) => s.status === 'trialing' || s.status === 'active');
+        if (liveStripe) {
+          return Response.json({ url: null, already_subscribed: true });
         }
-        return liveAction === 'access'
-          ? Response.json({ url: null, already_subscribed: true, status: liveStripe.status })
-          : Response.json({ url: null, requires_billing_update: true, status: liveStripe.status });
       }
     } catch (_e) {
-      // Stripe lookup failed — checkout creation below will surface a useful error if Stripe is unavailable.
+      // ignore — proceed to create checkout
     }
 
     const origin = appOrigin;
-    const customerDetails = stripeCustomer ? { customer: stripeCustomer.id } : { customer_email: user.email };
 
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       line_items: [{ price: priceId, quantity: 1 }],
       subscription_data: { trial_period_days: 7 },
-      ...customerDetails,
+      customer_email: user.email,
       success_url: `${origin}/app?checkout=success`,
       cancel_url: `${origin}/app?checkout=cancel`,
       allow_promotion_codes: true,
@@ -79,9 +54,6 @@ export default async function(req) {
 
     return Response.json({ url: session.url });
   } catch (error) {
-    // Return 200 with the real Stripe message so the frontend's
-    // `res.data?.error` branch can surface the actual cause — a 500 makes the
-    // SDK throw and the user sees a generic "500" instead of the reason.
-    return Response.json({ error: error.message }, { status: 200 });
+    return Response.json({ error: error.message }, { status: 500 });
   }
-}
+});

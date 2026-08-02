@@ -1,5 +1,4 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
-import { filterSourcesBlock, updateMemory } from '../../shared/chatHelpers.ts';
 
 // ---------------------------------------------------------------------------
 // HEX6 BLE Engine — inlined SCEFM math (no import overhead)
@@ -708,7 +707,29 @@ HEX6:`,
       // the LLM sometimes invents deep links that 404. Keep only well-formed http(s) URLs
       // with a real host. We don't HEAD-check (would add latency); a strict regex catches
       // most fabrications (random strings, bracketed placeholders, relative paths).
-      const sourcesBlock = filterSourcesBlock(fetchResult?.sources);
+      let sourcesBlock = '';
+      if (fetchResult?.sources && Array.isArray(fetchResult.sources) && fetchResult.sources.length > 0) {
+        const urlOk = (u) => {
+          try {
+            const parsed = new URL(u);
+            if (!/^https?:$/.test(parsed.protocol)) return false;
+            // Host must have a dot and look like a real domain
+            if (!/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(parsed.hostname)) return false;
+            // Reject obvious placeholder patterns
+            if (/example\.com|placeholder|your-?(site|url)/i.test(u)) return false;
+            return true;
+          } catch { return false; }
+        };
+        const validSources = fetchResult.sources.filter(s => s?.url && s?.name && urlOk(s.url));
+        // Dedupe by URL
+        const seen = new Set();
+        const uniqueSources = validSources.filter(s => {
+          if (seen.has(s.url)) return false;
+          seen.add(s.url);
+          return true;
+        });
+        sourcesBlock = uniqueSources.map(s => `[${s.name}](${s.url})`).join('\n');
+      }
 
       // Run engine if the LLM said it pulled a series and we have enough data points.
       let webEngineContext = '';
@@ -796,7 +817,57 @@ Markov forward μ: ${result.markov.mu} | confidence: ${result.markov.confidence}
   }
 });
 
+// Fire-and-forget memory update
+function updateMemory(base44, user, existingUserMemory, message, response, synthesis = null) {
+  (async () => {
+    try {
+      const synthesisNote = synthesis ? ` | ${synthesis.user_intent || ''}` : '';
+      const lastSnippet = `User: ${message.slice(0, 300)} | HEX6: ${response.slice(0, 300)}${synthesisNote.slice(0, 100)}`;
+      const newTotal = (existingUserMemory?.total_conversations || 0) + 1;
 
+      const memoryUpdate = await base44.integrations.Core.InvokeLLM({
+        prompt: `Maintain compressed memory for HEX6 BLE about this user.
+
+EXISTING SUMMARY: ${existingUserMemory?.memory_summary || 'None.'}
+EXISTING TOPICS: ${existingUserMemory?.topics_discussed || 'None.'}
+EXISTING STYLE: ${existingUserMemory?.user_style || 'Unknown.'}
+
+NEW EXCHANGE:
+User: ${message}
+HEX6: ${response.slice(0, 500)}
+
+Return JSON only:
+- memory_summary: concise paragraph (max 200 words) of what's known about this user
+- topics_discussed: comma-separated topics/assets/themes
+- user_style: one paragraph on their communication style and sophistication`,
+        model: 'gemini_3_flash',
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            memory_summary: { type: 'string' },
+            topics_discussed: { type: 'string' },
+            user_style: { type: 'string' }
+          }
+        }
+      });
+
+      const memoryData = {
+        user_email: user.email,
+        memory_summary: memoryUpdate?.memory_summary || existingUserMemory?.memory_summary || '',
+        topics_discussed: memoryUpdate?.topics_discussed || existingUserMemory?.topics_discussed || '',
+        user_style: memoryUpdate?.user_style || existingUserMemory?.user_style || '',
+        last_conversation_snippet: lastSnippet,
+        total_conversations: newTotal,
+      };
+
+      if (existingUserMemory?.id) {
+        await base44.asServiceRole.entities.UserConversationMemory.update(existingUserMemory.id, memoryData);
+      } else {
+        await base44.asServiceRole.entities.UserConversationMemory.create(memoryData);
+      }
+    } catch (e) { /* non-blocking */ }
+  })();
+}
 
 // Persist Markov matrix per ticker (fire-and-forget)
 function persistMarkovMatrix(base44, ticker, existing, priorMarkov, freshTransitions, freshStats, petal) {

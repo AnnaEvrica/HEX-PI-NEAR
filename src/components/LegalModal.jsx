@@ -6,12 +6,12 @@ export default function LegalModal({ open, onClose }) {
   const policies = [
     {
       title: 'Terms of Service',
-      content: `HEX6 BLE, developed by Evrica Technologies Inc., is an experimental Probabilistic Intelligence model, provided "as-is" for informational and exploratory purposes. By accessing this platform, you agree that:
+      content: `HEX6 BLE, developed by Evrica Technologies Inc., is provided "as-is" for informational purposes only. By accessing this platform, you agree that:
 
-• HEX6 BLE is an experimental framework; its goal is to provide maximum value to you through enhanced reasoning and insight
-• It does not provide investment advice, financial recommendations, or portfolio management services
-• Outputs are probabilistic and informational, not predictions or guarantees, and may be incorrect
-• You are solely responsible for how you interpret and apply any output
+• HEX6 BLE does not provide investment advice, financial recommendations, or portfolio management services
+• You are solely responsible for all investment decisions and financial outcomes
+• HEX6 BLE outputs are probabilistic models, not guarantees, and may be incorrect
+• You will not hold Evrica Technologies Inc. liable for financial losses
 • Your use of the platform is governed by these terms and all applicable laws`,
     },
     {
@@ -27,14 +27,14 @@ export default function LegalModal({ open, onClose }) {
     },
     {
       title: 'Risk Disclosure',
-      content: `HEX6 BLE is an experimental Probabilistic Intelligence model. Its goal is to provide maximum value to you through enhanced reasoning and insight — not to predict or guarantee outcomes. Important disclosures:
+      content: `Trading and investing involve substantial risk of loss. Important disclosures:
 
-• HEX6 BLE is an experimental framework; outputs are probabilistic and informational, not predictions or guarantees
-• Past patterns do not guarantee future results
-• Models are based on historical data which may not repeat
-• Conditions change rapidly; outputs may become outdated
+• Past performance does not guarantee future results
+• All investments carry the risk of total loss of capital
+• HEX6 BLE models are based on historical data which may not repeat
+• Market conditions change rapidly; HEX6 BLE recommendations may become outdated
 • Voice inputs and model selections do not affect legal liability
-• You should consult with a licensed professional before making decisions based on model outputs
+• You should consult with a licensed financial advisor before making investment decisions
 • Evrica Technologies Inc. is not registered as an investment advisor or broker`,
     },
     {

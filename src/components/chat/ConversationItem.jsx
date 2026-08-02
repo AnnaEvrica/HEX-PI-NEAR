@@ -13,12 +13,6 @@ export default function ConversationItem({ conversation, isSelected, onSelect, o
     }
   }, [isEditing]);
 
-  // Keep the edit field in sync with the persisted title when not editing,
-  // so an external title change doesn't leave a stale value in the input.
-  useEffect(() => {
-    if (!isEditing) setEditTitle(conversation.title);
-  }, [conversation.title, isEditing]);
-
   const handleSaveRename = () => {
     if (editTitle.trim() && editTitle !== conversation.title) {
       onRename(editTitle.trim());
@@ -51,7 +45,7 @@ export default function ConversationItem({ conversation, isSelected, onSelect, o
           onChange={(e) => setEditTitle(e.target.value)}
           onBlur={handleSaveRename}
           onKeyDown={handleKeyDown}
-          className="flex-1 px-2 py-1 text-xs bg-background text-foreground border border-border rounded focus:outline-none focus:border-accent"
+          className="flex-1 px-2 py-1 text-xs bg-black/20 border border-foreground/30 rounded text-foreground focus:outline-none focus:border-foreground"
         />
       ) : (
         <>
