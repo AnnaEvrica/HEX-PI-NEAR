@@ -17,13 +17,16 @@ import { useState, useEffect } from 'react';
 const AppExperience = () => {
   const { user, isNotRegistered, checkAuth } = useAuth();
   const [consentCompleted, setConsentCompleted] = useState(false);
-  const [authRetryCount, setAuthRetryCount] = useState(0);
+  const [authRetryCount, setAuthRetryCount] = useState(() =>
+    Number(sessionStorage.getItem('hex6_auth_retry_count')) || 0
+  );
 
   const consentDone = user?.hex6_consent_completed === true || !!localStorage.getItem('hex6_consent_timestamp') || consentCompleted;
 
   useEffect(() => {
     if (user) {
       sessionStorage.removeItem('hex6_auth_pending');
+      sessionStorage.removeItem('hex6_auth_retry_count');
       if (user.hex6_consent_completed === true) {
         setConsentCompleted(true);
       }
@@ -41,7 +44,9 @@ const AppExperience = () => {
         || !!sessionStorage.getItem('hex6_auth_pending');
       if (authPending && authRetryCount < 5) {
         const timer = setTimeout(() => {
-          setAuthRetryCount(c => c + 1);
+          const next = authRetryCount + 1;
+          sessionStorage.setItem('hex6_auth_retry_count', String(next));
+          setAuthRetryCount(next);
           checkAuth();
         }, 1500 * (authRetryCount + 1));
         return () => clearTimeout(timer);
@@ -49,24 +54,29 @@ const AppExperience = () => {
     }
   }, [user, authRetryCount]);
 
+  // During post-OAuth recovery, show spinner (not error screen) — me() failures
+  // are transient token-propagation delays, not genuinely "unregistered."
+  const authPending = new URLSearchParams(window.location.search).get('checkout') === 'success'
+    || !!sessionStorage.getItem('hex6_checkout_pending')
+    || !!sessionStorage.getItem('hex6_auth_pending');
+
+  if (authPending && authRetryCount < 5 && (isNotRegistered || !user)) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-background">
+        <div className="w-8 h-8 border-4 border-border border-t-accent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   if (isNotRegistered) {
     return <UserNotRegisteredError />;
   }
   if (!user) {
-    const authPending = new URLSearchParams(window.location.search).get('checkout') === 'success'
-      || !!sessionStorage.getItem('hex6_checkout_pending')
-      || !!sessionStorage.getItem('hex6_auth_pending');
-    if (authPending && authRetryCount < 5) {
-      return (
-        <div className="fixed inset-0 flex items-center justify-center bg-background">
-          <div className="w-8 h-8 border-4 border-border border-t-accent rounded-full animate-spin"></div>
-        </div>
-      );
-    }
     // Retries exhausted — clean up and fall through to landing redirect
     if (authPending) {
       sessionStorage.removeItem('hex6_checkout_pending');
       sessionStorage.removeItem('hex6_auth_pending');
+      sessionStorage.removeItem('hex6_auth_retry_count');
       window.history.replaceState({}, '', '/app');
     }
     return <Navigate to="/" replace />;
