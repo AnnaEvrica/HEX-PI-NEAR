@@ -5,12 +5,13 @@ import ReactMarkdown from 'react-markdown';
 import SettingsModal from '@/components/SettingsModal';
 import LegalModal from '@/components/LegalModal';
 import ConversationItem from '@/components/chat/ConversationItem';
+import ChatHeaderBrand from '@/components/chat/ChatHeaderBrand';
 
 export default function HEX6ChatInterface() {
   const welcomeMessage = {
     id: 'welcome',
     role: 'assistant',
-    content: `Welcome. I am HEX6 BLE — a probabilistic intelligence engine. I don't predict. I don't guess. I compute.\n\nI see markets as living probability distributions — constantly shifting, never binary. Where others force a single answer, I hold the entire possibility space and let mathematics speak.\n\nWhat would you like to explore?`,
+    content: `Welcome. I'm HEX6-BLE — the Binaureal Linguistic Engine.\n\nI fuse what's possible with what's meaningful, with reasoning you can follow. I read the data behind the moment, name the patterns others miss, and tell you where the weight actually sits — clearly, and without the noise.\n\nAsk me about a market, a number, or an idea you can't quite shake. Let's think clearly — and elevate the way you think.`,
   };
 
   // Loading copy — only "Thinking..." for fast chat replies.
@@ -113,9 +114,22 @@ export default function HEX6ChatInterface() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        setConversations(parsed);
-        if (parsed.length > 0) {
-          setCurrentConversationId(parsed[0].id);
+        // Migrate stale content: drop any "Evrica Intelligence" branding and
+        // refresh the intro so the AI always presents as HEX6 BLE.
+        const sanitized = parsed.map(c => {
+          let messages = (c.messages || []).map(m =>
+            typeof m?.content === 'string'
+              ? { ...m, content: m.content.replace(/Evrica Intelligence/g, 'HEX6 BLE') }
+              : m
+          );
+          if (messages[0]?.role === 'assistant' && messages[0]?.content !== welcomeMessage.content) {
+            messages = [welcomeMessage, ...messages.slice(1)];
+          }
+          return { ...c, messages };
+        });
+        setConversations(sanitized);
+        if (sanitized.length > 0) {
+          setCurrentConversationId(sanitized[0].id);
         }
       } catch (err) {
         console.log('Could not load saved conversations');
@@ -257,7 +271,7 @@ export default function HEX6ChatInterface() {
 
     // Read the latest input value — fall back to the DOM if React state is stale
     // (can happen right after dictation when state hasn't flushed yet).
-    const textareaEl = document.querySelector('textarea[placeholder="Ask HEX6..."]');
+    const textareaEl = document.querySelector('textarea[placeholder="Ask anything..."]');
     const liveValue = (textareaEl?.value ?? input).trim();
 
     if (!liveValue && !uploadedImage) {
@@ -350,7 +364,7 @@ export default function HEX6ChatInterface() {
 
     // Fire the request — completes even if the user switches tabs.
     const reqId = Date.now();
-    const requestPromise = base44.functions.invoke('hex6Chat', payload)
+    const requestPromise = base44.functions.invoke('think', payload)
       .then((response) => {
         const replyText = response?.data?.response;
         if (!replyText) return;
@@ -431,7 +445,7 @@ export default function HEX6ChatInterface() {
 
   const handleManageBilling = async () => {
     try {
-      const res = await base44.functions.invoke('manageBilling', {});
+      const res = await base44.functions.invoke('manageBilling', { origin: window.location.origin });
       if (res.data?.url) window.location.href = res.data.url;
     } catch (err) {
       console.error('Billing portal failed:', err);
@@ -456,7 +470,7 @@ export default function HEX6ChatInterface() {
       >
         <div className="flex flex-col h-full p-4">
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-lg font-bold">HEX6</h1>
+            <h1 className="text-lg font-bold">HEX6 BLE</h1>
             <button
               onClick={() => setSidebarOpen(false)}
               className="md:hidden p-2 hover:bg-muted rounded-sm"
@@ -536,9 +550,9 @@ export default function HEX6ChatInterface() {
               <Menu className="w-5 h-5" />
             </button>
           </div>
-          <h2 className="flex-1 text-center font-medium text-sm md:text-base text-secondary truncate">
-            HEX6 BLE : ORACLE
-          </h2>
+          <div className="flex-1 flex justify-center">
+            <ChatHeaderBrand />
+          </div>
           <div className="flex items-center justify-end w-10 md:w-auto shrink-0">
             {traderEnabled && (
               <span className="text-[10px] md:text-xs text-accent px-2 py-1 rounded bg-accent/10 whitespace-nowrap">
@@ -573,12 +587,12 @@ export default function HEX6ChatInterface() {
                 <div
                   className={`${
                     message.role === 'user'
-                      ? 'bg-primary text-primary-foreground rounded-2xl rounded-tr-sm'
+                      ? 'bg-accent/10 text-foreground border border-accent/30 rounded-2xl rounded-tr-sm'
                       : 'bg-muted text-foreground rounded-2xl rounded-tl-sm'
                   } px-4 py-2.5 text-sm md:text-base`}
                 >
                   <ReactMarkdown 
-                    className="prose prose-sm dark:prose-invert max-w-none [&>*]:my-0 [&>p]:my-1 [&>ul]:my-1 [&>ol]:my-1 [&>li]:my-0"
+                    className="prose prose-sm dark:prose-invert max-w-none text-foreground [&>*]:my-0 [&>p]:my-1 [&>ul]:my-1 [&>ol]:my-1 [&>li]:my-0"
                     components={{
                       p: ({ node, ...props }) => <p {...props} />,
                       ul: ({ node, ...props }) => <ul className="list-disc list-inside" {...props} />,
@@ -695,7 +709,7 @@ export default function HEX6ChatInterface() {
                   handleSendMessage();
                 }
               }}
-              placeholder="Ask HEX6..."
+              placeholder="Ask anything..."
               rows={1}
               className="flex-1 px-2 md:px-4 py-2 rounded-sm border border-border bg-background text-foreground placeholder-secondary text-sm md:text-base focus:outline-none focus:border-accent resize-none max-h-32 overflow-y-auto"
               style={{ minHeight: '44px' }}

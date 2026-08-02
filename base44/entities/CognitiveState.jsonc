@@ -1,0 +1,117 @@
+{
+  "name": "CognitiveState",
+  "type": "object",
+  "properties": {
+    "state_id": {
+      "type": "string",
+      "description": "Unique identifier for this cognitive state packet"
+    },
+    "thinking_mode": {
+      "type": "string",
+      "enum": [
+        "reason",
+        "understand"
+      ],
+      "description": "Which thinking mode produced this state"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user whose query produced this cognitive state"
+    },
+    "conversation_id": {
+      "type": "string",
+      "description": "Reference to the conversation that produced this state"
+    },
+    "query": {
+      "type": "string",
+      "description": "The user query that triggered this thinking cycle"
+    },
+    "probability": {
+      "type": "number",
+      "description": "HEX6-BLE probability score (0-1)"
+    },
+    "resonance": {
+      "type": "number",
+      "description": "PI-US resonance score (0-1)"
+    },
+    "coherence": {
+      "type": "number",
+      "description": "Agreement between probability and resonance (0-1)"
+    },
+    "value": {
+      "type": "number",
+      "description": "Pascal structural support score (Evidence x Agreement x Consistency x Coverage)"
+    },
+    "confidence": {
+      "type": "number",
+      "description": "Overall confidence of the thinking cycle (0-1)"
+    },
+    "predicted_direction": {
+      "type": "string",
+      "enum": [
+        "UP",
+        "DOWN",
+        "FLAT"
+      ],
+      "description": "The direction the engine predicted for the next step"
+    },
+    "forward_accuracy": {
+      "type": "number",
+      "description": "Walk-forward directional accuracy on the held-out tail of the input series (0-1); null if not tested"
+    },
+    "forward_count": {
+      "type": "number",
+      "description": "Number of held-out predictions in the forward test"
+    },
+    "cross_alignment": {
+      "type": "string",
+      "description": "HEX6-BLE <-> PI-US directional alignment: aligned / neutral / conflicting"
+    },
+    "friction": {
+      "type": "number",
+      "description": "Prediction-vs-reality friction score, filled when outcome is known"
+    },
+    "context_node_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "CoreNode IDs that formed the knowledge context for this cycle"
+    },
+    "resolved_outcome": {
+      "type": "string",
+      "description": "The realized outcome, filled when known (drives the Learning phase)"
+    }
+  },
+  "required": [
+    "state_id",
+    "thinking_mode"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,7 +1,7 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.41';
 import Stripe from 'npm:stripe@17.3.0';
 
-Deno.serve(async (req) => {
+export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
     const subs = await base44.asServiceRole.entities.Subscription.filter({ user_email: user.email });
     const sub = subs.find((s) => s.stripe_customer_id);
     if (!sub) {
-      return Response.json({ error: 'No subscription found' }, { status: 404 });
+      return Response.json({ error: 'No active subscription found. Start a free trial first.' }, { status: 200 });
     }
 
     // Ensure a portal configuration exists (self-bootstrap so it works without dashboard setup).
@@ -27,7 +27,6 @@ Deno.serve(async (req) => {
     let configId = configs.data[0]?.id;
     if (!configId) {
       const cfg = await stripe.billingPortal.configurations.create({
-        business_profile: { name: 'HEX6 BLE' },
         features: {
           customer_update: { enabled: true, allowed_updates: ['email', 'address'] },
           subscription_cancel: { enabled: true, mode: 'at_period_end' },
@@ -41,12 +40,17 @@ Deno.serve(async (req) => {
     const origin = body?.origin || new URL(req.url).origin;
     const session = await stripe.billingPortal.sessions.create({
       customer: sub.stripe_customer_id,
-      return_url: `${origin}/`,
+      return_url: `${origin}/app?billing=return`,
       configuration: configId,
     });
 
     return Response.json({ url: session.url });
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    // Surface the real error. A stale DB record pointing at a deleted Stripe
+    // customer shows up as "No such customer" — give a clear, actionable message.
+    const msg = /no such customer/i.test(error.message)
+      ? 'Your billing record is out of sync with Stripe. Please start a fresh free trial.'
+      : error.message;
+    return Response.json({ error: msg }, { status: 200 });
   }
-});
+}

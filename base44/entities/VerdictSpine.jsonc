@@ -1,0 +1,82 @@
+{
+  "name": "VerdictSpine",
+  "type": "object",
+  "properties": {
+    "verdict_id": {
+      "type": "string",
+      "description": "The assertion this record anchors (e.g. CognitiveState state_id, Output output_id)"
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "engine_output",
+        "signal_assertion",
+        "engine_run"
+      ],
+      "default": "engine_output",
+      "description": "Kind of verdict anchored to the spine"
+    },
+    "content_hash": {
+      "type": "string",
+      "description": "SHA-256 of the canonical anchored verdict content \u2014 a commitment, not the content itself"
+    },
+    "prior_spine_hash": {
+      "type": "string",
+      "description": "chain_hash of the immediately preceding spine record; 'GENESIS' for the first record"
+    },
+    "chain_hash": {
+      "type": "string",
+      "description": "SHA-256(prior_spine_hash : content_hash : anchored_at) \u2014 the tamper-evident link"
+    },
+    "validators": {
+      "type": "string",
+      "description": "JSON array of validator results [{id, kind, check, agrees, evidence_ref, weight}]"
+    },
+    "disagreement_flag": {
+      "type": "boolean",
+      "default": false,
+      "description": "true if any validator disagrees \u2014 the drift signal that becomes an alert"
+    },
+    "disagreement_reason": {
+      "type": "string",
+      "description": "Concatenated reasons from disagreeing validators"
+    },
+    "expert_echoes": {
+      "type": "string",
+      "description": "JSON array of curated expert/context echoes [{source, position, agrees, ref}]"
+    },
+    "authored_by": {
+      "type": "string",
+      "description": "Who/what produced the verdict (user email or 'HEX6_ENGINE')"
+    },
+    "anchored_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the verdict was anchored to the spine"
+    }
+  },
+  "required": [
+    "verdict_id",
+    "content_hash",
+    "prior_spine_hash",
+    "chain_hash"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": null,
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

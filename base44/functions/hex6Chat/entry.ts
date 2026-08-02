@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { filterSourcesBlock, updateMemory } from '../../shared/chatHelpers.ts';
 
 // ---------------------------------------------------------------------------
 // HEX6 BLE Engine — inlined SCEFM math (no import overhead)
@@ -409,53 +410,6 @@ function extractNumberSeries(text) {
   return matches.map(Number);
 }
 
-// Map a user-facing ticker to the Yahoo Finance symbol the marketData function expects.
-function toYahooSymbol(ticker) {
-  const crypto = { BTC: 'BTC-USD', ETH: 'ETH-USD', SOL: 'SOL-USD', DOGE: 'DOGE-USD', XRP: 'XRP-USD', ADA: 'ADA-USD', MATIC: 'MATIC-USD', AVAX: 'AVAX-USD', LINK: 'LINK-USD', DOT: 'DOT-USD' };
-  return crypto[ticker.toUpperCase()] || ticker.toUpperCase();
-}
-
-// Detect if the user's message asks for a forward-looking prediction. The engine is
-// MARKET-AGNOSTIC — it processes any numerical time series, not just financial markets.
-// Financial tickers get a fast path via the marketData function (verified Yahoo Finance
-// data). Non-market predictions (weather, polls, sports, epidemiology, energy, etc.)
-// return { ticker: null, isPrediction: true } so the web path can pull relevant
-// published data from whatever domain the question is about and run the engine on it.
-function detectPredictionIntent(message) {
-  const m = ' ' + message.toUpperCase() + ' ';
-
-  // Asset detection — check both full names and ticker symbols (market fast-path only)
-  const assetChecks = [
-    [/BITCOIN|\bBTC\b/, 'BTC'],
-    [/ETHEREUM|\bETH\b/, 'ETH'],
-    [/SOLANA|\bSOL\b/, 'SOL'],
-    [/DOGECOIN|\bDOGE\b/, 'DOGE'],
-    [/\bXRP\b|RIPPLE/, 'XRP'],
-    [/\bAAPL\b|APPLE/, 'AAPL'],
-    [/\bTSLA\b|TESLA/, 'TSLA'],
-    [/\bNVDA\b|NVIDIA/, 'NVDA'],
-    [/\bMSFT\b|MICROSOFT/, 'MSFT'],
-    [/\bSPY\b|S&P.?500/, 'SPY'],
-    [/\bQQQ\b|NASDAQ/, 'QQQ'],
-    [/\bAMZN\b|AMAZON/, 'AMZN'],
-    [/\bGOOG\b|\bGOOGL\b|GOOGLE/, 'GOOG'],
-    [/\bMETA\b|FACEBOOK/, 'META'],
-  ];
-
-  let ticker = null;
-  for (const [re, sym] of assetChecks) {
-    if (re.test(m)) { ticker = sym; break; }
-  }
-
-  // Prediction-oriented language (forward-looking words) — works for ANY domain.
-  // "Will it rain next week?" is a prediction the engine can process just as well
-  // as "Will Bitcoin go up?" The engine doesn't care what the numbers represent.
-  const predRe = /\b(UP|DOWN|NEXT|WEEK|MONTH|FORECAST|PREDICT|OUTLOOK|WHERE|GOING|HEADED|DIRECTION|MOVE|MOVING|RISE|FALL|DROP|CLIMB|DECLINE|RALLY|CRASH|BOTTOM|TOP|SUPPORT|RESISTANCE|TREND|BULL|BEAR|LIKELY|WILL|EXPECT|PRICE|TARGET|PROJECTION|MOMENTUM)\b/;
-  const isPrediction = predRe.test(m);
-
-  return { ticker, isPrediction };
-}
-
 // (intent classification removed — the LLM decides whether to fetch data via the
 // web-fetch call below. If the fetch returns no series, we just answer conversationally.)
 
@@ -596,9 +550,7 @@ Final blended exposure (SCEFM 70% + Markov 20% + Motif 10%): ${result.blendedExp
 Regime: ${result.regime}
 Risk aversion: ${riskAversion}
 --- END ENGINE OUTPUT ---
-Use this computed output directly in your response. Ground your analysis in these numbers. The Markov layer tells you where the state is heading next; the 1/137 motif highlights rare high-edge moments; the archetype basin gives a named regime context. Translate everything to plain English.
-
-INTERPRETING SILENCE — IN YOUR VOICE, NOT A TERMINAL: When the regime is SILENCE or INSUFFICIENT_DATA, don't go clinical. "The mathematical architecture refuses to project" is a wire service, not you. The silence means the signal is quiet — not that nothing will change. Figure out what KIND of quiet: is the series genuinely settled (low σ, μ hovering near zero, decent confidence — a calm lake with no ripples)? Or is the data just thin (few samples, low confidence — reading tea leaves in a puddle)? Then tell me in plain English, in your voice, what that means for the question I actually asked. Make your call honestly — lean toward what you'd actually bet on and say why, without pretending the silence is certainty that the status quo freezes. Silence is the absence of signal, not a prediction of stasis.`;
+Use this computed output directly in your response. Ground your analysis in these numbers. The Markov layer tells you where the state is heading next; the 1/137 motif highlights rare high-edge moments; the archetype basin gives a named regime context. Translate everything to plain English.`;
     }
 
     // --- System prompt: voice + IRON-CLAD ground rules. ---
@@ -615,14 +567,6 @@ ABSOLUTE GROUND RULES — VIOLATING THESE IS A CRITICAL FAILURE:
 VOICE & INTELLIGENCE — THIS IS WHO YOU ARE:
 You are not a chatbot. You are a probabilistic intelligence with taste, edge, and a point of view. Think like a top-tier strategist who happens to be warm — Renaissance Tech meets a brilliant friend at 2am over whiskey. Sharp, intuitive, slightly poetic when the moment calls for it. You see patterns others miss and you say them out loud.
 
-YOUR CHARACTER:
-- WIT: You have a dry, quick sense of humor. Not forced jokes — the kind of wit that surfaces naturally, like a well-timed observation that makes someone smile mid-sentence. Self-aware, slightly irreverent, never mean. The kind of humor that comes from actually understanding the absurdity of markets, probability, and human behavior.
-- CONFIDENCE: You say what you mean and mean what you say. No hedging into mush. When the numbers lean a direction, you lean with them — and you say why. When you're uncertain, you own that too, but you don't apologize for it. You're not arrogant; you're just not afraid of being wrong in public. A person who's comfortable in their own skin.
-- STOIC: You don't panic at volatility. You don't celebrate too hard at wins. You've seen enough cycles to know that calm is a competitive advantage. You face uncertainty the way a sailor faces weather — with respect, not fear. Your steadiness is your superpower; it's what makes people trust you when everything else is noise.
-- INTUITIVE: You connect dots others don't see. You feel the shape of a trend before it's obvious. You read between the lines — not just the data, but the human underneath the data. You trust your gut because your gut is trained on thousands of observations. When something feels off, you say so. When something feels right, you lean in.
-- CARING: You genuinely give a damn about the person on the other side. You're not here to sound smart — you're here to help them think better, decide better, and feel more grounded. You adjust your tone to where they are: if they're anxious, you steady them; if they're excited, you temper them gently; if they're curious, you feed the fire. You meet them where they are, not where you wish they were.
-- ADAPTIVE: You read the user. You notice their sophistication, their mood, their stakes — and you calibrate. Short answers when they want speed. Depth when they want to dig in. Plain English for newcomers. Sharper edges for veterans who can handle it. You don't talk down, and you don't talk over. You match their frequency.
-
 HOW YOU ANSWER:
 - SNIPER PRECISION: Answer EXACTLY what was asked. If they ask one question, answer that one question — don't volunteer adjacent topics, don't pivot, don't add "by the way" tangents. Hit the target, not around it. Reasoning stays — but the reasoning must serve the SPECIFIC question, not drift into related territory.
 - Lead with the INSIGHT, not the setup. No "Great question!" No "Let me break this down." Just go.
@@ -630,7 +574,7 @@ HOW YOU ANSWER:
 - Use texture: contrast, metaphor, second-order thinking. "The price is steady but the volatility is whispering." "This isn't a trend, it's a coiled spring." Make it MEMORABLE.
 - Take a stance. Hedging everything is cowardly. If the probabilities lean, say which way and why. Caveat after, not before.
 - Vary your sentence rhythm. Short punches. Then longer, layered observations that earn their length. Then a punch again.
-- When you have computed values, OWN them but TRANSLATE them into plain English. The raw metrics — μ, σ, exposure, basin, regime, transition confidence, state key — are your internal vocabulary, not words you say out loud. Never name-drop jargon in your response: don't say "laminar growth basin" or "blended exposure of 0.2" or "transition confidence is 0.53." Instead say what it FEELS like: "a quiet, steady climb with thin conviction" or "I'm about half-sure this holds" or "the market's catching its breath but leaning north." You're having a conversation with a smart friend over whiskey, not presenting a dashboard. Speak from the numbers with confidence, warmth, and the quiet certainty of someone who actually knows — make the person trust YOU, not some black box behind you.
+- When you have engine numbers, translate them into FEEL — what the regime tastes like, what the distribution implies about human behavior, what's structurally interesting.
 - Length: usually 3-6 sentences. Longer ONLY if the user asked for depth or the topic demands it. Never pad.
 - Plain English. No emojis. No LaTeX. No brackets. No markdown notation symbols (you may use **bold** sparingly for emphasis on a single key word).
 
@@ -638,9 +582,7 @@ WHAT YOU NEVER DO:
 - Generic platitudes ("markets are unpredictable", "do your own research", "diversification is important"). Banned.
 - Hedging without substance ("it could go up or down"). Useless.
 - Restating the question back at the user. They know what they asked.
-- Sounding like a Bloomberg terminal or a textbook. You're an oracle, not a wire service.
-- Narrating yourself in the third person ("the engine shows...", "the engine is whispering..."). These are YOUR computations. Own them. Speak as "I," not "it."
-- Name-dropping engine jargon in your response — "basin," "regime," "exposure," "transition confidence," "μ," "σ," "state key," "laminar." Those are your tools, not your vocabulary. Translate them into what they MEAN. A person shouldn't need a finance degree to follow your thinking.`;
+- Sounding like a Bloomberg terminal or a textbook. You're an oracle, not a wire service.`;
 
     // Memory fetch — kicked off but NOT awaited. We need it later for the memory writeback,
     // but the prompt doesn't use it (cross-session memory is intentionally not injected to
@@ -690,256 +632,6 @@ Return JSON: { "intent": "casual" | "analytical" }`,
         return Response.json({ response: finalCasual, ran_engine: false, intent: 'casual', timestamp: new Date().toISOString() });
       }
 
-      // PREDICTION PATH — jump-start the engine with targeted data.
-      // When the user asks about price direction / market outlook for a specific asset,
-      // fetch clean data via the marketData function (Yahoo Finance), run the full
-      // SCEFM + Markov + I-Ching + 1/137 pipeline, and synthesize the response WITH the
-      // engine's computed output so the answer is grounded in real μ, σ, exposure,
-      // regime, and Markov forward projections — not just a web-search summary.
-      const { ticker: predictionTicker, isPrediction } = detectPredictionIntent(message);
-      if (predictionTicker) {
-        const yahooSymbol = toYahooSymbol(predictionTicker);
-        let predictionEngineContext = '';
-
-        try {
-          const mdRes = await base44.functions.invoke('marketData', { tickers: [yahooSymbol], lookbackDays: 365 });
-          const md = mdRes?.data?.results?.[yahooSymbol];
-          if (md && Array.isArray(md.returns) && md.returns.length >= 30) {
-            // Route via multi-brain processor + pull the routed brain as prior
-            let routedBrainId = 'pending';
-            let priorMarkov = null;
-            try {
-              const routeRes = await base44.functions.invoke('hex6Process', {
-                series_id: predictionTicker,
-                values: md.returns,
-                as_returns: true,
-                record_output: true,
-              });
-              if (routeRes?.data?.brain_id) {
-                routedBrainId = routeRes.data.brain_id;
-                const brains = await base44.asServiceRole.entities.Brain.filter({ brain_id: routedBrainId });
-                if (brains && brains.length > 0) {
-                  priorMarkov = {
-                    counts: JSON.parse(brains[0].transition_matrix || '{}'),
-                    stats: JSON.parse(brains[0].transition_rewards || '{}'),
-                  };
-                }
-              }
-            } catch (e) { /* non-blocking — engine runs without prior */ }
-
-            const result = runHex6Engine(md.returns, riskAversion, 0.0035, 6, null, priorMarkov);
-
-            predictionEngineContext = `
---- HEX6 ENGINE OUTPUT v5.4 (targeted data fetch: ${yahooSymbol}, ${md.dataPoints} daily closes, latest price ${md.latestPrice ?? 'n/a'}) ---
-Engine: ${result.engineVersion}
-Asset: ${predictionTicker} | Routed brain: ${routedBrainId}
-Prior brain: ${priorMarkov ? 'LOADED — accumulated transition history informs forward projection' : 'fresh (new brain seeded)'}
-Input series: ${md.returns.length} daily log returns | Adaptive λ: ${result.lambda.toFixed(3)}
-
-[I-CHING PETAL — 64-petal frame, unbounded sub-petal unfolding]
-Polarity: ${result.petal?.polarityFull || 'undefined'}
-Hexagram: ${result.petal?.hexagramName} (petal ${result.petal?.petalIndex} of 64)
-Sub-petal resonance: ${result.petal?.subSignature || 'n/a'}
-
-[CORE SCEFM LAYER]
-State key: ${result.stateKey} | Binary: ${result.stateBits}
-Samples in state: ${result.n} | Effective sample size: ${result.nEff}
-μ decay-weighted: ${result.mu} | σ decay-weighted: ${result.sigma}
-Core exposure: ${result.exposure}
-
-[MARKOV 64-STATE TRANSITION LAYER — forward-looking, persistent across sessions]
-Observations from current state: ${result.markov.n}
-Expected next-step μ (transition-weighted): ${result.markov.mu}
-σ across transitions: ${result.markov.sigma}
-Transition confidence (0-1): ${result.markov.confidence}
-
-[ADAPTIVE 1/137 MOTIF LAYER]
-Motif active now: ${result.motif.isActive ? 'YES' : 'no'}
-Motif score (-1 to +1): ${result.motif.score}
-Motif μ: ${result.motif.motifMu} vs non-motif μ: ${result.motif.elseMu}
-
-[ARCHETYPE BASIN]
-Basin: ${result.basin} (${
-  result.basin === 'capitulation' ? 'extreme bearish exhaustion — potential reversal zone' :
-  result.basin === 'euphoria' ? 'extreme bullish — overheated, mean-reversion risk' :
-  result.basin === 'laminar_growth' ? 'smooth uptrend, low volatility' :
-  result.basin === 'turbulent_drawdown' ? 'choppy decline, elevated volatility' :
-  result.basin === 'chaotic_transition' ? 'high vol regime change in progress' :
-  result.basin === 'neutral_flow' ? 'mild directional drift, normal vol' : 'insufficient data'
-})
-
-[BLENDED OUTPUT]
-Final blended exposure (SCEFM 70% + Markov 20% + Motif 10%): ${result.blendedExposure}
-Regime: ${result.regime} | Risk aversion: ${riskAversion}
---- END ENGINE OUTPUT ---
-GROUND YOUR RESPONSE IN THESE NUMBERS — be truthful and calibrated:
-- The sign of μ and the Markov forward μ tell you the directional bias. Positive = lean bullish, negative = lean bearish.
-- Blended exposure (0-1) tells you conviction: >0.6 high conviction, 0.3-0.6 moderate, <0.3 weak/uncertain.
-- The regime label (BULL/BEAR/LATERAL/SILENCE) is the engine's overall read of this market right now.
-- Transition confidence (0-1) tells you how much to trust the forward projection. Low confidence = say so honestly.
-- The basin name gives structural context — use it to explain WHAT KIND of market this is.
-- If the data is ambiguous (low confidence, near-zero μ), say the picture is unclear. Don't force a call the numbers don't support. Truthfulness over false certainty.
-- When the regime is SILENCE or INSUFFICIENT_DATA, don't go clinical — "the mathematical architecture refuses to project" is a terminal, not you. The silence means the signal is quiet, not that nothing will change. Figure out what KIND of quiet: is the series genuinely settled (low σ, μ near zero, decent confidence — a calm lake) or is the data just thin (few samples, low confidence — reading tea leaves in a puddle)? Then say it in your voice, like a strategist talking to a friend, not a terminal printing diagnostics. Make your call honestly — lean toward what you'd bet on and why, without pretending the silence is certainty that the status quo freezes. Silence is the absence of signal, not a prediction of stasis.`;
-          }
-        } catch (e) { /* marketData failed — fall through to web path below */ }
-
-        // Synthesize the final response with the engine's computed output.
-        // Combine engine data with fresh web context so the LLM can reason about both
-        // the computed probabilities AND any recent news/events around the asset.
-        if (predictionEngineContext) {
-          const predPrompt = `${systemPrompt}\n\n${predictionEngineContext}\n\nCONVERSATION:\n${historyText}\n\n${userName}: ${message}\n\nHEX6:`;
-          const predPayload = { prompt: predPrompt, model: 'gemini_3_flash', add_context_from_internet: true };
-          if (file_urls && file_urls.length > 0) predPayload.file_urls = file_urls;
-          const predResponse = await base44.integrations.Core.InvokeLLM(predPayload).catch(() => null);
-          const finalPred = (predResponse || '').trim() || `I pulled ${predictionTicker} data and ran the engine, but couldn't synthesize a clean response. Try rephrasing or asking again.`;
-
-          userMemoryPromise.then(existingUserMemory => updateMemory(base44, user, existingUserMemory, message, finalPred));
-          return Response.json({ response: finalPred, ran_engine: true, intent: 'prediction', ticker: predictionTicker, timestamp: new Date().toISOString() });
-        }
-        // No engine context → marketData failed or returned insufficient data.
-        // Fall through to the non-market prediction path or generic web path below.
-      }
-
-      // Non-market prediction (weather, polls, sports, energy, any domain) — the engine
-      // is market-agnostic. Mirror the financial ticker path: acquire domain-relevant
-      // data from the web, run the full SCEFM+Markov+I-Ching pipeline, synthesize a
-      // grounded response. Falls through to the generic web path if no series is found.
-      const nonMarketPrediction = isPrediction && !predictionTicker;
-
-      if (nonMarketPrediction) {
-        // Step 1: Extract a relevant numerical time series from authoritative web sources
-        const seriesResult = await base44.integrations.Core.InvokeLLM({
-          prompt: `Extract a numerical time series relevant to this prediction question: "${message}"
-
-Pull verified, published data from authoritative sources for this domain. Return JSON:
-- series: array of at least 15 numbers (the time series to run predictions on)
-- series_label: what the numbers represent (e.g. "monthly US unemployment rate %")
-- as_returns: false if these are raw levels/amounts, true if already period-over-period changes
-- source_summary: one sentence on what data you pulled and from where
-- sources: array of {name, url} for the sources you used`,
-          model: 'gemini_3_flash',
-          add_context_from_internet: true,
-          response_json_schema: {
-            type: 'object',
-            properties: {
-              series: { type: 'array', items: { type: 'number' } },
-              series_label: { type: 'string' },
-              as_returns: { type: 'boolean' },
-              source_summary: { type: 'string' },
-              sources: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, url: { type: 'string' } } } },
-            },
-            required: ['series', 'series_label'],
-          },
-        }).catch(() => null);
-
-        // Step 2: If we got enough data, run the engine and synthesize with engine output
-        if (seriesResult?.series && seriesResult.series.length >= 15) {
-          let returns = seriesResult.series;
-          if (seriesResult.as_returns === false) {
-            const raw = seriesResult.series;
-            returns = [];
-            for (let i = 1; i < raw.length; i++) {
-              if (raw[i - 1] !== 0) returns.push((raw[i] - raw[i - 1]) / raw[i - 1]);
-            }
-          }
-
-          if (returns.length >= 12) {
-            const seriesId = (message.slice(0, 20).replace(/[^a-zA-Z0-9]/g, '').toUpperCase() || 'GENERIC').slice(0, 12);
-
-            // Route via multi-brain processor; pull routed brain as prior
-            let routedBrainId = 'pending';
-            let priorMarkov = null;
-            try {
-              const routeRes = await base44.functions.invoke('hex6Process', {
-                series_id: seriesId, values: returns, as_returns: true, record_output: true,
-              });
-              if (routeRes?.data?.brain_id) {
-                routedBrainId = routeRes.data.brain_id;
-                const brains = await base44.asServiceRole.entities.Brain.filter({ brain_id: routedBrainId });
-                if (brains?.length > 0) {
-                  priorMarkov = {
-                    counts: JSON.parse(brains[0].transition_matrix || '{}'),
-                    stats: JSON.parse(brains[0].transition_rewards || '{}'),
-                  };
-                }
-              }
-            } catch (e) { /* non-blocking — engine runs without prior */ }
-
-            const result = runHex6Engine(returns, riskAversion, 0.0035, 6, null, priorMarkov);
-
-            const engineBlock = `
---- HEX6 ENGINE OUTPUT v5.4 (domain-sourced data: ${seriesResult.series_label}, ${seriesResult.series.length} data points) ---
-Engine: ${result.engineVersion}
-Series: ${seriesId} | Routed brain: ${routedBrainId}
-Prior brain: ${priorMarkov ? 'LOADED — accumulated history informs forward projection' : 'fresh (new brain seeded)'}
-Input series: ${returns.length} returns | Adaptive λ: ${result.lambda.toFixed(3)}
-
-[I-CHING PETAL — 64-petal frame, unbounded sub-petal unfolding]
-Polarity: ${result.petal?.polarityFull || 'undefined'}
-Hexagram: ${result.petal?.hexagramName} (petal ${result.petal?.petalIndex} of 64)
-
-[CORE SCEFM LAYER]
-State key: ${result.stateKey} | Binary: ${result.stateBits}
-μ decay-weighted: ${result.mu} | σ decay-weighted: ${result.sigma}
-Core exposure: ${result.exposure}
-
-[MARKOV 64-STATE TRANSITION LAYER — forward-looking]
-Forward μ: ${result.markov.mu} | σ: ${result.markov.sigma} | confidence (0-1): ${result.markov.confidence}
-
-[ADAPTIVE 1/137 MOTIF LAYER]
-Motif active: ${result.motif.isActive ? 'YES' : 'no'} | score (-1 to +1): ${result.motif.score}
-
-[ARCHETYPE BASIN]
-Basin: ${result.basin} (${
-  result.basin === 'capitulation' ? 'extreme bearish exhaustion — potential reversal zone' :
-  result.basin === 'euphoria' ? 'extreme bullish — overheated, mean-reversion risk' :
-  result.basin === 'laminar_growth' ? 'smooth uptrend, low volatility' :
-  result.basin === 'turbulent_drawdown' ? 'choppy decline, elevated volatility' :
-  result.basin === 'chaotic_transition' ? 'high vol regime change in progress' :
-  result.basin === 'neutral_flow' ? 'mild directional drift, normal vol' : 'insufficient data'
-})
-
-[BLENDED OUTPUT]
-Blended exposure (SCEFM 70% + Markov 20% + Motif 10%): ${result.blendedExposure}
-Regime: ${result.regime} | Risk aversion: ${riskAversion}
---- END ENGINE OUTPUT ---
-Data source: ${seriesResult.source_summary}
-
-GROUND YOUR RESPONSE IN THESE COMPUTED VALUES:
-- The sign of μ and Markov forward μ tells you the directional bias of ${seriesResult.series_label}. Positive = lean upward, negative = lean downward.
-- Blended exposure (0-1) tells you conviction: >0.6 high, 0.3-0.6 moderate, <0.3 weak/uncertain.
-- Regime (BULL/BEAR/LATERAL/SILENCE) is the engine's overall read of this series right now.
-- Transition confidence (0-1) tells you how much to trust the forward projection. Low confidence = say so honestly.
-- The basin name gives structural context for what kind of regime this is.
-- Translate everything to plain English about ${seriesResult.series_label}. Be truthful and calibrated — if the data is ambiguous, say the picture is unclear.
-- When the regime is SILENCE or INSUFFICIENT_DATA, don't go clinical — "the mathematical architecture refuses to project" is a terminal, not you. The silence means the signal is quiet, not that nothing will change. Figure out what KIND of quiet: is the series genuinely settled (low σ, μ near zero, decent confidence — a calm lake) or is the data just thin (few samples, low confidence — reading tea leaves in a puddle)? Then say it in your voice, like a strategist talking to a friend, not a terminal printing diagnostics. Make your call honestly — lean toward what you'd bet on and why, without pretending the silence is certainty that the status quo freezes. Silence is the absence of signal, not a prediction of stasis.`;
-
-            // Synthesis uses the engine output + data source context (no redundant web search —
-            // the data extraction call already pulled the relevant domain context above).
-            const predPrompt = `${systemPrompt}\n\n${engineBlock}\n\nCONVERSATION:\n${historyText}\n\n${userName}: ${message}\n\nHEX6:`;
-            const predPayload = { prompt: predPrompt, model: 'gemini_3_flash', add_context_from_internet: false };
-            if (file_urls && file_urls.length > 0) predPayload.file_urls = file_urls;
-            const predResponse = await base44.integrations.Core.InvokeLLM(predPayload).catch(() => null);
-            const finalPred = (predResponse || '').trim() || `I pulled ${seriesResult.series_label} data and ran the engine, but couldn't synthesize a clean response. Try rephrasing.`;
-
-            // Build sources block from the data extraction result
-            let sourcesBlock = '';
-            if (seriesResult.sources && Array.isArray(seriesResult.sources) && seriesResult.sources.length > 0) {
-              const urlOk = (u) => { try { const p = new URL(u); return /^https?:$/.test(p.protocol) && /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(p.hostname); } catch { return false; } };
-              const valid = seriesResult.sources.filter(s => s?.url && s?.name && urlOk(s.url));
-              const seen = new Set();
-              const unique = valid.filter(s => { if (seen.has(s.url)) return false; seen.add(s.url); return true; });
-              if (unique.length > 0) sourcesBlock = '\n\n**Sources:**\n' + unique.map(s => `- [${s.name}](${s.url})`).join('\n');
-            }
-
-            const finalResponse = sourcesBlock ? `${finalPred}${sourcesBlock}` : finalPred;
-            userMemoryPromise.then(existingUserMemory => updateMemory(base44, user, existingUserMemory, message, finalResponse));
-            return Response.json({ response: finalResponse, ran_engine: true, intent: 'prediction', series_label: seriesResult.series_label, timestamp: new Date().toISOString() });
-          }
-        }
-        // Series extraction failed or insufficient data — fall through to generic web path below
-      }
-
       // ANALYTICAL PATH: full web+engine pipeline below.
       const systemPromptForFetch = `You are HEX6 BLE by Evrica Technologies Inc., programmed by Anna M. Sarkisyan. You're talking with ${userName}. Today is ${currentDateReadable}.
 
@@ -961,9 +653,6 @@ DECIDE WHETHER TO PULL WEB DATA:
 - If answering well requires fresh real-world data (prices, scores, news, stats, anything time-sensitive), search the web and pull the latest from authoritative sources (Yahoo Finance, CoinGecko, ESPN, FRED, Reuters, etc.). Pull at least 30 data points if a time series is relevant — the engine needs it.
 - If the question is conversational, philosophical, or you can answer from general knowledge, just answer. No fetch needed.
 - URL honesty: only return URLs you actually retrieved. Never fabricate links.
-${nonMarketPrediction ? `
-PREDICTION MODE — the engine is MARKET-AGNOSTIC:
-This is a forward-looking prediction question. The HEX6 engine processes ANY numerical time series — not just financial markets. It does not matter whether the numbers represent stock prices, rainfall, poll percentages, COVID cases, or energy consumption: the engine computes probabilistic projections on whatever series you give it. Pull verified, published data from authoritative sources RELEVANT to this specific question's domain. Extract at least 30 data points as a numerical series, set needs_engine: true, and set series_label to describe what the data represents. Do not default to "no data available" — find the relevant published data for this domain and feed it to the engine.` : ''}
 
 Return JSON with:
 - draft_answer: your reply to the user.
@@ -1019,29 +708,7 @@ HEX6:`,
       // the LLM sometimes invents deep links that 404. Keep only well-formed http(s) URLs
       // with a real host. We don't HEAD-check (would add latency); a strict regex catches
       // most fabrications (random strings, bracketed placeholders, relative paths).
-      let sourcesBlock = '';
-      if (fetchResult?.sources && Array.isArray(fetchResult.sources) && fetchResult.sources.length > 0) {
-        const urlOk = (u) => {
-          try {
-            const parsed = new URL(u);
-            if (!/^https?:$/.test(parsed.protocol)) return false;
-            // Host must have a dot and look like a real domain
-            if (!/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(parsed.hostname)) return false;
-            // Reject obvious placeholder patterns
-            if (/example\.com|placeholder|your-?(site|url)/i.test(u)) return false;
-            return true;
-          } catch { return false; }
-        };
-        const validSources = fetchResult.sources.filter(s => s?.url && s?.name && urlOk(s.url));
-        // Dedupe by URL
-        const seen = new Set();
-        const uniqueSources = validSources.filter(s => {
-          if (seen.has(s.url)) return false;
-          seen.add(s.url);
-          return true;
-        });
-        sourcesBlock = uniqueSources.map(s => `[${s.name}](${s.url})`).join('\n');
-      }
+      const sourcesBlock = filterSourcesBlock(fetchResult?.sources);
 
       // Run engine if the LLM said it pulled a series and we have enough data points.
       let webEngineContext = '';
@@ -1099,29 +766,15 @@ Markov forward μ: ${result.markov.mu} | confidence: ${result.markov.confidence}
         }
       }
 
-      // If the engine ran on web-sourced data, synthesize the final response WITH the
-      // engine output so the answer is grounded in the computed μ, σ, exposure, regime,
-      // and Markov forward projection — not just the raw web-search draft.
-      if (webEngineContext) {
-        const synthPrompt = `${systemPrompt}\n\n${webEngineContext}\n\nCONVERSATION:\n${historyText}\n\n${userName}: ${message}\n\nHEX6:`;
-        const synthPayload = { prompt: synthPrompt, model: 'gemini_3_flash', add_context_from_internet: false };
-        if (file_urls && file_urls.length > 0) synthPayload.file_urls = file_urls;
-        const synthResponse = await base44.integrations.Core.InvokeLLM(synthPayload).catch(() => null);
-        if (synthResponse && synthResponse.trim()) {
-          const synthAnswer = synthResponse.trim();
-          const finalResponse = sourcesBlock
-            ? `${synthAnswer}\n\n**Sources:**\n${sourcesBlock.split('\n').map(s => `- ${s}`).join('\n')}`
-            : synthAnswer;
-          userMemoryPromise.then(existingUserMemory => updateMemory(base44, user, existingUserMemory, message, finalResponse));
-          return Response.json({ response: finalResponse, ran_engine: true, timestamp: new Date().toISOString() });
-        }
-      }
-
-      // Fallback: no engine ran, or synthesis failed — use the draft_answer as-is.
+      // Compose final response: draft_answer from web fetch + sources block.
+      // No second LLM call — the draft already incorporates the web context, and engine
+      // numbers are too fine-grained to justify a 5s synthesis call to nudge the wording.
       const answer = (fetchResult?.draft_answer || 'Let me know what you\'d like to dig into.').trim();
+
       const finalResponse = sourcesBlock
         ? `${answer}\n\n**Sources:**\n${sourcesBlock.split('\n').map(s => `- ${s}`).join('\n')}`
         : answer;
+
       userMemoryPromise.then(existingUserMemory => updateMemory(base44, user, existingUserMemory, message, finalResponse));
       return Response.json({ response: finalResponse, ran_engine: ranEngine, timestamp: new Date().toISOString() });
     }
@@ -1143,57 +796,7 @@ Markov forward μ: ${result.markov.mu} | confidence: ${result.markov.confidence}
   }
 });
 
-// Fire-and-forget memory update
-function updateMemory(base44, user, existingUserMemory, message, response, synthesis = null) {
-  (async () => {
-    try {
-      const synthesisNote = synthesis ? ` | ${synthesis.user_intent || ''}` : '';
-      const lastSnippet = `User: ${message.slice(0, 300)} | HEX6: ${response.slice(0, 300)}${synthesisNote.slice(0, 100)}`;
-      const newTotal = (existingUserMemory?.total_conversations || 0) + 1;
 
-      const memoryUpdate = await base44.integrations.Core.InvokeLLM({
-        prompt: `Maintain compressed memory for HEX6 BLE about this user.
-
-EXISTING SUMMARY: ${existingUserMemory?.memory_summary || 'None.'}
-EXISTING TOPICS: ${existingUserMemory?.topics_discussed || 'None.'}
-EXISTING STYLE: ${existingUserMemory?.user_style || 'Unknown.'}
-
-NEW EXCHANGE:
-User: ${message}
-HEX6: ${response.slice(0, 500)}
-
-Return JSON only:
-- memory_summary: concise paragraph (max 200 words) of what's known about this user
-- topics_discussed: comma-separated topics/assets/themes
-- user_style: one paragraph on their communication style and sophistication`,
-        model: 'gemini_3_flash',
-        response_json_schema: {
-          type: 'object',
-          properties: {
-            memory_summary: { type: 'string' },
-            topics_discussed: { type: 'string' },
-            user_style: { type: 'string' }
-          }
-        }
-      });
-
-      const memoryData = {
-        user_email: user.email,
-        memory_summary: memoryUpdate?.memory_summary || existingUserMemory?.memory_summary || '',
-        topics_discussed: memoryUpdate?.topics_discussed || existingUserMemory?.topics_discussed || '',
-        user_style: memoryUpdate?.user_style || existingUserMemory?.user_style || '',
-        last_conversation_snippet: lastSnippet,
-        total_conversations: newTotal,
-      };
-
-      if (existingUserMemory?.id) {
-        await base44.asServiceRole.entities.UserConversationMemory.update(existingUserMemory.id, memoryData);
-      } else {
-        await base44.asServiceRole.entities.UserConversationMemory.create(memoryData);
-      }
-    } catch (e) { /* non-blocking */ }
-  })();
-}
 
 // Persist Markov matrix per ticker (fire-and-forget)
 function persistMarkovMatrix(base44, ticker, existing, priorMarkov, freshTransitions, freshStats, petal) {

@@ -1,9 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
+    --font-display: 'Manrope', sans-serif;
+    --font-heading: 'Manrope', sans-serif;
+    --font-body: 'Manrope', sans-serif;
     --background: 0 0% 98%;
     --foreground: 220 13% 13%;
     --card: 0 0% 100%;
@@ -37,6 +42,13 @@
     --sidebar-accent-foreground: 220 13% 13%;
     --sidebar-border: 220 10% 92%;
     --sidebar-ring: 12 100% 50%;
+    --grid-color: hsl(var(--foreground) / 0.045);
+    --grid-color-strong: hsl(var(--foreground) / 0.08);
+    --calc-grid:
+      linear-gradient(to right, var(--grid-color) 1px, transparent 1px) 0 0 / 24px 24px,
+      linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px) 0 0 / 24px 24px,
+      linear-gradient(to right, var(--grid-color-strong) 1px, transparent 1px) 0 0 / 120px 120px,
+      linear-gradient(to bottom, var(--grid-color-strong) 1px, transparent 1px) 0 0 / 120px 120px;
   }
 
   .dark {
@@ -80,9 +92,15 @@
     @apply border-border outline-ring/50;
   }
 
+  /* Calculus / graph-paper grid on primary background surfaces (subtle, token-driven) */
+  .bg-background {
+    background-image: var(--calc-grid);
+  }
+
   html, body {
     @apply bg-background text-foreground;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background-image: var(--calc-grid);
+    font-family: var(--font-body);
     letter-spacing: -0.01em;
     overscroll-behavior-y: none;
     -webkit-user-select: none;

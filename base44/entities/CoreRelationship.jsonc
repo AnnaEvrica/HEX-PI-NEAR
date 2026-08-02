@@ -1,0 +1,69 @@
+{
+  "name": "CoreRelationship",
+  "type": "object",
+  "properties": {
+    "relationship_id": {
+      "type": "string",
+      "description": "Unique identifier for this edge"
+    },
+    "source_node_id": {
+      "type": "string",
+      "description": "ID of the source CoreNode"
+    },
+    "target_node_id": {
+      "type": "string",
+      "description": "ID of the target CoreNode"
+    },
+    "relationship_type": {
+      "type": "string",
+      "enum": [
+        "related_to",
+        "causes",
+        "part_of",
+        "correlates_with",
+        "contradicts",
+        "derived_from"
+      ],
+      "default": "related_to",
+      "description": "Nature of the relationship \u2014 structural, never a judgment"
+    },
+    "interaction_count": {
+      "type": "number",
+      "default": 0,
+      "description": "How many times this relationship was observed (neutral observation, not a weight)"
+    },
+    "first_seen": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this relationship was first observed"
+    },
+    "last_seen": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this relationship was last observed"
+    }
+  },
+  "required": [
+    "relationship_id",
+    "source_node_id",
+    "target_node_id",
+    "relationship_type"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
