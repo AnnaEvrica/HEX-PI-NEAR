@@ -99,7 +99,7 @@ export default function HeroSection({ onAsteriskHover }) {
     // to the landing page) when Google OAuth redirects back with a token-
     // propagation delay.
     sessionStorage.setItem('hex6_auth_pending', Date.now().toString());
-    base44.auth.redirectToLogin('/app');
+    base44.auth.loginWithProvider('google', '/app');
   };
 
   return (
