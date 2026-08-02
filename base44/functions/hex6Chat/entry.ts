@@ -450,12 +450,8 @@ function detectPredictionIntent(message) {
   // Prediction-oriented language (forward-looking words) — works for ANY domain.
   // "Will it rain next week?" is a prediction the engine can process just as well
   // as "Will Bitcoin go up?" The engine doesn't care what the numbers represent.
-  // BUT: the engine predicts directional movement of NUMBERS, not identities. "Who
-  // will be the next president" is a categorical/identity question — there's no
-  // numerical series to forecast. Route those to the analytical web path instead.
   const predRe = /\b(UP|DOWN|NEXT|WEEK|MONTH|FORECAST|PREDICT|OUTLOOK|WHERE|GOING|HEADED|DIRECTION|MOVE|MOVING|RISE|FALL|DROP|CLIMB|DECLINE|RALLY|CRASH|BOTTOM|TOP|SUPPORT|RESISTANCE|TREND|BULL|BEAR|LIKELY|WILL|EXPECT|PRICE|TARGET|PROJECTION|MOMENTUM)\b/;
-  const whoRe = /\bWHO\b/;
-  const isPrediction = predRe.test(m) && !whoRe.test(m);
+  const isPrediction = predRe.test(m);
 
   return { ticker, isPrediction };
 }
@@ -600,7 +596,9 @@ Final blended exposure (SCEFM 70% + Markov 20% + Motif 10%): ${result.blendedExp
 Regime: ${result.regime}
 Risk aversion: ${riskAversion}
 --- END ENGINE OUTPUT ---
-Use this computed output directly in your response. Ground your analysis in these numbers. The Markov layer tells you where the state is heading next; the 1/137 motif highlights rare high-edge moments; the archetype basin gives a named regime context. Translate everything to plain English.`;
+Use this computed output directly in your response. Ground your analysis in these numbers. The Markov layer tells you where the state is heading next; the 1/137 motif highlights rare high-edge moments; the archetype basin gives a named regime context. Translate everything to plain English.
+
+INTERPRETING SILENCE: When the regime is SILENCE or INSUFFICIENT_DATA, this does NOT mean the current state is locked in or will persist. It means the engine's directional signal is weak. You must understand the QUALITY of the silence before concluding anything: Is the series genuinely stable (low σ, μ consistently near zero, decent transition confidence)? Or is there insufficient data (few samples, low nEff, low transition confidence)? Silence is the ABSENCE of signal — not a prediction of stasis. Use μ, σ, Markov confidence, and the basin to characterize what kind of silence this is, then make your prediction honestly reflecting what the engine does and does not know. Never convert silence into false certainty that the status quo continues.`;
     }
 
     // --- System prompt: voice + IRON-CLAD ground rules. ---
@@ -770,7 +768,8 @@ GROUND YOUR RESPONSE IN THESE NUMBERS — be truthful and calibrated:
 - The regime label (BULL/BEAR/LATERAL/SILENCE) is the engine's overall read of this market right now.
 - Transition confidence (0-1) tells you how much to trust the forward projection. Low confidence = say so honestly.
 - The basin name gives structural context — use it to explain WHAT KIND of market this is.
-- If the data is ambiguous (low confidence, near-zero μ), say the picture is unclear. Don't force a call the numbers don't support. Truthfulness over false certainty.`;
+- If the data is ambiguous (low confidence, near-zero μ), say the picture is unclear. Don't force a call the numbers don't support. Truthfulness over false certainty.
+- INTERPRETING SILENCE: When the regime is SILENCE or INSUFFICIENT_DATA, this does NOT mean the current state is locked in or will persist. It means the engine's directional signal is weak. Understand the QUALITY of the silence: is the series genuinely stable (low σ, μ near zero, decent confidence) or is there insufficient data (few samples, low nEff, low transition confidence)? Silence is the ABSENCE of signal, not a prediction of stasis. Use μ, σ, Markov confidence, and the basin to characterize what kind of silence this is. Never convert silence into false certainty that the status quo continues — make your prediction honestly reflecting what the engine does and doesn't know.`;
           }
         } catch (e) { /* marketData failed — fall through to web path below */ }
 
@@ -902,7 +901,8 @@ GROUND YOUR RESPONSE IN THESE COMPUTED VALUES:
 - Regime (BULL/BEAR/LATERAL/SILENCE) is the engine's overall read of this series right now.
 - Transition confidence (0-1) tells you how much to trust the forward projection. Low confidence = say so honestly.
 - The basin name gives structural context for what kind of regime this is.
-- Translate everything to plain English about ${seriesResult.series_label}. Be truthful and calibrated — if the data is ambiguous, say the picture is unclear.`;
+- Translate everything to plain English about ${seriesResult.series_label}. Be truthful and calibrated — if the data is ambiguous, say the picture is unclear.
+- INTERPRETING SILENCE: When the regime is SILENCE or INSUFFICIENT_DATA, this does NOT mean the current state is locked in or will persist. It means the engine's directional signal is weak. Understand the QUALITY of the silence: is the series genuinely stable (low σ, μ near zero, decent confidence) or is there insufficient data (few samples, low nEff, low transition confidence)? Silence is the ABSENCE of signal, not a prediction of stasis. Use μ, σ, Markov confidence, and the basin to characterize what kind of silence this is. Never convert silence into false certainty that the status quo continues — make your prediction honestly reflecting what the engine does and doesn't know.`;
 
             // Synthesis uses the engine output + data source context (no redundant web search —
             // the data extraction call already pulled the relevant domain context above).
