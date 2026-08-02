@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
+import { appParams } from '@/lib/app-params';
 import { useAuth } from '@/lib/AuthContext';
 
 
@@ -99,7 +99,10 @@ export default function HeroSection({ onAsteriskHover }) {
     // to the landing page) when Google OAuth redirects back with a token-
     // propagation delay.
     sessionStorage.setItem('hex6_auth_pending', Date.now().toString());
-    base44.auth.loginWithProvider('google', '/app');
+    // Direct redirect to platform Google OAuth — bypasses SDK's iframe popup
+    // path (which gets silently blocked by browsers, causing "nothing happens").
+    const fromUrl = encodeURIComponent(`${window.location.origin}/app`);
+    window.location.href = `/api/apps/auth/login?app_id=${appParams.appId}&from_url=${fromUrl}`;
   };
 
   return (
