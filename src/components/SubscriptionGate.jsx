@@ -55,7 +55,7 @@ export default function SubscriptionGate({ children }) {
           const msg = e?.message || 'Failed to load subscription status';
           // Auth errors mean the session is invalid — redirect to homepage for re-login
           // instead of showing a paywall + error combo that loops on "Try again".
-          if (/logged in|unauthorized|401|must be authenticated/i.test(msg)) {
+          if (/logged in|unauthorized|401|must be authenticated|authentication required|auth required/i.test(msg)) {
             sessionStorage.removeItem('hex6_auth_pending');
             sessionStorage.removeItem('hex6_checkout_pending');
             window.location.href = '/';
@@ -109,7 +109,7 @@ export default function SubscriptionGate({ children }) {
       setError('Checkout could not be started. Please try again.');
     } catch (e) {
       const msg = e?.message || 'Checkout failed to start';
-      if (/logged in|unauthorized|401|must be authenticated/i.test(msg)) {
+      if (/logged in|unauthorized|401|must be authenticated|authentication required|auth required/i.test(msg)) {
         sessionStorage.removeItem('hex6_auth_pending');
         window.location.href = '/';
         return;
