@@ -4,7 +4,14 @@ import Stripe from 'npm:stripe@17.3.0';
 export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
+    // Retry me() once — token propagation can lag after OAuth redirect on mobile.
+    let user = null;
+    try {
+      user = await base44.auth.me();
+    } catch (_meErr) {
+      await new Promise((r) => setTimeout(r, 2000));
+      user = await base44.auth.me();
+    }
     if (!user || !user.email) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
