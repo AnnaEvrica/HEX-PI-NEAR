@@ -42,7 +42,8 @@ const AppExperience = () => {
       const authPending = new URLSearchParams(window.location.search).get('checkout') === 'success'
         || !!sessionStorage.getItem('hex6_checkout_pending')
         || !!sessionStorage.getItem('hex6_auth_pending');
-      if (authPending && authRetryCount < 5) {
+      const maxRetries = authPending ? 5 : 3;
+      if (authRetryCount < maxRetries) {
         const timer = setTimeout(() => {
           const next = authRetryCount + 1;
           sessionStorage.setItem('hex6_auth_retry_count', String(next));
@@ -60,7 +61,7 @@ const AppExperience = () => {
     || !!sessionStorage.getItem('hex6_checkout_pending')
     || !!sessionStorage.getItem('hex6_auth_pending');
 
-  if (authPending && authRetryCount < 5 && (isNotRegistered || !user)) {
+  if (authRetryCount < (authPending ? 5 : 3) && (isNotRegistered || !user)) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-background">
         <div className="w-8 h-8 border-4 border-border border-t-accent rounded-full animate-spin"></div>

@@ -20,6 +20,7 @@ export default function SubscriptionGate({ children }) {
 
   useEffect(() => {
     let cancelled = false;
+    let pollForActive = false;
     (async () => {
       try {
         const urlParams = new URLSearchParams(window.location.search);
@@ -34,19 +35,18 @@ export default function SubscriptionGate({ children }) {
         // and a second "Start Free Trial" click would mint a second checkout → double charge.
         const pendingTs = sessionStorage.getItem('hex6_checkout_pending');
         const pendingRecent = checkoutResult !== 'cancel' && pendingTs && (Date.now() - Number(pendingTs) < 10 * 60 * 1000);
-        const pollForActive = justCheckedOut || billingReturn || pendingRecent;
+        pollForActive = justCheckedOut || billingReturn || pendingRecent;
 
         let data;
         let lastErr = null;
-        // Retry up to 4× on auth errors — the OAuth redirect can land here before
-        // the token fully propagates to the backend. Bouncing to '/' on a transient
-        // 401 traps the user in a landing-page loop with no paywall (and no price).
-        for (let attempt = 0; attempt < 4; attempt++) {
+        // Retry up to 6× on auth errors — mobile token propagation can lag 10+
+        // seconds behind the frontend after a full-page reload redirect.
+        for (let attempt = 0; attempt < 6; attempt++) {
           try { data = await fetchStatus(); lastErr = null; break; }
           catch (e) {
             lastErr = e;
-            if (AUTH_ERR.test(e?.message || '') && attempt < 3) {
-              await new Promise((r) => setTimeout(r, 1500 * (attempt + 1)));
+            if (AUTH_ERR.test(e?.message || '') && attempt < 5) {
+              await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)));
               continue;
             }
             break;
@@ -56,7 +56,7 @@ export default function SubscriptionGate({ children }) {
 
         // Webhook may lag the redirect by a second or two — retry briefly on success return.
         if (pollForActive) {
-          for (let i = 0; i < 6 && !(data && (data.status === 'trialing' || data.status === 'active')); i++) {
+          for (let i = 0; i < 8 && !(data && (data.status === 'trialing' || data.status === 'active')); i++) {
             await new Promise((r) => setTimeout(r, 1500));
             try { data = await fetchStatus(); } catch { /* tolerate transient failure during webhook lag */ }
           }
@@ -72,9 +72,13 @@ export default function SubscriptionGate({ children }) {
       } catch (e) {
         if (!cancelled) {
           const msg = e?.message || 'Failed to load subscription status';
-          // Don't redirect on auth errors — show the paywall (with price) + a
-          // "Try again" button so the user can retry once the token propagates.
-          // The "Back to homepage" link lets them re-login if genuinely logged out.
+          // Auto-retry on auth errors during post-checkout recovery. Mobile
+          // token propagation can lag 15+ seconds behind the frontend; showing
+          // a dead-end error here permanently traps the user on the paywall.
+          if (AUTH_ERR.test(msg) && pollForActive && retryKey < 8) {
+            setTimeout(() => { if (!cancelled) setRetryKey(k => k + 1); }, 2000);
+            return; // keep loading spinner — retry re-runs this effect
+          }
           setError(msg);
           setLoading(false);
         }
