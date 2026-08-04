@@ -85,6 +85,25 @@ async function processBoundarySignal(base44, user, userMemory, response) {
 // ===========================================================================
 const MODEL_VERSION = '6.0';
 
+// Claude returns the JSON-schema payload as a stringified JSON string. When that
+// string is truncated or has an unescaped character, JSON.parse fails and the
+// raw wrapper (including the internal "receiving" analysis) would reach the
+// user. Extract the response field textually as a last resort.
+function unwrapSynth(value) {
+  if (typeof value !== 'string') return value;
+  try {
+    const parsed = JSON.parse(value);
+    return unwrapSynth(parsed?.response ?? parsed);
+  } catch {
+    const m = value.match(/"response"\s*:\s*"([\s\S]*)$/);
+    if (m) {
+      let out = m[1].replace(/[\s"}\]]+$/, '');
+      return out.replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\\\/g, '\\').trim();
+    }
+    return value;
+  }
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -420,19 +439,9 @@ Return JSON with:
     const synthResult = await base44.integrations.Core.InvokeLLM(synthPayload).catch(() => null);
     let synthResponse;
     if (synthResult && typeof synthResult === 'object') {
-      synthResponse = synthResult.response;
-      // Claude returns the JSON-schema payload as a stringified JSON string
-      // inside .response (Gemini/GPT return a parsed object). If .response is
-      // a string that parses to JSON, extract the inner .response field.
-      if (typeof synthResponse === 'string') {
-        try { const parsed = JSON.parse(synthResponse); synthResponse = parsed?.response ?? parsed; }
-        catch { /* not JSON — keep the raw string */ }
-      }
-    } else if (typeof synthResult === 'string') {
-      try { const parsed = JSON.parse(synthResult); synthResponse = parsed?.response ?? parsed; }
-      catch { synthResponse = synthResult; }
+      synthResponse = unwrapSynth(synthResult.response);
     } else {
-      synthResponse = synthResult;
+      synthResponse = unwrapSynth(synthResult);
     }
     const rawResponse = (synthResponse || fallbackResponse).trim();
     const { visible, memory: mem } = await processBoundarySignal(base44, user, userMemory, rawResponse);
