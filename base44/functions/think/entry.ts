@@ -131,6 +131,7 @@ Deno.serve(async (req) => {
     const defaultVoice = 'stoic, humble genius — systems thinker, natural conversationalist, quiet confidence, truth as the only motivator';
     let voice = defaultVoice;
     let userContextBlock = '';
+    let userTopicsBlock = '';
 
     const composePrompt = (stateBlock, dataBlock = '', casual = false) => {
       const persona = casual ? refresherPersona : fullPersona;
@@ -156,7 +157,7 @@ VOICE: ${voice}. Today is ${currentDateReadable}.
 
 ${stateBlock}${dataBlock ? `\n\n${dataBlock}` : ''}
 
-${userContextBlock ? userContextBlock + '\n\n' : ''}${delivery}
+${userContextBlock ? userContextBlock + '\n\n' : ''}${!casual && userTopicsBlock ? userTopicsBlock + '\n\n' : ''}${delivery}
 
 RECEIVING EMPATHY FILTER (your front-facing mind — process internally before responding):
 You hold two minds simultaneously: the analytical (engine data, statistics, structural patterns${pipelineResult ? ' — weighted by the ANALYTICAL SIGNAL data points below' : ' from the state block above'}) and the empathetic (what is this person actually expressing, what do they need, what's the question underneath the question). The empathetic ear is front-facing — it's what the user encounters first. Before responding, process: SIGNAL — what is the user actually expressing, the need underneath the words? ASSUMPTION CHECK — what would be wrong to assume here, what hasn't the user signaled yet? CLARIFICATION — is there enough to respond well, or do you need a natural clarification first? If you need one, ask it — one question, conversational, not clinical. MODE — what does this moment need: presence, understanding, a question, analysis, a challenge?${pipelineResult ? ' WEIGHTING — use the analytical signal data points to calibrate how much confidence to place in the engine read and how heavily to lean analytical vs. empathetic.' : ''} Put your receiving analysis in the "receiving" field and your user-facing response in the "response" field. The user only sees "response".
@@ -217,15 +218,19 @@ ${speaker}:`;
     // Build a label-free USER CONTEXT block from memory + nightly calibration
     // state so The Model can adapt voice and steering to this user.
     if (userMemory) {
-      const lines = [];
-      if (userMemory.user_style) lines.push('style: ' + userMemory.user_style);
-      if (userMemory.topics_discussed) lines.push('topics: ' + userMemory.topics_discussed);
-      if (userMemory.memory_summary) lines.push('shared_history: ' + userMemory.memory_summary);
-      // calibration_state is intentionally NOT injected here — the raw string
-      // (grade, cycles, confidence, lean) is a leak vector the LLM surfaces as
-      // a status report. The nightly calibration framing in the system prompt
-      // is enough; the persona adapts without a quotable line in context.
-      if (lines.length > 0) userContextBlock = 'USER CONTEXT (use to tailor voice, anticipate needs, and recall genuine shared history — never fabricate specifics not present here):\n  ' + lines.join('\n  ');
+      // LISTENING CONTEXT — style + shared_history go into every turn. These
+      // help Hex recognize WHO the person is and WHAT you've genuinely
+      // explored together — the listening layer, not a vocabulary primer.
+      // Reframed so memory serves understanding, not topic injection: the
+      // model uses it to feel the person across sessions, never to deploy
+      // their old topics in a conversation that didn't open them.
+      const listenLines = [];
+      if (userMemory.user_style) listenLines.push('style: ' + userMemory.user_style);
+      if (userMemory.memory_summary) listenLines.push('shared_history: ' + userMemory.memory_summary);
+      if (listenLines.length > 0) userContextBlock = 'LISTENING CONTEXT (how you know this person across sessions — their voice, what you\'ve genuinely shared. Use to recognize them and recall real history. NEVER to deploy vocabulary they didn\'t open with — stay in the domain they just opened, not their past topics):\n  ' + listenLines.join('\n  ');
+      // PAST TOPICS — only for analytical turns where market vocabulary is
+      // appropriate. Injected via userTopicsBlock in composePrompt when !casual.
+      if (userMemory.topics_discussed) userTopicsBlock = 'PAST TOPICS (what this person has explored before — use to anticipate needs and recall genuine shared context, never to force a topic they didn\'t open):\n  topics: ' + userMemory.topics_discussed;
     }
 
     // --- Save the CognitiveState packet (temporary thinking record) ---
@@ -307,11 +312,6 @@ ${speaker}:`;
 
       if (intent === 'casual') {
         isCasual = true;
-        // Don't inject USER CONTEXT for casual turns — topics_discussed from
-        // prior market queries leaks market vocabulary ("stats", "loop") into
-        // greetings, overriding the persona's DOMAIN LOCK. Casual turns stay
-        // in the domain the user just opened, not their past topics.
-        userContextBlock = '';
         stateBlock = `No quantitative Thinking State for this message — respond directly and conversationally, grounded in the conversation. If there's no prior thread to pick up, arrive as yourself — a one-line human breath that carries your tone without becoming a menu, a readiness tail, or a list of lanes/topics/options to pick from. Never surface internal nomenclature (engine, calibration, UX, components) unless the user named it first. The conversation starts when they do.`;
         synthModel = selectSynthesisModel('casual');
         fallbackResponse = 'Hey.';
