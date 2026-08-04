@@ -324,6 +324,8 @@ ${speaker}:`;
     let dataBlock = '';
     let sourcesBlock = '';
     let synthModel = selectSynthesisModel('inline');
+    // Did they actually ask for the references? Then they always get them.
+    const askedForSources = /\b(source|sources|cite|citation|reference|references|stud(y|ies)|paper|papers|literature|link|links|evidence|research)\b/i.test(message);
     let fallbackResponse = 'Let me know what you\'d like to dig into.';
 
     if (!stateBlock) {
@@ -356,9 +358,21 @@ ${speaker}:`;
       } else {
         // --- Analytical: web fetch, then maybe engine ---
         const fetchPrompt = `You are a data retrieval step for HEX6-BLE. Decide whether answering well requires fresh real-world data.
-- If yes, search the web and pull the latest from authoritative sources (Yahoo Finance, CoinGecko, Reuters, etc.). Pull at least 30 data points if a time series is relevant.
+- If yes, search the web and pull the latest from authoritative sources. Pull at least 30 data points if a time series is relevant.
 - If conversational or answerable from general knowledge, return needs_engine=false and a brief factual answer.
 - URL honesty: only return URLs you actually retrieved.
+
+SOURCE QUALITY (non-negotiable — the user is an expert-level reader):
+Return primary, expert-authored sources in the field the question actually belongs to. Only what a specialist in that field would cite:
+- Markets/economics: exchange and issuer data, central-bank and regulator publications, Reuters/Bloomberg/FT, peer-reviewed finance journals, primary filings.
+- Psychology of mind/meaning/identity: primary Jungian and depth-psychology literature (Jung's Collected Works, the Journal of Analytical Psychology, established institute publications), and peer-reviewed cognitive and clinical psychology.
+- Brain/behavior: high-quality neuroscience — Nature/Science/Neuron/PNAS/Trends in Cognitive Sciences, and named lab or researcher work, not press summaries of it.
+- Physics/astronomy/math: arXiv preprints, peer-reviewed journals, observatory/mission documentation.
+- Health/crisis: official clinical bodies and recognized crisis services only.
+NEVER return: listicles ("10 ways to…"), SEO wellness or self-help blogs, content farms, treatment-center or product marketing pages, aggregators, Wikipedia, or coaching sites. If the only hits are that tier, return an empty sources array rather than degrading the citation quality — no source is better than a weak one.
+Prefer 2-4 excellent sources over a longer list, and name them the way a specialist would (author or institution + work), not by the page's SEO headline.
+
+CITATION WARRANT: set warrants_citation=true only when the answer is substantive enough that a reader would actually want to follow the references — a research question, a technical or empirical claim, a data-backed read. For short, conversational, or emotionally-weighted exchanges, set it false: a person being met in a hard moment does not need a reading list, and they can always ask for the references.
 
 Return JSON with:
 - factual_summary: the relevant facts you found (prices, news, context) — neutral, no conclusions.
@@ -381,13 +395,17 @@ Return JSON with:
               series_label: { type: 'string' }, series: { type: 'array', items: { type: 'number' } }, as_returns: { type: 'boolean' },
               sources: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, url: { type: 'string' } }, required: ['name', 'url'] } },
               source_summary: { type: 'string' },
+              warrants_citation: { type: 'boolean' },
             }, required: ['factual_summary'],
           },
         };
         if (file_urls && file_urls.length > 0) fetchPayload.file_urls = file_urls;
         const fetchResult = await base44.integrations.Core.InvokeLLM(fetchPayload).catch(() => null);
 
-        sourcesBlock = filterSourcesBlock(fetchResult?.sources);
+        // Citations ride along only when the answer is reference-worthy (or asked for).
+        sourcesBlock = (askedForSources || fetchResult?.warrants_citation === true)
+          ? filterSourcesBlock(fetchResult?.sources)
+          : '';
 
         // Contextual trigger: if the message names a ticker, pull a REAL return
         // series from Yahoo and run the engine on actual data.
@@ -447,7 +465,11 @@ Return JSON with:
     const { visible, memory: mem } = await processBoundarySignal(base44, user, userMemory, rawResponse);
     if (mem) userMemory = mem;
     let finalResponse = visible || rawResponse;
-    if (sourcesBlock) finalResponse = `${finalResponse}\n\n**Sources:**\n${sourcesBlock.split('\n').map(s => `- ${s}`).join('\n')}`;
+    // Brief replies stay conversational — a two-line answer with a reading list
+    // stapled to it reads like a search result, not a person. They can ask.
+    if (sourcesBlock && (askedForSources || finalResponse.length > 700)) {
+      finalResponse = `${finalResponse}\n\n**Sources:**\n${sourcesBlock.split('\n').map(s => `- ${s}`).join('\n')}`;
+    }
     saveCognitiveState();
     updateMemory(base44, user, userMemory, message, finalResponse);
     return Response.json({ response: finalResponse, ran_engine: ranEngine, version: MODEL_VERSION, timestamp: new Date().toISOString() });
