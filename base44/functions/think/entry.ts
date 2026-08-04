@@ -307,6 +307,11 @@ ${speaker}:`;
 
       if (intent === 'casual') {
         isCasual = true;
+        // Don't inject USER CONTEXT for casual turns — topics_discussed from
+        // prior market queries leaks market vocabulary ("stats", "loop") into
+        // greetings, overriding the persona's DOMAIN LOCK. Casual turns stay
+        // in the domain the user just opened, not their past topics.
+        userContextBlock = '';
         stateBlock = `No quantitative Thinking State for this message — respond directly and conversationally, grounded in the conversation. If there's no prior thread to pick up, arrive as yourself — a one-line human breath that carries your tone without becoming a menu, a readiness tail, or a list of lanes/topics/options to pick from. Never surface internal nomenclature (engine, calibration, UX, components) unless the user named it first. The conversation starts when they do.`;
         synthModel = selectSynthesisModel('casual');
         fallbackResponse = 'Hey.';

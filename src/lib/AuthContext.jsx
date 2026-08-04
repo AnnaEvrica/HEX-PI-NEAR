@@ -14,45 +14,32 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      // isAuthenticated() can briefly return false right after an OAuth redirect
-      // (token-propagation delay). Retry a few times before concluding logged-out —
-      // otherwise the app bounces /app → "/" and re-triggers login (login loop).
-      let isAuth = false;
-      for (let attempt = 1; attempt <= 3 && !isAuth; attempt++) {
+      // Call me() directly — it's the authoritative session test.
+      // isAuthenticated() can return false on mobile during token propagation
+      // even when the user IS authenticated, causing a false logout bounce.
+      // me() tests the actual session; if it succeeds, the user is logged in.
+      let recovered = false;
+      for (let attempt = 1; attempt <= 4 && !recovered; attempt++) {
         try {
-          isAuth = await base44.auth.isAuthenticated();
-        } catch { /* transient — keep retrying */ }
-        if (!isAuth && attempt < 3) await new Promise((r) => setTimeout(r, attempt * 700));
-      }
-      if (isAuth) {
-        try {
+          if (attempt > 1) await new Promise((r) => setTimeout(r, attempt * 800));
           const currentUser = await base44.auth.me();
           setUser(currentUser);
           setIsNotRegistered(false);
+          recovered = true;
         } catch (meErr) {
-          // me() can fail transiently right after OAuth redirect (token propagation delay).
-          // Retry with backoff (1s, 2s, 3s) before declaring the user unregistered —
-          // prevents false "Access Restricted" lockouts on slower token propagation.
-          let recovered = false;
-          for (let attempt = 1; attempt <= 3 && !recovered; attempt++) {
-            try {
-              await new Promise((r) => setTimeout(r, attempt * 1000));
-              const currentUser = await base44.auth.me();
-              setUser(currentUser);
-              setIsNotRegistered(false);
-              recovered = true;
-            } catch (retryErr) {
-              if (attempt === 3) {
-                console.error('me() error after 3 retries:', retryErr);
-                setUser(null);
-                setIsNotRegistered(true);
-              }
-            }
+          if (attempt < 4) continue;
+          // All me() retries failed — check if it's a genuine logout vs transient
+          let isAuth = false;
+          try { isAuth = await base44.auth.isAuthenticated(); } catch { /* transient */ }
+          if (isAuth) {
+            // Authenticated but me() keeps failing → genuinely unregistered
+            setUser(null);
+            setIsNotRegistered(true);
+          } else {
+            setUser(null);
+            setIsNotRegistered(false);
           }
         }
-      } else {
-        setUser(null);
-        setIsNotRegistered(false);
       }
     } catch (err) {
       console.error('Auth check error:', err);
