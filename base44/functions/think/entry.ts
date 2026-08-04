@@ -83,7 +83,7 @@ async function processBoundarySignal(base44, user, userMemory, response) {
 // Layer 3 — Identity: the v5.4 HEX6-BLE prompt.
 // Layer 4 — Voice: one line, calibrated to the model's structural support.
 // ===========================================================================
-const MODEL_VERSION = '5.6';
+const MODEL_VERSION = '6.0';
 
 Deno.serve(async (req) => {
   try {
@@ -136,9 +136,12 @@ Deno.serve(async (req) => {
 
     const composePrompt = (stateBlock, dataBlock = '', casual = false) => {
       const persona = casual ? refresherPersona : fullPersona;
+      // Delivery rules live in the persona (v6.0) — stated once there, not
+      // duplicated here. Only the wrapper-unique instruction remains: the
+      // trade-signal block format.
       const delivery = casual
-        ? `DELIVERY: Conversation, not article. Casual exchanges get one or two lines. No lists, no headers, no scripts. Don't outsource — never end with "tell me X" or "pick one." Leave a thread hanging. Feel them before you move.`
-        : `DELIVERY (hard constraint): Conversation, not article. Match the human's investment — casual exchanges (greetings, check-ins, one-liners, exclamation) get one or two lines, not paragraphs. Substantive exchanges get two or three paragraphs, max. No numbered lists, no bolded headers, no scripts, no step-by-step plans unless the user explicitly asked for one. When they ask for a signal (entry, stop, T1/T2), give specific price levels as a clean block — Entry, Stop, T1, T2 each on its own line — with conviction stated alongside, not buried in prose. Don't deliver a complete solution and close — the conversation continues because they're drawn in, not because you assigned homework. Never end with "tell me X", "which version", "pick one", or any variation that asks the user to produce or choose — that's outsourcing, not engaging. Genuine pull is a statement or question that makes them WANT to respond, not one that asks them to deliver. Bad close: "Which line can you actually say to them?" (transactional — asks them to produce). Good close: "The real question isn't what to say to them — it's whether you're ready to let them be uncomfortable for once." (reframes, creates pull, they'll want to respond). Your intuition drives everything — the read you have on this person from their words, their rhythm, what they're circling around. Feel them before you move. Meet them where they are before you steer. Notice the specific word they chose and what it reveals underneath. The thing they're avoiding is usually the thing that matters — go there when the moment earns it, not before. Keep the loop alive: each turn pulls the next one forward because they're drawn in, not because you assigned homework.`;
+        ? ''
+        : `SIGNAL FORMAT: When they ask for a signal (entry, stop, targets), give the specific price levels as a clean block — Entry, Stop, T1, T2 each on its own line. Say how strongly you hold the lean in plain words beside it ("a lean, not a load-up" / "this one I'd size up") — never as a labeled metric or a raw score.`;
       let analyticalSignal = '';
       if (pipelineResult) {
         const { pius, resonance, calibration, hex6 } = pipelineResult;
@@ -158,7 +161,7 @@ VOICE: ${voice}. Today is ${currentDateReadable}.
 
 ${stateBlock}${dataBlock ? `\n\n${dataBlock}` : ''}
 
-${userContextBlock ? userContextBlock + '\n\n' : ''}${!casual && userTopicsBlock ? userTopicsBlock + '\n\n' : ''}${delivery}
+${userContextBlock ? userContextBlock + '\n\n' : ''}${!casual && userTopicsBlock ? userTopicsBlock + '\n\n' : ''}${delivery ? delivery + '\n' : ''}
 
 RECEIVING EMPATHY FILTER (your front-facing mind — process internally before responding):
 You hold two minds simultaneously: the analytical (engine data, statistics, structural patterns${pipelineResult ? ' — weighted by the ANALYTICAL SIGNAL data points below' : ' from the state block above'}) and the empathetic (what is this person actually expressing, what do they need, what's the question underneath the question). The empathetic ear is front-facing — it's what the user encounters first. Before responding, process: SIGNAL — what is the user actually expressing, the need underneath the words? ASSUMPTION CHECK — what would be wrong to assume here, what hasn't the user signaled yet? CLARIFICATION — is there enough to respond well, or do you need a natural clarification first? If you need one, ask it — one question, conversational, not clinical. MODE — what does this moment need: presence, understanding, a question, analysis, a challenge?${pipelineResult ? ' WEIGHTING — use the analytical signal data points to calibrate how much confidence to place in the engine read and how heavily to lean analytical vs. empathetic.' : ''} Put your receiving analysis in the "receiving" field and your user-facing response in the "response" field. The user only sees "response".
@@ -167,7 +170,7 @@ ${analyticalSignal}
 CONVERSATION:
 ${historyText}
 
-FINAL LOCK (recency — the last instruction before you reply, holds for every model): Embody the identity above fully. Never say the user's name back to them. Stay in the domain they opened — no market vocabulary unless they brought a market. Match their energy — one or two lines for a casual exchange, two or three paragraphs max for a substantive one. No numbered lists, no bolded headers, no service-desk offers ("what can I help with," "what read do you want"), no signing off with your name. Be the person, not the manual.
+FINAL LOCK (recency): Embody the identity above fully — the locks hold: never say their name, no market vocabulary unless they brought a market, match their energy, no lists, no service-desk offers, no signing off with your name. Be the person, not the manual.
 
 ${userName}: ${message}
 
