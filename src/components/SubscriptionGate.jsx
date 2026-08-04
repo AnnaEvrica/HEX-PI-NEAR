@@ -1,7 +1,22 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import { appParams } from '@/lib/app-params';
 import { Loader2, ArrowRight, Check, CreditCard, ArrowLeft } from 'lucide-react';
+
+// The backend can reject the session token while the browser still holds a
+// "logged in" user (stale/partial token after an OAuth or Stripe redirect —
+// common on mobile). Showing an error there traps the user: the status call and
+// the trial button both fail with "authentication required" and nothing they
+// click can fix it. Instead, bounce them once through the platform login to
+// mint a fresh token and land straight back on /app. Once per session, so a
+// genuine auth failure can still surface its error instead of looping.
+const reauthenticate = () => {
+  if (sessionStorage.getItem('hex6_reauth_done')) return false;
+  sessionStorage.setItem('hex6_reauth_done', Date.now().toString());
+  window.location.href = `/api/apps/auth/login?app_id=${appParams.appId}&from_url=${encodeURIComponent(`${window.location.origin}/app`)}`;
+  return true;
+};
 
 export default function SubscriptionGate({ children }) {
   const [loading, setLoading] = useState(true);
@@ -66,6 +81,7 @@ export default function SubscriptionGate({ children }) {
           sessionStorage.removeItem('hex6_checkout_pending');
         }
         if (!cancelled) {
+          sessionStorage.removeItem('hex6_reauth_done'); // status call worked — allow future recovery
           setSub(data);
           setLoading(false);
         }
@@ -79,6 +95,8 @@ export default function SubscriptionGate({ children }) {
             setTimeout(() => { if (!cancelled) setRetryKey(k => k + 1); }, 2000);
             return; // keep loading spinner — retry re-runs this effect
           }
+          // Retries exhausted on an auth error → re-mint the session once.
+          if (AUTH_ERR.test(msg) && reauthenticate()) return;
           setError(msg);
           setLoading(false);
         }
@@ -127,9 +145,10 @@ export default function SubscriptionGate({ children }) {
       setError('Checkout could not be started. Please try again.');
     } catch (e) {
       const msg = e?.message || 'Checkout failed to start';
-      if (/logged in|unauthorized|401|must be authenticated|authentication required|auth required/i.test(msg)) {
+      if (AUTH_ERR.test(msg)) {
         sessionStorage.removeItem('hex6_auth_pending');
-        window.location.href = '/';
+        // Re-login to mint a fresh token instead of dumping them on the homepage.
+        if (!reauthenticate()) window.location.href = '/';
         return;
       }
       setError(msg);
