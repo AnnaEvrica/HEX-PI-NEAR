@@ -11,7 +11,7 @@ export default function HEX6ChatInterface() {
   const welcomeMessage = {
     id: 'welcome',
     role: 'assistant',
-    content: `Welcome. I'm HEX6-BLE — the Binaureal Linguistic Engine.\n\nI fuse what's possible with what's meaningful, with reasoning you can follow. I read the data behind the moment, name the patterns others miss, and tell you where the weight actually sits — clearly, and without the noise.\n\nAsk me about a market, a number, or an idea you can't quite shake. Let's think clearly — and elevate the way you think.`,
+    content: `I'm Hex.\n\nI read the data underneath a thing and tell you where the weight actually sits — a market, a number, or an idea you can't quite shake. Same either way.\n\nWhat's on your mind?`,
   };
 
   // Loading copy — only "Thinking..." for fast chat replies.

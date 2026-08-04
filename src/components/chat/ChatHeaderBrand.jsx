@@ -7,7 +7,7 @@ export default function ChatHeaderBrand() {
         HEX6-BLE
       </span>
       <span className="text-[10px] md:text-xs text-secondary font-medium tracking-[0.16em] uppercase self-end">
-        v5.5
+        v6.0
       </span>
     </div>
   );
