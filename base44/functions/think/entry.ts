@@ -4,6 +4,7 @@ import { filterSourcesBlock, updateMemory } from '../../shared/chatHelpers.ts';
 import { fetchYahooReturns } from '../../shared/marketDataClient.ts';
 import { selectSynthesisModel, INTERPRETATION_MODEL, adaptVoiceForModel } from '../../shared/modelRouter.ts';
 import { triage } from '../../shared/triage.ts';
+import { resonanceSignature } from '../../shared/piusResonance.ts';
 import { anchorVerdict } from '../../shared/asiSpine.ts';
 import { buildPersona, buildPersonaRefresher } from '../../shared/persona.ts';
 
@@ -312,7 +313,22 @@ ${speaker}:`;
 
       if (intent === 'casual') {
         isCasual = true;
-        stateBlock = `No quantitative Thinking State for this message — respond directly and conversationally, grounded in the conversation. If there's no prior thread to pick up, arrive as yourself — a one-line human breath that carries your tone without becoming a menu, a readiness tail, or a list of lanes/topics/options to pick from. Never surface internal nomenclature (engine, calibration, UX, components) unless the user named it first. The conversation starts when they do.`;
+        // PI-US layer for casual — resonance from conversation cadence (lightweight
+        // FFT on word tokens, no engine, no market data). Calibrates the warm
+        // voice to the person's rhythm so the persona listens with PI-US value-
+        // calibrated tone, not just the default register. The empathy filter gets
+        // real listening data instead of an empty state block.
+        const casMessages = history.slice(-12).map(m => m.content).filter(Boolean);
+        const casRes = resonanceSignature(casMessages);
+        if (casRes.status === 'computed' && casRes.resonance > 0.5) {
+          voice = 'warm, intuitive presence — in sync with their rhythm, meet them where they are';
+        } else if (casRes.status === 'computed' && casRes.resonance > 0.25) {
+          voice = 'warm, grounded patience — let the conversation find its own shape';
+        } else {
+          voice = 'warm, open curiosity — genuine presence, no fixed rhythm to match';
+        }
+        const resLine = casRes.status === 'computed' ? `\n  PI-US cadence: ${casRes.interpretation}` : '';
+        stateBlock = `No quantitative Thinking State for this message — respond directly and conversationally, grounded in the conversation.${resLine}\n  If there's no prior thread to pick up, arrive as yourself — a one-line human breath that carries your tone without becoming a menu, a readiness tail, or a list of lanes/topics/options to pick from. Never surface internal nomenclature (engine, calibration, UX, components) unless the user named it first. The conversation starts when they do.`;
         synthModel = selectSynthesisModel('casual');
         fallbackResponse = 'Hey.';
       } else {
