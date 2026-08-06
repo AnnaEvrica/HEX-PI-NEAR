@@ -34,7 +34,16 @@ export default async function(req: Request): Promise<Response> {
     }, trainRatio));
 
     return Response.json({
-      promotion_verdicts: Object.fromEntries(results.map((result) => [result.ticker, { direction_live: result.promotion.live, calibration_live: result.promotion.calibration.live, brier_improvement: result.promotion.brier_improvement }])),
+      promotion_verdicts: Object.fromEntries(results.map((result) => [result.ticker, {
+        direction_live: result.promotion.live,
+        calibration_live: result.promotion.calibration.live,
+        brier_improvement: result.promotion.brier_improvement,
+        directional_trust_now: result.directional_trust,
+        raw_accuracy: result.metrics.raw_directional_accuracy,
+        trust_gated_accuracy: result.metrics.trust_gated_directional_accuracy,
+        trust_gated_lift: result.metrics.trust_gated_lift,
+        trusted_share: result.metrics.trusted_share,
+      }])),
       mode: 'PREQUENTIAL_ARCHETYPE_WALK_FORWARD',
       data_source: 'Yahoo Finance daily OHLCV',
       protocol: {
@@ -48,7 +57,6 @@ export default async function(req: Request): Promise<Response> {
         fine_structure_137: 'A fixed 137-calendar-bar trailing log-return observation is a structural archetype input. It never changes HEX conviction; it may influence the adaptive directional ratio only after the complete promotion gate clears. Staking yield is excluded; results are USD spot-price direction only.'
       },
       aggregate: summarizeWalkForward(results),
-      promotion_verdicts: Object.fromEntries(results.map((result) => [result.ticker, { direction_live: result.promotion.live, calibration_live: result.promotion.calibration.live, brier_improvement: result.promotion.brier_improvement }])),
       asset_summary: results.map((result) => ({
         ticker: result.ticker,
         predictions: result.metrics.predictions,

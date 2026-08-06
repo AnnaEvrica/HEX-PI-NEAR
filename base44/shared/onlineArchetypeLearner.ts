@@ -16,6 +16,24 @@ export class OnlineArchetypeLearner {
   private archetypes = new Map<string, Counts>();
   public adjustments = 0;
   public directionFlips = 0;
+  // Rolling directional trust — the learner's right to move the call is not a
+  // one-time verdict, it is re-earned continuously. Over the last WINDOW
+  // resolved bars, the adjusted lean must actually be beating the raw lean;
+  // when it stops, direction reverts to raw automatically. Conviction sizing
+  // is unaffected — this only governs which way the call points.
+  private recent: { raw: 0 | 1; adj: 0 | 1 }[] = [];
+  private static readonly WINDOW = 250;
+  private static readonly MIN_SAMPLE = 150;
+  private static readonly EDGE = 0.02;
+
+  get directionalTrust() {
+    const n = this.recent.length;
+    if (n < OnlineArchetypeLearner.MIN_SAMPLE) return { live: false, sample: n, edge: null as number | null };
+    const rawAcc = this.recent.reduce((sum, row) => sum + row.raw, 0) / n;
+    const adjAcc = this.recent.reduce((sum, row) => sum + row.adj, 0) / n;
+    const edge = adjAcc - rawAcc;
+    return { live: edge >= OnlineArchetypeLearner.EDGE, sample: n, edge: Number(edge.toFixed(4)) };
+  }
 
   adjust(rawPUp: number, lens: PerceptionLens) {
     const stateKey = `state:${lens.state}`;
@@ -44,10 +62,16 @@ export class OnlineArchetypeLearner {
     const adjustedDirection: Direction = adjustedPUp >= 0.5 ? 1 : -1;
     if (archetypeWeight > 0) this.adjustments++;
     if (rawDirection !== adjustedDirection) this.directionFlips++;
-    return { stateKey, familyKey, archetypeKey, featureKeys, support: state.up + state.down, archetypeWeight, archetypePUp, adjustedPUp, rawDirection, adjustedDirection };
+    const trust = this.directionalTrust;
+    const liveDirection: Direction = trust.live ? adjustedDirection : rawDirection;
+    return { stateKey, familyKey, archetypeKey, featureKeys, support: state.up + state.down, archetypeWeight, archetypePUp, adjustedPUp, rawDirection, adjustedDirection, trust, liveDirection };
   }
 
-  learn(keys: { stateKey: string; familyKey: string; archetypeKey: string; featureKeys: string[] }, actualDirection: Direction) {
+  learn(keys: { stateKey: string; familyKey: string; archetypeKey: string; featureKeys: string[]; rawDirection?: Direction; adjustedDirection?: Direction }, actualDirection: Direction) {
+    if (keys.rawDirection != null && keys.adjustedDirection != null) {
+      this.recent.push({ raw: keys.rawDirection === actualDirection ? 1 : 0, adj: keys.adjustedDirection === actualDirection ? 1 : 0 });
+      if (this.recent.length > OnlineArchetypeLearner.WINDOW) this.recent.shift();
+    }
     for (const [map, key] of [[this.states, keys.stateKey], [this.families, keys.familyKey]] as const) {
       const counts = map.get(key) || { up: 0, down: 0 };
       if (actualDirection === 1) counts.up++; else counts.down++;

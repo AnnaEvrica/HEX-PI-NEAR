@@ -11,7 +11,7 @@ export interface HistoricalBars {
   volumes: number[];
 }
 
-type Prediction = { rawDirection: number; adjustedDirection: number; actualDirection: number; rawPUp: number; adjustedPUp: number; conviction: number; support: number; weight: number; fineStructure137: 'upward' | 'downward' | 'neutral' | 'insufficient_history'; };
+type Prediction = { rawDirection: number; adjustedDirection: number; liveDirection: number; trusted: boolean; actualDirection: number; rawPUp: number; adjustedPUp: number; conviction: number; support: number; weight: number; fineStructure137: 'upward' | 'downward' | 'neutral' | 'insufficient_history'; };
 const mean = (xs: number[]) => xs.length ? xs.reduce((sum, value) => sum + value, 0) / xs.length : null;
 const round = (value: number | null, decimals = 4) => value == null ? null : Number(value.toFixed(decimals));
 
@@ -38,8 +38,12 @@ function summarize(rows: Prediction[]) {
   const adjustedAccuracy = mean(valid.map((row) => row.adjustedDirection === row.actualDirection ? 1 : 0));
   const rawBrier = mean(valid.map((row) => (row.rawPUp - (row.actualDirection === 1 ? 1 : 0)) ** 2));
   const adjustedBrier = mean(valid.map((row) => (row.adjustedPUp - (row.actualDirection === 1 ? 1 : 0)) ** 2));
+  const liveAccuracy = mean(valid.map((row) => row.liveDirection === row.actualDirection ? 1 : 0));
   return {
     predictions: valid.length,
+    trust_gated_directional_accuracy: round(liveAccuracy),
+    trust_gated_lift: round(rawAccuracy == null || liveAccuracy == null ? null : liveAccuracy - rawAccuracy),
+    trusted_share: round(mean(valid.map((row) => row.trusted ? 1 : 0))),
     raw_directional_accuracy: round(rawAccuracy),
     archetype_adjusted_directional_accuracy: round(adjustedAccuracy),
     directional_accuracy_lift: round(rawAccuracy == null || adjustedAccuracy == null ? null : adjustedAccuracy - rawAccuracy),
@@ -69,6 +73,8 @@ export function runArchetypeWalkForward(bars: HistoricalBars, trainRatio = 0.6) 
     const row = {
       rawDirection: adjustment.rawDirection,
       adjustedDirection: adjustment.adjustedDirection,
+      liveDirection: adjustment.liveDirection,
+      trusted: adjustment.trust.live,
       actualDirection,
       rawPUp: raw.p_up,
       adjustedPUp: adjustment.adjustedPUp,
@@ -97,6 +103,7 @@ export function runArchetypeWalkForward(bars: HistoricalBars, trainRatio = 0.6) 
     direction_ratio_only: true,
     learning_activity: { adjusted_predictions: learner.adjustments, direction_flips: learner.directionFlips },
     promotion: promotionGate(metrics, recent),
+    directional_trust: currentAdjustment.trust,
     current_adjustment: currentAdjustment,
     metrics,
     fine_structure_137_regimes: {

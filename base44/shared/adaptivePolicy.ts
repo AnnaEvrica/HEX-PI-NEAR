@@ -19,6 +19,16 @@ export function applyPromotedAdaptivePolicy(result: Hex6PipelineResult, bars: Hi
     return { result: { ...result, hex6, pius }, policy: audit.promotion, applied: 'direction_and_calibration' };
   }
 
+  // Time-varying directional right: the learner moves the call only while its
+  // rolling recent record is actually beating the raw lean, and hands direction
+  // straight back the moment that edge decays. Direction and conviction now
+  // adapt together through time instead of one static all-window verdict.
+  if (audit.directional_trust?.live) {
+    const hex6 = { ...result.hex6, p_up: adjustment.adjustedPUp, predicted_direction: adjustment.liveDirection === 1 ? 'UP' : 'DOWN', personal_call_strength: Math.abs(adjustment.adjustedPUp - 0.5) * 2 };
+    const pius = calibrate(hex6, result.resonance.status === 'computed' ? result.resonance : null);
+    return { result: { ...result, hex6, pius }, policy: audit.promotion, trust: audit.directional_trust, applied: 'trusted_direction_and_calibration' };
+  }
+
   if (audit.promotion.calibration.live) {
     // Keep HEX's direction untouched; adopt only the sharpened probability,
     // clamped so a contrary learned probability can never silently invert the
