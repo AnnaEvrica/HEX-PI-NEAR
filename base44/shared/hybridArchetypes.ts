@@ -1,5 +1,6 @@
 import { predictFromSequence } from './hex6Engine.ts';
 import { buildChartContext, confluenceAgrees, ChartContext } from './chartContext.ts';
+import { iChingForState } from './iChing.ts';
 import type { ExperimentBarSet } from './confluenceExperiment.ts';
 
 const mean = (xs: number[]) => xs.length ? xs.reduce((s, x) => s + x, 0) / xs.length : 0;
@@ -16,6 +17,7 @@ export interface PerceptionLens {
   prediction_status: 'STRUCTURE_ALIGNED' | 'STRUCTURE_MIXED' | 'STRUCTURE_CONTESTED';
   qualified_confidence: number | null;
   archetype_id: string;
+  i_ching: ReturnType<typeof iChingForState>;
 }
 
 function bitsFor(state: number) {
@@ -54,6 +56,7 @@ export function classifyHybridArchetype(
   else if (ctx?.trend === 'choppy' && location === 'inside') family = 'compression';
 
   const shape = momentumShape(state);
+  const i_ching = iChingForState(state);
   return {
     state, grid: { x, y, z, label: `${x}:${y}:${z}` }, momentum_shape: shape,
     structural_family: family, volume_regime: volume, value_location: location,
@@ -61,7 +64,8 @@ export function classifyHybridArchetype(
     // The ablation improved move quality, not directional hit rate. Preserve
     // conviction as raw HEX evidence; structural alignment is descriptive.
     qualified_confidence: null,
-    archetype_id: `${family}|${shape}|${volume}|${location}`,
+    archetype_id: `H${i_ching.king_wen}|${family}|${shape}|${volume}|${location}`,
+    i_ching,
   };
 }
 
