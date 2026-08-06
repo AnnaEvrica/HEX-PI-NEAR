@@ -172,10 +172,10 @@ export default function HeroSection({ onAsteriskHover }) {
             </div>
 
             <div className="mt-8 sm:mt-10 max-w-4xl px-2">
-              <p className="text-center text-[0.68rem] sm:text-[0.8rem] md:text-[0.9rem] text-foreground/55 font-medium leading-relaxed">
+              <p className="text-center text-[0.68rem] sm:text-[0.8rem] md:text-[0.9rem] text-foreground/75 font-medium leading-relaxed">
                 HEX6-BLE is an experimental probabilistic reasoning system. Its outputs are informational, may be uncertain or incorrect, and do not constitute financial, legal, medical, or other professional advice. Verify important decisions using independent evidence and qualified professionals.
               </p>
-              <p className="text-center text-[0.62rem] sm:text-[0.72rem] md:text-[0.8rem] text-foreground/40 font-medium mt-3">
+              <p className="text-center text-[0.62rem] sm:text-[0.72rem] md:text-[0.8rem] text-foreground/60 font-medium mt-3">
                 © Evrica Technologies Inc. 2026.
               </p>
             </div>

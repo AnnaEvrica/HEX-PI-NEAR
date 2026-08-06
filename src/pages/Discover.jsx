@@ -117,7 +117,7 @@ export default function Discover() {
       <section 
         id="how-it-works" 
         ref={(el) => (sectionRefs.current['how-it-works'] = el)}
-        className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24 md:py-32 space-y-12 sm:space-y-16 md:space-y-20"
+        className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14 md:py-16 space-y-12 sm:space-y-16 md:space-y-20"
       >
         {/* Section Header */}
         <motion.div 
@@ -299,7 +299,7 @@ export default function Discover() {
       <section 
         id="structural"
         ref={(el) => (sectionRefs.current['structural'] = el)}
-        className="max-w-4xl mx-auto px-4 sm:px-6 py-16 sm:py-24 md:py-32 space-y-8 sm:space-y-12"
+        className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-14 md:py-16 space-y-8 sm:space-y-12"
       >
         <motion.div 
           className="space-y-4"
@@ -347,7 +347,7 @@ export default function Discover() {
       <section 
         id="compare"
         ref={(el) => (sectionRefs.current['compare'] = el)}
-        className="max-w-5xl mx-auto px-4 sm:px-6 py-16 sm:py-24 md:py-32 space-y-8 sm:space-y-12"
+        className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14 md:py-16 space-y-8 sm:space-y-12"
       >
         <div className="space-y-4">
           <h2 className="text-4xl font-bold">Compare & Contrast</h2>
@@ -514,7 +514,7 @@ export default function Discover() {
       </section>
 
       {/* CTA Section */}
-      <section id="cta" className="max-w-4xl mx-auto px-4 sm:px-6 py-16 sm:py-24 md:py-32 space-y-6 sm:space-y-8">
+      <section id="cta" className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-14 md:py-16 space-y-6 sm:space-y-8">
         <div className="space-y-4 sm:space-y-6">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">Ready to observe how outcomes reorganize?</h2>
           <p className="text-base sm:text-lg md:text-xl text-secondary">No credit card required. Reasoning through probability. Decisions through resonance.</p>

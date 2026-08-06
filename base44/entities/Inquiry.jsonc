@@ -1,0 +1,50 @@
+{
+  "name": "Inquiry",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Sender's name"
+    },
+    "email": {
+      "type": "string",
+      "description": "Sender's email address"
+    },
+    "subject": {
+      "type": "string",
+      "description": "Inquiry subject"
+    },
+    "message": {
+      "type": "string",
+      "description": "Inquiry message body"
+    }
+  },
+  "required": [
+    "name",
+    "email",
+    "subject",
+    "message"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,5 +1,6 @@
 import { X, Mail, Search } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import HeroSection from '@/components/landing/HeroSection';
 import ContactModal from '@/components/landing/ContactModal';
 import SearchOverlay from '@/components/landing/SearchOverlay';
@@ -26,6 +27,13 @@ export default function Landing() {
             </div>
           </a>
           <div className="flex items-center gap-2 sm:gap-3">
+            <Link
+              to="/discover"
+              className="text-xs sm:text-sm font-medium text-foreground hover:text-accent transition-colors px-2 py-2 flex items-center"
+              style={{ minWidth: 'auto', minHeight: 'auto' }}
+            >
+              Discover
+            </Link>
             <button
               onClick={() => setShowSearch(true)}
               aria-label="Search the page"
@@ -52,7 +60,7 @@ export default function Landing() {
       {/* Footer */}
       <footer className="border-t border-border py-8 sm:py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col items-center text-center gap-4 sm:gap-6">
-          <div className="flex gap-6 sm:gap-8 flex-wrap justify-center text-center text-xs text-secondary">
+          <div className="flex gap-6 sm:gap-8 flex-wrap justify-center text-center text-xs text-foreground/70">
             <button onClick={() => setOpenPolicy('terms')} className="hover:text-foreground transition-colors">
               Terms of Service
             </button>
@@ -134,7 +142,7 @@ export default function Landing() {
               <p>For questions or concerns regarding these Terms, please contact: legal@evrica.tech</p>
             </section>
 
-            <p className="text-xs text-secondary/60 pt-4 border-t border-border">Last updated: April 2026. These terms may be updated at any time. Continued use constitutes acceptance.</p>
+            <p className="text-xs text-secondary pt-4 border-t border-border">Last updated: April 2026. These terms may be updated at any time. Continued use constitutes acceptance.</p>
           </div>
         </PolicyModal>
       )}
@@ -220,7 +228,7 @@ export default function Landing() {
               <p>Our Service may contain links to third-party websites. We are not responsible for their privacy practices. Review their privacy policies before providing information.</p>
             </section>
 
-            <p className="text-xs text-secondary/60 pt-4 border-t border-border">Last updated: April 2026. Privacy policy changes will be announced with notice.</p>
+            <p className="text-xs text-secondary pt-4 border-t border-border">Last updated: April 2026. Privacy policy changes will be announced with notice.</p>
           </div>
         </PolicyModal>
       )}
@@ -297,7 +305,7 @@ export default function Landing() {
               <p>Before using this Service for significant investments, you should consult with a qualified financial advisor, tax professional, and legal counsel to ensure compliance with your circumstances and local laws.</p>
             </section>
 
-            <p className="text-xs text-secondary/60 pt-4 border-t border-border">Last updated: April 2026. All disclosures subject to change without notice.</p>
+            <p className="text-xs text-secondary pt-4 border-t border-border">Last updated: April 2026. All disclosures subject to change without notice.</p>
           </div>
         </PolicyModal>
       )}
