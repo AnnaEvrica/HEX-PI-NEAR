@@ -39,7 +39,12 @@ const LIFE_CONTEXT = /\b(diagnos\w*|autis\w*|adhd|neurodiverg\w*|therapy|therapi
 
 // Self-directed help-seeking. "Why am I like this" is a person asking about
 // their own life, whatever the surface topic is.
-const SELF_INQUIRY = /\b(why (do|am|can'?t|does|is) i|why is it that i|what'?s wrong with me|how do i (stop|start|deal|cope|handle|get over|move on|know)|should i|am i (the )?(problem|crazy|wrong|broken|normal|okay))\b/i;
+const SELF_INQUIRY = /\b(why (do|am|can'?t|does|is) i|why is it that i|what'?s wrong with me|how do i (stop|deal|cope|handle|get over|move on)|am i (the )?(problem|crazy|wrong|broken|normal|okay))\b/i;
+
+// Decision-seeking. Deliberately weaker: "should I" fronts everything from
+// "should I leave him" to "should I use Python or JS". On its own it is not
+// evidence of stakes — it needs a corroborating signal to reach the threshold.
+const DECISION = /\b(should i|do you think i should|what would you do|help me decide)\b/i;
 
 // First-person present-tense states — someone describing their own condition.
 const SELF_STATE = /\b(i (feel|felt|keep|can'?t|don'?t know|didn'?t|always|never|need|want|wonder|think i'?m)|i'?m (not|so|just|really|always|never|still))\b/i;
@@ -80,6 +85,7 @@ export function assessStakes(message: string): StakesResult {
   if (DISCLOSURE.test(msg)) { score += 3; signals.push('disclosure'); }
   if (LIFE_CONTEXT.test(msg)) { score += 3; signals.push('life_context'); }
   if (SELF_INQUIRY.test(msg)) { score += 3; signals.push('self_inquiry'); }
+  if (DECISION.test(msg)) { score += 2; signals.push('decision'); }
   if (SELF_STATE.test(msg)) { score += 2; signals.push('self_state'); }
 
   // Absolutes only count as weight when the person is talking about themselves;
