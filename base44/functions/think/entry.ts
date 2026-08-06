@@ -12,6 +12,7 @@ import { assessStakes } from '../../shared/stakes.ts';
 import { buildChartContext, chartContextBlock, confluenceAgrees } from '../../shared/chartContext.ts';
 import { buildCoinStory, marketStoryBlock, marketStorySummary } from '../../shared/marketStory.ts';
 import { applyPromotedAdaptivePolicy } from '../../shared/adaptivePolicy.ts';
+import { runPredictionJournal } from '../../shared/predictionJournal.ts';
 
 // hex6Engine takes raw values directly — valuesToBits encodes "did the value
 // go up?" which works on any sequence (prices, returns, scores). No conversion
@@ -487,6 +488,10 @@ Return JSON with:
               if (md.latestPrice != null) contextPriceLine = `${item.requestedTicker} last close: $${md.latestPrice.toFixed(2)} (${md.dataPoints} daily bars). PRICE AUTHORITY: this close is the ONLY valid current price; derive every stated level from the structural levels below.`;
               const chartBlock = chartContextBlock(chartCtx, pipelineResult.hex6.predicted_direction);
               if (chartBlock) stateBlock = `${stateBlock}\n\n${chartBlock}`;
+              if (md.latestPrice != null) {
+                const journalBlock = await runPredictionJournal(base44, item.requestedTicker, md.latestPrice, pipelineResult, user.email);
+                if (journalBlock) stateBlock = `${stateBlock}\n\n${journalBlock}`;
+              }
             }
           }
           const storyBlock = marketStoryBlock(activeStories);

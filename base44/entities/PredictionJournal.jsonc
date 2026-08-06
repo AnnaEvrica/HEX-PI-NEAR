@@ -1,0 +1,91 @@
+{
+  "name": "PredictionJournal",
+  "type": "object",
+  "properties": {
+    "ticker": {
+      "type": "string",
+      "description": "Asset the call was made on"
+    },
+    "predicted_direction": {
+      "type": "string",
+      "enum": [
+        "UP",
+        "DOWN",
+        "FLAT"
+      ],
+      "description": "The call Hex made at the time"
+    },
+    "conviction": {
+      "type": "number",
+      "description": "HEX personal_call_strength at the time of the call (0-1)"
+    },
+    "entry_price": {
+      "type": "number",
+      "description": "Close the call was made against"
+    },
+    "exit_price": {
+      "type": "number",
+      "description": "Close the call was resolved against"
+    },
+    "predicted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the call was made"
+    },
+    "resolve_after": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Earliest time this call may be scored"
+    },
+    "resolved": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the outcome is known"
+    },
+    "actual_direction": {
+      "type": "string",
+      "enum": [
+        "UP",
+        "DOWN",
+        "FLAT"
+      ],
+      "description": "Realized direction once resolved"
+    },
+    "correct": {
+      "type": "boolean",
+      "description": "Whether the call matched the realized direction"
+    },
+    "archetype": {
+      "type": "string",
+      "description": "HEX state archetype label at the time of the call"
+    },
+    "asked_by": {
+      "type": "string",
+      "description": "Email of the user whose question prompted the call"
+    }
+  },
+  "required": [
+    "ticker",
+    "predicted_direction",
+    "entry_price",
+    "predicted_at"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": null,
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
