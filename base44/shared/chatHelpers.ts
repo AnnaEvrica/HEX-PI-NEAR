@@ -10,6 +10,13 @@ export function filterSourcesBlock(sources) {
       if (!/^https?:$/.test(p.protocol)) return false;
       if (!/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(p.hostname)) return false;
       if (/example\.com|placeholder|your-?(site|url)/i.test(u)) return false;
+      // Tier guard — the fetch step is told to return specialist-grade sources,
+      // but it still slips in counseling-center blogs, wellness/SEO content and
+      // aggregators. A weak citation costs more trust than no citation, so the
+      // filter enforces the rule the prompt only requests.
+      if (/wikipedia\.org|medium\.com|quora\.com|reddit\.com|pinterest\.|substack\.com|blogspot\.|wordpress\.com/i.test(p.hostname)) return false;
+      if (/counsel|therapy|therapist|rehab|treatment|clinic-?marketing|wellness|coaching|lifecoach/i.test(p.hostname)) return false;
+      if (/\/blog\//i.test(p.pathname)) return false;
       return true;
     } catch { return false; }
   };

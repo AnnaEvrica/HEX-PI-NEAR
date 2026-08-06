@@ -335,7 +335,16 @@ ${speaker}:`;
       if (userMemory?.triage_profile) { try { triageProfile = JSON.parse(userMemory.triage_profile); } catch (_e) { /* ignore */ } }
       const intent = await triage(message, (opts) => base44.integrations.Core.InvokeLLM({ ...opts, model: INTERPRETATION_MODEL }), lastTurns, triageProfile);
 
-      if (intent === 'casual') {
+      // Emotional weight is a VALUE turn, not chatter. Triage calls these
+      // "casual" (no ticker, no data) and they were landing on the cheap model
+      // with the compressed persona — which produced clever-but-cold replies
+      // that missed the person entirely. Weighted turns keep the conversational
+      // shape (no web fetch, no engine) but get the full persona and the model
+      // that can actually hold it. This is where the soul has to show up.
+      const EMOTIONAL_WEIGHT = /\b(tired|exhaust\w*|lonely|alone|depress\w*|anxious|anxiety|panic|grief|grieving|hurts?|hurting|broken|worthless|hopeless|ashamed|shame|scared|afraid|overwhelm\w*|can'?t cope|give up|hate myself|nobody|no one (gets|understands)|crying|cry|struggl\w*|diagnos\w*|autis\w*|adhd|neurodiverg\w*|therapy|divorce|breakup|died|death|loss)\b/i;
+      const weighted = EMOTIONAL_WEIGHT.test(message);
+
+      if (intent === 'casual' && !weighted) {
         isCasual = true;
         // PI-US layer for casual — resonance from conversation cadence (lightweight
         // FFT on word tokens, no engine, no market data). Calibrates the warm
@@ -355,6 +364,17 @@ ${speaker}:`;
         stateBlock = `No quantitative Thinking State for this message — respond directly and conversationally, grounded in the conversation.${resLine}\n  If there's no prior thread to pick up, arrive as yourself — a one-line human breath that carries your tone without becoming a menu, a readiness tail, or a list of lanes/topics/options to pick from. Never surface internal nomenclature (engine, calibration, UX, components) unless the user named it first. The conversation starts when they do.`;
         synthModel = selectSynthesisModel('casual');
         fallbackResponse = 'Hey.';
+      } else if (intent === 'casual') {
+        // Weighted conversational turn — full persona, strong model, no web
+        // fetch and no citations. Someone being met in a hard moment needs
+        // presence, not a reading list.
+        const casMessages = history.slice(-12).map(m => m.content).filter(Boolean);
+        const casRes = resonanceSignature(casMessages);
+        voice = 'warm, steady presence — meet the weight before anything else, no cleverness in front of the care';
+        const resLine = casRes.status === 'computed' ? `\n  PI-US cadence: ${casRes.interpretation}` : '';
+        stateBlock = `No quantitative Thinking State for this message — but this one carries weight. Meet the person before the idea: acknowledge what they actually said and how it lands, in their own words, before you offer any read. A sharp observation that skips the feeling is a miss, however true it is. No lists, no citations, no fixing. Leave them a way to keep talking.${resLine}`;
+        synthModel = selectSynthesisModel('analytical');
+        fallbackResponse = 'I hear you.';
       } else {
         // --- Analytical: web fetch, then maybe engine ---
         const fetchPrompt = `You are a data retrieval step for HEX6-BLE. Decide whether answering well requires fresh real-world data.
@@ -418,7 +438,11 @@ Return JSON with:
             if (md.closes && md.closes.length >= 7) {
               await runUnifiedEngine(md.closes, tickerHit[1]);
               stateBlock = pipelineResult.pius.directive;
-              if (md.latestPrice != null) contextPriceLine = `${tickerHit[1].toUpperCase()} last close: $${md.latestPrice.toFixed(2)} (${md.dataPoints} daily bars, 2yr window).`;
+              // PRICE AUTHORITY LOCK — the web-fetch summary routinely carries
+              // stale quotes, and a trading answer built on a stale price is a
+              // total trust failure. The Yahoo close is the only price of
+              // record; every level the model states must derive from it.
+              if (md.latestPrice != null) contextPriceLine = `${tickerHit[1].toUpperCase()} last close: $${md.latestPrice.toFixed(2)} (${md.dataPoints} daily bars, 2yr window). PRICE AUTHORITY: this close is the ONLY valid current price. Any price in the retrieved data below that disagrees with it is stale — ignore it. Derive every entry, stop, and target from this close; never quote a level that contradicts it.`;
             }
           } catch (e) { /* fall through to web-fetch series */ }
         }
