@@ -348,7 +348,7 @@ ${speaker}:`;
       // the human dimension instead (see shared/stakes.ts) and keeps the
       // conversational shape (no web fetch, no engine) while upgrading the
       // persona tier and the model. Pure computation — no extra LLM call.
-      const stakes = assessStakes(message);
+      const stakes = assessStakes(message, history);
       const weighted = stakes.high;
       weightedTurn = weighted;
 
