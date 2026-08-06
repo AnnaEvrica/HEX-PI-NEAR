@@ -40,10 +40,12 @@ export async function fetchYahooReturns(rawTicker: string, lookbackDays = 730) {
   // instead of four independently-filtered arrays.
   const q = result.indicators?.quote?.[0] || {};
   const rawCloses = (q.close || []) as (number | null)[];
+  const rawTimestamps = (result.timestamp || []) as number[];
   const closes: number[] = [];
   const highs: number[] = [];
   const lows: number[] = [];
   const volumes: number[] = [];
+  const timestamps: number[] = [];
   for (let i = 0; i < rawCloses.length; i++) {
     const c = rawCloses[i];
     if (c === null || c === undefined) continue;
@@ -51,6 +53,7 @@ export async function fetchYahooReturns(rawTicker: string, lookbackDays = 730) {
     highs.push(q.high?.[i] ?? c);
     lows.push(q.low?.[i] ?? c);
     volumes.push(q.volume?.[i] ?? 0);
+    timestamps.push(rawTimestamps[i] ?? 0);
   }
   const returns: number[] = [];
   for (let i = 1; i < closes.length; i++) {
@@ -62,6 +65,7 @@ export async function fetchYahooReturns(rawTicker: string, lookbackDays = 730) {
     highs,
     lows,
     volumes,
+    timestamps,
     returns,
     latestPrice: closes[closes.length - 1] ?? null,
     dataPoints: closes.length,
