@@ -506,9 +506,12 @@ Return JSON with:
     const { visible, memory: mem } = await processBoundarySignal(base44, user, userMemory, rawResponse);
     if (mem) userMemory = mem;
     let finalResponse = visible || rawResponse;
-    // Brief replies stay conversational — a two-line answer with a reading list
-    // stapled to it reads like a search result, not a person. They can ask.
-    if (sourcesBlock && (askedForSources || finalResponse.length > 700)) {
+    // sourcesBlock is already gated upstream (only set when the user asked for
+    // sources or the retrieval step judged the answer citation-worthy, and only
+    // from quality domains). If it survived those gates, it attaches — a reply-
+    // length threshold here was silently dropping links from short but
+    // substantive answers like "what's the best currency to invest in".
+    if (sourcesBlock) {
       finalResponse = `${finalResponse}\n\n**Sources:**\n${sourcesBlock.split('\n').map(s => `- ${s}`).join('\n')}`;
     }
     saveCognitiveState();
