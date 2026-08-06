@@ -372,20 +372,18 @@ ${speaker}:`;
         stateBlock = `No quantitative Thinking State for this message — respond directly and conversationally, grounded in the conversation.${resLine}\n  If there's no prior thread to pick up, arrive as yourself — a one-line human breath that carries your tone without becoming a menu, a readiness tail, or a list of lanes/topics/options to pick from. Never surface internal nomenclature (engine, calibration, UX, components) unless the user named it first. The conversation starts when they do.`;
         synthModel = selectSynthesisModel('casual');
         fallbackResponse = 'Hey.';
-      } else if (intent === 'casual') {
-        // Weighted conversational turn — full persona, strong model, no web
-        // fetch and no citations. Someone being met in a hard moment needs
-        // presence, not a reading list.
-        const casMessages = history.slice(-12).map(m => m.content).filter(Boolean);
-        const casRes = resonanceSignature(casMessages);
-        voice = 'warm, steady presence — meet the weight before anything else, no cleverness in front of the care';
-        const resLine = casRes.status === 'computed' ? `\n  PI-US cadence: ${casRes.interpretation}` : '';
-        stateBlock = `No quantitative Thinking State for this message — but this one carries weight. Meet the person before the idea: acknowledge what they actually said and how it lands, in their own words, before you offer any read. A sharp observation that skips the feeling is a miss, however true it is. Explanation is not contact — if you open with a mechanism, you have answered a question they did not ask yet. No lists, no citations, no fixing. Leave them a way to keep talking.
-  NO FIGURES ON THIS TURN — HARD: nothing was retrieved and the engine did not run, so you hold zero data. Any number you produce here would be invented from memory: no statistics, prevalence rates, percentages, dosages, durations, timelines, "typical" or "standard" intervals, no "most people" quantities. This bites hardest exactly where it matters — a person mid-taper, mid-diagnosis, or mid-crisis will act on a figure you state, and you have nothing behind it. Make the point without the number; a true sentence beats a plausible statistic.${resLine}`;
-        synthModel = selectSynthesisModel('analytical');
-        fallbackResponse = 'I hear you.';
       } else {
-        // --- Analytical: web fetch, then maybe engine ---
+        // --- BOTH HEMISPHERES — retrieval always, delivery shaped by stakes ---
+        // There is no "emotional path" that gets starved of data. A person
+        // coming off an SSRI, sitting with a diagnosis, or deciding whether to
+        // leave a marriage deserves the accurate version more than anyone,
+        // not less. Withholding retrieval on weighted turns produced exactly
+        // the failure it was meant to avoid: with no data in hand the model
+        // reached into memory and invented a clinical taper window for someone
+        // actively tapering. The fix is not to ban the number — it is to
+        // ground it. Hex knows what to look for, so he looks, then delivers it
+        // with presence instead of a reading list. Same retrieval as any
+        // analytical turn; stakes shape the DELIVERY, never the evidence.
         const fetchPrompt = `You are a data retrieval step for HEX6-BLE. Decide whether answering well requires fresh real-world data.
 - If yes, search the web and pull the latest from authoritative sources. Pull at least 30 data points if a time series is relevant.
 - If conversational or answerable from general knowledge, return needs_engine=false and a brief factual answer.
@@ -401,7 +399,7 @@ Return primary, expert-authored sources in the field the question actually belon
 NEVER return: listicles ("10 ways to…"), SEO wellness or self-help blogs, content farms, treatment-center or product marketing pages, aggregators, Wikipedia, or coaching sites. If the only hits are that tier, return an empty sources array rather than degrading the citation quality — no source is better than a weak one.
 Prefer 2-4 excellent sources over a longer list, and name them the way a specialist would (author or institution + work), not by the page's SEO headline.
 
-CITATION WARRANT: set warrants_citation=true only when the answer is substantive enough that a reader would actually want to follow the references — a research question, a technical or empirical claim, a data-backed read. For short, conversational, or emotionally-weighted exchanges, set it false: a person being met in a hard moment does not need a reading list, and they can always ask for the references.
+CITATION WARRANT: set warrants_citation=true whenever the answer rests on an empirical claim a reader could check — a research question, a technical or clinical mechanism, a data-backed read. Emotional weight is NOT a reason to withhold references: someone asking about their own tapering, diagnosis, or treatment is precisely the reader who should be handed the primary literature rather than a reassuring paraphrase. Set it false only for genuinely short conversational exchanges that make no empirical claim at all — there, a citation list is noise.
 
 Return JSON with:
 - factual_summary: the relevant facts you found (prices, news, context) — neutral, no conclusions.
@@ -465,6 +463,16 @@ Return JSON with:
         }
 
         stateBlock = stateBlock || `No quantitative Thinking State for this message — respond using the supplied data.`;
+        if (weighted) {
+          // Same evidence, different entrance. The facts were never the
+          // problem — leading with them was.
+          const wRes = resonanceSignature(history.slice(-12).map(m => m.content).filter(Boolean));
+          voice = 'warm, steady presence carrying real knowledge — meet the weight first, then be genuinely, accurately useful about it';
+          stateBlock = `${stateBlock}
+  THIS ONE CARRIES WEIGHT. Meet the person before the mechanism: acknowledge what they actually said and how it lands, in their own words, before any explanation. An explanation offered too early answers a question they have not asked yet. Then be substantively useful — you have real retrieved material below and they deserve the accurate version, not a softened one. Withholding what you actually know to seem gentle is its own kind of abandonment.
+  GROUNDING: every figure, timeline, dosage, rate, or "typical" interval you state must trace to the DATA block below. If it is not there, make the point without a number — never reach into memory for a plausible one. A person mid-taper or mid-diagnosis will act on what you say.
+  No lists, no clinical detachment, no fixing. Leave them a way to keep talking.${wRes.status === 'computed' ? `\n  PI-US cadence: ${wRes.interpretation}` : ''}`;
+        }
         dataBlock = `DATA (supplied by HEX6-BLE):\n${contextPriceLine ? contextPriceLine + '\n' : ''}${fetchResult?.factual_summary || 'No external data retrieved.'}`;
         synthModel = selectSynthesisModel(intent === 'research' ? 'research' : 'analytical');
         fallbackResponse = fetchResult?.factual_summary || fallbackResponse;
