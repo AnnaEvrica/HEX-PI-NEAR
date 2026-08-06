@@ -18,6 +18,7 @@ export default async function(req: Request): Promise<Response> {
       : body.ticker ? [String(body.ticker).trim().toUpperCase()] : DEFAULT_BASKET;
     const lookbackDays = Math.max(365, Math.min(Number(body.lookbackDays) || 5475, 7300));
     const trainRatio = Math.max(0.5, Math.min(Number(body.trainRatio) || 0.6, 0.85));
+    const summaryOnly = body.summaryOnly === true;
 
     const fetched = await Promise.all(tickers.map(async (ticker: string) => {
       try {
@@ -40,8 +41,9 @@ export default async function(req: Request): Promise<Response> {
         held_out_fraction: 1 - trainRatio,
         rule: 'Each prediction sees only bars available at that timestamp. Its archetype ledger updates after, never before, the realized next daily close.',
         confidence: 'HEX personal_call_strength is recorded unchanged and never used as an archetype learning target or gate.',
-        adjustment: 'Archetypes blend only into directional probability/ratio, with conservative support-based shrinkage; direction may change only when the adjusted ratio crosses 50%.',
-        fine_structure_137: 'A fixed 137-calendar-bar trailing log-return observation is attached to each archetype as upward, neutral, or downward after volatility normalization. It is descriptive only: it does not alter raw HEX probability, conviction, or the learner weight. Staking yield is excluded; results are USD spot-price direction only.',
+        adjustment: 'All observed structural tools (HEX state, family, momentum shape, volume regime, value location, and 137-bar phase) may blend into directional probability through global → family → state → full-archetype shrinkage; direction may change only when the adjusted ratio crosses 50%.',
+        live_promotion: 'Adaptive direction is live only when a per-asset walk-forward clears all pre-registered gates: at least 400 predictions, +1.5 percentage-point accuracy lift, at least 0.002 Brier improvement, and no final-quarter accuracy deterioration. HEX conviction remains unchanged.',
+        fine_structure_137: 'A fixed 137-calendar-bar trailing log-return observation is a structural archetype input. It never changes HEX conviction; it may influence the adaptive directional ratio only after the complete promotion gate clears. Staking yield is excluded; results are USD spot-price direction only.'
       },
       aggregate: summarizeWalkForward(results),
       asset_summary: results.map((result) => ({
@@ -51,8 +53,9 @@ export default async function(req: Request): Promise<Response> {
         archetype_adjusted_directional_accuracy: result.metrics.archetype_adjusted_directional_accuracy,
         raw_brier: result.metrics.raw_brier,
         archetype_adjusted_brier: result.metrics.archetype_adjusted_brier,
-      })),
-      assets: results,
+        promotion: result.promotion,
+      })), 
+      assets: summaryOnly ? undefined : results,
       unavailable_tickers: tickers.filter((ticker: string) => !usable.some((data: any) => data.ticker === ticker || data.ticker === `${ticker}-USD`)),
       timestamp: new Date().toISOString(),
     });

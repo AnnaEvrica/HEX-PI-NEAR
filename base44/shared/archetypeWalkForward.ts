@@ -1,4 +1,4 @@
-import { predictFromSequence } from './hex6Engine.ts';
+import { mapTickerToDomain, applySelfCalibration } from './hex6Pipeline.ts';
 import { buildChartContext } from './chartContext.ts';
 import { classifyHybridArchetype } from './hybridArchetypes.ts';
 import { OnlineArchetypeLearner } from './onlineArchetypeLearner.ts';
@@ -14,6 +14,14 @@ export interface HistoricalBars {
 type Prediction = { rawDirection: number; adjustedDirection: number; actualDirection: number; rawPUp: number; adjustedPUp: number; conviction: number; support: number; weight: number; fineStructure137: 'upward' | 'downward' | 'neutral' | 'insufficient_history'; };
 const mean = (xs: number[]) => xs.length ? xs.reduce((sum, value) => sum + value, 0) / xs.length : null;
 const round = (value: number | null, decimals = 4) => value == null ? null : Number(value.toFixed(decimals));
+
+function promotionGate(metrics: ReturnType<typeof summarize>, recent: ReturnType<typeof summarize>) {
+  const lift = metrics.directional_accuracy_lift ?? -1;
+  const brierGain = metrics.raw_brier != null && metrics.archetype_adjusted_brier != null ? metrics.raw_brier - metrics.archetype_adjusted_brier : -1;
+  const stable = recent.archetype_adjusted_directional_accuracy != null && recent.raw_directional_accuracy != null && recent.archetype_adjusted_directional_accuracy >= recent.raw_directional_accuracy;
+  const rules = { minimum_predictions: metrics.predictions >= 400, minimum_accuracy_lift: lift >= 0.015, calibration_improves: brierGain >= 0.002, final_quarter_stable: stable };
+  return { ...rules, live: Object.values(rules).every(Boolean), accuracy_lift: round(lift), brier_improvement: round(brierGain) };
+}
 
 function summarize(rows: Prediction[]) {
   const valid = rows.filter((row) => row.actualDirection !== 0);
@@ -42,7 +50,7 @@ export function runArchetypeWalkForward(bars: HistoricalBars, trainRatio = 0.6) 
   const late: Prediction[] = [];
 
   for (let index = start; index + 1 < bars.closes.length; index++) {
-    const raw = predictFromSequence('BTC', bars.closes.slice(index - 6, index + 1));
+    const { hex6: raw } = applySelfCalibration(mapTickerToDomain(bars.ticker), bars.closes.slice(0, index + 1));
     const context = buildChartContext(bars.closes.slice(0, index + 1), bars.highs.slice(0, index + 1), bars.lows.slice(0, index + 1), bars.volumes.slice(0, index + 1));
     const lens = classifyHybridArchetype(raw.state, context, raw.predicted_direction, raw.personal_call_strength, bars.closes.slice(0, index + 1));
     const adjustment = learner.adjust(raw.p_up, lens);
@@ -65,6 +73,12 @@ export function runArchetypeWalkForward(bars: HistoricalBars, trainRatio = 0.6) 
     learner.learn(adjustment, actualDirection as -1 | 1);
   }
 
+  const metrics = summarize(rows);
+  const recent = summarize(rows.slice(Math.floor(rows.length * 0.75)));
+  const { hex6: currentHex } = applySelfCalibration(mapTickerToDomain(bars.ticker), bars.closes);
+  const currentContext = buildChartContext(bars.closes, bars.highs, bars.lows, bars.volumes);
+  const currentLens = classifyHybridArchetype(currentHex.state, currentContext, currentHex.predicted_direction, currentHex.personal_call_strength, bars.closes);
+  const currentAdjustment = learner.adjust(currentHex.p_up, currentLens);
   return {
     ticker: bars.ticker,
     historical_bars: bars.closes.length,
@@ -73,7 +87,9 @@ export function runArchetypeWalkForward(bars: HistoricalBars, trainRatio = 0.6) 
     no_confidence_mutation: true,
     direction_ratio_only: true,
     learning_activity: { adjusted_predictions: learner.adjustments, direction_flips: learner.directionFlips },
-    metrics: summarize(rows),
+    promotion: promotionGate(metrics, recent),
+    current_adjustment: currentAdjustment,
+    metrics,
     fine_structure_137_regimes: {
       upward: summarize(rows.filter((row) => row.fineStructure137 === 'upward')),
       neutral: summarize(rows.filter((row) => row.fineStructure137 === 'neutral')),

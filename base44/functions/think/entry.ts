@@ -11,6 +11,7 @@ import { noveltyDirective } from '../../shared/novelty.ts';
 import { assessStakes } from '../../shared/stakes.ts';
 import { buildChartContext, chartContextBlock, confluenceAgrees } from '../../shared/chartContext.ts';
 import { buildCoinStory, marketStoryBlock, marketStorySummary } from '../../shared/marketStory.ts';
+import { applyPromotedAdaptivePolicy } from '../../shared/adaptivePolicy.ts';
 
 // hex6Engine takes raw values directly — valuesToBits encodes "did the value
 // go up?" which works on any sequence (prices, returns, scores). No conversion
@@ -465,14 +466,17 @@ Return JSON with:
         const tickerHits = [...new Set([...(message.match(UPPER_TICKER_RE) || []), ...(message.match(LOWER_CRYPTO_RE) || []).map((ticker) => ticker.toUpperCase())])].slice(0, 8);
         if (tickerHits.length) {
           const marketData = await Promise.all(tickerHits.map(async (ticker) => {
-            try { return { requestedTicker: ticker, data: await fetchYahooReturns(ticker, 1825) }; } catch { return null; }
+            try { return { requestedTicker: ticker, data: await fetchYahooReturns(ticker, 5475) }; } catch { return null; }
           }));
           const usableMarkets = marketData.filter((item) => item?.data?.closes?.length >= 137);
           for (const item of usableMarkets) {
             const md = item.data;
-            const coinPipeline = runPipeline(md.closes, item.requestedTicker, history.map((turn) => turn.content).filter(Boolean));
+            const basePipeline = runPipeline(md.closes, item.requestedTicker, history.map((turn) => turn.content).filter(Boolean));
+            const adaptive = applyPromotedAdaptivePolicy(basePipeline, {
+              ticker: item.requestedTicker, closes: md.closes, highs: md.highs, lows: md.lows, volumes: md.volumes,
+            });
             const coinContext = buildChartContext(md.closes, md.highs, md.lows, md.volumes);
-            const perceived = applyChartPerception(coinPipeline, coinContext, md.closes);
+            const perceived = applyChartPerception(adaptive.result, coinContext, md.closes);
             activeStories.push(buildCoinStory(item.requestedTicker, perceived, coinContext, md.closes));
             if (item.requestedTicker === tickerHits[0]) {
               pipelineResult = perceived;

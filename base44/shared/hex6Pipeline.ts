@@ -121,6 +121,16 @@ function selfCalibrate(domain: string, values: number[]): CalibrationResult {
   };
 }
 
+export function applySelfCalibration(domain: string, values: number[]) {
+  const raw = predictFromSequence(domain, values);
+  const calibration = selfCalibrate(domain, values);
+  const hex6 = calibration.anti_predictive
+    ? { ...raw, predicted_direction: raw.predicted_direction === 'UP' ? 'DOWN' : 'UP', p_up: 1 - raw.p_up }
+    : raw;
+  calibration.flipped = calibration.anti_predictive;
+  return { hex6, calibration };
+}
+
 // Run the full pipeline: hex6Engine → self-calibration → piusResonance → piusEngine.calibrate.
 //
 // values: 7+ recent raw values (prices, temperatures, scores — any sequence).
@@ -135,18 +145,7 @@ export function runPipeline(
   messageHistory: string[] = [],
 ): Hex6PipelineResult {
   const domain = mapTickerToDomain(ticker);
-  const raw = predictFromSequence(domain, values);
-
-  // Self-calibration: check if the engine is currently anti-predictive. If so,
-  // flip the prediction — the engine is in an inverted regime. p_up inverts to
-  // 1-p_up; conviction and entropy are symmetric (|p-0.5| == |(1-p)-0.5|) so
-  // they stay unchanged. high_conviction is conviction-based, also unchanged.
-  const calibration = selfCalibrate(domain, values);
-  const flipped = calibration.anti_predictive;
-  const hex6 = flipped
-    ? { ...raw, predicted_direction: raw.predicted_direction === 'UP' ? 'DOWN' : 'UP', p_up: 1 - raw.p_up }
-    : raw;
-  calibration.flipped = flipped;
+  const { hex6, calibration } = applySelfCalibration(domain, values);
 
   const resonance = messageHistory.length >= 2
     ? resonanceSignature(messageHistory)
