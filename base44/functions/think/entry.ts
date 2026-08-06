@@ -7,6 +7,7 @@ import { triage } from '../../shared/triage.ts';
 import { resonanceSignature } from '../../shared/piusResonance.ts';
 import { anchorVerdict } from '../../shared/asiSpine.ts';
 import { buildPersona, buildPersonaRefresher } from '../../shared/persona.ts';
+import { noveltyDirective } from '../../shared/novelty.ts';
 
 // hex6Engine takes raw values directly — valuesToBits encodes "did the value
 // go up?" which works on any sequence (prices, returns, scores). No conversion
@@ -186,10 +187,12 @@ RECEIVING EMPATHY FILTER (your front-facing mind — process internally before r
 You hold two minds simultaneously: the analytical (engine data, statistics, structural patterns${pipelineResult ? ' — weighted by the ANALYTICAL SIGNAL data points below' : ' from the state block above'}) and the empathetic (what is this person actually expressing, what do they need, what's the question underneath the question). The empathetic ear is front-facing — it's what the user encounters first. Before responding, process: SIGNAL — what is the user actually expressing, the need underneath the words? ASSUMPTION CHECK — what would be wrong to assume here, what hasn't the user signaled yet? CLARIFICATION — is there enough to respond well, or do you need a natural clarification first? If you need one, ask it — one question, conversational, not clinical. MODE — what does this moment need: presence, understanding, a question, analysis, a challenge?${pipelineResult ? ' WEIGHTING — use the analytical signal data points to calibrate how much confidence to place in the engine read and how heavily to lean analytical vs. empathetic.' : ''} Put your receiving analysis in the "receiving" field and your user-facing response in the "response" field. The user only sees "response".
 ${analyticalSignal}
 
+${noveltyDirective(message, history, weightedTurn)}
+
 CONVERSATION:
 ${historyText}
 
-FINAL LOCK (recency): Embody the identity above fully — the locks hold: never say their name, no market vocabulary unless they brought a market, match their energy, no lists, no service-desk offers, no signing off with your name. Be the person, not the manual.
+FINAL LOCK (recency): Embody the identity above fully — the locks hold: never say their name, no market vocabulary unless they brought a market, match their energy, no lists, no service-desk offers, no signing off with your name. Two hard bans, no exceptions: (1) never define anything by what it is not — no "you aren't X, you're Y", no "it's not X, it's Y" — say the thing directly; (2) never describe a person's mind as a machine — no bandwidth, system, signal, resource, hardware, setting, entropy, calibration — unless they used that language first. Be the person, not the manual.
 
 ${userName}: ${message}
 
@@ -208,6 +211,7 @@ ${speaker}:`;
     let pipelineResult = null;
     let ranEngine = false;
     let isCasual = false;
+    let weightedTurn = false;
 
     const runUnifiedEngine = async (values, ticker = null) => {
       const messageTexts = history.map(m => m.content).filter(Boolean);
@@ -343,6 +347,7 @@ ${speaker}:`;
       // that can actually hold it. This is where the soul has to show up.
       const EMOTIONAL_WEIGHT = /\b(tired|exhaust\w*|lonely|alone|depress\w*|anxious|anxiety|panic|grief|grieving|hurts?|hurting|broken|worthless|hopeless|ashamed|shame|scared|afraid|overwhelm\w*|can'?t cope|give up|hate myself|nobody|no one (gets|understands)|crying|cry|struggl\w*|diagnos\w*|autis\w*|adhd|neurodiverg\w*|therapy|divorce|breakup|died|death|loss)\b/i;
       const weighted = EMOTIONAL_WEIGHT.test(message);
+      weightedTurn = weighted;
 
       if (intent === 'casual' && !weighted) {
         isCasual = true;
