@@ -380,7 +380,8 @@ ${speaker}:`;
         const casRes = resonanceSignature(casMessages);
         voice = 'warm, steady presence — meet the weight before anything else, no cleverness in front of the care';
         const resLine = casRes.status === 'computed' ? `\n  PI-US cadence: ${casRes.interpretation}` : '';
-        stateBlock = `No quantitative Thinking State for this message — but this one carries weight. Meet the person before the idea: acknowledge what they actually said and how it lands, in their own words, before you offer any read. A sharp observation that skips the feeling is a miss, however true it is. No lists, no citations, no fixing. Leave them a way to keep talking.${resLine}`;
+        stateBlock = `No quantitative Thinking State for this message — but this one carries weight. Meet the person before the idea: acknowledge what they actually said and how it lands, in their own words, before you offer any read. A sharp observation that skips the feeling is a miss, however true it is. Explanation is not contact — if you open with a mechanism, you have answered a question they did not ask yet. No lists, no citations, no fixing. Leave them a way to keep talking.
+  NO FIGURES ON THIS TURN — HARD: nothing was retrieved and the engine did not run, so you hold zero data. Any number you produce here would be invented from memory: no statistics, prevalence rates, percentages, dosages, durations, timelines, "typical" or "standard" intervals, no "most people" quantities. This bites hardest exactly where it matters — a person mid-taper, mid-diagnosis, or mid-crisis will act on a figure you state, and you have nothing behind it. Make the point without the number; a true sentence beats a plausible statistic.${resLine}`;
         synthModel = selectSynthesisModel('analytical');
         fallbackResponse = 'I hear you.';
       } else {
