@@ -8,6 +8,7 @@ import { resonanceSignature } from '../../shared/piusResonance.ts';
 import { anchorVerdict } from '../../shared/asiSpine.ts';
 import { buildPersona, buildPersonaRefresher } from '../../shared/persona.ts';
 import { noveltyDirective } from '../../shared/novelty.ts';
+import { assessStakes } from '../../shared/stakes.ts';
 
 // hex6Engine takes raw values directly — valuesToBits encodes "did the value
 // go up?" which works on any sequence (prices, returns, scores). No conversion
@@ -339,14 +340,16 @@ ${speaker}:`;
       if (userMemory?.triage_profile) { try { triageProfile = JSON.parse(userMemory.triage_profile); } catch (_e) { /* ignore */ } }
       const intent = await triage(message, (opts) => base44.integrations.Core.InvokeLLM({ ...opts, model: INTERPRETATION_MODEL }), lastTurns, triageProfile);
 
-      // Emotional weight is a VALUE turn, not chatter. Triage calls these
-      // "casual" (no ticker, no data) and they were landing on the cheap model
-      // with the compressed persona — which produced clever-but-cold replies
-      // that missed the person entirely. Weighted turns keep the conversational
-      // shape (no web fetch, no engine) but get the full persona and the model
-      // that can actually hold it. This is where the soul has to show up.
-      const EMOTIONAL_WEIGHT = /\b(tired|exhaust\w*|lonely|alone|depress\w*|anxious|anxiety|panic|grief|grieving|hurts?|hurting|broken|worthless|hopeless|ashamed|shame|scared|afraid|overwhelm\w*|can'?t cope|give up|hate myself|nobody|no one (gets|understands)|crying|cry|struggl\w*|diagnos\w*|autis\w*|adhd|neurodiverg\w*|therapy|divorce|breakup|died|death|loss)\b/i;
-      const weighted = EMOTIONAL_WEIGHT.test(message);
+      // SECOND ROUTING AXIS — stakes, not data-need. Triage answers "does this
+      // need fresh data?"; that answer must not also decide how much care the
+      // person gets. A life question needs no market data, so triage calls it
+      // casual — and the cheap model with the compressed persona was answering
+      // the most important messages this product receives. assessStakes reads
+      // the human dimension instead (see shared/stakes.ts) and keeps the
+      // conversational shape (no web fetch, no engine) while upgrading the
+      // persona tier and the model. Pure computation — no extra LLM call.
+      const stakes = assessStakes(message);
+      const weighted = stakes.high;
       weightedTurn = weighted;
 
       if (intent === 'casual' && !weighted) {
