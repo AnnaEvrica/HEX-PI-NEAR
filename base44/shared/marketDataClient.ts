@@ -11,6 +11,7 @@ const CRYPTO_MAP: Record<string, string> = {
   XRP: 'XRP-USD', ADA: 'ADA-USD', MATIC: 'MATIC-USD',
   LINK: 'LINK-USD', ATOM: 'ATOM-USD', AVAX: 'AVAX-USD', DOT: 'DOT-USD',
   LTC: 'LTC-USD', BNB: 'BNB-USD', UNI: 'UNI-USD',
+  NEAR: 'NEAR-USD', ALGO: 'ALGO-USD', XTZ: 'XTZ-USD',
 };
 
 export function resolveYahooTicker(raw: string): string {

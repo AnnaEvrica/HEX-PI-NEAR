@@ -18,10 +18,28 @@ export interface PerceptionLens {
   qualified_confidence: number | null;
   archetype_id: string;
   i_ching: ReturnType<typeof iChingForState>;
+  fine_structure_137: { available: boolean; lookback_bars: number; return: number | null; normalized_move: number | null; phase: 'upward' | 'downward' | 'neutral' | 'insufficient_history' };
 }
 
 function bitsFor(state: number) {
   return state.toString(2).padStart(6, '0').split('').map(Number);
+}
+
+function fineStructure137(closes: number[]) {
+  const lookback = 137;
+  if (closes.length < lookback) return { available: false, lookback_bars: lookback, return: null, normalized_move: null, phase: 'insufficient_history' as const };
+  const window = closes.slice(-lookback);
+  const logReturn = Math.log(window[window.length - 1] / window[0]);
+  const dailyLogReturns = window.slice(1).map((price, index) => Math.log(price / window[index]));
+  const avg = mean(dailyLogReturns);
+  const variance = mean(dailyLogReturns.map((value) => (value - avg) ** 2));
+  const denominator = Math.sqrt(variance) * Math.sqrt(dailyLogReturns.length);
+  const normalizedMove = denominator > 0 ? logReturn / denominator : 0;
+  return {
+    available: true, lookback_bars: lookback, return: Math.exp(logReturn) - 1,
+    normalized_move: normalizedMove,
+    phase: normalizedMove > 0.5 ? 'upward' as const : normalizedMove < -0.5 ? 'downward' as const : 'neutral' as const,
+  };
 }
 
 function momentumShape(state: number) {
@@ -40,6 +58,7 @@ export function classifyHybridArchetype(
   ctx: ChartContext | null,
   direction: 'UP' | 'DOWN',
   conviction = 0,
+  closes: number[] = [],
 ): PerceptionLens {
   const x = (state >> 4) & 3;
   const y = (state >> 2) & 3;
@@ -57,6 +76,7 @@ export function classifyHybridArchetype(
 
   const shape = momentumShape(state);
   const i_ching = iChingForState(state);
+  const fine_structure_137 = fineStructure137(closes);
   return {
     state, grid: { x, y, z, label: `${x}:${y}:${z}` }, momentum_shape: shape,
     structural_family: family, volume_regime: volume, value_location: location,
@@ -64,12 +84,13 @@ export function classifyHybridArchetype(
     // The ablation improved move quality, not directional hit rate. Preserve
     // conviction as raw HEX evidence; structural alignment is descriptive.
     qualified_confidence: null,
-    archetype_id: `H${i_ching.king_wen}|${family}|${shape}|${volume}|${location}`,
+    archetype_id: `H${i_ching.king_wen}|${family}|${shape}|${volume}|${location}|fs137_${fine_structure_137.phase}`,
     i_ching,
+    fine_structure_137,
   };
 }
 
-type Observation = { state: number; family: string; lens: string; correct: number; brier: number; signedMove: number; absoluteMove: number };
+type Observation = { state: number; family: string; lens: string; fineStructure137: string; correct: number; brier: number; signedMove: number; absoluteMove: number };
 
 function summarize(rows: Observation[], globalAccuracy: number) {
   if (!rows.length) return null;
@@ -112,12 +133,12 @@ export function runHybridArchetypeExperiment(series: ExperimentBarSet[]) {
           bars.closes.slice(0, i + 1), bars.highs.slice(0, i + 1),
           bars.lows.slice(0, i + 1), bars.volumes.slice(0, i + 1),
         );
-        const lens = classifyHybridArchetype(raw.state, ctx, direction === 1 ? 'UP' : 'DOWN', raw.personal_call_strength);
+        const lens = classifyHybridArchetype(raw.state, ctx, direction === 1 ? 'UP' : 'DOWN', raw.personal_call_strength, bars.closes.slice(0, i + 1));
         const realized = bars.closes[i + horizon] / bars.closes[i] - 1;
         const actual = realized > 0 ? 1 : realized < 0 ? -1 : 0;
         if (actual !== 0) {
           rows.push({
-            state: raw.state, family: lens.structural_family, lens: lens.confluence,
+            state: raw.state, family: lens.structural_family, lens: lens.confluence, fineStructure137: lens.fine_structure_137.phase,
             correct: direction === actual ? 1 : 0,
             brier: (pUp - (actual === 1 ? 1 : 0)) ** 2,
             signedMove: direction * realized, absoluteMove: Math.abs(realized),
@@ -138,6 +159,7 @@ export function runHybridArchetypeExperiment(series: ExperimentBarSet[]) {
       global: summarize(rows, globalAccuracy),
       perception_lenses: grouped(rows, (r) => r.lens, globalAccuracy),
       structural_families: grouped(rows, (r) => r.family, globalAccuracy),
+      fine_structure_137_regimes: grouped(rows.filter((r) => r.fineStructure137 !== 'insufficient_history'), (r) => r.fineStructure137, globalAccuracy),
       strongest_grid_cells: Object.fromEntries(rankedCells.slice(0, 10)),
       weakest_grid_cells: Object.fromEntries(rankedCells.slice(-10).reverse()),
     };

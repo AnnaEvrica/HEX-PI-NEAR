@@ -160,9 +160,9 @@ export function runPipeline(
 // Add the OHLCV perception lens without rewriting the frozen 64-state tables.
 // The next-move prediction remains visible; only independently corroborated
 // calls receive qualified confidence.
-export function applyChartPerception(result: Hex6PipelineResult, ctx: ChartContext | null): Hex6PipelineResult {
+export function applyChartPerception(result: Hex6PipelineResult, ctx: ChartContext | null, closes: number[] = []): Hex6PipelineResult {
   const perception = classifyHybridArchetype(
-    result.hex6.state, ctx, result.hex6.predicted_direction, result.hex6.personal_call_strength,
+    result.hex6.state, ctx, result.hex6.predicted_direction, result.hex6.personal_call_strength, closes,
   );
   const note = perception.prediction_status === 'STRUCTURE_ALIGNED'
     ? ` Perception lens: chart structure ALIGNS with the raw HEX next-move lean; this describes the market setup but does not raise directional confidence. Hybrid archetype ${perception.archetype_id}, grid ${perception.grid.label}.`

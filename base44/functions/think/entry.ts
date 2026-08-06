@@ -177,6 +177,8 @@ Deno.serve(async (req) => {
         if (pipelineResult.perception) {
           lines.push(`perception_lens: ${pipelineResult.perception.prediction_status} — ${pipelineResult.perception.structural_family} archetype in HEX grid ${pipelineResult.perception.grid.label}`);
           lines.push(`i_ching_state: ${pipelineResult.perception.i_ching.glyph} #${pipelineResult.perception.i_ching.king_wen}, ${pipelineResult.perception.i_ching.name} (${pipelineResult.perception.i_ching.chinese}); binary/Fu Xi index ${pipelineResult.perception.i_ching.fuxi_index}`);
+          const fs137 = pipelineResult.perception.fine_structure_137;
+          lines.push(`fine_structure_137: ${fs137.phase}${fs137.return == null ? ' — insufficient 137-bar history' : ` — ${(fs137.return * 100).toFixed(1)}% trailing move, volatility-normalized ${fs137.normalized_move?.toFixed(2)}`}`);
           lines.push('confidence_rule: keep HEX conviction raw — structural alignment is descriptive and does not increase directional confidence');
           lines.push('prediction_only: describe the next-move read and its confirmation/invalidation; no position advice unless explicitly requested');
         }
@@ -473,7 +475,7 @@ Return JSON with:
               // area off the same bars, then hand the model a second, independent
               // opinion on the engine's lean.
               chartCtx = buildChartContext(md.closes, md.highs, md.lows, md.volumes);
-              pipelineResult = applyChartPerception(pipelineResult, chartCtx);
+              pipelineResult = applyChartPerception(pipelineResult, chartCtx, md.closes);
               voice = REGISTER_VOICE[pipelineResult.pius.register] || defaultVoice;
               stateBlock = pipelineResult.pius.directive;
               const chartBlock = chartContextBlock(chartCtx, pipelineResult.hex6.predicted_direction);
@@ -536,7 +538,9 @@ Return JSON with:
     let finalResponse = visible || rawResponse;
     if (pipelineResult?.perception?.i_ching) {
       const hexagram = pipelineResult.perception.i_ching;
-      finalResponse = `${finalResponse}\n\n*HEX state archetype: ${hexagram.glyph} #${hexagram.king_wen} — ${hexagram.name} (${hexagram.chinese}); Fu Xi ${hexagram.fuxi_index}.*`;
+      const fs137 = pipelineResult.perception.fine_structure_137;
+      const lookbackNote = fs137.return == null ? '137-bar observation: insufficient history' : `137-bar observation: ${fs137.phase}, ${(fs137.return * 100).toFixed(1)}% trailing move`;
+      finalResponse = `${finalResponse}\n\n*HEX state archetype: ${hexagram.glyph} #${hexagram.king_wen} — ${hexagram.name} (${hexagram.chinese}); Fu Xi ${hexagram.fuxi_index}. ${lookbackNote}.*`;
     }
     // sourcesBlock is already gated upstream (only set when the user asked for
     // sources or the retrieval step judged the answer citation-worthy, and only
