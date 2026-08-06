@@ -1,0 +1,97 @@
+import { predictFromSequence } from './hex6Engine.ts';
+import { buildChartContext } from './chartContext.ts';
+import { classifyHybridArchetype } from './hybridArchetypes.ts';
+import { OnlineArchetypeLearner } from './onlineArchetypeLearner.ts';
+
+export interface HistoricalBars {
+  ticker: string;
+  closes: number[];
+  highs: number[];
+  lows: number[];
+  volumes: number[];
+}
+
+type Prediction = { rawDirection: number; adjustedDirection: number; actualDirection: number; rawPUp: number; adjustedPUp: number; conviction: number; support: number; weight: number; };
+const mean = (xs: number[]) => xs.length ? xs.reduce((sum, value) => sum + value, 0) / xs.length : null;
+const round = (value: number | null, decimals = 4) => value == null ? null : Number(value.toFixed(decimals));
+
+function summarize(rows: Prediction[]) {
+  const valid = rows.filter((row) => row.actualDirection !== 0);
+  const rawAccuracy = mean(valid.map((row) => row.rawDirection === row.actualDirection ? 1 : 0));
+  const adjustedAccuracy = mean(valid.map((row) => row.adjustedDirection === row.actualDirection ? 1 : 0));
+  const rawBrier = mean(valid.map((row) => (row.rawPUp - (row.actualDirection === 1 ? 1 : 0)) ** 2));
+  const adjustedBrier = mean(valid.map((row) => (row.adjustedPUp - (row.actualDirection === 1 ? 1 : 0)) ** 2));
+  return {
+    predictions: valid.length,
+    raw_directional_accuracy: round(rawAccuracy),
+    archetype_adjusted_directional_accuracy: round(adjustedAccuracy),
+    directional_accuracy_lift: round(rawAccuracy == null || adjustedAccuracy == null ? null : adjustedAccuracy - rawAccuracy),
+    raw_brier: round(rawBrier),
+    archetype_adjusted_brier: round(adjustedBrier),
+    avg_archetype_support: round(mean(valid.map((row) => row.support))),
+    avg_archetype_weight: round(mean(valid.map((row) => row.weight))),
+    avg_hex_conviction_unchanged: round(mean(valid.map((row) => row.conviction))),
+  };
+}
+
+export function runArchetypeWalkForward(bars: HistoricalBars, trainRatio = 0.6) {
+  const start = Math.max(120, Math.floor(bars.closes.length * trainRatio));
+  const learner = new OnlineArchetypeLearner();
+  const rows: Prediction[] = [];
+  const early: Prediction[] = [];
+  const late: Prediction[] = [];
+
+  for (let index = start; index + 1 < bars.closes.length; index++) {
+    const raw = predictFromSequence('BTC', bars.closes.slice(index - 6, index + 1));
+    const context = buildChartContext(bars.closes.slice(0, index + 1), bars.highs.slice(0, index + 1), bars.lows.slice(0, index + 1), bars.volumes.slice(0, index + 1));
+    const lens = classifyHybridArchetype(raw.state, context, raw.predicted_direction, raw.personal_call_strength);
+    const adjustment = learner.adjust(raw.p_up, lens);
+    const realized = bars.closes[index + 1] / bars.closes[index] - 1;
+    const actualDirection = realized > 0 ? 1 : realized < 0 ? -1 : 0;
+    if (actualDirection === 0) continue;
+    const row = {
+      rawDirection: adjustment.rawDirection,
+      adjustedDirection: adjustment.adjustedDirection,
+      actualDirection,
+      rawPUp: raw.p_up,
+      adjustedPUp: adjustment.adjustedPUp,
+      conviction: raw.personal_call_strength,
+      support: adjustment.support,
+      weight: adjustment.archetypeWeight,
+    };
+    rows.push(row);
+    if (rows.length <= 60) early.push(row); else late.push(row);
+    learner.learn(adjustment, actualDirection as -1 | 1);
+  }
+
+  return {
+    ticker: bars.ticker,
+    historical_bars: bars.closes.length,
+    held_out_bars: rows.length,
+    learning_protocol: 'empty archetype ledger at held-out start; predict first; update only after the next realized daily close',
+    no_confidence_mutation: true,
+    direction_ratio_only: true,
+    learning_activity: { adjusted_predictions: learner.adjustments, direction_flips: learner.directionFlips },
+    metrics: summarize(rows),
+    maturation_check: { first_60_predictions: summarize(early), later_predictions: summarize(late) },
+  };
+}
+
+export function summarizeWalkForward(results: ReturnType<typeof runArchetypeWalkForward>[]) {
+  const weighted = (field: string) => {
+    const total = results.reduce((sum, result) => sum + result.metrics.predictions, 0);
+    if (!total) return null;
+    return results.reduce((sum, result) => sum + (result.metrics[field] ?? 0) * result.metrics.predictions, 0) / total;
+  };
+  return {
+    assets: results.length,
+    predictions: results.reduce((sum, result) => sum + result.metrics.predictions, 0),
+    raw_directional_accuracy: round(weighted('raw_directional_accuracy')),
+    archetype_adjusted_directional_accuracy: round(weighted('archetype_adjusted_directional_accuracy')),
+    directional_accuracy_lift: round(weighted('directional_accuracy_lift')),
+    raw_brier: round(weighted('raw_brier')),
+    archetype_adjusted_brier: round(weighted('archetype_adjusted_brier')),
+    direction_flips: results.reduce((sum, result) => sum + result.learning_activity.direction_flips, 0),
+    adjusted_predictions: results.reduce((sum, result) => sum + result.learning_activity.adjusted_predictions, 0),
+  };
+}
