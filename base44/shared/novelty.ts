@@ -97,11 +97,21 @@ const BANNED_TELLS = [
  *                  never cost warmth, so the texture is constrained to the
  *                  human registers rather than the dry/clipped ones.
  */
+// Light social turns — greetings, acknowledgments, quick thanks. Routing one
+// of these through an approach vector ("name the shape of the absence") makes
+// the model manufacture cryptic depth out of a two-word hello. These turns
+// get NO vector: just answer like a person.
+const LIGHT_TURN = /^(hi+|hey+|hello+|yo|sup|howdy|gm|gn|good (morning|evening|night|afternoon)|what'?s up|how are you|how'?s it going|thanks?|thank you|thx|ok(ay)?|cool|nice|sure|sounds good|got it|lol|haha|bye|goodbye|later)\b[\s\S]{0,30}$/i;
+
 export function noveltyDirective(
   message: string,
   history: Array<{ role: string; content: string }> = [],
   weighted = false,
 ): string {
+  if (LIGHT_TURN.test(message.trim())) {
+    return `APPROACH: This is a light social turn — a greeting or quick acknowledgment. Do not manufacture depth, mystery, or analysis out of it. Answer the way a warm, quick person actually would: one short, natural, plainly worded line. Nothing cryptic, nothing performed. Never say their name back to them.`;
+  }
+
   // Hash on the message plus turn depth so a repeated question later in a
   // conversation still gets a different route than it did the first time.
   const seed = hash(`${message}::${history.length}`);
