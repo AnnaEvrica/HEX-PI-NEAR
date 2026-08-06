@@ -489,7 +489,7 @@ Return JSON with:
               const chartBlock = chartContextBlock(chartCtx, pipelineResult.hex6.predicted_direction);
               if (chartBlock) stateBlock = `${stateBlock}\n\n${chartBlock}`;
               if (md.latestPrice != null) {
-                const journalBlock = await runPredictionJournal(base44, item.requestedTicker, md.latestPrice, pipelineResult, user.email);
+                const journalBlock = await runPredictionJournal(base44, item.requestedTicker, md.latestPrice, pipelineResult, user.email, adaptive.audit);
                 if (journalBlock) stateBlock = `${stateBlock}\n\n${journalBlock}`;
               }
             }

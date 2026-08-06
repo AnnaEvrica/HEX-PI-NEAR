@@ -11,12 +11,12 @@ import { runArchetypeWalkForward, type HistoricalBars } from './archetypeWalkFor
 export function applyPromotedAdaptivePolicy(result: Hex6PipelineResult, bars: HistoricalBars) {
   const audit = runArchetypeWalkForward(bars);
   const adjustment = audit.current_adjustment;
-  if (!adjustment) return { result, policy: audit.promotion };
+  if (!adjustment) return { result, policy: audit.promotion, audit };
 
   if (audit.promotion.live) {
     const hex6 = { ...result.hex6, p_up: adjustment.adjustedPUp, predicted_direction: adjustment.adjustedDirection === 1 ? 'UP' : 'DOWN' };
     const pius = calibrate(hex6, result.resonance.status === 'computed' ? result.resonance : null);
-    return { result: { ...result, hex6, pius }, policy: audit.promotion, applied: 'direction_and_calibration' };
+    return { result: { ...result, hex6, pius }, policy: audit.promotion, audit, applied: 'direction_and_calibration' };
   }
 
   // Time-varying directional right: the learner moves the call only while its
@@ -26,7 +26,7 @@ export function applyPromotedAdaptivePolicy(result: Hex6PipelineResult, bars: Hi
   if (audit.directional_trust?.live) {
     const hex6 = { ...result.hex6, p_up: adjustment.adjustedPUp, predicted_direction: adjustment.liveDirection === 1 ? 'UP' : 'DOWN', personal_call_strength: Math.abs(adjustment.adjustedPUp - 0.5) * 2 };
     const pius = calibrate(hex6, result.resonance.status === 'computed' ? result.resonance : null);
-    return { result: { ...result, hex6, pius }, policy: audit.promotion, trust: audit.directional_trust, applied: 'trusted_direction_and_calibration' };
+    return { result: { ...result, hex6, pius }, policy: audit.promotion, audit, trust: audit.directional_trust, applied: 'trusted_direction_and_calibration' };
   }
 
   if (audit.promotion.calibration.live) {
@@ -37,8 +37,8 @@ export function applyPromotedAdaptivePolicy(result: Hex6PipelineResult, bars: Hi
     const pUp = up ? Math.max(0.5, adjustment.adjustedPUp) : Math.min(0.5, adjustment.adjustedPUp);
     const hex6 = { ...result.hex6, p_up: pUp, personal_call_strength: Math.abs(pUp - 0.5) * 2 };
     const pius = calibrate(hex6, result.resonance.status === 'computed' ? result.resonance : null);
-    return { result: { ...result, hex6, pius }, policy: audit.promotion, applied: 'calibration_only' };
+    return { result: { ...result, hex6, pius }, policy: audit.promotion, audit, applied: 'calibration_only' };
   }
 
-  return { result, policy: audit.promotion, applied: 'none' };
+  return { result, policy: audit.promotion, audit, applied: 'none' };
 }
