@@ -83,5 +83,5 @@ export async function persistLedger(base44: any, rows: any[], ticker: string, le
     const SR = base44.asServiceRole.entities.ArchetypeLedger;
     if (existing?.id) await SR.update(existing.id, payload);
     else await SR.create(payload);
-  } catch { /* never block a reply on ledger persistence */ }
+  } catch (e) { console.error('persistLedger failed:', (e as any)?.message || e); }
 }
