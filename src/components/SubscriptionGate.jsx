@@ -54,14 +54,15 @@ export default function SubscriptionGate({ children }) {
 
         let data;
         let lastErr = null;
-        // Retry up to 6× on auth errors — mobile token propagation can lag 10+
-        // seconds behind the frontend after a full-page reload redirect.
-        for (let attempt = 0; attempt < 6; attempt++) {
+        // Poll on auth errors at a fixed 1.5s — mobile token propagation can lag
+        // 10+ seconds, but fast polling means access resumes within ~1.5s of the
+        // token landing instead of waiting out an escalating backoff.
+        for (let attempt = 0; attempt < 12; attempt++) {
           try { data = await fetchStatus(); lastErr = null; break; }
           catch (e) {
             lastErr = e;
-            if (AUTH_ERR.test(e?.message || '') && attempt < 5) {
-              await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)));
+            if (AUTH_ERR.test(e?.message || '') && attempt < 11) {
+              await new Promise((r) => setTimeout(r, 1500));
               continue;
             }
             break;

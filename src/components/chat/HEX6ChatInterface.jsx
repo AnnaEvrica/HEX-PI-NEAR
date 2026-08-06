@@ -11,7 +11,7 @@ export default function HEX6ChatInterface() {
   const welcomeMessage = {
     id: 'welcome',
     role: 'assistant',
-    content: `I'm Hex.\n\nI read the data underneath a thing and tell you where the weight actually sits — a market, a number, or an idea you can't quite shake. Same either way.\n\nWhat's on your mind?`,
+    content: `I'm Hex.\n\nBring me anything — a market, a decision, a question you've been circling. I'll tell you what the data actually supports, and how strongly.\n\nWhat's on your mind?`,
   };
 
   // Loading copy — only "Thinking..." for fast chat replies.

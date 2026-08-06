@@ -42,14 +42,17 @@ const AppExperience = () => {
       const authPending = new URLSearchParams(window.location.search).get('checkout') === 'success'
         || !!sessionStorage.getItem('hex6_checkout_pending')
         || !!sessionStorage.getItem('hex6_auth_pending');
-      const maxRetries = authPending ? 5 : 3;
+      // Fixed 1.2s polling — same total recovery window as before, but success
+      // is detected within ~1.2s of the token landing instead of after a
+      // multi-second backoff step (this was the mobile "long load" after login).
+      const maxRetries = authPending ? 12 : 4;
       if (authRetryCount < maxRetries) {
         const timer = setTimeout(() => {
           const next = authRetryCount + 1;
           sessionStorage.setItem('hex6_auth_retry_count', String(next));
           setAuthRetryCount(next);
           checkAuth();
-        }, 1500 * (authRetryCount + 1));
+        }, 1200);
         return () => clearTimeout(timer);
       }
     }
@@ -61,7 +64,7 @@ const AppExperience = () => {
     || !!sessionStorage.getItem('hex6_checkout_pending')
     || !!sessionStorage.getItem('hex6_auth_pending');
 
-  if (authRetryCount < (authPending ? 5 : 3) && (isNotRegistered || !user)) {
+  if (authRetryCount < (authPending ? 12 : 4) && (isNotRegistered || !user)) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-background">
         <div className="w-8 h-8 border-4 border-border border-t-accent rounded-full animate-spin"></div>
