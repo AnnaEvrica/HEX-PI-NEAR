@@ -13,6 +13,7 @@ import { buildChartContext, chartContextBlock, confluenceAgrees } from '../../sh
 import { buildCoinStory, marketStoryBlock, marketStorySummary } from '../../shared/marketStory.ts';
 import { applyPromotedAdaptivePolicy } from '../../shared/adaptivePolicy.ts';
 import { runPredictionJournal } from '../../shared/predictionJournal.ts';
+import { loadLedgerRows, priorForTicker, priorSummary, persistLedger } from '../../shared/archetypeLedger.ts';
 
 // hex6Engine takes raw values directly — valuesToBits encodes "did the value
 // go up?" which works on any sequence (prices, returns, scores). No conversion
@@ -470,12 +471,16 @@ Return JSON with:
             try { return { requestedTicker: ticker, data: await fetchYahooReturns(ticker, 5475) }; } catch { return null; }
           }));
           const usableMarkets = marketData.filter((item) => item?.data?.closes?.length >= 137);
+          // One read of his accumulated memory serves every asset in this turn.
+          const ledgerRows = await loadLedgerRows(base44);
           for (const item of usableMarkets) {
             const md = item.data;
             const basePipeline = runPipeline(md.closes, item.requestedTicker, history.map((turn) => turn.content).filter(Boolean));
             const adaptive = applyPromotedAdaptivePolicy(basePipeline, {
               ticker: item.requestedTicker, closes: md.closes, highs: md.highs, lows: md.lows, volumes: md.volumes,
-            });
+            }, priorForTicker(ledgerRows, item.requestedTicker));
+            // What this asset just taught him outlives the conversation.
+            await persistLedger(base44, ledgerRows, item.requestedTicker, adaptive.audit.ledger, adaptive.audit.held_out_bars);
             const coinContext = buildChartContext(md.closes, md.highs, md.lows, md.volumes);
             const perceived = applyChartPerception(adaptive.result, coinContext, md.closes);
             activeStories.push(buildCoinStory(item.requestedTicker, perceived, coinContext, md.closes));
@@ -491,6 +496,10 @@ Return JSON with:
               if (md.latestPrice != null) {
                 const journalBlock = await runPredictionJournal(base44, item.requestedTicker, md.latestPrice, pipelineResult, user.email, adaptive.audit);
                 if (journalBlock) stateBlock = `${stateBlock}\n\n${journalBlock}`;
+                const inherited = priorSummary(ledgerRows, item.requestedTicker);
+                if (inherited.assets > 0) {
+                  stateBlock = `${stateBlock}\n\nINHERITED MEMORY (what you carry into this read from other assets you have lived):\n  carried from: ${inherited.tickers.join(', ')} — ${inherited.bars} bars of lived outcomes across ${inherited.assets} asset${inherited.assets === 1 ? '' : 's'}\n  weight: discounted to a quarter — having lived a state elsewhere is real evidence, but it is not the same as having lived it here\n  scope: this memory shapes today's read only. Your scored record above was earned without it, so never credit it for past accuracy.`;
+                }
               }
             }
           }

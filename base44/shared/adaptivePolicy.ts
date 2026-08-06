@@ -8,8 +8,8 @@ import { runArchetypeWalkForward, type HistoricalBars } from './archetypeWalkFor
 //                 so it sizes certainty live while the directional call stays
 //                 exactly as HEX called it. This is what the walk-forward
 //                 actually proved: better probabilities, not a better lean.
-export function applyPromotedAdaptivePolicy(result: Hex6PipelineResult, bars: HistoricalBars) {
-  const audit = runArchetypeWalkForward(bars);
+export function applyPromotedAdaptivePolicy(result: Hex6PipelineResult, bars: HistoricalBars, prior = null) {
+  const audit = runArchetypeWalkForward(bars, 0.6, prior);
   const adjustment = audit.current_adjustment;
   if (!adjustment) return { result, policy: audit.promotion, audit };
 

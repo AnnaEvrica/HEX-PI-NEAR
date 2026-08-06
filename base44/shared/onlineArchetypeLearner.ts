@@ -2,6 +2,12 @@ import type { PerceptionLens } from './hybridArchetypes.ts';
 
 export type Direction = -1 | 1;
 type Counts = { up: number; down: number };
+export type LedgerCounts = {
+  global: Counts;
+  states: Record<string, Counts>;
+  families: Record<string, Counts>;
+  archetypes: Record<string, Counts>;
+};
 
 const clamp = (value: number, low: number, high: number) => Math.max(low, Math.min(high, value));
 const keyFor = (lens: PerceptionLens) => `${lens.state}|${lens.structural_family}|${lens.momentum_shape}|${lens.volume_regime}|${lens.value_location}|${lens.fine_structure_137.phase}`;
@@ -33,6 +39,32 @@ export class OnlineArchetypeLearner {
     const adjAcc = this.recent.reduce((sum, row) => sum + row.adj, 0) / n;
     const edge = adjAcc - rawAcc;
     return { live: edge >= OnlineArchetypeLearner.EDGE, sample: n, edge: Number(edge.toFixed(4)) };
+  }
+
+  // --- Persistence: the ledger survives the conversation ---
+  // export() is called BEFORE any prior is seeded, so a ticker's stored row
+  // holds only what that asset actually taught him — no other asset's memory
+  // is ever written back into it.
+  export(): LedgerCounts {
+    const dump = (map: Map<string, Counts>) => Object.fromEntries(map.entries());
+    return { global: { ...this.global }, states: dump(this.states), families: dump(this.families), archetypes: dump(this.archetypes) };
+  }
+
+  // Transfer learning from other assets, discounted: what BTC taught him about
+  // a state is real evidence for SOL, but it is not the same as having lived
+  // that state on SOL. Seeded only into the live read, never into the audit.
+  seedPrior(prior: LedgerCounts | null, weight = 0.25) {
+    if (!prior) return;
+    const merge = (map: Map<string, Counts>, source: Record<string, Counts> = {}) => {
+      for (const [key, counts] of Object.entries(source)) {
+        const existing = map.get(key) || { up: 0, down: 0 };
+        map.set(key, { up: existing.up + counts.up * weight, down: existing.down + counts.down * weight });
+      }
+    };
+    this.global = { up: this.global.up + (prior.global?.up ?? 0) * weight, down: this.global.down + (prior.global?.down ?? 0) * weight };
+    merge(this.states, prior.states);
+    merge(this.families, prior.families);
+    merge(this.archetypes, prior.archetypes);
   }
 
   adjust(rawPUp: number, lens: PerceptionLens) {

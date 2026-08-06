@@ -1,7 +1,7 @@
 import { mapTickerToDomain, applySelfCalibration } from './hex6Pipeline.ts';
 import { buildChartContext } from './chartContext.ts';
 import { classifyHybridArchetype } from './hybridArchetypes.ts';
-import { OnlineArchetypeLearner } from './onlineArchetypeLearner.ts';
+import { OnlineArchetypeLearner, type LedgerCounts } from './onlineArchetypeLearner.ts';
 
 export interface HistoricalBars {
   ticker: string;
@@ -55,7 +55,7 @@ function summarize(rows: Prediction[]) {
   };
 }
 
-export function runArchetypeWalkForward(bars: HistoricalBars, trainRatio = 0.6) {
+export function runArchetypeWalkForward(bars: HistoricalBars, trainRatio = 0.6, prior: LedgerCounts | null = null) {
   const start = Math.max(120, Math.floor(bars.closes.length * trainRatio));
   const learner = new OnlineArchetypeLearner();
   const rows: Prediction[] = [];
@@ -93,9 +93,16 @@ export function runArchetypeWalkForward(bars: HistoricalBars, trainRatio = 0.6) 
   const { hex6: currentHex } = applySelfCalibration(mapTickerToDomain(bars.ticker), bars.closes);
   const currentContext = buildChartContext(bars.closes, bars.highs, bars.lows, bars.volumes);
   const currentLens = classifyHybridArchetype(currentHex.state, currentContext, currentHex.predicted_direction, currentHex.personal_call_strength, bars.closes);
+  // Export FIRST — this asset's row stores only what this asset taught him.
+  // Then seed the cross-asset prior, so inherited memory shapes today's live
+  // read only, never the held-out rows the metrics above were scored on.
+  const ledger = learner.export();
+  learner.seedPrior(prior);
   const currentAdjustment = learner.adjust(currentHex.p_up, currentLens);
   return {
     ticker: bars.ticker,
+    ledger,
+    prior_applied: prior != null,
     historical_bars: bars.closes.length,
     held_out_bars: rows.length,
     learning_protocol: 'empty archetype ledger at held-out start; predict first; update only after the next realized daily close',
