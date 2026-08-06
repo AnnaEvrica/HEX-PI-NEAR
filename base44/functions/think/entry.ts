@@ -9,6 +9,7 @@ import { anchorVerdict } from '../../shared/asiSpine.ts';
 import { buildPersona, buildPersonaRefresher } from '../../shared/persona.ts';
 import { noveltyDirective } from '../../shared/novelty.ts';
 import { assessStakes } from '../../shared/stakes.ts';
+import { buildChartContext, chartContextBlock, confluenceAgrees } from '../../shared/chartContext.ts';
 
 // hex6Engine takes raw values directly — valuesToBits encodes "did the value
 // go up?" which works on any sequence (prices, returns, scores). No conversion
@@ -210,6 +211,10 @@ ${speaker}:`;
       balanced: 'stoic, humble genius — state the lean plainly, moderate conviction without overclaiming',
     };
     let pipelineResult = null;
+    // The confluence layer (chartContext.ts) — volume, averages, levels and
+    // value area computed from the same OHLCV fetch. Independent of the engine
+    // by design: it corroborates or contradicts the lean, never replaces it.
+    let chartCtx = null;
     let ranEngine = false;
     let isCasual = false;
     let weightedTurn = false;
@@ -298,6 +303,14 @@ ${speaker}:`;
             { id: 'high_conviction', kind: 'statistical', check: 'personal_call_strength >= confidence_cutoff', agrees: hex6.high_conviction, evidence_ref: 'Hex6Output.high_conviction', weight: 0.25 },
             { id: 'conviction_level', kind: 'statistical', check: 'personal_call_strength >= 0.3', agrees: conf >= 0.3, evidence_ref: 'Hex6Output.personal_call_strength', weight: 0.25 },
           ];
+          // Confluence validator — the chart structure gets a vote on the spine.
+          // Persistent disagreement between the momentum engine and real volume/
+          // level structure is exactly the drift signal the spine exists to catch,
+          // and it accumulates for nightly calibration to score.
+          const chartAgrees = confluenceAgrees(chartCtx, hex6.predicted_direction);
+          if (chartAgrees !== null) {
+            validators.push({ id: 'chart_confluence', kind: 'structural', check: 'volume/level/moving-average structure agrees with engine direction', agrees: chartAgrees, evidence_ref: `ChartContext.bias=${chartCtx.bias} trend=${chartCtx.trend} relvol=${chartCtx.relative_volume?.toFixed(2) ?? 'n/a'}`, weight: 0.5 });
+          }
           const content = {
             verdict_id: state_id,
             query: message.slice(0, 500),
@@ -450,6 +463,12 @@ Return JSON with:
               // total trust failure. The Yahoo close is the only price of
               // record; every level the model states must derive from it.
               if (md.latestPrice != null) contextPriceLine = `${tickerHit[1].toUpperCase()} last close: $${md.latestPrice.toFixed(2)} (${md.dataPoints} daily bars, 2yr window). PRICE AUTHORITY: this close is the ONLY valid current price. Any price in the retrieved data below that disagrees with it is stale — ignore it. Derive every entry, stop, and target from this close; never quote a level that contradicts it.`;
+              // Confluence: read volume, averages, prior levels and the value
+              // area off the same bars, then hand the model a second, independent
+              // opinion on the engine's lean.
+              chartCtx = buildChartContext(md.closes, md.highs, md.lows, md.volumes);
+              const chartBlock = chartContextBlock(chartCtx, pipelineResult?.hex6?.predicted_direction);
+              if (chartBlock) stateBlock = `${stateBlock}\n\n${chartBlock}`;
             }
           } catch (e) { /* fall through to web-fetch series */ }
         }

@@ -35,9 +35,23 @@ export async function fetchYahooReturns(rawTicker: string, lookbackDays = 730) {
   const json = await res.json();
   const result = json?.chart?.result?.[0];
   if (!result) throw new Error(`No data for ${ticker}`);
-  const closes = (result.indicators?.quote?.[0]?.close || []).filter(
-    (c: number | null) => c !== null && c !== undefined,
-  ) as number[];
+  // Keep the bars aligned: filter on close but carry high/low/volume for the
+  // same index, so the chart-structure layer reads a coherent OHLCV series
+  // instead of four independently-filtered arrays.
+  const q = result.indicators?.quote?.[0] || {};
+  const rawCloses = (q.close || []) as (number | null)[];
+  const closes: number[] = [];
+  const highs: number[] = [];
+  const lows: number[] = [];
+  const volumes: number[] = [];
+  for (let i = 0; i < rawCloses.length; i++) {
+    const c = rawCloses[i];
+    if (c === null || c === undefined) continue;
+    closes.push(c);
+    highs.push(q.high?.[i] ?? c);
+    lows.push(q.low?.[i] ?? c);
+    volumes.push(q.volume?.[i] ?? 0);
+  }
   const returns: number[] = [];
   for (let i = 1; i < closes.length; i++) {
     if (closes[i] && closes[i - 1]) returns.push(Math.log(closes[i] / closes[i - 1]));
@@ -45,6 +59,9 @@ export async function fetchYahooReturns(rawTicker: string, lookbackDays = 730) {
   return {
     ticker,
     closes,
+    highs,
+    lows,
+    volumes,
     returns,
     latestPrice: closes[closes.length - 1] ?? null,
     dataPoints: closes.length,
