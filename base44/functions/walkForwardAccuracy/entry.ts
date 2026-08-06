@@ -34,6 +34,7 @@ export default async function(req: Request): Promise<Response> {
     }, trainRatio));
 
     return Response.json({
+      promotion_verdicts: Object.fromEntries(results.map((result) => [result.ticker, { direction_live: result.promotion.live, calibration_live: result.promotion.calibration.live, brier_improvement: result.promotion.brier_improvement }])),
       mode: 'PREQUENTIAL_ARCHETYPE_WALK_FORWARD',
       data_source: 'Yahoo Finance daily OHLCV',
       protocol: {
@@ -42,10 +43,12 @@ export default async function(req: Request): Promise<Response> {
         rule: 'Each prediction sees only bars available at that timestamp. Its archetype ledger updates after, never before, the realized next daily close.',
         confidence: 'HEX personal_call_strength is recorded unchanged and never used as an archetype learning target or gate.',
         adjustment: 'All observed structural tools (HEX state, family, momentum shape, volume regime, value location, and 137-bar phase) may blend into directional probability through global → family → state → full-archetype shrinkage; direction may change only when the adjusted ratio crosses 50%.',
+        live_calibration_promotion: 'Learned probability is live per asset when the walk-forward shows at least 400 predictions, a Brier improvement of 0.002 or better, and a final-quarter Brier that still improves. It sizes certainty only; the HEX directional call is never moved, and a contrary ledger pulls the read toward 50% rather than inverting it.',
         live_promotion: 'Adaptive direction is live only when a per-asset walk-forward clears all pre-registered gates: at least 400 predictions, +1.5 percentage-point accuracy lift, at least 0.002 Brier improvement, and no final-quarter accuracy deterioration. HEX conviction remains unchanged.',
         fine_structure_137: 'A fixed 137-calendar-bar trailing log-return observation is a structural archetype input. It never changes HEX conviction; it may influence the adaptive directional ratio only after the complete promotion gate clears. Staking yield is excluded; results are USD spot-price direction only.'
       },
       aggregate: summarizeWalkForward(results),
+      promotion_verdicts: Object.fromEntries(results.map((result) => [result.ticker, { direction_live: result.promotion.live, calibration_live: result.promotion.calibration.live, brier_improvement: result.promotion.brier_improvement }])),
       asset_summary: results.map((result) => ({
         ticker: result.ticker,
         predictions: result.metrics.predictions,

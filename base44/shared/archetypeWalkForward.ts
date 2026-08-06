@@ -20,7 +20,16 @@ function promotionGate(metrics: ReturnType<typeof summarize>, recent: ReturnType
   const brierGain = metrics.raw_brier != null && metrics.archetype_adjusted_brier != null ? metrics.raw_brier - metrics.archetype_adjusted_brier : -1;
   const stable = recent.archetype_adjusted_directional_accuracy != null && recent.raw_directional_accuracy != null && recent.archetype_adjusted_directional_accuracy >= recent.raw_directional_accuracy;
   const rules = { minimum_predictions: metrics.predictions >= 400, minimum_accuracy_lift: lift >= 0.015, calibration_improves: brierGain >= 0.002, final_quarter_stable: stable };
-  return { ...rules, live: Object.values(rules).every(Boolean), accuracy_lift: round(lift), brier_improvement: round(brierGain) };
+  // Two separate verdicts from one audit. Direction is the strict gate above.
+  // Calibration is its own earned right: when the learned ledger measurably
+  // sharpens probability (Brier) on enough held-out bars, that knowledge goes
+  // live as certainty sizing — without ever moving the directional call.
+  const recentBrierGain = recent.raw_brier != null && recent.archetype_adjusted_brier != null ? recent.raw_brier - recent.archetype_adjusted_brier : -1;
+  const calibrationRules = { minimum_predictions: metrics.predictions >= 400, brier_improves: brierGain >= 0.002, final_quarter_brier_holds: recentBrierGain > 0 };
+  return {
+    ...rules, live: Object.values(rules).every(Boolean), accuracy_lift: round(lift), brier_improvement: round(brierGain),
+    calibration: { ...calibrationRules, live: Object.values(calibrationRules).every(Boolean), final_quarter_brier_improvement: round(recentBrierGain) },
+  };
 }
 
 function summarize(rows: Prediction[]) {
