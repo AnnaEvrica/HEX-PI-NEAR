@@ -3,6 +3,7 @@
 // calls, no persistence, and no fitted parameters.
 import { predictFromSequence } from './hex6Engine.ts';
 import { buildChartContext, confluenceAgrees } from './chartContext.ts';
+import { runHybridArchetypeExperiment } from './hybridArchetypes.ts';
 
 const round = (x: number | null, n = 4) => x == null || !Number.isFinite(x) ? null : Number(x.toFixed(n));
 const mean = (xs: number[]) => xs.length ? xs.reduce((s, x) => s + x, 0) / xs.length : 0;
@@ -118,8 +119,14 @@ export function runConfluenceExperiment(series: ExperimentBarSet[], frictionBps 
           }
         }
 
-        // Update calibration only after this prediction has been scored, so no future leakage.
-        if (horizon === 1 && actualDirection !== 0) rawOutcomes.push(rawDirection === actualDirection ? 1 : 0);
+        // Update calibration only after this prediction has been scored. The
+        // calibration target is always the next daily move, including inside
+        // the non-overlapping three-day evaluation.
+        const nextDayDirection = bars.closes[i + 1] > bars.closes[i] ? 1 : bars.closes[i + 1] < bars.closes[i] ? -1 : 0;
+        if (nextDayDirection !== 0) {
+          rawOutcomes.push(rawDirection === nextDayDirection ? 1 : 0);
+          if (rawOutcomes.length > 30) rawOutcomes.shift();
+        }
       }
 
       assetSummary[bars.ticker] = Object.fromEntries(VARIANTS.map((v) => [v, metrics(local[v], horizon, [], local[v].filter((x) => x !== 0).length)]));
@@ -158,6 +165,7 @@ export function runConfluenceExperiment(series: ExperimentBarSet[], frictionBps 
     };
   }
 
+  const archetypes = runHybridArchetypeExperiment(series);
   return {
     design: {
       universe: series.map((s) => s.ticker), horizons: [1, 3], out_of_sample: 'final 40%',
@@ -170,5 +178,6 @@ export function runConfluenceExperiment(series: ExperimentBarSet[], frictionBps 
       safeguards: ['no future data in signals', 'non-overlapping 3-day outcomes', 'no fitted thresholds', 'production remains unchanged'],
     },
     horizons: horizonResults,
+    archetypes,
   };
 }

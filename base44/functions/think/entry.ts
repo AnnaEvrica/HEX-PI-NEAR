@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
-import { runPipeline, extractNumberSeries } from '../../shared/hex6Pipeline.ts';
+import { runPipeline, extractNumberSeries, applyChartPerception } from '../../shared/hex6Pipeline.ts';
 import { filterSourcesBlock, updateMemory } from '../../shared/chatHelpers.ts';
 import { fetchYahooReturns } from '../../shared/marketDataClient.ts';
 import { selectSynthesisModel, INTERPRETATION_MODEL, adaptVoiceForModel } from '../../shared/modelRouter.ts';
@@ -174,6 +174,11 @@ Deno.serve(async (req) => {
           `user_cadence: ${resonance?.status === 'computed' ? 'detectable rhythm — factor phrasing pattern into understanding' : 'naturally varied — no strong periodicity'}`,
         ];
         if (calibration?.anti_predictive) lines.push('regime_flag: anti-predictive — engine lean systematically wrong, invert directional confidence');
+        if (pipelineResult.perception) {
+          lines.push(`perception_lens: ${pipelineResult.perception.prediction_status} — ${pipelineResult.perception.structural_family} archetype in HEX grid ${pipelineResult.perception.grid.label}`);
+          lines.push('confidence_rule: keep HEX conviction raw — structural alignment is descriptive and does not increase directional confidence');
+          lines.push('prediction_only: describe the next-move read and its confirmation/invalidation; no position advice unless explicitly requested');
+        }
         analyticalSignal = `\nANALYTICAL SIGNAL (PI-US + resonance data points for weighting your understanding):\n  ${lines.join('\n  ')}`;
       }
 
@@ -467,7 +472,10 @@ Return JSON with:
               // area off the same bars, then hand the model a second, independent
               // opinion on the engine's lean.
               chartCtx = buildChartContext(md.closes, md.highs, md.lows, md.volumes);
-              const chartBlock = chartContextBlock(chartCtx, pipelineResult?.hex6?.predicted_direction);
+              pipelineResult = applyChartPerception(pipelineResult, chartCtx);
+              voice = REGISTER_VOICE[pipelineResult.pius.register] || defaultVoice;
+              stateBlock = pipelineResult.pius.directive;
+              const chartBlock = chartContextBlock(chartCtx, pipelineResult.hex6.predicted_direction);
               if (chartBlock) stateBlock = `${stateBlock}\n\n${chartBlock}`;
             }
           } catch (e) { /* fall through to web-fetch series */ }

@@ -27,6 +27,29 @@ export default async function(req) {
     if (usable.length < 3) return Response.json({ error: 'At least three assets need 300 aligned daily bars.' }, { status: 400 });
 
     const result = runConfluenceExperiment(usable, frictionBps);
+    if (body.archetypesOnly === true) {
+      const keys = body.archetypeHorizon && result.archetypes.horizons[body.archetypeHorizon]
+        ? [body.archetypeHorizon]
+        : Object.keys(result.archetypes.horizons);
+      const horizons = Object.fromEntries(keys.map((key) => {
+        const value = result.archetypes.horizons[key];
+        const section = body.archetypeSection || 'core';
+        return [key, section === 'families'
+          ? { global: value.global, structural_families: value.structural_families }
+          : section === 'cells'
+            ? {
+              global: value.global,
+              strongest_grid_cells: Object.fromEntries(Object.entries(value.strongest_grid_cells).slice(0, 5)),
+              weakest_grid_cells: Object.fromEntries(Object.entries(value.weakest_grid_cells).slice(0, 5)),
+            }
+            : { global: value.global, perception_lenses: value.perception_lenses }];
+      }));
+      return Response.json({
+        space_grid: result.archetypes.space_grid,
+        archetype_method: result.archetypes.archetype_method,
+        horizons,
+      });
+    }
     if (body.compact === true) {
       const horizonEntries = body.horizon && result.horizons[body.horizon]
         ? [[body.horizon, result.horizons[body.horizon]]]
@@ -36,7 +59,16 @@ export default async function(req) {
         promotion_candidate: value.promotion_candidate,
         verdict: value.verdict,
       }]));
-      return Response.json({ design: result.design, horizons, generated_at: new Date().toISOString() });
+      return Response.json({
+        design: result.design,
+        horizons,
+        archetypes: body.includeArchetypes === true
+          ? (body.archetypeHorizon && result.archetypes.horizons[body.archetypeHorizon]
+            ? { ...result.archetypes, horizons: { [body.archetypeHorizon]: result.archetypes.horizons[body.archetypeHorizon] } }
+            : result.archetypes)
+          : undefined,
+        generated_at: new Date().toISOString(),
+      });
     }
     return Response.json({ ...result, generated_at: new Date().toISOString() });
   } catch (error) {

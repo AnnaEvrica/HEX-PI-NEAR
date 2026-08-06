@@ -27,6 +27,8 @@
 import { predictFromSequence, Hex6Output } from './hex6Engine.ts';
 import { calibrate, PiUsResult } from './piusEngine.ts';
 import { resonanceSignature } from './piusResonance.ts';
+import type { ChartContext } from './chartContext.ts';
+import { classifyHybridArchetype, PerceptionLens } from './hybridArchetypes.ts';
 
 // Map a ticker to the closest pre-trained domain. hex6Engine has validated
 // tables for NFL, BTC, HORSE_RACING, and WEATHER. For equities and other
@@ -65,6 +67,7 @@ export interface Hex6PipelineResult {
   resonance: ReturnType<typeof resonanceSignature>;
   domain: string;
   calibration: CalibrationResult;
+  perception?: PerceptionLens;
 }
 
 // Self-calibration: the live forward learning loop. Walks the last 60 bars
@@ -152,4 +155,19 @@ export function runPipeline(
   const pius = calibrate(hex6, resonance.status === 'computed' ? resonance : null);
 
   return { hex6, pius, resonance, domain, calibration };
+}
+
+// Add the OHLCV perception lens without rewriting the frozen 64-state tables.
+// The next-move prediction remains visible; only independently corroborated
+// calls receive qualified confidence.
+export function applyChartPerception(result: Hex6PipelineResult, ctx: ChartContext | null): Hex6PipelineResult {
+  const perception = classifyHybridArchetype(
+    result.hex6.state, ctx, result.hex6.predicted_direction, result.hex6.personal_call_strength,
+  );
+  const note = perception.prediction_status === 'STRUCTURE_ALIGNED'
+    ? ` Perception lens: chart structure ALIGNS with the raw HEX next-move lean; this describes the market setup but does not raise directional confidence. Hybrid archetype ${perception.archetype_id}, grid ${perception.grid.label}.`
+    : perception.prediction_status === 'STRUCTURE_CONTESTED'
+      ? ` Perception lens: chart structure CONTESTS the raw HEX next-move lean; preserve both observations without quietly overriding either. Hybrid archetype ${perception.archetype_id}, grid ${perception.grid.label}.`
+      : ` Perception lens: chart structure is MIXED around the raw HEX lean. Hybrid archetype ${perception.archetype_id}, grid ${perception.grid.label}.`;
+  return { ...result, perception, pius: { ...result.pius, directive: result.pius.directive + note } };
 }

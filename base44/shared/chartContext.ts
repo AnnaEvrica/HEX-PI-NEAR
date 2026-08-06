@@ -33,6 +33,7 @@ export interface ChartContext {
   vah: number | null;
   val: number | null;
   inside_value: boolean | null;
+  value_location: 'above' | 'inside' | 'below' | 'unknown';
   bias: 'bullish' | 'bearish' | 'neutral';
   signals: string[];
 }
@@ -122,6 +123,9 @@ export function buildChartContext(
 
   const { poc, vah, val } = volumeProfile(closes, volumes.length === closes.length ? volumes : closes.map(() => 1));
   const insideValue = vah != null && val != null ? last <= vah && last >= val : null;
+  const valueLocation: ChartContext['value_location'] = vah == null || val == null
+    ? 'unknown'
+    : last > vah ? 'above' : last < val ? 'below' : 'inside';
 
   // Bias: only the structural reads, stated plainly. Never a trade call.
   const signals: string[] = [];
@@ -149,7 +153,7 @@ export function buildChartContext(
     trend, sma20: s20, sma50: s50, above_sma20: above20, above_sma50: above50,
     relative_volume: relVol, volume_confirms: volumeConfirms, divergence,
     prior_high: priorHigh, prior_low: priorLow, poc, vah, val, inside_value: insideValue,
-    bias, signals,
+    value_location: valueLocation, bias, signals,
   };
 }
 
@@ -187,5 +191,5 @@ export function chartContextBlock(ctx: ChartContext | null, engineDirection?: 'U
   ${ctx.signals.join('\n  ')}
   Levels of record: ${levels.join(' · ')}
   ${verdict}
-  When they ask for entry/stop/targets, anchor the stop to one of these structural levels — the far side of an average, the edge of the value area, the reclaimed level — never to a round number you picked. If volume is thin or the backdrop is choppy, size the conviction down and say why in plain words.`;
+  This is a next-move perception lens, not a default trading instruction. Describe what HEX sees and what would confirm or invalidate it; do not recommend positions, sizing, entries, stops, or targets unless the user explicitly asks for them. If they do explicitly ask, anchor every level to one of the structural levels above — never to an improvised round number.`;
 }
