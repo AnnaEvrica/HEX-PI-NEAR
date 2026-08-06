@@ -46,16 +46,19 @@ export class OnlineArchetypeLearner {
     const globalPUp = globalSupport ? this.global.up / globalSupport : 0.5;
     const familyPUp = (family.up + 24 * globalPUp) / (family.up + family.down + 24);
     const statePUp = (state.up + 12 * familyPUp) / (state.up + state.down + 12);
-    const candidates = [{ pUp: statePUp, support: state.up + state.down, cap: 0.16 }];
+    const candidates = [{ pUp: statePUp, support: state.up + state.down, cap: 0.5 }];
     for (const key of [...featureKeys, archetypeKey]) {
       const counts = this.archetypes.get(key) || { up: 0, down: 0 };
-      candidates.push({ pUp: (counts.up + 12 * statePUp) / (counts.up + counts.down + 12), support: counts.up + counts.down, cap: key === archetypeKey ? 0.06 : 0.08 });
+      candidates.push({ pUp: (counts.up + 12 * statePUp) / (counts.up + counts.down + 12), support: counts.up + counts.down, cap: key === archetypeKey ? 0.35 : 0.3 });
     }
-    // Each tool earns a bounded influence independently. Broad, repeated
-    // observations can participate; a rare composite remains a small vote.
-    const weighted = candidates.map((candidate) => ({ ...candidate, weight: candidate.support < 12 ? 0 : clamp((candidate.support - 12) / 96, 0, candidate.cap) }));
+    // Each observed tool plays its own hand. Once a tool has seen a handful of
+    // bars it participates at full strength, so the learned read is genuinely
+    // its own guess each bar rather than a nudge on the raw lean. The rolling
+    // directional-trust gate — not a damped weight — is what decides whether
+    // that guess is allowed to move the live call.
+    const weighted = candidates.map((candidate) => ({ ...candidate, weight: candidate.support < 4 ? 0 : clamp((candidate.support - 4) / 24, 0, candidate.cap) }));
     const rawWeight = weighted.reduce((sum, candidate) => sum + candidate.weight, 0);
-    const archetypeWeight = Math.min(0.35, rawWeight);
+    const archetypeWeight = Math.min(1, rawWeight);
     const archetypePUp = rawWeight ? weighted.reduce((sum, candidate) => sum + candidate.pUp * candidate.weight, 0) / rawWeight : rawPUp;
     const adjustedPUp = rawPUp * (1 - archetypeWeight) + archetypePUp * archetypeWeight;
     const rawDirection: Direction = rawPUp >= 0.5 ? 1 : -1;
