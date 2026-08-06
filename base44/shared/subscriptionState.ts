@@ -30,7 +30,7 @@ export function isTransitionalStatus(status) {
 }
 
 export async function findStripeCustomerSubscription(stripe, email) {
-  const customers = await stripe.customers.list({ email, limit: 10 });
+  const customers = await stripe.customers.list({ email, limit: 100 });
   const candidates = [];
   for (const customer of customers.data) {
     const subscriptions = await stripe.subscriptions.list({ customer: customer.id, status: 'all', limit: 100 });

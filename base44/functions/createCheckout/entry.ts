@@ -72,13 +72,21 @@ export default async function(req) {
     }
 
     const origin = appOrigin;
-    const customerDetails = stripeCustomer ? { customer: stripeCustomer.id } : { customer_email: user.email };
+    // One Stripe customer per email, always. Passing `customer_email` makes
+    // Stripe mint a BRAND-NEW customer on every checkout attempt, so a single
+    // person's subscriptions scatter across many customer records — which is
+    // how one account accumulated 16 live subscriptions. Binding every session
+    // to a single resolved customer keeps the duplicate guard above able to see
+    // every prior subscription this person has.
+    if (!stripeCustomer) {
+      stripeCustomer = await stripe.customers.create({ email: user.email });
+    }
 
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       line_items: [{ price: priceId, quantity: 1 }],
       subscription_data: { trial_period_days: 7 },
-      ...customerDetails,
+      customer: stripeCustomer.id,
       success_url: `${origin}/app?checkout=success`,
       cancel_url: `${origin}/app?checkout=cancel`,
       allow_promotion_codes: true,
