@@ -37,6 +37,13 @@ const DISCLOSURE = /\b(tired|exhaust\w*|lonely|alone|depress\w*|anxious|anxiety|
 // Life-context nouns — the domains where an answer actually changes a life.
 const LIFE_CONTEXT = /\b(diagnos\w*|autis\w*|adhd|neurodiverg\w*|therapy|therapist|divorce|breakup|broke up|died|death|dying|funeral|loss|fired|laid off|unemploy\w*|debt|bankrupt|evict\w*|addict\w*|sober|relapse|marriage|custody|miscarriage|illness|cancer|chronic|disabled|bully|bullied|abuse|abusive)\b/i;
 
+// Recovery, medication and withdrawal. Split out from LIFE_CONTEXT because the
+// phrasing is verb-led ("coming off", "recovering from") rather than noun-led,
+// and it was the blind spot that sent a person disclosing Adderall recovery to
+// the cheap path. "recovering from" is anchored to its preposition on purpose —
+// bare "recover" would also catch "is the market recovering".
+const RECOVERY = /\b(recovering from|in recovery|withdrawal|detox\w*|tapering off|coming off|weaning off|went off|quit(ting)? (drinking|smoking|weed|meds|my meds)|adderall|ritalin|vyvanse|concerta|stimulants?|benzo\w*|opioid|ssri|antidepressant|my meds|medicated|unmedicated|sobriety|dependence|dependency|withdrawals)\b/i;
+
 // Self-directed help-seeking. "Why am I like this" is a person asking about
 // their own life, whatever the surface topic is.
 const SELF_INQUIRY = /\b(why (do|am|can'?t|does|is) i|why is it that i|what'?s wrong with me|how do i (stop|deal|cope|handle|get over|move on)|am i (the )?(problem|crazy|wrong|broken|normal|okay))\b/i;
@@ -84,6 +91,7 @@ export function assessStakes(message: string): StakesResult {
 
   if (DISCLOSURE.test(msg)) { score += 3; signals.push('disclosure'); }
   if (LIFE_CONTEXT.test(msg)) { score += 3; signals.push('life_context'); }
+  if (RECOVERY.test(msg)) { score += 3; signals.push('recovery'); }
   if (SELF_INQUIRY.test(msg)) { score += 3; signals.push('self_inquiry'); }
   if (DECISION.test(msg)) { score += 2; signals.push('decision'); }
   if (SELF_STATE.test(msg)) { score += 2; signals.push('self_state'); }
