@@ -10,6 +10,7 @@ import { buildPersona, buildPersonaRefresher } from '../../shared/persona.ts';
 import { noveltyDirective } from '../../shared/novelty.ts';
 import { assessStakes } from '../../shared/stakes.ts';
 import { buildChartContext, chartContextBlock, confluenceAgrees } from '../../shared/chartContext.ts';
+import { buildCoinStory, marketStoryBlock, marketStorySummary } from '../../shared/marketStory.ts';
 
 // hex6Engine takes raw values directly — valuesToBits encodes "did the value
 // go up?" which works on any sequence (prices, returns, scores). No conversion
@@ -179,7 +180,7 @@ Deno.serve(async (req) => {
           lines.push(`i_ching_state: ${pipelineResult.perception.i_ching.glyph} #${pipelineResult.perception.i_ching.king_wen}, ${pipelineResult.perception.i_ching.name} (${pipelineResult.perception.i_ching.chinese}); binary/Fu Xi index ${pipelineResult.perception.i_ching.fuxi_index}`);
           const fs137 = pipelineResult.perception.fine_structure_137;
           lines.push(`fine_structure_137: ${fs137.phase}${fs137.return == null ? ' — insufficient 137-bar history' : ` — ${(fs137.return * 100).toFixed(1)}% trailing move, volatility-normalized ${fs137.normalized_move?.toFixed(2)}`}`);
-          lines.push('confidence_rule: keep HEX conviction raw — structural alignment is descriptive and does not increase directional confidence');
+          lines.push('confidence_rule: keep HEX conviction raw — structural alignment, 137-day observation, and narrative cards are descriptive and do not increase directional confidence');
           lines.push('prediction_only: describe the next-move read and its confirmation/invalidation; no position advice unless explicitly requested');
         }
         analyticalSignal = `\nANALYTICAL SIGNAL (PI-US + resonance data points for weighting your understanding):\n  ${lines.join('\n  ')}`;
@@ -223,6 +224,7 @@ ${speaker}:`;
     // value area computed from the same OHLCV fetch. Independent of the engine
     // by design: it corroborates or contradicts the lean, never replaces it.
     let chartCtx = null;
+    let activeStories = [];
     let ranEngine = false;
     let isCasual = false;
     let weightedTurn = false;
@@ -455,33 +457,36 @@ Return JSON with:
           ? filterSourcesBlock(fetchResult?.sources)
           : '';
 
-        // Contextual trigger: if the message names a ticker, pull a REAL return
-        // series from Yahoo and run the engine on actual data.
+        // Market queries fetch every named asset once, then assemble deterministic
+        // evidence cards for coin stories and a correlation-based basket read.
         let contextPriceLine = '';
-        const TICKER_RE = /\b(BTC|ETH|SOL|DOGE|XRP|ADA|MATIC|LINK|ATOM|AVAX|DOT|LTC|BNB|UNI|SPY|QQQ|TSLA|AAPL|MSFT|NVDA|GOOG|GOOGL|AMZN|META|COIN|BABA|JPM|GS|V|MA|NFLX|DIS|AMD|INTC|BA)\b/i;
-        const tickerHit = message.match(TICKER_RE);
-        if (tickerHit) {
-          try {
-            const md = await fetchYahooReturns(tickerHit[1], 1825);
-            if (md.closes && md.closes.length >= 7) {
-              await runUnifiedEngine(md.closes, tickerHit[1]);
-              stateBlock = pipelineResult.pius.directive;
-              // PRICE AUTHORITY LOCK — the web-fetch summary routinely carries
-              // stale quotes, and a trading answer built on a stale price is a
-              // total trust failure. The Yahoo close is the only price of
-              // record; every level the model states must derive from it.
-              if (md.latestPrice != null) contextPriceLine = `${tickerHit[1].toUpperCase()} last close: $${md.latestPrice.toFixed(2)} (${md.dataPoints} daily bars, 2yr window). PRICE AUTHORITY: this close is the ONLY valid current price. Any price in the retrieved data below that disagrees with it is stale — ignore it. Derive every entry, stop, and target from this close; never quote a level that contradicts it.`;
-              // Confluence: read volume, averages, prior levels and the value
-              // area off the same bars, then hand the model a second, independent
-              // opinion on the engine's lean.
-              chartCtx = buildChartContext(md.closes, md.highs, md.lows, md.volumes);
-              pipelineResult = applyChartPerception(pipelineResult, chartCtx, md.closes);
+        const UPPER_TICKER_RE = /\b(BTC|ETH|SOL|DOGE|XRP|ADA|MATIC|LINK|ATOM|AVAX|DOT|LTC|BNB|UNI|NEAR|ALGO|XTZ|SPY|QQQ|TSLA|AAPL|MSFT|NVDA|GOOG|GOOGL|AMZN|META|COIN|BABA|JPM|GS|V|MA|NFLX|DIS|AMD|INTC|BA)\b/g;
+        const LOWER_CRYPTO_RE = /\b(btc|eth|sol|doge|xrp|ada|matic|link|atom|avax|dot|ltc|bnb|uni|near|algo|xtz)\b/gi;
+        const tickerHits = [...new Set([...(message.match(UPPER_TICKER_RE) || []), ...(message.match(LOWER_CRYPTO_RE) || []).map((ticker) => ticker.toUpperCase())])].slice(0, 8);
+        if (tickerHits.length) {
+          const marketData = await Promise.all(tickerHits.map(async (ticker) => {
+            try { return { requestedTicker: ticker, data: await fetchYahooReturns(ticker, 1825) }; } catch { return null; }
+          }));
+          const usableMarkets = marketData.filter((item) => item?.data?.closes?.length >= 137);
+          for (const item of usableMarkets) {
+            const md = item.data;
+            const coinPipeline = runPipeline(md.closes, item.requestedTicker, history.map((turn) => turn.content).filter(Boolean));
+            const coinContext = buildChartContext(md.closes, md.highs, md.lows, md.volumes);
+            const perceived = applyChartPerception(coinPipeline, coinContext, md.closes);
+            activeStories.push(buildCoinStory(item.requestedTicker, perceived, coinContext, md.closes));
+            if (item.requestedTicker === tickerHits[0]) {
+              pipelineResult = perceived;
+              chartCtx = coinContext;
+              ranEngine = true;
               voice = REGISTER_VOICE[pipelineResult.pius.register] || defaultVoice;
               stateBlock = pipelineResult.pius.directive;
+              if (md.latestPrice != null) contextPriceLine = `${item.requestedTicker} last close: $${md.latestPrice.toFixed(2)} (${md.dataPoints} daily bars). PRICE AUTHORITY: this close is the ONLY valid current price; derive every stated level from the structural levels below.`;
               const chartBlock = chartContextBlock(chartCtx, pipelineResult.hex6.predicted_direction);
               if (chartBlock) stateBlock = `${stateBlock}\n\n${chartBlock}`;
             }
-          } catch (e) { /* fall through to web-fetch series */ }
+          }
+          const storyBlock = marketStoryBlock(activeStories);
+          if (storyBlock) stateBlock = `${stateBlock || 'No quantitative Thinking State for this message.'}\n\n${storyBlock}`;
         }
 
         // Fallback: run the engine on a series the web-fetch extracted.
@@ -536,6 +541,9 @@ Return JSON with:
     const { visible, memory: mem } = await processBoundarySignal(base44, user, userMemory, rawResponse);
     if (mem) userMemory = mem;
     let finalResponse = visible || rawResponse;
+    if (activeStories.length > 1) {
+      finalResponse = `${finalResponse}\n\n**Observed market story**\n${marketStorySummary(activeStories)}`;
+    }
     if (pipelineResult?.perception?.i_ching) {
       const hexagram = pipelineResult.perception.i_ching;
       const fs137 = pipelineResult.perception.fine_structure_137;
