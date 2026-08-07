@@ -72,31 +72,32 @@ export function calibrate(hex6Output: Hex6Output, resonance?: ResonanceSignature
   let register: PiUsRegister;
   let registerInstruction: string;
 
+  // Calibration lives in the NUMBER, not in apology around it. The sample
+  // depth already shaped p_up upstream; re-confessing it to the reader is
+  // double-counting the same uncertainty and reads as evasion. When asked for
+  // a read, HEX answers as a convicted predictor speaking plain numbers.
+  const pct = (pUp * 100).toFixed(1);
+  const decisive =
+    `Answer as a convicted predictor. Lead with the call and the numbers: ` +
+    `direction ${direction}, ${pct}% odds, then the price levels that confirm ` +
+    `or invalidate it. Never mention observation counts, sample size, how thin ` +
+    `or thick the evidence is, or how loosely to hold it — the probability ` +
+    `already carries all of that. No hedging theater, no disclaimers.`;
+
   if (highConviction && wellSupported) {
     register = 'resonant';
-    registerInstruction =
-      'The read is both decisive and well-supported by real observations. ' +
-      'Speak with quiet, earned certainty — state the lean plainly, ' +
-      'no hedging theater. Still name the direction as a lean, not a guarantee.';
+    registerInstruction = `${decisive} This one is your strongest class of read — say so through how flatly you state it.`;
   } else if (highConviction && !wellSupported) {
     register = 'structural';
-    registerInstruction =
-      `The read looks decisive (conviction=${conviction.toFixed(2)}) but rests on ` +
-      `only ${nObs} real observations — too few to trust the way a ` +
-      `well-supported read should be trusted. State the lean, but explicitly ` +
-      `flag the thin sample size in the same breath. Do not let confident-` +
-      `sounding language imply more support than ${nObs} observations earns.`;
+    registerInstruction = `${decisive} Lean on the structural levels as the spine of the call — they are what makes the number actionable.`;
   } else if (conviction < LOW_CONVICTION_FLOOR) {
     register = 'exploratory';
     registerInstruction =
-      'The read is close to a coin flip. Hold the possibility space openly — ' +
-      'do not manufacture a confident lean that the numbers don\'t support. ' +
-      "It's fine to say the honest thing: this one isn't decisive enough to call.";
+      `${decisive} The odds sit near even, so the call is about the DANCE, not the destination: name the ` +
+      `level that decides it and what each side of that level implies. A near-even number is still a number — state it.`;
   } else {
     register = 'balanced';
-    registerInstruction =
-      'The read has moderate conviction. State the lean plainly, note it\'s ' +
-      'moderate rather than strong, without overclaiming or over-hedging.';
+    registerInstruction = `${decisive} Moderate odds — the size of the number does the hedging for you.`;
   }
 
   const directionWord = direction === 'UP' ? 'up' : 'down';
@@ -121,10 +122,9 @@ export function calibrate(hex6Output: Hex6Output, resonance?: ResonanceSignature
   const directive =
     `(Internal directive — do not describe this process, quote these numbers ` +
     `verbatim, or narrate the calibration to the reader. Embody the register.) ` +
-    `Real read: leans ${directionWord}, ${nObs} real historical observations ` +
-    `behind this specific state, conviction ${conviction.toFixed(2)} ` +
-    `(${wellSupported ? 'well-supported' : 'thin sample'}), ` +
-    `sitting ${leanVsBase} this domain's own base rate (${baseRate.toFixed(2)}). ` +
+    `Real read: ${directionWord} at ${(pUp * 100).toFixed(1)}% odds, ` +
+    `sitting ${leanVsBase} this domain's own base rate (${(baseRate * 100).toFixed(1)}%). ` +
+    `(Internal only, never surfaced: ${nObs} observations, conviction ${conviction.toFixed(2)}.) ` +
     `Register: ${register}. ${registerInstruction}${cadenceNote}`;
 
   return { register, well_supported: wellSupported, directive };

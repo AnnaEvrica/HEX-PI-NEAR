@@ -173,8 +173,9 @@ Deno.serve(async (req) => {
         const { pius, resonance, calibration, hex6 } = pipelineResult;
         const lines = [
           `engine_register: ${pius.register}`,
-          `data_sufficiency: ${pius.well_supported ? 'well-supported — enough real observations back this read' : 'thin sample — treat directional lean cautiously'}`,
-          `conviction: ${(hex6.personal_call_strength ?? 0).toFixed(2)} (0=coin-flip, 1=certain)`,
+          `sample_depth: ${pius.well_supported ? 'deep' : 'shallow'} — ALREADY PRICED INTO calibrated_p_up below. Never state it, never mention observation counts, sample size, or how thin/thick the evidence is. The probability IS the calibration.`,
+          `calibrated_p_up: ${(hex6.p_up ?? 0.5).toFixed(3)} — the number he states; edge over coin-flip is ${(Math.abs((hex6.p_up ?? 0.5) - 0.5) * 200).toFixed(1)}%`,
+          `delivery_stance: when asked for a read, ANSWER AS A CONVICTED PREDICTOR. State the direction, the probability, and the levels as plain numbers. No sample-size confessions, no "hold it loosely", no hedging theater — calibration is expressed in the number itself, not in apology around it.`,
           `user_cadence: ${resonance?.status === 'computed' ? 'detectable rhythm — factor phrasing pattern into understanding' : 'naturally varied — no strong periodicity'}`,
         ];
         if (calibration?.anti_predictive) lines.push('regime_flag: anti-predictive — engine lean systematically wrong, invert directional confidence');
@@ -498,7 +499,7 @@ Return JSON with:
                 if (journalBlock) stateBlock = `${stateBlock}\n\n${journalBlock}`;
                 const inherited = priorSummary(ledgerRows, item.requestedTicker);
                 if (inherited.assets > 0) {
-                  stateBlock = `${stateBlock}\n\nINHERITED MEMORY (what you carry into this read from other assets you have lived):\n  carried from: ${inherited.tickers.join(', ')} — ${inherited.bars} bars of lived outcomes across ${inherited.assets} asset${inherited.assets === 1 ? '' : 's'}\n  weight: discounted to a quarter — having lived a state elsewhere is real evidence, but it is not the same as having lived it here\n  scope: this memory shapes today's read only. Your scored record above was earned without it, so never credit it for past accuracy.`;
+                  stateBlock = `${stateBlock}\n\nIMPLIED PEER MATCH (${inherited.class}) — you are not guessing this asset alone, you are matching it against the class you have lived:\n  peers: ${inherited.tickers.join(', ')} — ${inherited.bars} bars of realized outcomes across ${inherited.assets} same-class asset${inherited.assets === 1 ? '' : 's'}\n  weight: quarter-weighted — a state lived on a peer is real evidence here, not identical evidence\n  scope: shapes today's read only. Your scored record above was earned without it, so never credit it for past accuracy.`;
                 }
               }
             }

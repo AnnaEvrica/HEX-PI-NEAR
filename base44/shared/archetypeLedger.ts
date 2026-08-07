@@ -59,8 +59,27 @@ export async function loadLedgerRows(base44: any) {
   } catch { return []; }
 }
 
-export function priorForTicker(rows: any[], ticker: string): LedgerCounts | null {
+// Implied matching across similar classes: an asset's peers move it far more
+// than an unrelated one does. Same-class memory is the primary prior; the rest
+// of the book is only a fallback when no peer has been lived yet.
+const CLASSES: Record<string, string> = {
+  BTC: 'crypto_major', ETH: 'crypto_major', SOL: 'crypto_major', BNB: 'crypto_major', XRP: 'crypto_major', ADA: 'crypto_major', LTC: 'crypto_major',
+  DOGE: 'crypto_alt', MATIC: 'crypto_alt', LINK: 'crypto_alt', ATOM: 'crypto_alt', AVAX: 'crypto_alt', DOT: 'crypto_alt', UNI: 'crypto_alt', NEAR: 'crypto_alt', ALGO: 'crypto_alt', XTZ: 'crypto_alt',
+  SPY: 'index', QQQ: 'index',
+  AAPL: 'mega_tech', MSFT: 'mega_tech', NVDA: 'mega_tech', GOOG: 'mega_tech', GOOGL: 'mega_tech', AMZN: 'mega_tech', META: 'mega_tech', AMD: 'mega_tech', INTC: 'mega_tech', NFLX: 'mega_tech', TSLA: 'mega_tech',
+  JPM: 'financial', GS: 'financial', V: 'financial', MA: 'financial', COIN: 'financial',
+};
+export const assetClass = (ticker: string) => CLASSES[ticker?.toUpperCase()] || 'unclassified';
+
+function peerRows(rows: any[], ticker: string) {
   const others = rows.filter((row) => row.ticker !== ticker);
+  const cls = assetClass(ticker);
+  const sameClass = others.filter((row) => assetClass(row.ticker) === cls);
+  return sameClass.length ? sameClass : others;
+}
+
+export function priorForTicker(rows: any[], ticker: string): LedgerCounts | null {
+  const others = peerRows(rows, ticker);
   if (!others.length) return null;
   const merged = emptyLedger();
   let any = false;
@@ -71,9 +90,9 @@ export function priorForTicker(rows: any[], ticker: string): LedgerCounts | null
 }
 
 export function priorSummary(rows: any[], ticker: string) {
-  const others = rows.filter((row) => row.ticker !== ticker);
+  const others = peerRows(rows, ticker);
   const bars = others.reduce((sum, row) => sum + (row.bars_learned || 0), 0);
-  return { assets: others.length, bars, tickers: others.map((row) => row.ticker) };
+  return { assets: others.length, bars, tickers: others.map((row) => row.ticker), class: assetClass(ticker) };
 }
 
 // Fire-and-forget upsert of what this asset taught him on this replay.
