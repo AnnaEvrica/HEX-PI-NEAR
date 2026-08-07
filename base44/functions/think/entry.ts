@@ -430,6 +430,8 @@ Return primary, expert-authored sources in the field the question actually belon
 NEVER return: listicles ("10 ways to…"), SEO wellness or self-help blogs, content farms, treatment-center or product marketing pages, aggregators, Wikipedia, or coaching sites. If the only hits are that tier, return an empty sources array rather than degrading the citation quality — no source is better than a weak one.
 Prefer 2-4 excellent sources over a longer list, and name them the way a specialist would (author or institution + work), not by the page's SEO headline.
 
+RECENCY (equal weight to quality): the data must be CURRENT. For prices, rates, and market facts, only today's values — never a figure from a cached or older article presented as current. For research, prefer the most recent authoritative work unless a foundational classic is the right citation; when a field has moved (guidelines revised, findings superseded), return the current position, not the one that was true five years ago. If the freshest data you can find is stale for the question asked, say so in factual_summary rather than presenting it as current.
+
 CITATION WARRANT: set warrants_citation=true whenever the answer rests on an empirical claim a reader could check — a research question, a technical or clinical mechanism, a data-backed read. Emotional weight is NOT a reason to withhold references: someone asking about their own tapering, diagnosis, or treatment is precisely the reader who should be handed the primary literature rather than a reassuring paraphrase. Set it false only for genuinely short conversational exchanges that make no empirical claim at all — there, a citation list is noise.
 
 Return JSON with:
