@@ -497,6 +497,14 @@ Return JSON with:
               if (md.latestPrice != null) {
                 const journalBlock = await runPredictionJournal(base44, item.requestedTicker, md.latestPrice, pipelineResult, user.email, adaptive.audit);
                 if (journalBlock) stateBlock = `${stateBlock}\n\n${journalBlock}`;
+                const m = adaptive.audit.metrics;
+                const applied = adaptive.applied || 'none';
+                const basis = applied === 'direction_and_calibration' || applied === 'trusted_direction_and_calibration'
+                  ? 'both the direction and the odds are coming from what you learned on this asset — the learned read has been beating your raw instinct on held-out bars, so it is driving'
+                  : applied === 'calibration_only'
+                    ? 'the direction is your own raw read, unchanged. What you learned on this asset earned the right to size the odds, not to flip the call — it sharpened how sure you should be, and it has not shown it can pick better than you can'
+                    : 'the direction and the odds are both your raw read. What you learned on this asset has not yet proven it can improve either one, so it is sitting out of this call entirely';
+                stateBlock = `${stateBlock}\n\nWHY YOU HOLD IT THIS WAY (be forthcoming — this is the honest basis of the call, not a hedge):\n  basis: ${basis}\n  scored record on this asset: ${m.predictions} held-out days, ${m.raw_directional_accuracy != null ? (m.raw_directional_accuracy * 100).toFixed(1) + '% directional hit rate' : 'unscored'}\n  delivery: after the levels, give ONE precise sentence of provenance — plain English, stated as a confident opinion, never an apology and never a disclaimer paragraph. Say what is actually carrying the call and what specifically would break it. "The odds here are earned; the direction is mine and it has not been out-picked yet" is the register. Never name internals, never mention gates, ledgers, promotion, learners, Brier, or sample counts.`;
                 const inherited = priorSummary(ledgerRows, item.requestedTicker);
                 if (inherited.assets > 0) {
                   stateBlock = `${stateBlock}\n\nIMPLIED PEER MATCH (${inherited.class}) — you are not guessing this asset alone, you are matching it against the class you have lived:\n  peers: ${inherited.tickers.join(', ')} — ${inherited.bars} bars of realized outcomes across ${inherited.assets} same-class asset${inherited.assets === 1 ? '' : 's'}\n  weight: quarter-weighted — a state lived on a peer is real evidence here, not identical evidence\n  scope: shapes today's read only. Your scored record above was earned without it, so never credit it for past accuracy.`;
