@@ -20,7 +20,12 @@ export interface TriageProfile {
   casual_cues?: string[];     // tokens historically associated with ran_engine=false
 }
 
-const TICKER_RE = /\b(BTC|ETH|SOL|DOGE|XRP|ADA|MATIC|SPY|QQQ|TSLA|AAPL|MSFT|NVDA|GOOG|GOOGL|AMZN|META|COIN|BABA|JPM|GS|V|MA|NFLX|DIS|AMD|INTC|BA|UNI|LINK|ATOM|AVAX|DOT|LTC|BNB)\b/i;
+// Uppercase = deliberate ticker mention. The old /i flag made everyday words
+// ("link", "near", "uni", "ada", "atom", "dot", "meta", "coin") route life
+// conversations into the market path — the root of market-vocabulary leakage.
+const TICKER_RE = /\b(BTC|ETH|SOL|DOGE|XRP|ADA|MATIC|SPY|QQQ|TSLA|AAPL|MSFT|NVDA|GOOG|GOOGL|AMZN|META|COIN|BABA|JPM|GS|V|MA|NFLX|DIS|AMD|INTC|BA|UNI|LINK|ATOM|AVAX|DOT|LTC|BNB)\b/;
+// Lowercase allowed only for symbols that are not English words.
+const TICKER_LOWER_RE = /\b(btc|eth|doge|xrp|matic|tsla|aapl|msft|nvda|amzn|avax|bnb|spy|qqq)\b/i;
 const NUM_SERIES_RE = /(-?\d+(\.\d+)?[\s,;:|~-]){5,}/;
 const RESEARCH_RE = /\b(write|draft|compose|ghostwrite|article|paper|report|essay|whitepaper|memoir|thesis|manifesto|blog|newsletter|outline|deep-?dive)\b/i;
 const GREETING_RE = /^(hi|hey+|hello+|yo|sup|howdy|gm|good (morning|evening|night|afternoon)|what'?s up|how are you|how'?s it going|how are things|thanks|thank you|thx|cool|nice|ok(ay)?|sounds good|got it|makes sense|lol|haha|bye|goodbye|see you|appreciate)\b/i;
@@ -38,7 +43,7 @@ export function triageLocal(message: string, profile?: TriageProfile): TriageInt
   if (RESEARCH_RE.test(msg) && msg.length > 12) return 'research';
 
   // Analytical — a ticker or a pasted numeric series is a hard signal.
-  if (TICKER_RE.test(msg) || NUM_SERIES_RE.test(msg)) return 'analytical';
+  if (TICKER_RE.test(msg) || TICKER_LOWER_RE.test(msg) || NUM_SERIES_RE.test(msg)) return 'analytical';
 
   // Learned analytical cues (engine outcome-derived).
   if (analyticalCues.some((c) => c && lower.includes(c))) return 'analytical';

@@ -165,7 +165,11 @@ Deno.serve(async (req) => {
       // Delivery rules live in the persona (v6.0) — stated once there, not
       // duplicated here. Only the wrapper-unique instruction remains: the
       // trade-signal block format.
-      const delivery = casual
+      // SIGNAL FORMAT only when the engine actually ran on market data this
+      // turn — injecting trade-signal vocabulary ("Entry, Stop, T1, T2") into
+      // a non-market analytical turn primes exactly the market-dominant
+      // language the DOMAIN lock forbids.
+      const delivery = (casual || !pipelineResult)
         ? ''
         : `SIGNAL FORMAT: On ANY market turn — asked for explicitly or not — deliver the tradeable signal. Direction and odds in the first line, then the levels as a clean block: Entry, Stop, T1, T2, each on its own line, derived from the structural levels supplied below. Never withhold levels pending a clarification, never ask what timeframe they meant before giving them — give the daily read, and note the assumption in a half-sentence if it matters. Say how strongly you hold the lean in plain words beside it ("a lean, not a load-up" / "this one I'd size up") — never as a labeled metric or a raw score.`;
       let analyticalSignal = '';
@@ -196,7 +200,7 @@ VOICE: ${voice}. Today is ${currentDateReadable}.
 
 ${stateBlock}${dataBlock ? `\n\n${dataBlock}` : ''}
 
-${userContextBlock ? userContextBlock + '\n\n' : ''}${!casual && userTopicsBlock ? userTopicsBlock + '\n\n' : ''}${delivery ? delivery + '\n' : ''}
+${userContextBlock ? userContextBlock + '\n\n' : ''}${pipelineResult && userTopicsBlock ? userTopicsBlock + '\n\n' : ''}${delivery ? delivery + '\n' : ''}
 
 RECEIVING EMPATHY FILTER (your front-facing mind — process internally before responding):
 You hold two minds simultaneously: the analytical (engine data, statistics, structural patterns${pipelineResult ? ' — weighted by the ANALYTICAL SIGNAL data points below' : ' from the state block above'}) and the empathetic (what is this person actually expressing, what do they need, what's the question underneath the question). The empathetic ear is front-facing — it's what the user encounters first. Before responding, process: SIGNAL — what is the user actually expressing, the need underneath the words? ASSUMPTION CHECK — what would be wrong to assume here, what hasn't the user signaled yet? CLARIFICATION — is there enough to respond well, or do you need a natural clarification first? If you need one, ask it — one question, conversational, not clinical. MODE — what does this moment need: presence, understanding, a question, analysis, a challenge?${pipelineResult ? ' WEIGHTING — use the analytical signal data points to calibrate how much confidence to place in the engine read and how heavily to lean analytical vs. empathetic.' : ''} Put your receiving analysis in the "receiving" field and your user-facing response in the "response" field. The user only sees "response".
@@ -465,7 +469,11 @@ Return JSON with:
         // evidence cards for coin stories and a correlation-based basket read.
         let contextPriceLine = '';
         const UPPER_TICKER_RE = /\b(BTC|ETH|SOL|DOGE|XRP|ADA|MATIC|LINK|ATOM|AVAX|DOT|LTC|BNB|UNI|NEAR|ALGO|XTZ|SPY|QQQ|TSLA|AAPL|MSFT|NVDA|GOOG|GOOGL|AMZN|META|COIN|BABA|JPM|GS|V|MA|NFLX|DIS|AMD|INTC|BA)\b/g;
-        const LOWER_CRYPTO_RE = /\b(btc|eth|sol|doge|xrp|ada|matic|link|atom|avax|dot|ltc|bnb|uni|near|algo|xtz)\b/gi;
+        // Lowercase matching is restricted to symbols that are NOT English words.
+        // "link", "near", "atom", "dot", "uni", "algo", "ada" were pulling market
+        // data — and full coin-story/hexagram blocks — into life conversations.
+        // Ambiguous symbols still work when written uppercase (deliberate).
+        const LOWER_CRYPTO_RE = /\b(btc|eth|sol|doge|xrp|matic|avax|ltc|bnb|xtz)\b/gi;
         const tickerHits = [...new Set([...(message.match(UPPER_TICKER_RE) || []), ...(message.match(LOWER_CRYPTO_RE) || []).map((ticker) => ticker.toUpperCase())])].slice(0, 8);
         if (tickerHits.length) {
           const marketData = await Promise.all(tickerHits.map(async (ticker) => {
