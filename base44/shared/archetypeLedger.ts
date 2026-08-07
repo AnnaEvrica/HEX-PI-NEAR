@@ -18,6 +18,9 @@ import type { LedgerCounts } from './onlineArchetypeLearner.ts';
 // ticker's own row can never feed back into its own replay.
 
 const MAX_ARCHETYPE_KEYS = 400;
+// Stored fields have a hard size ceiling; a full 400-key ledger blew past it
+// and every write was silently lost. Keep the highest-support keys that fit.
+const MAX_COUNTS_CHARS = 15000;
 
 const emptyLedger = (): LedgerCounts => ({ global: { up: 0, down: 0 }, states: {}, families: {}, archetypes: {} });
 
@@ -26,10 +29,15 @@ const support = (counts: { up: number; down: number }) => counts.up + counts.dow
 // Entity fields must stay small — keep the highest-support archetype keys and
 // drop the long tail of near-empty ones, which carry no signal anyway.
 function prune(ledger: LedgerCounts): LedgerCounts {
-  const kept = Object.entries(ledger.archetypes)
+  let kept = Object.entries(ledger.archetypes)
     .sort((a, b) => support(b[1]) - support(a[1]))
     .slice(0, MAX_ARCHETYPE_KEYS);
-  return { ...ledger, archetypes: Object.fromEntries(kept) };
+  let out = { ...ledger, archetypes: Object.fromEntries(kept) };
+  while (kept.length > 0 && JSON.stringify(out).length > MAX_COUNTS_CHARS) {
+    kept = kept.slice(0, Math.floor(kept.length * 0.7));
+    out = { ...ledger, archetypes: Object.fromEntries(kept) };
+  }
+  return out;
 }
 
 function mergeInto(target: LedgerCounts, source: LedgerCounts) {
