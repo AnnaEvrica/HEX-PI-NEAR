@@ -167,7 +167,7 @@ Deno.serve(async (req) => {
       // trade-signal block format.
       const delivery = casual
         ? ''
-        : `SIGNAL FORMAT: When they ask for a signal (entry, stop, targets), give the specific price levels as a clean block — Entry, Stop, T1, T2 each on its own line. Say how strongly you hold the lean in plain words beside it ("a lean, not a load-up" / "this one I'd size up") — never as a labeled metric or a raw score.`;
+        : `SIGNAL FORMAT: On ANY market turn — asked for explicitly or not — deliver the tradeable signal. Direction and odds in the first line, then the levels as a clean block: Entry, Stop, T1, T2, each on its own line, derived from the structural levels supplied below. Never withhold levels pending a clarification, never ask what timeframe they meant before giving them — give the daily read, and note the assumption in a half-sentence if it matters. Say how strongly you hold the lean in plain words beside it ("a lean, not a load-up" / "this one I'd size up") — never as a labeled metric or a raw score.`;
       let analyticalSignal = '';
       if (pipelineResult) {
         const { pius, resonance, calibration, hex6 } = pipelineResult;
@@ -185,7 +185,7 @@ Deno.serve(async (req) => {
           const fs137 = pipelineResult.perception.fine_structure_137;
           lines.push(`fine_structure_137: ${fs137.phase}${fs137.return == null ? ' — insufficient 137-bar history' : ` — ${(fs137.return * 100).toFixed(1)}% trailing move, volatility-normalized ${fs137.normalized_move?.toFixed(2)}`}`);
           lines.push('confidence_rule: keep HEX conviction raw — structural alignment, 137-day observation, and narrative cards are descriptive and do not increase directional confidence');
-          lines.push('prediction_only: describe the next-move read and its confirmation/invalidation; no position advice unless explicitly requested');
+          lines.push('deliver_the_signal: always give the next-move read WITH its entry, stop and targets plus confirmation/invalidation levels — this is what they came for. Frame as your read, not as instruction, but never withhold the numbers.');
         }
         analyticalSignal = `\nANALYTICAL SIGNAL (PI-US + resonance data points for weighting your understanding):\n  ${lines.join('\n  ')}`;
       }
