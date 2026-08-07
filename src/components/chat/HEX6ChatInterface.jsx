@@ -108,14 +108,19 @@ export default function HEX6ChatInterface() {
     synth.speak(u);
   };
 
+  // Track whether the initial load from localStorage has completed.
+  // Without this guard, the save effect fires on mount BEFORE the load
+  // effect's setConversations takes effect, overwriting saved history
+  // with the default [welcomeMessage] — if the component unmounts in
+  // that brief window (e.g. auth redirect), conversations are lost.
+  const conversationsLoadedRef = useRef(false);
+
   // Load conversations on mount or initialize default
   useEffect(() => {
     const saved = localStorage.getItem('hex6_conversations');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Migrate stale content: drop any "Evrica Intelligence" branding and
-        // refresh the intro so the AI always presents as HEX6 BLE.
         const sanitized = parsed.map(c => {
           let messages = (c.messages || []).map(m =>
             typeof m?.content === 'string'
@@ -135,7 +140,6 @@ export default function HEX6ChatInterface() {
         console.log('Could not load saved conversations');
       }
     } else {
-      // Create default conversation if none exist
       const defaultConv = {
         id: Date.now().toString(),
         title: 'Chat',
@@ -147,10 +151,14 @@ export default function HEX6ChatInterface() {
       setCurrentConversationId(defaultConv.id);
       setMessages([welcomeMessage]);
     }
+    conversationsLoadedRef.current = true;
   }, []);
 
-  // Save conversations to localStorage whenever they change
+  // Save conversations to localStorage whenever they change — but only
+  // AFTER the initial load has completed, so we never overwrite saved
+  // history with the default welcome state.
   useEffect(() => {
+    if (!conversationsLoadedRef.current) return;
     if (conversations.length > 0) {
       localStorage.setItem('hex6_conversations', JSON.stringify(conversations));
     }

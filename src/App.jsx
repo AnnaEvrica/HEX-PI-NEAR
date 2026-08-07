@@ -17,9 +17,13 @@ import { useState, useEffect } from 'react';
 const AppExperience = () => {
   const { user, isNotRegistered, checkAuth } = useAuth();
   const [consentCompleted, setConsentCompleted] = useState(false);
-  const [authRetryCount, setAuthRetryCount] = useState(() =>
-    Number(sessionStorage.getItem('hex6_auth_retry_count')) || 0
-  );
+  // Always start at 0 on fresh mount. The old code read a stale count from
+  // sessionStorage — if a previous slow load had pushed it to the max, every
+  // subsequent page load would immediately redirect to the landing page
+  // before checkAuth() even finished, logging the user out on refresh.
+  // Post-OAuth recovery still works: authPending is detected separately and
+  // grants 12 retries (14.4s) starting from 0.
+  const [authRetryCount, setAuthRetryCount] = useState(0);
 
   const consentDone = user?.hex6_consent_completed === true || !!localStorage.getItem('hex6_consent_timestamp') || consentCompleted;
 
