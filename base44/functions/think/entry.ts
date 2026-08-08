@@ -27,7 +27,7 @@ import { detectBoundaryCrossing } from '../../shared/boundaryCheck.ts';
 // (email to support@evrica.tech + Discord webhook fallback). Email only
 // delivers if the address is a registered app user; Discord is the reliable
 // channel. Never blocks the user-facing reply.
-const MEDIATION_EMAIL = 'support@evrica.tech';
+const MEDIATION_EMAIL = 'anna@evrica.app';
 
 async function processBoundarySignal(base44, user, userMemory, response) {
   if (!response || typeof response !== 'string') return { visible: response, warned: false, memory: userMemory };
@@ -59,10 +59,6 @@ async function processBoundarySignal(base44, user, userMemory, response) {
       const subj = `[HEX6-BLE MEDIATION] Boundary escalation — ${user.email}`;
       const body = `A user has crossed the 3-warning boundary threshold.\n\nUser: ${user.email}\nEscalation #: ${prevEscalation + 1}\nTriggering warning: ${reason}\nWarning count reset after escalation.\n\nLast conversation snippet:\n${snippet}\n\nReview and mediate as needed.`;
       try { await base44.integrations.Core.SendEmail({ to: MEDIATION_EMAIL, subject: subj, body }); } catch (_e) { /* email only delivers to registered app users */ }
-      try {
-        const webhook = Deno.env.get('DISCORD_WEBHOOK_URL');
-        if (webhook) await fetch(webhook, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: `⚠️ **[HEX6-BLE MEDIATION]** boundary escalation\n**User:** ${user.email}\n**Escalation #:** ${prevEscalation + 1}\n**Trigger:** ${reason}` }) });
-      } catch (_e) { /* non-blocking */ }
     }
   } catch (e) { /* never block the reply on escalation errors */ }
   return { visible, warned: true, memory: mem };
