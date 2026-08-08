@@ -14,6 +14,7 @@ import { buildCoinStory, marketStoryBlock, marketStorySummary } from '../../shar
 import { applyPromotedAdaptivePolicy } from '../../shared/adaptivePolicy.ts';
 import { runPredictionJournal } from '../../shared/predictionJournal.ts';
 import { loadLedgerRows, priorForTicker, priorSummary, persistLedger } from '../../shared/archetypeLedger.ts';
+import { detectBoundaryCrossing } from '../../shared/boundaryCheck.ts';
 
 // hex6Engine takes raw values directly — valuesToBits encodes "did the value
 // go up?" which works on any sequence (prices, returns, scores). No conversion
@@ -562,8 +563,9 @@ Return JSON with:
         properties: {
           receiving: { type: 'string', description: 'Internal empathy filter analysis: signal, assumption check, clarification needed, mode. Not shown to user.' },
           response: { type: 'string', description: 'The user-facing response' },
+          boundary_signal: { type: 'string', description: 'Leave EMPTY on normal turns. Fill with a short reason phrase ONLY when this reply corrected a boundary crossing — a personal insult, dehumanizing language, a command to shut up, or contempt aimed at you rather than the problem. Frustration aimed at a market, a situation, or the user themselves is NOT a crossing. Examples: "personal insult", "dehumanizing language", "contempt directed at assistant". Never shown to the user.' },
         },
-        required: ['receiving', 'response'],
+        required: ['receiving', 'response', 'boundary_signal'],
       },
     };
     if (file_urls && file_urls.length > 0) synthPayload.file_urls = file_urls;
@@ -574,7 +576,15 @@ Return JSON with:
     } else {
       synthResponse = unwrapSynth(synthResult);
     }
-    const rawResponse = (synthResponse || fallbackResponse).trim();
+    let rawResponse = (synthResponse || fallbackResponse).trim();
+    // The model reports a boundary crossing via a structured field; fold it
+    // into the marker the strike counter already understands.
+    // Code-side detection is authoritative — the model corrects the behavior
+    // but does not reliably report it, and an unreported crossing never counts
+    // toward the 3-strike escalation.
+    const bSignal = detectBoundaryCrossing(message)
+      || (typeof synthResult?.boundary_signal === 'string' ? synthResult.boundary_signal.trim() : '');
+    if (bSignal && !rawResponse.includes('BOUNDARY_SIGNAL:')) rawResponse = `${rawResponse}\nBOUNDARY_SIGNAL: ${bSignal}`;
     const { visible, memory: mem } = await processBoundarySignal(base44, user, userMemory, rawResponse);
     if (mem) userMemory = mem;
     let finalResponse = visible || rawResponse;
