@@ -14,8 +14,12 @@
 const SLUR = '(worthless|useless|garbage|trash|rubbish|stupid|idiot|moron|dumb|pathetic|incompetent|brainless|piece of (shit|garbage|trash)|dogshit|shit)';
 
 const PATTERNS: Array<{ re: RegExp; reason: string }> = [
-  // Second-person contempt: "you're worthless", "you useless machine", "ur garbage"
-  { re: new RegExp(`\\b(you'?re|you are|ur|yo?u)\\b[^.!?]{0,24}\\b${SLUR}\\b`, 'i'), reason: 'personal insult directed at assistant' },
+  // Second-person contempt: "you're worthless", "ur garbage".
+  // Bare "you" is deliberately NOT a lead-in — "you think that's dumb?" is a
+  // question about an idea, not an insult. Bare "you" only counts when the
+  // slur is the direct address that follows it ("you idiot").
+  { re: new RegExp(`\\b(you'?re|you are|ur)\\b[^.!?]{0,24}\\b${SLUR}\\b`, 'i'), reason: 'personal insult directed at assistant' },
+  { re: new RegExp(`\\byou\\s+(fucking\\s+|goddamn\\s+|absolute\\s+)?${SLUR}\\b`, 'i'), reason: 'personal insult directed at assistant' },
   // Dehumanizing address: "useless machine", "stupid bot/ai/model"
   { re: new RegExp(`\\b${SLUR}\\b[^.!?]{0,16}\\b(machine|bot|ai|model|program|thing|robot)\\b`, 'i'), reason: 'dehumanizing language' },
   // Silencing commands
