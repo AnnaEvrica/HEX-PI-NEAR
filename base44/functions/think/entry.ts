@@ -418,7 +418,7 @@ ${speaker}:`;
         const fetchPrompt = `You are a data retrieval step for HEX6-BLE. Decide whether answering well requires fresh real-world data.
 - If yes, search the web and pull the latest from authoritative sources. Pull at least 30 data points if a time series is relevant.
 - If conversational or answerable from general knowledge, return needs_engine=false and a brief factual answer.
-- URL honesty: only return URLs you actually retrieved.
+- URL honesty: only return URLs you actually retrieved, and each returned {name, url} pair must be the exact page the figure was read from — never a plausible-looking link for a real paper you found cited elsewhere. If you know the study but not its live URL, name it in factual_summary and leave it out of sources.
 
 SOURCE QUALITY (non-negotiable — the user is an expert-level reader):
 Return primary, expert-authored sources in the field the question actually belongs to. Only what a specialist in that field would cite:
