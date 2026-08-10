@@ -164,8 +164,12 @@ Deno.serve(async (req) => {
     // (A) is correct" to a user who chose A).
     const lastAssistantTurn = [...history].reverse().find(m => m.role === 'assistant')?.content || '';
     const gradingTurn = /\(A\)[\s\S]{2,}\(B\)/.test(lastAssistantTurn);
+    // The comparison must physically happen in the hidden "receiving" field
+    // (generated BEFORE the visible response): the verdict is otherwise the
+    // first token out, forcing the model to commit to "correct/incorrect"
+    // before the reasoning that determines it exists.
     const gradingBlock = gradingTurn
-      ? `GRADING INTEGRITY (mandatory this turn): Your previous message posed a multiple-choice question. Before writing a word: (1) re-read that question and its lettered options verbatim from the conversation above; (2) work out which letter is correct from first principles; (3) read the exact letter the user chose in their latest message; (4) compare the two, character for character. Your opening verdict must match that comparison — if they chose the letter your reasoning says is correct, the first word is confirmation that they got it right. The verdict, the explanation, and the letter you name as correct must all agree with each other and with what the user actually typed. Never declare an answer wrong and then argue for the very letter they picked.`
+      ? `GRADING INTEGRITY (mandatory this turn): Your previous message posed a multiple-choice question. You have no stored answer key — you must derive it now, and the derivation must happen INSIDE the "receiving" field, in writing, before the "response" field begins. In "receiving", write exactly: (1) CORRECT ANSWER: the letter your own first-principles reasoning selects, with one line of why; (2) USER CHOSE: the exact letter in their latest message; (3) VERDICT: MATCH or MISMATCH, from comparing those two letters character for character. Only then write "response", and its opening verdict must restate that VERDICT — MATCH means they got it right, full stop. The letter you praise or correct in the explanation must be the same letter written at step (1). Never emit a verdict in "response" that contradicts the VERDICT line in "receiving".`
       : '';
 
     const composePrompt = (stateBlock, dataBlock = '', casual = false) => {
