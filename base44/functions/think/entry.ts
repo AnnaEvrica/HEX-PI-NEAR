@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import { runPipeline, extractNumberSeries, applyChartPerception } from '../../shared/hex6Pipeline.ts';
-import { filterSourcesBlock, updateMemory } from '../../shared/chatHelpers.ts';
+import { verifiedSourcesBlock, updateMemory } from '../../shared/chatHelpers.ts';
 import { fetchYahooReturns } from '../../shared/marketDataClient.ts';
 import { selectSynthesisModel, INTERPRETATION_MODEL, adaptVoiceForModel } from '../../shared/modelRouter.ts';
 import { triage } from '../../shared/triage.ts';
@@ -460,8 +460,10 @@ Return JSON with:
         const fetchResult = await base44.integrations.Core.InvokeLLM(fetchPayload).catch(() => null);
 
         // Citations ride along only when the answer is reference-worthy (or asked for).
+        // Every link is live-checked (parallel HEAD/GET) before it can reach
+        // the user — hallucinated or dead URLs are dropped here.
         sourcesBlock = (askedForSources || fetchResult?.warrants_citation === true)
-          ? filterSourcesBlock(fetchResult?.sources)
+          ? await verifiedSourcesBlock(fetchResult?.sources)
           : '';
 
         // Market queries fetch every named asset once, then assemble deterministic

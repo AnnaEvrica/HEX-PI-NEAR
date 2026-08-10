@@ -25,6 +25,54 @@ export function filterSourcesBlock(sources) {
   return valid.map(s => `[${s.name}](${s.url})`).join('\n');
 }
 
+// Verify that each source URL actually resolves before it is shown to the
+// user. The retrieval model sometimes returns plausible-looking links that
+// 404 or point at pages that no longer exist — a dead citation costs more
+// trust than no citation. Each URL gets one live check (HEAD, falling back to
+// GET for servers that reject HEAD) with a short timeout; anything that
+// errors, times out, or returns 4xx/5xx is dropped. All checks run in
+// parallel so the added latency is one round-trip, not one per link.
+async function urlResolves(url) {
+  const attempt = async (method) => {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 5000);
+    try {
+      const res = await fetch(url, {
+        method,
+        redirect: 'follow',
+        signal: ctrl.signal,
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; HEX6-BLE citation check)' },
+      });
+      return res.status < 400;
+    } finally {
+      clearTimeout(timer);
+    }
+  };
+  try {
+    if (await attempt('HEAD')) return true;
+  } catch { /* fall through to GET */ }
+  try {
+    return await attempt('GET');
+  } catch {
+    return false;
+  }
+}
+
+// Async version of filterSourcesBlock: same quality gates, plus a live
+// resolution check on every surviving URL. Use this wherever the sources
+// will be shown to the user.
+export async function verifiedSourcesBlock(sources) {
+  const block = filterSourcesBlock(sources);
+  if (!block) return '';
+  const lines = block.split('\n');
+  const checks = await Promise.all(lines.map(async (line) => {
+    const m = line.match(/\]\((https?:\/\/[^)]+)\)$/);
+    if (!m) return null;
+    return (await urlResolves(m[1])) ? line : null;
+  }));
+  return checks.filter(Boolean).join('\n');
+}
+
 // Fire-and-forget compressed user memory update.
 export function updateMemory(base44, user, existing, message, response) {
   (async () => {
