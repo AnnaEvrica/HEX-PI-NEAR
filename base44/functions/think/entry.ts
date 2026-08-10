@@ -157,6 +157,17 @@ Deno.serve(async (req) => {
     let userContextBlock = '';
     let userTopicsBlock = '';
 
+    // Quiz/grading coherence — when the previous assistant turn posed a
+    // multiple-choice question, the verdict must be checked against the exact
+    // letter the user picked before it is announced. Without this, the model
+    // reasons out the right answer but misfires on the label ("incorrect —
+    // (A) is correct" to a user who chose A).
+    const lastAssistantTurn = [...history].reverse().find(m => m.role === 'assistant')?.content || '';
+    const gradingTurn = /\(A\)[\s\S]{2,}\(B\)/.test(lastAssistantTurn);
+    const gradingBlock = gradingTurn
+      ? `GRADING INTEGRITY (mandatory this turn): Your previous message posed a multiple-choice question. Before writing a word: (1) re-read that question and its lettered options verbatim from the conversation above; (2) work out which letter is correct from first principles; (3) read the exact letter the user chose in their latest message; (4) compare the two, character for character. Your opening verdict must match that comparison — if they chose the letter your reasoning says is correct, the first word is confirmation that they got it right. The verdict, the explanation, and the letter you name as correct must all agree with each other and with what the user actually typed. Never declare an answer wrong and then argue for the very letter they picked.`
+      : '';
+
     const composePrompt = (stateBlock, dataBlock = '', casual = false) => {
       const persona = casual ? refresherPersona : fullPersona;
       // Delivery rules live in the persona (v6.0) — stated once there, not
@@ -205,7 +216,7 @@ ${analyticalSignal}
 
 ${noveltyDirective(message, history, weightedTurn)}
 
-CONVERSATION:
+${gradingBlock ? gradingBlock + '\n\n' : ''}CONVERSATION:
 ${historyText}
 
 CITATION FORM: Never write a bare source name, "Sources:" list, or reference list of your own — the verified, clickable source links are appended automatically beneath your reply. Attribute inside the sentence in plain words ("per the Fed's own release") and let the appended links carry the addresses.
