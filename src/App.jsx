@@ -92,6 +92,14 @@ const AppExperience = () => {
   return consentDone ? <SubscriptionGate><HEX6ChatInterface /></SubscriptionGate> : <ConsentFlow onComplete={() => setConsentCompleted(true)} />;
 };
 
+// Logged-in visitors skip the landing page entirely — straight into the app.
+// Only signed-out (or unregistered) visitors see the public landing.
+const LandingGate = () => {
+  const { user } = useAuth();
+  if (user) return <Navigate to="/app" replace />;
+  return <Landing />;
+};
+
 const AuthenticatedApp = () => {
   const { isLoading } = useAuth();
 
@@ -105,7 +113,7 @@ const AuthenticatedApp = () => {
 
   return (
     <Routes>
-      <Route path="/" element={<Landing />} />
+      <Route path="/" element={<LandingGate />} />
       <Route path="/discover" element={<Discover />} />
       <Route path="/app" element={<AppExperience />} />
       <Route path="*" element={<PageNotFound />} />
