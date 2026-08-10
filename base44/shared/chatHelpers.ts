@@ -43,7 +43,10 @@ async function urlResolves(url) {
         signal: ctrl.signal,
         headers: { 'User-Agent': 'Mozilla/5.0 (compatible; HEX6-BLE citation check)' },
       });
-      return res.status < 400;
+      // Only a definitive "this page does not exist" disqualifies a source.
+      // Publishers routinely answer automated requests with 403/405/429 while
+      // the page is perfectly real for a human, so those stay.
+      return res.status !== 404 && res.status !== 410;
     } finally {
       clearTimeout(timer);
     }
@@ -54,7 +57,8 @@ async function urlResolves(url) {
   try {
     return await attempt('GET');
   } catch {
-    return false;
+    // Network error / timeout is not evidence the page is dead — keep it.
+    return true;
   }
 }
 
