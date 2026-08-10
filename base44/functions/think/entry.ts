@@ -358,6 +358,7 @@ ${speaker}:`;
     let stateBlock = inlineStateBlock;
     let dataBlock = '';
     let sourcesBlock = '';
+    let sourceLedger = '';
     let synthModel = selectSynthesisModel('inline');
     // Did they actually ask for the references? Then they always get them.
     const askedForSources = /\b(source|sources|cite|citation|reference|references|stud(y|ies)|paper|papers|literature|link|links|evidence|research)\b/i.test(message);
@@ -440,7 +441,7 @@ Return JSON with:
 - series: array of >=30 numbers — only if needs_engine.
 - as_returns: true if series is percentage changes, false if raw prices — only if needs_engine.
 - series_label: brief description — only if needs_engine.
-- sources: array of {name, url} — only if you actually pulled web data.
+- sources: array of {name, url, published, finding} — one entry per work you actually name in factual_summary, in the SAME order you introduce them. "url" must be the exact page that finding was read from, "published" its publication date as shown on that page (YYYY-MM or YYYY-MM-DD), and "finding" a one-line restatement of what THAT page says. Never pair a new paper's title with an older page's URL, and never include a source whose page date contradicts the date you attribute to it in factual_summary — drop it instead. Only if you actually pulled web data.
 - source_summary: one sentence on what you pulled — only if you pulled data.`;
 
         const conversationBlock = history.length > 0 ? history.slice(-12).map(m => `${m.role === 'user' ? userName : speaker}: ${m.content}`).join('\n') : '';
@@ -452,7 +453,7 @@ Return JSON with:
             properties: {
               factual_summary: { type: 'string' }, needs_engine: { type: 'boolean' }, ticker: { type: 'string' },
               series_label: { type: 'string' }, series: { type: 'array', items: { type: 'number' } }, as_returns: { type: 'boolean' },
-              sources: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, url: { type: 'string' } }, required: ['name', 'url'] } },
+              sources: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, url: { type: 'string' }, published: { type: 'string' }, finding: { type: 'string' } }, required: ['name', 'url'] } },
               source_summary: { type: 'string' },
               warrants_citation: { type: 'boolean' },
             }, required: ['factual_summary'],
@@ -464,8 +465,15 @@ Return JSON with:
         // Citations ride along only when the answer is reference-worthy (or asked for).
         // Every link is live-checked (parallel HEAD/GET) before it can reach
         // the user — hallucinated or dead URLs are dropped here.
-        sourcesBlock = (askedForSources || fetchResult?.warrants_citation === true)
+        const verifiedSources = (askedForSources || fetchResult?.warrants_citation === true)
           ? await verifiedSourcesBlock(fetchResult?.sources)
+          : { block: '', verified: [] };
+        sourcesBlock = verifiedSources.block;
+        // The exact ledger of works whose links will be attached beneath the
+        // reply. Naming anything outside this list is what produced "new
+        // article, old link" — the prose named a paper the link list never had.
+        sourceLedger = verifiedSources.verified.length
+          ? `VERIFIED SOURCE LEDGER (these links, and ONLY these, will be attached under your reply — every work, date, or finding you name in prose must be one of these rows, described exactly as its row describes it. If a finding you want to state is not here, state it without naming a work or a date):\n${verifiedSources.verified.map((s, i) => `  ${i + 1}. ${s.name}${s.published ? ` (published ${s.published})` : ''}${s.finding ? ` — ${s.finding}` : ''}`).join('\n')}`
           : '';
 
         // Market queries fetch every named asset once, then assemble deterministic
@@ -546,7 +554,7 @@ Return JSON with:
   GROUNDING: every figure, timeline, dosage, rate, or "typical" interval you state must trace to the DATA block below. If it is not there, make the point without a number — never reach into memory for a plausible one. A person mid-taper or mid-diagnosis will act on what you say.
   No lists, no clinical detachment, no fixing. Leave them a way to keep talking.${wRes.status === 'computed' ? `\n  PI-US cadence: ${wRes.interpretation}` : ''}`;
         }
-        dataBlock = `DATA (supplied by HEX6-BLE):\n${contextPriceLine ? contextPriceLine + '\n' : ''}${fetchResult?.factual_summary || 'No external data retrieved.'}`;
+        dataBlock = `DATA (supplied by HEX6-BLE):\n${contextPriceLine ? contextPriceLine + '\n' : ''}${fetchResult?.factual_summary || 'No external data retrieved.'}${sourceLedger ? `\n\n${sourceLedger}` : ''}`;
         synthModel = selectSynthesisModel(intent === 'research' ? 'research' : 'analytical');
         fallbackResponse = fetchResult?.factual_summary || fallbackResponse;
       }

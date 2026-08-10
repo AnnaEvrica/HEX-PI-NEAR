@@ -67,14 +67,23 @@ async function urlResolves(url) {
 // will be shown to the user.
 export async function verifiedSourcesBlock(sources) {
   const block = filterSourcesBlock(sources);
-  if (!block) return '';
+  if (!block) return { block: '', verified: [] };
   const lines = block.split('\n');
   const checks = await Promise.all(lines.map(async (line) => {
     const m = line.match(/\]\((https?:\/\/[^)]+)\)$/);
     if (!m) return null;
-    return (await urlResolves(m[1])) ? line : null;
+    if (!(await urlResolves(m[1]))) return null;
+    const meta = (sources || []).find((s) => s?.url === m[1]) || {};
+    // Label carries the publication date so a 2026 finding can never be shown
+    // behind a link the reader will discover is years old.
+    const label = meta.published ? `${meta.name} — ${meta.published}` : meta.name;
+    return { line: `[${label}](${m[1]})`, meta };
   }));
-  return checks.filter(Boolean).join('\n');
+  const kept = checks.filter(Boolean);
+  return {
+    block: kept.map((k) => k.line).join('\n'),
+    verified: kept.map((k) => k.meta),
+  };
 }
 
 // Fire-and-forget compressed user memory update.
