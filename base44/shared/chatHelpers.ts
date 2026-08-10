@@ -16,7 +16,7 @@ export function filterSourcesBlock(sources) {
       // filter enforces the rule the prompt only requests.
       if (/wikipedia\.org|medium\.com|quora\.com|reddit\.com|pinterest\.|substack\.com|blogspot\.|wordpress\.com/i.test(p.hostname)) return false;
       if (/counsel|therapy|therapist|rehab|treatment|clinic-?marketing|wellness|coaching|lifecoach/i.test(p.hostname)) return false;
-      if (/\/blog\//i.test(p.pathname)) return false;
+      if (/\/(blog|advice|tips|guides?)\//i.test(p.pathname)) return false;
       return true;
     } catch { return false; }
   };
@@ -76,7 +76,9 @@ export async function verifiedSourcesBlock(sources) {
     const meta = (sources || []).find((s) => s?.url === m[1]) || {};
     // Label carries the publication date so a 2026 finding can never be shown
     // behind a link the reader will discover is years old.
-    const label = meta.published ? `${meta.name} — ${meta.published}` : meta.name;
+    // Only a real date earns a date stamp — "unknown"/"n/a" is noise, not provenance.
+    const dated = /^\d{4}(-\d{2}){0,2}$/.test(String(meta.published || '').trim());
+    const label = dated ? `${meta.name} — ${meta.published}` : meta.name;
     return { line: `[${label}](${m[1]})`, meta };
   }));
   const kept = checks.filter(Boolean);
