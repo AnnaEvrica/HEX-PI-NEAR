@@ -131,12 +131,12 @@ export default function HeroSection({ onAsteriskHover }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.1 }}
             >
-              [<span className="text-accent">HEX</span>-BLE<sup className="text-accent text-[0.42em]" style={{ lineHeight: 0 }}>6</sup>]
+              [<span className="text-accent">HEX</span>-BLE<sup className="text-accent text-[0.38em] relative -top-[1.15em] ml-[0.06em]" style={{ lineHeight: 0 }}>6</sup>]
             </motion.h2>
 
             {/* Line 2 — THE ROLE MODEL, small italics */}
             <motion.p
-              className="w-full whitespace-nowrap text-center italic font-semibold tracking-[0.3em] uppercase text-foreground/80 text-[clamp(0.75rem,2.2vw,1.35rem)] leading-none mt-3 md:mt-8 transition-all duration-500"
+              className="w-full whitespace-nowrap text-center font-semibold tracking-[0.3em] uppercase text-foreground/80 text-[clamp(0.75rem,2.2vw,1.35rem)] leading-none mt-6 transition-all duration-500"
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.25 }}
@@ -155,14 +155,14 @@ export default function HeroSection({ onAsteriskHover }) {
             </motion.p>
           </div>
 
-          <div className="relative mt-16 sm:mt-24 flex flex-col items-center text-center">
+          <div className="relative mt-16 flex flex-col items-center text-center">
             <motion.div
               className="flex flex-col items-center gap-10 sm:gap-14 w-full"
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.2 }}
             >
-              <p className="whitespace-nowrap flex items-baseline justify-center gap-3 sm:gap-5 leading-none w-auto rounded-md bg-white px-6 sm:px-10 py-5 sm:py-7 transition-all duration-500">
+              <p className="whitespace-nowrap flex items-baseline justify-center gap-3 sm:gap-5 leading-none w-full rounded-md bg-white px-6 py-6 transition-all duration-500">
                 <span className="line-through decoration-accent decoration-[3px] text-foreground/30 text-[clamp(1rem,3.2vw,2rem)] font-light uppercase tracking-[0.22em]">Validation</span>
                 <span className="flex flex-col items-center leading-none">
                   <span className="text-foreground text-[clamp(2rem,7vw,4.5rem)] font-extrabold uppercase tracking-[-0.04em]">Truth</span>
