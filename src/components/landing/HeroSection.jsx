@@ -3,7 +3,6 @@ import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { appParams } from '@/lib/app-params';
 import { useAuth } from '@/lib/AuthContext';
-import RoleModelTagline from '@/components/branding/RoleModelTagline';
 
 
 const POOL = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ∑∫π∞≈±∇√∂λμ';
@@ -132,18 +131,27 @@ export default function HeroSection({ onAsteriskHover }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.1 }}
             >
-              [<span className="text-accent">HEX6</span>-BLE]
+              [<span className="text-accent">HEX</span>-BLE<sup className="text-accent text-[0.42em]" style={{ lineHeight: 0 }}>6</sup>]
             </motion.h2>
 
-            {/* Main tagline — incredibly pronounced */}
+            {/* Line 2 — THE ROLE MODEL, small italics */}
             <motion.p
-              className="w-full whitespace-nowrap text-center text-[clamp(1.15rem,5.2vw,3.6rem)] leading-none mt-2 sm:mt-4"
-              style={{ textShadow: '0 0 12px rgba(255,255,255,0.28), 0 2px 14px rgba(0,0,0,0.45)' }}
-              initial={{ opacity: 0, y: 16 }}
+              className="w-full whitespace-nowrap text-center italic font-semibold tracking-[0.3em] uppercase text-foreground/80 text-[clamp(0.75rem,2.2vw,1.35rem)] leading-none mt-3 md:mt-8 transition-all duration-500"
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.25 }}
             >
-              <RoleModelTagline />
+              The Role Model
+            </motion.p>
+
+            {/* Line 3 — BLE, smallest */}
+            <motion.p
+              className="w-full whitespace-nowrap text-center font-medium tracking-[0.12em] text-foreground/55 text-[clamp(0.6rem,1.5vw,0.95rem)] leading-none mt-2 md:mt-6 transition-all duration-500"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.35 }}
+            >
+              [BLE: Binaureal Linguistic Engine]
             </motion.p>
           </div>
 
@@ -154,13 +162,7 @@ export default function HeroSection({ onAsteriskHover }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.2 }}
             >
-              <span
-                className="w-full whitespace-nowrap font-semibold tracking-[-0.035em] text-[clamp(1rem,5vw,4.5rem)] leading-none text-center"
-                style={{ textShadow: '0 1px 2px rgba(255,255,255,0.35), 0 2px 8px rgba(0,0,0,0.2)' }}
-              >
-                <span className="text-foreground/70">[</span><span className="text-foreground">BLE</span><span className="text-foreground/70">: Binaureal Linguistic Engine]</span>
-              </span>
-              <p className="whitespace-nowrap flex items-baseline justify-center gap-3 sm:gap-5 leading-none">
+              <p className="whitespace-nowrap flex items-baseline justify-center gap-3 sm:gap-5 leading-none w-auto rounded-md bg-white px-6 sm:px-10 py-5 sm:py-7 transition-all duration-500">
                 <span className="line-through decoration-accent decoration-[3px] text-foreground/30 text-[clamp(1rem,3.2vw,2rem)] font-light uppercase tracking-[0.22em]">Validation</span>
                 <span className="flex flex-col items-center leading-none">
                   <span className="text-foreground text-[clamp(2rem,7vw,4.5rem)] font-extrabold uppercase tracking-[-0.04em]">Truth</span>
@@ -169,26 +171,24 @@ export default function HeroSection({ onAsteriskHover }) {
               </p>
             </motion.div>
 
-            <div className="relative mt-10 sm:mt-14 w-full rounded-md bg-white px-5 py-5 sm:py-6 flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-              <p className="text-sm sm:text-lg md:text-xl text-black font-mono font-semibold leading-snug">
-                Experimental LLM in testing
-              </p>
+            <div className="relative mt-10 md:mt-24 flex flex-col items-center gap-3 transition-all duration-500">
               <a
                 href={authUrl}
                 target="_top"
                 onClick={handleEnter}
-                className="inline-flex items-center justify-center px-6 py-2 sm:py-3 rounded-sm bg-primary text-primary-foreground border-2 border-accent font-bold hover:bg-primary/90 transition-colors text-sm sm:text-base tracking-[0.18em] uppercase whitespace-nowrap"
+                className="inline-flex items-baseline justify-center px-8 py-3 sm:py-4 rounded-sm bg-primary text-primary-foreground border-2 border-accent font-bold hover:bg-primary/90 transition-colors text-sm sm:text-base tracking-[0.18em] uppercase whitespace-nowrap"
               >
-                Join Beta
+                Join Beta<sup className="text-[0.6em] ml-0.5">*</sup>
               </a>
+              <p className="text-[0.62rem] sm:text-xs text-foreground/60 font-mono">* Experimental LLM in testing</p>
             </div>
 
-            <div className="mt-8 sm:mt-10 max-w-4xl px-2">
-              <p className="text-center text-[0.68rem] sm:text-[0.8rem] md:text-[0.9rem] text-foreground/75 font-medium leading-relaxed">
-                HEX6-BLE is an experimental probabilistic reasoning system. Its outputs are informational, may be uncertain or incorrect, and do not constitute financial, legal, medical, or other professional advice. Verify important decisions using independent evidence and qualified professionals.
+            <div className="mt-10 md:mt-24 w-full max-w-4xl px-2 border-t border-foreground/15 pt-4 transition-all duration-500">
+              <p className="text-left text-[0.6rem] sm:text-[0.66rem] text-foreground/50 font-medium leading-relaxed">
+                § 1. Disclaimer. HEX6-BLE is an experimental probabilistic reasoning system. Its outputs are informational, may be uncertain or incorrect, and do not constitute financial, legal, medical, or other professional advice. Verify important decisions using independent evidence and qualified professionals.
               </p>
-              <p className="text-center text-[0.62rem] sm:text-[0.72rem] md:text-[0.8rem] text-foreground/60 font-medium mt-3">
-                © Evrica Technologies Inc. 2026.
+              <p className="text-left text-[0.58rem] sm:text-[0.64rem] text-foreground/50 font-medium mt-2">
+                © <a href="https://evrica.tech" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground transition-colors">Evrica Technologies Inc.</a> 2026.
               </p>
             </div>
           </div>
