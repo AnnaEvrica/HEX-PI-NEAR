@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { appParams } from '@/lib/app-params';
 import { useAuth } from '@/lib/AuthContext';
+import RoleModelTagline from '@/components/branding/RoleModelTagline';
 
 
 const POOL = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ∑∫π∞≈±∇√∂λμ';
@@ -133,6 +134,17 @@ export default function HeroSection({ onAsteriskHover }) {
             >
               [<span className="text-accent">HEX6</span>-BLE]
             </motion.h2>
+
+            {/* Main tagline — incredibly pronounced */}
+            <motion.p
+              className="w-full whitespace-nowrap text-center text-[clamp(1.15rem,5.2vw,3.6rem)] leading-none mt-2 sm:mt-4"
+              style={{ textShadow: '0 0 12px rgba(255,255,255,0.28), 0 2px 14px rgba(0,0,0,0.45)' }}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.25 }}
+            >
+              <RoleModelTagline />
+            </motion.p>
           </div>
 
           <div className="relative mt-16 sm:mt-24 flex flex-col items-center text-center">

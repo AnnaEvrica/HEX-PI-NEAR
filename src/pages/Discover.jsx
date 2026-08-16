@@ -7,6 +7,7 @@ import { base44 } from '@/api/base44Client';
 import MirrorSection from '@/components/landing/MirrorSection';
 import InvitationSection from '@/components/landing/InvitationSection';
 import FoundersSection from '@/components/landing/FoundersSection';
+import RoleModelTagline from '@/components/branding/RoleModelTagline';
 
 const DEFAULT_METRICS = {
   systemComparison: {
@@ -103,6 +104,13 @@ export default function Discover() {
           <Link to="/" className="text-sm text-secondary hover:text-foreground transition-colors" style={{ minWidth: 'auto', minHeight: 'auto' }}>← Back to home</Link>
         </div>
       </nav>
+
+      {/* Main tagline — incredibly pronounced */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 sm:pt-14 pb-2 text-center">
+        <p className="text-[clamp(1.5rem,6vw,4rem)] leading-none">
+          <RoleModelTagline />
+        </p>
+      </div>
 
       {/* Mirror — HEX6-BLE, two lenses on one mind */}
       <div id="mirror"><MirrorSection /></div>
