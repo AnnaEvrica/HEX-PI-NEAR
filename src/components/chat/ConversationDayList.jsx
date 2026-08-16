@@ -27,10 +27,10 @@ export default function ConversationDayList({ conversations, currentConversation
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2.5">
       {groups.map((group) => (
-        <div key={group.label} className="space-y-1.5">
-          <p className="px-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-secondary/70">{group.label}</p>
+        <div key={group.label} className="space-y-1">
+          <p className="px-1.5 text-[9px] font-semibold uppercase tracking-[0.16em] text-secondary/70">{group.label}</p>
           {group.items.map((conv) => (
             <ConversationItem
               key={conv.id}

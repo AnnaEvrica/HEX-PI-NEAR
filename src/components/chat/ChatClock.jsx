@@ -15,9 +15,9 @@ export default function ChatClock() {
   const time = now.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', second: '2-digit' });
 
   return (
-    <div className="flex flex-col items-center leading-tight select-none">
-      <span className="text-sm md:text-base font-semibold tracking-tight text-foreground">{time}</span>
-      <span className="text-[10px] md:text-xs text-secondary font-medium tracking-[0.14em] uppercase">{date}</span>
+    <div className="flex flex-col items-end leading-tight select-none">
+      <span className="text-xs md:text-sm font-semibold tracking-tight tabular-nums text-foreground">{time}</span>
+      <span className="text-[9px] md:text-[10px] text-secondary font-medium tracking-[0.14em] uppercase">{date}</span>
     </div>
   );
 }

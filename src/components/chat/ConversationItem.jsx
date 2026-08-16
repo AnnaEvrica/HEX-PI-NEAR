@@ -40,7 +40,7 @@ export default function ConversationItem({ conversation, isSelected, onSelect, o
 
   return (
     <div
-      className={`group flex items-center gap-1 px-3 py-2 rounded-2xl transition-colors ${
+      className={`group flex items-center gap-1 px-2 py-1.5 rounded-xl transition-colors ${
         isSelected
           ? 'bg-primary text-primary-foreground'
           : 'text-secondary hover:bg-muted'
@@ -62,8 +62,8 @@ export default function ConversationItem({ conversation, isSelected, onSelect, o
             onClick={onSelect}
             className="flex-1 min-w-0 text-left flex flex-col"
           >
-            <span className="text-sm truncate">{conversation.title}</span>
-            <span className={`text-[10px] tabular-nums ${isSelected ? 'text-primary-foreground/60' : 'text-secondary/60'}`}>{stamp}</span>
+            <span className="text-[11px] leading-tight truncate">{conversation.title}</span>
+            <span className={`text-[9px] tabular-nums ${isSelected ? 'text-primary-foreground/60' : 'text-secondary/60'}`}>{stamp}</span>
           </button>
           <button
             onClick={(e) => {

@@ -6,6 +6,7 @@ import SettingsModal from '@/components/SettingsModal';
 import LegalModal from '@/components/LegalModal';
 import ConversationDayList from '@/components/chat/ConversationDayList';
 import ChatClock from '@/components/chat/ChatClock';
+import SidebarActions from '@/components/chat/SidebarActions';
 
 export default function HEX6ChatInterface() {
   const welcomeMessage = {
@@ -492,16 +493,17 @@ export default function HEX6ChatInterface() {
     <div className="flex h-screen bg-background overflow-hidden">
       {/* Sidebar - hidden on mobile */}
       <div
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-card border-r border-border transition-transform duration-300 ${
+        className={`fixed inset-y-0 left-0 z-40 w-44 bg-card border-r border-border transition-transform duration-300 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } md:relative md:translate-x-0`}
       >
-        <div className="flex flex-col h-full p-4">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-lg font-bold">HEX6 BLE</h1>
+        <div className="flex flex-col h-full p-2.5">
+          <div className="flex items-center justify-between mb-3">
+            <h1 className="text-xs font-bold tracking-tight">HEX6 BLE</h1>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="md:hidden p-2 hover:bg-muted rounded-sm"
+              className="md:hidden p-1 hover:bg-muted rounded-sm text-sm flex items-center justify-center"
+              style={{ minWidth: '28px', minHeight: '28px' }}
             >
               ×
             </button>
@@ -509,15 +511,16 @@ export default function HEX6ChatInterface() {
 
           <button
             onClick={handleNewChat}
-            className="w-full flex items-center gap-2 px-3 py-2.5 rounded-2xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors mb-4"
+            className="w-full flex items-center gap-1.5 px-2 py-1.5 rounded-xl bg-primary text-primary-foreground text-[11px] font-medium hover:bg-primary/90 transition-colors mb-2.5"
+            style={{ minHeight: '30px' }}
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3 h-3" />
             New Chat
           </button>
 
-          <div className="flex-1 overflow-y-auto mb-4">
+          <div className="flex-1 overflow-y-auto mb-2.5">
             {conversations.length === 0 ? (
-              <p className="text-xs text-secondary text-center py-4">No conversations yet. Start a chat!</p>
+              <p className="text-[10px] text-secondary text-center py-3">No conversations yet.</p>
             ) : (
               <ConversationDayList
                 conversations={conversations}
@@ -529,66 +532,41 @@ export default function HEX6ChatInterface() {
             )}
           </div>
 
-          <div className="space-y-2 border-t border-border pt-4">
-            <button
-              onClick={() => setSettingsOpen(true)}
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-secondary hover:text-foreground hover:bg-muted rounded-sm transition-colors"
-            >
-              <Settings className="w-4 h-4" />
-              Settings
-            </button>
-            <button
-              onClick={() => setLegalOpen(true)}
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-secondary hover:text-foreground hover:bg-muted rounded-sm transition-colors"
-            >
-              <BookOpen className="w-4 h-4" />
-              Legal
-            </button>
-            <button
-              onClick={handleManageBilling}
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-secondary hover:text-foreground hover:bg-muted rounded-sm transition-colors"
-            >
-              <CreditCard className="w-4 h-4" />
-              Billing
-            </button>
-            <button
-              onClick={handleSignOut}
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-secondary hover:text-foreground hover:bg-muted rounded-sm transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-              Sign Out
-            </button>
-          </div>
+          <SidebarActions
+            onSettings={() => setSettingsOpen(true)}
+            onLegal={() => setLegalOpen(true)}
+            onBilling={handleManageBilling}
+            onSignOut={handleSignOut}
+          />
         </div>
       </div>
 
       {/* Main chat area */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Header */}
-        <div className="flex items-center px-3 md:px-6 py-3 md:py-4 border-b border-border gap-2">
-          <div className="flex items-center w-10 md:w-0 shrink-0">
+        <div className="flex items-center px-3 md:px-4 py-2 md:py-2.5 border-b border-border gap-2">
+          <div className="flex items-center shrink-0">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="md:hidden p-2 hover:bg-muted rounded-sm flex items-center justify-center"
+              className="md:hidden p-1.5 hover:bg-muted rounded-sm flex items-center justify-center"
               aria-label="Open menu"
+              style={{ minWidth: '32px', minHeight: '32px' }}
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-4 h-4" />
             </button>
           </div>
-          <div className="flex-1 flex justify-center">
-            <ChatClock />
-          </div>
-          <div className="flex items-center justify-end w-10 md:w-auto shrink-0">
+          <div className="flex-1 flex items-center justify-end gap-2">
             {traderEnabled && (
-              <span className="text-[10px] md:text-xs text-accent px-2 py-1 rounded bg-accent/10 whitespace-nowrap">
+              <span className="text-[9px] md:text-[10px] text-accent px-1.5 py-0.5 rounded bg-accent/10 whitespace-nowrap">
                 Trader: Coming Soon
               </span>
             )}
+            <ChatClock />
           </div>
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-3 md:px-6 py-4 md:py-8 space-y-4 md:space-y-6">
+        <div className="flex-1 overflow-y-auto px-3 md:px-4 py-3 md:py-5 space-y-3 md:space-y-4">
           {messages.map((message) => (
             <div
               key={message.id}
@@ -612,12 +590,12 @@ export default function HEX6ChatInterface() {
                 <div
                   className={`${
                     message.role === 'user'
-                      ? 'bg-accent text-accent-foreground rounded-[1.375rem] rounded-br-md'
-                      : 'bg-muted text-foreground rounded-[1.375rem] rounded-bl-md'
-                  } px-4 py-2.5 text-sm md:text-base shadow-sm`}
+                      ? 'rounded-[1.125rem] rounded-br-sm'
+                      : 'rounded-[1.125rem] rounded-bl-sm'
+                  } bg-muted/60 text-foreground border-2 border-foreground/25 px-3 py-2 text-[13px] md:text-sm`}
                 >
                   <ReactMarkdown 
-                    className={`prose prose-sm dark:prose-invert max-w-none [&>*]:my-0 [&>p]:my-1 [&>ul]:my-1 [&>ol]:my-1 [&>li]:my-0 ${message.role === 'user' ? 'text-accent-foreground prose-strong:text-accent-foreground' : 'text-foreground'}`}
+                    className="prose prose-sm dark:prose-invert max-w-none text-foreground [&>*]:my-0 [&>p]:my-1 [&>ul]:my-1 [&>ol]:my-1 [&>li]:my-0"
                     components={{
                       p: ({ node, ...props }) => <p {...props} />,
                       ul: ({ node, ...props }) => <ul className="list-disc list-inside" {...props} />,
@@ -628,7 +606,7 @@ export default function HEX6ChatInterface() {
                           {...props}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className={`underline hover:opacity-80 break-all ${message.role === 'user' ? 'text-accent-foreground' : 'text-accent'}`}
+                          className="underline hover:opacity-80 break-all text-accent"
                         />
                       ),
                     }}
@@ -641,7 +619,8 @@ export default function HEX6ChatInterface() {
                 <div className={`flex gap-0.5 mt-1 px-1 opacity-60 hover:opacity-100 transition-opacity ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <button
                     onClick={() => handleCopy(message)}
-                    className="p-1.5 rounded-md hover:bg-muted text-secondary hover:text-foreground transition-colors"
+                    className="p-1 rounded-md hover:bg-muted text-secondary hover:text-foreground transition-colors flex items-center justify-center"
+                    style={{ minWidth: '24px', minHeight: '24px' }}
                     title="Copy message"
                   >
                     {copiedId === message.id ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
@@ -649,7 +628,8 @@ export default function HEX6ChatInterface() {
                   {message.role === 'assistant' && (
                     <button
                       onClick={() => handleSpeak(message)}
-                      className={`p-1.5 rounded-md hover:bg-muted transition-colors ${speakingId === message.id ? 'text-accent' : 'text-secondary hover:text-foreground'}`}
+                      className={`p-1 rounded-md hover:bg-muted transition-colors flex items-center justify-center ${speakingId === message.id ? 'text-accent' : 'text-secondary hover:text-foreground'}`}
+                      style={{ minWidth: '24px', minHeight: '24px' }}
                       title={speakingId === message.id ? 'Stop speaking' : 'Read aloud'}
                     >
                       {speakingId === message.id ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
@@ -661,13 +641,13 @@ export default function HEX6ChatInterface() {
           ))}
           {loading && (
             <div className="flex justify-start">
-              <div className="ml-2 bg-muted text-foreground rounded-[1.375rem] rounded-bl-md px-4 py-3 text-sm text-secondary flex flex-col gap-2 max-w-xs">
+              <div className="ml-2 bg-muted/60 text-foreground border-2 border-foreground/25 rounded-[1.125rem] rounded-bl-sm px-3 py-2 text-[13px] text-secondary flex flex-col gap-1.5 max-w-xs">
                 <div className="flex gap-1">
-                  <div className="w-2 h-2 rounded-full bg-secondary" style={{ animation: 'bounce 1.2s infinite', animationDelay: '0s' }} />
-                  <div className="w-2 h-2 rounded-full bg-secondary" style={{ animation: 'bounce 1.2s infinite', animationDelay: '0.2s' }} />
-                  <div className="w-2 h-2 rounded-full bg-secondary" style={{ animation: 'bounce 1.2s infinite', animationDelay: '0.4s' }} />
+                  <div className="w-1.5 h-1.5 rounded-full bg-secondary" style={{ animation: 'bounce 1.2s infinite', animationDelay: '0s' }} />
+                  <div className="w-1.5 h-1.5 rounded-full bg-secondary" style={{ animation: 'bounce 1.2s infinite', animationDelay: '0.2s' }} />
+                  <div className="w-1.5 h-1.5 rounded-full bg-secondary" style={{ animation: 'bounce 1.2s infinite', animationDelay: '0.4s' }} />
                 </div>
-                <span className="text-xs text-secondary/70 transition-all duration-500">{slowStep === null ? 'Thinking...' : SLOW_PATH_STEPS[slowStep]}</span>
+                <span className="text-[11px] text-secondary/70 transition-all duration-500">{slowStep === null ? 'Thinking...' : SLOW_PATH_STEPS[slowStep]}</span>
               </div>
             </div>
           )}
@@ -681,8 +661,8 @@ export default function HEX6ChatInterface() {
         </div>
 
         {/* Input */}
-        <div className="border-t border-border px-3 md:px-6 py-3 md:py-4 bg-background">
-          <div className="flex flex-col gap-2 md:gap-3">
+        <div className="border-t border-border px-3 md:px-4 py-2.5 md:py-3 bg-background">
+          <div className="flex flex-col gap-2">
             {uploadedImage && (
               <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 rounded-2xl border border-accent/30">
                 <Image className="w-4 h-4 text-accent" />
@@ -698,24 +678,24 @@ export default function HEX6ChatInterface() {
             <div className="flex items-center gap-2 md:gap-3">
             <button
               onClick={handleVoiceInput}
-              className={`p-2 md:p-2.5 rounded-full transition-colors shrink-0 flex items-center justify-center ${
+              className={`p-2 rounded-full transition-colors shrink-0 flex items-center justify-center ${
                 listening
                   ? 'bg-accent text-accent-foreground'
                   : 'hover:bg-muted text-secondary hover:text-foreground'
               }`}
               title={listening ? 'Stop listening' : 'Start voice input'}
-              style={{ minWidth: '44px', minHeight: '44px' }}
+              style={{ minWidth: '32px', minHeight: '32px' }}
             >
-              <Mic className={`w-4 md:w-5 h-4 md:h-5 ${listening ? 'animate-pulse' : ''}`} />
+              <Mic className={`w-4 h-4 ${listening ? 'animate-pulse' : ''}`} strokeWidth={1.5} />
             </button>
 
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="p-2 md:p-2.5 rounded-full hover:bg-muted text-secondary hover:text-foreground transition-colors shrink-0 flex items-center justify-center"
+              className="p-2 rounded-full hover:bg-muted text-secondary hover:text-foreground transition-colors shrink-0 flex items-center justify-center"
               title="Upload image"
-              style={{ minWidth: '44px', minHeight: '44px' }}
+              style={{ minWidth: '32px', minHeight: '32px' }}
             >
-              <Image className="w-4 md:w-5 h-4 md:h-5" />
+              <Image className="w-4 h-4" strokeWidth={1.5} />
             </button>
             <input
               ref={fileInputRef}
@@ -736,20 +716,20 @@ export default function HEX6ChatInterface() {
               }}
               placeholder="Ask anything..."
               rows={1}
-              className="flex-1 px-3 md:px-4 py-2 rounded-3xl border border-border bg-background text-foreground placeholder-secondary text-sm md:text-base focus:outline-none focus:border-accent resize-none max-h-32 overflow-y-auto"
-              style={{ minHeight: '44px' }}
+              className="flex-1 px-3 py-1.5 rounded-2xl border-2 border-foreground/20 bg-background text-foreground placeholder-secondary text-[13px] md:text-sm focus:outline-none focus:border-accent resize-none max-h-28 overflow-y-auto"
+              style={{ minHeight: '34px' }}
             />
             <button
               onClick={handleSendMessage}
               disabled={loading || (!input.trim() && !listening && !uploadedImage)}
-              className="p-2 md:p-2.5 rounded-full bg-accent text-accent-foreground hover:bg-accent/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0 flex items-center justify-center"
-              style={{ minWidth: '44px', minHeight: '44px' }}
+              className="p-2 rounded-full bg-accent text-accent-foreground hover:bg-accent/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0 flex items-center justify-center"
+              style={{ minWidth: '32px', minHeight: '32px' }}
             >
-              <Send className="w-4 md:w-5 h-4 md:h-5" />
+              <Send className="w-4 h-4" strokeWidth={1.5} />
             </button>
             </div>
           </div>
-          <p className="text-[11px] text-secondary/70 px-1 mt-3 md:mt-4 leading-relaxed">
+          <p className="text-[9px] text-secondary/70 px-1 mt-2 leading-relaxed">
             HEX6 BLE is a probabilistic intelligence model. No information provided constitutes financial, legal, or professional advice.
           </p>
         </div>
