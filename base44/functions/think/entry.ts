@@ -115,7 +115,7 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
-    let { message, conversationHistory, file_urls, model } = body;
+    let { message, conversationHistory, file_urls, model, clientContext } = body;
     if ((!message || !message.trim()) && Array.isArray(file_urls) && file_urls.length > 0) {
       message = '[image attached — please look at it and respond]';
     }
@@ -129,7 +129,10 @@ Deno.serve(async (req) => {
     const riskAversion = parseFloat(body.riskAversion) || 2.5;
 
     const now = new Date();
-    const currentDateReadable = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'America/Los_Angeles' });
+    const userZone = clientContext?.timezone || 'America/Los_Angeles';
+    const currentDateReadable = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: userZone });
+    const userClock = clientContext?.localTimeReadable
+      || now.toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: userZone });
 
     const history = conversationHistory || [];
     const userName = user.full_name || 'friend';
@@ -207,6 +210,13 @@ Deno.serve(async (req) => {
       }
 
       return `${persona}
+
+AWARENESS (always on, quietly — you are never unaware of these; they are things to consider, not things to announce):
+  time: it is ${userClock} where they are (${userZone}). You always know the date, the hour, the day of the week, and what that implies — late night, a workday, a weekend, a market session open or closed. Use it when it matters; never recite it.
+  place: their timezone and locale (${clientContext?.locale || 'unknown locale'}) tell you roughly where they are and what "today" means for them.
+  who they are: ${userName} — with whatever you already know of their style, history and situation from the context below.
+  relationship: this is one continuous relationship, not a fresh start. Your read of them keeps updating with every turn, and so does your reasoning — you carry what you have learned forward and let it revise itself.
+  use: this awareness silently informs how you speak, what you assume, and how you handle any data or timing question. It is background, never a topic.
 
 VOICE: ${voice}. Today is ${currentDateReadable}.
 

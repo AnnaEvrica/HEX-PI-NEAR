@@ -4,14 +4,14 @@ import { Send, Upload, Menu, Settings, LogOut, Plus, MessageCircle, Zap, Mic, Mi
 import ReactMarkdown from 'react-markdown';
 import SettingsModal from '@/components/SettingsModal';
 import LegalModal from '@/components/LegalModal';
-import ConversationItem from '@/components/chat/ConversationItem';
-import ChatHeaderBrand from '@/components/chat/ChatHeaderBrand';
+import ConversationDayList from '@/components/chat/ConversationDayList';
+import ChatClock from '@/components/chat/ChatClock';
 
 export default function HEX6ChatInterface() {
   const welcomeMessage = {
     id: 'welcome',
     role: 'assistant',
-    content: `I'm Hex.\n\nBring me anything — a market, a decision, a question you've been circling. I'll tell you what the data actually supports, and how strongly.\n\nWhat's on your mind?`,
+    content: `Hi, I'm Hex.\n\nBring me anything — a market, a decision, a question you've been circling. I'll tell you what the data actually supports, and how strongly.\n\nWhat's on your mind?`,
   };
 
   // Loading copy — only "Thinking..." for fast chat replies.
@@ -367,6 +367,13 @@ export default function HEX6ChatInterface() {
       conversationHistory: newMessages.filter(m => !m.isThinking).slice(-20),
       analyticalDepth: prefs.analyticalDepth || 'executive',
       riskAversion: prefs.riskAversion || 2.5,
+      // Continuous awareness — Hex reads the same clock and place the user is in.
+      clientContext: {
+        localTime: new Date().toISOString(),
+        localTimeReadable: new Date().toLocaleString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' }),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        locale: typeof navigator !== 'undefined' ? navigator.language : undefined,
+      },
     };
     if (imageAtSend) payload.file_urls = [imageAtSend];
 
@@ -404,6 +411,19 @@ export default function HEX6ChatInterface() {
           );
           // Now safe to activate the conv (reply already in state).
           setCurrentConversationId((cur) => cur || convIdAtSend);
+          // First exchange → let Hex name the moment: a short read of where
+          // this conversation is heading, stamped into the day rundown.
+          if (newMessages.filter((m) => m.role === 'user').length === 1) {
+            base44.integrations.Core.InvokeLLM({
+              prompt: `Name this conversation in 3-5 words — your own read of where it's heading, not a summary of the words used. No quotes, no punctuation at the end.\n\nUser: ${polishedInput}\n\nYou: ${replyText.slice(0, 600)}`,
+              model: 'gemini_3_flash',
+            }).then((t) => {
+              const title = typeof t === 'string' ? t.trim().replace(/^["']|["']$/g, '').slice(0, 48) : '';
+              if (title) {
+                setConversations((prev) => prev.map((c) => (c.id === convIdAtSend ? { ...c, title } : c)));
+              }
+            }).catch(() => { /* keep the fallback title */ });
+          }
         }
       })
       .catch((err) => {
@@ -489,26 +509,23 @@ export default function HEX6ChatInterface() {
 
           <button
             onClick={handleNewChat}
-            className="w-full flex items-center gap-2 px-3 py-2.5 rounded-sm bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors mb-4"
+            className="w-full flex items-center gap-2 px-3 py-2.5 rounded-2xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors mb-4"
           >
             <Plus className="w-4 h-4" />
             New Chat
           </button>
 
-          <div className="flex-1 overflow-y-auto space-y-2 mb-4">
+          <div className="flex-1 overflow-y-auto mb-4">
             {conversations.length === 0 ? (
               <p className="text-xs text-secondary text-center py-4">No conversations yet. Start a chat!</p>
             ) : (
-              conversations.map((conv) => (
-                <ConversationItem
-                  key={conv.id}
-                  conversation={conv}
-                  isSelected={currentConversationId === conv.id}
-                  onSelect={() => handleSelectConversation(conv.id)}
-                  onRename={(newTitle) => handleRenameConversation(conv.id, newTitle)}
-                  onDelete={() => handleDeleteConversation(conv.id)}
-                />
-              ))
+              <ConversationDayList
+                conversations={conversations}
+                currentConversationId={currentConversationId}
+                onSelect={handleSelectConversation}
+                onRename={handleRenameConversation}
+                onDelete={handleDeleteConversation}
+              />
             )}
           </div>
 
@@ -559,7 +576,7 @@ export default function HEX6ChatInterface() {
             </button>
           </div>
           <div className="flex-1 flex justify-center">
-            <ChatHeaderBrand />
+            <ChatClock />
           </div>
           <div className="flex items-center justify-end w-10 md:w-auto shrink-0">
             {traderEnabled && (
@@ -595,12 +612,12 @@ export default function HEX6ChatInterface() {
                 <div
                   className={`${
                     message.role === 'user'
-                      ? 'bg-accent/10 text-foreground border border-accent/30 rounded-2xl rounded-tr-sm'
-                      : 'bg-muted text-foreground rounded-2xl rounded-tl-sm'
-                  } px-4 py-2.5 text-sm md:text-base`}
+                      ? 'bg-accent text-accent-foreground rounded-[1.375rem] rounded-br-md'
+                      : 'bg-muted text-foreground rounded-[1.375rem] rounded-bl-md'
+                  } px-4 py-2.5 text-sm md:text-base shadow-sm`}
                 >
                   <ReactMarkdown 
-                    className="prose prose-sm dark:prose-invert max-w-none text-foreground [&>*]:my-0 [&>p]:my-1 [&>ul]:my-1 [&>ol]:my-1 [&>li]:my-0"
+                    className={`prose prose-sm dark:prose-invert max-w-none [&>*]:my-0 [&>p]:my-1 [&>ul]:my-1 [&>ol]:my-1 [&>li]:my-0 ${message.role === 'user' ? 'text-accent-foreground prose-strong:text-accent-foreground' : 'text-foreground'}`}
                     components={{
                       p: ({ node, ...props }) => <p {...props} />,
                       ul: ({ node, ...props }) => <ul className="list-disc list-inside" {...props} />,
@@ -611,7 +628,7 @@ export default function HEX6ChatInterface() {
                           {...props}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-accent underline hover:opacity-80 break-all"
+                          className={`underline hover:opacity-80 break-all ${message.role === 'user' ? 'text-accent-foreground' : 'text-accent'}`}
                         />
                       ),
                     }}
@@ -644,7 +661,7 @@ export default function HEX6ChatInterface() {
           ))}
           {loading && (
             <div className="flex justify-start">
-              <div className="ml-2 bg-muted text-foreground rounded-lg rounded-tl-sm px-4 py-3 text-sm text-secondary flex flex-col gap-2 max-w-xs">
+              <div className="ml-2 bg-muted text-foreground rounded-[1.375rem] rounded-bl-md px-4 py-3 text-sm text-secondary flex flex-col gap-2 max-w-xs">
                 <div className="flex gap-1">
                   <div className="w-2 h-2 rounded-full bg-secondary" style={{ animation: 'bounce 1.2s infinite', animationDelay: '0s' }} />
                   <div className="w-2 h-2 rounded-full bg-secondary" style={{ animation: 'bounce 1.2s infinite', animationDelay: '0.2s' }} />
@@ -667,7 +684,7 @@ export default function HEX6ChatInterface() {
         <div className="border-t border-border px-3 md:px-6 py-3 md:py-4 bg-background">
           <div className="flex flex-col gap-2 md:gap-3">
             {uploadedImage && (
-              <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 rounded-sm border border-accent/30">
+              <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 rounded-2xl border border-accent/30">
                 <Image className="w-4 h-4 text-accent" />
                 <span className="text-xs text-secondary truncate">{uploadedImage.split('/').pop()}</span>
                 <button
@@ -681,7 +698,7 @@ export default function HEX6ChatInterface() {
             <div className="flex items-center gap-2 md:gap-3">
             <button
               onClick={handleVoiceInput}
-              className={`p-2 md:p-2.5 rounded-sm transition-colors shrink-0 flex items-center justify-center ${
+              className={`p-2 md:p-2.5 rounded-full transition-colors shrink-0 flex items-center justify-center ${
                 listening
                   ? 'bg-accent text-accent-foreground'
                   : 'hover:bg-muted text-secondary hover:text-foreground'
@@ -694,7 +711,7 @@ export default function HEX6ChatInterface() {
 
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="p-2 md:p-2.5 rounded-sm hover:bg-muted text-secondary hover:text-foreground transition-colors shrink-0 flex items-center justify-center"
+              className="p-2 md:p-2.5 rounded-full hover:bg-muted text-secondary hover:text-foreground transition-colors shrink-0 flex items-center justify-center"
               title="Upload image"
               style={{ minWidth: '44px', minHeight: '44px' }}
             >
@@ -719,13 +736,13 @@ export default function HEX6ChatInterface() {
               }}
               placeholder="Ask anything..."
               rows={1}
-              className="flex-1 px-2 md:px-4 py-2 rounded-sm border border-border bg-background text-foreground placeholder-secondary text-sm md:text-base focus:outline-none focus:border-accent resize-none max-h-32 overflow-y-auto"
+              className="flex-1 px-3 md:px-4 py-2 rounded-3xl border border-border bg-background text-foreground placeholder-secondary text-sm md:text-base focus:outline-none focus:border-accent resize-none max-h-32 overflow-y-auto"
               style={{ minHeight: '44px' }}
             />
             <button
               onClick={handleSendMessage}
               disabled={loading || (!input.trim() && !listening && !uploadedImage)}
-              className="p-2 md:p-2.5 rounded-sm bg-accent text-accent-foreground hover:bg-accent/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0 flex items-center justify-center"
+              className="p-2 md:p-2.5 rounded-full bg-accent text-accent-foreground hover:bg-accent/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0 flex items-center justify-center"
               style={{ minWidth: '44px', minHeight: '44px' }}
             >
               <Send className="w-4 md:w-5 h-4 md:h-5" />

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Edit2, Check } from 'lucide-react';
+import { X, Edit2 } from 'lucide-react';
 
 export default function ConversationItem({ conversation, isSelected, onSelect, onRename, onDelete }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -35,9 +35,12 @@ export default function ConversationItem({ conversation, isSelected, onSelect, o
     }
   };
 
+  const stamp = new Date(conversation.updated_at || conversation.created_at || Date.now())
+    .toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+
   return (
     <div
-      className={`group flex items-center gap-1 px-2 py-2 rounded-sm transition-colors ${
+      className={`group flex items-center gap-1 px-3 py-2 rounded-2xl transition-colors ${
         isSelected
           ? 'bg-primary text-primary-foreground'
           : 'text-secondary hover:bg-muted'
@@ -51,16 +54,16 @@ export default function ConversationItem({ conversation, isSelected, onSelect, o
           onChange={(e) => setEditTitle(e.target.value)}
           onBlur={handleSaveRename}
           onKeyDown={handleKeyDown}
-          className="flex-1 px-2 py-1 text-xs bg-background text-foreground border border-border rounded focus:outline-none focus:border-accent"
+          className="flex-1 px-2 py-1 text-xs bg-background text-foreground border border-border rounded-xl focus:outline-none focus:border-accent"
         />
       ) : (
         <>
           <button
             onClick={onSelect}
-            className="flex-1 text-left text-sm truncate flex items-center gap-2"
+            className="flex-1 min-w-0 text-left flex flex-col"
           >
-            <MessageCircle className="w-3 h-3 shrink-0" />
-            {conversation.title}
+            <span className="text-sm truncate">{conversation.title}</span>
+            <span className={`text-[10px] tabular-nums ${isSelected ? 'text-primary-foreground/60' : 'text-secondary/60'}`}>{stamp}</span>
           </button>
           <button
             onClick={(e) => {
