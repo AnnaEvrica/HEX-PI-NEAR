@@ -125,7 +125,7 @@ export default function HeroSection({ onAsteriskHover }) {
           <div className="relative flex flex-col items-center text-center gap-[0.6rem] sm:gap-[1rem]">
             {/* Single-line wordmark scales fluidly from phone to desktop. */}
             <motion.h2
-              className="w-full whitespace-nowrap text-center text-[clamp(2.65rem,14vw,10rem)] leading-[0.9] font-bold tracking-[-0.055em] text-foreground"
+              className="w-full whitespace-nowrap text-center text-[clamp(1.9rem,7vw,4.5rem)] leading-[0.9] font-bold tracking-[-0.055em] text-foreground"
               style={{ textShadow: '0 0 14px rgba(255,255,255,0.3), 0 2px 18px rgba(0,0,0,0.45)' }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -136,7 +136,7 @@ export default function HeroSection({ onAsteriskHover }) {
 
             {/* Line 2 — THE ROLE MODEL, small italics */}
             <motion.p
-              className="w-full whitespace-nowrap text-center font-semibold tracking-[0.3em] uppercase text-foreground/80 text-[clamp(0.75rem,2.2vw,1.35rem)] leading-none mt-6 transition-all duration-500"
+              className="w-full whitespace-nowrap text-center font-semibold tracking-[0.3em] uppercase text-foreground/80 text-[clamp(0.6rem,1.6vw,0.95rem)] leading-none mt-3 transition-all duration-500"
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.25 }}
@@ -146,7 +146,7 @@ export default function HeroSection({ onAsteriskHover }) {
 
             {/* Line 3 — BLE, smallest */}
             <motion.p
-              className="w-full whitespace-nowrap text-center font-medium tracking-[0.12em] text-foreground/55 text-[clamp(0.6rem,1.5vw,0.95rem)] leading-none mt-2 md:mt-6 transition-all duration-500"
+              className="w-full whitespace-nowrap text-center font-medium tracking-[0.12em] text-foreground/55 text-[clamp(0.5rem,1.1vw,0.72rem)] leading-none mt-1.5 md:mt-3 transition-all duration-500"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.35 }}
@@ -155,7 +155,21 @@ export default function HeroSection({ onAsteriskHover }) {
             </motion.p>
           </div>
 
-          <div className="relative mt-16 flex flex-col items-center text-center">
+          {/* Central hero image — stretched edge-to-edge of the card on all viewports */}
+          <motion.div
+            className="relative -mx-5 sm:-mx-10 mt-8 sm:mt-10"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.3 }}
+          >
+            <img
+              src="https://media.base44.com/images/public/69eef3d514386627566a9bf6/f137c7dff_u3683223828_severance-style_room_with_computers_and_parrots_o_2a1c272a-ac62-40af-8ca9-4fd3e63e0a2c_1.png"
+              alt="A black crow standing among green parrots"
+              className="w-full h-[52vh] sm:h-[64vh] md:h-[74vh] object-cover object-center"
+            />
+          </motion.div>
+
+          <div className="relative mt-8 sm:mt-10 flex flex-col items-center text-center">
             <motion.div
               className="flex flex-col items-center gap-10 sm:gap-14 w-full"
               initial={{ opacity: 0, y: 18 }}
