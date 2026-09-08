@@ -1,0 +1,44 @@
+{
+  "name": "Sync EngineRunLog \u2192 Postgres (5 min)",
+  "description": "Every 5 minutes: pulls new EngineRunLog records since the last watermark and upserts them into the external Postgres tables (apex_history, organism_steps, cross_market_series). Lock-protected; skips if previous run still in flight.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "interval",
+      "cron_expression": null,
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": 5,
+      "interval_unit": "minutes",
+      "interval_anchor": "2026-05-07T01:42:20.731000",
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "sync_enginerunlog_postgres_5_min",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sync-engine-runs-to-postgres",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "sync-engine-runs-to-postgres"
+  }
+}
