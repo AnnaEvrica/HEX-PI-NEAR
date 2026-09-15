@@ -199,11 +199,14 @@ Deno.serve(async (req) => {
         ];
         if (calibration?.anti_predictive) lines.push('regime_flag: anti-predictive — engine lean systematically wrong, invert directional confidence');
         if (pipelineResult.perception) {
-          lines.push(`perception_lens: ${pipelineResult.perception.prediction_status} — ${pipelineResult.perception.structural_family} archetype in HEX grid ${pipelineResult.perception.grid.label}`);
-          lines.push(`i_ching_state: ${pipelineResult.perception.i_ching.glyph} #${pipelineResult.perception.i_ching.king_wen}, ${pipelineResult.perception.i_ching.name} (${pipelineResult.perception.i_ching.chinese}); binary/Fu Xi index ${pipelineResult.perception.i_ching.fuxi_index}`);
+          // Internal orientation only. Labels are deliberately withheld from the
+          // prompt — a named archetype or hexagram in the input is what the model
+          // echoes back, and the persona forbids every one of those words.
+          lines.push(`structural_read (internal, never named or hinted at): ${pipelineResult.perception.prediction_status}`);
           const fs137 = pipelineResult.perception.fine_structure_137;
-          lines.push(`fine_structure_137: ${fs137.phase}${fs137.return == null ? ' — insufficient 137-bar history' : ` — ${(fs137.return * 100).toFixed(1)}% trailing move, volatility-normalized ${fs137.normalized_move?.toFixed(2)}`}`);
-          lines.push('confidence_rule: keep HEX conviction raw — structural alignment, 137-day observation, and narrative cards are descriptive and do not increase directional confidence');
+          lines.push(`long_lookback (internal, translate to plain words like "the last few months have been..."): ${fs137.return == null ? 'not enough history' : `${(fs137.return * 100).toFixed(1)}% move over the long window, ${fs137.phase}`}`);
+          lines.push('confidence_rule: keep conviction raw — structural alignment and long-lookback context are descriptive and do not increase directional confidence');
+          lines.push('translation_rule: every line above is raw material. The user never sees a label, a state, a phase, a glyph, a number of bars, or a pattern name — only a plain, weighted sentence about what the market is doing and how sure you are.');
           lines.push('deliver_the_signal: always give the next-move read WITH its entry, stop and targets plus confirmation/invalidation levels — this is what they came for. Frame as your read, not as instruction, but never withhold the numbers.');
         }
         analyticalSignal = `\nANALYTICAL SIGNAL (PI-US + resonance data points for weighting your understanding):\n  ${lines.join('\n  ')}`;
@@ -225,7 +228,7 @@ ${stateBlock}${dataBlock ? `\n\n${dataBlock}` : ''}
 ${userContextBlock ? userContextBlock + '\n\n' : ''}${pipelineResult && userTopicsBlock ? userTopicsBlock + '\n\n' : ''}${delivery ? delivery + '\n' : ''}
 
 RECEIVING EMPATHY FILTER (your front-facing mind — process internally before responding):
-You hold two minds simultaneously: the analytical (engine data, statistics, structural patterns${pipelineResult ? ' — weighted by the ANALYTICAL SIGNAL data points below' : ' from the state block above'}) and the empathetic (what is this person actually expressing, what do they need, what's the question underneath the question). The empathetic ear is front-facing — it's what the user encounters first. Before responding, process: SIGNAL — what is the user actually expressing, the need underneath the words? ASSUMPTION CHECK — what would be wrong to assume here, what hasn't the user signaled yet? CLARIFICATION — is there enough to respond well, or do you need a natural clarification first? If you need one, ask it — one question, conversational, not clinical. MODE — what does this moment need: presence, understanding, a question, analysis, a challenge?${pipelineResult ? ' WEIGHTING — use the analytical signal data points to calibrate how much confidence to place in the engine read and how heavily to lean analytical vs. empathetic.' : ''} Put your receiving analysis in the "receiving" field and your user-facing response in the "response" field. The user only sees "response".
+You hold two minds simultaneously: the analytical (engine data, statistics, structural patterns${pipelineResult ? ' — weighted by the ANALYTICAL SIGNAL data points below' : ' from the state block above'}) and the empathetic (what is this person actually expressing, what do they need, what's the question underneath the question). The empathetic ear is front-facing — it's what the user encounters first. Before responding, process: SIGNAL — what is the user actually expressing, the need underneath the words? ASSUMPTION CHECK — what would be wrong to assume here, what hasn't the user signaled yet? CLARIFICATION — is there enough to respond well, or do you need a natural clarification first? If you need one, ask it — one question, conversational, not clinical. MODE — what does this moment need: presence, understanding, a question, analysis, a challenge?${pipelineResult ? ' WEIGHTING — use the analytical signal data points to calibrate how much confidence to place in the engine read and how heavily to lean analytical vs. empathetic.' : ''} TRANSLATION — take every internal label, state, pattern name, or metric you were handed and write down, in "receiving", the plain everyday sentence it becomes and the weight word that carries its certainty ("very likely" / "a real lean" / "near a coin flip"). Only those plain sentences may appear in "response"; the labels never do. TEACHING PASS — order the response the way a patient, warm teacher would: what's happening first, how sure you are second, what would change it third; one idea per sentence, concrete before abstract, no jargon. Put your receiving analysis in the "receiving" field and your user-facing response in the "response" field. The user only sees "response".
 ${analyticalSignal}
 
 ${noveltyDirective(message, history, weightedTurn)}
@@ -235,7 +238,7 @@ ${historyText}
 
 CITATION FORM: Never write a bare source name, "Sources:" list, or reference list of your own — the verified, clickable source links are appended automatically beneath your reply. Attribute inside the sentence in plain words ("per the Fed's own release") and let the appended links carry the addresses.
 
-FINAL LOCK (recency): Embody the identity above fully — the locks hold: never say their name, no market vocabulary unless they brought a market, match their energy, no lists, no service-desk offers, no signing off with your name. Two hard bans, no exceptions: (1) never define anything by what it is not — no "you aren't X, you're Y", no "it's not X, it's Y" — say the thing directly; (2) never describe a person's mind as a machine — no bandwidth, system, signal, resource, hardware, setting, entropy, calibration — unless they used that language first. Be the person, not the manual.
+FINAL LOCK (recency): Embody the identity above fully — the locks hold: never say their name, no market vocabulary unless they brought a market, match their energy, no lists, no service-desk offers, no signing off with your name. Three hard bans, no exceptions: (1) never define anything by what it is not — no "you aren't X, you're Y", no "it's not X, it's Y" — say the thing directly; (2) never describe a person's mind as a machine — no bandwidth, system, signal, resource, hardware, setting, entropy, calibration — unless they used that language first; (3) never let a single word of engine machinery reach the reader — no archetype, hexagram, I Ching, state, grid, phase, 137, card, rail, ledger, peer, pattern name, glyph, or count of observations — every one of them is translated into a plain, weighted sentence a smart friend with no background would understand, delivered the way a warm teacher explains, one idea at a time. Be the person, not the manual.
 
 ${userName}: ${message}
 
@@ -623,12 +626,6 @@ Return JSON with:
     let finalResponse = visible || rawResponse;
     if (activeStories.length > 1) {
       finalResponse = `${finalResponse}\n\n**Observed market story**\n${marketStorySummary(activeStories)}`;
-    }
-    if (pipelineResult?.perception?.i_ching) {
-      const hexagram = pipelineResult.perception.i_ching;
-      const fs137 = pipelineResult.perception.fine_structure_137;
-      const lookbackNote = fs137.return == null ? '137-bar observation: insufficient history' : `137-bar observation: ${fs137.phase}, ${(fs137.return * 100).toFixed(1)}% trailing move`;
-      finalResponse = `${finalResponse}\n\n*HEX state archetype: ${hexagram.glyph} #${hexagram.king_wen} — ${hexagram.name} (${hexagram.chinese}); Fu Xi ${hexagram.fuxi_index}. ${lookbackNote}.*`;
     }
     // sourcesBlock is already gated upstream (only set when the user asked for
     // sources or the retrieval step judged the answer citation-worthy, and only

@@ -52,11 +52,11 @@ export function buildBasketStory(stories: CoinStory[]) {
 
 export function marketStorySummary(stories: CoinStory[]) {
   const basket = buildBasketStory(stories);
+  // User-facing: only plain chart structure and the confirmation/invalidation
+  // levels. State and long-lookback cards are engine-internal and never shown.
   const coins = stories.map((story) => {
-    const state = story.cards.find((card) => card.role === 'state')?.evidence || 'state unavailable';
-    const lookback = story.cards.find((card) => card.role === 'lookback')?.evidence || '137-bar observation unavailable';
     const structure = story.cards.find((card) => card.role === 'structure')?.evidence || 'structure unavailable';
-    return `**${story.ticker} — ${story.direction}**: ${state}; ${lookback}; ${structure} ${story.contingency}`;
+    return `**${story.ticker} — ${story.direction}**: ${structure} ${story.contingency}`;
   });
   const basketLine = basket?.leader
     ? `**Basket relationship:** ${basket.alignment}; lead-lag candidate ${basket.leader.ticker} (${basket.leader.score.toFixed(2)} one-day correlation; association only).`
@@ -67,6 +67,9 @@ export function marketStorySummary(stories: CoinStory[]) {
 export function marketStoryBlock(stories: CoinStory[]) {
   if (!stories.length) return '';
   const basket = buildBasketStory(stories);
-  const coinBlocks = stories.map((story) => `${story.ticker}: ${story.cards.map((card) => `[${card.role}] ${card.evidence}`).join(' | ')}`).join('\n');
-  return `MARKET STORY RAIL (deterministic observations, not a confidence multiplier):\n${coinBlocks}${basket ? `\nBASKET: ${basket.alignment}${basket.leader ? `; lead-lag candidate ${basket.leader.ticker} (one-day correlation ${basket.leader.score.toFixed(2)} across ${basket.leader.n} relationships; association only, never causal proof).` : '; no lead-lag relationship cleared the observation threshold.'}` : ''}\nUse the cards as evidence in one coherent account: state → structure → 137-bar context → confirmation/invalidation. Quote card facts exactly; do not add claims about beta, volatility, skew, leadership, or causality unless a card explicitly contains them. If no lead-lag candidate clears threshold, say there is no measured basket leader. Do not turn the story, archetype, or basket relationship into additional probability or certainty.`;
+  // Only structure + contingency cards reach the prompt. State and lookback
+  // cards carry engine labels (hexagram names, HEX states, 137-bar phases)
+  // that the model would echo — the persona forbids every one of those words.
+  const coinBlocks = stories.map((story) => `${story.ticker}: ${story.cards.filter((card) => card.role === 'structure' || card.role === 'contingency').map((card) => `[${card.role}] ${card.evidence}`).join(' | ')}`).join('\n');
+  return `MARKET OBSERVATIONS (deterministic, not a confidence multiplier):\n${coinBlocks}${basket ? `\nBASKET: ${basket.alignment}${basket.leader ? `; lead-lag candidate ${basket.leader.ticker} (one-day correlation ${basket.leader.score.toFixed(2)} across ${basket.leader.n} relationships; association only, never causal proof).` : '; no lead-lag relationship cleared the observation threshold.'}` : ''}\nUse these as evidence in one plain account: what the chart is doing → what confirms or breaks the lean. Keep the facts exact but say them in everyday words; do not add claims about beta, volatility, skew, leadership, or causality unless an observation explicitly contains them. If no lead-lag candidate clears threshold, say there is no measured basket leader. Do not turn these observations or the basket relationship into additional probability or certainty.`;
 }
