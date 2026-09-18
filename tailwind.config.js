@@ -50,6 +50,13 @@ module.exports = {
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
   			},
+  			landing: {
+  				bg: 'hsl(var(--landing-bg))',
+  				sheet: 'hsl(var(--landing-sheet))',
+  				'sheet-2': 'hsl(var(--landing-sheet-2))',
+  				ink: 'hsl(var(--landing-ink))',
+  				muted: 'hsl(var(--landing-muted))'
+  			},
   			sidebar: {
   				DEFAULT: 'hsl(var(--sidebar-background))',
   				foreground: 'hsl(var(--sidebar-foreground))',
