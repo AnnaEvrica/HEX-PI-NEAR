@@ -8,8 +8,8 @@ export default function ClosingCTA({ onOpenPolicy }) {
       <div className="lp-finale-inner">
         <div className="lp-finale-kicker">The source of truth is the outcome</div>
         <div className="lp-finale-logo"><span className="br">[</span><span className="hex">HEX</span><span className="dash">-</span><span className="ble">BLE</span><sup>6</sup><span className="br">]</span></div>
-        <div className="lp-finale-copy">Don&rsquo;t just ask AI.<br /><b>Know when to act.</b></div>
-        <div className="lp-finale-sub">Prediction becomes probability. Probability meets risk. Reality improves the next decision.</div>
+        <div className="lp-finale-copy">Don&rsquo;t fear the dark.<br /><b>Find the signal.</b></div>
+        <div className="lp-finale-sub">Signal decays. The raven finds it. Probability meets risk. Reality improves the next decision.</div>
         <div className="lp-finale-actions">
           <Link to="/discover" className="lp-btn primary">Join the experiment ↗</Link>
           <a href="https://evrica.tech" target="_blank" rel="noopener noreferrer" className="lp-btn">Explore the method ↗</a>

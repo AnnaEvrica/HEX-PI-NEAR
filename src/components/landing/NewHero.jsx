@@ -16,10 +16,10 @@ export default function NewHero() {
     <section className="lp-hero">
       <RavenArt variant="hero" className="lp-raven-top" />
       <div className="lp-logo-lockup">
-        <div className="lp-hero-kicker">Probabilistic intelligence for consequential decisions</div>
+        <div className="lp-hero-kicker">Signal in the decay</div>
         <div className="lp-main-logo"><span className="br">[</span><span className="hex">HEX</span><span className="dash">-</span><span className="ble">BLE</span><sup>6</sup><span className="br">]</span></div>
-        <h1>AI predicts.<br /><strong>HEX6-BLE decides.</strong></h1>
-        <p className="lp-hero-deck">A reasoning layer above AI models that turns predictions into calibrated, risk-bounded actions — and learns from what actually happened.</p>
+        <h1>The dark is full<br /><strong>of signal.</strong></h1>
+        <p className="lp-hero-deck">Where others see noise and randomness, HEX6-BLE detects the patterns that matter — turning decay into calibrated, risk-bounded action, and learning from what actually happened.</p>
         <div className="lp-hero-proof"><span>Quantify uncertainty</span><span>Apply explicit risk</span><span>Score reality</span></div>
         <a href={authUrl} target="_top" onClick={handleEnter} className="lp-enter-hex">
           ENTER HEX<sup>*</sup>

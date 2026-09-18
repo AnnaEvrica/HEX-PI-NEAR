@@ -5,8 +5,8 @@ export default function ComparisonSection() {
     <section className="lp-positioning" aria-labelledby="difference-title">
       <RavenArt variant="positioning" className="lp-raven-positioning" />
       <div className="lp-positioning-head">
-        <h2 id="difference-title">Most AI stops at <strong>an answer.</strong></h2>
-        <p className="lp-positioning-lede">Fluent output can sound certain even when the world is not. HEX6-BLE begins where the model stops: exposing uncertainty, weighing consequences, and deciding whether — and how — to act.</p>
+        <h2 id="difference-title">Most AI fears<br /><strong>the dark.</strong></h2>
+        <p className="lp-positioning-lede">Conventional models retreat when signal decays into noise. HEX6-BLE works where the data thins — finding structure in the aftermath, weighing consequences, and deciding whether — and how — to act.</p>
       </div>
       <div className="lp-contrast-grid">
         <article className="lp-contrast">
