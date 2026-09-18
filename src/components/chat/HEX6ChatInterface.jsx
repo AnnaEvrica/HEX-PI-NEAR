@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Send, Upload, Menu, Settings, LogOut, Plus, MessageCircle, Zap, Mic, MicOff, BookOpen, X, Image, Copy, Check, Volume2, VolumeX, CreditCard } from 'lucide-react';
+import { Send, Upload, Menu, Settings, LogOut, Plus, MessageCircle, Zap, Mic, MicOff, BookOpen, X, Image, Copy, Check, Volume2, VolumeX } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import SettingsModal from '@/components/SettingsModal';
 import LegalModal from '@/components/LegalModal';
@@ -472,15 +472,6 @@ export default function HEX6ChatInterface() {
     await base44.auth.logout(window.location.origin + '/');
   };
 
-  const handleManageBilling = async () => {
-    try {
-      const res = await base44.functions.invoke('manageBilling', { origin: window.location.origin });
-      if (res.data?.url) window.location.href = res.data.url;
-    } catch (err) {
-      console.error('Billing portal failed:', err);
-    }
-  };
-
   // Detect if mobile — reactive to window resize
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < 768);
   useEffect(() => {
@@ -535,7 +526,6 @@ export default function HEX6ChatInterface() {
           <SidebarActions
             onSettings={() => setSettingsOpen(true)}
             onLegal={() => setLegalOpen(true)}
-            onBilling={handleManageBilling}
             onSignOut={handleSignOut}
           />
         </div>

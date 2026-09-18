@@ -1,12 +1,11 @@
-import { Settings, BookOpen, CreditCard, LogOut } from 'lucide-react';
+import { Settings, BookOpen, LogOut } from 'lucide-react';
 
 // Bottom of the sidebar — line symbols only, no labels. Still fully interactive,
 // each one keeps its tooltip so the meaning stays discoverable.
-export default function SidebarActions({ onSettings, onLegal, onBilling, onSignOut }) {
+export default function SidebarActions({ onSettings, onLegal, onSignOut }) {
   const items = [
     { icon: Settings, label: 'Settings', onClick: onSettings },
     { icon: BookOpen, label: 'Legal', onClick: onLegal },
-    { icon: CreditCard, label: 'Billing', onClick: onBilling },
     { icon: LogOut, label: 'Sign Out', onClick: onSignOut },
   ];
   return (

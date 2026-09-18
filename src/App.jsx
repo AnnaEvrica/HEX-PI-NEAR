@@ -9,7 +9,6 @@ import Landing from '@/pages/Landing.jsx';
 import Discover from '@/pages/Discover.jsx';
 import ConsentFlow from '@/components/onboarding/ConsentFlow';
 import HEX6ChatInterface from '@/components/chat/HEX6ChatInterface';
-import SubscriptionGate from '@/components/SubscriptionGate';
 import { useState, useEffect } from 'react';
 
 // The authenticated app experience — consent → subscription gate → chat.
@@ -89,7 +88,7 @@ const AppExperience = () => {
     }
     return <Navigate to="/" replace />;
   }
-  return consentDone ? <SubscriptionGate><HEX6ChatInterface /></SubscriptionGate> : <ConsentFlow onComplete={() => setConsentCompleted(true)} />;
+  return consentDone ? <HEX6ChatInterface /> : <ConsentFlow onComplete={() => setConsentCompleted(true)} />;
 };
 
 // Logged-in visitors skip the landing page entirely — straight into the app.
