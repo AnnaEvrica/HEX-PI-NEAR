@@ -1,7 +1,18 @@
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { LANDING_IMAGES } from './landingImages';
+import { appParams } from '@/lib/app-params';
+import { useAuth } from '@/lib/AuthContext';
 
 export default function NewHero() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const authUrl = `/api/apps/auth/login?app_id=${appParams.appId}&from_url=${encodeURIComponent(`${window.location.origin}/app`)}`;
+  const handleEnter = (e) => {
+    if (user) { e.preventDefault(); navigate('/app'); return; }
+    sessionStorage.setItem('hex6_auth_pending', Date.now().toString());
+  };
+
   return (
     <section className="relative bg-landing-bg pt-8 pb-20 lg:pt-12 lg:pb-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -79,16 +90,28 @@ export default function NewHero() {
           ))}
         </motion.div>
 
-        {/* CTA */}
+        {/* CTA — ENTER HEX */}
         <motion.a
-          href="#difference"
+          href={authUrl}
+          target="_top"
+          onClick={handleEnter}
           className="inline-block px-6 sm:px-8 py-3 bg-accent text-white font-mono text-xs sm:text-sm uppercase tracking-widest hover:bg-accent/90 transition-colors"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.7 }}
         >
-          See the difference
+          ENTER HEX<sup className="text-[0.6em] ml-0.5">*</sup>
         </motion.a>
+
+        {/* Experimental note */}
+        <motion.p
+          className="mt-3 text-landing-muted text-[0.62rem] font-mono"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+        >
+          * Experimental LLM in testing
+        </motion.p>
 
         {/* Scroll hint */}
         <motion.p
