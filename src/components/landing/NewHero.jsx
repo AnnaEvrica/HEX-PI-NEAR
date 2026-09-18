@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { LANDING_IMAGES } from './landingImages';
+import RavenArt from './RavenArt';
 import { appParams } from '@/lib/app-params';
 import { useAuth } from '@/lib/AuthContext';
 
@@ -14,7 +14,7 @@ export default function NewHero() {
 
   return (
     <section className="lp-hero">
-      <img className="lp-raven-art lp-raven-top" src={LANDING_IMAGES.hero} alt="" aria-hidden="true" decoding="async" fetchpriority="high" />
+      <RavenArt variant="hero" className="lp-raven-top" />
       <div className="lp-logo-lockup">
         <div className="lp-hero-kicker">Probabilistic intelligence for consequential decisions</div>
         <div className="lp-main-logo"><span className="br">[</span><span className="hex">HEX</span><span className="dash">-</span><span className="ble">BLE</span><sup>6</sup><span className="br">]</span></div>

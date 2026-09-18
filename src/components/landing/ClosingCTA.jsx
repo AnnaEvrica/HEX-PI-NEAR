@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom';
-import { LANDING_IMAGES } from './landingImages';
+import RavenArt from './RavenArt';
 
 export default function ClosingCTA({ onOpenPolicy }) {
   return (
     <section className="lp-finale" id="finale">
-      <img className="lp-raven-art lp-raven-finale" src={LANDING_IMAGES.inspect} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+      <RavenArt variant="finale" className="lp-raven-finale" />
       <div className="lp-finale-inner">
         <div className="lp-finale-kicker">The source of truth is the outcome</div>
         <div className="lp-finale-logo"><span className="br">[</span><span className="hex">HEX</span><span className="dash">-</span><span className="ble">BLE</span><sup>6</sup><span className="br">]</span></div>

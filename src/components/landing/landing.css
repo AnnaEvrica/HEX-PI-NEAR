@@ -11,7 +11,7 @@
   position: relative;
   background: var(--lp-black);
   color: var(--lp-text);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Manrope', Arial, Helvetica, sans-serif;
   overflow-x: hidden;
   min-height: 100vh;
 }
@@ -121,7 +121,7 @@
 .lp-scroll-line { position: absolute; right: 36px; bottom: 0; height: 92px; width: 1px; background: linear-gradient(var(--lp-orange), transparent); z-index: 4; }
 
 /* Raven art */
-.lp-raven-art { position: absolute; display: block; height: auto; pointer-events: none; user-select: none; z-index: 2; transform-origin: center; will-change: transform; filter: saturate(.78) contrast(.96); mix-blend-mode: multiply; }
+.lp-raven-art { position: absolute; display: block; height: auto; pointer-events: none; user-select: none; z-index: 2; transform-origin: center; will-change: transform; color: var(--lp-text); fill: currentColor; mix-blend-mode: multiply; }
 .lp-raven-top { width: min(780px, 72%); right: -24%; top: 3%; opacity: .24; animation: lp-ravenHover 8s ease-in-out infinite; mask-image: linear-gradient(115deg, #000 58%, rgba(0,0,0,.82) 74%, transparent 100%); }
 .lp-raven-positioning { width: min(390px, 38%); left: -8%; bottom: -6%; opacity: .16; filter: grayscale(.35) saturate(.72) contrast(.96); mask-image: linear-gradient(80deg, #000 0, #000 76%, transparent 100%); }
 .lp-raven-middle { width: min(750px, 74%); left: auto; right: -29%; bottom: 8%; opacity: .19; animation: lp-ravenGlideMirrored 10s ease-in-out infinite; mask-image: linear-gradient(105deg, transparent 0, #000 22%, #000 86%, transparent 100%); }

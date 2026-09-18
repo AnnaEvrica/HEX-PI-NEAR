@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { LANDING_IMAGES } from './landingImages';
+import RavenArt from './RavenArt';
 
 const STEPS = [
   { eyebrow: '01 / Prediction', h2: <>The model says: <em>act.</em></>, p: 'A conventional model produces a fast, convincing recommendation. HEX6-BLE treats it as a signal — not a command.' },
@@ -165,7 +165,7 @@ export default function StoryEngine() {
   return (
     <section className="lp-story-wrap" id="story" ref={wrapRef}>
       <div className="lp-stage">
-        <img className="lp-raven-art lp-raven-resolution" id="resolution-raven" ref={resolutionRavenRef} src={LANDING_IMAGES.transitions} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+        <RavenArt variant="resolution" className="lp-raven-resolution" id="resolution-raven" ref={resolutionRavenRef} />
         <div className="lp-story-intro"><b>One signal. Six transitions.</b><br />A decision moving through the engine.</div>
         <div className="lp-matrix" id="matrix" ref={matrixRef} />
         <div className="lp-copy">

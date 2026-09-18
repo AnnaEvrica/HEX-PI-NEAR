@@ -1,9 +1,9 @@
-import { LANDING_IMAGES } from './landingImages';
+import RavenArt from './RavenArt';
 
 export default function ComparisonSection() {
   return (
     <section className="lp-positioning" aria-labelledby="difference-title">
-      <img className="lp-raven-art lp-raven-positioning" src={LANDING_IMAGES.comparison} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+      <RavenArt variant="positioning" className="lp-raven-positioning" />
       <div className="lp-positioning-head">
         <h2 id="difference-title">Most AI stops at <strong>an answer.</strong></h2>
         <p className="lp-positioning-lede">Fluent output can sound certain even when the world is not. HEX6-BLE begins where the model stops: exposing uncertainty, weighing consequences, and deciding whether — and how — to act.</p>

@@ -1,9 +1,9 @@
-import { LANDING_IMAGES } from './landingImages';
+import RavenArt from './RavenArt';
 
 export default function DomainsSection() {
   return (
     <section className="lp-after">
-      <img className="lp-raven-art lp-raven-middle" src={LANDING_IMAGES.domains} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+      <RavenArt variant="domains" className="lp-raven-middle" />
       <div className="lp-after-grid">
         <div>
           <div className="lp-eyebrow">One engine / Many domains</div>
