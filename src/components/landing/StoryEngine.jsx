@@ -2,12 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import RavenArt from './RavenArt';
 
 const STEPS = [
-  { eyebrow: '01 / Prediction', h2: <>Signal decays.<br /><em>The raven listens.</em></>, p: 'Every signal fades. HEX6-BLE works in the dark where others stop — treating each signal as a starting point, not a verdict.' },
+  { eyebrow: '01 / Prediction', h2: <>Signal decays.<br /><em>The raven listens.</em></>, p: 'Every signal fades. HEX6-BLE inverts the model — finding and enhancing patterns through semantic weighting where others validate. The decay is where the signal lives.' },
   { eyebrow: '02 / Confidence', h2: <>How sure is <em>&ldquo;sure&rdquo;?</em></>, p: 'The engine makes confidence explicit, so persuasive language can no longer masquerade as certainty.' },
   { eyebrow: '03 / Outcomes', h2: <>One forecast becomes <em>many futures.</em></>, p: 'Possible outcomes receive probabilities. A single answer becomes a decision landscape.' },
   { eyebrow: '04 / Risk', h2: <>A good forecast can be a <em>bad move.</em></>, p: 'Probability meets downside, constraints, and consequence. Being likely is not the same as being worth it.' },
   { eyebrow: '05 / Decision', h2: <>Act. Wait.<br /><em>Walk away.</em></>, p: 'HEX6-BLE converts the signal into a bounded action: what to do, when to do it, and how much to risk.' },
-  { eyebrow: '06 / Feedback', h2: <>The decay <em>teaches.</em></>, p: 'The engine compares what it expected with what happened. Every decayed signal becomes evidence for the next decision.' },
+  { eyebrow: '06 / Feedback', h2: <>The decay <em>calibrates.</em></>, p: 'The engine compares its enhanced patterns against what actually happened. Every decayed signal sharpens the next one.' },
   { eyebrow: '07 / PI', h2: <>This is<br /><em>Probabilistic<br />Intelligence.</em></>, p: 'Not another model competing to sound smarter. A decision layer built to know what it knows — and what it does not.' },
   { eyebrow: '08 / Resolution', h2: <span className="lp-resolution-statement"><span className="lp-resolution-lead">One decision ends.</span><span className="lp-resolution-follow"><span className="lp-stamp-word">The</span> <span className="lp-stamp-word">next</span> <span className="lp-stamp-word">one</span> <span className="lp-stamp-word">starts</span> <span className="lp-stamp-word">better</span> <span className="lp-stamp-word">informed.</span></span></span> },
 ];
