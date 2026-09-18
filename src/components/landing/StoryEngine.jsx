@@ -13,7 +13,7 @@ const STEPS = [
 ];
 
 const SCORES = [
-  ['?', 'unresolved'], ['42%', 'confidence'], ['63%', 'leading path'], ['71%', 'risk adjusted'],
+  ['target', 'precision'], ['42%', 'confidence'], ['63%', 'leading path'], ['71%', 'risk adjusted'],
   ['ACT', 'decision'], ['✓', 'observed'], ['PI', 'calibrated'], ['PI', 'resolved'],
 ];
 const FACET_OFFSETS = [[-24, -22, -8], [18, -24, 7], [-18, 18, -5], [25, -4, 8], [16, 18, 5]];
@@ -127,7 +127,7 @@ export default function StoryEngine() {
 
       setActiveStep(step);
 
-      if (score) score.innerHTML = SCORES[step][0] + '<small>' + SCORES[step][1] + '</small>';
+      if (score) { score.innerHTML = SCORES[step][0] + '<small>' + SCORES[step][1] + '</small>'; score.classList.toggle('pulsing', step === 0); }
       if (outcomes) { outcomes.classList.toggle('active', step === 2); outcomes.setAttribute('aria-hidden', String(step !== 2)); }
       if (decision) { decision.classList.toggle('active', step === 4 || step === 5); decision.setAttribute('aria-hidden', String(step !== 4 && step !== 5)); }
       engine.classList.toggle('resolving', resolving);
@@ -206,7 +206,7 @@ export default function StoryEngine() {
               </svg>
               <div className="lp-hex-inner">
                 <div className="lp-core-logo"><span className="br">[</span><span className="hex">HEX</span><span className="dash">-</span><span className="ble">BLE</span><sup>6</sup><span className="br">]</span></div>
-                <div className="lp-score" ref={scoreRef}>?<small>unresolved</small></div>
+                <div className="lp-score pulsing" ref={scoreRef}>target<small>precision</small></div>
               </div>
             </div>
           </div>
