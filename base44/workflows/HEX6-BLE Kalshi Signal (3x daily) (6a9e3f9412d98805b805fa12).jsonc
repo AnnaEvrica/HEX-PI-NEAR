@@ -30,7 +30,7 @@
         "run_function": {
           "call": "invoke_backend_function",
           "with": {
-            "function_name": "discord-morning-signal",
+            "function_name": "discordMorningSignal",
             "args": {}
           },
           "then": "end"
