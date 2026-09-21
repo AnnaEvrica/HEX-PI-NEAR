@@ -1,6 +1,4 @@
 {
-  "name": "HEX6-BLE Kalshi Signal (3x daily) (6a9e3fda80b974c69de7de75)",
-  "description": "Three times daily (6:00 pre-open, 10:00 midday, 14:00 after-close Pacific): scans the Kalshi universe (BTC, ETH, SOL, XRP, DOGE, S&P 500, Nasdaq-100) through the HEX6-BLE engine and posts session-aware probability reads in contract-cents language to Discord.",
   "trigger": {
     "condition": null,
     "config": {
@@ -18,6 +16,8 @@
       "ends_after_count": null
     }
   },
+  "name": "HEX6-BLE Kalshi Signal (3x daily) (6a9e3fda80b974c69de7de75)",
+  "description": "Three times daily (6:00 pre-open, 10:00 midday, 14:00 after-close Pacific): scans the Kalshi universe (BTC, ETH, SOL, XRP, DOGE, S&P 500, Nasdaq-100) through the HEX6-BLE engine and posts session-aware probability reads in contract-cents language to Discord.",
   "definition": {
     "document": {
       "dsl": "1.0.0",
@@ -30,7 +30,7 @@
         "run_function": {
           "call": "invoke_backend_function",
           "with": {
-            "function_name": "discord-morning-signal",
+            "function_name": "discordMorningSignal",
             "args": {}
           },
           "then": "end"
