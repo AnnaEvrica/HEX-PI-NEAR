@@ -1,16 +1,4 @@
 {
-  "name": "ASI Spine \u2014 drift alert",
-  "description": "Posts a Discord alert when a verdict is anchored with disagreement_flag=true.",
-  "trigger": {
-    "condition": "${ (.trigger.data.disagreement_flag == true) }",
-    "config": {
-      "trigger_type": "entity",
-      "events": [
-        "create"
-      ],
-      "entity_name": "VerdictSpine"
-    }
-  },
   "definition": {
     "document": {
       "dsl": "1.0.0",
@@ -23,13 +11,25 @@
         "run_function": {
           "call": "invoke_backend_function",
           "with": {
-            "function_name": "spine-alert",
+            "function_name": "spineAlert",
             "args": {}
           },
           "then": "end"
         }
       }
     ]
+  },
+  "description": "Posts a Discord alert when a verdict is anchored with disagreement_flag=true.",
+  "name": "ASI Spine \u2014 drift alert",
+  "trigger": {
+    "condition": "${ (.trigger.data.disagreement_flag == true) }",
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create"
+      ],
+      "entity_name": "VerdictSpine"
+    }
   },
   "x-base44-migrated-from-automation": {
     "legacy_payload_function": "spine-alert"
