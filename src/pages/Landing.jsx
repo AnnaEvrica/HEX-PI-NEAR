@@ -5,8 +5,10 @@ import LandingCanvas from '@/components/landing/LandingCanvas';
 import NewHero from '@/components/landing/NewHero';
 import ComparisonSection from '@/components/landing/ComparisonSection';
 import StoryEngine from '@/components/landing/StoryEngine';
+import DualStructureSection from '@/components/landing/DualStructureSection';
 import DomainsSection from '@/components/landing/DomainsSection';
 import ClosingCTA from '@/components/landing/ClosingCTA';
+import LegalFooter from '@/components/landing/LegalFooter';
 import PolicyModals from '@/components/landing/PolicyModals';
 import ContactModal from '@/components/landing/ContactModal';
 import SearchOverlay from '@/components/landing/SearchOverlay';
@@ -36,8 +38,10 @@ export default function Landing() {
         <NewHero />
         <ComparisonSection />
         <StoryEngine />
+        <DualStructureSection />
         <DomainsSection />
         <ClosingCTA onOpenPolicy={setOpenPolicy} />
+        <LegalFooter onOpenPolicy={setOpenPolicy} />
 
         <PolicyModals openPolicy={openPolicy} onClose={() => setOpenPolicy(null)} />
         {showContact && <ContactModal onClose={() => setShowContact(false)} />}
