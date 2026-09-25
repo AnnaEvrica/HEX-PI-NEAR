@@ -12,7 +12,7 @@
   background: var(--lp-black);
   color: var(--lp-text);
   font-family: 'Manrope', Arial, Helvetica, sans-serif;
-  overflow-x: hidden;
+  overflow-x: clip;
   min-height: 100vh;
 }
 .landing-page * { box-sizing: border-box; }

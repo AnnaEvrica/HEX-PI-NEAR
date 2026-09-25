@@ -170,7 +170,7 @@ export default function StoryEngine() {
         <div className="lp-matrix" id="matrix" ref={matrixRef} />
         <div className="lp-copy">
           {STEPS.map((s, i) => (
-            <article key={i} className={`lp-step ${i === 0 ? 'active' : ''} ${i === 7 ? 'lp-resolution-step' : ''}`} aria-hidden={i !== 0}>
+            <article key={i} className={`lp-step ${i === activeStep ? 'active' : ''} ${i === 7 ? 'lp-resolution-step' : ''}`} aria-hidden={i !== activeStep}>
               <div className="lp-eyebrow">{s.eyebrow}</div>
               <h2>{s.h2}</h2>
               {s.p && <p>{s.p}</p>}
