@@ -95,7 +95,7 @@ const AppExperience = () => {
 // Only signed-out (or unregistered) visitors see the public landing.
 const LandingGate = () => {
   const { user } = useAuth();
-  if (user) return <Navigate to="/app" replace />;
+  if (user && !new URLSearchParams(window.location.search).has('preview')) return <Navigate to="/app" replace />;
   return <Landing />;
 };
 
