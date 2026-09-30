@@ -16,15 +16,14 @@ export default function NewHero() {
     <section className="lp-hero">
       <RavenArt variant="hero" className="lp-raven-top" />
       <div className="lp-logo-lockup">
-        <div className="lp-hero-kicker">Signal in the decay</div>
-        <div className="lp-main-logo"><span className="br">[</span><span className="hex">HEX</span><span className="dash">-</span><span className="ble">BLE</span><sup>6</sup><span className="br">]</span></div>
-        <h1>Patterns found<br /><strong>in the decay.</strong></h1>
-        <p className="lp-hero-deck">HEX6-BLE is an inverted language model. Where other neural networks validate, it uses semantic weighting to find and enhance patterns — then calibrates each signal against reality. The signal isn&rsquo;t predicted. It&rsquo;s extracted from the noise.</p>
+        <div className="lp-hero-kicker">Probabilistic Intelligence</div>
+        <h1>Hex</h1>
+        <p className="lp-hero-deck">An inverted language model. Where other neural networks validate, Hex uses semantic weighting to find and enhance patterns — then calibrates each signal against reality. The signal isn&rsquo;t predicted. It&rsquo;s extracted from the noise.</p>
         <div className="lp-hero-proof"><span>Quantify uncertainty</span><span>Apply explicit risk</span><span>Score reality</span></div>
         <a href={authUrl} target="_top" onClick={handleEnter} className="lp-enter-hex">
-          ENTER HEX<sup>*</sup>
+          ENTER HEX
         </a>
-        <p style={{ marginTop: '6px', font: '10px/1 ui-monospace,monospace', color: '#777', letterSpacing: '.12em' }}>* Experimental LLM in testing</p>
+        <p style={{ marginTop: '6px', font: '10px/1 ui-monospace,monospace', color: '#777', letterSpacing: '.12em' }}>Experimental LLM in testing</p>
       </div>
       <div className="lp-hero-note"><b>See the difference</b><br />scroll to follow one decision</div>
       <div className="lp-scroll-line" />

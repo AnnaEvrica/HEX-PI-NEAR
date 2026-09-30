@@ -3,7 +3,7 @@ export default function DualStructureSection() {
     <section className="lp-positioning lp-dual-structure" aria-labelledby="dual-structure-title">
       <div className="lp-positioning-head">
         <h2 id="dual-structure-title">One engine.<br />Two <strong>disciplines.</strong></h2>
-        <p className="lp-positioning-lede">HEX6-BLE is not a single model. It is a dual structure — one layer finds precision through structural signals, the other extracts value through contextual resonance. Together they produce a decision that is both accurate and useful.</p>
+        <p className="lp-positioning-lede">Hex is not a single model. It is a dual structure — one layer finds precision through structural signals, the other extracts value through contextual resonance. Together they produce a decision that is both accurate and useful.</p>
       </div>
       <div className="lp-contrast-grid">
         <article className="lp-contrast">
