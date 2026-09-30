@@ -9,7 +9,7 @@ export default function ClosingCTA({ onOpenPolicy }) {
         <div className="lp-finale-kicker">The source of truth is the outcome</div>
         <div className="lp-finale-logo">Hex</div>
         <div className="lp-finale-copy">Find the pattern.<br /><b>Enhance the signal.</b></div>
-        <div className="lp-finale-sub">Patterns found in the decay. Enhanced through calibrated accuracy. Scored against reality.</div>
+        <div className="lp-finale-sub">Found in the decay. Enhanced through calibration. Scored against reality.</div>
         <div className="lp-finale-actions">
           <Link to="/discover" className="lp-btn primary">Join the experiment ↗</Link>
           <a href="https://evrica.tech" target="_blank" rel="noopener noreferrer" className="lp-btn">Explore the method ↗</a>

@@ -18,14 +18,14 @@ export default function NewHero() {
       <div className="lp-logo-lockup">
         <div className="lp-hero-kicker">Probabilistic Intelligence</div>
         <h1>Hex</h1>
-        <p className="lp-hero-deck">An inverted language model. Where other neural networks validate, Hex uses semantic weighting to find and enhance patterns — then calibrates each signal against reality. The signal isn&rsquo;t predicted. It&rsquo;s extracted from the noise.</p>
+        <p className="lp-hero-deck">An inverted language model. Where others validate, Hex finds patterns in the decay — then calibrates each signal against reality.</p>
         <div className="lp-hero-proof"><span>Quantify uncertainty</span><span>Apply explicit risk</span><span>Score reality</span></div>
         <a href={authUrl} target="_top" onClick={handleEnter} className="lp-enter-hex">
           ENTER HEX
         </a>
-        <p style={{ marginTop: '6px', font: '10px/1 ui-monospace,monospace', color: '#777', letterSpacing: '.12em' }}>Experimental LLM in testing</p>
+        <p style={{ marginTop: '6px', font: '10px/1 ui-monospace,monospace', color: '#8a8a8a', letterSpacing: '.12em' }}>Experimental LLM in testing</p>
       </div>
-      <div className="lp-hero-note"><b>See the difference</b><br />scroll to follow one decision</div>
+      <div className="lp-hero-note"><b>Scroll</b><br />follow one decision</div>
       <div className="lp-scroll-line" />
     </section>
   );
