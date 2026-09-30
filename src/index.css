@@ -131,3 +131,9 @@
     }
   }
 }
+
+/* App shell — strictly square, no rounded corners anywhere */
+.app-shell,
+.app-shell * {
+  border-radius: 0 !important;
+}

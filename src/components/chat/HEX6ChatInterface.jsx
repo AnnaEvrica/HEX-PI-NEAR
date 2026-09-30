@@ -481,7 +481,7 @@ export default function HEX6ChatInterface() {
   }, []);
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
+    <div className="app-shell flex h-screen bg-background overflow-hidden">
       {/* Sidebar - hidden on mobile */}
       <div
         className={`fixed inset-y-0 left-0 z-40 w-44 bg-card border-r border-border transition-transform duration-300 ${
@@ -490,7 +490,7 @@ export default function HEX6ChatInterface() {
       >
         <div className="flex flex-col h-full p-2.5">
           <div className="flex items-center justify-between mb-3">
-            <h1 className="text-xs font-bold tracking-tight">HEX6 BLE</h1>
+            <h1 className="text-xs font-bold tracking-tight">Hex</h1>
             <button
               onClick={() => setSidebarOpen(false)}
               className="md:hidden p-1 hover:bg-muted rounded-sm text-sm flex items-center justify-center"
@@ -578,11 +578,7 @@ export default function HEX6ChatInterface() {
                   </div>
                 )}
                 <div
-                  className={`${
-                    message.role === 'user'
-                      ? 'rounded-[1.125rem] rounded-br-sm'
-                      : 'rounded-[1.125rem] rounded-bl-sm'
-                  } bg-muted/60 text-foreground border-2 border-foreground/25 px-3 py-2 text-[13px] md:text-sm`}
+                  className="bg-muted/60 text-foreground border border-foreground/20 px-3 py-2 text-[13px] md:text-sm"
                 >
                   <ReactMarkdown 
                     className="prose prose-sm dark:prose-invert max-w-none text-foreground [&>*]:my-0 [&>p]:my-1 [&>ul]:my-1 [&>ol]:my-1 [&>li]:my-0"
@@ -631,7 +627,7 @@ export default function HEX6ChatInterface() {
           ))}
           {loading && (
             <div className="flex justify-start">
-              <div className="ml-2 bg-muted/60 text-foreground border-2 border-foreground/25 rounded-[1.125rem] rounded-bl-sm px-3 py-2 text-[13px] text-secondary flex flex-col gap-1.5 max-w-xs">
+              <div className="ml-2 bg-muted/60 text-foreground border border-foreground/20 px-3 py-2 text-[13px] text-secondary flex flex-col gap-1.5 max-w-xs">
                 <div className="flex gap-1">
                   <div className="w-1.5 h-1.5 rounded-full bg-secondary" style={{ animation: 'bounce 1.2s infinite', animationDelay: '0s' }} />
                   <div className="w-1.5 h-1.5 rounded-full bg-secondary" style={{ animation: 'bounce 1.2s infinite', animationDelay: '0.2s' }} />
@@ -720,7 +716,7 @@ export default function HEX6ChatInterface() {
             </div>
           </div>
           <p className="text-[9px] text-secondary/70 px-1 mt-2 leading-relaxed">
-            HEX6 BLE is a probabilistic intelligence model. No information provided constitutes financial, legal, or professional advice.
+            Hex is a probabilistic intelligence model. No information provided constitutes financial, legal, or professional advice.
           </p>
         </div>
       </div>
