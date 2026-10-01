@@ -8,6 +8,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import Landing from '@/pages/Landing.jsx';
 import Discover from '@/pages/Discover.jsx';
 import ConsentFlow from '@/components/onboarding/ConsentFlow';
+import SubscriptionGate from '@/components/SubscriptionGate';
 import HEX6ChatInterface from '@/components/chat/HEX6ChatInterface';
 import { useState, useEffect } from 'react';
 
@@ -88,7 +89,11 @@ const AppExperience = () => {
     }
     return <Navigate to="/" replace />;
   }
-  return consentDone ? <HEX6ChatInterface /> : <ConsentFlow onComplete={() => setConsentCompleted(true)} />;
+  return consentDone ? (
+    <SubscriptionGate user={user}>
+      <HEX6ChatInterface />
+    </SubscriptionGate>
+  ) : <ConsentFlow onComplete={() => setConsentCompleted(true)} />;
 };
 
 // Logged-in visitors skip the landing page entirely — straight into the app.
