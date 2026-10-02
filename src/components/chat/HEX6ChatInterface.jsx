@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
 import { Send, Upload, Menu, Settings, LogOut, Plus, MessageCircle, Zap, Mic, MicOff, BookOpen, X, Image, Copy, Check, Volume2, VolumeX } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import SettingsModal from '@/components/SettingsModal';
@@ -468,8 +469,9 @@ export default function HEX6ChatInterface() {
     }
   };
 
-  const handleSignOut = async () => {
-    await base44.auth.logout(window.location.origin + '/');
+  const { logout } = useAuth();
+  const handleSignOut = () => {
+    logout();
   };
 
   // Detect if mobile — reactive to window resize

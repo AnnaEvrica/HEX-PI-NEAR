@@ -71,11 +71,11 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     setIsNotRegistered(false);
-    // The SDK's logout() clears localStorage tokens AND redirects to a
-    // server-side endpoint that clears HTTP-only session cookies, then
-    // redirects back to the given URL. Do NOT override the redirect —
-    // doing so skips the server-side cookie clear and the user stays
-    // authenticated on reload.
+    // Flag tells LandingGate to show the landing page on the next load,
+    // even if the session persists (preview re-auth, cookie edge cases).
+    try { sessionStorage.setItem('hex6_force_landing', '1'); } catch {}
+    // SDK clears localStorage tokens AND redirects to a server-side
+    // endpoint that clears HTTP-only cookies, then back to '/'.
     base44.auth.logout('/');
   };
 

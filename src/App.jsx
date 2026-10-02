@@ -97,7 +97,19 @@ const AppExperience = () => {
 // Only signed-out (or unregistered) visitors see the public landing.
 const LandingGate = () => {
   const { user } = useAuth();
-  if (user) return <Navigate to="/app" replace />;
+  // After logout, the SDK redirects to a server endpoint that clears
+  // cookies then back to '/'. In the preview sandbox the builder session
+  // re-authenticates instantly, which would bounce the user back to /app.
+  // This flag forces the landing page for one load after sign-out.
+  const forceLanding = (() => {
+    try { return sessionStorage.getItem('hex6_force_landing') === '1'; } catch { return false; }
+  })();
+  useEffect(() => {
+    if (forceLanding) {
+      try { sessionStorage.removeItem('hex6_force_landing'); } catch {}
+    }
+  }, [forceLanding]);
+  if (user && !forceLanding) return <Navigate to="/app" replace />;
   return <Landing />;
 };
 
