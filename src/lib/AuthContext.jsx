@@ -71,13 +71,21 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     setUser(null);
     setIsNotRegistered(false);
+    // Tell the server to invalidate the session (fire-and-forget — don't
+    // let a slow/hung response delay the redirect).
+    try { base44.auth.logout(); } catch { /* server will expire it */ }
+    // Manually purge any locally-cached auth token so isAuthenticated()
+    // returns false on the next load — otherwise the stale token keeps
+    // LandingGate bouncing the user back to /app.
     try {
-      await base44.auth.logout();
-    } catch (err) {
-      console.error('Logout error:', err);
-    }
-    // Force a full page reload to '/' so the app re-mounts fresh and
-    // LandingGate renders the landing page — no stale state, no retry loop.
+      Object.keys(localStorage).forEach((key) => {
+        if (/base44|auth|token|session/i.test(key)) localStorage.removeItem(key);
+      });
+      Object.keys(sessionStorage).forEach((key) => {
+        if (/base44|auth|token|session/i.test(key)) sessionStorage.removeItem(key);
+      });
+    } catch { /* storage may be blocked */ }
+    // Full reload to '/' — fresh mount, no session, landing page renders.
     window.location.href = '/';
   };
 
