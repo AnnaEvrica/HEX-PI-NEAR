@@ -71,12 +71,10 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     setIsNotRegistered(false);
-    // Flag tells LandingGate to show the landing page on the next load,
-    // even if the session persists (preview re-auth, cookie edge cases).
-    try { sessionStorage.setItem('hex6_force_landing', '1'); } catch {}
     // SDK clears localStorage tokens AND redirects to a server-side
-    // endpoint that clears HTTP-only cookies, then back to '/'.
-    base44.auth.logout('/');
+    // endpoint that clears HTTP-only cookies, then to evrica.tech.
+    // External origin — can't re-enter the app's auth loop.
+    base44.auth.logout('https://evrica.tech');
   };
 
   return (

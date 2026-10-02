@@ -5,7 +5,6 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-import Landing from '@/pages/Landing.jsx';
 import Discover from '@/pages/Discover.jsx';
 import ConsentFlow from '@/components/onboarding/ConsentFlow';
 import SubscriptionGate from '@/components/SubscriptionGate';
@@ -95,22 +94,22 @@ const AppExperience = () => {
 
 // Logged-in visitors skip the landing page entirely — straight into the app.
 // Only signed-out (or unregistered) visitors see the public landing.
+// Logged-in visitors go straight to /app. Logged-out visitors are
+// redirected to the public marketing site on evrica.tech — a separate
+// origin that can't bounce back into the app's auth loop.
 const LandingGate = () => {
   const { user } = useAuth();
-  // After logout, the SDK redirects to a server endpoint that clears
-  // cookies then back to '/'. In the preview sandbox the builder session
-  // re-authenticates instantly, which would bounce the user back to /app.
-  // This flag forces the landing page for one load after sign-out.
-  const forceLanding = (() => {
-    try { return sessionStorage.getItem('hex6_force_landing') === '1'; } catch { return false; }
-  })();
   useEffect(() => {
-    if (forceLanding) {
-      try { sessionStorage.removeItem('hex6_force_landing'); } catch {}
+    if (!user) {
+      window.location.href = 'https://evrica.tech';
     }
-  }, [forceLanding]);
-  if (user && !forceLanding) return <Navigate to="/app" replace />;
-  return <Landing />;
+  }, [user]);
+  if (user) return <Navigate to="/app" replace />;
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-background">
+      <div className="w-8 h-8 border-4 border-border border-t-accent rounded-full animate-spin"></div>
+    </div>
+  );
 };
 
 const AuthenticatedApp = () => {
