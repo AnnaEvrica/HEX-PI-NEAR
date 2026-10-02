@@ -69,16 +69,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    // Clear local state FIRST so LandingGate doesn't bounce back to /app
-    // during the redirect window.
     setUser(null);
     setIsNotRegistered(false);
     try {
-      await base44.auth.logout('/');
+      await base44.auth.logout();
     } catch (err) {
       console.error('Logout error:', err);
-      window.location.href = '/';
     }
+    // Force a full page reload to '/' so the app re-mounts fresh and
+    // LandingGate renders the landing page — no stale state, no retry loop.
+    window.location.href = '/';
   };
 
   return (
