@@ -36,9 +36,22 @@ export const AuthProvider = ({ children }) => {
             recovered = true;
           } catch (meErr) {
             if (attempt < 8) continue;
-            // Authenticated but me() keeps failing → genuinely unregistered
+            // Only mark as "not registered" if the server explicitly says so
+            // (403 / "not registered" in the error). A timeout or network error
+            // during token propagation should NOT be treated as unregistered —
+            // that's what was throwing logged-in users out after OAuth.
+            const err = meErr?.response?.data || meErr;
+            const status = err?.statusCode || err?.status || meErr?.statusCode || meErr?.status;
+            const msg = (err?.message || meErr?.message || '').toLowerCase();
+            const explicitlyNotRegistered =
+              status === 403 ||
+              msg.includes('not registered') ||
+              msg.includes('user not found') ||
+              msg.includes('forbidden');
+            if (explicitlyNotRegistered) {
+              setIsNotRegistered(true);
+            }
             setUser(null);
-            setIsNotRegistered(true);
           }
         }
       } else {
