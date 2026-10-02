@@ -68,25 +68,15 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = async () => {
+  const logout = () => {
     setUser(null);
     setIsNotRegistered(false);
-    // Tell the server to invalidate the session (fire-and-forget — don't
-    // let a slow/hung response delay the redirect).
-    try { base44.auth.logout(); } catch { /* server will expire it */ }
-    // Manually purge any locally-cached auth token so isAuthenticated()
-    // returns false on the next load — otherwise the stale token keeps
-    // LandingGate bouncing the user back to /app.
-    try {
-      Object.keys(localStorage).forEach((key) => {
-        if (/base44|auth|token|session/i.test(key)) localStorage.removeItem(key);
-      });
-      Object.keys(sessionStorage).forEach((key) => {
-        if (/base44|auth|token|session/i.test(key)) sessionStorage.removeItem(key);
-      });
-    } catch { /* storage may be blocked */ }
-    // Full reload to '/' — fresh mount, no session, landing page renders.
-    window.location.href = '/';
+    // The SDK's logout() clears localStorage tokens AND redirects to a
+    // server-side endpoint that clears HTTP-only session cookies, then
+    // redirects back to the given URL. Do NOT override the redirect —
+    // doing so skips the server-side cookie clear and the user stays
+    // authenticated on reload.
+    base44.auth.logout('/');
   };
 
   return (
