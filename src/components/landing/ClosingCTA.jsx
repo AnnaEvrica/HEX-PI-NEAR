@@ -1,25 +1,23 @@
-import { useNavigate } from 'react-router-dom';
-import { appParams } from '@/lib/app-params';
-import { useAuth } from '@/lib/AuthContext';
+import { Link } from 'react-router-dom';
+import RavenArt from './RavenArt';
 
-export default function ClosingCTA() {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const authUrl = `/api/apps/auth/login?app_id=${appParams.appId}&from_url=${encodeURIComponent(`${window.location.origin}/app`)}`;
-  const handleEnter = (e) => {
-    if (user) { e.preventDefault(); navigate('/app'); return; }
-    sessionStorage.setItem('hex6_auth_pending', Date.now().toString());
-  };
-
+export default function ClosingCTA({ onOpenPolicy }) {
   return (
-    <section className="lp-section" id="enter" style={{ textAlign: 'center' }}>
-      <div className="lp-section-inner" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <div className="lp-section-label">03 / Enter</div>
-        <h2 className="lp-section-heading" style={{ margin: '0 auto 28px', textAlign: 'center' }}>Be <em>first.</em></h2>
-        <p className="lp-section-body" style={{ textAlign: 'center', margin: '0 auto 32px' }}>
-          Join the beta. Experience probabilistic intelligence that knows what it knows — and what it does not.
-        </p>
-        <a href={authUrl} target="_top" onClick={handleEnter} className="lp-app-link">Enter Hex →</a>
+    <section className="lp-finale" id="finale">
+      <RavenArt variant="finale" className="lp-raven-finale" />
+      <div className="lp-finale-inner">
+        <div className="lp-finale-kicker">The source of truth is the outcome</div>
+        <div className="lp-finale-logo">Hex</div>
+        <div className="lp-finale-copy">Find the pattern.<br /><b>Enhance the signal.</b></div>
+        <div className="lp-finale-sub">Found in the decay. Enhanced through calibration. Scored against reality.</div>
+        <div className="lp-finale-actions">
+          <Link to="/discover" className="lp-btn primary">Join the experiment ↗</Link>
+          <a href="https://evrica.tech" target="_blank" rel="noopener noreferrer" className="lp-btn">Explore the method ↗</a>
+        </div>
+      </div>
+      <div className="lp-finale-footer">
+        <span>Hex // Probabilistic Intelligence</span>
+        <span>Binaural Linguistic Engine</span>
       </div>
     </section>
   );
