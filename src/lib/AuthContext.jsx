@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, useRef, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
-import { redirectPending } from '@/lib/authPending';
+import { redirectPending, clearPending } from '@/lib/authPending';
 
 const AuthContext = createContext();
 
@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
       // which always lands on /app. Everywhere else one request settles it,
       // so a signed-out visitor never waits on a spinner.
       const pending = redirectPending() && window.location.pathname.startsWith('/app');
-      const tries = attempts ?? (pending ? 8 : hasStoredToken() ? 2 : 1);
+      const tries = attempts ?? (pending ? 14 : hasStoredToken() ? 2 : 1);
       let lastStatus = null;
       try {
         for (let attempt = 1; attempt <= tries; attempt++) {
@@ -48,18 +48,15 @@ export const AuthProvider = ({ children }) => {
             userRef.current = currentUser;
             setUser(currentUser);
             setIsNotRegistered(false);
+            clearPending();
             return currentUser;
           } catch (err) {
             lastStatus = statusOf(err);
-            if (isNotRegisteredError(err)) {
-              userRef.current = null;
-              setUser(null);
-              setIsNotRegistered(true);
-              return null;
-            }
+            // A genuine "not registered" 403 won't change on retry — stop early.
+            if (isNotRegisteredError(err)) break;
             // 401 is a definite "signed out" unless a redirect is still settling.
             if (lastStatus === 401 && !pending) break;
-            if (attempt < tries) await sleep(800);
+            if (attempt < tries) await sleep(1200);
           }
         }
         // A network blip or server error is not a sign-out: keep the person
