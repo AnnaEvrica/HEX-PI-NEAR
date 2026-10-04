@@ -1,0 +1,416 @@
+{
+ "racing direction": {
+  "S012 vs hex62 logloss": [
+   -39.45,
+   -45.07,
+   -33.88
+  ],
+  "hex62": {
+   "logloss skill %": 7.68,
+   "brier skill %": 10.34,
+   "precision all": 65.0,
+   "strongest 50%": {
+    "precision": 69.7,
+    "coverage": 53.2,
+    "usual": 56.1
+   },
+   "strongest 25%": {
+    "precision": 72.7,
+    "coverage": 28.6,
+    "usual": 61.4
+   },
+   "strongest 10%": {
+    "precision": 76.9,
+    "coverage": 12.4,
+    "usual": 67.3
+   }
+  },
+  "M1": {
+   "logloss skill %": 7.54,
+   "brier skill %": 10.19,
+   "precision all": 64.6,
+   "strongest 50%": {
+    "precision": 70.1,
+    "coverage": 52.8,
+    "usual": 54.4
+   },
+   "strongest 25%": {
+    "precision": 73.8,
+    "coverage": 25.4,
+    "usual": 56.0
+   },
+   "strongest 10%": {
+    "precision": 77.1,
+    "coverage": 10.8,
+    "usual": 60.0
+   }
+  },
+  "S012": {
+   "logloss skill %": 13.36,
+   "brier skill %": 17.6,
+   "precision all": 68.4,
+   "strongest 50%": {
+    "precision": 77.6,
+    "coverage": 49.9,
+    "usual": 51.5
+   },
+   "strongest 25%": {
+    "precision": 81.0,
+    "coverage": 27.0,
+    "usual": 52.6
+   },
+   "strongest 10%": {
+    "precision": 82.8,
+    "coverage": 11.9,
+    "usual": 57.2
+   }
+  },
+  "usual all": 51.8,
+  "steps": 13178
+ },
+ "racing size": {
+  "S012 vs hex62 logloss": [
+   12.24,
+   8.76,
+   16.05
+  ],
+  "hex62": {
+   "logloss skill %": 0.15,
+   "brier skill %": 0.22,
+   "precision all": 51.2,
+   "strongest 50%": {
+    "precision": 52.3,
+    "coverage": 33.7,
+    "usual": 51.9
+   },
+   "strongest 25%": {
+    "precision": 53.6,
+    "coverage": 10.7,
+    "usual": 53.1
+   },
+   "strongest 10%": {
+    "precision": 57.4,
+    "coverage": 2.5,
+    "usual": 58.3
+   }
+  },
+  "M1": {
+   "logloss skill %": -0.61,
+   "brier skill %": -0.69,
+   "precision all": 51.9,
+   "strongest 50%": {
+    "precision": 52.3,
+    "coverage": 35.7,
+    "usual": 50.1
+   },
+   "strongest 25%": {
+    "precision": 52.7,
+    "coverage": 10.4,
+    "usual": 53.3
+   },
+   "strongest 10%": {
+    "precision": 58.8,
+    "coverage": 0.9,
+    "usual": 58.8
+   }
+  },
+  "S012": {
+   "logloss skill %": -1.61,
+   "brier skill %": -1.88,
+   "precision all": 51.8,
+   "strongest 50%": {
+    "precision": 54.1,
+    "coverage": 36.3,
+    "usual": 50.1
+   },
+   "strongest 25%": {
+    "precision": 55.3,
+    "coverage": 13.0,
+    "usual": 50.5
+   },
+   "strongest 10%": {
+    "precision": 53.5,
+    "coverage": 2.8,
+    "usual": 48.9
+   }
+  },
+  "usual all": 49.8,
+  "steps": 13022
+ },
+ "weather direction": {
+  "S012 vs hex62 logloss": [
+   -12.57,
+   -16.09,
+   -9.13
+  ],
+  "hex62": {
+   "logloss skill %": 1.62,
+   "brier skill %": 2.23,
+   "precision all": 56.3,
+   "strongest 50%": {
+    "precision": 59.6,
+    "coverage": 48.6,
+    "usual": 52.4
+   },
+   "strongest 25%": {
+    "precision": 62.1,
+    "coverage": 24.5,
+    "usual": 53.2
+   },
+   "strongest 10%": {
+    "precision": 63.7,
+    "coverage": 10.7,
+    "usual": 56.7
+   }
+  },
+  "M1": {
+   "logloss skill %": 1.7,
+   "brier skill %": 2.34,
+   "precision all": 56.5,
+   "strongest 50%": {
+    "precision": 60.3,
+    "coverage": 49.5,
+    "usual": 51.7
+   },
+   "strongest 25%": {
+    "precision": 62.5,
+    "coverage": 24.2,
+    "usual": 53.8
+   },
+   "strongest 10%": {
+    "precision": 65.8,
+    "coverage": 9.3,
+    "usual": 56.5
+   }
+  },
+  "S012": {
+   "logloss skill %": 3.44,
+   "brier skill %": 4.7,
+   "precision all": 59.4,
+   "strongest 50%": {
+    "precision": 64.2,
+    "coverage": 48.7,
+    "usual": 52.4
+   },
+   "strongest 25%": {
+    "precision": 67.1,
+    "coverage": 22.9,
+    "usual": 55.1
+   },
+   "strongest 10%": {
+    "precision": 68.4,
+    "coverage": 8.6,
+    "usual": 57.7
+   }
+  },
+  "usual all": 51.1,
+  "steps": 9030
+ },
+ "weather size": {
+  "S012 vs hex62 logloss": [
+   -3.17,
+   -4.6,
+   -1.74
+  ],
+  "hex62": {
+   "logloss skill %": 0.82,
+   "brier skill %": 1.12,
+   "precision all": 55.1,
+   "strongest 50%": {
+    "precision": 58.2,
+    "coverage": 59.7,
+    "usual": 57.9
+   },
+   "strongest 25%": {
+    "precision": 59.1,
+    "coverage": 35.0,
+    "usual": 59.0
+   },
+   "strongest 10%": {
+    "precision": 62.8,
+    "coverage": 16.1,
+    "usual": 62.3
+   }
+  },
+  "M1": {
+   "logloss skill %": 0.97,
+   "brier skill %": 1.33,
+   "precision all": 56.1,
+   "strongest 50%": {
+    "precision": 58.9,
+    "coverage": 55.0,
+    "usual": 58.2
+   },
+   "strongest 25%": {
+    "precision": 60.9,
+    "coverage": 30.5,
+    "usual": 61.0
+   },
+   "strongest 10%": {
+    "precision": 64.6,
+    "coverage": 14.0,
+    "usual": 64.8
+   }
+  },
+  "S012": {
+   "logloss skill %": 1.28,
+   "brier skill %": 1.74,
+   "precision all": 56.0,
+   "strongest 50%": {
+    "precision": 59.5,
+    "coverage": 53.4,
+    "usual": 58.9
+   },
+   "strongest 25%": {
+    "precision": 63.2,
+    "coverage": 29.7,
+    "usual": 63.2
+   },
+   "strongest 10%": {
+    "precision": 66.5,
+    "coverage": 13.3,
+    "usual": 66.3
+   }
+  },
+  "usual all": 54.5,
+  "steps": 9030
+ },
+ "markets direction": {
+  "S012 vs hex62 logloss": [
+   0.91,
+   -0.16,
+   1.98
+  ],
+  "hex62": {
+   "logloss skill %": 0.07,
+   "brier skill %": 0.1,
+   "precision all": 53.0,
+   "strongest 50%": {
+    "precision": 54.0,
+    "coverage": 45.5,
+    "usual": 54.1
+   },
+   "strongest 25%": {
+    "precision": 54.8,
+    "coverage": 25.5,
+    "usual": 54.8
+   },
+   "strongest 10%": {
+    "precision": 55.8,
+    "coverage": 12.0,
+    "usual": 56.2
+   }
+  },
+  "M1": {
+   "logloss skill %": 0.06,
+   "brier skill %": 0.09,
+   "precision all": 52.4,
+   "strongest 50%": {
+    "precision": 53.9,
+    "coverage": 47.2,
+    "usual": 53.8
+   },
+   "strongest 25%": {
+    "precision": 55.5,
+    "coverage": 24.2,
+    "usual": 55.3
+   },
+   "strongest 10%": {
+    "precision": 57.2,
+    "coverage": 10.7,
+    "usual": 57.4
+   }
+  },
+  "S012": {
+   "logloss skill %": -0.06,
+   "brier skill %": -0.08,
+   "precision all": 52.7,
+   "strongest 50%": {
+    "precision": 54.0,
+    "coverage": 45.1,
+    "usual": 53.3
+   },
+   "strongest 25%": {
+    "precision": 55.1,
+    "coverage": 22.1,
+    "usual": 54.7
+   },
+   "strongest 10%": {
+    "precision": 57.3,
+    "coverage": 9.0,
+    "usual": 57.0
+   }
+  },
+  "usual all": 52.5,
+  "steps": 17402
+ },
+ "markets size": {
+  "S012 vs hex62 logloss": [
+   -3.28,
+   -6.08,
+   -0.75
+  ],
+  "hex62": {
+   "logloss skill %": 1.68,
+   "brier skill %": 2.3,
+   "precision all": 58.0,
+   "strongest 50%": {
+    "precision": 62.2,
+    "coverage": 48.3,
+    "usual": 59.8
+   },
+   "strongest 25%": {
+    "precision": 63.3,
+    "coverage": 25.3,
+    "usual": 61.5
+   },
+   "strongest 10%": {
+    "precision": 66.1,
+    "coverage": 11.5,
+    "usual": 63.8
+   }
+  },
+  "M1": {
+   "logloss skill %": 1.48,
+   "brier skill %": 2.05,
+   "precision all": 58.0,
+   "strongest 50%": {
+    "precision": 61.7,
+    "coverage": 47.7,
+    "usual": 58.2
+   },
+   "strongest 25%": {
+    "precision": 63.6,
+    "coverage": 23.4,
+    "usual": 61.4
+   },
+   "strongest 10%": {
+    "precision": 66.3,
+    "coverage": 9.3,
+    "usual": 64.2
+   }
+  },
+  "S012": {
+   "logloss skill %": 2.16,
+   "brier skill %": 2.97,
+   "precision all": 59.0,
+   "strongest 50%": {
+    "precision": 63.5,
+    "coverage": 46.7,
+    "usual": 58.9
+   },
+   "strongest 25%": {
+    "precision": 65.7,
+    "coverage": 23.0,
+    "usual": 62.6
+   },
+   "strongest 10%": {
+    "precision": 67.9,
+    "coverage": 8.6,
+    "usual": 65.9
+   }
+  },
+  "usual all": 54.7,
+  "steps": 17402
+ }
+}

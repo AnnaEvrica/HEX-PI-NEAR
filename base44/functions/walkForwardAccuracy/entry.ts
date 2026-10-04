@@ -1,4 +1,4 @@
-// walkForwardAccuracy — run the engine's own walk-forward test on live data.
+// walkForwardAccuracy — run both engines' walk-forward test on live data.
 //
 // For each ticker it replays the calibrated probability read one bar at a
 // time: every call is made before its outcome is known, and learning happens
@@ -11,6 +11,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import { fetchYahooReturns } from '../../shared/marketDataClient.ts';
 import { walkStateProbability, stateProbability } from '../../shared/stateProbability.ts';
+import { walkRank } from '../../shared/rankCore.ts';
 import { ENGINE_VERSION } from '../../shared/version.ts';
 
 const DEFAULT_BASKET = ['BTC', 'ETH', 'SOL', 'SPY', 'QQQ'];
@@ -62,7 +63,7 @@ export default async function(req: Request): Promise<Response> {
     const lookbackDays = Math.max(730, Math.min(Number(body.lookbackDays) || 5475, 7300));
 
     const perTicker: Record<string, unknown> = {};
-    const pooledUp = [], pooledBig = [];
+    const pooledUp = [], pooledBig = [], rankUp = [], rankBig = [];
     for (const ticker of tickers) {
       let md = null;
       try { md = await fetchYahooReturns(ticker, lookbackDays); } catch { perTicker[ticker] = { error: 'no data' }; continue; }
@@ -74,17 +75,22 @@ export default async function(req: Request): Promise<Response> {
       const up = scoredSteps.map((s) => ({ p: s.p_up, b: s.b_up, y: s.y_up }));
       const big = scoredSteps.filter((s) => s.p_big !== null && s.y_big !== null).map((s) => ({ p: s.p_big as number, b: s.b_big, y: s.y_big as number }));
       pooledUp.push(...up); pooledBig.push(...big);
+      // rank-1 on the same series, scored from the same step. `b` is its own baseline.
+      const from = WARMUP + 12;
+      const rk = (read) => walkRank(md.returns, read).steps.filter((s) => s.i >= from).map((s) => ({ p: s.p, b: s.null, y: s.y }));
+      const rUp = rk('MOVE'), rBig = rk('RANGE');
+      rankUp.push(...rUp); rankBig.push(...rBig);
       // Which pre-trained family the series came to resemble, worked out from
       // the series alone.
       const now = stateProbability(md.returns);
-      perTicker[ticker] = { bars: md.dataPoints, direction: score(up), move_size: score(big), behaves_like: { direction: now?.family_up, move_size: now?.family_big } };
+      perTicker[ticker] = { bars: md.dataPoints, direction: score(up), move_size: score(big), rank_1: { direction: score(rUp), move_size: score(rBig) }, behaves_like: { direction: now?.family_up, move_size: now?.family_big } };
     }
 
     return Response.json({
       engine_version: ENGINE_VERSION,
-      method: 'walk-forward: each call precedes its outcome; first 250 steps of each series unscored; skill is against the series own decayed base rate',
+      method: 'walk-forward: each call precedes its outcome; first 250 steps of each series unscored; skill is against each engine own baseline; rank_1 is uncalibrated here',
       tickers: perTicker,
-      pooled: { direction: score(pooledUp), move_size: score(pooledBig) },
+      pooled: { direction: score(pooledUp), move_size: score(pooledBig), rank_1: { direction: score(rankUp), move_size: score(rankBig) } },
     });
   } catch (error) {
     return Response.json({ error: (error as Error).message }, { status: 500 });

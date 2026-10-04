@@ -1,0 +1,108 @@
+{
+ "h1": {
+  "n": 46937,
+  "Deployed chat engine (SCEFM)": {
+   "brier": 0.35506,
+   "brier_skill_vs_drift": -0.4199,
+   "log_loss": 1.3266,
+   "ece": 0.2356
+  },
+  "Deployed pipeline (frozen, excl. BTC)": {
+   "brier": 0.28979,
+   "brier_skill_vs_drift": -0.1586,
+   "log_loss": 0.7953,
+   "ece": 0.1705
+  },
+  "Patched SCEFM (same 128 states)": {
+   "brier": 0.24961,
+   "brier_skill_vs_drift": 0.0018,
+   "log_loss": 0.6924,
+   "ece": 0.0026
+  },
+  "Patched SCEFM on SHUFFLED returns": {
+   "brier": 0.24908,
+   "brier_skill_vs_drift": 0.0027,
+   "log_loss": 0.6913,
+   "ece": 0.0018
+  },
+  "patched_minus_deployed_brier": [
+   -0.1054,
+   [
+    -0.1093,
+    -0.1021
+   ]
+  ],
+  "NEW event: next move larger than usual": {
+   "brier": 0.24167,
+   "brier_skill_vs_drift": 0.0333,
+   "log_loss": 0.6763,
+   "ece": 0.0108
+  },
+  "magnitude_reliability": [
+   {
+    "stated": "0\u201340%",
+    "avg_stated": 37.7,
+    "happened": 37.3,
+    "n": 3932
+   },
+   {
+    "stated": "40\u201345%",
+    "avg_stated": 42.7,
+    "happened": 42.0,
+    "n": 3205
+   },
+   {
+    "stated": "45\u201355%",
+    "avg_stated": 50.6,
+    "happened": 50.8,
+    "n": 15450
+   },
+   {
+    "stated": "55\u201360%",
+    "avg_stated": 57.0,
+    "happened": 56.5,
+    "n": 9221
+   },
+   {
+    "stated": "60\u2013100%",
+    "avg_stated": 64.9,
+    "happened": 62.4,
+    "n": 15129
+   }
+  ]
+ },
+ "h5": {
+  "n": 46869,
+  "Deployed chat engine (SCEFM)": {
+   "brier": 0.37324,
+   "brier_skill_vs_drift": -0.4801,
+   "log_loss": 1.4752,
+   "ece": 0.2606
+  },
+  "Deployed pipeline (frozen, excl. BTC)": {
+   "brier": 0.29046,
+   "brier_skill_vs_drift": -0.1506,
+   "log_loss": 0.7965,
+   "ece": 0.1726
+  },
+  "Patched SCEFM (same 128 states)": {
+   "brier": 0.24998,
+   "brier_skill_vs_drift": 0.0087,
+   "log_loss": 0.6931,
+   "ece": 0.0113
+  },
+  "Patched SCEFM on SHUFFLED returns": {
+   "brier": 0.24979,
+   "brier_skill_vs_drift": -0.0003,
+   "log_loss": 0.6927,
+   "ece": 0.0114
+  },
+  "patched_minus_deployed_brier": [
+   -0.1233,
+   [
+    -0.1269,
+    -0.1197
+   ]
+  ]
+ }
+}

@@ -1,0 +1,55 @@
+{
+ "n": 46954,
+ "direction, field only": {
+  "brier": 0.2496,
+  "brier_skill_vs_drift": 0.0015,
+  "log_loss": 0.6923,
+  "ece": 0.0032
+ },
+ "direction, field + pre-trained": {
+  "brier": 0.24956,
+  "brier_skill_vs_drift": 0.0017,
+  "log_loss": 0.6923,
+  "ece": 0.003
+ },
+ "size, field only": {
+  "brier": 0.23957,
+  "brier_skill_vs_drift": 0.0357,
+  "log_loss": 0.672,
+  "ece": 0.0078
+ },
+ "size, field + pre-trained": {
+  "brier": 0.2393,
+  "brier_skill_vs_drift": 0.0367,
+  "log_loss": 0.6715,
+  "ece": 0.0054
+ },
+ "direction: pre-trained minus field-only Brier": [
+  -3.3e-05,
+  [
+   -9e-05,
+   2.8e-05
+  ]
+ ],
+ "size: pre-trained minus field-only Brier": [
+  -0.000263,
+  [
+   -0.000394,
+   -0.000128
+  ]
+ ],
+ "shuffled control, field + pre-trained": {
+  "shuffled direction": {
+   "brier": 0.24916,
+   "brier_skill_vs_drift": 0.0023,
+   "log_loss": 0.6915,
+   "ece": 0.0022
+  },
+  "shuffled size": {
+   "brier": 0.25001,
+   "brier_skill_vs_drift": -0.0001,
+   "log_loss": 0.6932,
+   "ece": 0.003
+  }
+ }
+}

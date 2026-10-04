@@ -1,0 +1,1131 @@
+{
+ "A leakage": {
+  "features up to T identical after randomising the future": true,
+  "predictions up to T identical": true,
+  "T": 973
+ },
+ "B-C scales and level": {
+  "racing direction": {
+   "steps": 13178,
+   "skill %": {
+    "hex62": 7.68,
+    "S0": 7.54,
+    "S1": 11.07,
+    "S2": 13.35,
+    "S3": 14.71,
+    "S4": 15.79,
+    "level": 27.23,
+    "level+S2": 24.1
+   },
+   "scale spectrum (gain from adding scale k; positive helps)": {
+    "scale 0 (1 step)": [
+     52.33,
+     47.26,
+     56.84
+    ],
+    "scale 1 (2 step)": [
+     24.51,
+     21.46,
+     26.93
+    ],
+    "scale 2 (4 step)": [
+     15.84,
+     10.99,
+     19.77
+    ],
+    "scale 3 (8 step)": [
+     9.44,
+     5.75,
+     12.33
+    ],
+    "scale 4 (16 step)": [
+     7.47,
+     4.18,
+     10.34
+    ]
+   },
+   "paired (negative = first better)": {
+    "S2 vs hex62": [
+     -39.37,
+     -45.03,
+     -31.55
+    ],
+    "S4 vs hex62": [
+     -56.28,
+     -67.65,
+     -43.63
+    ],
+    "S2 vs level": [
+     96.37,
+     83.82,
+     108.55
+    ],
+    "level+S2 vs level": [
+     21.75,
+     19.38,
+     25.07
+    ],
+    "level+S2 vs S2": [
+     -74.62,
+     -87.71,
+     -60.47
+    ]
+   },
+   "best scale model": "S4",
+   "precision": {
+    "hex62": {
+     "all": {
+      "precision": 65.0,
+      "coverage": 100.0,
+      "usual": 51.8
+     },
+     "strongest 25%": {
+      "precision": 72.7,
+      "coverage": 28.6,
+      "usual": 61.4
+     },
+     "strongest 10%": {
+      "precision": 76.9,
+      "coverage": 12.4,
+      "usual": 67.3
+     }
+    },
+    "S4": {
+     "all": {
+      "precision": 70.4,
+      "coverage": 100.0,
+      "usual": 51.8
+     },
+     "strongest 25%": {
+      "precision": 82.8,
+      "coverage": 27.3,
+      "usual": 52.8
+     },
+     "strongest 10%": {
+      "precision": 84.8,
+      "coverage": 12.1,
+      "usual": 54.6
+     }
+    },
+    "level": {
+     "all": {
+      "precision": 74.7,
+      "coverage": 100.0,
+      "usual": 51.8
+     },
+     "strongest 25%": {
+      "precision": 92.8,
+      "coverage": 27.5,
+      "usual": 59.3
+     },
+     "strongest 10%": {
+      "precision": 95.4,
+      "coverage": 11.6,
+      "usual": 68.4
+     }
+    }
+   }
+  },
+  "racing size": {
+   "steps": 13022,
+   "skill %": {
+    "hex62": 0.15,
+    "S0": -0.61,
+    "S1": -0.86,
+    "S2": -1.56,
+    "S3": -2.02,
+    "S4": -2.69
+   },
+   "scale spectrum (gain from adding scale k; positive helps)": {
+    "scale 0 (1 step)": [
+     -4.26,
+     -8.0,
+     -0.03
+    ],
+    "scale 1 (2 step)": [
+     -1.75,
+     -5.3,
+     1.54
+    ],
+    "scale 2 (4 step)": [
+     -4.86,
+     -6.04,
+     -3.91
+    ],
+    "scale 3 (8 step)": [
+     -3.17,
+     -4.84,
+     -1.78
+    ],
+    "scale 4 (16 step)": [
+     -4.69,
+     -5.9,
+     -3.53
+    ]
+   },
+   "paired (negative = first better)": {
+    "S2 vs hex62": [
+     11.94,
+     5.55,
+     18.63
+    ],
+    "S4 vs hex62": [
+     19.79,
+     10.76,
+     28.6
+    ]
+   },
+   "best scale model": "S0",
+   "precision": {
+    "hex62": {
+     "all": {
+      "precision": 51.2,
+      "coverage": 100.0,
+      "usual": 49.8
+     },
+     "strongest 25%": {
+      "precision": 53.6,
+      "coverage": 10.7,
+      "usual": 53.1
+     },
+     "strongest 10%": {
+      "precision": 57.4,
+      "coverage": 2.5,
+      "usual": 58.3
+     }
+    },
+    "S0": {
+     "all": {
+      "precision": 51.9,
+      "coverage": 100.0,
+      "usual": 49.8
+     },
+     "strongest 25%": {
+      "precision": 52.6,
+      "coverage": 10.4,
+      "usual": 53.2
+     },
+     "strongest 10%": {
+      "precision": 58.8,
+      "coverage": 0.9,
+      "usual": 58.8
+     }
+    }
+   }
+  },
+  "weather direction": {
+   "steps": 9030,
+   "skill %": {
+    "hex62": 1.62,
+    "S0": 1.7,
+    "S1": 2.55,
+    "S2": 3.44,
+    "S3": 4.02,
+    "S4": 4.46,
+    "level": 6.07,
+    "level+S2": 6.6
+   },
+   "scale spectrum (gain from adding scale k; positive helps)": {
+    "scale 0 (1 step)": [
+     11.81,
+     8.61,
+     15.14
+    ],
+    "scale 1 (2 step)": [
+     5.84,
+     3.41,
+     8.04
+    ],
+    "scale 2 (4 step)": [
+     6.17,
+     3.85,
+     8.79
+    ],
+    "scale 3 (8 step)": [
+     4.04,
+     1.93,
+     6.04
+    ],
+    "scale 4 (16 step)": [
+     3.02,
+     1.09,
+     5.05
+    ]
+   },
+   "paired (negative = first better)": {
+    "S2 vs hex62": [
+     -12.57,
+     -16.4,
+     -9.3
+    ],
+    "S4 vs hex62": [
+     -19.63,
+     -24.37,
+     -14.98
+    ],
+    "S2 vs level": [
+     18.25,
+     13.44,
+     22.95
+    ],
+    "level+S2 vs level": [
+     -3.67,
+     -5.74,
+     -1.41
+    ],
+    "level+S2 vs S2": [
+     -21.92,
+     -26.5,
+     -17.32
+    ]
+   },
+   "best scale model": "S4",
+   "precision": {
+    "hex62": {
+     "all": {
+      "precision": 56.3,
+      "coverage": 100.0,
+      "usual": 51.1
+     },
+     "strongest 25%": {
+      "precision": 62.1,
+      "coverage": 24.5,
+      "usual": 53.2
+     },
+     "strongest 10%": {
+      "precision": 63.7,
+      "coverage": 10.7,
+      "usual": 56.7
+     }
+    },
+    "S4": {
+     "all": {
+      "precision": 60.5,
+      "coverage": 100.0,
+      "usual": 51.1
+     },
+     "strongest 25%": {
+      "precision": 68.1,
+      "coverage": 24.2,
+      "usual": 54.1
+     },
+     "strongest 10%": {
+      "precision": 72.7,
+      "coverage": 8.6,
+      "usual": 60.7
+     }
+    },
+    "level": {
+     "all": {
+      "precision": 62.2,
+      "coverage": 100.0,
+      "usual": 51.1
+     },
+     "strongest 25%": {
+      "precision": 72.3,
+      "coverage": 24.8,
+      "usual": 56.5
+     },
+     "strongest 10%": {
+      "precision": 76.2,
+      "coverage": 10.0,
+      "usual": 62.3
+     }
+    }
+   }
+  },
+  "weather size": {
+   "steps": 9030,
+   "skill %": {
+    "hex62": 0.82,
+    "S0": 0.97,
+    "S1": 1.2,
+    "S2": 1.28,
+    "S3": 1.38,
+    "S4": 1.39
+   },
+   "scale spectrum (gain from adding scale k; positive helps)": {
+    "scale 0 (1 step)": [
+     6.71,
+     3.92,
+     9.5
+    ],
+    "scale 1 (2 step)": [
+     1.54,
+     0.5,
+     2.57
+    ],
+    "scale 2 (4 step)": [
+     0.58,
+     0.13,
+     1.05
+    ],
+    "scale 3 (8 step)": [
+     0.69,
+     -0.05,
+     1.43
+    ],
+    "scale 4 (16 step)": [
+     0.09,
+     -0.55,
+     0.76
+    ]
+   },
+   "paired (negative = first better)": {
+    "S2 vs hex62": [
+     -3.17,
+     -4.73,
+     -1.58
+    ],
+    "S4 vs hex62": [
+     -3.95,
+     -5.72,
+     -2.16
+    ]
+   },
+   "best scale model": "S4",
+   "precision": {
+    "hex62": {
+     "all": {
+      "precision": 55.1,
+      "coverage": 100.0,
+      "usual": 54.5
+     },
+     "strongest 25%": {
+      "precision": 59.1,
+      "coverage": 35.0,
+      "usual": 59.0
+     },
+     "strongest 10%": {
+      "precision": 62.8,
+      "coverage": 16.1,
+      "usual": 62.3
+     }
+    },
+    "S4": {
+     "all": {
+      "precision": 56.3,
+      "coverage": 100.0,
+      "usual": 54.5
+     },
+     "strongest 25%": {
+      "precision": 63.3,
+      "coverage": 28.2,
+      "usual": 62.9
+     },
+     "strongest 10%": {
+      "precision": 67.2,
+      "coverage": 12.6,
+      "usual": 67.2
+     }
+    }
+   }
+  },
+  "markets direction": {
+   "steps": 46937,
+   "skill %": {
+    "hex62": -0.01,
+    "S0": -0.02,
+    "S1": -0.1,
+    "S2": -0.13,
+    "S3": -0.18,
+    "S4": -0.27,
+    "level": 0.02,
+    "level+S2": -0.16
+   },
+   "scale spectrum (gain from adding scale k; positive helps)": {
+    "scale 0 (1 step)": [
+     -0.14,
+     -0.5,
+     0.28
+    ],
+    "scale 1 (2 step)": [
+     -0.54,
+     -0.92,
+     -0.18
+    ],
+    "scale 2 (4 step)": [
+     -0.25,
+     -0.62,
+     0.11
+    ],
+    "scale 3 (8 step)": [
+     -0.32,
+     -0.62,
+     -0.05
+    ],
+    "scale 4 (16 step)": [
+     -0.61,
+     -0.9,
+     -0.31
+    ]
+   },
+   "paired (negative = first better)": {
+    "S2 vs hex62": [
+     0.86,
+     0.23,
+     1.49
+    ],
+    "S4 vs hex62": [
+     1.79,
+     1.09,
+     2.52
+    ],
+    "S2 vs level": [
+     1.1,
+     0.49,
+     1.68
+    ],
+    "level+S2 vs level": [
+     1.29,
+     0.77,
+     1.81
+    ],
+    "level+S2 vs S2": [
+     0.2,
+     -0.17,
+     0.56
+    ]
+   },
+   "best scale model": "S0",
+   "precision": {
+    "hex62": {
+     "all": {
+      "precision": 51.2,
+      "coverage": 100.0,
+      "usual": 51.3
+     },
+     "strongest 25%": {
+      "precision": 52.6,
+      "coverage": 25.4,
+      "usual": 52.8
+     },
+     "strongest 10%": {
+      "precision": 53.5,
+      "coverage": 10.9,
+      "usual": 53.8
+     }
+    },
+    "S0": {
+     "all": {
+      "precision": 50.8,
+      "coverage": 100.0,
+      "usual": 51.3
+     },
+     "strongest 25%": {
+      "precision": 53.0,
+      "coverage": 23.4,
+      "usual": 53.1
+     },
+     "strongest 10%": {
+      "precision": 54.7,
+      "coverage": 9.5,
+      "usual": 54.7
+     }
+    },
+    "level": {
+     "all": {
+      "precision": 51.5,
+      "coverage": 100.0,
+      "usual": 51.3
+     },
+     "strongest 25%": {
+      "precision": 52.6,
+      "coverage": 27.2,
+      "usual": 52.3
+     },
+     "strongest 10%": {
+      "precision": 53.1,
+      "coverage": 11.9,
+      "usual": 53.1
+     }
+    }
+   }
+  },
+  "markets size": {
+   "steps": 46937,
+   "skill %": {
+    "hex62": 1.17,
+    "S0": 0.58,
+    "S1": 0.86,
+    "S2": 0.96,
+    "S3": 0.93,
+    "S4": 0.94
+   },
+   "scale spectrum (gain from adding scale k; positive helps)": {
+    "scale 0 (1 step)": [
+     3.93,
+     1.86,
+     5.91
+    ],
+    "scale 1 (2 step)": [
+     1.9,
+     1.01,
+     2.81
+    ],
+    "scale 2 (4 step)": [
+     0.68,
+     0.09,
+     1.25
+    ],
+    "scale 3 (8 step)": [
+     -0.19,
+     -0.68,
+     0.3
+    ],
+    "scale 4 (16 step)": [
+     0.1,
+     -0.4,
+     0.58
+    ]
+   },
+   "paired (negative = first better)": {
+    "S2 vs hex62": [
+     1.44,
+     -0.17,
+     3.16
+    ],
+    "S4 vs hex62": [
+     1.53,
+     -0.13,
+     3.31
+    ]
+   },
+   "best scale model": "S2",
+   "precision": {
+    "hex62": {
+     "all": {
+      "precision": 59.1,
+      "coverage": 100.0,
+      "usual": 57.3
+     },
+     "strongest 25%": {
+      "precision": 64.7,
+      "coverage": 20.2,
+      "usual": 63.3
+     },
+     "strongest 10%": {
+      "precision": 66.5,
+      "coverage": 9.0,
+      "usual": 65.0
+     }
+    },
+    "S2": {
+     "all": {
+      "precision": 59.8,
+      "coverage": 100.0,
+      "usual": 57.3
+     },
+     "strongest 25%": {
+      "precision": 65.8,
+      "coverage": 19.0,
+      "usual": 63.8
+     },
+     "strongest 10%": {
+      "precision": 68.5,
+      "coverage": 7.3,
+      "usual": 66.8
+     }
+    }
+   }
+  }
+ },
+ "shuffled racing direction skill %": {
+  "hex62": -0.11,
+  "S0": -1.08,
+  "S2": -2.27,
+  "S4": -3.41,
+  "level": -0.48,
+  "level+S2": -2.38
+ },
+ "D dyadic memory": {
+  "markets direction": {
+   "skill %": {
+    "hex62": -0.01,
+    "mem32": -5.17,
+    "mem64": -3.59,
+    "mem128": -2.22,
+    "mem256": -1.24,
+    "mem512": -0.64,
+    "mem1024": -0.32,
+    "memNone": -0.13,
+    "memmix": -0.13
+   },
+   "memmix vs no forgetting": [
+    -0.03,
+    -0.29,
+    0.24
+   ],
+   "memmix vs hex62": [
+    0.84,
+    0.26,
+    1.41
+   ]
+  },
+  "markets size": {
+   "skill %": {
+    "hex62": 1.17,
+    "mem32": -3.5,
+    "mem64": -2.07,
+    "mem128": -0.78,
+    "mem256": 0.16,
+    "mem512": 0.73,
+    "mem1024": 1.02,
+    "memNone": 0.96,
+    "memmix": 1.07
+   },
+   "memmix vs no forgetting": [
+    -0.74,
+    -1.79,
+    0.3
+   ],
+   "memmix vs hex62": [
+    0.69,
+    -0.82,
+    2.21
+   ]
+  },
+  "weather direction": {
+   "skill %": {
+    "hex62": 1.62,
+    "mem32": -1.98,
+    "mem64": -0.45,
+    "mem128": 0.93,
+    "mem256": 1.97,
+    "mem512": 2.63,
+    "mem1024": 3.02,
+    "memNone": 3.44,
+    "memmix": 3.44
+   },
+   "memmix vs no forgetting": [
+    0.0,
+    -0.0,
+    0.0
+   ],
+   "memmix vs hex62": [
+    -12.57,
+    -15.99,
+    -8.9
+   ]
+  },
+  "weather size": {
+   "skill %": {
+    "hex62": 0.82,
+    "mem32": -4.28,
+    "mem64": -2.75,
+    "mem128": -1.31,
+    "mem256": -0.22,
+    "mem512": 0.48,
+    "mem1024": 0.9,
+    "memNone": 1.28,
+    "memmix": 1.28
+   },
+   "memmix vs no forgetting": [
+    0.0,
+    -0.0,
+    0.0
+   ],
+   "memmix vs hex62": [
+    -3.17,
+    -4.7,
+    -1.66
+   ]
+  },
+  "racing direction": {
+   "skill %": {
+    "hex62": 7.68,
+    "mem32": 10.67,
+    "mem64": 11.73,
+    "mem128": 12.56,
+    "mem256": 13.03,
+    "mem512": 13.23,
+    "mem1024": 13.3,
+    "memNone": 13.35,
+    "memmix": 13.21
+   },
+   "memmix vs no forgetting": [
+    0.95,
+    0.85,
+    1.07
+   ],
+   "memmix vs hex62": [
+    -38.42,
+    -44.0,
+    -30.76
+   ]
+  },
+  "racing size": {
+   "skill %": {
+    "hex62": 0.15,
+    "mem32": -5.03,
+    "mem64": -3.68,
+    "mem128": -2.61,
+    "mem256": -1.99,
+    "mem512": -1.73,
+    "mem1024": -1.63,
+    "memNone": -1.56,
+    "memmix": -1.72
+   },
+   "memmix vs no forgetting": [
+    1.08,
+    0.91,
+    1.27
+   ],
+   "memmix vs hex62": [
+    13.02,
+    6.63,
+    19.41
+   ]
+  }
+ },
+ "E prior means (three scales x six lines, newest last)": {
+  "direction": {
+   "markets": [
+    -0.003,
+    0.004,
+    0.009,
+    -0.014,
+    -0.021,
+    -0.026,
+    -0.005,
+    0.017,
+    0.003,
+    -0.003,
+    0.002,
+    -0.033,
+    -0.015,
+    0.024,
+    0.004,
+    0.015,
+    0.018,
+    0.004
+   ],
+   "weather": [
+    -0.016,
+    -0.045,
+    -0.02,
+    -0.091,
+    -0.16,
+    0.063,
+    -0.001,
+    -0.048,
+    -0.051,
+    -0.157,
+    -0.083,
+    -0.175,
+    -0.001,
+    0.042,
+    -0.007,
+    -0.038,
+    -0.121,
+    -0.298
+   ],
+   "racing": [
+    -0.016,
+    -0.153,
+    0.104,
+    -0.129,
+    -0.056,
+    -0.396,
+    0.029,
+    -0.024,
+    -0.049,
+    -0.131,
+    -0.086,
+    -0.48,
+    0.023,
+    -0.007,
+    0.003,
+    -0.067,
+    -0.123,
+    -0.632
+   ]
+  },
+  "size": {
+   "markets": [
+    0.044,
+    0.058,
+    0.049,
+    0.049,
+    0.044,
+    0.049,
+    0.045,
+    0.042,
+    0.04,
+    0.043,
+    0.036,
+    0.065,
+    0.028,
+    0.06,
+    0.06,
+    0.038,
+    0.041,
+    0.049
+   ],
+   "weather": [
+    0.052,
+    0.004,
+    0.033,
+    0.037,
+    0.074,
+    0.091,
+    0.006,
+    0.048,
+    0.031,
+    0.018,
+    0.039,
+    0.041,
+    0.003,
+    -0.009,
+    0.019,
+    0.002,
+    -0.007,
+    0.018
+   ],
+   "racing": [
+    0.012,
+    -0.024,
+    -0.067,
+    -0.022,
+    0.012,
+    0.082,
+    -0.031,
+    -0.008,
+    -0.042,
+    0.036,
+    -0.038,
+    0.091,
+    -0.015,
+    0.026,
+    -0.051,
+    0.015,
+    -0.004,
+    0.087
+   ]
+  }
+ },
+ "E learning curves (mean log-loss difference vs base x1000; negative is better)": {
+  "markets": {
+   "direction first 25": {
+    "6.2 with 64-state tables": -8.6,
+    "6.2 from nothing": 1.2,
+    "lines, no prior": 60.3,
+    "lines, coefficient priors (mixed)": -9.4
+   },
+   "direction first 50": {
+    "6.2 with 64-state tables": -1.2,
+    "6.2 from nothing": 1.0,
+    "lines, no prior": 54.0,
+    "lines, coefficient priors (mixed)": 2.9
+   },
+   "direction first 100": {
+    "6.2 with 64-state tables": -1.8,
+    "6.2 from nothing": 0.2,
+    "lines, no prior": 46.5,
+    "lines, coefficient priors (mixed)": 7.2
+   },
+   "direction first 250": {
+    "6.2 with 64-state tables": 0.0,
+    "6.2 from nothing": 0.2,
+    "lines, no prior": 32.8,
+    "lines, coefficient priors (mixed)": 6.4
+   },
+   "direction first 500": {
+    "6.2 with 64-state tables": 0.8,
+    "6.2 from nothing": 0.6,
+    "lines, no prior": 24.8,
+    "lines, coefficient priors (mixed)": 4.3
+   },
+   "direction first 1000": {
+    "6.2 with 64-state tables": 0.7,
+    "6.2 from nothing": 0.5,
+    "lines, no prior": 16.5,
+    "lines, coefficient priors (mixed)": 2.4
+   },
+   "size first 25": {
+    "6.2 with 64-state tables": 6.4,
+    "6.2 from nothing": 0.9,
+    "lines, no prior": 87.7,
+    "lines, coefficient priors (mixed)": 25.0
+   },
+   "size first 50": {
+    "6.2 with 64-state tables": 3.5,
+    "6.2 from nothing": -0.0,
+    "lines, no prior": 55.2,
+    "lines, coefficient priors (mixed)": 15.1
+   },
+   "size first 100": {
+    "6.2 with 64-state tables": 0.8,
+    "6.2 from nothing": -0.2,
+    "lines, no prior": 46.1,
+    "lines, coefficient priors (mixed)": 8.6
+   },
+   "size first 250": {
+    "6.2 with 64-state tables": -0.6,
+    "6.2 from nothing": -0.9,
+    "lines, no prior": 30.4,
+    "lines, coefficient priors (mixed)": 3.6
+   },
+   "size first 500": {
+    "6.2 with 64-state tables": -1.2,
+    "6.2 from nothing": -1.4,
+    "lines, no prior": 24.4,
+    "lines, coefficient priors (mixed)": 1.9
+   },
+   "size first 1000": {
+    "6.2 with 64-state tables": -2.0,
+    "6.2 from nothing": -1.9,
+    "lines, no prior": 14.8,
+    "lines, coefficient priors (mixed)": -0.7
+   }
+  },
+  "weather": {
+   "direction first 25": {
+    "6.2 with 64-state tables": 1.2,
+    "6.2 from nothing": 0.1,
+    "lines, no prior": -6.2,
+    "lines, coefficient priors (mixed)": -62.4
+   },
+   "direction first 50": {
+    "6.2 with 64-state tables": -12.6,
+    "6.2 from nothing": -1.5,
+    "lines, no prior": 62.9,
+    "lines, coefficient priors (mixed)": -27.7
+   },
+   "direction first 100": {
+    "6.2 with 64-state tables": -6.5,
+    "6.2 from nothing": -1.4,
+    "lines, no prior": 11.6,
+    "lines, coefficient priors (mixed)": -36.9
+   },
+   "direction first 250": {
+    "6.2 with 64-state tables": -6.5,
+    "6.2 from nothing": -0.6,
+    "lines, no prior": -1.0,
+    "lines, coefficient priors (mixed)": -41.5
+   },
+   "direction first 500": {
+    "6.2 with 64-state tables": -17.0,
+    "6.2 from nothing": -6.5,
+    "lines, no prior": -17.8,
+    "lines, coefficient priors (mixed)": -40.9
+   },
+   "direction first 1000": {
+    "6.2 with 64-state tables": -15.6,
+    "6.2 from nothing": -4.9,
+    "lines, no prior": -16.4,
+    "lines, coefficient priors (mixed)": -31.5
+   },
+   "size first 25": {
+    "6.2 with 64-state tables": 1.2,
+    "6.2 from nothing": 0.2,
+    "lines, no prior": 68.7,
+    "lines, coefficient priors (mixed)": 25.9
+   },
+   "size first 50": {
+    "6.2 with 64-state tables": 3.7,
+    "6.2 from nothing": 1.0,
+    "lines, no prior": 80.7,
+    "lines, coefficient priors (mixed)": 31.2
+   },
+   "size first 100": {
+    "6.2 with 64-state tables": -2.8,
+    "6.2 from nothing": -2.0,
+    "lines, no prior": 54.1,
+    "lines, coefficient priors (mixed)": 9.4
+   },
+   "size first 250": {
+    "6.2 with 64-state tables": 0.1,
+    "6.2 from nothing": -0.3,
+    "lines, no prior": 45.1,
+    "lines, coefficient priors (mixed)": 2.4
+   },
+   "size first 500": {
+    "6.2 with 64-state tables": -0.1,
+    "6.2 from nothing": -0.5,
+    "lines, no prior": 24.8,
+    "lines, coefficient priors (mixed)": 1.4
+   },
+   "size first 1000": {
+    "6.2 with 64-state tables": 0.3,
+    "6.2 from nothing": 0.0,
+    "lines, no prior": 18.9,
+    "lines, coefficient priors (mixed)": 0.4
+   }
+  },
+  "racing": {
+   "direction first 25": {
+    "6.2 with 64-state tables": -31.2,
+    "6.2 from nothing": 1.5,
+    "lines, no prior": 56.7,
+    "lines, coefficient priors (mixed)": -72.2
+   },
+   "direction first 50": {
+    "6.2 with 64-state tables": -29.8,
+    "6.2 from nothing": -0.5,
+    "lines, no prior": 12.3,
+    "lines, coefficient priors (mixed)": -79.1
+   },
+   "direction first 100": {
+    "6.2 with 64-state tables": -42.7,
+    "6.2 from nothing": -2.5,
+    "lines, no prior": -23.1,
+    "lines, coefficient priors (mixed)": -96.6
+   },
+   "direction first 250": {
+    "6.2 with 64-state tables": -52.1,
+    "6.2 from nothing": -9.5,
+    "lines, no prior": -71.0,
+    "lines, coefficient priors (mixed)": -113.5
+   },
+   "direction first 500": {
+    "6.2 with 64-state tables": -51.1,
+    "6.2 from nothing": -17.7,
+    "lines, no prior": -81.5,
+    "lines, coefficient priors (mixed)": -109.5
+   },
+   "direction first 1000": {
+    "6.2 with 64-state tables": -55.6,
+    "6.2 from nothing": -26.8,
+    "lines, no prior": -99.6,
+    "lines, coefficient priors (mixed)": -116.7
+   },
+   "size first 25": {
+    "6.2 with 64-state tables": 10.8,
+    "6.2 from nothing": 1.9,
+    "lines, no prior": 65.4,
+    "lines, coefficient priors (mixed)": 18.6
+   },
+   "size first 50": {
+    "6.2 with 64-state tables": 7.5,
+    "6.2 from nothing": 2.1,
+    "lines, no prior": 55.8,
+    "lines, coefficient priors (mixed)": 11.1
+   },
+   "size first 100": {
+    "6.2 with 64-state tables": 4.5,
+    "6.2 from nothing": 1.5,
+    "lines, no prior": 40.9,
+    "lines, coefficient priors (mixed)": 7.6
+   },
+   "size first 250": {
+    "6.2 with 64-state tables": 0.1,
+    "6.2 from nothing": 0.1,
+    "lines, no prior": 31.9,
+    "lines, coefficient priors (mixed)": 0.9
+   },
+   "size first 500": {
+    "6.2 with 64-state tables": -1.1,
+    "6.2 from nothing": -0.3,
+    "lines, no prior": 14.7,
+    "lines, coefficient priors (mixed)": -4.6
+   },
+   "size first 1000": {
+    "6.2 with 64-state tables": -1.2,
+    "6.2 from nothing": -0.7,
+    "lines, no prior": 9.6,
+    "lines, coefficient priors (mixed)": -4.2
+   }
+  }
+ }
+}

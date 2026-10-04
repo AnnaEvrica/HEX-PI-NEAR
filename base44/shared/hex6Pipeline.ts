@@ -2,9 +2,9 @@
 // HEX PIPELINE — the single entry point from a numeric series to what the
 // language model is told.
 //
-//   1. Probability  (probabilityRead.ts -> stateProbability.ts)
+//   1. Probability  (probabilityRead.ts -> engines.ts)
 //      The only numbers HEX states: P(next move up) and P(next move larger
-//      than usual), each beside the series' own usual odds.
+//      than usual), each beside its usual odds.
 //   2. Voice        (piusEngine.ts, piusResonance.ts)
 //      How to speak about the read. No numbers of its own.
 //   3. Chart lens   (chartContext.ts)
@@ -13,6 +13,7 @@
 // ===========================================================================
 
 import { readProbability, seriesToReturns, ProbabilityRead } from './probabilityRead.ts';
+import { DEFAULT_LIVE, LiveEngines } from './engines.ts';
 import { calibrate, PiUsResult } from './piusEngine.ts';
 import { resonanceSignature, ResonanceSignature } from './piusResonance.ts';
 import { confluenceAgrees, ChartContext } from './chartContext.ts';
@@ -42,14 +43,16 @@ export interface Hex6PipelineResult {
 // messageHistory: the person's earlier messages, for cadence.
 // asReturns: true if `values` are already changes, false if levels, undefined
 //            to decide from the data (strictly positive = levels).
+// live:      which engine is shown for each read (shared/ledger.ts loadLive).
 export function runPipeline(
   values: number[],
   label: string | null = null,
   messageHistory: string[] = [],
   asReturns?: boolean,
+  live: LiveEngines = DEFAULT_LIVE,
 ): Hex6PipelineResult {
   const clean = (values || []).filter((v) => Number.isFinite(v));
-  const read = readProbability(seriesToReturns(clean, asReturns));
+  const read = readProbability(seriesToReturns(clean, asReturns), live);
   const resonance = messageHistory.length >= 2
     ? resonanceSignature(messageHistory)
     : { status: 'insufficient_data' as const, n_tokens: 0 };

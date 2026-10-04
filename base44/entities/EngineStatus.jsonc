@@ -1,0 +1,118 @@
+{
+  "name": "EngineStatus",
+  "type": "object",
+  "properties": {
+    "read": {
+      "type": "string",
+      "enum": [
+        "MOVE",
+        "RANGE"
+      ],
+      "description": "One row per read"
+    },
+    "live_engine": {
+      "type": "string",
+      "enum": [
+        "state-6.2",
+        "rank-1"
+      ],
+      "description": "The engine shown for this read"
+    },
+    "paired_calls": {
+      "type": "number",
+      "description": "Calls scored for both engines on the same series and day"
+    },
+    "paired_days": {
+      "type": "number",
+      "description": "Distinct days those calls span"
+    },
+    "gain": {
+      "type": "number",
+      "description": "Mean log loss of 6.2 minus rank-1, nats per call. Positive: rank-1 better"
+    },
+    "gain_low": {
+      "type": "number",
+      "description": "Lower end of the 95% interval, by day"
+    },
+    "gain_high": {
+      "type": "number",
+      "description": "Upper end of the 95% interval, by day"
+    },
+    "hit_control": {
+      "type": "number",
+      "description": "Share of 6.2 calls right on the paired calls (0-1)"
+    },
+    "hit_candidate": {
+      "type": "number",
+      "description": "Share of rank-1 calls right on the paired calls (0-1)"
+    },
+    "hit_baseline": {
+      "type": "number",
+      "description": "Share right for the baseline rule on the same calls (0-1)"
+    },
+    "stated_control": {
+      "type": "number",
+      "description": "Mean probability 6.2 stated for the side it called"
+    },
+    "stated_candidate": {
+      "type": "number",
+      "description": "Mean probability rank-1 stated for the side it called"
+    },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "hold",
+        "promote",
+        "demote"
+      ],
+      "description": "What the last nightly run decided"
+    },
+    "reason": {
+      "type": "string",
+      "description": "The decision in words"
+    },
+    "calibration": {
+      "type": "string",
+      "description": "JSON: pooled calibration map for rank-1 on this read"
+    },
+    "calibration_steps": {
+      "type": "number",
+      "description": "Scored steps the map was fitted on"
+    },
+    "promoted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When rank-1 was last promoted for this read"
+    },
+    "engine_version": {
+      "type": "string",
+      "description": "Release that wrote this row"
+    }
+  },
+  "required": [
+    "read",
+    "live_engine"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

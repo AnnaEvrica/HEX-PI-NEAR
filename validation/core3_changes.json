@@ -1,0 +1,215 @@
+{
+ "racing MOVE": {
+  "steps": 13022,
+  "skill % over base rate": {
+   "M0": -0.09,
+   "M1w": -0.69,
+   "M1b": -0.4,
+   "M1": -0.81,
+   "M2": -2.86,
+   "M1+mag": -0.86,
+   "lines": -2.46,
+   "ranks/base": -0.69,
+   "alt": -61.27
+  },
+  "null over base (x1000 nats, positive = null better)": [
+   -0.64,
+   -0.81,
+   -0.52
+  ],
+  "STRUCTURE: M1 over null": [
+   -4.96,
+   -6.43,
+   -3.97
+  ]
+ },
+ "racing RANGE": {
+  "steps": 13022,
+  "skill % over base rate": {
+   "M0": 0.0,
+   "M1w": -0.45,
+   "M1b": -0.53,
+   "M1": -0.75,
+   "M2": -2.94,
+   "M1+mag": -0.77,
+   "lines": -2.59,
+   "ranks/base": -0.75
+  },
+  "null over base (x1000 nats, positive = null better)": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "STRUCTURE: M1 over null": [
+   -5.25,
+   -6.0,
+   -4.53
+  ]
+ },
+ "racing LEVEL": {
+  "steps": 13022,
+  "skill % over base rate": {
+   "M0": 74.29,
+   "M1w": 77.81,
+   "M1b": 78.15,
+   "M1": 77.99,
+   "M2": 76.94,
+   "M1+mag": 78.0,
+   "lines": 5.72,
+   "ranks/base": 75.74,
+   "alt": 74.38
+  },
+  "null over base (x1000 nats, positive = null better)": [
+   487.03,
+   437.45,
+   527.69
+  ],
+  "STRUCTURE: M1 over null": [
+   24.31,
+   19.39,
+   29.54
+  ]
+ },
+ "weather MOVE": {
+  "steps": 9030,
+  "skill % over base rate": {
+   "M0": 0.0,
+   "M1w": -5.22,
+   "M1b": -1.47,
+   "M1": -3.03,
+   "M2": -2.97,
+   "M1+mag": -3.09,
+   "lines": -3.24,
+   "ranks/base": -3.04,
+   "alt": -159.92
+  },
+  "null over base (x1000 nats, positive = null better)": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "STRUCTURE: M1 over null": [
+   -21.01,
+   -26.69,
+   -15.8
+  ]
+ },
+ "weather RANGE": {
+  "steps": 9030,
+  "skill % over base rate": {
+   "M0": 0.0,
+   "M1w": -0.44,
+   "M1b": -0.62,
+   "M1": -0.66,
+   "M2": -0.73,
+   "M1+mag": -0.66,
+   "lines": -0.5,
+   "ranks/base": -0.66
+  },
+  "null over base (x1000 nats, positive = null better)": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "STRUCTURE: M1 over null": [
+   -4.54,
+   -6.19,
+   -2.91
+  ]
+ },
+ "weather LEVEL": {
+  "steps": 9030,
+  "skill % over base rate": {
+   "M0": 85.79,
+   "M1w": 95.18,
+   "M1b": 95.32,
+   "M1": 95.11,
+   "M2": 95.16,
+   "M1+mag": 95.15,
+   "lines": -0.69,
+   "ranks/base": 95.05,
+   "alt": 85.79
+  },
+  "null over base (x1000 nats, positive = null better)": [
+   530.34,
+   510.67,
+   552.03
+  ],
+  "STRUCTURE: M1 over null": [
+   57.59,
+   50.09,
+   63.67
+  ]
+ },
+ "markets MOVE": {
+  "steps": 46937,
+  "skill % over base rate": {
+   "M0": 0.0,
+   "M1w": 0.0,
+   "M1b": 0.11,
+   "M1": -0.0,
+   "M2": -0.21,
+   "M1+mag": -0.01,
+   "lines": -0.25,
+   "ranks/base": -0.0,
+   "alt": -87.44
+  },
+  "null over base (x1000 nats, positive = null better)": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "STRUCTURE: M1 over null": [
+   -0.02,
+   -0.87,
+   0.92
+  ]
+ },
+ "markets RANGE": {
+  "steps": 46937,
+  "skill % over base rate": {
+   "M0": 0.0,
+   "M1w": -0.81,
+   "M1b": -1.02,
+   "M1": -1.01,
+   "M2": -1.35,
+   "M1+mag": -0.84,
+   "lines": -1.51,
+   "ranks/base": -1.01
+  },
+  "null over base (x1000 nats, positive = null better)": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "STRUCTURE: M1 over null": [
+   -6.98,
+   -8.65,
+   -4.98
+  ]
+ },
+ "markets LEVEL": {
+  "steps": 46937,
+  "skill % over base rate": {
+   "M0": 91.12,
+   "M1w": 91.87,
+   "M1b": 91.81,
+   "M1": 91.91,
+   "M2": 91.77,
+   "M1+mag": 91.92,
+   "lines": 0.7,
+   "ranks/base": 82.33,
+   "alt": 91.12
+  },
+  "null over base (x1000 nats, positive = null better)": [
+   389.48,
+   357.44,
+   421.96
+  ],
+  "STRUCTURE: M1 over null": [
+   3.38,
+   2.79,
+   3.94
+  ]
+ }
+}

@@ -15,7 +15,7 @@ export type PiUsRegister = 'resonant' | 'structural' | 'balanced' | 'exploratory
 
 export interface PiUsResult {
   register: PiUsRegister;
-  /** True when the read is calibrated (200+ scored steps on this series). */
+  /** True when the read has 200+ scored steps on this series behind it. */
   well_supported: boolean;
   directive: string;
 }

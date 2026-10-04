@@ -1,0 +1,114 @@
+{
+ "markets RANGE": {
+  "skill % over static base": {
+   "drift null": 1.77,
+   "core + drift": 3.78,
+   "hex62": 2.95
+  },
+  "drift null over static base": [
+   12.26,
+   8.73,
+   15.35
+  ],
+  "STRUCTURE beyond drift null: core": [
+   13.91,
+   11.2,
+   17.07
+  ],
+  "6.2 beyond drift null": [
+   8.16,
+   6.51,
+   10.01
+  ],
+  "precision core": {
+   "all": {
+    "precision": 60.4,
+    "drift-null rule": 57.5,
+    "coverage": 100.0
+   },
+   "strongest 25%": {
+    "precision": 68.5,
+    "drift-null rule": 65.6,
+    "coverage": 20.4
+   },
+   "strongest 10%": {
+    "precision": 72.4,
+    "drift-null rule": 68.7,
+    "coverage": 8.7
+   }
+  },
+  "precision 6.2": {
+   "all": {
+    "precision": 59.1,
+    "drift-null rule": 57.5,
+    "coverage": 100.0
+   },
+   "strongest 25%": {
+    "precision": 64.7,
+    "drift-null rule": 63.8,
+    "coverage": 20.2
+   },
+   "strongest 10%": {
+    "precision": 66.5,
+    "drift-null rule": 65.2,
+    "coverage": 9.0
+   }
+  }
+ },
+ "weather RANGE": {
+  "skill % over static base": {
+   "drift null": 0.08,
+   "core + drift": 1.72,
+   "hex62": 0.91
+  },
+  "drift null over static base": [
+   0.55,
+   -0.47,
+   1.56
+  ],
+  "STRUCTURE beyond drift null: core": [
+   11.29,
+   7.85,
+   14.77
+  ],
+  "6.2 beyond drift null": [
+   5.7,
+   3.38,
+   8.09
+  ],
+  "precision core": {
+   "all": {
+    "precision": 56.8,
+    "drift-null rule": 54.5,
+    "coverage": 100.0
+   },
+   "strongest 25%": {
+    "precision": 63.7,
+    "drift-null rule": 61.8,
+    "coverage": 27.8
+   },
+   "strongest 10%": {
+    "precision": 65.8,
+    "drift-null rule": 65.4,
+    "coverage": 13.0
+   }
+  },
+  "precision 6.2": {
+   "all": {
+    "precision": 55.1,
+    "drift-null rule": 54.5,
+    "coverage": 100.0
+   },
+   "strongest 25%": {
+    "precision": 59.1,
+    "drift-null rule": 59.0,
+    "coverage": 35.0
+   },
+   "strongest 10%": {
+    "precision": 62.8,
+    "drift-null rule": 62.3,
+    "coverage": 16.1
+   }
+  }
+ }
+}

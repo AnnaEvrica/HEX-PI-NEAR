@@ -1,0 +1,105 @@
+{
+ "steps": 46937,
+ "skill % over base rate": {
+  "M0": 0.0,
+  "M1w": 1.74,
+  "M1b": 2.98,
+  "M1": 2.99,
+  "M2": 2.74,
+  "M1+mag": 3.09,
+  "lines": 1.47,
+  "ranks/base": 2.99,
+  "core + long blocks": 3.12,
+  "core + long blocks + cell with field": 3.6,
+  "core + cell with field": 3.54,
+  "core + cell with field, no decay": 3.21,
+  "core + drift": 3.78,
+  "core + drift + cell with field": 3.91,
+  "core, dyadic memory": 3.39,
+  "6.2 full": 2.95
+ },
+ "over the rank core (positive = helps)": {
+  "core + long blocks": [
+   0.92,
+   0.48,
+   1.37
+  ],
+  "core + long blocks + cell with field": [
+   4.26,
+   3.46,
+   5.06
+  ],
+  "core + cell with field": [
+   3.83,
+   3.11,
+   4.56
+  ],
+  "core + cell with field, no decay": [
+   1.52,
+   0.98,
+   2.01
+  ],
+  "core + drift": [
+   5.5,
+   4.23,
+   6.86
+  ],
+  "core + drift + cell with field": [
+   6.38,
+   5.18,
+   7.59
+  ],
+  "core, dyadic memory": [
+   2.79,
+   1.54,
+   3.98
+  ]
+ },
+ "cell with field on top of drift": [
+  0.87,
+  0.33,
+  1.37
+ ],
+ "cell with field on top of long blocks": [
+  3.34,
+  2.7,
+  4.0
+ ],
+ "over 6.2 full (positive = better than 6.2)": {
+  "core + long blocks": [
+   1.18,
+   -1.2,
+   3.49
+  ],
+  "core + long blocks + cell with field": [
+   4.51,
+   2.66,
+   6.56
+  ],
+  "core + cell with field": [
+   4.08,
+   2.13,
+   6.02
+  ],
+  "core + cell with field, no decay": [
+   1.77,
+   -0.4,
+   3.96
+  ],
+  "core + drift": [
+   5.76,
+   4.11,
+   7.62
+  ],
+  "core + drift + cell with field": [
+   6.63,
+   4.86,
+   8.35
+  ],
+  "core, dyadic memory": [
+   3.04,
+   0.84,
+   5.27
+  ]
+ }
+}

@@ -1,0 +1,432 @@
+{
+ "warm": {
+  "racing MOVE": {
+   "skill % over base rate": {
+    "M0": 28.28,
+    "M1": 27.86,
+    "gated": 28.34
+   },
+   "null over base": [
+    196.31,
+    178.12,
+    212.16
+   ],
+   "STRUCTURE: M1 over null": [
+    -2.91,
+    -5.37,
+    0.05
+   ],
+   "gated over null": [
+    0.4,
+    -0.79,
+    2.28
+   ],
+   "gated vs M1 (positive = gate better)": [
+    3.32,
+    2.12,
+    4.47
+   ],
+   "precision %": {
+    "base": 51.8,
+    "M0": 74.9,
+    "M1": 74.7,
+    "gated": 74.9
+   }
+  },
+  "racing RANGE": {
+   "skill % over base rate": {
+    "M0": 0.0,
+    "M1": -0.05,
+    "gated": 0.3
+   },
+   "null over base": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "STRUCTURE: M1 over null": [
+    -0.37,
+    -4.6,
+    4.83
+   ],
+   "gated over null": [
+    2.12,
+    -0.67,
+    6.92
+   ],
+   "gated vs M1 (positive = gate better)": [
+    2.49,
+    1.34,
+    3.94
+   ],
+   "precision %": {
+    "base": 49.7,
+    "M0": 49.7,
+    "M1": 52.3,
+    "gated": 50.9
+   }
+  },
+  "weather MOVE": {
+   "skill % over base rate": {
+    "M0": 0.0,
+    "M1": 6.08,
+    "gated": 6.08
+   },
+   "null over base": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "STRUCTURE: M1 over null": [
+    42.11,
+    36.2,
+    47.95
+   ],
+   "gated over null": [
+    42.11,
+    35.95,
+    48.08
+   ],
+   "gated vs M1 (positive = gate better)": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "precision %": {
+    "base": 51.2,
+    "M0": 51.2,
+    "M1": 62.5,
+    "gated": 62.5
+   }
+  },
+  "weather RANGE": {
+   "skill % over base rate": {
+    "M0": 0.0,
+    "M1": 1.72,
+    "gated": 1.72
+   },
+   "null over base": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "STRUCTURE: M1 over null": [
+    11.86,
+    8.1,
+    16.01
+   ],
+   "gated over null": [
+    11.86,
+    8.07,
+    15.82
+   ],
+   "gated vs M1 (positive = gate better)": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "precision %": {
+    "base": 54.5,
+    "M0": 54.5,
+    "M1": 56.8,
+    "gated": 56.8
+   }
+  },
+  "markets MOVE": {
+   "skill % over base rate": {
+    "M0": 0.0,
+    "M1": 0.16,
+    "gated": 0.2
+   },
+   "null over base": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "STRUCTURE: M1 over null": [
+    1.13,
+    0.44,
+    1.84
+   ],
+   "gated over null": [
+    1.39,
+    0.77,
+    2.08
+   ],
+   "gated vs M1 (positive = gate better)": [
+    0.26,
+    0.0,
+    0.54
+   ],
+   "precision %": {
+    "base": 51.4,
+    "M0": 51.4,
+    "M1": 51.3,
+    "gated": 51.6
+   }
+  },
+  "markets RANGE": {
+   "skill % over base rate": {
+    "M0": 0.0,
+    "M1": 2.99,
+    "gated": 2.99
+   },
+   "null over base": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "STRUCTURE: M1 over null": [
+    20.67,
+    17.21,
+    24.11
+   ],
+   "gated over null": [
+    20.67,
+    17.61,
+    23.84
+   ],
+   "gated vs M1 (positive = gate better)": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "precision %": {
+    "base": 54.8,
+    "M0": 54.8,
+    "M1": 59.9,
+    "gated": 59.9
+   }
+  }
+ },
+ "cold start (log-loss difference vs base rate x1000; negative is better)": {
+  "markets MOVE": {
+   "first 25": {
+    "M0": -4.1,
+    "M1": 62.2,
+    "gated": 16.1,
+    "gated+priors": 25.6
+   },
+   "first 50": {
+    "M0": 19.7,
+    "M1": 61.9,
+    "gated": 31.0,
+    "gated+priors": 36.7
+   },
+   "first 100": {
+    "M0": 19.1,
+    "M1": 46.2,
+    "gated": 25.2,
+    "gated+priors": 29.3
+   },
+   "first 250": {
+    "M0": 8.3,
+    "M1": 23.6,
+    "gated": 10.9,
+    "gated+priors": 13.3
+   },
+   "first 500": {
+    "M0": 4.2,
+    "M1": 13.0,
+    "gated": 5.5,
+    "gated+priors": 6.6
+   },
+   "first 1000": {
+    "M0": 2.1,
+    "M1": 6.5,
+    "gated": 2.4,
+    "gated+priors": 2.9
+   }
+  },
+  "markets RANGE": {
+   "first 25": {
+    "M0": 0.0,
+    "M1": 43.9,
+    "gated": 14.6,
+    "gated+priors": 18.9
+   },
+   "first 50": {
+    "M0": 0.0,
+    "M1": 25.2,
+    "gated": 5.1,
+    "gated+priors": 8.6
+   },
+   "first 100": {
+    "M0": 0.0,
+    "M1": 21.8,
+    "gated": 4.7,
+    "gated+priors": 7.5
+   },
+   "first 250": {
+    "M0": 0.0,
+    "M1": 8.8,
+    "gated": -0.7,
+    "gated+priors": 0.9
+   },
+   "first 500": {
+    "M0": 0.0,
+    "M1": 3.7,
+    "gated": -1.7,
+    "gated+priors": -1.3
+   },
+   "first 1000": {
+    "M0": 0.0,
+    "M1": -1.6,
+    "gated": -3.5,
+    "gated+priors": -4.1
+   }
+  },
+  "weather MOVE": {
+   "first 25": {
+    "M0": 39.3,
+    "M1": 114.2,
+    "gated": 61.3,
+    "gated+priors": 71.9
+   },
+   "first 50": {
+    "M0": 4.7,
+    "M1": 52.8,
+    "gated": 16.8,
+    "gated+priors": 23.0
+   },
+   "first 100": {
+    "M0": 19.0,
+    "M1": 36.1,
+    "gated": 24.3,
+    "gated+priors": 24.7
+   },
+   "first 250": {
+    "M0": -8.2,
+    "M1": 3.8,
+    "gated": -5.7,
+    "gated+priors": -4.2
+   },
+   "first 500": {
+    "M0": 0.3,
+    "M1": 0.3,
+    "gated": 0.3,
+    "gated+priors": -1.5
+   },
+   "first 1000": {
+    "M0": 2.1,
+    "M1": 5.1,
+    "gated": 2.7,
+    "gated+priors": 2.2
+   }
+  },
+  "weather RANGE": {
+   "first 25": {
+    "M0": 0.0,
+    "M1": 37.2,
+    "gated": 14.4,
+    "gated+priors": 10.3
+   },
+   "first 50": {
+    "M0": 0.0,
+    "M1": 26.9,
+    "gated": 9.2,
+    "gated+priors": 9.3
+   },
+   "first 100": {
+    "M0": 0.0,
+    "M1": 27.5,
+    "gated": 6.3,
+    "gated+priors": 9.9
+   },
+   "first 250": {
+    "M0": 0.0,
+    "M1": 16.8,
+    "gated": 2.7,
+    "gated+priors": 4.9
+   },
+   "first 500": {
+    "M0": 0.0,
+    "M1": 7.1,
+    "gated": 1.3,
+    "gated+priors": 2.3
+   },
+   "first 1000": {
+    "M0": 0.0,
+    "M1": 3.5,
+    "gated": 0.7,
+    "gated+priors": 0.3
+   }
+  },
+  "racing MOVE": {
+   "first 25": {
+    "M0": -182.1,
+    "M1": -153.8,
+    "gated": -172.7,
+    "gated+priors": -170.9
+   },
+   "first 50": {
+    "M0": -219.7,
+    "M1": -205.5,
+    "gated": -215.6,
+    "gated+priors": -216.4
+   },
+   "first 100": {
+    "M0": -203.9,
+    "M1": -193.1,
+    "gated": -202.0,
+    "gated+priors": -200.9
+   },
+   "first 250": {
+    "M0": -221.6,
+    "M1": -212.8,
+    "gated": -219.6,
+    "gated+priors": -219.0
+   },
+   "first 500": {
+    "M0": -211.9,
+    "M1": -207.0,
+    "gated": -211.9,
+    "gated+priors": -211.3
+   },
+   "first 1000": {
+    "M0": -218.3,
+    "M1": -217.5,
+    "gated": -220.1,
+    "gated+priors": -219.7
+   }
+  },
+  "racing RANGE": {
+   "first 25": {
+    "M0": 0.0,
+    "M1": 47.4,
+    "gated": 16.4,
+    "gated+priors": 22.9
+   },
+   "first 50": {
+    "M0": 0.0,
+    "M1": 28.1,
+    "gated": 6.2,
+    "gated+priors": 11.4
+   },
+   "first 100": {
+    "M0": 0.0,
+    "M1": 20.1,
+    "gated": 4.9,
+    "gated+priors": 8.6
+   },
+   "first 250": {
+    "M0": 0.0,
+    "M1": 10.5,
+    "gated": 2.3,
+    "gated+priors": 2.8
+   },
+   "first 500": {
+    "M0": 0.0,
+    "M1": 3.2,
+    "gated": -2.2,
+    "gated+priors": -2.6
+   },
+   "first 1000": {
+    "M0": 0.0,
+    "M1": 0.9,
+    "gated": -2.8,
+    "gated+priors": -3.2
+   }
+  }
+ }
+}

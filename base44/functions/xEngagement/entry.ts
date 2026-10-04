@@ -13,6 +13,9 @@ import { fetchYahooReturns } from '../../shared/marketDataClient.ts';
 import { CLAUDE_MODEL } from '../../shared/modelRouter.ts';
 import { IDENTITY_LINE, CONFIDENTIALITY_LINE } from '../../shared/persona.ts';
 import { postDiscord } from '../../shared/discord.ts';
+import { loadLive } from '../../shared/ledger.ts';
+import { DEFAULT_LIVE } from '../../shared/engines.ts';
+import { HISTORY_DAYS } from '../../shared/universe.ts';
 
 // ---------------------------------------------------------------------------
 // Config
@@ -116,11 +119,11 @@ async function xPostReply(text, inReplyToId) {
 
 // Real daily bars for a ticker, then the calibrated read. Returns null when
 // the ticker has no usable price history (the post is then skipped).
-async function readTicker(ticker) {
+async function readTicker(ticker, live = DEFAULT_LIVE) {
   try {
-    const md = await fetchYahooReturns(ticker, 5475);
+    const md = await fetchYahooReturns(ticker, HISTORY_DAYS);
     if (!md?.returns || md.returns.length < 250) return null;
-    const read = readProbability(md.returns);
+    const read = readProbability(md.returns, live);
     if (!read) return null;
     return { read, latestPrice: md.latestPrice, bars: md.dataPoints };
   } catch {
@@ -155,6 +158,7 @@ Deno.serve(async (req) => {
     }
 
     const base44 = createClientFromRequest(req);
+    const live = await loadLive(base44);
     const body = await req.json().catch(() => ({}));
     const asset = (body?.asset || '').toString().toUpperCase().trim();
 
@@ -163,7 +167,7 @@ Deno.serve(async (req) => {
     //     No X dependency — fires on demand (e.g. scheduled or manual trigger). ---
     if (asset) {
       const ticker = asset;
-      const tr = await readTicker(ticker);
+      const tr = await readTicker(ticker, live);
       if (!tr) {
         return Response.json({ ok: false, error: 'insufficient_market_data', ticker });
       }
@@ -297,7 +301,7 @@ Produce JSON:
       }
 
       // 5–6. Real daily bars for the ticker, then the calibrated read.
-      const tr = await readTicker(ticker);
+      const tr = await readTicker(ticker, live);
       if (!tr) {
         log(`skip no-data ${tweetId}`);
         await base44.asServiceRole.entities.XEngagement.create({

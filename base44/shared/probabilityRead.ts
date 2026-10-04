@@ -1,23 +1,24 @@
 // ===========================================================================
 // Probability read — the single place where a numeric series becomes the
 // numbers HEX states. Every caller (chat, Discord signal, X engagement) goes
-// through here, so there is one engine, one wording and one set of rules.
+// through here, so there is one wording and one set of rules.
 //
 // Rules:
-//   - Probability and statistics only. Each probability is shown next to the
-//     series' own base rate. There is no confidence, conviction or exposure.
-//   - The numbers come from shared/stateProbability.ts (walk-forward, decayed
-//     evidence, symmetry field, isotonic calibration on earlier calls only).
-//   - The engine comes pre-trained on markets, weather and horse racing and
-//     is domain-agnostic: it is never told what kind of series it is reading.
-//   - Measured, walk-forward, 17 market series, 2016-01 to 2026-09:
-//       next-day direction: at chance (Brier skill 0.15% vs 0.25% shuffled)
-//       next-day move size: Brier skill 3.6% (0.0% shuffled)
-//     So the size read carries the measured edge; the direction read is
-//     calibrated and usually sits at its base rate.
+//   - Probability and statistics only. Each probability is shown next to its
+//     baseline ("its usual odds"). There is no confidence, conviction or
+//     exposure.
+//   - The numbers come from shared/engines.ts, which runs both engines and
+//     shows, for each read, the one the ledger has earned (6.2 until rank-1
+//     is promoted).
+//   - The engines are never told what kind of series they are reading.
+//   - Measured, walk-forward, 17 market series, 2016-2026 (46,937 days):
+//       next-day direction: at chance for both engines
+//       next-day move size: 58.8% of calls right (6.2), 60.1% (rank-1)
+//     So the size read carries the measured edge; the direction read usually
+//     sits at its usual odds.
 // ===========================================================================
 
-import { stateProbability, StateProbability } from './stateProbability.ts';
+import { runEngines, DEFAULT_LIVE, EngineRun, LiveEngines } from './engines.ts';
 
 /**
  * Minimum step-to-step changes before any probability is stated. Below this
@@ -84,8 +85,20 @@ export function aggregateReturns(returns: number[], n: number): number[] {
   return out;
 }
 
+/** The numbers shown, each beside its baseline. */
+export interface ReadNumbers {
+  p_up: number; base_up: number;
+  p_big_move: number; base_big: number;
+  /** Forward-scored steps behind the numbers. */
+  history: number;
+  /** True when there are enough scored steps (200) for the read to be more than early. */
+  calibrated: boolean;
+}
+
 export interface ProbabilityRead {
-  prob: StateProbability;
+  prob: ReadNumbers;
+  /** Both engines' calls, and which one is shown for each read. Recorded in the ledger. */
+  run: EngineRun;
   direction: 'UP' | 'DOWN';
   /** p_up minus its base rate, signed. */
   edge_up: number;
@@ -97,15 +110,22 @@ export interface ProbabilityRead {
   size_at_base: boolean;
 }
 
-export function readProbability(returns: number[]): ProbabilityRead | null {
+const ENOUGH_RECORD = 200;
+
+export function readProbability(returns: number[], live: LiveEngines = DEFAULT_LIVE): ProbabilityRead | null {
   const r = (returns || []).filter((x) => Number.isFinite(x));
   if (r.length < MIN_RETURNS) return null;
-  const prob = stateProbability(r);
-  if (!prob || prob.history < MIN_SCORED_STEPS) return null;
+  const run = runEngines(r, live);
+  if (!run || run.history < MIN_SCORED_STEPS) return null;
+  const move = run.calls[run.live.MOVE].MOVE, range = run.calls[run.live.RANGE].RANGE;
+  const prob: ReadNumbers = {
+    p_up: move.p, base_up: move.baseline, p_big_move: range.p, base_big: range.baseline,
+    history: run.history, calibrated: run.history >= ENOUGH_RECORD,
+  };
   const edge_up = prob.p_up - prob.base_up;
   const edge_big = prob.p_big_move - prob.base_big;
   return {
-    prob,
+    prob, run,
     direction: prob.p_up >= 0.5 ? 'UP' : 'DOWN',
     edge_up,
     edge_big,
@@ -115,7 +135,6 @@ export function readProbability(returns: number[]): ProbabilityRead | null {
 }
 
 const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
-const skill = (v: number | null) => (v === null ? 'not yet scored' : `${(v * 100).toFixed(2)}%`);
 
 // What the engine has worked out about the KIND of series this is, from the
 // series alone (it is never told). Shown to the model as plain behaviour, so
@@ -125,7 +144,7 @@ const BEHAVIOUR: Record<string, string> = {
   weather: 'after a run one way it tends to swing back, the way day-to-day temperature changes do',
   racing: 'it swings back strongly after a run one way, the way a competitor\'s results do from one outing to the next',
 };
-function behaviourLine(p: StateProbability): string {
+function behaviourLine(p: EngineRun): string {
   const top = (w: Record<string, number>) => Object.entries(w || {}).sort((a, b) => b[1] - a[1])[0];
   const d = top(p.family_up), m = top(p.family_big);
   const parts: string[] = [];
@@ -149,13 +168,12 @@ export function probabilityBlock(read: ProbabilityRead | null, label = 'this ser
   const sizeLine = read.size_at_base
     ? `at its usual odds`
     : `${Math.abs(read.edge_big * 100).toFixed(1)} points ${read.edge_big > 0 ? 'above' : 'below'} its usual odds — ${read.edge_big > 0 ? 'a larger-than-usual move is more likely than normal' : 'a quieter-than-usual move is more likely than normal'}`;
-  return `PROBABILITY READ (${label}; walk-forward${p.calibrated ? ', calibrated on its own earlier calls' : ', not yet calibrated: fewer than 200 scored steps'}):
+  return `PROBABILITY READ (${label}; walk-forward${p.calibrated ? '' : ', early: fewer than 200 scored steps'}):
   next move up: ${pct(p.p_up)} — usual odds ${pct(p.base_up)} — ${dirLine}
   next move larger than usual: ${pct(p.p_big_move)} — usual odds ${pct(p.base_big)} — ${sizeLine}
   scored steps behind these numbers: ${p.history}
-${behaviourLine(p)}  measured skill on this series against its usual odds (internal, never quoted): direction ${skill(p.brier_skill_up)}, move size ${skill(p.brier_skill_big)}
-HOW TO SPEAK ABOUT IT:
-  - These are the only probabilities you may state for ${label}. State each one next to its usual odds, in plain words ("about 54%, against a usual 52%").
+${behaviourLine(read.run)}HOW TO SPEAK ABOUT IT:
+  - These are the only probabilities you may state for ${label}. State each one next to its usual odds, in plain words ("about 54%, against a usual 52%"). "Usual odds" here means what this series' own recent behaviour and present position already imply.
   - Probability and statistics only. Never state or imply a confidence level, a conviction, a strength-of-call, or how firmly you hold it. The number and its distance from the usual odds carry everything.
   - The move-size read is where this method has measured skill. Next-move direction has tested at chance for markets, so when the direction number sits at its usual odds, say exactly that and lead with the size read.
   - Never round a number toward a stronger claim, and never present a direction as a prediction when it sits at its usual odds.`;

@@ -1,0 +1,262 @@
+{
+ "markets RANGE": {
+  "skill %": {
+   "null": 3.88,
+   "p": 4.06,
+   "static_p": 2.99,
+   "three": 4.09,
+   "p_cal": 3.99,
+   "three_cal": 4.04,
+   "pool": 4.24
+  },
+  "hit %": {
+   "null": 59.7,
+   "p": 60.1,
+   "static_p": 59.9,
+   "three": 60.1,
+   "p_cal": 60.1,
+   "three_cal": 60.2,
+   "pool": 60.1
+  },
+  "three-way over dyadic two-way": [
+   0.16,
+   -0.14,
+   0.46
+  ],
+  "three-way over static two-way": [
+   7.61,
+   6.11,
+   9.32
+  ],
+  "date-aligned pooled calibration over per-series": [
+   1.32,
+   0.75,
+   1.89
+  ],
+  "pooled over uncalibrated": [
+   1.04,
+   0.61,
+   1.45
+  ],
+  "stated vs right, strongest decile": {
+   "three": [
+    77.4,
+    73.1
+   ],
+   "three_cal": [
+    75.8,
+    72.1
+   ],
+   "pool": [
+    75.1,
+    72.7
+   ]
+  }
+ },
+ "markets MOVE": {
+  "skill %": {
+   "null": 0.09,
+   "p": 0.18,
+   "static_p": 0.2,
+   "three": 0.18,
+   "p_cal": 0.28,
+   "three_cal": 0.28,
+   "pool": 0.25
+  },
+  "hit %": {
+   "null": 50.9,
+   "p": 51.3,
+   "static_p": 51.6,
+   "three": 51.3,
+   "p_cal": 51.7,
+   "three_cal": 51.6,
+   "pool": 51.3
+  },
+  "three-way over dyadic two-way": [
+   -0.0,
+   -0.01,
+   0.0
+  ],
+  "three-way over static two-way": [
+   -0.11,
+   -0.63,
+   0.42
+  ],
+  "date-aligned pooled calibration over per-series": [
+   -0.22,
+   -0.53,
+   0.04
+  ],
+  "pooled over uncalibrated": [
+   0.45,
+   0.13,
+   0.81
+  ],
+  "stated vs right, strongest decile": {
+   "three": [
+    59.8,
+    57.1
+   ],
+   "three_cal": [
+    59.1,
+    57.2
+   ],
+   "pool": [
+    56.3,
+    55.8
+   ]
+  }
+ },
+ "weather RANGE": {
+  "skill %": {
+   "null": 0.73,
+   "p": 1.25,
+   "static_p": 1.72,
+   "three": 1.72,
+   "p_cal": 1.16,
+   "three_cal": 1.74
+  },
+  "hit %": {
+   "null": 55.7,
+   "p": 56.2,
+   "static_p": 56.8,
+   "three": 56.8,
+   "p_cal": 56.3,
+   "three_cal": 56.9
+  },
+  "three-way over dyadic two-way": [
+   3.25,
+   1.53,
+   4.86
+  ],
+  "three-way over static two-way": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "stated vs right, strongest decile": {
+   "three": [
+    64.4,
+    66.8
+   ],
+   "three_cal": [
+    66.0,
+    66.7
+   ]
+  }
+ },
+ "weather MOVE": {
+  "skill %": {
+   "null": -0.0,
+   "p": 6.08,
+   "static_p": 6.08,
+   "three": 6.08,
+   "p_cal": 5.86,
+   "three_cal": 5.87
+  },
+  "hit %": {
+   "null": 51.2,
+   "p": 62.5,
+   "static_p": 62.5,
+   "three": 62.5,
+   "p_cal": 62.4,
+   "three_cal": 62.4
+  },
+  "three-way over dyadic two-way": [
+   0.0,
+   -0.02,
+   0.02
+  ],
+  "three-way over static two-way": [
+   -0.0,
+   -0.0,
+   0.0
+  ],
+  "stated vs right, strongest decile": {
+   "three": [
+    76.5,
+    76.4
+   ],
+   "three_cal": [
+    77.0,
+    74.7
+   ]
+  }
+ },
+ "racing RANGE": {
+  "skill %": {
+   "null": -0.03,
+   "p": 0.26,
+   "static_p": 0.3,
+   "three": 0.24,
+   "p_cal": 0.02,
+   "three_cal": -0.02
+  },
+  "hit %": {
+   "null": 49.7,
+   "p": 50.9,
+   "static_p": 50.8,
+   "three": 51.0,
+   "p_cal": 50.4,
+   "three_cal": 50.8
+  },
+  "three-way over dyadic two-way": [
+   -0.15,
+   -0.39,
+   0.12
+  ],
+  "three-way over static two-way": [
+   -0.46,
+   -0.83,
+   -0.04
+  ],
+  "stated vs right, strongest decile": {
+   "three": [
+    64.3,
+    56.6
+   ],
+   "three_cal": [
+    64.1,
+    55.0
+   ]
+  }
+ },
+ "racing MOVE": {
+  "skill %": {
+   "null": 27.91,
+   "p": 28.03,
+   "static_p": 26.52,
+   "three": 28.07,
+   "p_cal": 27.15,
+   "three_cal": 26.99
+  },
+  "hit %": {
+   "null": 74.9,
+   "p": 74.8,
+   "static_p": 74.4,
+   "three": 74.9,
+   "p_cal": 74.5,
+   "three_cal": 74.6
+  },
+  "three-way over dyadic two-way": [
+   0.28,
+   -0.48,
+   1.49
+  ],
+  "three-way over static two-way": [
+   10.74,
+   6.94,
+   14.27
+  ],
+  "stated vs right, strongest decile": {
+   "three": [
+    97.6,
+    97.3
+   ],
+   "three_cal": [
+    99.0,
+    96.9
+   ]
+  }
+ }
+}

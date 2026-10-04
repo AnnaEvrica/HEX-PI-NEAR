@@ -1,0 +1,947 @@
+{
+ "engine": "base",
+ "real": {
+  "markets": {
+   "direction": {
+    "steps scored": 46954,
+    "brier skill": -0.001,
+    "all calls": {
+     "precision": 0.514,
+     "95% range": [
+      0.5098,
+      0.5185
+     ],
+     "coverage": 1.0,
+     "calls": 46954,
+     "usual": 0.5128,
+     "stated": 0.5228
+    },
+    "strongest 50%": {
+     "precision": 0.5357,
+     "95% range": [
+      0.5265,
+      0.5453
+     ],
+     "coverage": 0.257,
+     "calls": 12070,
+     "usual": 0.5349,
+     "stated": 0.5516
+    },
+    "strongest 25%": {
+     "precision": 0.5507,
+     "95% range": [
+      0.537,
+      0.5648
+     ],
+     "coverage": 0.119,
+     "calls": 5607,
+     "usual": 0.5502,
+     "stated": 0.5704
+    },
+    "strongest 10%": {
+     "precision": 0.5525,
+     "95% range": [
+      0.5326,
+      0.5717
+     ],
+     "coverage": 0.047,
+     "calls": 2230,
+     "usual": 0.5498,
+     "stated": 0.5898
+    }
+   },
+   "size": {
+    "steps scored": 46954,
+    "brier skill": 0.0121,
+    "all calls": {
+     "precision": 0.5878,
+     "95% range": [
+      0.5806,
+      0.5952
+     ],
+     "coverage": 1.0,
+     "calls": 46954,
+     "usual": 0.5731,
+     "stated": 0.602
+    },
+    "strongest 50%": {
+     "precision": 0.6238,
+     "95% range": [
+      0.6126,
+      0.6353
+     ],
+     "coverage": 0.321,
+     "calls": 15063,
+     "usual": 0.611,
+     "stated": 0.6436
+    },
+    "strongest 25%": {
+     "precision": 0.6362,
+     "95% range": [
+      0.6191,
+      0.6532
+     ],
+     "coverage": 0.123,
+     "calls": 5769,
+     "usual": 0.6315,
+     "stated": 0.6681
+    },
+    "strongest 10%": {
+     "precision": 0.6461,
+     "95% range": [
+      0.6054,
+      0.6902
+     ],
+     "coverage": 0.038,
+     "calls": 1783,
+     "usual": 0.6411,
+     "stated": 0.6846
+    }
+   }
+  },
+  "weather": {
+   "direction": {
+    "steps scored": 9031,
+    "brier skill": 0.0219,
+    "all calls": {
+     "precision": 0.5635,
+     "95% range": [
+      0.5532,
+      0.5735
+     ],
+     "coverage": 1.0,
+     "calls": 9031,
+     "usual": 0.5112,
+     "stated": 0.5675
+    },
+    "strongest 50%": {
+     "precision": 0.5982,
+     "95% range": [
+      0.582,
+      0.6129
+     ],
+     "coverage": 0.406,
+     "calls": 3671,
+     "usual": 0.5157,
+     "stated": 0.6143
+    },
+    "strongest 25%": {
+     "precision": 0.6307,
+     "95% range": [
+      0.615,
+      0.6446
+     ],
+     "coverage": 0.214,
+     "calls": 1936,
+     "usual": 0.5429,
+     "stated": 0.6406
+    },
+    "strongest 10%": {
+     "precision": 0.6409,
+     "95% range": [
+      0.6083,
+      0.6782
+     ],
+     "coverage": 0.067,
+     "calls": 607,
+     "usual": 0.631,
+     "stated": 0.683
+    }
+   },
+   "size": {
+    "steps scored": 9031,
+    "brier skill": 0.0108,
+    "all calls": {
+     "precision": 0.5562,
+     "95% range": [
+      0.5411,
+      0.5693
+     ],
+     "coverage": 1.0,
+     "calls": 9031,
+     "usual": 0.5453,
+     "stated": 0.5568
+    },
+    "strongest 50%": {
+     "precision": 0.5811,
+     "95% range": [
+      0.5642,
+      0.5989
+     ],
+     "coverage": 0.613,
+     "calls": 5534,
+     "usual": 0.5728,
+     "stated": 0.5828
+    },
+    "strongest 25%": {
+     "precision": 0.5871,
+     "95% range": [
+      0.5656,
+      0.6099
+     ],
+     "coverage": 0.489,
+     "calls": 4417,
+     "usual": 0.585,
+     "stated": 0.5917
+    },
+    "strongest 10%": {
+     "precision": 0.6261,
+     "95% range": [
+      0.5926,
+      0.6628
+     ],
+     "coverage": 0.17,
+     "calls": 1538,
+     "usual": 0.6203,
+     "stated": 0.6302
+    }
+   }
+  },
+  "racing": {
+   "direction": {
+    "steps scored": 13190,
+    "brier skill": 0.0921,
+    "all calls": {
+     "precision": 0.6456,
+     "95% range": [
+      0.6383,
+      0.6527
+     ],
+     "coverage": 1.0,
+     "calls": 13190,
+     "usual": 0.5176,
+     "stated": 0.6609
+    },
+    "strongest 50%": {
+     "precision": 0.6975,
+     "95% range": [
+      0.6887,
+      0.7059
+     ],
+     "coverage": 0.555,
+     "calls": 7320,
+     "usual": 0.5552,
+     "stated": 0.7264
+    },
+    "strongest 25%": {
+     "precision": 0.7163,
+     "95% range": [
+      0.7035,
+      0.7297
+     ],
+     "coverage": 0.302,
+     "calls": 3980,
+     "usual": 0.5892,
+     "stated": 0.7782
+    },
+    "strongest 10%": {
+     "precision": 0.7563,
+     "95% range": [
+      0.7368,
+      0.7751
+     ],
+     "coverage": 0.121,
+     "calls": 1596,
+     "usual": 0.6228,
+     "stated": 0.8498
+    }
+   },
+   "size": {
+    "steps scored": 13022,
+    "brier skill": -0.0014,
+    "all calls": {
+     "precision": 0.5081,
+     "95% range": [
+      0.4984,
+      0.5176
+     ],
+     "coverage": 1.0,
+     "calls": 13022,
+     "usual": 0.4978,
+     "stated": 0.5333
+    },
+    "strongest 50%": {
+     "precision": 0.534,
+     "95% range": [
+      0.5161,
+      0.5516
+     ],
+     "coverage": 0.26,
+     "calls": 3384,
+     "usual": 0.5204,
+     "stated": 0.5649
+    },
+    "strongest 25%": {
+     "precision": 0.5451,
+     "95% range": [
+      0.5175,
+      0.5748
+     ],
+     "coverage": 0.088,
+     "calls": 1143,
+     "usual": 0.5372,
+     "stated": 0.6121
+    },
+    "strongest 10%": {
+     "precision": 0.5395,
+     "95% range": [
+      0.4591,
+      0.6135
+     ],
+     "coverage": 0.027,
+     "calls": 354,
+     "usual": 0.5282,
+     "stated": 0.6362
+    }
+   }
+  }
+ },
+ "shuffled": {
+  "markets": {
+   "direction": {
+    "steps scored": 46954,
+    "brier skill": -0.001,
+    "all calls": {
+     "precision": 0.5135,
+     "95% range": [
+      0.5089,
+      0.5179
+     ],
+     "coverage": 1.0,
+     "calls": 46954,
+     "usual": 0.5134,
+     "stated": 0.5204
+    },
+    "strongest 50%": {
+     "precision": 0.526,
+     "95% range": [
+      0.5161,
+      0.5359
+     ],
+     "coverage": 0.29,
+     "calls": 13619,
+     "usual": 0.5265,
+     "stated": 0.5415
+    },
+    "strongest 25%": {
+     "precision": 0.5373,
+     "95% range": [
+      0.5221,
+      0.5537
+     ],
+     "coverage": 0.084,
+     "calls": 3964,
+     "usual": 0.5373,
+     "stated": 0.5612
+    },
+    "strongest 10%": {
+     "precision": 0.5396,
+     "95% range": [
+      0.5101,
+      0.5707
+     ],
+     "coverage": 0.013,
+     "calls": 593,
+     "usual": 0.5363,
+     "stated": 0.6179
+    }
+   },
+   "size": {
+    "steps scored": 46954,
+    "brier skill": 0.0003,
+    "all calls": {
+     "precision": 0.5655,
+     "95% range": [
+      0.5602,
+      0.5709
+     ],
+     "coverage": 1.0,
+     "calls": 46954,
+     "usual": 0.5654,
+     "stated": 0.5804
+    },
+    "strongest 50%": {
+     "precision": 0.5869,
+     "95% range": [
+      0.5769,
+      0.597
+     ],
+     "coverage": 0.209,
+     "calls": 9801,
+     "usual": 0.5862,
+     "stated": 0.6131
+    },
+    "strongest 25%": {
+     "precision": 0.5953,
+     "95% range": [
+      0.5764,
+      0.6151
+     ],
+     "coverage": 0.058,
+     "calls": 2723,
+     "usual": 0.5953,
+     "stated": 0.6229
+    },
+    "strongest 10%": {
+     "precision": 0.5724,
+     "95% range": [
+      0.5386,
+      0.6102
+     ],
+     "coverage": 0.015,
+     "calls": 725,
+     "usual": 0.5724,
+     "stated": 0.644
+    }
+   }
+  },
+  "weather": {
+   "direction": {
+    "steps scored": 9031,
+    "brier skill": -0.0032,
+    "all calls": {
+     "precision": 0.5115,
+     "95% range": [
+      0.5009,
+      0.521
+     ],
+     "coverage": 1.0,
+     "calls": 9031,
+     "usual": 0.5129,
+     "stated": 0.5202
+    },
+    "strongest 50%": {
+     "precision": 0.4942,
+     "95% range": [
+      0.4672,
+      0.5218
+     ],
+     "coverage": 0.066,
+     "calls": 599,
+     "usual": 0.4925,
+     "stated": 0.583
+    },
+    "strongest 25%": {
+     "precision": 0.4889,
+     "95% range": [
+      0.4889,
+      0.4889
+     ],
+     "coverage": 0.01,
+     "calls": 90,
+     "usual": 0.5,
+     "stated": 0.6378
+    },
+    "strongest 10%": null
+   },
+   "size": {
+    "steps scored": 9031,
+    "brier skill": -0.0014,
+    "all calls": {
+     "precision": 0.5425,
+     "95% range": [
+      0.5312,
+      0.553
+     ],
+     "coverage": 1.0,
+     "calls": 9031,
+     "usual": 0.5453,
+     "stated": 0.5442
+    },
+    "strongest 50%": {
+     "precision": 0.5443,
+     "95% range": [
+      0.532,
+      0.5555
+     ],
+     "coverage": 0.745,
+     "calls": 6732,
+     "usual": 0.5443,
+     "stated": 0.5524
+    },
+    "strongest 25%": {
+     "precision": 0.5144,
+     "95% range": [
+      0.4902,
+      0.5405
+     ],
+     "coverage": 0.085,
+     "calls": 766,
+     "usual": 0.5144,
+     "stated": 0.5685
+    },
+    "strongest 10%": {
+     "precision": 0.4714,
+     "95% range": [
+      0.4571,
+      0.4857
+     ],
+     "coverage": 0.016,
+     "calls": 140,
+     "usual": 0.4714,
+     "stated": 0.5854
+    }
+   }
+  },
+  "racing": {
+   "direction": {
+    "steps scored": 13190,
+    "brier skill": -0.0085,
+    "all calls": {
+     "precision": 0.518,
+     "95% range": [
+      0.5099,
+      0.5275
+     ],
+     "coverage": 1.0,
+     "calls": 13190,
+     "usual": 0.5193,
+     "stated": 0.5512
+    },
+    "strongest 50%": {
+     "precision": 0.5302,
+     "95% range": [
+      0.514,
+      0.5465
+     ],
+     "coverage": 0.26,
+     "calls": 3429,
+     "usual": 0.5273,
+     "stated": 0.5883
+    },
+    "strongest 25%": {
+     "precision": 0.5318,
+     "95% range": [
+      0.5063,
+      0.5541
+     ],
+     "coverage": 0.091,
+     "calls": 1194,
+     "usual": 0.5285,
+     "stated": 0.6196
+    },
+    "strongest 10%": {
+     "precision": 0.5437,
+     "95% range": [
+      0.4735,
+      0.6046
+     ],
+     "coverage": 0.02,
+     "calls": 263,
+     "usual": 0.5399,
+     "stated": 0.6852
+    }
+   },
+   "size": {
+    "steps scored": 13022,
+    "brier skill": -0.0025,
+    "all calls": {
+     "precision": 0.5002,
+     "95% range": [
+      0.4919,
+      0.509
+     ],
+     "coverage": 1.0,
+     "calls": 13022,
+     "usual": 0.5022,
+     "stated": 0.5288
+    },
+    "strongest 50%": {
+     "precision": 0.4957,
+     "95% range": [
+      0.4783,
+      0.5132
+     ],
+     "coverage": 0.189,
+     "calls": 2459,
+     "usual": 0.501,
+     "stated": 0.5449
+    },
+    "strongest 25%": {
+     "precision": 0.4975,
+     "95% range": [
+      0.4651,
+      0.5342
+     ],
+     "coverage": 0.045,
+     "calls": 589,
+     "usual": 0.5161,
+     "stated": 0.5687
+    },
+    "strongest 10%": {
+     "precision": 0.4742,
+     "95% range": [
+      0.4742,
+      0.4742
+     ],
+     "coverage": 0.007,
+     "calls": 97,
+     "usual": 0.4742,
+     "stated": 0.6249
+    }
+   }
+  }
+ },
+ "per series": {
+  "markets | BTC-USD | direction": {
+   "steps": 3926,
+   "precision all": 0.5199,
+   "precision strongest 10%": 0.5518,
+   "calls strongest 10%": 299
+  },
+  "markets | BTC-USD | size": {
+   "steps": 3926,
+   "precision all": 0.5851,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 0
+  },
+  "markets | WTI | direction": {
+   "steps": 2686,
+   "precision all": 0.5212,
+   "precision strongest 10%": 0.5203,
+   "calls strongest 10%": 444
+  },
+  "markets | WTI | size": {
+   "steps": 2686,
+   "precision all": 0.5629,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 15
+  },
+  "markets | BRENT | direction": {
+   "steps": 2726,
+   "precision all": 0.5037,
+   "precision strongest 10%": 0.5212,
+   "calls strongest 10%": 165
+  },
+  "markets | BRENT | size": {
+   "steps": 2726,
+   "precision all": 0.5356,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 5
+  },
+  "markets | NATGAS | direction": {
+   "steps": 2704,
+   "precision all": 0.5558,
+   "precision strongest 10%": 0.607,
+   "calls strongest 10%": 313
+  },
+  "markets | NATGAS | size": {
+   "steps": 2704,
+   "precision all": 0.5984,
+   "precision strongest 10%": 0.7388,
+   "calls strongest 10%": 134
+  },
+  "markets | VIX | direction": {
+   "steps": 2728,
+   "precision all": 0.5495,
+   "precision strongest 10%": 0.5779,
+   "calls strongest 10%": 597
+  },
+  "markets | VIX | size": {
+   "steps": 2728,
+   "precision all": 0.5499,
+   "precision strongest 10%": 0.6037,
+   "calls strongest 10%": 593
+  },
+  "markets | FX-Australia | direction": {
+   "steps": 2682,
+   "precision all": 0.5056,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 0
+  },
+  "markets | FX-Australia | size": {
+   "steps": 2682,
+   "precision all": 0.6178,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 0
+  },
+  "markets | FX-Canada | direction": {
+   "steps": 2682,
+   "precision all": 0.4952,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 19
+  },
+  "markets | FX-Canada | size": {
+   "steps": 2682,
+   "precision all": 0.6305,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 0
+  },
+  "markets | FX-Switzerland | direction": {
+   "steps": 2682,
+   "precision all": 0.5101,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 0
+  },
+  "markets | FX-Switzerland | size": {
+   "steps": 2682,
+   "precision all": 0.6182,
+   "precision strongest 10%": 0.6772,
+   "calls strongest 10%": 347
+  },
+  "markets | FX-Japan | direction": {
+   "steps": 2682,
+   "precision all": 0.5209,
+   "precision strongest 10%": 0.5109,
+   "calls strongest 10%": 92
+  },
+  "markets | FX-Japan | size": {
+   "steps": 2682,
+   "precision all": 0.5682,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 0
+  },
+  "markets | FX-UnitedKingdom | direction": {
+   "steps": 2682,
+   "precision all": 0.5,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 0
+  },
+  "markets | FX-UnitedKingdom | size": {
+   "steps": 2682,
+   "precision all": 0.5481,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 0
+  },
+  "markets | FX-NewZealand | direction": {
+   "steps": 2682,
+   "precision all": 0.5026,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 0
+  },
+  "markets | FX-NewZealand | size": {
+   "steps": 2682,
+   "precision all": 0.6145,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 0
+  },
+  "markets | FX-Sweden | direction": {
+   "steps": 2682,
+   "precision all": 0.4907,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 18
+  },
+  "markets | FX-Sweden | size": {
+   "steps": 2682,
+   "precision all": 0.5418,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 0
+  },
+  "markets | FX-Norway | direction": {
+   "steps": 2682,
+   "precision all": 0.5015,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 0
+  },
+  "markets | FX-Norway | size": {
+   "steps": 2682,
+   "precision all": 0.5809,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 0
+  },
+  "markets | FX-Euro | direction": {
+   "steps": 2682,
+   "precision all": 0.5089,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 0
+  },
+  "markets | FX-Euro | size": {
+   "steps": 2682,
+   "precision all": 0.6063,
+   "precision strongest 10%": 0.6503,
+   "calls strongest 10%": 589
+  },
+  "markets | FX-Mexico | direction": {
+   "steps": 2682,
+   "precision all": 0.5194,
+   "precision strongest 10%": 0.5461,
+   "calls strongest 10%": 282
+  },
+  "markets | FX-Mexico | size": {
+   "steps": 2682,
+   "precision all": 0.5858,
+   "precision strongest 10%": 0.69,
+   "calls strongest 10%": 100
+  },
+  "markets | FX-India | direction": {
+   "steps": 2682,
+   "precision all": 0.5123,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 0
+  },
+  "markets | FX-India | size": {
+   "steps": 2682,
+   "precision all": 0.6171,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 0
+  },
+  "markets | FX-SouthAfrica | direction": {
+   "steps": 2682,
+   "precision all": 0.5179,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 1
+  },
+  "markets | FX-SouthAfrica | size": {
+   "steps": 2682,
+   "precision all": 0.6339,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 0
+  },
+  "weather | Chicago daily high | direction": {
+   "steps": 9031,
+   "precision all": 0.5635,
+   "precision strongest 10%": 0.6409,
+   "calls strongest 10%": 607
+  },
+  "weather | Chicago daily high | size": {
+   "steps": 9031,
+   "precision all": 0.5562,
+   "precision strongest 10%": 0.6261,
+   "calls strongest 10%": 1538
+  },
+  "racing | jockey J Moreira | direction": {
+   "steps": 1934,
+   "precision all": 0.6525,
+   "precision strongest 10%": 0.7983,
+   "calls strongest 10%": 238
+  },
+  "racing | jockey J Moreira | size": {
+   "steps": 1920,
+   "precision all": 0.5573,
+   "precision strongest 10%": 0.6111,
+   "calls strongest 10%": 162
+  },
+  "racing | jockey Z Purton | direction": {
+   "steps": 1597,
+   "precision all": 0.6299,
+   "precision strongest 10%": 0.7412,
+   "calls strongest 10%": 170
+  },
+  "racing | jockey Z Purton | size": {
+   "steps": 1583,
+   "precision all": 0.5117,
+   "precision strongest 10%": 0.3333,
+   "calls strongest 10%": 39
+  },
+  "racing | jockey N Callan | direction": {
+   "steps": 1549,
+   "precision all": 0.6559,
+   "precision strongest 10%": 0.7548,
+   "calls strongest 10%": 208
+  },
+  "racing | jockey N Callan | size": {
+   "steps": 1535,
+   "precision all": 0.4919,
+   "precision strongest 10%": 0.4167,
+   "calls strongest 10%": 36
+  },
+  "racing | jockey K C Leung | direction": {
+   "steps": 1400,
+   "precision all": 0.6629,
+   "precision strongest 10%": 0.7394,
+   "calls strongest 10%": 165
+  },
+  "racing | jockey K C Leung | size": {
+   "steps": 1386,
+   "precision all": 0.4921,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 0
+  },
+  "racing | jockey B Prebble | direction": {
+   "steps": 1334,
+   "precision all": 0.6507,
+   "precision strongest 10%": 0.7293,
+   "calls strongest 10%": 133
+  },
+  "racing | jockey B Prebble | size": {
+   "steps": 1320,
+   "precision all": 0.4939,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 5
+  },
+  "racing | jockey N Rawiller | direction": {
+   "steps": 1058,
+   "precision all": 0.6578,
+   "precision strongest 10%": 0.7712,
+   "calls strongest 10%": 118
+  },
+  "racing | jockey N Rawiller | size": {
+   "steps": 1044,
+   "precision all": 0.5048,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 1
+  },
+  "racing | jockey M Chadwick | direction": {
+   "steps": 950,
+   "precision all": 0.6368,
+   "precision strongest 10%": 0.6957,
+   "calls strongest 10%": 92
+  },
+  "racing | jockey M Chadwick | size": {
+   "steps": 936,
+   "precision all": 0.5085,
+   "precision strongest 10%": 0.5493,
+   "calls strongest 10%": 71
+  },
+  "racing | jockey C Schofield | direction": {
+   "steps": 861,
+   "precision all": 0.6632,
+   "precision strongest 10%": 0.7723,
+   "calls strongest 10%": 101
+  },
+  "racing | jockey C Schofield | size": {
+   "steps": 847,
+   "precision all": 0.4864,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 0
+  },
+  "racing | jockey O Doleuze | direction": {
+   "steps": 812,
+   "precision all": 0.6244,
+   "precision strongest 10%": 0.7786,
+   "calls strongest 10%": 131
+  },
+  "racing | jockey O Doleuze | size": {
+   "steps": 798,
+   "precision all": 0.4912,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 2
+  },
+  "racing | jockey Y T Cheng | direction": {
+   "steps": 682,
+   "precision all": 0.6305,
+   "precision strongest 10%": 0.7111,
+   "calls strongest 10%": 90
+  },
+  "racing | jockey Y T Cheng | size": {
+   "steps": 668,
+   "precision all": 0.4775,
+   "precision strongest 10%": 0.64,
+   "calls strongest 10%": 25
+  },
+  "racing | jockey C K Tong | direction": {
+   "steps": 537,
+   "precision all": 0.6089,
+   "precision strongest 10%": 0.8,
+   "calls strongest 10%": 75
+  },
+  "racing | jockey C K Tong | size": {
+   "steps": 523,
+   "precision all": 0.5526,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 13
+  },
+  "racing | jockey S Clipperton | direction": {
+   "steps": 476,
+   "precision all": 0.6282,
+   "precision strongest 10%": 0.7467,
+   "calls strongest 10%": 75
+  },
+  "racing | jockey S Clipperton | size": {
+   "steps": 462,
+   "precision all": 0.5022,
+   "precision strongest 10%": null,
+   "calls strongest 10%": 0
+  }
+ }
+}

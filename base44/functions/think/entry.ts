@@ -13,7 +13,9 @@ import { noveltyDirective } from '../../shared/novelty.ts';
 import { assessStakes } from '../../shared/stakes.ts';
 import { buildChartContext, chartContextBlock, confluenceAgrees } from '../../shared/chartContext.ts';
 import { buildCoinStory, marketStoryBlock, marketStorySummary } from '../../shared/marketStory.ts';
-import { runPredictionJournal } from '../../shared/predictionJournal.ts';
+import { loadLive, logCalls, rowsFor, recordBlock } from '../../shared/ledger.ts';
+import { DEFAULT_LIVE, withoutCalibration } from '../../shared/engines.ts';
+import { HISTORY_DAYS } from '../../shared/universe.ts';
 import { detectBoundaryCrossing } from '../../shared/boundaryCheck.ts';
 import { ENGINE_VERSION, ENGINE_NAME } from '../../shared/version.ts';
 
@@ -53,9 +55,9 @@ async function recordBoundaryWarning(base44, user, userMemory, reason) {
 // ===========================================================================
 // think — the chat function. This is the function the app's chat screen calls.
 //
-// Probability  (shared/probabilityRead.ts, stateProbability.ts): the only
-//              source of any probability HEX states. Walk-forward, calibrated,
-//              each number beside the series' own usual odds.
+// Probability  (shared/probabilityRead.ts, engines.ts): the only source of
+//              any probability HEX states, each beside its usual odds. Both
+//              engines run; the ledger decides which is shown (ledger.ts).
 // Description  (hex6Pipeline.ts, chartContext.ts, marketStory.ts): what the
 //              chart is doing. Never changes a probability.
 // Identity     (persona.ts) and voice (piusEngine.ts): how it is said.
@@ -232,9 +234,14 @@ ${speaker}:`;
     let isCasual = false;
     let weightedTurn = false;
 
-    const runEngine = (values, ticker = null, asReturns = undefined) => {
+    // Which engine is shown for each read, loaded once and only if needed.
+    let liveEngines = null;
+    const getLive = async () => (liveEngines ??= await loadLive(base44).catch(() => DEFAULT_LIVE));
+
+    // A series that is not daily market bars: no stored market calibration.
+    const runEngine = async (values, ticker = null, asReturns = undefined) => {
       const messageTexts = history.map(m => m.content).filter(Boolean);
-      pipelineResult = runPipeline(values, ticker, messageTexts, asReturns);
+      pipelineResult = runPipeline(values, ticker, messageTexts, asReturns, withoutCalibration(await getLive()));
       voice = REGISTER_VOICE[pipelineResult.pius.register] || defaultVoice;
       ranEngine = true;
       return pipelineResult;
@@ -245,7 +252,7 @@ ${speaker}:`;
     let inlineStateBlock = '';
     const dataSeries = extractNumberSeries(message);
     if (dataSeries && dataSeries.length > MIN_RETURNS) {
-      runEngine(dataSeries, tickersIn(message, 1)[0] || null);
+      await runEngine(dataSeries, tickersIn(message, 1)[0] || null);
       inlineStateBlock = pipelineResult.pius.directive;
     } else if (dataSeries) {
       // A list was pasted but it is too short for a probability: say so,
@@ -315,7 +322,8 @@ ${speaker}:`;
             probability_big_move: read.prob.p_big_move,
             base_rate_big_move: read.prob.base_big,
             scored_steps: read.prob.history,
-            calibrated: read.prob.calibrated,
+            engine_shown: read.run.live,
+            engine_calls: read.run.calls,
             engine_version: ENGINE_VERSION,
           };
           await anchorVerdict(base44, {
@@ -438,7 +446,7 @@ Return JSON with:
         const tickerHits = tickersIn(message);
         if (tickerHits.length) {
           const marketData = await Promise.all(tickerHits.map(async (ticker) => {
-            try { return { requestedTicker: ticker, data: await fetchYahooReturns(ticker, 5475) }; } catch { return null; }
+            try { return { requestedTicker: ticker, data: await fetchYahooReturns(ticker, HISTORY_DAYS) }; } catch { return null; }
           }));
           const usableMarkets = marketData.filter((item) => item?.data?.completedCloses?.length >= LONG_LOOKBACK_BARS);
           const historyTexts = history.map((turn) => turn.content).filter(Boolean);
@@ -446,7 +454,12 @@ Return JSON with:
             const md = item.data;
             // The read is computed on finished bars only; chart levels and
             // the latest price use the live bar as well.
-            const basePipeline = runPipeline(md.completedCloses, item.requestedTicker, historyTexts, false);
+            const basePipeline = runPipeline(md.completedCloses, item.requestedTicker, historyTexts, false, await getLive());
+            // Both engines' calls go into the ledger before the outcome exists.
+            if (basePipeline.read) {
+              const bars = { closes: md.completedCloses, timestamps: md.timestamps.slice(0, md.completedBars) };
+              logCalls(base44, rowsFor(item.requestedTicker, bars, md.returns, basePipeline.read.run, 'chat'));
+            }
             const coinContext = buildChartContext(md.closes, md.highs, md.lows, md.volumes);
             const perceived = applyChartLens(basePipeline, coinContext, md.closes);
             activeStories.push(buildCoinStory(item.requestedTicker, perceived, coinContext, md.closes));
@@ -460,10 +473,8 @@ Return JSON with:
               const leaning = pipelineResult.read && !pipelineResult.read.direction_at_base;
               const chartBlock = chartContextBlock(chartCtx, leaning ? pipelineResult.read.direction : undefined);
               if (chartBlock) stateBlock = `${stateBlock}\n\n${chartBlock}`;
-              if (md.latestPrice != null) {
-                const journalBlock = await runPredictionJournal(base44, item.requestedTicker, md.latestPrice, pipelineResult, user.email, { closes: md.completedCloses, timestamps: md.timestamps.slice(0, md.completedBars) });
-                if (journalBlock) stateBlock = `${stateBlock}\n\n${journalBlock}`;
-              }
+              const record = await recordBlock(base44, item.requestedTicker);
+              if (record) stateBlock = `${stateBlock}\n\n${record}`;
             }
           }
           const storyBlock = marketStoryBlock(activeStories);
@@ -474,7 +485,7 @@ Return JSON with:
         if (!stateBlock && fetchResult?.needs_engine && Array.isArray(fetchResult.series) && fetchResult.series.length > MIN_RETURNS) {
           const asReturns = typeof fetchResult.as_returns === 'boolean' ? fetchResult.as_returns : undefined;
           const fetchedTicker = fetchResult?.ticker && fetchResult.ticker !== 'UNKNOWN' ? fetchResult.ticker : null;
-          runEngine(fetchResult.series, fetchedTicker, asReturns);
+          await runEngine(fetchResult.series, fetchedTicker, asReturns);
           stateBlock = `${pipelineResult.pius.directive}\n  SOURCE OF THE SERIES: ${fetchResult.series.length} values retrieved from the web this turn${fetchResult.series_label ? ` (${fetchResult.series_label})` : ''}. Say that the read rests on that retrieved series.`;
         }
 

@@ -4,54 +4,16 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { rows, posted, llmCalls, writes, mkBase44, load, call, sub, out, synthPrompt } from './harness.mjs';
+import { renderPromptDoc } from '../render-prompt.mjs';
 const here = path.dirname(fileURLToPath(import.meta.url));
-// ---- real BTC bars served as a Yahoo chart response
-const rows = fs.readFileSync(path.join(here, 'BTC_daily.csv'),'utf8').trim().split('\n').slice(1).map(l=>l.split(','));
-const yahoo = () => ({ chart: { result: [{ timestamp: rows.map(r=>Math.floor(new Date(r[0]).getTime()/1000)),
-  indicators: { quote: [{ close: rows.map(r=>+r[4]), high: rows.map(r=>+r[2]), low: rows.map(r=>+r[3]), volume: rows.map(r=>+r[5]) }] } }] } });
-const posted = [];
-globalThis.fetch = async (url, opts={}) => {
-  const u = String(url);
-  if (u.includes('finance.yahoo.com')) return new Response(JSON.stringify(yahoo()), { status: 200 });
-  if (u.includes('discord') ) { posted.push({u, body: opts.body}); return new Response('{}', {status:200}); }
-  return new Response('{}', { status: 200 });
-};
-const llmCalls = [];
-const writes = [];
-const mkBase44 = (user) => {
-  const entity = new Proxy({}, { get: (_, m) => async (...a) => { writes.push({ m, a }); return (m === 'create' ? { id: 'x1', ...a[0] } : m === 'update' ? {} : []); } });
-  const entities = new Proxy({}, { get: () => entity });
-  const InvokeLLM = async (o) => {
-    llmCalls.push(o);
-    const props = o.response_json_schema?.properties || {};
-    if (props.intent) return { intent: 'analytical' };
-    if (props.factual_summary) return { factual_summary: 'stub facts', needs_engine: false, sources: [], warrants_citation: false };
-    if (props.response) return { receiving: 'r', response: 'STUB REPLY', boundary_signal: '' };
-    if (props.message) return { message: 'stub discord message' };
-    if (props.discord_elaboration) return { discord_elaboration: 'stub elaboration', x_reply: 'stub' };
-    if (props.memory_summary) return { memory_summary: 'm', topics_discussed: 't', user_style: 's' };
-    return 'stub';
-  };
-  return { auth: { me: async () => { if (!user) { const e = new Error('unauth'); e.status = 401; throw e; } return user; } },
-    entities, asServiceRole: { entities, functions: { invoke: async () => ({ data: {} }) } },
-    integrations: { Core: { InvokeLLM, SendEmail: async () => ({}) } } };
-};
-let handler = null;
-globalThis.Deno = { serve: (h) => { handler = h; }, env: { get: (k) => ({ DISCORD_SIGNALS_WEBHOOK_URL: 'https://discord.test/hook', DISCORD_WEBHOOK_URL: 'https://discord.test/hook2', X_BEARER_TOKEN:'a',X_API_KEY:'a',X_API_SECRET:'a',X_ACCESS_TOKEN:'a',X_ACCESS_TOKEN_SECRET:'a' })[k] } };
-const load = async (fn) => { handler = null; const m = await import(`${path.join(here, 'out', fn + '.mjs')}?${Math.random()}`); return handler || m.default; };
-const call = async (h, user, body) => { globalThis.__base44 = mkBase44(user); llmCalls.length = 0;
-  const res = await h(new Request('https://app.test/fn', { method: 'POST', headers: { 'content-type': 'application/json', origin: 'https://evil.example' }, body: JSON.stringify(body) }));
-  return { status: res.status, json: await res.json() }; };
-const sub = { email: 'u@test.com', full_name: 'Test User', role: 'user', subscription_status: 'active' };
-const out = (label, v) => console.log(`\n=== ${label}\n${typeof v === 'string' ? v : JSON.stringify(v, null, 1)}`);
-const synthPrompt = () => (llmCalls.find(c => c.response_json_schema?.properties?.response)?.prompt || '');
 let fails = 0; const check = (name, ok) => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}`); if (!ok) fails++; };
 
 const think = await load('think');
 let r = await call(think, { ...sub, subscription_status: 'canceled' }, { message: 'hi' });
 check('think: no subscription -> 402', r.status === 402);
 r = await call(think, sub, { message: 'hey' });
-check('think: casual -> 200, engine not run', r.status === 200 && r.json.ran_engine === false && r.json.version === '6.2');
+check('think: casual -> 200, engine not run', r.status === 200 && r.json.ran_engine === false && r.json.version === '6.3');
 r = await call(think, sub, { message: "what's your read on BTC right now?" });
 let p = synthPrompt();
 check('think: ticker -> engine ran', r.status === 200 && r.json.ran_engine === true);
@@ -140,5 +102,23 @@ check('stripeWebhook: wrong signature rejected', await post(now, 'deadbeef') ===
   q = await call(lc, null, {});
   check('landingComparison: web model retrieves, Claude writes', llmCalls.length === 2 && llmCalls[0].add_context_from_internet === true && /claude/.test(llmCalls[1].model) && !llmCalls[1].add_context_from_internet);
 }
+
+// ---- the loop (6.3)
+{
+  const t = await load('think');
+  writes.length = 0;
+  await call(t, sub, { message: "what's your read on BTC right now?" });
+  await new Promise((r) => setTimeout(r, 50));
+  const led = writes.filter(w => w.m === 'create' && w.a[0]?.series_id === 'BTC' && w.a[0]?.engine);
+  check('think: a ticker read writes four ledger rows (two reads, two engines) before the outcome', led.length === 4 && led.every(w => w.a[0].scored === false && w.a[0].source === 'chat') && led.filter(w => w.a[0].shown).length === 2);
+  check('think: 6.2 is the engine shown until rank-1 is promoted', led.filter(w => w.a[0].shown).every(w => w.a[0].engine === 'state-6.2'));
+  const nightly = await load('calibrateCognition');
+  writes.length = 0;
+  const q = await call(nightly, null, {});
+  check('nightly: logs calls for every tracked series and writes one status row per read', q.json.ok && q.json.series >= 7 && q.json.newly_logged >= 28 && ['MOVE', 'RANGE'].every(k => q.json.status[k]?.live_engine === 'state-6.2' && q.json.status[k].decision === 'hold'));
+  const stRows = writes.filter(w => w.m === 'create' && w.a[0]?.live_engine);
+  check('nightly: the pooled calibration map is stored with the status', stRows.length === 2 && stRows.every(w => typeof w.a[0].calibration === 'string' && JSON.parse(w.a[0].calibration).x.length > 2));
+}
+check('docs/PROMPT.md matches the prompt the code builds (regenerate with: node tests/render-prompt.mjs)', fs.readFileSync(path.join(here, '../../docs/PROMPT.md'), 'utf8') === await renderPromptDoc());
 console.log(`\n${fails ? fails + ' FAILED' : 'ALL PASSED'}`);
 process.exit(fails ? 1 : 0);

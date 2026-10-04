@@ -1,0 +1,126 @@
+{
+  "name": "CallLedger",
+  "type": "object",
+  "properties": {
+    "series_id": {
+      "type": "string",
+      "description": "The series the call was made on (a ticker)"
+    },
+    "read": {
+      "type": "string",
+      "enum": [
+        "MOVE",
+        "RANGE"
+      ],
+      "description": "MOVE: next close higher. RANGE: next change larger than usual"
+    },
+    "engine": {
+      "type": "string",
+      "enum": [
+        "state-6.2",
+        "rank-1"
+      ],
+      "description": "Which engine made the call"
+    },
+    "call_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of the last finished bar the call was made from"
+    },
+    "bar_ts": {
+      "type": "number",
+      "description": "Timestamp (seconds) of that bar"
+    },
+    "last_close": {
+      "type": "number",
+      "description": "Close of that bar"
+    },
+    "threshold": {
+      "type": "number",
+      "description": "RANGE only: the change size above which the event counts, fixed at call time"
+    },
+    "baseline": {
+      "type": "number",
+      "description": "The baseline probability (usual odds) at call time (0-1)"
+    },
+    "probability": {
+      "type": "number",
+      "description": "The engine's probability at call time (0-1)"
+    },
+    "shown": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this engine was the one shown for this read"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "nightly",
+        "chat",
+        "signal"
+      ],
+      "description": "What produced the call"
+    },
+    "made_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the call was written"
+    },
+    "engine_version": {
+      "type": "string",
+      "description": "Release that made the call"
+    },
+    "scored": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the outcome is known"
+    },
+    "outcome": {
+      "type": "number",
+      "description": "1 if the event happened, 0 if not"
+    },
+    "scored_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When it was scored"
+    },
+    "log_loss": {
+      "type": "number",
+      "description": "Log loss of the engine's probability"
+    },
+    "log_loss_baseline": {
+      "type": "number",
+      "description": "Log loss of the baseline"
+    }
+  },
+  "required": [
+    "series_id",
+    "read",
+    "engine",
+    "call_date",
+    "baseline",
+    "probability"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

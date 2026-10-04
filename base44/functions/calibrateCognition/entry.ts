@@ -1,80 +1,78 @@
-// Nightly forward-record scorer.
+// Nightly update — the learning loop.
 //
-// Every direction read HEX gives in chat that departs from its usual odds is
-// logged in PredictionJournal (shared/predictionJournal.ts). This job scores
-// the ones whose horizon has passed against the first real daily close after
-// that horizon, then writes one CalibrationScore row per ticker and one
-// GLOBAL row. It is the live, out-of-sample record of the engine: nothing is
-// replayed or back-filled.
-//
-// Runs from the "Nightly Cognition Calibration" workflow.
+// Runs from the "Nightly Cognition Calibration" workflow. For every tracked
+// series (shared/universe.ts, plus tickers people asked about in chat):
+//   1. score yesterday's calls from both engines against the bar that has
+//      now finished
+//   2. write down today's calls from both engines, before their outcome
+// Then, across all series:
+//   3. refit rank-1's calibration map, pooled over every tracked series
+//   4. summarise each engine's record on the same calls and apply the
+//      promotion rule (shared/ledger.ts)
+//   5. store one EngineStatus row per read: the engine to show, its record,
+//      and the calibration map. Every function reads that row before it
+//      shows a number.
 
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import { fetchYahooReturns } from '../../shared/marketDataClient.ts';
-import { scoreDueCalls } from '../../shared/predictionJournal.ts';
+import { runEngines, READS, CANDIDATE_ENGINE } from '../../shared/engines.ts';
+import { loadLive, logCalls, rowsFor, scoreOpenCalls, summarise, pooledCalibration } from '../../shared/ledger.ts';
+import { UNIVERSE, MAX_EXTRA_SERIES, HISTORY_DAYS } from '../../shared/universe.ts';
 import { ENGINE_VERSION } from '../../shared/version.ts';
-
-// With fewer scored reads than this, a hit rate means nothing and is not graded.
-const MIN_TO_GRADE = 100;
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const J = base44.asServiceRole.entities.PredictionJournal;
-    const today = new Date().toISOString().split('T')[0];
-    const now = Date.now();
+    const L = base44.asServiceRole.entities.CallLedger;
+    const S = base44.asServiceRole.entities.EngineStatus;
+    const live = await loadLive(base44);
 
-    const rows = await J.list('-predicted_at', 2000).catch(() => []);
-    const due = (rows || []).filter((r) => !r.resolved && r.resolve_after && new Date(r.resolve_after).getTime() <= now);
+    // Series to track tonight: the fixed list, then anything asked about in chat.
+    const tickers = UNIVERSE.map((u) => u.ticker);
+    try {
+      const chat = await L.filter({ source: 'chat' }, '-call_date', 400);
+      for (const r of chat || []) {
+        if (tickers.length >= UNIVERSE.length + MAX_EXTRA_SERIES) break;
+        if (!tickers.includes(r.series_id)) tickers.push(r.series_id);
+      }
+    } catch { /* fixed list only */ }
 
-    // 1. Score what is due, one price fetch per ticker.
-    const byTicker = new Map();
-    for (const r of due) {
-      if (!byTicker.has(r.ticker)) byTicker.set(r.ticker, []);
-      byTicker.get(r.ticker).push(r);
-    }
-    let newlyScored = 0;
-    for (const [ticker, list] of byTicker) {
+    let scored = 0, logged = 0;
+    const pooled = { MOVE: [], RANGE: [] };
+    const failed: string[] = [];
+    for (const ticker of tickers) {
       let md = null;
-      try { md = await fetchYahooReturns(ticker, 120); } catch { continue; }
-      // Finished bars only: the bar still in progress has no close yet.
-      newlyScored += await scoreDueCalls(J, list, { closes: md.completedCloses, timestamps: md.timestamps.slice(0, md.completedBars) });
+      try { md = await fetchYahooReturns(ticker, HISTORY_DAYS); } catch { failed.push(ticker); continue; }
+      const bars = { closes: md.completedCloses, timestamps: md.timestamps.slice(0, md.completedBars) };
+      scored += await scoreOpenCalls(base44, ticker, bars);
+      const run = runEngines(md.returns, live);
+      if (!run) { failed.push(ticker); continue; }
+      logged += await logCalls(base44, rowsFor(ticker, bars, md.returns, run, 'nightly'));
+      // rank-1's own scored steps on this series. Every outcome in them is
+      // already known, so pooling them leaks nothing forward.
+      for (const read of READS) pooled[read].push(...run.rankSteps[read]);
     }
 
-    // 2. Summarise the whole scored record.
-    const scored = (rows || []).filter((r) => r.resolved && typeof r.correct === 'boolean');
-    const summarise = (list) => {
-      const n = list.length;
-      const hits = list.filter((r) => r.correct).length;
-      const moves = list.filter((r) => r.entry_price > 0 && r.exit_price > 0).map((r) => Math.log(r.exit_price / r.entry_price));
-      return {
-        n,
-        accuracy: n ? hits / n : 0,
-        avgMove: moves.length ? moves.reduce((s, x) => s + x, 0) / moves.length : 0,
+    const rows = await L.filter({ scored: true }, '-call_date', 5000).catch(() => []);
+    const existing = await S.list('-updated_date', 10).catch(() => []);
+    const status = {};
+    for (const read of READS) {
+      const st = summarise(read, rows || [], live[read]);
+      const map = pooledCalibration(pooled[read]);
+      const prev = (existing || []).find((r) => r.read === read);
+      const row = {
+        ...st,
+        calibration: map ? JSON.stringify(map) : (prev?.calibration ?? null),
+        calibration_steps: map ? map.n : (prev?.calibration_steps ?? 0),
+        promoted_at: st.decision === 'promote' ? new Date().toISOString() : (st.live_engine === CANDIDATE_ENGINE ? prev?.promoted_at ?? null : null),
+        engine_version: ENGINE_VERSION,
       };
-    };
-    const CS = base44.asServiceRole.entities.CalibrationScore;
-    const write = async (ticker, list) => {
-      const { n, accuracy, avgMove } = summarise(list);
-      await CS.create({
-        score_date: today,
-        ticker,
-        predictions_evaluated: n,
-        directional_accuracy: Number(accuracy.toFixed(4)),
-        avg_realized_return: Number(avgMove.toFixed(6)),
-        // No letter grade is given. The field says only whether there are
-        // enough scored reads for the hit rate to be read at all.
-        calibration_grade: n < MIN_TO_GRADE ? 'INSUFFICIENT_DATA' : 'UNGRADED',
-        notes: n < MIN_TO_GRADE
-          ? `Forward record, engine ${ENGINE_VERSION}: ${n} scored direction reads so far (${(accuracy * 100).toFixed(1)}% matched the next close). Too few to draw a conclusion; at least ${MIN_TO_GRADE} are needed.`
-          : `Forward record, engine ${ENGINE_VERSION}: ${n} scored direction reads, ${(accuracy * 100).toFixed(1)}% matched the next close.`,
-      }).catch(() => {});
-    };
-    const tickers = [...new Set(scored.map((r) => r.ticker))];
-    for (const t of tickers) await write(t, scored.filter((r) => r.ticker === t));
-    await write('GLOBAL', scored);
+      if (prev?.id) await S.update(prev.id, row).catch(() => {});
+      else await S.create(row).catch(() => {});
+      status[read] = { live_engine: st.live_engine, decision: st.decision, reason: st.reason, paired_calls: st.paired_calls, gain: st.gain, hit_control: st.hit_control, hit_candidate: st.hit_candidate, calibration_steps: row.calibration_steps };
+    }
 
-    return Response.json({ ok: true, newly_scored: newlyScored, total_scored: scored.length, tickers: tickers.length, engine_version: ENGINE_VERSION });
+    return Response.json({ ok: true, engine_version: ENGINE_VERSION, series: tickers.length, failed, newly_scored: scored, newly_logged: logged, status });
   } catch (error) {
     console.error('calibrateCognition error:', error);
     return Response.json({ error: error.message }, { status: 500 });

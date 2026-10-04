@@ -1,5 +1,56 @@
 # Changelog
 
+## 6.3 — 4 October 2026: the learning loop
+
+### What changed
+
+- **Two engines on every call.** `state-6.2` is the control and is what
+  people see. `rank-1` (the rank core) runs beside it. `engines.ts` is the one
+  place they meet.
+- **A ledger.** Every call from both engines on a tracked series is written
+  to `CallLedger` before its outcome exists, and scored on the next finished
+  daily bar. It replaces the prediction journal and the calibration scores.
+- **A nightly update** (`calibrateCognition`): scores, logs, refits rank-1's
+  calibration pooled across every tracked series, and applies the promotion
+  rule. One `EngineStatus` row per read holds the result.
+- **A promotion rule fixed in advance.** At least 300 calls over 60 days
+  scored beside 6.2, a 95% interval for the log-loss gain that excludes zero,
+  and a hit rate at least as high. Demotion by the mirror rule.
+- **One source for the prompt.** `src/docs/HEX6_BLE_COMPLETE_PROMPT.md` is
+  gone. `docs/PROMPT.md` is generated from the code and the tests fail when it
+  is stale.
+- `validation/` (scripts, predictions and results; not the data) is now in
+  the repository.
+
+### Measured (17 market series, 2016–2026, 46,954 calls per read)
+
+| | 6.2 alone | With the loop |
+|---|---|---|
+| Move-size calls right | 58.8% | 60.1% |
+| Stated on the strongest tenth of calls / actually right | 71.2% / 66.9% | 75.1% / 72.9% |
+| Next-day direction calls right | 51.5% | 51.3% |
+
+In the replay rank-1 was promoted for move size after 72 days and never
+demoted; it was ahead of or level with 6.2 in every year. The gain is a step,
+not a climb: accuracy does not keep rising year after year.
+
+### Predictions scored (`validation/prereg_core4.md`)
+
+| # | Prediction | Outcome |
+|---|---|---|
+| 1 | Dyadic base-rate memories match the single drift term | Better on markets (+1.9), worse on weather (-3.2) |
+| 2 | rank-1 beats 6.2 on market move size, at least 60.0% right | Held (60.1%) |
+| 3 | Per-series calibration narrows the gap on the strongest calls | Held for the gap; it does not lower log loss |
+| 4 | Pooled calibration is no better than per-series | Failed: pooled is better (+1.5) |
+| 5 | Market direction stays at chance | Held |
+| 6 | A three-way gate is within 0.5 of the better two-way model | Held; it is what ships |
+| 7 | Pooled calibration still wins with series aligned by date | Held (+1.3) |
+
+### Entities no code uses
+
+`PredictionJournal` and `CalibrationScore` join the twelve already unused.
+None was removed: removing an entity can delete its stored rows.
+
 ## 6.2.2 — 3 October 2026: backend clean-up (engine unchanged)
 
 The engine and every probability it produces are the same as 6.2 (parity test

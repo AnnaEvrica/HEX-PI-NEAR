@@ -1,0 +1,5992 @@
+{
+ "real": {
+  "markets": {
+   "direction": {
+    "steps": 46937,
+    "models": {
+     "hex62": {
+      "logloss_skill": -9e-05,
+      "brier_skill": -0.00012,
+      "mean_logloss_diff_vs_base": 6.2e-05,
+      "ci95": [
+       -0.000214,
+       0.000337
+      ],
+      "precision_all": 0.5115,
+      "usual_all": 0.5128,
+      "precision_strongest25": 0.5256,
+      "coverage_strongest25": 0.254,
+      "usual_strongest25": 0.5279
+     },
+     "ctw": {
+      "logloss_skill": -0.00228,
+      "brier_skill": -0.00287,
+      "mean_logloss_diff_vs_base": 0.001581,
+      "ci95": [
+       0.001075,
+       0.002104
+      ],
+      "precision_all": 0.5136,
+      "usual_all": 0.5128,
+      "precision_strongest25": 0.5285,
+      "coverage_strongest25": 0.261,
+      "usual_strongest25": 0.5305
+     },
+     "M1": {
+      "logloss_skill": -0.0002,
+      "brier_skill": -0.00027,
+      "mean_logloss_diff_vs_base": 0.000136,
+      "ci95": [
+       -0.000292,
+       0.000538
+      ],
+      "precision_all": 0.5078,
+      "usual_all": 0.5128,
+      "precision_strongest25": 0.5301,
+      "coverage_strongest25": 0.234,
+      "usual_strongest25": 0.5306
+     },
+     "M2": {
+      "logloss_skill": -0.00161,
+      "brier_skill": -0.0022,
+      "mean_logloss_diff_vs_base": 0.001118,
+      "ci95": [
+       0.00057,
+       0.001708
+      ],
+      "precision_all": 0.5113,
+      "usual_all": 0.5128,
+      "precision_strongest25": 0.5201,
+      "coverage_strongest25": 0.228,
+      "usual_strongest25": 0.5251
+     },
+     "M3": {
+      "logloss_skill": -0.00356,
+      "brier_skill": -0.00483,
+      "mean_logloss_diff_vs_base": 0.002467,
+      "ci95": [
+       0.00175,
+       0.003265
+      ],
+      "precision_all": 0.5102,
+      "usual_all": 0.5128,
+      "precision_strongest25": 0.5192,
+      "coverage_strongest25": 0.224,
+      "usual_strongest25": 0.521
+     },
+     "M4": {
+      "logloss_skill": -0.0051,
+      "brier_skill": -0.00688,
+      "mean_logloss_diff_vs_base": 0.003532,
+      "ci95": [
+       0.002673,
+       0.004342
+      ],
+      "precision_all": 0.509,
+      "usual_all": 0.5128,
+      "precision_strongest25": 0.5144,
+      "coverage_strongest25": 0.226,
+      "usual_strongest25": 0.5216
+     },
+     "M5": {
+      "logloss_skill": -0.00587,
+      "brier_skill": -0.0079,
+      "mean_logloss_diff_vs_base": 0.004063,
+      "ci95": [
+       0.003169,
+       0.004963
+      ],
+      "precision_all": 0.5097,
+      "usual_all": 0.5128,
+      "precision_strongest25": 0.5108,
+      "coverage_strongest25": 0.226,
+      "usual_strongest25": 0.5197
+     },
+     "M6": {
+      "logloss_skill": -0.00604,
+      "brier_skill": -0.00813,
+      "mean_logloss_diff_vs_base": 0.00418,
+      "ci95": [
+       0.00323,
+       0.005126
+      ],
+      "precision_all": 0.5089,
+      "usual_all": 0.5128,
+      "precision_strongest25": 0.5143,
+      "coverage_strongest25": 0.225,
+      "usual_strongest25": 0.5206
+     },
+     "S0": {
+      "logloss_skill": -0.0002,
+      "brier_skill": -0.00027,
+      "mean_logloss_diff_vs_base": 0.000136,
+      "ci95": [
+       -0.000262,
+       0.000532
+      ],
+      "precision_all": 0.5078,
+      "usual_all": 0.5128,
+      "precision_strongest25": 0.5301,
+      "coverage_strongest25": 0.234,
+      "usual_strongest25": 0.5306
+     },
+     "S01": {
+      "logloss_skill": -0.00098,
+      "brier_skill": -0.00133,
+      "mean_logloss_diff_vs_base": 0.000675,
+      "ci95": [
+       0.000106,
+       0.001197
+      ],
+      "precision_all": 0.5112,
+      "usual_all": 0.5128,
+      "precision_strongest25": 0.5217,
+      "coverage_strongest25": 0.232,
+      "usual_strongest25": 0.5277
+     },
+     "S012": {
+      "logloss_skill": -0.00133,
+      "brier_skill": -0.00181,
+      "mean_logloss_diff_vs_base": 0.000923,
+      "ci95": [
+       0.000339,
+       0.001554
+      ],
+      "precision_all": 0.513,
+      "usual_all": 0.5128,
+      "precision_strongest25": 0.5237,
+      "coverage_strongest25": 0.23,
+      "usual_strongest25": 0.5279
+     },
+     "mix": {
+      "logloss_skill": -3e-05,
+      "brier_skill": -4e-05,
+      "mean_logloss_diff_vs_base": 2.3e-05,
+      "ci95": [
+       -0.000359,
+       0.000363
+      ],
+      "precision_all": 0.5144,
+      "usual_all": 0.5128,
+      "precision_strongest25": 0.5287,
+      "coverage_strongest25": 0.279,
+      "usual_strongest25": 0.5316
+     }
+    },
+    "paired (negative = first is better)": {
+     "M1 vs ctw": {
+      "diff": -0.001444,
+      "ci95": [
+       -0.001984,
+       -0.000925
+      ]
+     },
+     "M1 vs hex62": {
+      "diff": 7.4e-05,
+      "ci95": [
+       -0.000288,
+       0.000454
+      ]
+     },
+     "ctw vs hex62": {
+      "diff": 0.001519,
+      "ci95": [
+       0.000919,
+       0.002064
+      ]
+     },
+     "mix vs hex62": {
+      "diff": -3.9e-05,
+      "ci95": [
+       -0.000487,
+       0.000391
+      ]
+     },
+     "S01 vs S0": {
+      "diff": 0.000539,
+      "ci95": [
+       0.000175,
+       0.000924
+      ]
+     },
+     "S012 vs S01": {
+      "diff": 0.000248,
+      "ci95": [
+       -8.4e-05,
+       0.000601
+      ]
+     }
+    },
+    "incremental information by order (positive = the higher order helps)": {
+     "order 1": {
+      "diff": -0.000136,
+      "ci95": [
+       -0.000519,
+       0.000276
+      ]
+     },
+     "order 2": {
+      "diff": -0.000981,
+      "ci95": [
+       -0.001447,
+       -0.000502
+      ]
+     },
+     "order 3": {
+      "diff": -0.001349,
+      "ci95": [
+       -0.001833,
+       -0.000934
+      ]
+     },
+     "order 4": {
+      "diff": -0.001065,
+      "ci95": [
+       -0.001487,
+       -0.000609
+      ]
+     },
+     "order 5": {
+      "diff": -0.000531,
+      "ci95": [
+       -0.00082,
+       -0.000296
+      ]
+     },
+     "order 6": {
+      "diff": -0.000117,
+      "ci95": [
+       -0.000259,
+       1e-05
+      ]
+     }
+    }
+   },
+   "size": {
+    "steps": 46937,
+    "models": {
+     "hex62": {
+      "logloss_skill": 0.01169,
+      "brier_skill": 0.01599,
+      "mean_logloss_diff_vs_base": -0.007944,
+      "ci95": [
+       -0.009799,
+       -0.006121
+      ],
+      "precision_all": 0.5914,
+      "usual_all": 0.5729,
+      "precision_strongest25": 0.6468,
+      "coverage_strongest25": 0.202,
+      "usual_strongest25": 0.6335
+     },
+     "ctw": {
+      "logloss_skill": -0.00755,
+      "brier_skill": -0.00889,
+      "mean_logloss_diff_vs_base": 0.005132,
+      "ci95": [
+       0.002417,
+       0.007525
+      ],
+      "precision_all": 0.5734,
+      "usual_all": 0.5729,
+      "precision_strongest25": 0.6205,
+      "coverage_strongest25": 0.235,
+      "usual_strongest25": 0.5979
+     },
+     "M1": {
+      "logloss_skill": 0.00578,
+      "brier_skill": 0.00938,
+      "mean_logloss_diff_vs_base": -0.003926,
+      "ci95": [
+       -0.006119,
+       -0.001851
+      ],
+      "precision_all": 0.5912,
+      "usual_all": 0.5729,
+      "precision_strongest25": 0.6444,
+      "coverage_strongest25": 0.194,
+      "usual_strongest25": 0.6297
+     },
+     "M2": {
+      "logloss_skill": 0.00407,
+      "brier_skill": 0.00708,
+      "mean_logloss_diff_vs_base": -0.002769,
+      "ci95": [
+       -0.004716,
+       -0.000566
+      ],
+      "precision_all": 0.5897,
+      "usual_all": 0.5729,
+      "precision_strongest25": 0.6401,
+      "coverage_strongest25": 0.195,
+      "usual_strongest25": 0.6255
+     },
+     "M3": {
+      "logloss_skill": 0.00169,
+      "brier_skill": 0.004,
+      "mean_logloss_diff_vs_base": -0.001146,
+      "ci95": [
+       -0.003459,
+       0.001048
+      ],
+      "precision_all": 0.587,
+      "usual_all": 0.5729,
+      "precision_strongest25": 0.6377,
+      "coverage_strongest25": 0.19,
+      "usual_strongest25": 0.6191
+     },
+     "M4": {
+      "logloss_skill": -0.00029,
+      "brier_skill": 0.00155,
+      "mean_logloss_diff_vs_base": 0.000198,
+      "ci95": [
+       -0.002191,
+       0.002433
+      ],
+      "precision_all": 0.5854,
+      "usual_all": 0.5729,
+      "precision_strongest25": 0.6326,
+      "coverage_strongest25": 0.19,
+      "usual_strongest25": 0.6154
+     },
+     "M5": {
+      "logloss_skill": -0.00078,
+      "brier_skill": 0.00095,
+      "mean_logloss_diff_vs_base": 0.000528,
+      "ci95": [
+       -0.001808,
+       0.002849
+      ],
+      "precision_all": 0.585,
+      "usual_all": 0.5729,
+      "precision_strongest25": 0.6321,
+      "coverage_strongest25": 0.194,
+      "usual_strongest25": 0.6165
+     },
+     "M6": {
+      "logloss_skill": -0.00097,
+      "brier_skill": 0.00073,
+      "mean_logloss_diff_vs_base": 0.000659,
+      "ci95": [
+       -0.001761,
+       0.002919
+      ],
+      "precision_all": 0.5846,
+      "usual_all": 0.5729,
+      "precision_strongest25": 0.6334,
+      "coverage_strongest25": 0.196,
+      "usual_strongest25": 0.6168
+     },
+     "S0": {
+      "logloss_skill": 0.00578,
+      "brier_skill": 0.00938,
+      "mean_logloss_diff_vs_base": -0.003926,
+      "ci95": [
+       -0.00607,
+       -0.001875
+      ],
+      "precision_all": 0.5912,
+      "usual_all": 0.5729,
+      "precision_strongest25": 0.6444,
+      "coverage_strongest25": 0.194,
+      "usual_strongest25": 0.6297
+     },
+     "S01": {
+      "logloss_skill": 0.00857,
+      "brier_skill": 0.01339,
+      "mean_logloss_diff_vs_base": -0.005825,
+      "ci95": [
+       -0.008441,
+       -0.003706
+      ],
+      "precision_all": 0.5947,
+      "usual_all": 0.5729,
+      "precision_strongest25": 0.6539,
+      "coverage_strongest25": 0.195,
+      "usual_strongest25": 0.6338
+     },
+     "S012": {
+      "logloss_skill": 0.00957,
+      "brier_skill": 0.01475,
+      "mean_logloss_diff_vs_base": -0.006507,
+      "ci95": [
+       -0.009145,
+       -0.00399
+      ],
+      "precision_all": 0.5975,
+      "usual_all": 0.5729,
+      "precision_strongest25": 0.6579,
+      "coverage_strongest25": 0.19,
+      "usual_strongest25": 0.6381
+     },
+     "mix": {
+      "logloss_skill": 0.00536,
+      "brier_skill": 0.00856,
+      "mean_logloss_diff_vs_base": -0.003647,
+      "ci95": [
+       -0.006022,
+       -0.001143
+      ],
+      "precision_all": 0.59,
+      "usual_all": 0.5729,
+      "precision_strongest25": 0.6444,
+      "coverage_strongest25": 0.195,
+      "usual_strongest25": 0.621
+     }
+    },
+    "paired (negative = first is better)": {
+     "M1 vs ctw": {
+      "diff": -0.009059,
+      "ci95": [
+       -0.010914,
+       -0.007174
+      ]
+     },
+     "M1 vs hex62": {
+      "diff": 0.004018,
+      "ci95": [
+       0.002868,
+       0.005066
+      ]
+     },
+     "ctw vs hex62": {
+      "diff": 0.013077,
+      "ci95": [
+       0.010732,
+       0.015341
+      ]
+     },
+     "mix vs hex62": {
+      "diff": 0.004298,
+      "ci95": [
+       0.002905,
+       0.005645
+      ]
+     },
+     "S01 vs S0": {
+      "diff": -0.001899,
+      "ci95": [
+       -0.002745,
+       -0.001107
+      ]
+     },
+     "S012 vs S01": {
+      "diff": -0.000682,
+      "ci95": [
+       -0.001261,
+       -0.000122
+      ]
+     }
+    },
+    "incremental information by order (positive = the higher order helps)": {
+     "order 1": {
+      "diff": 0.003926,
+      "ci95": [
+       0.001751,
+       0.006181
+      ]
+     },
+     "order 2": {
+      "diff": -0.001157,
+      "ci95": [
+       -0.001643,
+       -0.000676
+      ]
+     },
+     "order 3": {
+      "diff": -0.001623,
+      "ci95": [
+       -0.00218,
+       -0.001055
+      ]
+     },
+     "order 4": {
+      "diff": -0.001344,
+      "ci95": [
+       -0.001891,
+       -0.000809
+      ]
+     },
+     "order 5": {
+      "diff": -0.00033,
+      "ci95": [
+       -0.000648,
+       -1e-06
+      ]
+     },
+     "order 6": {
+      "diff": -0.00013,
+      "ci95": [
+       -0.00026,
+       -1.6e-05
+      ]
+     }
+    }
+   }
+  },
+  "weather": {
+   "direction": {
+    "steps": 9030,
+    "models": {
+     "hex62": {
+      "logloss_skill": 0.01624,
+      "brier_skill": 0.02234,
+      "mean_logloss_diff_vs_base": -0.011257,
+      "ci95": [
+       -0.013685,
+       -0.008911
+      ],
+      "precision_all": 0.5627,
+      "usual_all": 0.5113,
+      "precision_strongest25": 0.621,
+      "coverage_strongest25": 0.245,
+      "usual_strongest25": 0.5319
+     },
+     "ctw": {
+      "logloss_skill": 0.01577,
+      "brier_skill": 0.02167,
+      "mean_logloss_diff_vs_base": -0.010934,
+      "ci95": [
+       -0.013883,
+       -0.007789
+      ],
+      "precision_all": 0.5633,
+      "usual_all": 0.5113,
+      "precision_strongest25": 0.6129,
+      "coverage_strongest25": 0.26,
+      "usual_strongest25": 0.5077
+     },
+     "M1": {
+      "logloss_skill": 0.01704,
+      "brier_skill": 0.02338,
+      "mean_logloss_diff_vs_base": -0.01181,
+      "ci95": [
+       -0.014963,
+       -0.008531
+      ],
+      "precision_all": 0.565,
+      "usual_all": 0.5113,
+      "precision_strongest25": 0.6247,
+      "coverage_strongest25": 0.242,
+      "usual_strongest25": 0.5376
+     },
+     "M2": {
+      "logloss_skill": 0.01708,
+      "brier_skill": 0.02345,
+      "mean_logloss_diff_vs_base": -0.011841,
+      "ci95": [
+       -0.015112,
+       -0.008512
+      ],
+      "precision_all": 0.563,
+      "usual_all": 0.5113,
+      "precision_strongest25": 0.6206,
+      "coverage_strongest25": 0.235,
+      "usual_strongest25": 0.5226
+     },
+     "M3": {
+      "logloss_skill": 0.0168,
+      "brier_skill": 0.02309,
+      "mean_logloss_diff_vs_base": -0.011648,
+      "ci95": [
+       -0.015089,
+       -0.008232
+      ],
+      "precision_all": 0.5643,
+      "usual_all": 0.5113,
+      "precision_strongest25": 0.619,
+      "coverage_strongest25": 0.241,
+      "usual_strongest25": 0.5211
+     },
+     "M4": {
+      "logloss_skill": 0.01624,
+      "brier_skill": 0.02238,
+      "mean_logloss_diff_vs_base": -0.011254,
+      "ci95": [
+       -0.014542,
+       -0.007777
+      ],
+      "precision_all": 0.5653,
+      "usual_all": 0.5113,
+      "precision_strongest25": 0.6157,
+      "coverage_strongest25": 0.256,
+      "usual_strongest25": 0.5121
+     },
+     "M5": {
+      "logloss_skill": 0.01588,
+      "brier_skill": 0.02189,
+      "mean_logloss_diff_vs_base": -0.011007,
+      "ci95": [
+       -0.014374,
+       -0.007405
+      ],
+      "precision_all": 0.5636,
+      "usual_all": 0.5113,
+      "precision_strongest25": 0.6164,
+      "coverage_strongest25": 0.257,
+      "usual_strongest25": 0.5177
+     },
+     "M6": {
+      "logloss_skill": 0.01585,
+      "brier_skill": 0.02186,
+      "mean_logloss_diff_vs_base": -0.010987,
+      "ci95": [
+       -0.014677,
+       -0.007604
+      ],
+      "precision_all": 0.5646,
+      "usual_all": 0.5113,
+      "precision_strongest25": 0.6145,
+      "coverage_strongest25": 0.257,
+      "usual_strongest25": 0.5168
+     },
+     "S0": {
+      "logloss_skill": 0.01704,
+      "brier_skill": 0.02338,
+      "mean_logloss_diff_vs_base": -0.01181,
+      "ci95": [
+       -0.01535,
+       -0.008563
+      ],
+      "precision_all": 0.565,
+      "usual_all": 0.5113,
+      "precision_strongest25": 0.6247,
+      "coverage_strongest25": 0.242,
+      "usual_strongest25": 0.5376
+     },
+     "S01": {
+      "logloss_skill": 0.02546,
+      "brier_skill": 0.03477,
+      "mean_logloss_diff_vs_base": -0.017651,
+      "ci95": [
+       -0.021391,
+       -0.0139
+      ],
+      "precision_all": 0.5734,
+      "usual_all": 0.5113,
+      "precision_strongest25": 0.6564,
+      "coverage_strongest25": 0.233,
+      "usual_strongest25": 0.5483
+     },
+     "S012": {
+      "logloss_skill": 0.03437,
+      "brier_skill": 0.04702,
+      "mean_logloss_diff_vs_base": -0.023823,
+      "ci95": [
+       -0.028342,
+       -0.019483
+      ],
+      "precision_all": 0.5936,
+      "usual_all": 0.5113,
+      "precision_strongest25": 0.671,
+      "coverage_strongest25": 0.229,
+      "usual_strongest25": 0.5509
+     },
+     "mix": {
+      "logloss_skill": 0.01704,
+      "brier_skill": 0.02338,
+      "mean_logloss_diff_vs_base": -0.01181,
+      "ci95": [
+       -0.01512,
+       -0.008137
+      ],
+      "precision_all": 0.565,
+      "usual_all": 0.5113,
+      "precision_strongest25": 0.6247,
+      "coverage_strongest25": 0.242,
+      "usual_strongest25": 0.5376
+     }
+    },
+    "paired (negative = first is better)": {
+     "M1 vs ctw": {
+      "diff": -0.000877,
+      "ci95": [
+       -0.002233,
+       0.000456
+      ]
+     },
+     "M1 vs hex62": {
+      "diff": -0.000553,
+      "ci95": [
+       -0.001884,
+       0.000803
+      ]
+     },
+     "ctw vs hex62": {
+      "diff": 0.000324,
+      "ci95": [
+       -0.001052,
+       0.001827
+      ]
+     },
+     "mix vs hex62": {
+      "diff": -0.000553,
+      "ci95": [
+       -0.001879,
+       0.000685
+      ]
+     },
+     "S01 vs S0": {
+      "diff": -0.00584,
+      "ci95": [
+       -0.008135,
+       -0.003597
+      ]
+     },
+     "S012 vs S01": {
+      "diff": -0.006172,
+      "ci95": [
+       -0.008839,
+       -0.003401
+      ]
+     }
+    },
+    "incremental information by order (positive = the higher order helps)": {
+     "order 1": {
+      "diff": 0.01181,
+      "ci95": [
+       0.008566,
+       0.015106
+      ]
+     },
+     "order 2": {
+      "diff": 3e-05,
+      "ci95": [
+       -0.000789,
+       0.000787
+      ]
+     },
+     "order 3": {
+      "diff": -0.000192,
+      "ci95": [
+       -0.000736,
+       0.000422
+      ]
+     },
+     "order 4": {
+      "diff": -0.000394,
+      "ci95": [
+       -0.000954,
+       0.000155
+      ]
+     },
+     "order 5": {
+      "diff": -0.000247,
+      "ci95": [
+       -0.0005,
+       9e-06
+      ]
+     },
+     "order 6": {
+      "diff": -2e-05,
+      "ci95": [
+       -0.000108,
+       7.4e-05
+      ]
+     }
+    }
+   },
+   "size": {
+    "steps": 9030,
+    "models": {
+     "hex62": {
+      "logloss_skill": 0.00821,
+      "brier_skill": 0.01123,
+      "mean_logloss_diff_vs_base": -0.005661,
+      "ci95": [
+       -0.007911,
+       -0.003374
+      ],
+      "precision_all": 0.5512,
+      "usual_all": 0.5454,
+      "precision_strongest25": 0.5912,
+      "coverage_strongest25": 0.35,
+      "usual_strongest25": 0.5896
+     },
+     "ctw": {
+      "logloss_skill": 0.00714,
+      "brier_skill": 0.00977,
+      "mean_logloss_diff_vs_base": -0.00492,
+      "ci95": [
+       -0.007409,
+       -0.002455
+      ],
+      "precision_all": 0.5546,
+      "usual_all": 0.5454,
+      "precision_strongest25": 0.6106,
+      "coverage_strongest25": 0.259,
+      "usual_strongest25": 0.6106
+     },
+     "M1": {
+      "logloss_skill": 0.00973,
+      "brier_skill": 0.01334,
+      "mean_logloss_diff_vs_base": -0.00671,
+      "ci95": [
+       -0.009393,
+       -0.004109
+      ],
+      "precision_all": 0.561,
+      "usual_all": 0.5454,
+      "precision_strongest25": 0.6086,
+      "coverage_strongest25": 0.305,
+      "usual_strongest25": 0.6101
+     },
+     "M2": {
+      "logloss_skill": 0.00935,
+      "brier_skill": 0.01278,
+      "mean_logloss_diff_vs_base": -0.006443,
+      "ci95": [
+       -0.009188,
+       -0.003536
+      ],
+      "precision_all": 0.5548,
+      "usual_all": 0.5454,
+      "precision_strongest25": 0.6071,
+      "coverage_strongest25": 0.299,
+      "usual_strongest25": 0.6082
+     },
+     "M3": {
+      "logloss_skill": 0.00848,
+      "brier_skill": 0.01166,
+      "mean_logloss_diff_vs_base": -0.005844,
+      "ci95": [
+       -0.008819,
+       -0.003098
+      ],
+      "precision_all": 0.5589,
+      "usual_all": 0.5454,
+      "precision_strongest25": 0.597,
+      "coverage_strongest25": 0.29,
+      "usual_strongest25": 0.5986
+     },
+     "M4": {
+      "logloss_skill": 0.00817,
+      "brier_skill": 0.01121,
+      "mean_logloss_diff_vs_base": -0.005632,
+      "ci95": [
+       -0.008756,
+       -0.002783
+      ],
+      "precision_all": 0.5574,
+      "usual_all": 0.5454,
+      "precision_strongest25": 0.6017,
+      "coverage_strongest25": 0.296,
+      "usual_strongest25": 0.5995
+     },
+     "M5": {
+      "logloss_skill": 0.00801,
+      "brier_skill": 0.01101,
+      "mean_logloss_diff_vs_base": -0.005523,
+      "ci95": [
+       -0.008293,
+       -0.00267
+      ],
+      "precision_all": 0.5568,
+      "usual_all": 0.5454,
+      "precision_strongest25": 0.5998,
+      "coverage_strongest25": 0.293,
+      "usual_strongest25": 0.6002
+     },
+     "M6": {
+      "logloss_skill": 0.00797,
+      "brier_skill": 0.01095,
+      "mean_logloss_diff_vs_base": -0.005496,
+      "ci95": [
+       -0.008645,
+       -0.002736
+      ],
+      "precision_all": 0.5571,
+      "usual_all": 0.5454,
+      "precision_strongest25": 0.6007,
+      "coverage_strongest25": 0.292,
+      "usual_strongest25": 0.6014
+     },
+     "S0": {
+      "logloss_skill": 0.00973,
+      "brier_skill": 0.01334,
+      "mean_logloss_diff_vs_base": -0.00671,
+      "ci95": [
+       -0.00945,
+       -0.004121
+      ],
+      "precision_all": 0.561,
+      "usual_all": 0.5454,
+      "precision_strongest25": 0.6086,
+      "coverage_strongest25": 0.305,
+      "usual_strongest25": 0.6101
+     },
+     "S01": {
+      "logloss_skill": 0.01197,
+      "brier_skill": 0.01631,
+      "mean_logloss_diff_vs_base": -0.00825,
+      "ci95": [
+       -0.011149,
+       -0.005293
+      ],
+      "precision_all": 0.5584,
+      "usual_all": 0.5454,
+      "precision_strongest25": 0.6262,
+      "coverage_strongest25": 0.3,
+      "usual_strongest25": 0.624
+     },
+     "S012": {
+      "logloss_skill": 0.01281,
+      "brier_skill": 0.01744,
+      "mean_logloss_diff_vs_base": -0.008833,
+      "ci95": [
+       -0.011839,
+       -0.005899
+      ],
+      "precision_all": 0.5597,
+      "usual_all": 0.5454,
+      "precision_strongest25": 0.6323,
+      "coverage_strongest25": 0.297,
+      "usual_strongest25": 0.6323
+     },
+     "mix": {
+      "logloss_skill": 0.00973,
+      "brier_skill": 0.01334,
+      "mean_logloss_diff_vs_base": -0.00671,
+      "ci95": [
+       -0.009521,
+       -0.004028
+      ],
+      "precision_all": 0.561,
+      "usual_all": 0.5454,
+      "precision_strongest25": 0.6086,
+      "coverage_strongest25": 0.305,
+      "usual_strongest25": 0.6101
+     }
+    },
+    "paired (negative = first is better)": {
+     "M1 vs ctw": {
+      "diff": -0.00179,
+      "ci95": [
+       -0.003655,
+       0.000114
+      ]
+     },
+     "M1 vs hex62": {
+      "diff": -0.001049,
+      "ci95": [
+       -0.00209,
+       -8e-06
+      ]
+     },
+     "ctw vs hex62": {
+      "diff": 0.00074,
+      "ci95": [
+       -0.001108,
+       0.002513
+      ]
+     },
+     "mix vs hex62": {
+      "diff": -0.001049,
+      "ci95": [
+       -0.00212,
+       3.7e-05
+      ]
+     },
+     "S01 vs S0": {
+      "diff": -0.00154,
+      "ci95": [
+       -0.002544,
+       -0.000475
+      ]
+     },
+     "S012 vs S01": {
+      "diff": -0.000583,
+      "ci95": [
+       -0.001066,
+       -0.000112
+      ]
+     }
+    },
+    "incremental information by order (positive = the higher order helps)": {
+     "order 1": {
+      "diff": 0.00671,
+      "ci95": [
+       0.003993,
+       0.009416
+      ]
+     },
+     "order 2": {
+      "diff": -0.000267,
+      "ci95": [
+       -0.00092,
+       0.000382
+      ]
+     },
+     "order 3": {
+      "diff": -0.000599,
+      "ci95": [
+       -0.001288,
+       0.000142
+      ]
+     },
+     "order 4": {
+      "diff": -0.000212,
+      "ci95": [
+       -0.001031,
+       0.000633
+      ]
+     },
+     "order 5": {
+      "diff": -0.00011,
+      "ci95": [
+       -0.0004,
+       0.00019
+      ]
+     },
+     "order 6": {
+      "diff": -2.6e-05,
+      "ci95": [
+       -6.2e-05,
+       4e-06
+      ]
+     }
+    }
+   }
+  },
+  "racing": {
+   "direction": {
+    "steps": 13178,
+    "models": {
+     "hex62": {
+      "logloss_skill": 0.07679,
+      "brier_skill": 0.10343,
+      "mean_logloss_diff_vs_base": -0.053312,
+      "ci95": [
+       -0.057496,
+       -0.04933
+      ],
+      "precision_all": 0.6497,
+      "usual_all": 0.5176,
+      "precision_strongest25": 0.7272,
+      "coverage_strongest25": 0.286,
+      "usual_strongest25": 0.6138
+     },
+     "ctw": {
+      "logloss_skill": 0.07571,
+      "brier_skill": 0.10225,
+      "mean_logloss_diff_vs_base": -0.052564,
+      "ci95": [
+       -0.058127,
+       -0.047216
+      ],
+      "precision_all": 0.6463,
+      "usual_all": 0.5176,
+      "precision_strongest25": 0.7237,
+      "coverage_strongest25": 0.279,
+      "usual_strongest25": 0.6141
+     },
+     "M1": {
+      "logloss_skill": 0.07537,
+      "brier_skill": 0.10195,
+      "mean_logloss_diff_vs_base": -0.052328,
+      "ci95": [
+       -0.057531,
+       -0.047204
+      ],
+      "precision_all": 0.6459,
+      "usual_all": 0.5176,
+      "precision_strongest25": 0.7378,
+      "coverage_strongest25": 0.254,
+      "usual_strongest25": 0.5604
+     },
+     "M2": {
+      "logloss_skill": 0.0562,
+      "brier_skill": 0.07797,
+      "mean_logloss_diff_vs_base": -0.039018,
+      "ci95": [
+       -0.045266,
+       -0.032887
+      ],
+      "precision_all": 0.6282,
+      "usual_all": 0.5176,
+      "precision_strongest25": 0.7251,
+      "coverage_strongest25": 0.237,
+      "usual_strongest25": 0.5876
+     },
+     "M3": {
+      "logloss_skill": 0.0365,
+      "brier_skill": 0.0546,
+      "mean_logloss_diff_vs_base": -0.025339,
+      "ci95": [
+       -0.032496,
+       -0.018131
+      ],
+      "precision_all": 0.6135,
+      "usual_all": 0.5176,
+      "precision_strongest25": 0.7144,
+      "coverage_strongest25": 0.214,
+      "usual_strongest25": 0.5837
+     },
+     "M4": {
+      "logloss_skill": 0.02384,
+      "brier_skill": 0.04046,
+      "mean_logloss_diff_vs_base": -0.016553,
+      "ci95": [
+       -0.024464,
+       -0.008361
+      ],
+      "precision_all": 0.6078,
+      "usual_all": 0.5176,
+      "precision_strongest25": 0.7066,
+      "coverage_strongest25": 0.2,
+      "usual_strongest25": 0.5819
+     },
+     "M5": {
+      "logloss_skill": 0.019,
+      "brier_skill": 0.03525,
+      "mean_logloss_diff_vs_base": -0.01319,
+      "ci95": [
+       -0.02156,
+       -0.004106
+      ],
+      "precision_all": 0.6062,
+      "usual_all": 0.5176,
+      "precision_strongest25": 0.7011,
+      "coverage_strongest25": 0.194,
+      "usual_strongest25": 0.5747
+     },
+     "M6": {
+      "logloss_skill": 0.01819,
+      "brier_skill": 0.03439,
+      "mean_logloss_diff_vs_base": -0.012626,
+      "ci95": [
+       -0.020436,
+       -0.004924
+      ],
+      "precision_all": 0.6046,
+      "usual_all": 0.5176,
+      "precision_strongest25": 0.7017,
+      "coverage_strongest25": 0.195,
+      "usual_strongest25": 0.5771
+     },
+     "S0": {
+      "logloss_skill": 0.07537,
+      "brier_skill": 0.10195,
+      "mean_logloss_diff_vs_base": -0.052328,
+      "ci95": [
+       -0.057463,
+       -0.046952
+      ],
+      "precision_all": 0.6459,
+      "usual_all": 0.5176,
+      "precision_strongest25": 0.7378,
+      "coverage_strongest25": 0.254,
+      "usual_strongest25": 0.5604
+     },
+     "S01": {
+      "logloss_skill": 0.11075,
+      "brier_skill": 0.14776,
+      "mean_logloss_diff_vs_base": -0.076885,
+      "ci95": [
+       -0.08286,
+       -0.070343
+      ],
+      "precision_all": 0.6706,
+      "usual_all": 0.5176,
+      "precision_strongest25": 0.7788,
+      "coverage_strongest25": 0.278,
+      "usual_strongest25": 0.541
+     },
+     "S012": {
+      "logloss_skill": 0.13362,
+      "brier_skill": 0.17604,
+      "mean_logloss_diff_vs_base": -0.092762,
+      "ci95": [
+       -0.099452,
+       -0.086066
+      ],
+      "precision_all": 0.6841,
+      "usual_all": 0.5176,
+      "precision_strongest25": 0.8105,
+      "coverage_strongest25": 0.27,
+      "usual_strongest25": 0.5261
+     },
+     "mix": {
+      "logloss_skill": 0.07501,
+      "brier_skill": 0.10132,
+      "mean_logloss_diff_vs_base": -0.052078,
+      "ci95": [
+       -0.057294,
+       -0.046741
+      ],
+      "precision_all": 0.6449,
+      "usual_all": 0.5176,
+      "precision_strongest25": 0.7368,
+      "coverage_strongest25": 0.257,
+      "usual_strongest25": 0.5854
+     }
+    },
+    "paired (negative = first is better)": {
+     "M1 vs ctw": {
+      "diff": 0.000235,
+      "ci95": [
+       -0.001622,
+       0.002127
+      ]
+     },
+     "M1 vs hex62": {
+      "diff": 0.000984,
+      "ci95": [
+       -0.001503,
+       0.003312
+      ]
+     },
+     "ctw vs hex62": {
+      "diff": 0.000748,
+      "ci95": [
+       -0.001308,
+       0.002654
+      ]
+     },
+     "mix vs hex62": {
+      "diff": 0.001234,
+      "ci95": [
+       -0.001132,
+       0.003661
+      ]
+     },
+     "S01 vs S0": {
+      "diff": -0.024557,
+      "ci95": [
+       -0.02855,
+       -0.021046
+      ]
+     },
+     "S012 vs S01": {
+      "diff": -0.015877,
+      "ci95": [
+       -0.018789,
+       -0.012548
+      ]
+     }
+    },
+    "incremental information by order (positive = the higher order helps)": {
+     "order 1": {
+      "diff": 0.052328,
+      "ci95": [
+       0.047177,
+       0.057465
+      ]
+     },
+     "order 2": {
+      "diff": -0.01331,
+      "ci95": [
+       -0.016191,
+       -0.010341
+      ]
+     },
+     "order 3": {
+      "diff": -0.013679,
+      "ci95": [
+       -0.01653,
+       -0.010715
+      ]
+     },
+     "order 4": {
+      "diff": -0.008786,
+      "ci95": [
+       -0.011262,
+       -0.006346
+      ]
+     },
+     "order 5": {
+      "diff": -0.003364,
+      "ci95": [
+       -0.004435,
+       -0.002145
+      ]
+     },
+     "order 6": {
+      "diff": -0.000564,
+      "ci95": [
+       -0.001008,
+       -0.000113
+      ]
+     }
+    }
+   },
+   "size": {
+    "steps": 13022,
+    "models": {
+     "hex62": {
+      "logloss_skill": 0.00153,
+      "brier_skill": 0.00221,
+      "mean_logloss_diff_vs_base": -0.001062,
+      "ci95": [
+       -0.00208,
+       -0.000166
+      ],
+      "precision_all": 0.5116,
+      "usual_all": 0.4978,
+      "precision_strongest25": 0.5356,
+      "coverage_strongest25": 0.107,
+      "usual_strongest25": 0.5313
+     },
+     "ctw": {
+      "logloss_skill": 0.00261,
+      "brier_skill": 0.00386,
+      "mean_logloss_diff_vs_base": -0.001813,
+      "ci95": [
+       -0.003605,
+       -0.000196
+      ],
+      "precision_all": 0.5111,
+      "usual_all": 0.4978,
+      "precision_strongest25": 0.5765,
+      "coverage_strongest25": 0.085,
+      "usual_strongest25": 0.5403
+     },
+     "M1": {
+      "logloss_skill": -0.00609,
+      "brier_skill": -0.00693,
+      "mean_logloss_diff_vs_base": 0.00424,
+      "ci95": [
+       0.001927,
+       0.006605
+      ],
+      "precision_all": 0.5187,
+      "usual_all": 0.4978,
+      "precision_strongest25": 0.5267,
+      "coverage_strongest25": 0.104,
+      "usual_strongest25": 0.5326
+     },
+     "M2": {
+      "logloss_skill": -0.02308,
+      "brier_skill": -0.02792,
+      "mean_logloss_diff_vs_base": 0.016059,
+      "ci95": [
+       0.01203,
+       0.020437
+      ],
+      "precision_all": 0.5147,
+      "usual_all": 0.4978,
+      "precision_strongest25": 0.545,
+      "coverage_strongest25": 0.134,
+      "usual_strongest25": 0.5163
+     },
+     "M3": {
+      "logloss_skill": -0.04755,
+      "brier_skill": -0.05584,
+      "mean_logloss_diff_vs_base": 0.033081,
+      "ci95": [
+       0.027561,
+       0.038842
+      ],
+      "precision_all": 0.5184,
+      "usual_all": 0.4978,
+      "precision_strongest25": 0.52,
+      "coverage_strongest25": 0.133,
+      "usual_strongest25": 0.5049
+     },
+     "M4": {
+      "logloss_skill": -0.06445,
+      "brier_skill": -0.0739,
+      "mean_logloss_diff_vs_base": 0.044844,
+      "ci95": [
+       0.038099,
+       0.052301
+      ],
+      "precision_all": 0.5148,
+      "usual_all": 0.4978,
+      "precision_strongest25": 0.531,
+      "coverage_strongest25": 0.145,
+      "usual_strongest25": 0.487
+     },
+     "M5": {
+      "logloss_skill": -0.07015,
+      "brier_skill": -0.0796,
+      "mean_logloss_diff_vs_base": 0.04881,
+      "ci95": [
+       0.041041,
+       0.056695
+      ],
+      "precision_all": 0.516,
+      "usual_all": 0.4978,
+      "precision_strongest25": 0.5256,
+      "coverage_strongest25": 0.146,
+      "usual_strongest25": 0.486
+     },
+     "M6": {
+      "logloss_skill": -0.07064,
+      "brier_skill": -0.07991,
+      "mean_logloss_diff_vs_base": 0.049152,
+      "ci95": [
+       0.041824,
+       0.056578
+      ],
+      "precision_all": 0.5172,
+      "usual_all": 0.4978,
+      "precision_strongest25": 0.5287,
+      "coverage_strongest25": 0.143,
+      "usual_strongest25": 0.4804
+     },
+     "S0": {
+      "logloss_skill": -0.00609,
+      "brier_skill": -0.00693,
+      "mean_logloss_diff_vs_base": 0.00424,
+      "ci95": [
+       0.001979,
+       0.006757
+      ],
+      "precision_all": 0.5187,
+      "usual_all": 0.4978,
+      "precision_strongest25": 0.5267,
+      "coverage_strongest25": 0.104,
+      "usual_strongest25": 0.5326
+     },
+     "S01": {
+      "logloss_skill": -0.0089,
+      "brier_skill": -0.0102,
+      "mean_logloss_diff_vs_base": 0.00619,
+      "ci95": [
+       0.002457,
+       0.009623
+      ],
+      "precision_all": 0.5203,
+      "usual_all": 0.4978,
+      "precision_strongest25": 0.5544,
+      "coverage_strongest25": 0.137,
+      "usual_strongest25": 0.5325
+     },
+     "S012": {
+      "logloss_skill": -0.01607,
+      "brier_skill": -0.01883,
+      "mean_logloss_diff_vs_base": 0.01118,
+      "ci95": [
+       0.007633,
+       0.015066
+      ],
+      "precision_all": 0.5178,
+      "usual_all": 0.4978,
+      "precision_strongest25": 0.5527,
+      "coverage_strongest25": 0.13,
+      "usual_strongest25": 0.5047
+     },
+     "mix": {
+      "logloss_skill": 4e-05,
+      "brier_skill": 0.00082,
+      "mean_logloss_diff_vs_base": -2.5e-05,
+      "ci95": [
+       -0.001917,
+       0.00187
+      ],
+      "precision_all": 0.5087,
+      "usual_all": 0.4978,
+      "precision_strongest25": 0.5821,
+      "coverage_strongest25": 0.077,
+      "usual_strongest25": 0.5373
+     }
+    },
+    "paired (negative = first is better)": {
+     "M1 vs ctw": {
+      "diff": 0.006053,
+      "ci95": [
+       0.004266,
+       0.008066
+      ]
+     },
+     "M1 vs hex62": {
+      "diff": 0.005302,
+      "ci95": [
+       0.003442,
+       0.007305
+      ]
+     },
+     "ctw vs hex62": {
+      "diff": -0.000751,
+      "ci95": [
+       -0.001938,
+       0.00039
+      ]
+     },
+     "mix vs hex62": {
+      "diff": 0.001036,
+      "ci95": [
+       -0.000476,
+       0.002597
+      ]
+     },
+     "S01 vs S0": {
+      "diff": 0.00195,
+      "ci95": [
+       -0.000276,
+       0.004297
+      ]
+     },
+     "S012 vs S01": {
+      "diff": 0.00499,
+      "ci95": [
+       0.003198,
+       0.006835
+      ]
+     }
+    },
+    "incremental information by order (positive = the higher order helps)": {
+     "order 1": {
+      "diff": -0.00424,
+      "ci95": [
+       -0.006918,
+       -0.001837
+      ]
+     },
+     "order 2": {
+      "diff": -0.011819,
+      "ci95": [
+       -0.014811,
+       -0.008909
+      ]
+     },
+     "order 3": {
+      "diff": -0.017023,
+      "ci95": [
+       -0.02051,
+       -0.013549
+      ]
+     },
+     "order 4": {
+      "diff": -0.011763,
+      "ci95": [
+       -0.015,
+       -0.008294
+      ]
+     },
+     "order 5": {
+      "diff": -0.003966,
+      "ci95": [
+       -0.005618,
+       -0.002053
+      ]
+     },
+     "order 6": {
+      "diff": -0.000342,
+      "ci95": [
+       -0.001233,
+       0.000485
+      ]
+     }
+    }
+   }
+  }
+ },
+ "shuffled": {
+  "markets": {
+   "direction": {
+    "steps": 46937,
+    "models": {
+     "hex62": {
+      "logloss_skill": -0.00088,
+      "brier_skill": -0.00121,
+      "mean_logloss_diff_vs_base": 0.000609,
+      "ci95": [
+       0.000379,
+       0.000856
+      ],
+      "precision_all": 0.5087,
+      "usual_all": 0.5125,
+      "precision_strongest25": 0.5155,
+      "coverage_strongest25": 0.254,
+      "usual_strongest25": 0.5145
+     },
+     "ctw": {
+      "logloss_skill": -0.0019,
+      "brier_skill": -0.00238,
+      "mean_logloss_diff_vs_base": 0.001316,
+      "ci95": [
+       0.000801,
+       0.001861
+      ],
+      "precision_all": 0.5132,
+      "usual_all": 0.5125,
+      "precision_strongest25": 0.5263,
+      "coverage_strongest25": 0.276,
+      "usual_strongest25": 0.5237
+     },
+     "M1": {
+      "logloss_skill": -0.00127,
+      "brier_skill": -0.00175,
+      "mean_logloss_diff_vs_base": 0.000878,
+      "ci95": [
+       0.000494,
+       0.00128
+      ],
+      "precision_all": 0.5081,
+      "usual_all": 0.5125,
+      "precision_strongest25": 0.5087,
+      "coverage_strongest25": 0.229,
+      "usual_strongest25": 0.5136
+     },
+     "M2": {
+      "logloss_skill": -0.00296,
+      "brier_skill": -0.00406,
+      "mean_logloss_diff_vs_base": 0.002052,
+      "ci95": [
+       0.001492,
+       0.002642
+      ],
+      "precision_all": 0.507,
+      "usual_all": 0.5125,
+      "precision_strongest25": 0.5104,
+      "coverage_strongest25": 0.23,
+      "usual_strongest25": 0.5161
+     },
+     "M3": {
+      "logloss_skill": -0.00522,
+      "brier_skill": -0.00711,
+      "mean_logloss_diff_vs_base": 0.003612,
+      "ci95": [
+       0.002891,
+       0.004399
+      ],
+      "precision_all": 0.5038,
+      "usual_all": 0.5125,
+      "precision_strongest25": 0.5062,
+      "coverage_strongest25": 0.224,
+      "usual_strongest25": 0.5095
+     },
+     "M4": {
+      "logloss_skill": -0.00679,
+      "brier_skill": -0.00921,
+      "mean_logloss_diff_vs_base": 0.0047,
+      "ci95": [
+       0.003886,
+       0.005553
+      ],
+      "precision_all": 0.5033,
+      "usual_all": 0.5125,
+      "precision_strongest25": 0.5005,
+      "coverage_strongest25": 0.219,
+      "usual_strongest25": 0.5074
+     },
+     "M5": {
+      "logloss_skill": -0.0073,
+      "brier_skill": -0.00988,
+      "mean_logloss_diff_vs_base": 0.005057,
+      "ci95": [
+       0.004152,
+       0.006004
+      ],
+      "precision_all": 0.504,
+      "usual_all": 0.5125,
+      "precision_strongest25": 0.5036,
+      "coverage_strongest25": 0.219,
+      "usual_strongest25": 0.506
+     },
+     "M6": {
+      "logloss_skill": -0.00734,
+      "brier_skill": -0.00993,
+      "mean_logloss_diff_vs_base": 0.005085,
+      "ci95": [
+       0.004187,
+       0.006079
+      ],
+      "precision_all": 0.5037,
+      "usual_all": 0.5125,
+      "precision_strongest25": 0.5048,
+      "coverage_strongest25": 0.221,
+      "usual_strongest25": 0.5096
+     },
+     "S0": {
+      "logloss_skill": -0.00127,
+      "brier_skill": -0.00175,
+      "mean_logloss_diff_vs_base": 0.000878,
+      "ci95": [
+       0.000487,
+       0.001281
+      ],
+      "precision_all": 0.5081,
+      "usual_all": 0.5125,
+      "precision_strongest25": 0.5087,
+      "coverage_strongest25": 0.229,
+      "usual_strongest25": 0.5136
+     },
+     "S01": {
+      "logloss_skill": -0.00242,
+      "brier_skill": -0.00332,
+      "mean_logloss_diff_vs_base": 0.001674,
+      "ci95": [
+       0.001136,
+       0.002221
+      ],
+      "precision_all": 0.5072,
+      "usual_all": 0.5125,
+      "precision_strongest25": 0.5118,
+      "coverage_strongest25": 0.226,
+      "usual_strongest25": 0.5107
+     },
+     "S012": {
+      "logloss_skill": -0.00334,
+      "brier_skill": -0.00457,
+      "mean_logloss_diff_vs_base": 0.002311,
+      "ci95": [
+       0.001651,
+       0.002942
+      ],
+      "precision_all": 0.5068,
+      "usual_all": 0.5125,
+      "precision_strongest25": 0.5131,
+      "coverage_strongest25": 0.217,
+      "usual_strongest25": 0.5136
+     },
+     "mix": {
+      "logloss_skill": -0.0003,
+      "brier_skill": -0.00041,
+      "mean_logloss_diff_vs_base": 0.000209,
+      "ci95": [
+       -0.000152,
+       0.000568
+      ],
+      "precision_all": 0.5134,
+      "usual_all": 0.5125,
+      "precision_strongest25": 0.5216,
+      "coverage_strongest25": 0.285,
+      "usual_strongest25": 0.5212
+     }
+    },
+    "paired (negative = first is better)": {
+     "M1 vs ctw": {
+      "diff": -0.000438,
+      "ci95": [
+       -0.001009,
+       0.000129
+      ]
+     },
+     "M1 vs hex62": {
+      "diff": 0.00027,
+      "ci95": [
+       -0.000108,
+       0.000662
+      ]
+     },
+     "ctw vs hex62": {
+      "diff": 0.000707,
+      "ci95": [
+       0.000151,
+       0.001357
+      ]
+     },
+     "mix vs hex62": {
+      "diff": -0.0004,
+      "ci95": [
+       -0.000807,
+       3.1e-05
+      ]
+     },
+     "S01 vs S0": {
+      "diff": 0.000796,
+      "ci95": [
+       0.000442,
+       0.001158
+      ]
+     },
+     "S012 vs S01": {
+      "diff": 0.000637,
+      "ci95": [
+       0.000291,
+       0.000986
+      ]
+     }
+    },
+    "incremental information by order (positive = the higher order helps)": {
+     "order 1": {
+      "diff": -0.000878,
+      "ci95": [
+       -0.001246,
+       -0.00049
+      ]
+     },
+     "order 2": {
+      "diff": -0.001173,
+      "ci95": [
+       -0.001595,
+       -0.000727
+      ]
+     },
+     "order 3": {
+      "diff": -0.001561,
+      "ci95": [
+       -0.002025,
+       -0.001077
+      ]
+     },
+     "order 4": {
+      "diff": -0.001087,
+      "ci95": [
+       -0.001554,
+       -0.000611
+      ]
+     },
+     "order 5": {
+      "diff": -0.000357,
+      "ci95": [
+       -0.000631,
+       -0.000104
+      ]
+     },
+     "order 6": {
+      "diff": -2.8e-05,
+      "ci95": [
+       -0.000173,
+       0.000101
+      ]
+     }
+    }
+   },
+   "size": {
+    "steps": 46937,
+    "models": {
+     "hex62": {
+      "logloss_skill": 0.0001,
+      "brier_skill": 0.00014,
+      "mean_logloss_diff_vs_base": -6.5e-05,
+      "ci95": [
+       -0.000606,
+       0.000503
+      ],
+      "precision_all": 0.565,
+      "usual_all": 0.5632,
+      "precision_strongest25": 0.5804,
+      "coverage_strongest25": 0.1,
+      "usual_strongest25": 0.577
+     },
+     "ctw": {
+      "logloss_skill": -0.02078,
+      "brier_skill": -0.02659,
+      "mean_logloss_diff_vs_base": 0.01418,
+      "ci95": [
+       0.012571,
+       0.015713
+      ],
+      "precision_all": 0.5508,
+      "usual_all": 0.5632,
+      "precision_strongest25": 0.5642,
+      "coverage_strongest25": 0.214,
+      "usual_strongest25": 0.5725
+     },
+     "M1": {
+      "logloss_skill": -0.01153,
+      "brier_skill": -0.01394,
+      "mean_logloss_diff_vs_base": 0.007864,
+      "ci95": [
+       0.006694,
+       0.009002
+      ],
+      "precision_all": 0.5595,
+      "usual_all": 0.5632,
+      "precision_strongest25": 0.5685,
+      "coverage_strongest25": 0.165,
+      "usual_strongest25": 0.5657
+     },
+     "M2": {
+      "logloss_skill": -0.01247,
+      "brier_skill": -0.0153,
+      "mean_logloss_diff_vs_base": 0.00851,
+      "ci95": [
+       0.00737,
+       0.009669
+      ],
+      "precision_all": 0.5578,
+      "usual_all": 0.5632,
+      "precision_strongest25": 0.5699,
+      "coverage_strongest25": 0.161,
+      "usual_strongest25": 0.5724
+     },
+     "M3": {
+      "logloss_skill": -0.01438,
+      "brier_skill": -0.01774,
+      "mean_logloss_diff_vs_base": 0.00981,
+      "ci95": [
+       0.008585,
+       0.011082
+      ],
+      "precision_all": 0.5569,
+      "usual_all": 0.5632,
+      "precision_strongest25": 0.5695,
+      "coverage_strongest25": 0.164,
+      "usual_strongest25": 0.5705
+     },
+     "M4": {
+      "logloss_skill": -0.01667,
+      "brier_skill": -0.02057,
+      "mean_logloss_diff_vs_base": 0.011371,
+      "ci95": [
+       0.010028,
+       0.012729
+      ],
+      "precision_all": 0.5587,
+      "usual_all": 0.5632,
+      "precision_strongest25": 0.5686,
+      "coverage_strongest25": 0.166,
+      "usual_strongest25": 0.5685
+     },
+     "M5": {
+      "logloss_skill": -0.0176,
+      "brier_skill": -0.02176,
+      "mean_logloss_diff_vs_base": 0.012007,
+      "ci95": [
+       0.010583,
+       0.01335
+      ],
+      "precision_all": 0.5569,
+      "usual_all": 0.5632,
+      "precision_strongest25": 0.5649,
+      "coverage_strongest25": 0.168,
+      "usual_strongest25": 0.5657
+     },
+     "M6": {
+      "logloss_skill": -0.01774,
+      "brier_skill": -0.02193,
+      "mean_logloss_diff_vs_base": 0.012106,
+      "ci95": [
+       0.01081,
+       0.013603
+      ],
+      "precision_all": 0.5564,
+      "usual_all": 0.5632,
+      "precision_strongest25": 0.5637,
+      "coverage_strongest25": 0.167,
+      "usual_strongest25": 0.566
+     },
+     "S0": {
+      "logloss_skill": -0.01153,
+      "brier_skill": -0.01394,
+      "mean_logloss_diff_vs_base": 0.007864,
+      "ci95": [
+       0.006809,
+       0.008954
+      ],
+      "precision_all": 0.5595,
+      "usual_all": 0.5632,
+      "precision_strongest25": 0.5685,
+      "coverage_strongest25": 0.165,
+      "usual_strongest25": 0.5657
+     },
+     "S01": {
+      "logloss_skill": -0.01425,
+      "brier_skill": -0.01716,
+      "mean_logloss_diff_vs_base": 0.009726,
+      "ci95": [
+       0.008499,
+       0.010992
+      ],
+      "precision_all": 0.5601,
+      "usual_all": 0.5632,
+      "precision_strongest25": 0.5611,
+      "coverage_strongest25": 0.166,
+      "usual_strongest25": 0.5639
+     },
+     "S012": {
+      "logloss_skill": -0.01552,
+      "brier_skill": -0.01872,
+      "mean_logloss_diff_vs_base": 0.010589,
+      "ci95": [
+       0.009294,
+       0.011932
+      ],
+      "precision_all": 0.56,
+      "usual_all": 0.5632,
+      "precision_strongest25": 0.5557,
+      "coverage_strongest25": 0.162,
+      "usual_strongest25": 0.5551
+     },
+     "mix": {
+      "logloss_skill": -0.01266,
+      "brier_skill": -0.01572,
+      "mean_logloss_diff_vs_base": 0.00864,
+      "ci95": [
+       0.007488,
+       0.009758
+      ],
+      "precision_all": 0.5577,
+      "usual_all": 0.5632,
+      "precision_strongest25": 0.5685,
+      "coverage_strongest25": 0.172,
+      "usual_strongest25": 0.5657
+     }
+    },
+    "paired (negative = first is better)": {
+     "M1 vs ctw": {
+      "diff": -0.006316,
+      "ci95": [
+       -0.00771,
+       -0.0048
+      ]
+     },
+     "M1 vs hex62": {
+      "diff": 0.007929,
+      "ci95": [
+       0.006979,
+       0.008875
+      ]
+     },
+     "ctw vs hex62": {
+      "diff": 0.014246,
+      "ci95": [
+       0.012809,
+       0.015774
+      ]
+     },
+     "mix vs hex62": {
+      "diff": 0.008705,
+      "ci95": [
+       0.007568,
+       0.0098
+      ]
+     },
+     "S01 vs S0": {
+      "diff": 0.001862,
+      "ci95": [
+       0.001232,
+       0.002528
+      ]
+     },
+     "S012 vs S01": {
+      "diff": 0.000863,
+      "ci95": [
+       0.000273,
+       0.001417
+      ]
+     }
+    },
+    "incremental information by order (positive = the higher order helps)": {
+     "order 1": {
+      "diff": -0.007864,
+      "ci95": [
+       -0.008868,
+       -0.006821
+      ]
+     },
+     "order 2": {
+      "diff": -0.000646,
+      "ci95": [
+       -0.001158,
+       -0.000126
+      ]
+     },
+     "order 3": {
+      "diff": -0.0013,
+      "ci95": [
+       -0.001865,
+       -0.000762
+      ]
+     },
+     "order 4": {
+      "diff": -0.001561,
+      "ci95": [
+       -0.002057,
+       -0.001081
+      ]
+     },
+     "order 5": {
+      "diff": -0.000637,
+      "ci95": [
+       -0.000938,
+       -0.000315
+      ]
+     },
+     "order 6": {
+      "diff": -9.8e-05,
+      "ci95": [
+       -0.00022,
+       3.4e-05
+      ]
+     }
+    }
+   }
+  },
+  "weather": {
+   "direction": {
+    "steps": 9030,
+    "models": {
+     "hex62": {
+      "logloss_skill": -0.00168,
+      "brier_skill": -0.0023,
+      "mean_logloss_diff_vs_base": 0.001162,
+      "ci95": [
+       0.000322,
+       0.002104
+      ],
+      "precision_all": 0.5038,
+      "usual_all": 0.5107,
+      "precision_strongest25": 0.5055,
+      "coverage_strongest25": 0.151,
+      "usual_strongest25": 0.504
+     },
+     "ctw": {
+      "logloss_skill": -0.0127,
+      "brier_skill": -0.01732,
+      "mean_logloss_diff_vs_base": 0.008799,
+      "ci95": [
+       0.005729,
+       0.012011
+      ],
+      "precision_all": 0.4994,
+      "usual_all": 0.5107,
+      "precision_strongest25": 0.5093,
+      "coverage_strongest25": 0.178,
+      "usual_strongest25": 0.528
+     },
+     "M1": {
+      "logloss_skill": -0.01636,
+      "brier_skill": -0.02213,
+      "mean_logloss_diff_vs_base": 0.011336,
+      "ci95": [
+       0.007868,
+       0.015196
+      ],
+      "precision_all": 0.4972,
+      "usual_all": 0.5107,
+      "precision_strongest25": 0.5037,
+      "coverage_strongest25": 0.167,
+      "usual_strongest25": 0.5262
+     },
+     "M2": {
+      "logloss_skill": -0.01724,
+      "brier_skill": -0.02328,
+      "mean_logloss_diff_vs_base": 0.011946,
+      "ci95": [
+       0.008348,
+       0.015409
+      ],
+      "precision_all": 0.4969,
+      "usual_all": 0.5107,
+      "precision_strongest25": 0.4901,
+      "coverage_strongest25": 0.167,
+      "usual_strongest25": 0.5337
+     },
+     "M3": {
+      "logloss_skill": -0.01733,
+      "brier_skill": -0.02337,
+      "mean_logloss_diff_vs_base": 0.012012,
+      "ci95": [
+       0.008779,
+       0.015764
+      ],
+      "precision_all": 0.4967,
+      "usual_all": 0.5107,
+      "precision_strongest25": 0.5018,
+      "coverage_strongest25": 0.151,
+      "usual_strongest25": 0.5347
+     },
+     "M4": {
+      "logloss_skill": -0.01738,
+      "brier_skill": -0.02338,
+      "mean_logloss_diff_vs_base": 0.012046,
+      "ci95": [
+       0.008476,
+       0.015613
+      ],
+      "precision_all": 0.5003,
+      "usual_all": 0.5107,
+      "precision_strongest25": 0.492,
+      "coverage_strongest25": 0.152,
+      "usual_strongest25": 0.5263
+     },
+     "M5": {
+      "logloss_skill": -0.01757,
+      "brier_skill": -0.02364,
+      "mean_logloss_diff_vs_base": 0.012176,
+      "ci95": [
+       0.008598,
+       0.015955
+      ],
+      "precision_all": 0.5003,
+      "usual_all": 0.5107,
+      "precision_strongest25": 0.4942,
+      "coverage_strongest25": 0.153,
+      "usual_strongest25": 0.5339
+     },
+     "M6": {
+      "logloss_skill": -0.01763,
+      "brier_skill": -0.02372,
+      "mean_logloss_diff_vs_base": 0.012222,
+      "ci95": [
+       0.008205,
+       0.01571
+      ],
+      "precision_all": 0.4996,
+      "usual_all": 0.5107,
+      "precision_strongest25": 0.495,
+      "coverage_strongest25": 0.154,
+      "usual_strongest25": 0.5367
+     },
+     "S0": {
+      "logloss_skill": -0.01636,
+      "brier_skill": -0.02213,
+      "mean_logloss_diff_vs_base": 0.011336,
+      "ci95": [
+       0.008134,
+       0.015349
+      ],
+      "precision_all": 0.4972,
+      "usual_all": 0.5107,
+      "precision_strongest25": 0.5037,
+      "coverage_strongest25": 0.167,
+      "usual_strongest25": 0.5262
+     },
+     "S01": {
+      "logloss_skill": -0.02669,
+      "brier_skill": -0.03538,
+      "mean_logloss_diff_vs_base": 0.018499,
+      "ci95": [
+       0.013802,
+       0.023296
+      ],
+      "precision_all": 0.4981,
+      "usual_all": 0.5107,
+      "precision_strongest25": 0.485,
+      "coverage_strongest25": 0.152,
+      "usual_strongest25": 0.5179
+     },
+     "S012": {
+      "logloss_skill": -0.03613,
+      "brier_skill": -0.04752,
+      "mean_logloss_diff_vs_base": 0.025043,
+      "ci95": [
+       0.020142,
+       0.030047
+      ],
+      "precision_all": 0.4996,
+      "usual_all": 0.5107,
+      "precision_strongest25": 0.4713,
+      "coverage_strongest25": 0.12,
+      "usual_strongest25": 0.512
+     },
+     "mix": {
+      "logloss_skill": -0.01636,
+      "brier_skill": -0.02213,
+      "mean_logloss_diff_vs_base": 0.011336,
+      "ci95": [
+       0.007934,
+       0.014929
+      ],
+      "precision_all": 0.4972,
+      "usual_all": 0.5107,
+      "precision_strongest25": 0.5037,
+      "coverage_strongest25": 0.167,
+      "usual_strongest25": 0.5262
+     }
+    },
+    "paired (negative = first is better)": {
+     "M1 vs ctw": {
+      "diff": 0.002537,
+      "ci95": [
+       0.001218,
+       0.003889
+      ]
+     },
+     "M1 vs hex62": {
+      "diff": 0.010174,
+      "ci95": [
+       0.007071,
+       0.01336
+      ]
+     },
+     "ctw vs hex62": {
+      "diff": 0.007637,
+      "ci95": [
+       0.004864,
+       0.010128
+      ]
+     },
+     "mix vs hex62": {
+      "diff": 0.010174,
+      "ci95": [
+       0.006819,
+       0.013159
+      ]
+     },
+     "S01 vs S0": {
+      "diff": 0.007163,
+      "ci95": [
+       0.004939,
+       0.009337
+      ]
+     },
+     "S012 vs S01": {
+      "diff": 0.006544,
+      "ci95": [
+       0.004693,
+       0.008454
+      ]
+     }
+    },
+    "incremental information by order (positive = the higher order helps)": {
+     "order 1": {
+      "diff": -0.011336,
+      "ci95": [
+       -0.014901,
+       -0.007685
+      ]
+     },
+     "order 2": {
+      "diff": -0.000609,
+      "ci95": [
+       -0.001223,
+       -2.2e-05
+      ]
+     },
+     "order 3": {
+      "diff": -6.6e-05,
+      "ci95": [
+       -0.000858,
+       0.000698
+      ]
+     },
+     "order 4": {
+      "diff": -3.4e-05,
+      "ci95": [
+       -0.000706,
+       0.000655
+      ]
+     },
+     "order 5": {
+      "diff": -0.00013,
+      "ci95": [
+       -0.000448,
+       0.000196
+      ]
+     },
+     "order 6": {
+      "diff": -4.6e-05,
+      "ci95": [
+       -8.3e-05,
+       -1.1e-05
+      ]
+     }
+    }
+   },
+   "size": {
+    "steps": 9030,
+    "models": {
+     "hex62": {
+      "logloss_skill": -0.00095,
+      "brier_skill": -0.0013,
+      "mean_logloss_diff_vs_base": 0.000655,
+      "ci95": [
+       4.6e-05,
+       0.001207
+      ],
+      "precision_all": 0.5424,
+      "usual_all": 0.5453,
+      "precision_strongest25": 0.5495,
+      "coverage_strongest25": 0.389,
+      "usual_strongest25": 0.5489
+     },
+     "ctw": {
+      "logloss_skill": -0.00448,
+      "brier_skill": -0.00619,
+      "mean_logloss_diff_vs_base": 0.00309,
+      "ci95": [
+       0.001749,
+       0.004507
+      ],
+      "precision_all": 0.5219,
+      "usual_all": 0.5453,
+      "precision_strongest25": 0.5292,
+      "coverage_strongest25": 0.227,
+      "usual_strongest25": 0.5292
+     },
+     "M1": {
+      "logloss_skill": -0.00463,
+      "brier_skill": -0.00634,
+      "mean_logloss_diff_vs_base": 0.003195,
+      "ci95": [
+       0.001888,
+       0.00464
+      ],
+      "precision_all": 0.5338,
+      "usual_all": 0.5453,
+      "precision_strongest25": 0.5388,
+      "coverage_strongest25": 0.288,
+      "usual_strongest25": 0.54
+     },
+     "M2": {
+      "logloss_skill": -0.00491,
+      "brier_skill": -0.00668,
+      "mean_logloss_diff_vs_base": 0.003383,
+      "ci95": [
+       0.001931,
+       0.004916
+      ],
+      "precision_all": 0.5353,
+      "usual_all": 0.5453,
+      "precision_strongest25": 0.543,
+      "coverage_strongest25": 0.283,
+      "usual_strongest25": 0.5434
+     },
+     "M3": {
+      "logloss_skill": -0.00543,
+      "brier_skill": -0.00737,
+      "mean_logloss_diff_vs_base": 0.003744,
+      "ci95": [
+       0.002155,
+       0.005397
+      ],
+      "precision_all": 0.5332,
+      "usual_all": 0.5453,
+      "precision_strongest25": 0.5448,
+      "coverage_strongest25": 0.282,
+      "usual_strongest25": 0.544
+     },
+     "M4": {
+      "logloss_skill": -0.0052,
+      "brier_skill": -0.00704,
+      "mean_logloss_diff_vs_base": 0.003583,
+      "ci95": [
+       0.001695,
+       0.005447
+      ],
+      "precision_all": 0.5358,
+      "usual_all": 0.5453,
+      "precision_strongest25": 0.544,
+      "coverage_strongest25": 0.275,
+      "usual_strongest25": 0.5411
+     },
+     "M5": {
+      "logloss_skill": -0.00532,
+      "brier_skill": -0.0072,
+      "mean_logloss_diff_vs_base": 0.003667,
+      "ci95": [
+       0.001754,
+       0.005525
+      ],
+      "precision_all": 0.5341,
+      "usual_all": 0.5453,
+      "precision_strongest25": 0.5486,
+      "coverage_strongest25": 0.281,
+      "usual_strongest25": 0.547
+     },
+     "M6": {
+      "logloss_skill": -0.00512,
+      "brier_skill": -0.00692,
+      "mean_logloss_diff_vs_base": 0.003526,
+      "ci95": [
+       0.001824,
+       0.005371
+      ],
+      "precision_all": 0.5349,
+      "usual_all": 0.5453,
+      "precision_strongest25": 0.5534,
+      "coverage_strongest25": 0.28,
+      "usual_strongest25": 0.5511
+     },
+     "S0": {
+      "logloss_skill": -0.00463,
+      "brier_skill": -0.00634,
+      "mean_logloss_diff_vs_base": 0.003195,
+      "ci95": [
+       0.001767,
+       0.004577
+      ],
+      "precision_all": 0.5338,
+      "usual_all": 0.5453,
+      "precision_strongest25": 0.5388,
+      "coverage_strongest25": 0.288,
+      "usual_strongest25": 0.54
+     },
+     "S01": {
+      "logloss_skill": -0.00509,
+      "brier_skill": -0.00693,
+      "mean_logloss_diff_vs_base": 0.00351,
+      "ci95": [
+       0.00197,
+       0.004951
+      ],
+      "precision_all": 0.5303,
+      "usual_all": 0.5453,
+      "precision_strongest25": 0.5427,
+      "coverage_strongest25": 0.28,
+      "usual_strongest25": 0.543
+     },
+     "S012": {
+      "logloss_skill": -0.00533,
+      "brier_skill": -0.00726,
+      "mean_logloss_diff_vs_base": 0.003673,
+      "ci95": [
+       0.002165,
+       0.005196
+      ],
+      "precision_all": 0.5296,
+      "usual_all": 0.5453,
+      "precision_strongest25": 0.5447,
+      "coverage_strongest25": 0.278,
+      "usual_strongest25": 0.5471
+     },
+     "mix": {
+      "logloss_skill": -0.00463,
+      "brier_skill": -0.00634,
+      "mean_logloss_diff_vs_base": 0.003195,
+      "ci95": [
+       0.001732,
+       0.00458
+      ],
+      "precision_all": 0.5338,
+      "usual_all": 0.5453,
+      "precision_strongest25": 0.5386,
+      "coverage_strongest25": 0.288,
+      "usual_strongest25": 0.5398
+     }
+    },
+    "paired (negative = first is better)": {
+     "M1 vs ctw": {
+      "diff": 0.000105,
+      "ci95": [
+       -0.00139,
+       0.001403
+      ]
+     },
+     "M1 vs hex62": {
+      "diff": 0.002539,
+      "ci95": [
+       0.00124,
+       0.003795
+      ]
+     },
+     "ctw vs hex62": {
+      "diff": 0.002435,
+      "ci95": [
+       0.001064,
+       0.003978
+      ]
+     },
+     "mix vs hex62": {
+      "diff": 0.002539,
+      "ci95": [
+       0.001262,
+       0.003838
+      ]
+     },
+     "S01 vs S0": {
+      "diff": 0.000316,
+      "ci95": [
+       -0.000482,
+       0.001119
+      ]
+     },
+     "S012 vs S01": {
+      "diff": 0.000162,
+      "ci95": [
+       -0.000162,
+       0.000507
+      ]
+     }
+    },
+    "incremental information by order (positive = the higher order helps)": {
+     "order 1": {
+      "diff": -0.003195,
+      "ci95": [
+       -0.004494,
+       -0.001819
+      ]
+     },
+     "order 2": {
+      "diff": -0.000188,
+      "ci95": [
+       -0.000766,
+       0.000487
+      ]
+     },
+     "order 3": {
+      "diff": -0.000361,
+      "ci95": [
+       -0.001102,
+       0.000458
+      ]
+     },
+     "order 4": {
+      "diff": 0.000161,
+      "ci95": [
+       -0.000662,
+       0.000957
+      ]
+     },
+     "order 5": {
+      "diff": -8.4e-05,
+      "ci95": [
+       -0.000369,
+       0.000189
+      ]
+     },
+     "order 6": {
+      "diff": 0.000141,
+      "ci95": [
+       1.3e-05,
+       0.000282
+      ]
+     }
+    }
+   }
+  },
+  "racing": {
+   "direction": {
+    "steps": 13178,
+    "models": {
+     "hex62": {
+      "logloss_skill": -0.00129,
+      "brier_skill": -0.00178,
+      "mean_logloss_diff_vs_base": 0.000897,
+      "ci95": [
+       0.000242,
+       0.001522
+      ],
+      "precision_all": 0.5141,
+      "usual_all": 0.5162,
+      "precision_strongest25": 0.5242,
+      "coverage_strongest25": 0.155,
+      "usual_strongest25": 0.5213
+     },
+     "ctw": {
+      "logloss_skill": -0.00145,
+      "brier_skill": -0.00169,
+      "mean_logloss_diff_vs_base": 0.001005,
+      "ci95": [
+       0.000447,
+       0.001616
+      ],
+      "precision_all": 0.5173,
+      "usual_all": 0.5162,
+      "precision_strongest25": 0.5227,
+      "coverage_strongest25": 0.128,
+      "usual_strongest25": 0.5227
+     },
+     "M1": {
+      "logloss_skill": -0.01057,
+      "brier_skill": -0.01333,
+      "mean_logloss_diff_vs_base": 0.007339,
+      "ci95": [
+       0.00527,
+       0.009202
+      ],
+      "precision_all": 0.5065,
+      "usual_all": 0.5162,
+      "precision_strongest25": 0.528,
+      "coverage_strongest25": 0.113,
+      "usual_strongest25": 0.5293
+     },
+     "M2": {
+      "logloss_skill": -0.03183,
+      "brier_skill": -0.04015,
+      "mean_logloss_diff_vs_base": 0.022095,
+      "ci95": [
+       0.018612,
+       0.025683
+      ],
+      "precision_all": 0.4989,
+      "usual_all": 0.5162,
+      "precision_strongest25": 0.4997,
+      "coverage_strongest25": 0.109,
+      "usual_strongest25": 0.5283
+     },
+     "M3": {
+      "logloss_skill": -0.05754,
+      "brier_skill": -0.07029,
+      "mean_logloss_diff_vs_base": 0.039941,
+      "ci95": [
+       0.034164,
+       0.045281
+      ],
+      "precision_all": 0.498,
+      "usual_all": 0.5162,
+      "precision_strongest25": 0.5109,
+      "coverage_strongest25": 0.125,
+      "usual_strongest25": 0.5134
+     },
+     "M4": {
+      "logloss_skill": -0.07479,
+      "brier_skill": -0.08821,
+      "mean_logloss_diff_vs_base": 0.051914,
+      "ci95": [
+       0.045575,
+       0.058338
+      ],
+      "precision_all": 0.493,
+      "usual_all": 0.5162,
+      "precision_strongest25": 0.5069,
+      "coverage_strongest25": 0.138,
+      "usual_strongest25": 0.5206
+     },
+     "M5": {
+      "logloss_skill": -0.0813,
+      "brier_skill": -0.09487,
+      "mean_logloss_diff_vs_base": 0.056429,
+      "ci95": [
+       0.049467,
+       0.063549
+      ],
+      "precision_all": 0.4969,
+      "usual_all": 0.5162,
+      "precision_strongest25": 0.4959,
+      "coverage_strongest25": 0.137,
+      "usual_strongest25": 0.5052
+     },
+     "M6": {
+      "logloss_skill": -0.08239,
+      "brier_skill": -0.09603,
+      "mean_logloss_diff_vs_base": 0.057186,
+      "ci95": [
+       0.050333,
+       0.064162
+      ],
+      "precision_all": 0.4951,
+      "usual_all": 0.5162,
+      "precision_strongest25": 0.4969,
+      "coverage_strongest25": 0.133,
+      "usual_strongest25": 0.502
+     },
+     "S0": {
+      "logloss_skill": -0.01057,
+      "brier_skill": -0.01333,
+      "mean_logloss_diff_vs_base": 0.007339,
+      "ci95": [
+       0.005274,
+       0.009406
+      ],
+      "precision_all": 0.5065,
+      "usual_all": 0.5162,
+      "precision_strongest25": 0.528,
+      "coverage_strongest25": 0.113,
+      "usual_strongest25": 0.5293
+     },
+     "S01": {
+      "logloss_skill": -0.01784,
+      "brier_skill": -0.02228,
+      "mean_logloss_diff_vs_base": 0.012384,
+      "ci95": [
+       0.009636,
+       0.015045
+      ],
+      "precision_all": 0.5055,
+      "usual_all": 0.5162,
+      "precision_strongest25": 0.5174,
+      "coverage_strongest25": 0.111,
+      "usual_strongest25": 0.5256
+     },
+     "S012": {
+      "logloss_skill": -0.02359,
+      "brier_skill": -0.02937,
+      "mean_logloss_diff_vs_base": 0.016373,
+      "ci95": [
+       0.012968,
+       0.019695
+      ],
+      "precision_all": 0.5058,
+      "usual_all": 0.5162,
+      "precision_strongest25": 0.5207,
+      "coverage_strongest25": 0.119,
+      "usual_strongest25": 0.5029
+     },
+     "mix": {
+      "logloss_skill": -0.004,
+      "brier_skill": -0.00462,
+      "mean_logloss_diff_vs_base": 0.002774,
+      "ci95": [
+       0.00153,
+       0.004047
+      ],
+      "precision_all": 0.5176,
+      "usual_all": 0.5162,
+      "precision_strongest25": 0.5272,
+      "coverage_strongest25": 0.116,
+      "usual_strongest25": 0.5265
+     }
+    },
+    "paired (negative = first is better)": {
+     "M1 vs ctw": {
+      "diff": 0.006334,
+      "ci95": [
+       0.004694,
+       0.0081
+      ]
+     },
+     "M1 vs hex62": {
+      "diff": 0.006442,
+      "ci95": [
+       0.004711,
+       0.008196
+      ]
+     },
+     "ctw vs hex62": {
+      "diff": 0.000107,
+      "ci95": [
+       -0.000627,
+       0.000918
+      ]
+     },
+     "mix vs hex62": {
+      "diff": 0.001876,
+      "ci95": [
+       0.000663,
+       0.00326
+      ]
+     },
+     "S01 vs S0": {
+      "diff": 0.005045,
+      "ci95": [
+       0.003177,
+       0.006914
+      ]
+     },
+     "S012 vs S01": {
+      "diff": 0.003989,
+      "ci95": [
+       0.00259,
+       0.005474
+      ]
+     }
+    },
+    "incremental information by order (positive = the higher order helps)": {
+     "order 1": {
+      "diff": -0.007339,
+      "ci95": [
+       -0.009409,
+       -0.005246
+      ]
+     },
+     "order 2": {
+      "diff": -0.014756,
+      "ci95": [
+       -0.01729,
+       -0.011806
+      ]
+     },
+     "order 3": {
+      "diff": -0.017847,
+      "ci95": [
+       -0.021609,
+       -0.014361
+      ]
+     },
+     "order 4": {
+      "diff": -0.011972,
+      "ci95": [
+       -0.015003,
+       -0.008798
+      ]
+     },
+     "order 5": {
+      "diff": -0.004516,
+      "ci95": [
+       -0.006577,
+       -0.00241
+      ]
+     },
+     "order 6": {
+      "diff": -0.000757,
+      "ci95": [
+       -0.001618,
+       0.000109
+      ]
+     }
+    }
+   },
+   "size": {
+    "steps": 13022,
+    "models": {
+     "hex62": {
+      "logloss_skill": -0.00108,
+      "brier_skill": -0.00133,
+      "mean_logloss_diff_vs_base": 0.000752,
+      "ci95": [
+       0.000133,
+       0.001319
+      ],
+      "precision_all": 0.5038,
+      "usual_all": 0.5022,
+      "precision_strongest25": 0.5041,
+      "coverage_strongest25": 0.095,
+      "usual_strongest25": 0.5032
+     },
+     "ctw": {
+      "logloss_skill": -0.00136,
+      "brier_skill": -0.00156,
+      "mean_logloss_diff_vs_base": 0.000948,
+      "ci95": [
+       0.000475,
+       0.001466
+      ],
+      "precision_all": 0.5018,
+      "usual_all": 0.5022,
+      "precision_strongest25": 0.473,
+      "coverage_strongest25": 0.053,
+      "usual_strongest25": 0.473
+     },
+     "M1": {
+      "logloss_skill": -0.01074,
+      "brier_skill": -0.0136,
+      "mean_logloss_diff_vs_base": 0.00747,
+      "ci95": [
+       0.005432,
+       0.009382
+      ],
+      "precision_all": 0.4982,
+      "usual_all": 0.5022,
+      "precision_strongest25": 0.4995,
+      "coverage_strongest25": 0.079,
+      "usual_strongest25": 0.4714
+     },
+     "M2": {
+      "logloss_skill": -0.02882,
+      "brier_skill": -0.03519,
+      "mean_logloss_diff_vs_base": 0.020049,
+      "ci95": [
+       0.016749,
+       0.02363
+      ],
+      "precision_all": 0.5111,
+      "usual_all": 0.5022,
+      "precision_strongest25": 0.5069,
+      "coverage_strongest25": 0.1,
+      "usual_strongest25": 0.4977
+     },
+     "M3": {
+      "logloss_skill": -0.05614,
+      "brier_skill": -0.06757,
+      "mean_logloss_diff_vs_base": 0.039049,
+      "ci95": [
+       0.033882,
+       0.044279
+      ],
+      "precision_all": 0.4965,
+      "usual_all": 0.5022,
+      "precision_strongest25": 0.5033,
+      "coverage_strongest25": 0.115,
+      "usual_strongest25": 0.514
+     },
+     "M4": {
+      "logloss_skill": -0.07408,
+      "brier_skill": -0.08654,
+      "mean_logloss_diff_vs_base": 0.05153,
+      "ci95": [
+       0.045078,
+       0.05787
+      ],
+      "precision_all": 0.5056,
+      "usual_all": 0.5022,
+      "precision_strongest25": 0.5056,
+      "coverage_strongest25": 0.124,
+      "usual_strongest25": 0.5012
+     },
+     "M5": {
+      "logloss_skill": -0.07977,
+      "brier_skill": -0.09254,
+      "mean_logloss_diff_vs_base": 0.055488,
+      "ci95": [
+       0.049435,
+       0.06207
+      ],
+      "precision_all": 0.499,
+      "usual_all": 0.5022,
+      "precision_strongest25": 0.514,
+      "coverage_strongest25": 0.129,
+      "usual_strongest25": 0.4973
+     },
+     "M6": {
+      "logloss_skill": -0.08053,
+      "brier_skill": -0.093,
+      "mean_logloss_diff_vs_base": 0.056017,
+      "ci95": [
+       0.049223,
+       0.062201
+      ],
+      "precision_all": 0.5009,
+      "usual_all": 0.5022,
+      "precision_strongest25": 0.5161,
+      "coverage_strongest25": 0.129,
+      "usual_strongest25": 0.4976
+     },
+     "S0": {
+      "logloss_skill": -0.01074,
+      "brier_skill": -0.0136,
+      "mean_logloss_diff_vs_base": 0.00747,
+      "ci95": [
+       0.005335,
+       0.009432
+      ],
+      "precision_all": 0.4982,
+      "usual_all": 0.5022,
+      "precision_strongest25": 0.4995,
+      "coverage_strongest25": 0.079,
+      "usual_strongest25": 0.4714
+     },
+     "S01": {
+      "logloss_skill": -0.01815,
+      "brier_skill": -0.02292,
+      "mean_logloss_diff_vs_base": 0.012628,
+      "ci95": [
+       0.010154,
+       0.015098
+      ],
+      "precision_all": 0.4986,
+      "usual_all": 0.5022,
+      "precision_strongest25": 0.503,
+      "coverage_strongest25": 0.102,
+      "usual_strongest25": 0.5262
+     },
+     "S012": {
+      "logloss_skill": -0.02538,
+      "brier_skill": -0.03137,
+      "mean_logloss_diff_vs_base": 0.017657,
+      "ci95": [
+       0.014244,
+       0.02123
+      ],
+      "precision_all": 0.5036,
+      "usual_all": 0.5022,
+      "precision_strongest25": 0.5053,
+      "coverage_strongest25": 0.102,
+      "usual_strongest25": 0.509
+     },
+     "mix": {
+      "logloss_skill": -0.00393,
+      "brier_skill": -0.00418,
+      "mean_logloss_diff_vs_base": 0.002736,
+      "ci95": [
+       0.001591,
+       0.004055
+      ],
+      "precision_all": 0.5053,
+      "usual_all": 0.5022,
+      "precision_strongest25": 0.5023,
+      "coverage_strongest25": 0.033,
+      "usual_strongest25": 0.4931
+     }
+    },
+    "paired (negative = first is better)": {
+     "M1 vs ctw": {
+      "diff": 0.006522,
+      "ci95": [
+       0.004862,
+       0.008142
+      ]
+     },
+     "M1 vs hex62": {
+      "diff": 0.006718,
+      "ci95": [
+       0.004842,
+       0.008432
+      ]
+     },
+     "ctw vs hex62": {
+      "diff": 0.000196,
+      "ci95": [
+       -0.000521,
+       0.000887
+      ]
+     },
+     "mix vs hex62": {
+      "diff": 0.001984,
+      "ci95": [
+       0.000844,
+       0.003265
+      ]
+     },
+     "S01 vs S0": {
+      "diff": 0.005158,
+      "ci95": [
+       0.003183,
+       0.007068
+      ]
+     },
+     "S012 vs S01": {
+      "diff": 0.005029,
+      "ci95": [
+       0.002941,
+       0.006964
+      ]
+     }
+    },
+    "incremental information by order (positive = the higher order helps)": {
+     "order 1": {
+      "diff": -0.00747,
+      "ci95": [
+       -0.009407,
+       -0.005616
+      ]
+     },
+     "order 2": {
+      "diff": -0.012579,
+      "ci95": [
+       -0.015621,
+       -0.009557
+      ]
+     },
+     "order 3": {
+      "diff": -0.019001,
+      "ci95": [
+       -0.022215,
+       -0.015537
+      ]
+     },
+     "order 4": {
+      "diff": -0.01248,
+      "ci95": [
+       -0.015827,
+       -0.00889
+      ]
+     },
+     "order 5": {
+      "diff": -0.003958,
+      "ci95": [
+       -0.006069,
+       -0.00195
+      ]
+     },
+     "order 6": {
+      "diff": -0.000529,
+      "ci95": [
+       -0.001217,
+       0.000179
+      ]
+     }
+    }
+   }
+  }
+ },
+ "learning curves (mean log-loss difference vs base; negative is better)": {
+  "markets": {
+   "direction first 25": {
+    "pre-trained 6.2": -0.00856,
+    "6.2 from nothing": 0.00118,
+    "order-1 Walsh": 0.04969,
+    "context tree": 0.02332
+   },
+   "direction first 50": {
+    "pre-trained 6.2": -0.00123,
+    "6.2 from nothing": 0.00099,
+    "order-1 Walsh": 0.04003,
+    "context tree": 0.01476
+   },
+   "direction first 100": {
+    "pre-trained 6.2": -0.00182,
+    "6.2 from nothing": 0.00024,
+    "order-1 Walsh": 0.02635,
+    "context tree": 0.01001
+   },
+   "direction first 250": {
+    "pre-trained 6.2": 3e-05,
+    "6.2 from nothing": 0.00017,
+    "order-1 Walsh": 0.01621,
+    "context tree": 0.00426
+   },
+   "direction first 500": {
+    "pre-trained 6.2": 0.00085,
+    "6.2 from nothing": 0.0006,
+    "order-1 Walsh": 0.01203,
+    "context tree": 0.00217
+   },
+   "direction first full": {
+    "pre-trained 6.2": 0.00011,
+    "6.2 from nothing": 0.00011,
+    "order-1 Walsh": 0.00319,
+    "context tree": 0.00044
+   },
+   "size first 25": {
+    "pre-trained 6.2": 0.00643,
+    "6.2 from nothing": 0.00091,
+    "order-1 Walsh": 0.06848,
+    "context tree": 0.02146
+   },
+   "size first 50": {
+    "pre-trained 6.2": 0.00351,
+    "6.2 from nothing": -4e-05,
+    "order-1 Walsh": 0.04074,
+    "context tree": 0.01316
+   },
+   "size first 100": {
+    "pre-trained 6.2": 0.00082,
+    "6.2 from nothing": -0.00022,
+    "order-1 Walsh": 0.02534,
+    "context tree": 0.0067
+   },
+   "size first 250": {
+    "pre-trained 6.2": -0.00057,
+    "6.2 from nothing": -0.00093,
+    "order-1 Walsh": 0.01389,
+    "context tree": 0.00317
+   },
+   "size first 500": {
+    "pre-trained 6.2": -0.0012,
+    "6.2 from nothing": -0.00137,
+    "order-1 Walsh": 0.01004,
+    "context tree": 0.00093
+   },
+   "size first full": {
+    "pre-trained 6.2": -0.00594,
+    "6.2 from nothing": -0.00508,
+    "order-1 Walsh": -0.00195,
+    "context tree": 0.00081
+   }
+  },
+  "weather": {
+   "direction first 25": {
+    "pre-trained 6.2": 0.00122,
+    "6.2 from nothing": 0.00014,
+    "order-1 Walsh": 0.04926,
+    "context tree": 0.02465
+   },
+   "direction first 50": {
+    "pre-trained 6.2": -0.01255,
+    "6.2 from nothing": -0.00152,
+    "order-1 Walsh": 0.02891,
+    "context tree": 0.01765
+   },
+   "direction first 100": {
+    "pre-trained 6.2": -0.00646,
+    "6.2 from nothing": -0.00141,
+    "order-1 Walsh": 0.01592,
+    "context tree": 0.00771
+   },
+   "direction first 250": {
+    "pre-trained 6.2": -0.00653,
+    "6.2 from nothing": -0.00064,
+    "order-1 Walsh": 0.00944,
+    "context tree": 0.0041
+   },
+   "direction first 500": {
+    "pre-trained 6.2": -0.01705,
+    "6.2 from nothing": -0.00646,
+    "order-1 Walsh": -0.00958,
+    "context tree": -0.00221
+   },
+   "direction first full": {
+    "pre-trained 6.2": -0.01113,
+    "6.2 from nothing": -0.00646,
+    "order-1 Walsh": -0.01026,
+    "context tree": -0.00738
+   },
+   "size first 25": {
+    "pre-trained 6.2": 0.0012,
+    "6.2 from nothing": 0.00016,
+    "order-1 Walsh": 0.0567,
+    "context tree": 0.0322
+   },
+   "size first 50": {
+    "pre-trained 6.2": 0.00369,
+    "6.2 from nothing": 0.00096,
+    "order-1 Walsh": 0.03546,
+    "context tree": 0.0153
+   },
+   "size first 100": {
+    "pre-trained 6.2": -0.00283,
+    "6.2 from nothing": -0.00199,
+    "order-1 Walsh": 0.032,
+    "context tree": 0.00315
+   },
+   "size first 250": {
+    "pre-trained 6.2": 9e-05,
+    "6.2 from nothing": -0.00027,
+    "order-1 Walsh": 0.02109,
+    "context tree": 0.00476
+   },
+   "size first 500": {
+    "pre-trained 6.2": -0.00015,
+    "6.2 from nothing": -0.00054,
+    "order-1 Walsh": 0.00725,
+    "context tree": 0.00234
+   },
+   "size first full": {
+    "pre-trained 6.2": -0.00545,
+    "6.2 from nothing": -0.00407,
+    "order-1 Walsh": -0.00522,
+    "context tree": -0.00377
+   }
+  },
+  "racing": {
+   "direction first 25": {
+    "pre-trained 6.2": -0.02248,
+    "6.2 from nothing": 0.00068,
+    "order-1 Walsh": 0.04766,
+    "context tree": 0.01387
+   },
+   "direction first 50": {
+    "pre-trained 6.2": -0.02455,
+    "6.2 from nothing": -0.00136,
+    "order-1 Walsh": 0.01063,
+    "context tree": 0.00022
+   },
+   "direction first 100": {
+    "pre-trained 6.2": -0.03492,
+    "6.2 from nothing": -0.00282,
+    "order-1 Walsh": -0.00493,
+    "context tree": -0.00973
+   },
+   "direction first 250": {
+    "pre-trained 6.2": -0.05116,
+    "6.2 from nothing": -0.01023,
+    "order-1 Walsh": -0.03652,
+    "context tree": -0.03835
+   },
+   "direction first 500": {
+    "pre-trained 6.2": -0.05235,
+    "6.2 from nothing": -0.01994,
+    "order-1 Walsh": -0.04776,
+    "context tree": -0.04693
+   },
+   "direction first full": {
+    "pre-trained 6.2": -0.05276,
+    "6.2 from nothing": -0.02683,
+    "order-1 Walsh": -0.05261,
+    "context tree": -0.05225
+   },
+   "size first 25": {
+    "pre-trained 6.2": 0.00841,
+    "6.2 from nothing": 0.00123,
+    "order-1 Walsh": 0.04547,
+    "context tree": 0.02244
+   },
+   "size first 50": {
+    "pre-trained 6.2": 0.0059,
+    "6.2 from nothing": 0.00126,
+    "order-1 Walsh": 0.04436,
+    "context tree": 0.01699
+   },
+   "size first 100": {
+    "pre-trained 6.2": 0.00361,
+    "6.2 from nothing": 0.00135,
+    "order-1 Walsh": 0.03044,
+    "context tree": 0.01044
+   },
+   "size first 250": {
+    "pre-trained 6.2": 0.00039,
+    "6.2 from nothing": 0.00031,
+    "order-1 Walsh": 0.01691,
+    "context tree": 0.0038
+   },
+   "size first 500": {
+    "pre-trained 6.2": 0.00015,
+    "6.2 from nothing": 0.00022,
+    "order-1 Walsh": 0.00996,
+    "context tree": 2e-05
+   },
+   "size first full": {
+    "pre-trained 6.2": -0.0004,
+    "6.2 from nothing": -0.00028,
+    "order-1 Walsh": 0.00543,
+    "context tree": -0.00091
+   }
+  }
+ },
+ "cumulative curves": {
+  "markets direction": {
+   "step": [
+    0,
+    795,
+    1591,
+    2386,
+    3182,
+    3977,
+    4773,
+    5568,
+    6364,
+    7159,
+    7955,
+    8750,
+    9546,
+    10341,
+    11137,
+    11932,
+    12728,
+    13523,
+    14319,
+    15114,
+    15910,
+    16706,
+    17501,
+    18297,
+    19092,
+    19888,
+    20683,
+    21479,
+    22274,
+    23070,
+    23865,
+    24661,
+    25456,
+    26252,
+    27047,
+    27843,
+    28638,
+    29434,
+    30229,
+    31025,
+    31821,
+    32616,
+    33412,
+    34207,
+    35003,
+    35798,
+    36594,
+    37389,
+    38185,
+    38980,
+    39776,
+    40571,
+    41367,
+    42162,
+    42958,
+    43753,
+    44549,
+    45344,
+    46140,
+    46936
+   ],
+   "hex62": [
+    -0.03,
+    0.27,
+    -0.77,
+    -2.37,
+    -3.74,
+    -3.18,
+    -2.8,
+    -3.39,
+    -3.52,
+    -3.42,
+    -2.94,
+    -2.62,
+    -1.79,
+    -1.85,
+    -0.71,
+    -2.44,
+    -2.38,
+    -4.65,
+    -5.05,
+    -6.06,
+    -5.41,
+    -5.87,
+    -6.14,
+    -5.25,
+    -4.55,
+    -4.46,
+    -4.01,
+    -3.67,
+    -2.48,
+    -2.21,
+    -1.37,
+    -1.8,
+    -1.44,
+    -1.69,
+    -0.52,
+    -0.42,
+    -0.57,
+    0.44,
+    -0.45,
+    -0.05,
+    1.83,
+    2.79,
+    1.98,
+    3.16,
+    3.37,
+    3.79,
+    4.43,
+    4.75,
+    4.65,
+    3.75,
+    4.57,
+    4.45,
+    3.28,
+    2.78,
+    3.87,
+    3.81,
+    4.91,
+    5.71,
+    5.37,
+    2.91
+   ],
+   "ctw": [
+    0.02,
+    -0.09,
+    -0.1,
+    -0.39,
+    0.58,
+    1.55,
+    0.95,
+    2.09,
+    1.06,
+    0.64,
+    0.83,
+    2.28,
+    3.22,
+    5.4,
+    3.62,
+    3.58,
+    3.51,
+    3.58,
+    4.32,
+    5.43,
+    8.3,
+    12.76,
+    15.72,
+    15.56,
+    14.95,
+    14.76,
+    14.6,
+    14.38,
+    14.59,
+    15.35,
+    14.7,
+    16.21,
+    20.22,
+    21.0,
+    21.49,
+    21.45,
+    24.21,
+    24.75,
+    27.36,
+    31.89,
+    31.51,
+    31.76,
+    31.26,
+    31.01,
+    31.04,
+    31.61,
+    30.7,
+    30.54,
+    30.29,
+    29.9,
+    29.19,
+    29.06,
+    29.26,
+    42.41,
+    53.25,
+    65.86,
+    74.79,
+    74.6,
+    74.2,
+    74.19
+   ],
+   "M1": [
+    -0.04,
+    -1.52,
+    0.48,
+    -2.32,
+    -4.56,
+    -1.49,
+    -2.08,
+    -2.26,
+    -2.12,
+    -1.55,
+    -2.01,
+    -2.03,
+    -0.68,
+    -1.88,
+    -2.01,
+    -3.22,
+    -4.71,
+    -9.21,
+    -12.23,
+    -12.44,
+    -12.17,
+    -12.03,
+    -10.17,
+    -10.25,
+    -9.54,
+    -8.78,
+    -7.7,
+    -6.48,
+    -5.57,
+    -4.8,
+    -4.33,
+    -3.6,
+    -4.07,
+    -3.84,
+    -3.04,
+    -3.33,
+    -2.66,
+    -1.55,
+    -3.21,
+    -1.55,
+    -0.72,
+    -0.3,
+    -0.07,
+    0.9,
+    1.9,
+    0.62,
+    0.49,
+    2.82,
+    4.86,
+    6.23,
+    5.39,
+    4.79,
+    2.15,
+    5.91,
+    6.38,
+    7.92,
+    8.17,
+    7.29,
+    7.12,
+    6.4
+   ],
+   "M2": [
+    -0.05,
+    3.75,
+    5.71,
+    3.87,
+    2.37,
+    4.45,
+    5.63,
+    5.78,
+    7.37,
+    9.66,
+    9.87,
+    9.88,
+    13.25,
+    13.8,
+    17.48,
+    17.19,
+    17.99,
+    14.02,
+    13.58,
+    12.98,
+    15.24,
+    14.6,
+    16.01,
+    17.08,
+    18.04,
+    18.61,
+    19.59,
+    20.36,
+    22.62,
+    24.19,
+    24.58,
+    25.22,
+    25.69,
+    24.31,
+    26.68,
+    28.14,
+    28.23,
+    30.57,
+    28.9,
+    31.82,
+    32.62,
+    32.39,
+    31.88,
+    34.18,
+    34.63,
+    34.68,
+    35.35,
+    37.1,
+    38.8,
+    40.26,
+    40.22,
+    40.07,
+    40.2,
+    46.07,
+    46.37,
+    49.17,
+    50.79,
+    51.33,
+    52.11,
+    52.46
+   ],
+   "M6": [
+    -0.05,
+    20.05,
+    21.12,
+    25.27,
+    32.13,
+    39.32,
+    38.54,
+    42.75,
+    49.66,
+    53.68,
+    54.23,
+    56.49,
+    61.51,
+    64.16,
+    74.56,
+    79.5,
+    82.05,
+    76.85,
+    78.05,
+    76.43,
+    78.24,
+    78.61,
+    78.17,
+    76.78,
+    79.86,
+    81.0,
+    83.94,
+    88.33,
+    93.32,
+    96.48,
+    96.81,
+    100.47,
+    104.2,
+    105.73,
+    107.9,
+    111.81,
+    111.03,
+    116.81,
+    115.47,
+    121.31,
+    126.73,
+    128.11,
+    129.65,
+    131.06,
+    134.82,
+    134.68,
+    142.91,
+    146.28,
+    146.56,
+    148.96,
+    154.83,
+    163.63,
+    170.73,
+    180.64,
+    183.64,
+    190.19,
+    196.68,
+    198.16,
+    198.74,
+    196.19
+   ],
+   "mix": [
+    0.02,
+    -0.09,
+    -0.1,
+    -0.4,
+    0.44,
+    1.54,
+    0.93,
+    2.07,
+    1.04,
+    0.62,
+    0.81,
+    2.26,
+    3.2,
+    5.34,
+    3.6,
+    3.53,
+    2.52,
+    -1.98,
+    -5.0,
+    -5.21,
+    -4.94,
+    -4.8,
+    -3.05,
+    -3.21,
+    -3.82,
+    -4.0,
+    -4.16,
+    -4.37,
+    -4.16,
+    -3.51,
+    -3.03,
+    -2.3,
+    -2.77,
+    -2.58,
+    -2.08,
+    -2.13,
+    -1.26,
+    -0.14,
+    -1.81,
+    -0.06,
+    -0.42,
+    -0.17,
+    -0.66,
+    -0.91,
+    -0.88,
+    -0.31,
+    -1.22,
+    -1.36,
+    -1.6,
+    -1.99,
+    -2.7,
+    -2.83,
+    -2.72,
+    0.06,
+    0.52,
+    2.07,
+    1.68,
+    1.49,
+    1.08,
+    1.07
+   ]
+  },
+  "markets size": {
+   "step": [
+    0,
+    795,
+    1591,
+    2386,
+    3182,
+    3977,
+    4773,
+    5568,
+    6364,
+    7159,
+    7955,
+    8750,
+    9546,
+    10341,
+    11137,
+    11932,
+    12728,
+    13523,
+    14319,
+    15114,
+    15910,
+    16706,
+    17501,
+    18297,
+    19092,
+    19888,
+    20683,
+    21479,
+    22274,
+    23070,
+    23865,
+    24661,
+    25456,
+    26252,
+    27047,
+    27843,
+    28638,
+    29434,
+    30229,
+    31025,
+    31821,
+    32616,
+    33412,
+    34207,
+    35003,
+    35798,
+    36594,
+    37389,
+    38185,
+    38980,
+    39776,
+    40571,
+    41367,
+    42162,
+    42958,
+    43753,
+    44549,
+    45344,
+    46140,
+    46936
+   ],
+   "hex62": [
+    -0.18,
+    -43.83,
+    -53.41,
+    -61.86,
+    -72.23,
+    -80.31,
+    -86.64,
+    -99.47,
+    -101.25,
+    -106.17,
+    -112.03,
+    -118.35,
+    -124.78,
+    -123.74,
+    -164.43,
+    -172.36,
+    -170.67,
+    -177.33,
+    -185.35,
+    -186.05,
+    -193.38,
+    -193.69,
+    -192.94,
+    -192.04,
+    -192.46,
+    -194.42,
+    -205.83,
+    -223.15,
+    -217.53,
+    -214.97,
+    -226.39,
+    -234.56,
+    -240.51,
+    -241.65,
+    -242.55,
+    -246.74,
+    -253.21,
+    -261.21,
+    -259.52,
+    -261.11,
+    -267.24,
+    -266.52,
+    -265.66,
+    -268.97,
+    -268.77,
+    -270.65,
+    -272.93,
+    -279.15,
+    -281.95,
+    -291.79,
+    -290.39,
+    -300.27,
+    -305.12,
+    -306.56,
+    -308.0,
+    -362.25,
+    -366.63,
+    -368.12,
+    -368.11,
+    -372.89
+   ],
+   "ctw": [
+    -0.13,
+    -36.54,
+    -38.75,
+    -35.9,
+    -49.42,
+    -45.27,
+    -41.09,
+    -52.95,
+    -51.32,
+    -52.72,
+    -58.59,
+    -62.55,
+    -61.72,
+    -55.59,
+    -73.25,
+    -50.33,
+    -55.37,
+    -58.82,
+    -68.54,
+    -60.07,
+    -28.72,
+    -26.56,
+    -2.57,
+    5.75,
+    7.76,
+    7.6,
+    31.81,
+    80.12,
+    98.5,
+    108.56,
+    132.89,
+    140.25,
+    139.02,
+    146.55,
+    161.57,
+    163.77,
+    171.15,
+    180.16,
+    184.11,
+    202.58,
+    220.12,
+    220.19,
+    224.77,
+    232.65,
+    238.46,
+    236.25,
+    238.17,
+    252.27,
+    255.07,
+    259.87,
+    265.3,
+    252.74,
+    248.12,
+    248.93,
+    266.73,
+    212.3,
+    219.8,
+    224.2,
+    232.8,
+    240.9
+   ],
+   "M1": [
+    -0.21,
+    -48.48,
+    -57.49,
+    -62.04,
+    -73.7,
+    -80.45,
+    -86.32,
+    -95.84,
+    -96.55,
+    -104.55,
+    -109.84,
+    -115.46,
+    -118.97,
+    -112.43,
+    -145.42,
+    -150.35,
+    -151.67,
+    -160.43,
+    -170.15,
+    -164.54,
+    -162.21,
+    -166.59,
+    -163.2,
+    -151.82,
+    -149.97,
+    -146.91,
+    -151.8,
+    -165.47,
+    -163.21,
+    -162.32,
+    -168.05,
+    -179.72,
+    -186.49,
+    -188.12,
+    -187.69,
+    -192.81,
+    -192.42,
+    -188.82,
+    -190.36,
+    -183.92,
+    -180.88,
+    -184.65,
+    -184.87,
+    -182.51,
+    -183.04,
+    -184.53,
+    -185.79,
+    -188.06,
+    -190.19,
+    -199.84,
+    -193.73,
+    -207.69,
+    -212.09,
+    -192.37,
+    -179.65,
+    -210.31,
+    -214.27,
+    -206.96,
+    -193.93,
+    -184.28
+   ],
+   "M2": [
+    -0.31,
+    -48.05,
+    -54.16,
+    -56.52,
+    -68.57,
+    -69.62,
+    -74.92,
+    -85.05,
+    -87.7,
+    -93.74,
+    -96.59,
+    -100.56,
+    -101.58,
+    -92.5,
+    -125.05,
+    -130.48,
+    -132.65,
+    -140.16,
+    -146.84,
+    -140.75,
+    -134.05,
+    -137.7,
+    -132.94,
+    -120.82,
+    -118.4,
+    -112.64,
+    -117.51,
+    -130.22,
+    -127.5,
+    -124.64,
+    -130.57,
+    -142.0,
+    -149.21,
+    -150.84,
+    -150.12,
+    -154.48,
+    -154.64,
+    -149.78,
+    -150.1,
+    -141.89,
+    -140.01,
+    -144.42,
+    -141.77,
+    -140.21,
+    -138.13,
+    -138.76,
+    -139.39,
+    -140.58,
+    -139.71,
+    -148.6,
+    -141.76,
+    -152.71,
+    -158.99,
+    -136.95,
+    -120.28,
+    -155.09,
+    -160.54,
+    -154.07,
+    -142.63,
+    -129.98
+   ],
+   "M6": [
+    -0.39,
+    -41.62,
+    -31.32,
+    -25.75,
+    -34.61,
+    -33.12,
+    -39.46,
+    -48.98,
+    -47.07,
+    -51.29,
+    -49.65,
+    -52.92,
+    -50.41,
+    -36.04,
+    -64.01,
+    -63.2,
+    -63.92,
+    -68.07,
+    -70.59,
+    -69.41,
+    -55.34,
+    -57.73,
+    -50.36,
+    -35.67,
+    -33.3,
+    -24.95,
+    -25.08,
+    -34.97,
+    -31.83,
+    -31.08,
+    -33.96,
+    -40.16,
+    -44.6,
+    -40.53,
+    -32.06,
+    -36.41,
+    -37.33,
+    -31.14,
+    -27.12,
+    -15.05,
+    -9.44,
+    -11.15,
+    -4.83,
+    -2.1,
+    5.38,
+    8.75,
+    10.59,
+    8.74,
+    11.72,
+    3.64,
+    9.78,
+    1.48,
+    -2.75,
+    23.84,
+    43.06,
+    13.2,
+    8.86,
+    11.82,
+    19.64,
+    30.92
+   ],
+   "mix": [
+    -0.21,
+    -48.48,
+    -57.49,
+    -62.04,
+    -73.7,
+    -80.45,
+    -86.32,
+    -95.84,
+    -96.55,
+    -104.55,
+    -109.84,
+    -115.46,
+    -118.97,
+    -112.43,
+    -145.42,
+    -150.35,
+    -151.67,
+    -160.43,
+    -170.15,
+    -158.65,
+    -127.48,
+    -130.06,
+    -126.67,
+    -115.29,
+    -113.44,
+    -110.37,
+    -115.26,
+    -128.94,
+    -126.68,
+    -125.79,
+    -131.51,
+    -143.18,
+    -149.96,
+    -151.59,
+    -151.16,
+    -156.28,
+    -155.88,
+    -152.29,
+    -153.82,
+    -147.39,
+    -144.35,
+    -148.12,
+    -148.33,
+    -145.98,
+    -146.51,
+    -148.0,
+    -149.26,
+    -151.53,
+    -153.66,
+    -163.31,
+    -157.2,
+    -171.16,
+    -175.56,
+    -168.25,
+    -150.45,
+    -204.88,
+    -201.15,
+    -193.84,
+    -180.81,
+    -171.16
+   ]
+  },
+  "weather direction": {
+   "step": [
+    0,
+    153,
+    306,
+    459,
+    612,
+    765,
+    918,
+    1071,
+    1224,
+    1377,
+    1530,
+    1683,
+    1836,
+    1989,
+    2142,
+    2295,
+    2448,
+    2601,
+    2754,
+    2907,
+    3060,
+    3213,
+    3366,
+    3519,
+    3672,
+    3825,
+    3978,
+    4131,
+    4284,
+    4437,
+    4591,
+    4744,
+    4897,
+    5050,
+    5203,
+    5356,
+    5509,
+    5662,
+    5815,
+    5968,
+    6121,
+    6274,
+    6427,
+    6580,
+    6733,
+    6886,
+    7039,
+    7192,
+    7345,
+    7498,
+    7651,
+    7804,
+    7957,
+    8110,
+    8263,
+    8416,
+    8569,
+    8722,
+    8875,
+    9029
+   ],
+   "hex62": [
+    0.1,
+    -1.38,
+    -4.82,
+    -8.79,
+    -11.0,
+    -13.1,
+    -15.07,
+    -18.01,
+    -18.36,
+    -19.55,
+    -20.69,
+    -20.96,
+    -21.35,
+    -22.37,
+    -22.71,
+    -24.8,
+    -27.4,
+    -26.69,
+    -29.43,
+    -30.08,
+    -31.36,
+    -31.28,
+    -31.55,
+    -32.71,
+    -34.05,
+    -34.76,
+    -35.34,
+    -38.07,
+    -41.2,
+    -44.46,
+    -45.39,
+    -47.48,
+    -47.96,
+    -49.36,
+    -49.84,
+    -54.8,
+    -58.25,
+    -58.81,
+    -59.4,
+    -63.3,
+    -65.25,
+    -65.41,
+    -66.48,
+    -68.39,
+    -72.76,
+    -73.41,
+    -75.5,
+    -79.29,
+    -83.34,
+    -83.42,
+    -87.27,
+    -89.1,
+    -90.79,
+    -93.71,
+    -94.63,
+    -95.53,
+    -97.76,
+    -100.14,
+    -102.39,
+    -101.65
+   ],
+   "ctw": [
+    0.21,
+    -1.58,
+    -6.51,
+    -11.43,
+    -13.57,
+    -15.57,
+    -16.36,
+    -18.59,
+    -17.05,
+    -16.7,
+    -18.2,
+    -17.1,
+    -16.92,
+    -18.91,
+    -19.81,
+    -22.66,
+    -26.66,
+    -25.86,
+    -28.82,
+    -29.73,
+    -31.58,
+    -30.15,
+    -30.54,
+    -31.37,
+    -32.47,
+    -32.59,
+    -32.82,
+    -37.55,
+    -40.92,
+    -45.02,
+    -46.31,
+    -49.21,
+    -48.74,
+    -49.76,
+    -50.28,
+    -53.79,
+    -55.9,
+    -56.39,
+    -56.66,
+    -59.98,
+    -61.41,
+    -63.27,
+    -65.97,
+    -66.69,
+    -71.36,
+    -72.04,
+    -74.36,
+    -78.27,
+    -82.78,
+    -82.78,
+    -86.95,
+    -88.22,
+    -89.37,
+    -92.05,
+    -91.21,
+    -92.74,
+    -94.63,
+    -97.67,
+    -99.76,
+    -98.73
+   ],
+   "M1": [
+    0.18,
+    -2.3,
+    -6.13,
+    -10.53,
+    -13.89,
+    -16.24,
+    -17.98,
+    -20.38,
+    -19.58,
+    -20.76,
+    -21.42,
+    -20.46,
+    -21.17,
+    -23.54,
+    -24.63,
+    -26.96,
+    -30.7,
+    -29.2,
+    -31.73,
+    -31.1,
+    -32.72,
+    -32.26,
+    -34.0,
+    -36.28,
+    -37.55,
+    -37.38,
+    -37.36,
+    -41.23,
+    -45.49,
+    -49.64,
+    -50.53,
+    -52.98,
+    -53.47,
+    -54.15,
+    -53.4,
+    -57.54,
+    -60.24,
+    -61.28,
+    -62.76,
+    -66.89,
+    -68.94,
+    -67.83,
+    -69.46,
+    -71.96,
+    -77.08,
+    -75.88,
+    -78.07,
+    -82.35,
+    -86.91,
+    -87.64,
+    -92.52,
+    -93.2,
+    -95.25,
+    -98.79,
+    -99.22,
+    -100.36,
+    -102.58,
+    -105.71,
+    -108.28,
+    -106.65
+   ],
+   "M2": [
+    0.2,
+    -2.03,
+    -5.86,
+    -10.9,
+    -14.63,
+    -16.85,
+    -18.11,
+    -20.51,
+    -19.84,
+    -21.37,
+    -22.56,
+    -20.59,
+    -20.76,
+    -23.14,
+    -23.99,
+    -26.72,
+    -30.72,
+    -28.72,
+    -32.05,
+    -31.51,
+    -33.42,
+    -32.94,
+    -34.0,
+    -35.97,
+    -37.46,
+    -38.0,
+    -38.47,
+    -42.93,
+    -46.28,
+    -50.13,
+    -50.93,
+    -53.47,
+    -53.54,
+    -54.15,
+    -54.36,
+    -59.33,
+    -61.86,
+    -63.1,
+    -64.41,
+    -68.48,
+    -70.92,
+    -70.32,
+    -71.53,
+    -73.85,
+    -79.52,
+    -78.9,
+    -81.22,
+    -85.85,
+    -90.71,
+    -90.94,
+    -95.55,
+    -95.59,
+    -97.79,
+    -100.24,
+    -100.43,
+    -101.17,
+    -103.25,
+    -105.94,
+    -108.74,
+    -106.92
+   ],
+   "M6": [
+    0.14,
+    -2.5,
+    -6.55,
+    -11.07,
+    -14.75,
+    -16.97,
+    -19.49,
+    -22.18,
+    -21.98,
+    -22.5,
+    -23.58,
+    -23.15,
+    -21.67,
+    -23.25,
+    -23.49,
+    -25.97,
+    -29.17,
+    -25.82,
+    -29.15,
+    -28.29,
+    -30.21,
+    -28.53,
+    -29.08,
+    -30.75,
+    -31.82,
+    -32.1,
+    -33.37,
+    -37.22,
+    -41.4,
+    -45.72,
+    -46.77,
+    -49.24,
+    -49.47,
+    -50.3,
+    -50.76,
+    -55.76,
+    -58.56,
+    -59.02,
+    -59.33,
+    -63.11,
+    -65.04,
+    -64.34,
+    -65.38,
+    -67.47,
+    -73.18,
+    -72.62,
+    -75.18,
+    -79.75,
+    -84.43,
+    -83.35,
+    -88.11,
+    -89.09,
+    -91.37,
+    -94.35,
+    -93.7,
+    -94.57,
+    -96.4,
+    -98.5,
+    -100.97,
+    -99.21
+   ],
+   "mix": [
+    0.18,
+    -2.3,
+    -6.13,
+    -10.53,
+    -13.89,
+    -16.24,
+    -17.98,
+    -20.38,
+    -19.58,
+    -20.76,
+    -21.42,
+    -20.46,
+    -21.17,
+    -23.54,
+    -24.63,
+    -26.96,
+    -30.7,
+    -29.2,
+    -31.73,
+    -31.1,
+    -32.72,
+    -32.26,
+    -34.0,
+    -36.28,
+    -37.55,
+    -37.38,
+    -37.36,
+    -41.23,
+    -45.49,
+    -49.64,
+    -50.53,
+    -52.98,
+    -53.47,
+    -54.15,
+    -53.4,
+    -57.54,
+    -60.24,
+    -61.28,
+    -62.76,
+    -66.89,
+    -68.94,
+    -67.83,
+    -69.46,
+    -71.96,
+    -77.08,
+    -75.88,
+    -78.07,
+    -82.35,
+    -86.91,
+    -87.64,
+    -92.52,
+    -93.2,
+    -95.25,
+    -98.79,
+    -99.22,
+    -100.36,
+    -102.58,
+    -105.71,
+    -108.28,
+    -106.65
+   ]
+  },
+  "weather size": {
+   "step": [
+    0,
+    153,
+    306,
+    459,
+    612,
+    765,
+    918,
+    1071,
+    1224,
+    1377,
+    1530,
+    1683,
+    1836,
+    1989,
+    2142,
+    2295,
+    2448,
+    2601,
+    2754,
+    2907,
+    3060,
+    3213,
+    3366,
+    3519,
+    3672,
+    3825,
+    3978,
+    4131,
+    4284,
+    4437,
+    4591,
+    4744,
+    4897,
+    5050,
+    5203,
+    5356,
+    5509,
+    5662,
+    5815,
+    5968,
+    6121,
+    6274,
+    6427,
+    6580,
+    6733,
+    6886,
+    7039,
+    7192,
+    7345,
+    7498,
+    7651,
+    7804,
+    7957,
+    8110,
+    8263,
+    8416,
+    8569,
+    8722,
+    8875,
+    9029
+   ],
+   "hex62": [
+    0.19,
+    -0.39,
+    0.19,
+    0.43,
+    -0.46,
+    -0.03,
+    -0.14,
+    -0.51,
+    -0.01,
+    -0.66,
+    -0.51,
+    -1.45,
+    -2.57,
+    -2.27,
+    -5.67,
+    -6.29,
+    -6.47,
+    -10.22,
+    -10.05,
+    -9.83,
+    -8.96,
+    -10.59,
+    -12.28,
+    -12.26,
+    -13.8,
+    -15.11,
+    -13.26,
+    -13.51,
+    -14.38,
+    -14.25,
+    -15.55,
+    -15.15,
+    -15.19,
+    -15.85,
+    -16.8,
+    -18.39,
+    -18.37,
+    -20.8,
+    -21.25,
+    -28.23,
+    -27.23,
+    -26.18,
+    -29.78,
+    -31.95,
+    -36.45,
+    -39.12,
+    -41.86,
+    -41.91,
+    -42.58,
+    -44.09,
+    -44.02,
+    -45.23,
+    -46.63,
+    -48.92,
+    -48.91,
+    -50.55,
+    -52.35,
+    -52.12,
+    -50.88,
+    -51.12
+   ],
+   "ctw": [
+    0.09,
+    -0.05,
+    1.32,
+    1.01,
+    -0.11,
+    0.4,
+    1.0,
+    1.08,
+    0.27,
+    -0.28,
+    0.57,
+    -0.83,
+    -3.3,
+    -3.63,
+    -6.38,
+    -8.12,
+    -9.39,
+    -11.41,
+    -11.08,
+    -8.22,
+    -8.64,
+    -11.35,
+    -12.84,
+    -11.91,
+    -14.66,
+    -13.63,
+    -12.19,
+    -12.15,
+    -13.63,
+    -14.4,
+    -15.49,
+    -15.52,
+    -14.95,
+    -15.86,
+    -18.38,
+    -19.14,
+    -18.95,
+    -19.53,
+    -20.98,
+    -26.91,
+    -25.86,
+    -25.08,
+    -27.72,
+    -30.87,
+    -34.82,
+    -37.14,
+    -37.97,
+    -36.07,
+    -38.72,
+    -38.05,
+    -37.09,
+    -40.26,
+    -40.58,
+    -43.41,
+    -43.59,
+    -45.39,
+    -46.79,
+    -46.63,
+    -44.8,
+    -44.43
+   ],
+   "M1": [
+    0.21,
+    0.41,
+    1.23,
+    1.05,
+    0.5,
+    0.03,
+    -0.54,
+    -1.4,
+    -1.19,
+    -2.22,
+    -1.36,
+    -3.0,
+    -4.8,
+    -3.6,
+    -8.98,
+    -9.35,
+    -10.18,
+    -14.85,
+    -15.01,
+    -15.66,
+    -15.04,
+    -18.0,
+    -20.07,
+    -19.8,
+    -21.97,
+    -23.53,
+    -21.14,
+    -20.89,
+    -22.28,
+    -21.71,
+    -23.58,
+    -22.83,
+    -22.56,
+    -22.82,
+    -24.02,
+    -27.1,
+    -26.24,
+    -29.06,
+    -29.31,
+    -36.83,
+    -35.94,
+    -34.36,
+    -38.31,
+    -40.54,
+    -45.92,
+    -48.94,
+    -51.21,
+    -50.36,
+    -51.73,
+    -53.93,
+    -53.6,
+    -55.35,
+    -56.67,
+    -58.5,
+    -58.73,
+    -60.22,
+    -62.75,
+    -62.76,
+    -60.29,
+    -60.59
+   ],
+   "M2": [
+    0.16,
+    0.07,
+    0.94,
+    0.77,
+    0.1,
+    0.63,
+    0.32,
+    -0.31,
+    -0.25,
+    -1.41,
+    -0.8,
+    -2.67,
+    -4.55,
+    -3.7,
+    -8.74,
+    -9.24,
+    -9.92,
+    -14.63,
+    -15.25,
+    -14.95,
+    -14.49,
+    -17.1,
+    -19.14,
+    -18.97,
+    -21.16,
+    -22.6,
+    -20.1,
+    -20.1,
+    -21.75,
+    -20.87,
+    -23.29,
+    -22.68,
+    -21.85,
+    -21.98,
+    -23.3,
+    -26.33,
+    -25.66,
+    -29.02,
+    -29.91,
+    -36.9,
+    -36.11,
+    -34.12,
+    -38.12,
+    -40.34,
+    -45.86,
+    -49.38,
+    -51.76,
+    -50.58,
+    -51.67,
+    -53.49,
+    -52.52,
+    -54.07,
+    -55.11,
+    -56.67,
+    -57.26,
+    -58.5,
+    -61.34,
+    -61.21,
+    -58.54,
+    -58.18
+   ],
+   "M6": [
+    0.14,
+    0.03,
+    1.45,
+    2.12,
+    0.86,
+    0.42,
+    -0.21,
+    -0.71,
+    -0.02,
+    -1.57,
+    -1.38,
+    -2.85,
+    -4.64,
+    -4.08,
+    -8.91,
+    -10.62,
+    -9.73,
+    -14.38,
+    -14.65,
+    -14.62,
+    -12.86,
+    -15.87,
+    -17.5,
+    -16.61,
+    -18.35,
+    -19.73,
+    -16.75,
+    -15.73,
+    -17.59,
+    -17.1,
+    -19.83,
+    -18.15,
+    -17.3,
+    -18.54,
+    -18.67,
+    -21.91,
+    -21.36,
+    -23.96,
+    -24.25,
+    -30.57,
+    -29.67,
+    -28.32,
+    -32.73,
+    -34.36,
+    -40.11,
+    -43.36,
+    -45.49,
+    -44.37,
+    -45.02,
+    -46.88,
+    -44.13,
+    -46.11,
+    -46.73,
+    -48.45,
+    -49.97,
+    -50.59,
+    -52.72,
+    -52.6,
+    -49.84,
+    -49.63
+   ],
+   "mix": [
+    0.21,
+    0.41,
+    1.23,
+    1.05,
+    0.5,
+    0.03,
+    -0.54,
+    -1.4,
+    -1.19,
+    -2.22,
+    -1.36,
+    -3.0,
+    -4.8,
+    -3.6,
+    -8.98,
+    -9.35,
+    -10.18,
+    -14.85,
+    -15.01,
+    -15.66,
+    -15.04,
+    -18.0,
+    -20.07,
+    -19.8,
+    -21.97,
+    -23.53,
+    -21.14,
+    -20.89,
+    -22.28,
+    -21.71,
+    -23.58,
+    -22.83,
+    -22.56,
+    -22.82,
+    -24.02,
+    -27.1,
+    -26.24,
+    -29.06,
+    -29.31,
+    -36.83,
+    -35.94,
+    -34.36,
+    -38.31,
+    -40.54,
+    -45.92,
+    -48.94,
+    -51.21,
+    -50.36,
+    -51.73,
+    -53.93,
+    -53.6,
+    -55.35,
+    -56.67,
+    -58.5,
+    -58.73,
+    -60.22,
+    -62.75,
+    -62.76,
+    -60.29,
+    -60.59
+   ]
+  },
+  "racing direction": {
+   "step": [
+    0,
+    223,
+    446,
+    670,
+    893,
+    1116,
+    1340,
+    1563,
+    1786,
+    2010,
+    2233,
+    2456,
+    2680,
+    2903,
+    3126,
+    3350,
+    3573,
+    3796,
+    4020,
+    4243,
+    4466,
+    4690,
+    4913,
+    5136,
+    5360,
+    5583,
+    5806,
+    6030,
+    6253,
+    6476,
+    6700,
+    6923,
+    7146,
+    7370,
+    7593,
+    7816,
+    8040,
+    8263,
+    8486,
+    8710,
+    8933,
+    9156,
+    9380,
+    9603,
+    9826,
+    10050,
+    10273,
+    10496,
+    10720,
+    10943,
+    11166,
+    11390,
+    11613,
+    11836,
+    12060,
+    12283,
+    12506,
+    12730,
+    12953,
+    13177
+   ],
+   "hex62": [
+    -0.14,
+    -18.02,
+    -29.49,
+    -40.09,
+    -55.57,
+    -66.12,
+    -76.33,
+    -94.49,
+    -99.21,
+    -110.2,
+    -119.84,
+    -132.71,
+    -147.12,
+    -157.08,
+    -166.27,
+    -178.14,
+    -182.78,
+    -196.75,
+    -209.44,
+    -222.96,
+    -237.46,
+    -247.15,
+    -257.7,
+    -262.35,
+    -269.83,
+    -282.41,
+    -293.86,
+    -311.01,
+    -320.79,
+    -339.65,
+    -347.06,
+    -361.47,
+    -372.02,
+    -385.93,
+    -405.03,
+    -418.79,
+    -432.54,
+    -451.17,
+    -463.79,
+    -473.31,
+    -482.62,
+    -491.33,
+    -504.69,
+    -512.99,
+    -524.04,
+    -538.32,
+    -552.77,
+    -566.35,
+    -580.44,
+    -595.45,
+    -610.19,
+    -620.02,
+    -626.8,
+    -633.96,
+    -645.25,
+    -655.97,
+    -672.9,
+    -682.17,
+    -692.59,
+    -702.54
+   ],
+   "ctw": [
+    0.06,
+    -15.39,
+    -25.84,
+    -36.76,
+    -56.33,
+    -71.21,
+    -81.31,
+    -101.83,
+    -107.7,
+    -116.79,
+    -125.24,
+    -136.68,
+    -150.63,
+    -160.27,
+    -169.46,
+    -180.11,
+    -182.1,
+    -195.03,
+    -211.29,
+    -224.16,
+    -241.11,
+    -250.5,
+    -263.11,
+    -267.45,
+    -272.96,
+    -283.6,
+    -296.17,
+    -317.24,
+    -326.09,
+    -348.32,
+    -352.67,
+    -367.37,
+    -377.09,
+    -392.25,
+    -412.28,
+    -425.75,
+    -434.69,
+    -452.27,
+    -466.27,
+    -475.32,
+    -483.23,
+    -490.08,
+    -505.49,
+    -509.23,
+    -520.39,
+    -531.75,
+    -548.44,
+    -563.58,
+    -578.57,
+    -592.06,
+    -606.4,
+    -616.38,
+    -623.37,
+    -631.65,
+    -642.91,
+    -651.99,
+    -668.45,
+    -675.76,
+    -684.84,
+    -692.68
+   ],
+   "M1": [
+    0.0,
+    -17.25,
+    -24.74,
+    -31.47,
+    -49.62,
+    -62.05,
+    -70.39,
+    -89.88,
+    -93.16,
+    -101.34,
+    -111.06,
+    -123.43,
+    -138.01,
+    -149.65,
+    -158.6,
+    -169.75,
+    -170.46,
+    -183.62,
+    -200.71,
+    -214.36,
+    -229.61,
+    -239.53,
+    -251.54,
+    -254.84,
+    -261.12,
+    -272.82,
+    -286.1,
+    -308.41,
+    -314.73,
+    -335.21,
+    -339.71,
+    -353.81,
+    -363.63,
+    -379.52,
+    -400.22,
+    -415.48,
+    -424.47,
+    -444.22,
+    -457.69,
+    -467.35,
+    -475.28,
+    -482.04,
+    -498.72,
+    -503.86,
+    -513.89,
+    -525.13,
+    -542.81,
+    -558.19,
+    -576.0,
+    -589.99,
+    -604.04,
+    -614.06,
+    -619.77,
+    -628.52,
+    -639.97,
+    -647.4,
+    -664.35,
+    -670.12,
+    -680.15,
+    -689.58
+   ],
+   "M2": [
+    -0.14,
+    -6.49,
+    -14.48,
+    -23.55,
+    -38.85,
+    -50.97,
+    -58.7,
+    -79.27,
+    -81.56,
+    -87.82,
+    -95.78,
+    -103.35,
+    -117.98,
+    -127.02,
+    -137.03,
+    -144.28,
+    -141.76,
+    -148.13,
+    -161.16,
+    -172.25,
+    -187.0,
+    -194.61,
+    -205.49,
+    -206.44,
+    -206.7,
+    -214.7,
+    -225.19,
+    -246.87,
+    -254.67,
+    -275.39,
+    -273.53,
+    -287.29,
+    -293.27,
+    -309.66,
+    -327.35,
+    -341.12,
+    -339.73,
+    -356.07,
+    -366.92,
+    -377.32,
+    -380.25,
+    -382.78,
+    -393.78,
+    -395.89,
+    -405.81,
+    -405.69,
+    -421.18,
+    -432.7,
+    -446.67,
+    -455.98,
+    -466.59,
+    -472.75,
+    -473.09,
+    -480.05,
+    -488.7,
+    -488.58,
+    -503.03,
+    -505.78,
+    -508.97,
+    -514.18
+   ],
+   "M6": [
+    -0.02,
+    2.77,
+    3.95,
+    2.25,
+    -12.11,
+    -18.17,
+    -23.37,
+    -42.85,
+    -43.29,
+    -43.25,
+    -44.7,
+    -46.51,
+    -52.58,
+    -61.11,
+    -64.73,
+    -67.43,
+    -63.46,
+    -56.23,
+    -64.25,
+    -69.56,
+    -83.64,
+    -90.7,
+    -93.49,
+    -87.53,
+    -77.04,
+    -77.62,
+    -79.17,
+    -101.2,
+    -110.47,
+    -126.0,
+    -114.0,
+    -121.82,
+    -115.99,
+    -128.43,
+    -141.94,
+    -155.67,
+    -147.24,
+    -159.96,
+    -165.4,
+    -170.34,
+    -169.96,
+    -156.15,
+    -161.09,
+    -154.61,
+    -167.67,
+    -163.48,
+    -170.97,
+    -178.2,
+    -188.65,
+    -186.35,
+    -190.84,
+    -190.59,
+    -177.67,
+    -175.56,
+    -180.9,
+    -174.87,
+    -182.8,
+    -177.26,
+    -169.58,
+    -166.38
+   ],
+   "mix": [
+    -0.03,
+    -15.45,
+    -24.18,
+    -34.82,
+    -54.39,
+    -69.26,
+    -79.36,
+    -99.89,
+    -105.75,
+    -113.08,
+    -121.83,
+    -133.73,
+    -148.11,
+    -159.5,
+    -168.46,
+    -179.59,
+    -180.66,
+    -192.64,
+    -209.26,
+    -222.61,
+    -238.69,
+    -248.28,
+    -260.67,
+    -263.5,
+    -269.33,
+    -280.72,
+    -293.9,
+    -316.13,
+    -322.77,
+    -344.13,
+    -347.27,
+    -361.72,
+    -371.47,
+    -386.97,
+    -407.42,
+    -422.91,
+    -430.23,
+    -449.31,
+    -462.87,
+    -472.44,
+    -479.64,
+    -486.36,
+    -502.33,
+    -507.09,
+    -518.5,
+    -527.71,
+    -544.81,
+    -560.08,
+    -576.02,
+    -589.69,
+    -603.78,
+    -613.8,
+    -618.65,
+    -627.15,
+    -638.52,
+    -645.99,
+    -662.52,
+    -668.27,
+    -677.47,
+    -686.29
+   ]
+  },
+  "racing size": {
+   "step": [
+    0,
+    220,
+    441,
+    662,
+    882,
+    1103,
+    1324,
+    1544,
+    1765,
+    1986,
+    2206,
+    2427,
+    2648,
+    2869,
+    3089,
+    3310,
+    3531,
+    3751,
+    3972,
+    4193,
+    4413,
+    4634,
+    4855,
+    5075,
+    5296,
+    5517,
+    5738,
+    5958,
+    6179,
+    6400,
+    6620,
+    6841,
+    7062,
+    7282,
+    7503,
+    7724,
+    7945,
+    8165,
+    8386,
+    8607,
+    8827,
+    9048,
+    9269,
+    9489,
+    9710,
+    9931,
+    10151,
+    10372,
+    10593,
+    10814,
+    11034,
+    11255,
+    11476,
+    11696,
+    11917,
+    12138,
+    12358,
+    12579,
+    12800,
+    13021
+   ],
+   "hex62": [
+    -0.0,
+    -2.32,
+    -4.82,
+    -6.16,
+    -8.96,
+    -8.96,
+    -11.6,
+    -12.92,
+    -13.71,
+    -14.38,
+    -14.02,
+    -14.76,
+    -14.49,
+    -14.84,
+    -16.37,
+    -16.19,
+    -17.82,
+    -17.42,
+    -17.38,
+    -17.67,
+    -16.77,
+    -16.85,
+    -17.78,
+    -18.03,
+    -17.87,
+    -17.66,
+    -17.54,
+    -17.39,
+    -16.37,
+    -16.36,
+    -15.93,
+    -16.02,
+    -15.28,
+    -15.82,
+    -15.07,
+    -14.49,
+    -14.53,
+    -13.83,
+    -13.61,
+    -13.98,
+    -13.91,
+    -14.3,
+    -13.7,
+    -14.06,
+    -14.0,
+    -13.45,
+    -13.74,
+    -12.92,
+    -12.43,
+    -11.82,
+    -11.58,
+    -11.05,
+    -11.46,
+    -11.5,
+    -11.27,
+    -12.74,
+    -13.87,
+    -14.06,
+    -13.35,
+    -13.83
+   ],
+   "ctw": [
+    0.0,
+    -1.34,
+    -8.75,
+    -11.89,
+    -18.38,
+    -17.51,
+    -22.37,
+    -26.47,
+    -27.62,
+    -28.99,
+    -28.9,
+    -28.86,
+    -28.95,
+    -29.11,
+    -29.29,
+    -29.28,
+    -31.05,
+    -30.35,
+    -30.59,
+    -30.52,
+    -30.38,
+    -30.48,
+    -30.91,
+    -30.54,
+    -30.13,
+    -30.19,
+    -30.03,
+    -30.13,
+    -30.24,
+    -30.28,
+    -29.15,
+    -29.19,
+    -29.21,
+    -29.25,
+    -29.28,
+    -29.35,
+    -28.23,
+    -28.2,
+    -28.31,
+    -28.37,
+    -28.61,
+    -27.35,
+    -27.34,
+    -27.22,
+    -27.3,
+    -26.17,
+    -26.1,
+    -26.22,
+    -26.06,
+    -25.11,
+    -25.08,
+    -25.15,
+    -24.29,
+    -24.29,
+    -24.25,
+    -24.15,
+    -23.37,
+    -23.8,
+    -23.5,
+    -23.61
+   ],
+   "M1": [
+    0.0,
+    -0.02,
+    -5.21,
+    -7.62,
+    -13.0,
+    -11.7,
+    -14.72,
+    -16.94,
+    -18.72,
+    -16.64,
+    -13.86,
+    -13.56,
+    -11.92,
+    -11.69,
+    -11.5,
+    -11.69,
+    -12.92,
+    -9.32,
+    -8.96,
+    -10.28,
+    -5.97,
+    -4.5,
+    -6.47,
+    -5.37,
+    -1.22,
+    -1.23,
+    -1.48,
+    -0.85,
+    0.67,
+    1.25,
+    4.13,
+    5.36,
+    9.57,
+    8.56,
+    9.37,
+    10.76,
+    13.3,
+    16.97,
+    17.32,
+    15.86,
+    18.94,
+    19.02,
+    22.14,
+    22.8,
+    22.19,
+    27.9,
+    28.18,
+    29.43,
+    32.98,
+    37.04,
+    37.22,
+    40.23,
+    43.79,
+    46.07,
+    47.2,
+    49.28,
+    51.65,
+    51.3,
+    56.5,
+    55.21
+   ],
+   "M2": [
+    0.0,
+    7.03,
+    6.77,
+    5.97,
+    -0.29,
+    0.76,
+    -2.99,
+    -7.91,
+    -8.23,
+    -3.38,
+    6.0,
+    6.65,
+    11.46,
+    9.13,
+    9.8,
+    10.97,
+    8.8,
+    19.34,
+    22.18,
+    24.65,
+    32.17,
+    32.27,
+    30.03,
+    33.9,
+    39.82,
+    42.84,
+    49.35,
+    51.88,
+    57.52,
+    57.25,
+    65.89,
+    68.31,
+    76.21,
+    75.57,
+    81.99,
+    84.65,
+    95.19,
+    101.81,
+    103.65,
+    103.2,
+    106.58,
+    113.82,
+    120.0,
+    118.97,
+    121.39,
+    131.55,
+    134.4,
+    140.93,
+    146.53,
+    157.62,
+    159.89,
+    164.02,
+    169.36,
+    173.49,
+    178.26,
+    184.33,
+    191.52,
+    193.71,
+    205.69,
+    209.12
+   ],
+   "M6": [
+    0.0,
+    7.95,
+    12.29,
+    21.03,
+    21.1,
+    24.69,
+    24.98,
+    18.99,
+    26.34,
+    28.52,
+    57.31,
+    66.33,
+    80.35,
+    82.2,
+    84.13,
+    88.16,
+    89.39,
+    116.59,
+    134.3,
+    142.26,
+    146.44,
+    149.33,
+    152.7,
+    159.08,
+    178.4,
+    188.2,
+    204.34,
+    214.18,
+    228.04,
+    227.23,
+    254.12,
+    262.25,
+    280.28,
+    284.04,
+    292.1,
+    300.45,
+    321.2,
+    336.04,
+    345.13,
+    353.34,
+    365.56,
+    389.79,
+    400.98,
+    405.76,
+    407.7,
+    429.22,
+    447.47,
+    459.24,
+    466.34,
+    496.15,
+    501.54,
+    519.28,
+    531.63,
+    537.37,
+    567.64,
+    582.66,
+    595.98,
+    605.27,
+    630.73,
+    640.05
+   ],
+   "mix": [
+    0.0,
+    0.37,
+    -6.84,
+    -9.96,
+    -16.44,
+    -15.57,
+    -20.42,
+    -24.53,
+    -25.67,
+    -25.44,
+    -25.02,
+    -24.98,
+    -25.06,
+    -25.22,
+    -25.4,
+    -25.39,
+    -26.36,
+    -24.55,
+    -24.77,
+    -24.74,
+    -24.55,
+    -24.64,
+    -25.08,
+    -23.11,
+    -22.35,
+    -22.42,
+    -22.26,
+    -22.36,
+    -22.46,
+    -22.5,
+    -19.64,
+    -19.53,
+    -19.48,
+    -19.52,
+    -19.56,
+    -19.62,
+    -16.76,
+    -16.53,
+    -16.64,
+    -16.72,
+    -15.56,
+    -13.92,
+    -13.74,
+    -13.62,
+    -13.7,
+    -10.63,
+    -10.56,
+    -10.67,
+    -9.38,
+    -7.63,
+    -7.6,
+    -7.65,
+    -5.02,
+    -4.87,
+    -4.81,
+    -2.92,
+    -2.01,
+    -3.06,
+    -0.21,
+    -0.33
+   ]
+  }
+ }
+}

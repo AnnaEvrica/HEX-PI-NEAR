@@ -1,0 +1,416 @@
+{
+ "training steps (direction, size)": {
+  "markets": [
+   139847,
+   135745
+  ],
+  "weather": [
+   15258,
+   14810
+  ],
+  "racing": [
+   11430,
+   11052
+  ]
+ },
+ "real": {
+  "markets": {
+   "series": 17,
+   "steps": 46733,
+   "direction, first 250 steps": {
+    "scratch": -0.0003,
+    "pretrained": -0.0002,
+    "transfer": -0.0009,
+    "brier_diff_pretrained_minus_scratch": [
+     -2e-05,
+     [
+      -0.00079,
+      0.00078
+     ]
+    ]
+   },
+   "direction, all steps": {
+    "scratch": -0.0002,
+    "pretrained": -0.0002,
+    "transfer": -0.0005,
+    "brier_diff_pretrained_minus_scratch": [
+     -0.0,
+     [
+      -9e-05,
+      9e-05
+     ]
+    ]
+   },
+   "size, first 250 steps": {
+    "scratch": 0.0019,
+    "pretrained": 0.0014,
+    "transfer": 0.0003,
+    "brier_diff_pretrained_minus_scratch": [
+     0.00014,
+     [
+      -0.00024,
+      0.00047
+     ]
+    ]
+   },
+   "size, all steps": {
+    "scratch": 0.0106,
+    "pretrained": 0.0123,
+    "transfer": 0.0113,
+    "brier_diff_pretrained_minus_scratch": [
+     -0.00041,
+     [
+      -0.00055,
+      -0.00027
+     ]
+    ]
+   },
+   "final family weights (none, markets, weather, racing)": {
+    "direction": [
+     0.645,
+     0.283,
+     0.054,
+     0.018
+    ],
+    "size": [
+     0.321,
+     0.401,
+     0.216,
+     0.062
+    ]
+   }
+  },
+  "weather": {
+   "series": 1,
+   "steps": 9018,
+   "direction, first 250 steps": {
+    "scratch": 0.0013,
+    "pretrained": 0.0126,
+    "transfer": 0.0006,
+    "brier_diff_pretrained_minus_scratch": [
+     -0.00289,
+     [
+      -0.00486,
+      -0.00086
+     ]
+    ]
+   },
+   "direction, all steps": {
+    "scratch": 0.0129,
+    "pretrained": 0.0221,
+    "transfer": 0.0145,
+    "brier_diff_pretrained_minus_scratch": [
+     -0.0023,
+     [
+      -0.00303,
+      -0.00145
+     ]
+    ]
+   },
+   "size, first 250 steps": {
+    "scratch": 0.0025,
+    "pretrained": 0.0029,
+    "transfer": 0.0032,
+    "brier_diff_pretrained_minus_scratch": [
+     -8e-05,
+     [
+      -0.00104,
+      0.00104
+     ]
+    ]
+   },
+   "size, all steps": {
+    "scratch": 0.0081,
+    "pretrained": 0.0108,
+    "transfer": 0.0104,
+    "brier_diff_pretrained_minus_scratch": [
+     -0.00067,
+     [
+      -0.0011,
+      -0.00031
+     ]
+    ]
+   },
+   "final family weights (none, markets, weather, racing)": {
+    "direction": [
+     0.127,
+     0.104,
+     0.682,
+     0.087
+    ],
+    "size": [
+     0.38,
+     0.308,
+     0.22,
+     0.092
+    ]
+   }
+  },
+  "racing": {
+   "series": 12,
+   "steps": 13190,
+   "direction, first 250 steps": {
+    "scratch": 0.0198,
+    "pretrained": 0.0985,
+    "transfer": 0.0325,
+    "brier_diff_pretrained_minus_scratch": [
+     -0.02,
+     [
+      -0.02298,
+      -0.01707
+     ]
+    ]
+   },
+   "direction, all steps": {
+    "scratch": 0.0529,
+    "pretrained": 0.1034,
+    "transfer": 0.06,
+    "brier_diff_pretrained_minus_scratch": [
+     -0.01265,
+     [
+      -0.01397,
+      -0.01127
+     ]
+    ]
+   },
+   "size, first 250 steps": {
+    "scratch": -0.0011,
+    "pretrained": -0.0004,
+    "transfer": -0.0011,
+    "brier_diff_pretrained_minus_scratch": [
+     -0.00018,
+     [
+      -0.00076,
+      0.0003
+     ]
+    ]
+   },
+   "size, all steps": {
+    "scratch": 0.0013,
+    "pretrained": 0.0022,
+    "transfer": 0.0016,
+    "brier_diff_pretrained_minus_scratch": [
+     -0.00023,
+     [
+      -0.00048,
+      2e-05
+     ]
+    ]
+   },
+   "final family weights (none, markets, weather, racing)": {
+    "direction": [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ],
+    "size": [
+     0.527,
+     0.125,
+     0.096,
+     0.252
+    ]
+   }
+  }
+ },
+ "shuffled": {
+  "markets": {
+   "series": 17,
+   "steps": 46733,
+   "direction, first 250 steps": {
+    "scratch": -0.0013,
+    "pretrained": -0.0033,
+    "transfer": -0.0052,
+    "brier_diff_pretrained_minus_scratch": [
+     0.00051,
+     [
+      -8e-05,
+      0.00104
+     ]
+    ]
+   },
+   "direction, all steps": {
+    "scratch": -0.0009,
+    "pretrained": -0.0013,
+    "transfer": -0.0015,
+    "brier_diff_pretrained_minus_scratch": [
+     9e-05,
+     [
+      2e-05,
+      0.00017
+     ]
+    ]
+   },
+   "size, first 250 steps": {
+    "scratch": -0.0004,
+    "pretrained": -0.0014,
+    "transfer": -0.0012,
+    "brier_diff_pretrained_minus_scratch": [
+     0.00024,
+     [
+      -0.00014,
+      0.00059
+     ]
+    ]
+   },
+   "size, all steps": {
+    "scratch": -0.0005,
+    "pretrained": -0.0009,
+    "transfer": -0.0009,
+    "brier_diff_pretrained_minus_scratch": [
+     0.0001,
+     [
+      5e-05,
+      0.00016
+     ]
+    ]
+   },
+   "final family weights (none, markets, weather, racing)": {
+    "direction": [
+     0.751,
+     0.211,
+     0.03,
+     0.009
+    ],
+    "size": [
+     0.725,
+     0.088,
+     0.086,
+     0.101
+    ]
+   }
+  },
+  "weather": {
+   "series": 1,
+   "steps": 9018,
+   "direction, first 250 steps": {
+    "scratch": 0.0051,
+    "pretrained": 0.0034,
+    "transfer": 0.0026,
+    "brier_diff_pretrained_minus_scratch": [
+     0.00044,
+     [
+      -0.00063,
+      0.0015
+     ]
+    ]
+   },
+   "direction, all steps": {
+    "scratch": -0.0009,
+    "pretrained": -0.0011,
+    "transfer": -0.0011,
+    "brier_diff_pretrained_minus_scratch": [
+     4e-05,
+     [
+      -5e-05,
+      0.00014
+     ]
+    ]
+   },
+   "size, first 250 steps": {
+    "scratch": -0.0023,
+    "pretrained": -0.0057,
+    "transfer": -0.005,
+    "brier_diff_pretrained_minus_scratch": [
+     0.00085,
+     [
+      3e-05,
+      0.00168
+     ]
+    ]
+   },
+   "size, all steps": {
+    "scratch": -0.0006,
+    "pretrained": -0.001,
+    "transfer": -0.001,
+    "brier_diff_pretrained_minus_scratch": [
+     0.0001,
+     [
+      0.0,
+      0.0002
+     ]
+    ]
+   },
+   "final family weights (none, markets, weather, racing)": {
+    "direction": [
+     0.634,
+     0.286,
+     0.062,
+     0.018
+    ],
+    "size": [
+     0.616,
+     0.187,
+     0.111,
+     0.086
+    ]
+   }
+  },
+  "racing": {
+   "series": 12,
+   "steps": 13190,
+   "direction, first 250 steps": {
+    "scratch": -0.0008,
+    "pretrained": -0.002,
+    "transfer": -0.0011,
+    "brier_diff_pretrained_minus_scratch": [
+     0.00029,
+     [
+      -0.00054,
+      0.00125
+     ]
+    ]
+   },
+   "direction, all steps": {
+    "scratch": 0.0,
+    "pretrained": -0.0007,
+    "transfer": -0.0006,
+    "brier_diff_pretrained_minus_scratch": [
+     0.00019,
+     [
+      -4e-05,
+      0.00041
+     ]
+    ]
+   },
+   "size, first 250 steps": {
+    "scratch": -0.0007,
+    "pretrained": -0.0027,
+    "transfer": -0.0032,
+    "brier_diff_pretrained_minus_scratch": [
+     0.00052,
+     [
+      0.0002,
+      0.00087
+     ]
+    ]
+   },
+   "size, all steps": {
+    "scratch": -0.0009,
+    "pretrained": -0.0017,
+    "transfer": -0.0019,
+    "brier_diff_pretrained_minus_scratch": [
+     0.00021,
+     [
+      8e-05,
+      0.00033
+     ]
+    ]
+   },
+   "final family weights (none, markets, weather, racing)": {
+    "direction": [
+     0.752,
+     0.193,
+     0.05,
+     0.005
+    ],
+    "size": [
+     0.729,
+     0.063,
+     0.073,
+     0.135
+    ]
+   }
+  }
+ }
+}

@@ -12,23 +12,13 @@
 // same voice (for when a bot or manual trigger forwards a user reply).
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import { readProbability, aggregateReturns } from '../../shared/probabilityRead.ts';
+import { loadLive, logCalls, rowsFor } from '../../shared/ledger.ts';
+import { withoutCalibration } from '../../shared/engines.ts';
+import { UNIVERSE, HISTORY_DAYS } from '../../shared/universe.ts';
 import { CLAUDE_MODEL } from '../../shared/modelRouter.ts';
 import { fetchYahooReturns } from '../../shared/marketDataClient.ts';
 import { IDENTITY_LINE, CONFIDENTIALITY_LINE, STATISTICS_LINE } from '../../shared/persona.ts';
 import { postDiscord } from '../../shared/discord.ts';
-
-// The Kalshi universe — only underlyings with live Kalshi markets.
-// Crypto trades 24/7 (hourly + daily contracts); SPY/QQQ proxy the S&P 500
-// and Nasdaq-100 daily close/range markets.
-const UNIVERSE = [
-  { ticker: 'BTC', label: 'Bitcoin', kind: 'crypto' },
-  { ticker: 'ETH', label: 'Ethereum', kind: 'crypto' },
-  { ticker: 'SOL', label: 'Solana', kind: 'crypto' },
-  { ticker: 'XRP', label: 'XRP', kind: 'crypto' },
-  { ticker: 'DOGE', label: 'Dogecoin', kind: 'crypto' },
-  { ticker: 'SPY', label: 'S&P 500', kind: 'index' },
-  { ticker: 'QQQ', label: 'Nasdaq-100', kind: 'index' },
-];
 
 // Kalshi horizons only — the contracts people are actually holding.
 const TIMEFRAMES = [
@@ -76,9 +66,9 @@ Deno.serve(async (req) => {
       UNIVERSE.map(async (u) => {
         // Fifteen years of daily bars: the read is calibrated on the series'
         // own earlier calls and needs 200+ scored steps, on the weekly horizon too.
-        const data = await fetchYahooReturns(u.ticker, 5475);
+        const data = await fetchYahooReturns(u.ticker, HISTORY_DAYS);
         if (!data?.returns || data.returns.length < 30) return null;
-        return { ...u, returns: data.returns, latestPrice: data.latestPrice };
+        return { ...u, returns: data.returns, latestPrice: data.latestPrice, bars: { closes: data.completedCloses, timestamps: data.timestamps.slice(0, data.completedBars) } };
       }),
     );
     const assets = fetchResults.flatMap((r) => (r.status === 'fulfilled' && r.value ? [r.value] : []));
@@ -88,6 +78,7 @@ Deno.serve(async (req) => {
     }
 
     // 2. Run the calibrated probability read on each asset and each horizon.
+    const live = await loadLive(base44);
     const reads = {};
     for (const tf of TIMEFRAMES) {
       const candidates = [];
@@ -96,8 +87,10 @@ Deno.serve(async (req) => {
         // A week is 7 daily bars for crypto and 5 for an exchange-traded index.
         const step = tf.period === 1 ? 1 : (asset.kind === 'crypto' ? 7 : 5);
         const returns = aggregateReturns(asset.returns, step);
-        const read = readProbability(returns);
+        // The stored calibration is fitted on daily steps, so it applies to the daily horizon only.
+        const read = readProbability(returns, step === 1 ? live : withoutCalibration(live));
         if (!read) continue;
+        if (step === 1 && !dryRun) logCalls(base44, rowsFor(asset.ticker, asset.bars, asset.returns, read.run, 'signal'));
         candidates.push({
           ticker: asset.ticker,
           label: asset.label,

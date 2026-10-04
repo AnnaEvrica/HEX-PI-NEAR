@@ -1,0 +1,710 @@
+{
+ "markets RANGE": {
+  "steps": 46937,
+  "skill % over static base": {
+   "null": 3.88,
+   "core": 4.04,
+   "p": 4.06,
+   "p_cal": 3.99,
+   "p_pool": 4.21,
+   "static_p": 2.99,
+   "hex62_raw": 2.95,
+   "hex62": 2.64,
+   "drift_core": 3.78,
+   "drift_null": 1.77
+  },
+  "dyadic null over static base": [
+   26.89,
+   23.42,
+   30.92
+  ],
+  "STRUCTURE: gated core over its null": [
+   1.23,
+   0.28,
+   2.17
+  ],
+  "rank-1 calibrated over 6.2 calibrated": [
+   9.32,
+   7.27,
+   11.32
+  ],
+  "calibration: per-series over none": [
+   -0.53,
+   -1.23,
+   0.13
+  ],
+  "calibration: pooled over per-series": [
+   1.53,
+   0.96,
+   2.14
+  ],
+  "ECE %": {
+   "p": 2.05,
+   "p_cal": 1.33,
+   "p_pool": 0.85,
+   "hex62_raw": 1.47,
+   "hex62": 1.66
+  },
+  "dyadic-null model over single-drift model": [
+   1.94,
+   0.66,
+   3.18
+  ],
+  "dyadic null over drift null": [
+   14.63,
+   11.83,
+   17.57
+  ],
+  "precision p_cal": {
+   "all": {
+    "right %": 60.1,
+    "baseline rule %": 59.7,
+    "stated %": 61.2,
+    "coverage %": 100.0,
+    "calls": 46937
+   },
+   "strongest 25%": {
+    "right %": 68.4,
+    "baseline rule %": 68.4,
+    "stated %": 69.9,
+    "coverage %": 19.9,
+    "calls": 9353
+   },
+   "strongest 10%": {
+    "right %": 71.5,
+    "baseline rule %": 71.5,
+    "stated %": 72.8,
+    "coverage %": 8.5,
+    "calls": 3967
+   }
+  },
+  "precision p": {
+   "all": {
+    "right %": 60.1,
+    "baseline rule %": 59.7,
+    "stated %": 61.9,
+    "coverage %": 100.0,
+    "calls": 46937
+   },
+   "strongest 25%": {
+    "right %": 68.6,
+    "baseline rule %": 68.6,
+    "stated %": 71.4,
+    "coverage %": 21.8,
+    "calls": 10215
+   },
+   "strongest 10%": {
+    "right %": 71.3,
+    "baseline rule %": 71.3,
+    "stated %": 74.4,
+    "coverage %": 9.3,
+    "calls": 4377
+   }
+  },
+  "precision hex62": {
+   "all": {
+    "right %": 58.8,
+    "baseline rule %": 59.7,
+    "stated %": 60.2,
+    "coverage %": 100.0,
+    "calls": 46937
+   },
+   "strongest 25%": {
+    "right %": 63.8,
+    "baseline rule %": 64.0,
+    "stated %": 65.1,
+    "coverage %": 18.8,
+    "calls": 8825
+   },
+   "strongest 10%": {
+    "right %": 66.0,
+    "baseline rule %": 66.3,
+    "stated %": 67.5,
+    "coverage %": 6.8,
+    "calls": 3182
+   }
+  }
+ },
+ "markets MOVE": {
+  "steps": 46937,
+  "skill % over static base": {
+   "null": 0.09,
+   "core": 0.16,
+   "p": 0.18,
+   "p_cal": 0.28,
+   "p_pool": 0.26,
+   "static_p": 0.2,
+   "hex62_raw": 0.21,
+   "hex62": 0.12
+  },
+  "dyadic null over static base": [
+   0.66,
+   0.08,
+   1.27
+  ],
+  "STRUCTURE: gated core over its null": [
+   0.62,
+   0.24,
+   1.07
+  ],
+  "rank-1 calibrated over 6.2 calibrated": [
+   1.12,
+   0.64,
+   1.66
+  ],
+  "calibration: per-series over none": [
+   0.67,
+   0.38,
+   0.96
+  ],
+  "calibration: pooled over per-series": [
+   -0.15,
+   -0.38,
+   0.1
+  ],
+  "ECE %": {
+   "p": 1.57,
+   "p_cal": 0.67,
+   "p_pool": 0.65,
+   "hex62_raw": 1.03,
+   "hex62": 1.12
+  },
+  "precision p_cal": {
+   "all": {
+    "right %": 51.7,
+    "baseline rule %": 50.9,
+    "stated %": 52.2,
+    "coverage %": 100.0,
+    "calls": 46937
+   },
+   "strongest 25%": {
+    "right %": 52.3,
+    "baseline rule %": 52.2,
+    "stated %": 53.5,
+    "coverage %": 22.0,
+    "calls": 10332
+   },
+   "strongest 10%": {
+    "right %": 53.3,
+    "baseline rule %": 53.4,
+    "stated %": 54.1,
+    "coverage %": 8.4,
+    "calls": 3925
+   }
+  },
+  "precision p": {
+   "all": {
+    "right %": 51.3,
+    "baseline rule %": 50.9,
+    "stated %": 52.7,
+    "coverage %": 100.0,
+    "calls": 46937
+   },
+   "strongest 25%": {
+    "right %": 52.1,
+    "baseline rule %": 51.9,
+    "stated %": 54.5,
+    "coverage %": 24.8,
+    "calls": 11631
+   },
+   "strongest 10%": {
+    "right %": 52.5,
+    "baseline rule %": 52.5,
+    "stated %": 54.9,
+    "coverage %": 11.9,
+    "calls": 5570
+   }
+  },
+  "precision hex62": {
+   "all": {
+    "right %": 51.5,
+    "baseline rule %": 50.9,
+    "stated %": 52.3,
+    "coverage %": 100.0,
+    "calls": 46937
+   },
+   "strongest 25%": {
+    "right %": 53.1,
+    "baseline rule %": 53.0,
+    "stated %": 53.6,
+    "coverage %": 20.8,
+    "calls": 9758
+   },
+   "strongest 10%": {
+    "right %": 54.1,
+    "baseline rule %": 53.8,
+    "stated %": 54.6,
+    "coverage %": 10.4,
+    "calls": 4859
+   }
+  }
+ },
+ "weather RANGE": {
+  "steps": 9030,
+  "skill % over static base": {
+   "null": 0.73,
+   "core": 1.25,
+   "p": 1.25,
+   "p_cal": 1.16,
+   "p_pool": 1.16,
+   "static_p": 1.72,
+   "hex62_raw": 0.91,
+   "hex62": 0.87,
+   "drift_core": 1.72,
+   "drift_null": 0.08
+  },
+  "dyadic null over static base": [
+   5.07,
+   0.68,
+   9.61
+  ],
+  "STRUCTURE: gated core over its null": [
+   3.55,
+   1.78,
+   5.24
+  ],
+  "rank-1 calibrated over 6.2 calibrated": [
+   2.0,
+   -1.18,
+   4.74
+  ],
+  "calibration: per-series over none": [
+   -0.61,
+   -3.49,
+   1.73
+  ],
+  "calibration: pooled over per-series": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "ECE %": {
+   "p": 1.98,
+   "p_cal": 0.97,
+   "p_pool": 0.97,
+   "hex62_raw": 1.17,
+   "hex62": 1.19
+  },
+  "dyadic-null model over single-drift model": [
+   -3.23,
+   -4.89,
+   -1.57
+  ],
+  "dyadic null over drift null": [
+   4.51,
+   0.47,
+   8.96
+  ],
+  "precision p_cal": {
+   "all": {
+    "right %": 56.3,
+    "baseline rule %": 55.7,
+    "stated %": 55.6,
+    "coverage %": 100.0,
+    "calls": 9030
+   },
+   "strongest 25%": {
+    "right %": 63.8,
+    "baseline rule %": 63.8,
+    "stated %": 62.7,
+    "coverage %": 25.8,
+    "calls": 2329
+   },
+   "strongest 10%": {
+    "right %": 65.4,
+    "baseline rule %": 65.4,
+    "stated %": 64.1,
+    "coverage %": 14.7,
+    "calls": 1325
+   }
+  },
+  "precision p": {
+   "all": {
+    "right %": 56.2,
+    "baseline rule %": 55.7,
+    "stated %": 58.0,
+    "coverage %": 100.0,
+    "calls": 9030
+   },
+   "strongest 25%": {
+    "right %": 62.6,
+    "baseline rule %": 62.6,
+    "stated %": 65.7,
+    "coverage %": 27.5,
+    "calls": 2487
+   },
+   "strongest 10%": {
+    "right %": 65.7,
+    "baseline rule %": 65.7,
+    "stated %": 68.7,
+    "coverage %": 12.6,
+    "calls": 1134
+   }
+  },
+  "precision hex62": {
+   "all": {
+    "right %": 55.6,
+    "baseline rule %": 55.7,
+    "stated %": 55.7,
+    "coverage %": 100.0,
+    "calls": 9030
+   },
+   "strongest 25%": {
+    "right %": 59.1,
+    "baseline rule %": 58.7,
+    "stated %": 60.3,
+    "coverage %": 32.2,
+    "calls": 2908
+   },
+   "strongest 10%": {
+    "right %": 63.3,
+    "baseline rule %": 62.9,
+    "stated %": 62.8,
+    "coverage %": 15.7,
+    "calls": 1415
+   }
+  }
+ },
+ "weather MOVE": {
+  "steps": 9030,
+  "skill % over static base": {
+   "null": -0.0,
+   "core": 6.08,
+   "p": 6.08,
+   "p_cal": 5.86,
+   "p_pool": 5.86,
+   "static_p": 6.08,
+   "hex62_raw": 1.58,
+   "hex62": 1.54
+  },
+  "dyadic null over static base": [
+   -0.0,
+   -0.01,
+   0.0
+  ],
+  "STRUCTURE: gated core over its null": [
+   42.1,
+   36.27,
+   48.55
+  ],
+  "rank-1 calibrated over 6.2 calibrated": [
+   29.95,
+   23.79,
+   35.95
+  ],
+  "calibration: per-series over none": [
+   -1.5,
+   -2.91,
+   -0.3
+  ],
+  "calibration: pooled over per-series": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "ECE %": {
+   "p": 0.99,
+   "p_cal": 1.22,
+   "p_pool": 1.22,
+   "hex62_raw": 1.31,
+   "hex62": 1.46
+  },
+  "precision p_cal": {
+   "all": {
+    "right %": 62.4,
+    "baseline rule %": 51.2,
+    "stated %": 63.3,
+    "coverage %": 100.0,
+    "calls": 9030
+   },
+   "strongest 25%": {
+    "right %": 72.0,
+    "baseline rule %": 54.6,
+    "stated %": 73.8,
+    "coverage %": 24.5,
+    "calls": 2216
+   },
+   "strongest 10%": {
+    "right %": 75.2,
+    "baseline rule %": 52.8,
+    "stated %": 77.4,
+    "coverage %": 8.5,
+    "calls": 765
+   }
+  },
+  "precision p": {
+   "all": {
+    "right %": 62.5,
+    "baseline rule %": 51.2,
+    "stated %": 63.0,
+    "coverage %": 100.0,
+    "calls": 9030
+   },
+   "strongest 25%": {
+    "right %": 72.2,
+    "baseline rule %": 53.8,
+    "stated %": 73.3,
+    "coverage %": 24.0,
+    "calls": 2169
+   },
+   "strongest 10%": {
+    "right %": 76.1,
+    "baseline rule %": 57.2,
+    "stated %": 76.6,
+    "coverage %": 9.6,
+    "calls": 867
+   }
+  },
+  "precision hex62": {
+   "all": {
+    "right %": 56.4,
+    "baseline rule %": 51.2,
+    "stated %": 56.8,
+    "coverage %": 100.0,
+    "calls": 9030
+   },
+   "strongest 25%": {
+    "right %": 62.9,
+    "baseline rule %": 54.8,
+    "stated %": 63.9,
+    "coverage %": 21.8,
+    "calls": 1973
+   },
+   "strongest 10%": {
+    "right %": 64.6,
+    "baseline rule %": 62.0,
+    "stated %": 67.0,
+    "coverage %": 9.2,
+    "calls": 835
+   }
+  }
+ },
+ "racing RANGE": {
+  "steps": 13022,
+  "skill % over static base": {
+   "null": -0.03,
+   "core": -0.12,
+   "p": 0.26,
+   "p_cal": 0.02,
+   "p_pool": 0.23,
+   "static_p": 0.3,
+   "hex62_raw": 0.15,
+   "hex62": -0.12
+  },
+  "dyadic null over static base": [
+   -0.22,
+   -0.51,
+   0.21
+  ],
+  "STRUCTURE: gated core over its null": [
+   2.03,
+   -0.69,
+   6.38
+  ],
+  "rank-1 calibrated over 6.2 calibrated": [
+   0.94,
+   0.07,
+   1.88
+  ],
+  "calibration: per-series over none": [
+   -1.67,
+   -3.31,
+   -0.06
+  ],
+  "calibration: pooled over per-series": [
+   1.5,
+   0.75,
+   2.19
+  ],
+  "ECE %": {
+   "p": 2.75,
+   "p_cal": 3.32,
+   "p_pool": 1.47,
+   "hex62_raw": 2.24,
+   "hex62": 2.82
+  },
+  "precision p_cal": {
+   "all": {
+    "right %": 50.4,
+    "baseline rule %": 49.7,
+    "stated %": 53.4,
+    "coverage %": 100.0,
+    "calls": 13022
+   },
+   "strongest 25%": {
+    "right %": 56.1,
+    "baseline rule %": 51.0,
+    "stated %": 61.3,
+    "coverage %": 7.0,
+    "calls": 909
+   },
+   "strongest 10%": {
+    "right %": 58.9,
+    "baseline rule %": 49.5,
+    "stated %": 66.4,
+    "coverage %": 2.1,
+    "calls": 275
+   }
+  },
+  "precision p": {
+   "all": {
+    "right %": 50.9,
+    "baseline rule %": 49.7,
+    "stated %": 53.4,
+    "coverage %": 100.0,
+    "calls": 13022
+   },
+   "strongest 25%": {
+    "right %": 56.9,
+    "baseline rule %": 52.0,
+    "stated %": 60.0,
+    "coverage %": 11.3,
+    "calls": 1476
+   },
+   "strongest 10%": {
+    "right %": 59.0,
+    "baseline rule %": 51.4,
+    "stated %": 64.4,
+    "coverage %": 3.2,
+    "calls": 422
+   }
+  },
+  "precision hex62": {
+   "all": {
+    "right %": 50.8,
+    "baseline rule %": 49.7,
+    "stated %": 53.3,
+    "coverage %": 100.0,
+    "calls": 13022
+   },
+   "strongest 25%": {
+    "right %": 54.5,
+    "baseline rule %": 54.9,
+    "stated %": 61.2,
+    "coverage %": 8.8,
+    "calls": 1143
+   },
+   "strongest 10%": {
+    "right %": 54.0,
+    "baseline rule %": 54.8,
+    "stated %": 63.6,
+    "coverage %": 2.7,
+    "calls": 354
+   }
+  }
+ },
+ "racing MOVE": {
+  "steps": 13022,
+  "skill % over static base": {
+   "null": 27.91,
+   "core": 27.54,
+   "p": 28.03,
+   "p_cal": 27.15,
+   "p_pool": 28.36,
+   "static_p": 26.52,
+   "hex62_raw": 7.83,
+   "hex62": 4.76
+  },
+  "dyadic null over static base": [
+   193.7,
+   178.8,
+   205.85
+  ],
+  "STRUCTURE: gated core over its null": [
+   0.86,
+   -0.8,
+   3.75
+  ],
+  "rank-1 calibrated over 6.2 calibrated": [
+   155.39,
+   136.87,
+   173.95
+  ],
+  "calibration: per-series over none": [
+   -6.1,
+   -12.39,
+   1.35
+  ],
+  "calibration: pooled over per-series": [
+   8.41,
+   3.28,
+   12.67
+  ],
+  "ECE %": {
+   "p": 2.72,
+   "p_cal": 2.14,
+   "p_pool": 1.39,
+   "hex62_raw": 3.44,
+   "hex62": 3.55
+  },
+  "precision p_cal": {
+   "all": {
+    "right %": 74.5,
+    "baseline rule %": 74.9,
+    "stated %": 76.2,
+    "coverage %": 100.0,
+    "calls": 13022
+   },
+   "strongest 25%": {
+    "right %": 93.9,
+    "baseline rule %": 93.9,
+    "stated %": 96.1,
+    "coverage %": 22.9,
+    "calls": 2988
+   },
+   "strongest 10%": {
+    "right %": 95.2,
+    "baseline rule %": 95.2,
+    "stated %": 98.4,
+    "coverage %": 5.4,
+    "calls": 707
+   }
+  },
+  "precision p": {
+   "all": {
+    "right %": 74.8,
+    "baseline rule %": 74.9,
+    "stated %": 75.4,
+    "coverage %": 100.0,
+    "calls": 13022
+   },
+   "strongest 25%": {
+    "right %": 93.6,
+    "baseline rule %": 93.6,
+    "stated %": 93.7,
+    "coverage %": 24.2,
+    "calls": 3145
+   },
+   "strongest 10%": {
+    "right %": 96.2,
+    "baseline rule %": 96.2,
+    "stated %": 97.4,
+    "coverage %": 9.3,
+    "calls": 1210
+   }
+  },
+  "precision hex62": {
+   "all": {
+    "right %": 64.9,
+    "baseline rule %": 74.9,
+    "stated %": 66.6,
+    "coverage %": 100.0,
+    "calls": 13022
+   },
+   "strongest 25%": {
+    "right %": 71.8,
+    "baseline rule %": 76.2,
+    "stated %": 78.3,
+    "coverage %": 29.9,
+    "calls": 3894
+   },
+   "strongest 10%": {
+    "right %": 75.0,
+    "baseline rule %": 79.4,
+    "stated %": 84.2,
+    "coverage %": 12.5,
+    "calls": 1625
+   }
+  }
+ }
+}

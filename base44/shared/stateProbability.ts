@@ -17,6 +17,8 @@
 //
 // Learning happens only after an outcome is known: no call sees its future.
 //
+// state-6.2: the control engine (see engines.ts).
+//
 // Walk-forward test, 17 market series, 2016-01 to 2026-09, 46,937 days
 // (validation/field.py, validation/field_results.json):
 //   direction, 1 day:  Brier 0.2496, skill 0.15% (shuffled data 0.25%) — at chance
@@ -27,6 +29,7 @@
 // ===========================================================================
 
 import { PRETRAINED_FAMILIES, PRETRAINED_DIRECTION, PRETRAINED_SIZE } from './pretrainedTables.ts';
+import { fitIsotonic } from './isotonic.ts';
 
 export interface StateProbability {
   p_up: number;            // P(next move is up), calibrated
@@ -127,33 +130,6 @@ function key128(r: number[], i: number): number {
   let pos = 0;
   for (let j = i - 11; j <= i; j++) if (r[j] > 0) pos++;
   return (mom << 1) | (pos / 12 > 0.6 ? 1 : 0);
-}
-
-// Pool-adjacent-violators: returns a monotone step function p -> calibrated p
-function fitIsotonic(ps: number[], ys: number[]): (p: number) => number {
-  const idx = ps.map((_, i) => i).sort((a, b) => ps[a] - ps[b]);
-  const blocks: { x0: number; x1: number; sum: number; n: number }[] = [];
-  for (const i of idx) {
-    blocks.push({ x0: ps[i], x1: ps[i], sum: ys[i], n: 1 });
-    while (blocks.length > 1) {
-      const b = blocks[blocks.length - 1], a = blocks[blocks.length - 2];
-      if (a.sum / a.n <= b.sum / b.n) break;
-      blocks.splice(blocks.length - 2, 2, { x0: a.x0, x1: b.x1, sum: a.sum + b.sum, n: a.n + b.n });
-    }
-  }
-  return (p: number) => {
-    if (p <= blocks[0].x1) return clip(blocks[0].sum / blocks[0].n);
-    for (let k = 1; k < blocks.length; k++) {
-      const prev = blocks[k - 1], cur = blocks[k];
-      if (p < cur.x0) { // between blocks: linear interpolation
-        const v0 = prev.sum / prev.n, v1 = cur.sum / cur.n;
-        return clip(v0 + (v1 - v0) * (p - prev.x1) / Math.max(1e-12, cur.x0 - prev.x1));
-      }
-      if (p <= cur.x1) return clip(cur.sum / cur.n);
-    }
-    const last = blocks[blocks.length - 1];
-    return clip(last.sum / last.n);
-  };
 }
 
 /** Walk the series forward. Returns raw per-step calls (for testing) and the final call. */

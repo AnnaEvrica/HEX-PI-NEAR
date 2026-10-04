@@ -1,0 +1,453 @@
+{
+ "A warm (scored 2016-2026, each series walked from its start)": {
+  "steps": 46937,
+  "skill % over base rate": {
+   "M0": 0.0,
+   "M1w": 1.74,
+   "M1b": 2.98,
+   "M1": 2.99,
+   "M2": 2.74,
+   "M1+mag": 3.09,
+   "lines": 1.47,
+   "ranks/base": 2.99,
+   "core + size lines (scale 1)": 2.89,
+   "core + line pairs": 2.74,
+   "core + 64-state cell": 3.16,
+   "core + cell with field": 3.54,
+   "core + full 6.2 read": 3.5,
+   "core + pre-trained table values": 2.93,
+   "6.2 full": 2.95,
+   "6.2 no tables": 2.89,
+   "6.2 no field": 2.65,
+   "6.2 no decay": 1.49,
+   "6.2 bare cells": 2.27,
+   "6.2 bare cells, no decay": 1.29
+  },
+  "taking 6.2 apart (x1000 nats lost by removing; positive = the part helps)": {
+   "6.2 no tables": [
+    0.4,
+    0.2,
+    0.59
+   ],
+   "6.2 no field": [
+    2.06,
+    1.23,
+    2.94
+   ],
+   "6.2 no decay": [
+    10.1,
+    8.2,
+    12.13
+   ],
+   "6.2 bare cells": [
+    4.68,
+    3.56,
+    5.91
+   ],
+   "6.2 bare cells, no decay": [
+    11.5,
+    9.33,
+    13.82
+   ]
+  },
+  "adding one 6.2 mechanism to the rank core (positive = it helps)": {
+   "core + size lines (scale 1)": [
+    -0.68,
+    -1.06,
+    -0.32
+   ],
+   "core + line pairs": [
+    -1.73,
+    -2.34,
+    -1.08
+   ],
+   "core + 64-state cell": [
+    1.2,
+    0.86,
+    1.57
+   ],
+   "core + cell with field": [
+    3.83,
+    3.11,
+    4.5
+   ],
+   "core + full 6.2 read": [
+    3.58,
+    2.9,
+    4.31
+   ],
+   "core + pre-trained table values": [
+    -0.37,
+    -0.71,
+    -0.01
+   ]
+  },
+  "rank core vs 6.2 (positive = core better)": {
+   "M1 over 6.2 full": [
+    0.25,
+    -2.05,
+    2.61
+   ],
+   "M2 over 6.2 full": [
+    -1.43,
+    -3.86,
+    1.09
+   ],
+   "core + full 6.2 read over 6.2 full": [
+    3.84,
+    1.92,
+    5.89
+   ]
+  }
+ },
+ "B prior means (7 window ranks, 5 block ranks)": {
+  "MOVE": {
+   "markets": [
+    0.017,
+    -0.134,
+    -0.002,
+    0.061,
+    -0.062,
+    0.097,
+    -0.149,
+    -0.108,
+    0.033,
+    0.109,
+    0.099,
+    -0.046
+   ],
+   "weather": [
+    0.509,
+    -0.126,
+    0.036,
+    -0.469,
+    -0.891,
+    0.652,
+    -0.336,
+    -0.573,
+    0.097,
+    0.18,
+    0.197,
+    0.221
+   ],
+   "racing": [
+    0.139,
+    -0.173,
+    -0.103,
+    0.017,
+    -0.117,
+    -0.092,
+    0.358,
+    0.03,
+    -0.085,
+    -0.124,
+    0.167,
+    0.122
+   ]
+  },
+  "RANGE": {
+   "markets": [
+    -0.013,
+    0.057,
+    0.005,
+    -0.044,
+    -0.146,
+    -0.089,
+    0.249,
+    0.024,
+    0.113,
+    0.166,
+    0.177,
+    0.188
+   ],
+   "weather": [
+    0.043,
+    -0.145,
+    0.073,
+    -0.057,
+    -0.198,
+    0.294,
+    -0.029,
+    0.167,
+    0.033,
+    0.208,
+    -0.095,
+    0.181
+   ],
+   "racing": [
+    0.295,
+    -0.067,
+    0.026,
+    0.33,
+    -0.27,
+    -0.036,
+    -0.064,
+    0.313,
+    -0.187,
+    -0.071,
+    0.106,
+    -0.048
+   ]
+  }
+ },
+ "C learning curves (mean log-loss difference vs base rate x1000; negative is better)": {
+  "markets": {
+   "MOVE first 25": {
+    "null": 25.2,
+    "6.2 with 64-state tables": -19.6,
+    "6.2 from nothing": -20.6,
+    "rank core, no prior": 87.0,
+    "rank core, coefficient priors": 63.1
+   },
+   "MOVE first 50": {
+    "null": 12.8,
+    "6.2 with 64-state tables": -9.9,
+    "6.2 from nothing": -11.6,
+    "rank core, no prior": 54.8,
+    "rank core, coefficient priors": 36.4
+   },
+   "MOVE first 100": {
+    "null": 6.9,
+    "6.2 with 64-state tables": -7.4,
+    "6.2 from nothing": -6.3,
+    "rank core, no prior": 34.6,
+    "rank core, coefficient priors": 24.2
+   },
+   "MOVE first 250": {
+    "null": 2.8,
+    "6.2 with 64-state tables": -1.9,
+    "6.2 from nothing": -2.4,
+    "rank core, no prior": 17.5,
+    "rank core, coefficient priors": 12.6
+   },
+   "MOVE first 500": {
+    "null": 1.4,
+    "6.2 with 64-state tables": -0.2,
+    "6.2 from nothing": -0.8,
+    "rank core, no prior": 10.3,
+    "rank core, coefficient priors": 7.3
+   },
+   "MOVE first 1000": {
+    "null": 0.7,
+    "6.2 with 64-state tables": 0.3,
+    "6.2 from nothing": -0.1,
+    "rank core, no prior": 5.2,
+    "rank core, coefficient priors": 3.7
+   },
+   "RANGE first 25": {
+    "null": 0.0,
+    "6.2 with 64-state tables": 6.3,
+    "6.2 from nothing": 0.8,
+    "rank core, no prior": 43.9,
+    "rank core, coefficient priors": 26.8
+   },
+   "RANGE first 50": {
+    "null": 0.0,
+    "6.2 with 64-state tables": 3.5,
+    "6.2 from nothing": -0.1,
+    "rank core, no prior": 25.2,
+    "rank core, coefficient priors": 14.0
+   },
+   "RANGE first 100": {
+    "null": 0.0,
+    "6.2 with 64-state tables": 0.8,
+    "6.2 from nothing": -0.3,
+    "rank core, no prior": 21.8,
+    "rank core, coefficient priors": 13.1
+   },
+   "RANGE first 250": {
+    "null": 0.0,
+    "6.2 with 64-state tables": -0.6,
+    "6.2 from nothing": -1.0,
+    "rank core, no prior": 8.8,
+    "rank core, coefficient priors": 4.6
+   },
+   "RANGE first 500": {
+    "null": 0.0,
+    "6.2 with 64-state tables": -1.4,
+    "6.2 from nothing": -1.6,
+    "rank core, no prior": 3.7,
+    "rank core, coefficient priors": 0.8
+   },
+   "RANGE first 1000": {
+    "null": 0.0,
+    "6.2 with 64-state tables": -2.8,
+    "6.2 from nothing": -2.8,
+    "rank core, no prior": -1.6,
+    "rank core, coefficient priors": -3.3
+   }
+  },
+  "weather": {
+   "MOVE first 25": {
+    "null": 27.2,
+    "6.2 with 64-state tables": -52.2,
+    "6.2 from nothing": -39.5,
+    "rank core, no prior": 111.5,
+    "rank core, coefficient priors": 81.0
+   },
+   "MOVE first 50": {
+    "null": 13.8,
+    "6.2 with 64-state tables": -33.0,
+    "6.2 from nothing": -22.3,
+    "rank core, no prior": 55.9,
+    "rank core, coefficient priors": 32.5
+   },
+   "MOVE first 100": {
+    "null": 6.9,
+    "6.2 with 64-state tables": -20.7,
+    "6.2 from nothing": -13.0,
+    "rank core, no prior": 7.4,
+    "rank core, coefficient priors": -4.4
+   },
+   "MOVE first 250": {
+    "null": 2.8,
+    "6.2 with 64-state tables": -12.9,
+    "6.2 from nothing": -5.0,
+    "rank core, no prior": -25.8,
+    "rank core, coefficient priors": -36.2
+   },
+   "MOVE first 500": {
+    "null": 1.4,
+    "6.2 with 64-state tables": -19.2,
+    "6.2 from nothing": -8.3,
+    "rank core, no prior": -35.4,
+    "rank core, coefficient priors": -45.8
+   },
+   "MOVE first 1000": {
+    "null": 0.7,
+    "6.2 with 64-state tables": -17.6,
+    "6.2 from nothing": -6.6,
+    "rank core, no prior": -33.7,
+    "rank core, coefficient priors": -41.1
+   },
+   "RANGE first 25": {
+    "null": 0.0,
+    "6.2 with 64-state tables": 1.3,
+    "6.2 from nothing": 0.3,
+    "rank core, no prior": 37.2,
+    "rank core, coefficient priors": 13.3
+   },
+   "RANGE first 50": {
+    "null": 0.0,
+    "6.2 with 64-state tables": 3.8,
+    "6.2 from nothing": 1.1,
+    "rank core, no prior": 26.9,
+    "rank core, coefficient priors": 12.5
+   },
+   "RANGE first 100": {
+    "null": 0.0,
+    "6.2 with 64-state tables": -2.8,
+    "6.2 from nothing": -2.0,
+    "rank core, no prior": 27.5,
+    "rank core, coefficient priors": 15.4
+   },
+   "RANGE first 250": {
+    "null": 0.0,
+    "6.2 with 64-state tables": -0.5,
+    "6.2 from nothing": -0.8,
+    "rank core, no prior": 16.8,
+    "rank core, coefficient priors": 8.7
+   },
+   "RANGE first 500": {
+    "null": 0.0,
+    "6.2 with 64-state tables": -0.4,
+    "6.2 from nothing": -0.8,
+    "rank core, no prior": 7.1,
+    "rank core, coefficient priors": 3.7
+   },
+   "RANGE first 1000": {
+    "null": 0.0,
+    "6.2 with 64-state tables": 0.2,
+    "6.2 from nothing": -0.2,
+    "rank core, no prior": 3.5,
+    "rank core, coefficient priors": 0.4
+   }
+  },
+  "racing": {
+   "MOVE first 25": {
+    "null": -205.6,
+    "6.2 with 64-state tables": -63.1,
+    "6.2 from nothing": -33.8,
+    "rank core, no prior": -170.7,
+    "rank core, coefficient priors": -180.7
+   },
+   "MOVE first 50": {
+    "null": -232.3,
+    "6.2 with 64-state tables": -61.0,
+    "6.2 from nothing": -20.7,
+    "rank core, no prior": -215.2,
+    "rank core, coefficient priors": -222.5
+   },
+   "MOVE first 100": {
+    "null": -214.3,
+    "6.2 with 64-state tables": -52.7,
+    "6.2 from nothing": -14.3,
+    "rank core, no prior": -201.5,
+    "rank core, coefficient priors": -205.9
+   },
+   "MOVE first 250": {
+    "null": -226.5,
+    "6.2 with 64-state tables": -58.5,
+    "6.2 from nothing": -15.2,
+    "rank core, no prior": -217.2,
+    "rank core, coefficient priors": -220.7
+   },
+   "MOVE first 500": {
+    "null": -214.4,
+    "6.2 with 64-state tables": -52.1,
+    "6.2 from nothing": -19.9,
+    "rank core, no prior": -208.9,
+    "rank core, coefficient priors": -210.5
+   },
+   "MOVE first 1000": {
+    "null": -217.2,
+    "6.2 with 64-state tables": -56.8,
+    "6.2 from nothing": -28.0,
+    "rank core, no prior": -216.7,
+    "rank core, coefficient priors": -217.6
+   },
+   "RANGE first 25": {
+    "null": 0.0,
+    "6.2 with 64-state tables": 10.8,
+    "6.2 from nothing": 1.9,
+    "rank core, no prior": 47.4,
+    "rank core, coefficient priors": 31.8
+   },
+   "RANGE first 50": {
+    "null": 0.0,
+    "6.2 with 64-state tables": 7.4,
+    "6.2 from nothing": 2.0,
+    "rank core, no prior": 28.1,
+    "rank core, coefficient priors": 17.9
+   },
+   "RANGE first 100": {
+    "null": 0.0,
+    "6.2 with 64-state tables": 4.5,
+    "6.2 from nothing": 1.5,
+    "rank core, no prior": 20.1,
+    "rank core, coefficient priors": 13.6
+   },
+   "RANGE first 250": {
+    "null": 0.0,
+    "6.2 with 64-state tables": 0.1,
+    "6.2 from nothing": 0.0,
+    "rank core, no prior": 10.5,
+    "rank core, coefficient priors": 5.0
+   },
+   "RANGE first 500": {
+    "null": 0.0,
+    "6.2 with 64-state tables": -1.1,
+    "6.2 from nothing": -0.3,
+    "rank core, no prior": 3.2,
+    "rank core, coefficient priors": -1.0
+   },
+   "RANGE first 1000": {
+    "null": 0.0,
+    "6.2 with 64-state tables": -1.2,
+    "6.2 from nothing": -0.7,
+    "rank core, no prior": 0.9,
+    "rank core, coefficient priors": -2.3
+   }
+  }
+ }
+}
