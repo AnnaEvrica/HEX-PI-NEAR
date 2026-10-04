@@ -2,11 +2,11 @@
 //
 // Runs from the "Nightly Cognition Calibration" workflow. For every tracked
 // series (shared/universe.ts, plus tickers people asked about in chat):
-//   1. score yesterday's calls from both engines against the bar that has
+//   1. score yesterday's calls from both versions of HEX against the bar that has
 //      now finished
-//   2. write down today's calls from both engines, before their outcome
+//   2. write down today's calls from both versions of HEX, before their outcome
 // Then, across all series:
-//   3. refit rank-1's calibration map, pooled over every tracked series
+//   3. refit 6.3's calibration map, pooled over every tracked series
 //   4. summarise each engine's record on the same calls and apply the
 //      promotion rule (shared/ledger.ts)
 //   5. store one EngineStatus row per read: the engine to show, its record,
@@ -48,9 +48,9 @@ Deno.serve(async (req) => {
       const run = runEngines(md.returns, live);
       if (!run) { failed.push(ticker); continue; }
       logged += await logCalls(base44, rowsFor(ticker, bars, md.returns, run, 'nightly'));
-      // rank-1's own scored steps on this series. Every outcome in them is
+      // 6.3's own scored steps on this series. Every outcome in them is
       // already known, so pooling them leaks nothing forward.
-      for (const read of READS) pooled[read].push(...run.rankSteps[read]);
+      for (const read of READS) pooled[read].push(...run.candidateSteps[read]);
     }
 
     const rows = await L.filter({ scored: true }, '-call_date', 5000).catch(() => []);

@@ -17,7 +17,12 @@
 //
 // Learning happens only after an outcome is known: no call sees its future.
 //
-// state-6.2: the control engine (see engines.ts).
+// Two versions of the same engine live here (see engines.ts):
+//   state-6.2  each state's evidence is measured against one decayed base
+//              rate (factor 0.999). The control.
+//   state-6.3  the same formula, measured against the observer's baseline
+//              (observer.ts): base rates at dyadic memories, and for MOVE
+//              the rank rule. Nothing else differs.
 //
 // Walk-forward test, 17 market series, 2016-01 to 2026-09, 46,937 days
 // (validation/field.py, validation/field_results.json):
@@ -29,7 +34,8 @@
 // ===========================================================================
 
 import { PRETRAINED_FAMILIES, PRETRAINED_DIRECTION, PRETRAINED_SIZE } from './pretrainedTables.ts';
-import { fitIsotonic } from './isotonic.ts';
+import { fitIsotonic, applyKnots, Knots } from './isotonic.ts';
+import { observeBaseline } from './observer.ts';
 
 export interface StateProbability {
   p_up: number;            // P(next move is up), calibrated
@@ -132,8 +138,15 @@ function key128(r: number[], i: number): number {
   return (mom << 1) | (pos / 12 > 0.6 ? 1 : 0);
 }
 
-/** Walk the series forward. Returns raw per-step calls (for testing) and the final call. */
-export function walkStateProbability(r: number[]) {
+/** Where state-6.3 takes its baseline from: one entry per step, NaN where the observer has none. */
+export interface Baselines { up: Float64Array; big: Float64Array }
+
+/**
+ * Walk the series forward. Returns raw per-step calls (for testing) and the final call.
+ * Without `baseline` this is state-6.2. With it, state-6.3: a read is made and learned
+ * from only at steps where the observer has a baseline; elsewhere p is NaN.
+ */
+export function walkStateProbability(r: number[], baseline?: Baselines) {
   const n = r.length;
   const a = r.map(Math.abs);
   // running median of |r| over indices < j (needs 20 values)
@@ -162,12 +175,13 @@ export function walkStateProbability(r: number[]) {
 
   for (let i = 12; i < n; i++) {
     const s = key128(r, i);
-    const b = (bu + 1) / (bn + 2);
-    const Pd = fieldCandidates(WD, s, Dd, Nd, b, DELTA_D);
+    const b = baseline ? baseline.up[i] : (bu + 1) / (bn + 2);
+    const dirOn = Number.isFinite(b);
+    const Pd = dirOn ? fieldCandidates(WD, s, Dd, Nd, b, DELTA_D) : null;
     const wd = mixWeights(lld);
-    const p = Pd.reduce((acc, v, k) => acc + wd[k] * v, 0);
-    const sm = i > 25 ? sizeKey(i) : null;
-    const bm = (mu + 1) / (mn + 2);
+    const p = Pd ? Pd.reduce((acc, v, k) => acc + wd[k] * v, 0) : NaN;
+    const bm = baseline ? baseline.big[i] : (mu + 1) / (mn + 2);
+    const sm = i > 25 && Number.isFinite(bm) ? sizeKey(i) : null;
     const Pm = sm !== null ? fieldCandidates(WM, sm, Dm, Nm, bm, DELTA_M) : null;
     const wm = mixWeights(llm);
     const pm = Pm ? Pm.reduce((acc, v, k) => acc + wm[k] * v, 0) : null;
@@ -187,9 +201,11 @@ export function walkStateProbability(r: number[]) {
       for (let k = 0; k < 64; k++) { Dm[k] *= LAM; Nm[k] *= LAM; }
       Dm[sm] += ym - bm; Nm[sm] += 1; mu = mu * LAM + ym; mn = mn * LAM + 1;
     }
-    for (let k = 0; k < NC; k++) lld[k] = G * lld[k] + Math.log(y ? Pd[k] : 1 - Pd[k]);
-    for (let k = 0; k < 128; k++) { Dd[k] *= LAM; Nd[k] *= LAM; }
-    Dd[s] += y - b; Nd[s] += 1; bu = bu * LAM + y; bn = bn * LAM + 1;
+    if (Pd) {
+      for (let k = 0; k < NC; k++) lld[k] = G * lld[k] + Math.log(y ? Pd[k] : 1 - Pd[k]);
+      for (let k = 0; k < 128; k++) { Dd[k] *= LAM; Nd[k] *= LAM; }
+      Dd[s] += y - b; Nd[s] += 1; bu = bu * LAM + y; bn = bn * LAM + 1;
+    }
   }
   return { steps, final };
 }
@@ -222,5 +238,38 @@ export function stateProbability(returns: number[]): StateProbability | null {
     field_big: Number(final.field_big.toFixed(3)),
     family_up: final.family_up,
     family_big: final.family_big,
+  };
+}
+
+/** One scored step of state-6.3: the raw probability and what happened. */
+export interface ScoredStep { p: number; y: number }
+
+export interface AdaptiveProbability {
+  p_up: number; base_up: number;
+  p_big_move: number; base_big: number;
+  history: number;
+  /** Every scored step, for the nightly pooled calibration. */
+  steps: { MOVE: ScoredStep[]; RANGE: ScoredStep[] };
+}
+
+/**
+ * state-6.3: HEX measured against the observer's baseline. `calibration` is
+ * the map the nightly job fits across every tracked series (ledger.ts); in
+ * testing a map pooled across series beat one fitted on the series alone, so
+ * no per-series map is applied.
+ */
+export function adaptiveProbability(returns: number[], calibration?: { MOVE?: Knots | null; RANGE?: Knots | null }): AdaptiveProbability | null {
+  const r = returns.filter((v) => Number.isFinite(v));
+  if (r.length < 28) return null;
+  const baseline = { up: observeBaseline(r, 'MOVE'), big: observeBaseline(r, 'RANGE') };
+  const { steps, final } = walkStateProbability(r, baseline);
+  if (!Number.isFinite(final.p_up) || !Number.isFinite(final.b_up) || !Number.isFinite(final.b_big)) return null;
+  const MOVE = steps.filter((s) => Number.isFinite(s.p_up)).map((s) => ({ p: s.p_up, y: s.y_up }));
+  const RANGE = steps.filter((s) => s.p_big !== null && s.y_big !== null).map((s) => ({ p: s.p_big as number, y: s.y_big as number }));
+  return {
+    p_up: Number(applyKnots(calibration?.MOVE, final.p_up).toFixed(4)), base_up: Number(final.b_up.toFixed(4)),
+    p_big_move: Number(applyKnots(calibration?.RANGE, final.p_big).toFixed(4)), base_big: Number(final.b_big.toFixed(4)),
+    history: MOVE.length,
+    steps: { MOVE, RANGE },
   };
 }

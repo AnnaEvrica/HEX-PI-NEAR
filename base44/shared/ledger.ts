@@ -1,7 +1,8 @@
 // ===========================================================================
 // LEDGER — the learning loop's memory.
 //
-// Every call either engine makes on a tracked series is written down before
+// HEX makes every call, in two versions (engines.ts). Every call either
+// version makes on a tracked series is written down before
 // its outcome exists: the baseline probability, the engine's probability, and
 // what would count as the event. When the next finished daily bar prints, the
 // call is scored. Nothing is replayed or back-filled.
@@ -9,19 +10,19 @@
 // The nightly job (functions/calibrateCognition) then does three things with
 // the scored rows:
 //   1. STATUS     how each engine has done on each read, on the same calls
-//   2. PROMOTION  rank-1 is shown for a read once its probabilities there
+//   2. PROMOTION  6.3 is shown for a read once its probabilities there
 //                 beat 6.2's by a margin that excludes zero AND it is right
 //                 at least as often; it is taken back down when the margin
 //                 the other way excludes zero
 //   3. CALIBRATION  one map per read from stated to observed frequency for
-//                 rank-1, pooled across every tracked series
+//                 6.3, pooled across every tracked series
 // The result is one EngineStatus row per read, which every function reads
 // before it shows a number (loadLive).
 // ===========================================================================
 
 import { CANDIDATE_ENGINE, CONTROL_ENGINE, DEFAULT_LIVE, ENGINES, EngineId, EngineRun, LiveEngines, READS, ReadName } from './engines.ts';
 import { isotonicKnots, Knots } from './isotonic.ts';
-import type { RankStep } from './rankCore.ts';
+import type { ScoredStep } from './stateProbability.ts';
 import { ENGINE_VERSION } from './version.ts';
 
 // ---- the promotion rule, fixed in advance ---------------------------------
@@ -123,7 +124,7 @@ export interface ReadStatus {
   read: ReadName;
   live_engine: EngineId;
   paired_calls: number; paired_days: number;
-  /** Mean log loss of 6.2 minus rank-1 on the same calls, nats. Positive = rank-1 better. */
+  /** Mean log loss of 6.2 minus 6.3 on the same calls, nats. Positive = 6.3 better. */
   gain: number | null; gain_low: number | null; gain_high: number | null;
   /** Share of calls right, on the paired calls. */
   hit_control: number | null; hit_candidate: number | null; hit_baseline: number | null;
@@ -181,21 +182,21 @@ export function summarise(read: ReadName, rows: LedgerRow[], current: EngineId):
   if (!enough) {
     st.reason = `${st.paired_calls} of ${MIN_PAIRED_CALLS} paired calls over ${st.paired_days} of ${MIN_PAIRED_DAYS} days: no decision yet`;
   } else if (current === CONTROL_ENGINE && st.gain_low! > 0 && st.hit_candidate! < st.hit_control!) {
-    st.reason = `rank-1 states better probabilities (gain ${(g * 1000).toFixed(1)}) but is right less often (${(st.hit_candidate! * 100).toFixed(1)}% against ${(st.hit_control! * 100).toFixed(1)}%), so 6.2 stays`;
+    st.reason = `6.3 states better probabilities (gain ${(g * 1000).toFixed(1)}) but is right less often (${(st.hit_candidate! * 100).toFixed(1)}% against ${(st.hit_control! * 100).toFixed(1)}%), so 6.2 stays`;
   } else if (current === CONTROL_ENGINE && st.gain_low! > 0) {
     st.decision = 'promote'; st.live_engine = CANDIDATE_ENGINE;
-    st.reason = `rank-1 beat 6.2 by ${(g * 1000).toFixed(1)} thousandths of a nat per call; the interval excludes zero`;
+    st.reason = `6.3 beat 6.2 by ${(g * 1000).toFixed(1)} thousandths of a nat per call; the interval excludes zero`;
   } else if (current === CANDIDATE_ENGINE && st.gain_high! < 0) {
     st.decision = 'demote'; st.live_engine = CONTROL_ENGINE;
-    st.reason = `rank-1 trailed 6.2 by ${(-g * 1000).toFixed(1)} thousandths of a nat per call; the interval excludes zero`;
+    st.reason = `6.3 trailed 6.2 by ${(-g * 1000).toFixed(1)} thousandths of a nat per call; the interval excludes zero`;
   } else {
     st.reason = `gain ${(g * 1000).toFixed(1)} thousandths of a nat per call; the interval includes zero, so ${current} stays`;
   }
   return st;
 }
 
-/** One calibration map per read for rank-1, pooled across series. Null until there are enough steps. */
-export function pooledCalibration(steps: RankStep[]): Knots | null {
+/** One calibration map per read for 6.3, pooled across series. Null until there are enough steps. */
+export function pooledCalibration(steps: ScoredStep[]): Knots | null {
   if (steps.length < MIN_CALIBRATION_STEPS) return null;
   return isotonicKnots(steps.map((s) => s.p), steps.map((s) => s.y));
 }

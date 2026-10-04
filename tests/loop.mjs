@@ -47,32 +47,32 @@ check('MOVE outcome uses the next bar', mv.outcome === (closes[km + 1] > closes[
 
 for (const read of ['MOVE', 'RANGE']) {
   const st = M.summarise(read, L, 'state-6.2');
-  console.log(`  ${read}: ${st.paired_calls} paired calls over ${st.paired_days} days | right: 6.2 ${(st.hit_control * 100).toFixed(1)}%, rank-1 ${(st.hit_candidate * 100).toFixed(1)}%, baseline rule ${(st.hit_baseline * 100).toFixed(1)}% | gain ${(st.gain * 1000).toFixed(1)} [${(st.gain_low * 1000).toFixed(1)}, ${(st.gain_high * 1000).toFixed(1)}] | ${st.decision}: ${st.reason}`);
+  console.log(`  ${read}: ${st.paired_calls} paired calls over ${st.paired_days} days | right: 6.2 ${(st.hit_control * 100).toFixed(1)}%, 6.3 ${(st.hit_candidate * 100).toFixed(1)}%, baseline rule ${(st.hit_baseline * 100).toFixed(1)}% | gain ${(st.gain * 1000).toFixed(1)} [${(st.gain_low * 1000).toFixed(1)}, ${(st.gain_high * 1000).toFixed(1)}] | ${st.decision}: ${st.reason}`);
   check(`${read}: summary pairs every scored night`, st.paired_calls === NIGHTS && st.paired_days === NIGHTS);
   check(`${read}: decision follows the rule`, (st.decision === 'promote') === (st.gain_low > 0 && st.hit_candidate >= st.hit_control) && st.decision !== 'demote');
 }
 // ---- the rule itself, on made-up rows
 const mk = (n, days, dCtl, dCand) => { const rows = []; for (let i = 0; i < n; i++) { const day = `2026-01-${String(1 + (i % days)).padStart(2, '0')}-${i % days}`; const j = (i * 7919) % 100 / 100 - 0.5;
-  for (const [engine, ll] of [['state-6.2', 0.69 + dCtl + j * 0.05], ['rank-1', 0.69 + dCand + j * 0.05 + ((i * 31) % 10 - 4.5) * 0.002]]) rows.push({ series_id: 'S' + (i % 5), read: 'RANGE', engine, call_date: day + '|' + Math.floor(i / days), scored: true, outcome: 1, probability: 0.6, baseline: 0.55, log_loss: ll }); } return rows; };
-const lessOften = mk(400, 80, 0, -0.02).map((r, i) => (r.engine === 'rank-1' && i % 6 < 2 ? { ...r, probability: 0.4 } : r));
+  for (const [engine, ll] of [['state-6.2', 0.69 + dCtl + j * 0.05], ['state-6.3', 0.69 + dCand + j * 0.05 + ((i * 31) % 10 - 4.5) * 0.002]]) rows.push({ series_id: 'S' + (i % 5), read: 'RANGE', engine, call_date: day + '|' + Math.floor(i / days), scored: true, outcome: 1, probability: 0.6, baseline: 0.55, log_loss: ll }); } return rows; };
+const lessOften = mk(400, 80, 0, -0.02).map((r, i) => (r.engine === 'state-6.3' && i % 6 < 2 ? { ...r, probability: 0.4 } : r));
 check('rule: better probabilities but right less often -> hold', M.summarise('RANGE', lessOften, 'state-6.2').decision === 'hold');
 check('rule: too few calls -> hold', M.summarise('RANGE', mk(200, 70, 0, -0.02), 'state-6.2').decision === 'hold');
-check('rule: enough calls, rank-1 clearly better -> promote', M.summarise('RANGE', mk(400, 80, 0, -0.02), 'state-6.2').decision === 'promote');
+check('rule: enough calls, 6.3 clearly better -> promote', M.summarise('RANGE', mk(400, 80, 0, -0.02), 'state-6.2').decision === 'promote');
 check('rule: enough calls, no difference -> hold', M.summarise('RANGE', mk(400, 80, 0, 0), 'state-6.2').decision === 'hold');
-check('rule: promoted and clearly worse -> demote', M.summarise('RANGE', mk(400, 80, 0, 0.02), 'rank-1').decision === 'demote');
-check('rule: promoted and still better -> stays', M.summarise('RANGE', mk(400, 80, 0, -0.02), 'rank-1').live_engine === 'rank-1');
+check('rule: promoted and clearly worse -> demote', M.summarise('RANGE', mk(400, 80, 0, 0.02), 'state-6.3').decision === 'demote');
+check('rule: promoted and still better -> stays', M.summarise('RANGE', mk(400, 80, 0, -0.02), 'state-6.3').live_engine === 'state-6.3');
 
 // ---- pooled calibration
-const map = M.pooledCalibration(lastRun.rankSteps.RANGE);
+const map = M.pooledCalibration(lastRun.candidateSteps.RANGE);
 check('calibration map is fitted and monotone', !!map && map.y.every((v, i) => i === 0 || v >= map.y[i - 1] - 1e-12) && map.x.every((v, i) => i === 0 || v > map.x[i - 1]));
-check('too few steps -> no map', M.pooledCalibration(lastRun.rankSteps.RANGE.slice(0, 500)) === null);
-const f = M.fitIsotonic(lastRun.rankSteps.RANGE.map((s) => s.p), lastRun.rankSteps.RANGE.map((s) => s.y));
+check('too few steps -> no map', M.pooledCalibration(lastRun.candidateSteps.RANGE.slice(0, 500)) === null);
+const f = M.fitIsotonic(lastRun.candidateSteps.RANGE.map((s) => s.p), lastRun.candidateSteps.RANGE.map((s) => s.y));
 check('stored map reproduces the fitted curve', [0.2, 0.35, 0.5, 0.62, 0.8].every((p) => Math.abs(M.applyKnots(map, p) - f(p)) < 1e-4));
 console.log(`  calibration map: ${map.x.length} knots from ${map.n} steps`);
 
 // ---- loadLive
-await db.EngineStatus.create({ read: 'RANGE', live_engine: 'rank-1', calibration: JSON.stringify(map) });
+await db.EngineStatus.create({ read: 'RANGE', live_engine: 'state-6.3', calibration: JSON.stringify(map) });
 live = await M.loadLive(base44);
-check('loadLive returns the promoted engine and its map', live.RANGE === 'rank-1' && live.MOVE === 'state-6.2' && live.calibration.RANGE.x.length === map.x.length);
+check('loadLive returns the promoted engine and its map', live.RANGE === 'state-6.3' && live.MOVE === 'state-6.2' && live.calibration.RANGE.x.length === map.x.length);
 console.log(`\n${fails ? fails + ' FAILED' : 'ALL PASSED'}`);
 process.exit(fails ? 1 : 0);

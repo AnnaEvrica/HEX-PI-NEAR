@@ -14,7 +14,7 @@
       "type": "string",
       "enum": [
         "state-6.2",
-        "rank-1"
+        "state-6.3"
       ],
       "description": "The engine shown for this read"
     },
@@ -28,7 +28,7 @@
     },
     "gain": {
       "type": "number",
-      "description": "Mean log loss of 6.2 minus rank-1, nats per call. Positive: rank-1 better"
+      "description": "Mean log loss of 6.2 minus 6.3, nats per call. Positive: 6.3 better"
     },
     "gain_low": {
       "type": "number",
@@ -44,7 +44,7 @@
     },
     "hit_candidate": {
       "type": "number",
-      "description": "Share of rank-1 calls right on the paired calls (0-1)"
+      "description": "Share of 6.3 calls right on the paired calls (0-1)"
     },
     "hit_baseline": {
       "type": "number",
@@ -56,7 +56,7 @@
     },
     "stated_candidate": {
       "type": "number",
-      "description": "Mean probability rank-1 stated for the side it called"
+      "description": "Mean probability 6.3 stated for the side it called"
     },
     "decision": {
       "type": "string",
@@ -73,7 +73,7 @@
     },
     "calibration": {
       "type": "string",
-      "description": "JSON: pooled calibration map for rank-1 on this read"
+      "description": "JSON: pooled calibration map for 6.3 on this read"
     },
     "calibration_steps": {
       "type": "number",
@@ -82,7 +82,7 @@
     "promoted_at": {
       "type": "string",
       "format": "date-time",
-      "description": "When rank-1 was last promoted for this read"
+      "description": "When 6.3 was last promoted for this read"
     },
     "engine_version": {
       "type": "string",

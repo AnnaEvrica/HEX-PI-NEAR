@@ -6,8 +6,9 @@
 //       probabilities, in chat and in every scheduled post.
 // 6.2 — the engine comes pre-trained (markets, weather, horse racing) and is
 //       domain-agnostic: a series is never told which family it is.
-// 6.3 — two engines on every call (state-6.2 shown, rank-1 beside it), a
-//       ledger of every call, a nightly update and a promotion rule.
+// 6.3 — HEX in two versions on every call (state-6.2 shown, state-6.3 with
+//       the observer's baseline beside it), a ledger of every call, a nightly
+//       update and a promotion rule.
 export const ENGINE_VERSION = '6.3';
 /** The software people use. */
 export const PRODUCT_NAME = 'HEX [PI]';

@@ -4,47 +4,71 @@
 
 ### What changed
 
-- **Two engines on every call.** `state-6.2` is the control and is what
-  people see. `rank-1` (the rank core) runs beside it. `engines.ts` is the one
-  place they meet.
-- **A ledger.** Every call from both engines on a tracked series is written
+- **HEX makes every call.** An observer (`observer.ts`) watches the series
+  and reports its baseline; it never makes a call. Two versions of HEX run on
+  every read: 6.2 (the control, shown) and 6.3, which measures each state's
+  evidence against the observer's baseline. `engines.ts` is the one place
+  they meet.
+- **A ledger.** Every call from both versions on a tracked series is written
   to `CallLedger` before its outcome exists, and scored on the next finished
   daily bar. It replaces the prediction journal and the calibration scores.
-- **A nightly update** (`calibrateCognition`): scores, logs, refits rank-1's
-  calibration pooled across every tracked series, and applies the promotion
-  rule. One `EngineStatus` row per read holds the result.
+- **A nightly update** (`calibrateCognition`): scores, logs, refits the
+  calibration map pooled across every tracked series, and applies the
+  promotion rule. One `EngineStatus` row per read holds the result.
 - **A promotion rule fixed in advance.** At least 300 calls over 60 days
   scored beside 6.2, a 95% interval for the log-loss gain that excludes zero,
-  and a hit rate at least as high. Demotion by the mirror rule.
+  and a hit rate at least as high. Demotion when the interval the other way
+  excludes zero.
 - **One source for the prompt.** `src/docs/HEX6_BLE_COMPLETE_PROMPT.md` is
   gone. `docs/PROMPT.md` is generated from the code and the tests fail when it
   is stale.
 - `validation/` (scripts, predictions and results; not the data) is now in
   the repository.
 
+An earlier commit the same day (`b31d0ed`) let a separate rank model make
+calls once promoted. That was withdrawn: the rank model is kept only in
+`validation/` as a benchmark.
+
 ### Measured (17 market series, 2016–2026, 46,954 calls per read)
 
-| | 6.2 alone | With the loop |
-|---|---|---|
-| Move-size calls right | 58.8% | 60.1% |
-| Stated on the strongest tenth of calls / actually right | 71.2% / 66.9% | 75.1% / 72.9% |
-| Next-day direction calls right | 51.5% | 51.3% |
+| | HEX 6.2 | HEX 6.3 | Rank model (benchmark, not shipped) |
+|---|---|---|---|
+| Move-size calls right | 58.8% | 60.0% | 60.1% |
+| Strongest tenth of calls: stated / right | 71.2% / 66.9% | 74.6% / 72.0% | 75.1% / 72.9% |
+| Next-day direction calls right | 51.5% | 51.0% | 51.3% |
 
-In the replay rank-1 was promoted for move size after 72 days and never
-demoted; it was ahead of or level with 6.2 in every year. The gain is a step,
-not a climb: accuracy does not keep rising year after year.
+In the replay 6.3 was promoted for move size after 191 days and never
+demoted. The gain is a step, not a climb: accuracy does not keep rising year
+after year.
 
-### Predictions scored (`validation/prereg_core4.md`)
+Other series, share of direction calls right: racing 64.9% (6.2) to 75.0%
+(6.3), which is the rank rule's own level; weather 56.4% for both, where the
+rank model reaches 62.5%. That gap is the one place the rank model sees
+something HEX's six binary lines do not.
+
+### Predictions scored
+
+`validation/prereg_core4.md` (the rank model and calibration):
 
 | # | Prediction | Outcome |
 |---|---|---|
 | 1 | Dyadic base-rate memories match the single drift term | Better on markets (+1.9), worse on weather (-3.2) |
-| 2 | rank-1 beats 6.2 on market move size, at least 60.0% right | Held (60.1%) |
+| 2 | The rank model beats 6.2 on market move size, at least 60.0% right | Held (60.1%) |
 | 3 | Per-series calibration narrows the gap on the strongest calls | Held for the gap; it does not lower log loss |
 | 4 | Pooled calibration is no better than per-series | Failed: pooled is better (+1.5) |
 | 5 | Market direction stays at chance | Held |
-| 6 | A three-way gate is within 0.5 of the better two-way model | Held; it is what ships |
+| 6 | A three-way gate is within 0.5 of the better two-way model | Held |
 | 7 | Pooled calibration still wins with series aligned by date | Held (+1.3) |
+
+`validation/prereg_core5.md` (HEX calls, the rank model only observes):
+
+| # | Prediction | Outcome |
+|---|---|---|
+| 1 | Pooled calibration alone moves the hit rate under 0.3 points and narrows the overstatement under 3 | Held (58.8% to 59.1%; gap 1.0) |
+| 2 | Observer-calibrated HEX reaches 59.7% and does not beat the rank model | Held (59.8%) |
+| 3 | Keeping HEX's side leaves the hit rate at exactly 58.8% | Mis-specified: per-series calibration itself moves sides; 59.5% |
+| 4 | Putting the baseline inside HEX's own formula recovers at least half the gap | Held: 60.0%, nine tenths of it |
+| 5 | Direction stays at chance | Held |
 
 ### Entities no code uses
 

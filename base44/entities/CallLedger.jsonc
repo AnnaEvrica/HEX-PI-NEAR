@@ -18,7 +18,7 @@
       "type": "string",
       "enum": [
         "state-6.2",
-        "rank-1"
+        "state-6.3"
       ],
       "description": "Which engine made the call"
     },

@@ -111,7 +111,7 @@ check('stripeWebhook: wrong signature rejected', await post(now, 'deadbeef') ===
   await new Promise((r) => setTimeout(r, 50));
   const led = writes.filter(w => w.m === 'create' && w.a[0]?.series_id === 'BTC' && w.a[0]?.engine);
   check('think: a ticker read writes four ledger rows (two reads, two engines) before the outcome', led.length === 4 && led.every(w => w.a[0].scored === false && w.a[0].source === 'chat') && led.filter(w => w.a[0].shown).length === 2);
-  check('think: 6.2 is the engine shown until rank-1 is promoted', led.filter(w => w.a[0].shown).every(w => w.a[0].engine === 'state-6.2'));
+  check('think: 6.2 is the engine shown until 6.3 is promoted', led.filter(w => w.a[0].shown).every(w => w.a[0].engine === 'state-6.2'));
   const nightly = await load('calibrateCognition');
   writes.length = 0;
   const q = await call(nightly, null, {});
