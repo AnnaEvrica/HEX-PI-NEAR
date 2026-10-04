@@ -1,3 +1,5 @@
+> **Superseded, 4 October 2026.** This file describes prompt version 6.0. The prompt that runs is built in `base44/shared/persona.ts` and `base44/functions/think/entry.ts` (6.2.2): Claude writes every reply, the web model only retrieves, and no confidence or conviction wording is used. Kept for reference.
+
 # HEX6 BLE — Complete Prompt System (Consolidated)
 
 **Version 6.0 — "The Dragon"**

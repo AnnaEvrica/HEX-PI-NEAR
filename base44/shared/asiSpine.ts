@@ -5,11 +5,13 @@
 // functions). Each verdict is anchored as one link in a hash-chain; the chain
 // makes any later softening or alteration of a past verdict visible on verify.
 //
-// Validators (statistical + expert echoes) run at anchor time. When any
+// Validators run at anchor time. When any
 // validator disagrees, disagreement_flag is set — that is the drift signal
 // the referee / alerting layer subscribes to. Keeping the referee off the
 // per-verdict path (only firing on flagged records) is what keeps LLM credit
 // cost scaling with drift, not volume.
+
+import { ENGINE_NAME } from './version.ts';
 
 const GENESIS = 'GENESIS';
 
@@ -53,7 +55,7 @@ export async function anchorVerdict(base44, input) {
       content,
       validators = [],
       expert_echoes = [],
-      authored_by = 'HEX6_ENGINE',
+      authored_by = ENGINE_NAME,
     } = input;
     if (!verdict_id) return null;
     const SR = base44.asServiceRole.entities.VerdictSpine;

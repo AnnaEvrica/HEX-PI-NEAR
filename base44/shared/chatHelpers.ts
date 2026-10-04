@@ -1,8 +1,9 @@
-// Shared helpers used by both the unified `think` function and the legacy `hex6Chat`.
-// Extracted to honor Law 2 (one intelligence) and the no-duplication platform rule.
+// Shared helpers for the `think` chat function: source-link checking and the
+// compressed per-user memory update.
+import { CLAUDE_MODEL } from './modelRouter.ts';
 
 // Filter + dedupe source links, rejecting malformed/hallucinated URLs.
-export function filterSourcesBlock(sources) {
+function filterSourcesBlock(sources) {
   if (!sources || !Array.isArray(sources) || sources.length === 0) return '';
   const urlOk = (u) => {
     try {
@@ -41,7 +42,7 @@ async function urlResolves(url) {
         method,
         redirect: 'follow',
         signal: ctrl.signal,
-        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; HEX6-BLE citation check)' },
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; HEX [PI] citation check)' },
       });
       // Only a definitive "this page does not exist" disqualifies a source.
       // Publishers routinely answer automated requests with 403/405/429 while
@@ -92,11 +93,11 @@ export async function verifiedSourcesBlock(sources) {
 export function updateMemory(base44, user, existing, message, response) {
   (async () => {
     try {
-      const lastSnippet = `User: ${message.slice(0, 300)} | HEX6 BLE: ${response.slice(0, 300)}`;
+      const lastSnippet = `User: ${message.slice(0, 300)} | HEX [PI]: ${response.slice(0, 300)}`;
       const newTotal = (existing?.total_conversations || 0) + 1;
       const memoryUpdate = await base44.integrations.Core.InvokeLLM({
-        prompt: `Maintain compressed memory for HEX6 BLE about this user.\n\nEXISTING SUMMARY: ${existing?.memory_summary || 'None.'}\nEXISTING TOPICS: ${existing?.topics_discussed || 'None.'}\nEXISTING STYLE: ${existing?.user_style || 'Unknown.'}\n\nNEW EXCHANGE:\nUser: ${message}\nHEX6 BLE: ${response.slice(0, 500)}\n\nReturn JSON only:\n- memory_summary: concise paragraph (max 200 words)\n- topics_discussed: comma-separated topics/assets/themes\n- user_style: one paragraph on their communication style`,
-        model: 'gemini_3_flash',
+        prompt: `Maintain compressed memory for HEX [PI] about this user.\n\nEXISTING SUMMARY: ${existing?.memory_summary || 'None.'}\nEXISTING TOPICS: ${existing?.topics_discussed || 'None.'}\nEXISTING STYLE: ${existing?.user_style || 'Unknown.'}\n\nNEW EXCHANGE:\nUser: ${message}\nHEX [PI]: ${response.slice(0, 500)}\n\nReturn JSON only:\n- memory_summary: concise paragraph (max 200 words)\n- topics_discussed: comma-separated topics/assets/themes\n- user_style: one paragraph on their communication style`,
+        model: CLAUDE_MODEL,
         response_json_schema: { type: 'object', properties: { memory_summary: { type: 'string' }, topics_discussed: { type: 'string' }, user_style: { type: 'string' } } },
       });
       const memoryData = {

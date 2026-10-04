@@ -1,59 +1,87 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useRef, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
+import { redirectPending } from '@/lib/authPending';
 
 const AuthContext = createContext();
+
+const hasStoredToken = () => {
+  try {
+    return !!(localStorage.getItem('base44_access_token') || localStorage.getItem('token'));
+  } catch {
+    return false;
+  }
+};
+
+const statusOf = (err) => err?.status ?? err?.response?.status ?? null;
+
+// Base44 answers 403 with this reason when the account exists on the platform
+// but has not been added to this app.
+const isNotRegisteredError = (err) => {
+  const reason = err?.data?.extra_data?.reason ?? err?.response?.data?.extra_data?.reason;
+  return statusOf(err) === 403 && reason === 'user_not_registered';
+};
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isNotRegistered, setIsNotRegistered] = useState(false);
+  // Only one session check runs at a time; later callers share its result.
+  const inFlight = useRef(null);
+
+  const userRef = useRef(null);
+
+  const checkAuth = useCallback(({ attempts } = {}) => {
+    if (inFlight.current) return inFlight.current;
+    const run = (async () => {
+      // Retrying is only useful right after a sign-in or checkout redirect,
+      // which always lands on /app. Everywhere else one request settles it,
+      // so a signed-out visitor never waits on a spinner.
+      const pending = redirectPending() && window.location.pathname.startsWith('/app');
+      const tries = attempts ?? (pending ? 8 : hasStoredToken() ? 2 : 1);
+      let lastStatus = null;
+      try {
+        for (let attempt = 1; attempt <= tries; attempt++) {
+          try {
+            const currentUser = await base44.auth.me();
+            userRef.current = currentUser;
+            setUser(currentUser);
+            setIsNotRegistered(false);
+            return currentUser;
+          } catch (err) {
+            lastStatus = statusOf(err);
+            if (isNotRegisteredError(err)) {
+              userRef.current = null;
+              setUser(null);
+              setIsNotRegistered(true);
+              return null;
+            }
+            // 401 is a definite "signed out" unless a redirect is still settling.
+            if (lastStatus === 401 && !pending) break;
+            if (attempt < tries) await sleep(800);
+          }
+        }
+        // A network blip or server error is not a sign-out: keep the person
+        // who is already signed in.
+        const definite = lastStatus === 401 || lastStatus === 403;
+        if (userRef.current && !definite) return userRef.current;
+        userRef.current = null;
+        setUser(null);
+        setIsNotRegistered(false);
+        return null;
+      } finally {
+        setIsLoading(false);
+        inFlight.current = null;
+      }
+    })();
+    inFlight.current = run;
+    return run;
+  }, []);
 
   useEffect(() => {
     checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
-    try {
-      // Fast path: if there's no auth token at all, the user is logged out.
-      // Skip the 8-retry me() loop entirely — otherwise a logged-out visitor
-      // stares at a spinner for 5.6s before the landing page appears.
-      // Only retry me() when isAuthenticated() says there IS a session but
-      // me() keeps failing (the post-OAuth / Stripe checkout token
-      // propagation delay case).
-      let isAuth = false;
-      try { isAuth = await base44.auth.isAuthenticated(); } catch { /* transient */ }
-
-      if (isAuth) {
-        // There's a session — me() should work, but may need retries during
-        // token propagation (post-OAuth, post-Stripe-checkout redirect).
-        let recovered = false;
-        for (let attempt = 1; attempt <= 8 && !recovered; attempt++) {
-          try {
-            if (attempt > 1) await new Promise((r) => setTimeout(r, 800));
-            const currentUser = await base44.auth.me();
-            setUser(currentUser);
-            setIsNotRegistered(false);
-            recovered = true;
-          } catch (meErr) {
-            if (attempt < 8) continue;
-            // Authenticated but me() keeps failing → genuinely unregistered
-            setUser(null);
-            setIsNotRegistered(true);
-          }
-        }
-      } else {
-        // No session — logged out. Show the landing page immediately.
-        setUser(null);
-        setIsNotRegistered(false);
-      }
-    } catch (err) {
-      console.error('Auth check error:', err);
-      setUser(null);
-      setIsNotRegistered(false);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [checkAuth]);
 
   const logout = async () => {
     try {

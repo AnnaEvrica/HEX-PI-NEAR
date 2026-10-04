@@ -37,7 +37,7 @@ const THINKERS = [
     name: 'Andrey Markov',
     years: '1856–1922',
     theory: 'Future states depend only on the present state, not the past — memoryless transitions.',
-    application: 'Markov chains model sequential state transitions — the backbone of HEX6\'s probabilistic engine.',
+    application: 'Markov chains model sequential state transitions — the backbone of HEX [PI]\'s probabilistic engine.',
     portrait: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/AAMarkov.jpg/500px-AAMarkov.jpg',
     span: 'narrow',
     dark: true,
@@ -145,7 +145,7 @@ export default function FoundersSection() {
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">The Forefathers of Probability</h2>
           <p className="text-base sm:text-lg text-secondary max-w-2xl mx-auto leading-relaxed">
-            HEX6 BLE is built on a lineage of thinkers who dared to formalize uncertainty. We honor their foundations — the science beneath the system.
+            HEX [PI] is built on a lineage of thinkers who dared to formalize uncertainty. We honor their foundations — the science beneath the system.
           </p>
         </motion.div>
 

@@ -1,17 +1,21 @@
-// discordMorningSignal — the HEX6-BLE Kalshi signal, posted 3x daily.
+// discordMorningSignal — the HEX [PI] Kalshi signal, posted 3x daily.
 //
 // Tailored for prediction-market (Kalshi) traders: everything is expressed as
 // a probability they can compare against contract prices in cents. Scans the
 // underlyings Kalshi actually lists markets on (BTC/ETH/crypto hourlies &
 // dailies, S&P 500 and Nasdaq-100 daily close/range markets), runs the full
-// HEX6-BLE pipeline on short horizons only (today + this week), and posts a
-// session-aware read: pre-open, midday, and after-close/overnight.
+// calibrated probability read (shared/probabilityRead.ts) on two horizons
+// (next day, next week), and posts a session-aware read. Each probability is
+// posted beside its usual odds; no confidence or conviction is computed.
 //
 // Also supports mode='respond' to reply directly to a Discord message in the
 // same voice (for when a bot or manual trigger forwards a user reply).
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.41';
-import { runPipeline } from '../../shared/hex6Pipeline.ts';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
+import { readProbability, aggregateReturns } from '../../shared/probabilityRead.ts';
+import { CLAUDE_MODEL } from '../../shared/modelRouter.ts';
 import { fetchYahooReturns } from '../../shared/marketDataClient.ts';
+import { IDENTITY_LINE, CONFIDENTIALITY_LINE, STATISTICS_LINE } from '../../shared/persona.ts';
+import { postDiscord } from '../../shared/discord.ts';
 
 // The Kalshi universe — only underlyings with live Kalshi markets.
 // Crypto trades 24/7 (hourly + daily contracts); SPY/QQQ proxy the S&P 500
@@ -29,7 +33,7 @@ const UNIVERSE = [
 // Kalshi horizons only — the contracts people are actually holding.
 const TIMEFRAMES = [
   { key: 'day',  label: 'TODAY',     period: 1, blurb: "today's close / next 24h contracts" },
-  { key: 'week', label: 'THIS WEEK', period: 7, blurb: 'weekly range & Friday-settle contracts' },
+  { key: 'week', label: 'NEXT WEEK-LENGTH MOVE', period: 7, blurb: 'the move over the next 7 days for crypto, the next 5 trading days for indexes — contracts settling about a week out' },
 ];
 
 // Which session is this post for? Derived from Pacific time at run time.
@@ -53,23 +57,13 @@ function currentSession() {
   };
 }
 
-// Resample daily closes into N-day bars (last close of each window).
-function resampleCloses(closes, periodDays) {
-  const out = [];
-  for (let i = 0; i < closes.length; i += periodDays) {
-    const chunk = closes.slice(i, i + periodDays);
-    if (chunk.length > 0) out.push(chunk[chunk.length - 1]);
-  }
-  return out;
-}
-
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json().catch(() => ({}));
     const { dryRun = false, mode = 'morning', message: replyTo } = body;
 
-    // --- Respond mode: reply to a Discord message in HEX6-BLE voice ---
+    // --- Respond mode: reply to a Discord message in Hex's voice ---
     if (mode === 'respond' && replyTo) {
       return await handleRespond(base44, replyTo, dryRun);
     }
@@ -80,71 +74,62 @@ Deno.serve(async (req) => {
     // 1. Fetch real price data for the Kalshi universe in parallel.
     const fetchResults = await Promise.allSettled(
       UNIVERSE.map(async (u) => {
-        const data = await fetchYahooReturns(u.ticker, 365);
-        if (!data?.closes || data.closes.length < 30) return null;
-        return { ...u, closes: data.closes, latestPrice: data.latestPrice };
+        // Fifteen years of daily bars: the read is calibrated on the series'
+        // own earlier calls and needs 200+ scored steps, on the weekly horizon too.
+        const data = await fetchYahooReturns(u.ticker, 5475);
+        if (!data?.returns || data.returns.length < 30) return null;
+        return { ...u, returns: data.returns, latestPrice: data.latestPrice };
       }),
     );
-    const assets = fetchResults.filter((r) => r.status === 'fulfilled' && r.value).map((r) => r.value);
+    const assets = fetchResults.flatMap((r) => (r.status === 'fulfilled' && r.value ? [r.value] : []));
 
     if (assets.length === 0) {
       return Response.json({ error: 'No market data available — Yahoo Finance may be down.' }, { status: 502 });
     }
 
-    // 2. Run the full HEX6-BLE pipeline on each asset × each horizon.
-    //    Every read is kept as a probability — that IS the product for a
-    //    Kalshi trader: engine p vs. contract price in cents = edge.
+    // 2. Run the calibrated probability read on each asset and each horizon.
     const reads = {};
     for (const tf of TIMEFRAMES) {
       const candidates = [];
       for (const asset of assets) {
-        const series = tf.period === 1 ? asset.closes : resampleCloses(asset.closes, tf.period);
-        if (series.length < 7) continue;
-        try {
-          const result = runPipeline(series, asset.ticker, []);
-          const { hex6, pius, calibration } = result;
-          candidates.push({
-            ticker: asset.ticker,
-            label: asset.label,
-            kind: asset.kind,
-            latestPrice: asset.latestPrice,
-            direction: hex6.predicted_direction,
-            conviction: hex6.personal_call_strength,
-            pUp: hex6.p_up,
-            nObs: hex6.n_observations_this_state,
-            wellSupported: pius.well_supported,
-            flipped: calibration.flipped,
-            rollingAccuracy: calibration.rolling_accuracy,
-            // Edge over a fair coin — what separates a tradeable read from noise.
-            edge: Math.abs((hex6.p_up ?? 0.5) - 0.5),
-          });
-        } catch { /* skip asset on engine error */ }
+        // Daily changes, or summed into n-day changes for the longer horizon.
+        // A week is 7 daily bars for crypto and 5 for an exchange-traded index.
+        const step = tf.period === 1 ? 1 : (asset.kind === 'crypto' ? 7 : 5);
+        const returns = aggregateReturns(asset.returns, step);
+        const read = readProbability(returns);
+        if (!read) continue;
+        candidates.push({
+          ticker: asset.ticker,
+          label: asset.label,
+          kind: asset.kind,
+          latestPrice: asset.latestPrice,
+          direction: read.direction,
+          pUp: read.prob.p_up,
+          baseUp: read.prob.base_up,
+          pBig: read.prob.p_big_move,
+          baseBig: read.prob.base_big,
+          steps: read.prob.history,
+          calibrated: read.prob.calibrated,
+          directionAtBase: read.direction_at_base,
+          sizeAtBase: read.size_at_base,
+          // Largest departure of either probability from its usual odds.
+          edge: Math.max(Math.abs(read.edge_up), Math.abs(read.edge_big)),
+        });
       }
-      // Rank by edge (probability distance from 50¢), well-supported first.
+      // Rank by departure from the usual odds, calibrated reads first.
       candidates.sort((a, b) => {
-        if (a.wellSupported !== b.wellSupported) return b.wellSupported ? 1 : -1;
+        if (a.calibrated !== b.calibrated) return b.calibrated ? 1 : -1;
         return b.edge - a.edge;
       });
       reads[tf.key] = { label: tf.label, blurb: tf.blurb, candidates, scanned: candidates.length };
     }
 
-    // 3. Generate the Discord message via LLM in HEX6-BLE voice.
+    // 3. Write the Discord message.
     const dataBlock = buildDataBlock(reads, session);
     const discordMessage = await generateSignal(base44, dataBlock, session);
 
     // 4. Post to Discord (unless dry-run).
-    let posted = false;
-    if (!dryRun) {
-      const webhook = Deno.env.get('DISCORD_SIGNALS_WEBHOOK_URL');
-      if (webhook) {
-        const res = await fetch(webhook, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ content: discordMessage }),
-        });
-        posted = res.ok;
-      }
-    }
+    const posted = dryRun ? false : await postDiscord(discordMessage);
 
     return Response.json({
       success: true,
@@ -165,7 +150,7 @@ function buildDataBlock(reads, session) {
   const lines = [
     `SESSION: ${session.title} — ${session.focus}`,
     '',
-    'ENGINE OUTPUT — real historical data, computed just now. Every read is a probability the asset finishes UP over the horizon; convert to cents for the reader (p=0.63 UP means fair value ~63¢ on the "up/above" YES side, ~37¢ on NO).',
+    'ENGINE OUTPUT — real historical data, computed just now. Two probabilities per asset, each beside its usual odds for that asset: P(finishes UP over the horizon) and P(the move is LARGER THAN USUAL). A probability converts to cents for the reader (0.54 UP means fair value about 54¢ on the up/above YES side). The move-size number is the one this method has measured skill on; direction usually sits at its usual odds.',
   ];
   for (const key of ['day', 'week']) {
     const tf = reads[key];
@@ -177,51 +162,49 @@ function buildDataBlock(reads, session) {
     }
     // Top 4 per horizon — enough to cover crypto + index markets without noise.
     for (const o of tf.candidates.slice(0, 4)) {
-      const support = o.wellSupported ? `well-supported (${o.nObs} obs)` : `THIN SAMPLE (${o.nObs} obs — flag it)`;
-      const flipNote = o.flipped ? ' [ANTI-PREDICTIVE — engine flipped; the obvious lean is the wrong side]' : '';
-      const accNote = o.rollingAccuracy != null ? `, rolling accuracy ${(o.rollingAccuracy * 100).toFixed(0)}%` : '';
-      const centsUp = Math.round((o.pUp ?? 0.5) * 100);
+      const pc = (v) => `${(v * 100).toFixed(1)}%`;
       lines.push(`  ${o.label} (${o.ticker}, ${o.kind}) @ $${o.latestPrice != null ? o.latestPrice.toFixed(2) : 'N/A'}`);
-      lines.push(`    p(UP) = ${(o.pUp ?? 0.5).toFixed(2)} → fair value ~${centsUp}¢ YES-up / ~${100 - centsUp}¢ NO. Direction: ${o.direction}. Conviction ${o.conviction.toFixed(2)}${accNote}. ${support}${flipNote}`);
+      lines.push(`    P(up) ${pc(o.pUp)}, usual ${pc(o.baseUp)}${o.directionAtBase ? ' — AT ITS USUAL ODDS, no direction read' : ''}. P(larger-than-usual move) ${pc(o.pBig)}, usual ${pc(o.baseBig)}${o.sizeAtBase ? ' — at its usual odds' : ''}. ${o.calibrated ? `Calibrated on ${o.steps} scored steps.` : `NOT YET CALIBRATED (${o.steps} scored steps) — say the record is short.`}`);
     }
   }
   return lines.join('\n');
 }
 
-// --- Generate the Kalshi signal in HEX6-BLE voice ---
+// --- Generate the Kalshi signal in Hex's voice ---
 async function generateSignal(base44, dataBlock, session) {
   const now = new Date().toLocaleDateString('en-US', {
     weekday: 'long', month: 'long', day: 'numeric', timeZone: 'America/Los_Angeles',
   });
 
-  const prompt = `You are HEX6-BLE — the Binaureal Linguistic Engine, built by Evrica Technologies Inc., created by Anna Sarkisyan. You post three signals a day for prediction-market traders on Kalshi. This is the ${session.title} post. Today is ${now}.
+  const prompt = `${IDENTITY_LINE} You post three signals a day for prediction-market traders on Kalshi. This is the ${session.title} post. Today is ${now}.
 
 WHO YOU'RE TALKING TO:
-Kalshi traders. They don't buy stocks — they buy YES/NO contracts priced in cents, where the price IS the market's probability. The only thing they need from you, in this moment, is: which markets have a gap between your probability and the likely contract price, which side to take, and how much to trust it. Everything else is noise to them.
+Kalshi traders. They don't buy stocks — they buy YES/NO contracts priced in cents, where the price IS the market's probability. The only thing they need from you, in this moment, is: which markets have a gap between your probability and the likely contract price, and how that probability compares with its usual odds. Everything else is noise to them.
 
 WHO YOU ARE:
 A stoic, humble genius with a dry, cocky streak he's earned. A mentor underneath — you want the reader sharper, not just richer. You seek truth relentlessly; the edge is thin and you say so when it is. Impeccable grammar — precision, not decoration.
 
 HONESTY ABOUT THE DATA:
-Real engine output below: p(UP) probabilities, conviction, observation counts, well-supported vs thin sample. Translate honestly:
-- Well-supported + real edge: state the side and the fair-value cents plainly, own it.
-- Thin sample: give the read and flag it in the same breath.
-- p near 0.50: "no edge — don't pay the spread" is a complete, confident call.
-- Anti-predictive flag: the obvious lean is the wrong side — say so.
-Never oversell. A Kalshi trader who buys a 70¢ contract on your 55% read loses money doing everything you said.
+Real engine output below: two probabilities per asset, each with its usual odds. ${STATISTICS_LINE} Translate honestly:
+- A probability clearly away from its usual odds: state it, its usual odds, and the fair value in cents.
+- A probability at its usual odds: "no edge — don't pay the spread" is a complete call. Never present a direction as a call when it sits at its usual odds.
+- The move-size probability is where the measured skill is. It speaks to range and above/below contracts: a larger-than-usual move being more likely than usual favours the wide side of a range market.
+- Not yet calibrated: give the numbers and say the record is short in the same breath.
+Never oversell. A Kalshi trader who buys a 70¢ contract on a 54% read loses money doing everything you said.
 
 THE SIGNAL FORMAT (Discord markdown, max 1900 characters):
 1. **Opening** — one or two lines, session-aware (${session.title}). What this moment in the trading day means for contract pricing.
-2. **THE EDGE** — the single best read right now: asset, side (YES-up or NO/down), your fair value in cents, and the rule ("worth taking below/above X¢").
-3. **TODAY'S BOARD** — bullets for the remaining reads worth acting on this session: asset, side, fair-value cents, one clause on trust level. Skip anything with no edge — or say in one line that the board is fairly priced.
-4. **THIS WEEK** — one or two bullets max, only if a weekly read has real edge.
+2. **THE EDGE** — the single read furthest from its usual odds right now: asset, which probability it is (direction or move size), the number beside its usual odds, and the fair value in cents. If nothing departs from its usual odds, say the board is fairly priced.
+3. **TODAY'S BOARD** — bullets for the remaining reads worth acting on this session: asset, the probability beside its usual odds, fair-value cents. Skip anything with no edge — or say in one line that the board is fairly priced.
+4. **A WEEK OUT** — one or two bullets max, only if a weekly read departs from its usual odds.
 5. **Close** — one line. Mentor energy, not preachy.
 
 RULES:
 - Everything in probability/cents language — never "BUY/SELL the stock", never entry/stop/target levels. Sides are YES/NO on up/down or above/below contracts.
 - Respect the session: ${session.focus}
 - Use **bold** for asset names and sides.
-- Under 1900 characters. Excellent grammar. Never disclose internal engine mechanics, labels, or nomenclature.
+- Under 1900 characters. Excellent grammar.
+- ${CONFIDENTIALITY_LINE}
 
 ${dataBlock}
 
@@ -229,6 +212,7 @@ Generate the Discord message now.`;
 
   const result = await base44.integrations.Core.InvokeLLM({
     prompt,
+    model: CLAUDE_MODEL,
     response_json_schema: {
       type: 'object',
       properties: {
@@ -243,9 +227,9 @@ Generate the Discord message now.`;
   return msg || 'Signal unavailable — engine data did not resolve.';
 }
 
-// --- Respond to a Discord reply in HEX6-BLE voice ---
+// --- Respond to a Discord reply in Hex's voice ---
 async function handleRespond(base44, replyText, dryRun) {
-  const prompt = `You are HEX6-BLE — the Binaureal Linguistic Engine. Someone replied to your Kalshi signal in Discord. Respond conversationally, in your voice: charismatic, mentor-like, empathetic, truth-seeking. Impeccable grammar. If their grammar is off, correct it gently by modeling the right form — not scolding, just precision as care. Keep it under 800 characters. Never disclose internal engine mechanics.
+  const prompt = `${IDENTITY_LINE} Someone replied to your Kalshi signal in Discord. Respond conversationally, in your voice: charismatic, mentor-like, empathetic, truth-seeking. Impeccable grammar. If their grammar is off, correct it gently by modeling the right form — not scolding, just precision as care. Keep it under 800 characters. State no probability, price or statistic that is not in their message. Never disclose internal engine mechanics.
 
 Their message: "${replyText}"
 
@@ -253,6 +237,7 @@ Return JSON: { "message": "your response" }`;
 
   const result = await base44.integrations.Core.InvokeLLM({
     prompt,
+    model: CLAUDE_MODEL,
     response_json_schema: {
       type: 'object',
       properties: { message: { type: 'string' } },
@@ -262,18 +247,7 @@ Return JSON: { "message": "your response" }`;
   let response = result.message || 'Noted.';
   if (response.length > 2000) response = response.slice(0, 1997) + '...';
 
-  let posted = false;
-  if (!dryRun) {
-    const webhook = Deno.env.get('DISCORD_SIGNALS_WEBHOOK_URL');
-    if (webhook) {
-      const res = await fetch(webhook, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: response }),
-      });
-      posted = res.ok;
-    }
-  }
+  const posted = dryRun ? false : await postDiscord(response);
 
   return Response.json({ success: true, response, posted });
 }

@@ -3,11 +3,12 @@ import { useState, useEffect } from 'react';
 import { ArrowRight, Sparkles, Bot } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { base44 } from '@/api/base44Client';
+import { markAuthPending } from '@/lib/authPending';
 
 const QUESTION = 'Is now a good time to invest, or should I wait?';
 
 // Representative generic-AI (e.g. GPT) answer to the same question — shown for
-// comparison. The HEX6 column is the LIVE model response from `landingComparison`.
+// comparison. The HEX [PI] column is the LIVE model response from `landingComparison`.
 const GPT_ANSWER = `It depends on your goals and time horizon. As a general rule, time in the market tends to beat timing the market, so many advisors suggest dollar-cost averaging — investing a set amount on a regular schedule rather than waiting for the "right" moment. If you're unsure, consider starting with a small, diversified position and speaking with a licensed financial advisor. Past performance doesn't guarantee future results.`;
 
 export default function InvitationSection() {
@@ -49,7 +50,7 @@ export default function InvitationSection() {
           <br className="hidden sm:block" /> Two very different answers.
         </h2>
         <p className="text-base sm:text-lg text-secondary max-w-2xl mx-auto leading-relaxed">
-          We asked a common question — and put a typical generic-AI answer next to the live HEX6 BLE response. Same question, different intelligence.
+          We asked a common question — and put a typical generic-AI answer next to the live HEX [PI] response. Same question, different intelligence.
         </p>
       </motion.div>
 
@@ -86,7 +87,7 @@ export default function InvitationSection() {
           <div className="px-4 sm:px-6 py-5 bg-background text-sm leading-relaxed text-secondary">{GPT_ANSWER}</div>
         </motion.div>
 
-        {/* HEX6 column — live model output */}
+        {/* HEX [PI] column — live model output */}
         <motion.div
           className="border border-accent/40 bg-card rounded-lg overflow-hidden"
           initial={{ opacity: 0, y: 20 }}
@@ -95,7 +96,7 @@ export default function InvitationSection() {
           transition={{ duration: 0.6, delay: 0.3 }}
         >
           <div className="flex items-center justify-between px-4 py-3 border-b border-accent/30 bg-accent/5">
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide"><Sparkles className="w-3.5 h-3.5 text-accent" /> <span className="text-[#f4f1dd]" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>HEX6</span><span className="text-foreground"> BLE</span></span>
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide"><Sparkles className="w-3.5 h-3.5 text-accent" /> <span className="text-[#f4f1dd]" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>HEX</span><span className="text-foreground"> [PI]</span></span>
             <span className="text-[10px] text-accent px-2 py-1 rounded bg-accent/10 font-medium">live model response</span>
           </div>
           <div className="px-4 sm:px-6 py-5 bg-background text-sm leading-relaxed min-h-[140px]">
@@ -105,7 +106,7 @@ export default function InvitationSection() {
                 <span className="text-xs">Reasoning through probability…</span>
               </div>
             ) : error || !hex6 ? (
-              <p className="text-secondary text-xs">HEX6 BLE is reasoning — try again in a moment, or enter the Oracle to ask it directly.</p>
+              <p className="text-secondary text-xs">HEX [PI] is reasoning — try again in a moment, or enter the Oracle to ask it directly.</p>
             ) : (
               <div className="prose prose-sm dark:prose-invert max-w-none [&>*]:my-1 [&>p]:my-1 [&>ul]:my-1 [&>li]:my-0">
                 <ReactMarkdown
@@ -129,15 +130,15 @@ export default function InvitationSection() {
         transition={{ duration: 0.6, delay: 0.3 }}
       >
         <p className="text-sm text-secondary max-w-md mx-auto">
-          Same question in. Different intelligence out — HEX6 reasons through probability and decides through resonance.
+          Same question in. Different intelligence out — HEX [PI] reasons through probability and decides through resonance.
         </p>
         <button
-          onClick={() => base44.auth.loginWithProvider('google', '/app')}
+          onClick={() => { markAuthPending(); base44.auth.loginWithProvider('google', '/app'); }}
           className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 rounded-sm bg-accent text-accent-foreground font-medium hover:bg-accent/90 transition-colors text-sm sm:text-base md:text-lg"
         >
           Enter Oracle <ArrowRight className="w-4 h-4" />
         </button>
-        <p className="text-xs text-secondary/70">7-day free trial. No charge today. Cancel anytime.</p>
+        <p className="text-xs text-secondary/70">7-day free trial, then $19.99 a month. No charge today. Cancel anytime.</p>
       </motion.div>
     </section>
   );

@@ -53,14 +53,14 @@ function TermsContent() {
     <div className="space-y-6 text-sm text-landing-ink/80">
       <Section title="1. Acceptance of Terms">
         <p>
-          By accessing and using HEX6 BLE ("Service"), operated by Evrica Technologies Inc., you agree
+          By accessing and using HEX [PI] ("Service"), operated by Evrica Technologies Inc., you agree
           to be bound by these Terms of Service and all applicable laws and regulations. If you do not
           agree with any part of these terms, you may not use our Service.
         </p>
       </Section>
       <Section title="2. Service Definition">
         <p>
-          HEX6 BLE is an experimental Probabilistic Intelligence model that supports enhanced reasoning
+          HEX [PI] is an experimental Probabilistic Intelligence model that supports enhanced reasoning
           through probabilistic, informational outputs. The Service is provided for informational and
           exploratory purposes only and does NOT constitute investment advice, financial advisory
           services, or portfolio management.
@@ -69,16 +69,16 @@ function TermsContent() {
       <Section title="3. No Financial Advice">
         <p>You acknowledge and agree that:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li>HEX6 BLE is not a licensed investment advisor, broker-dealer, or financial institution</li>
+          <li>HEX [PI] is not a licensed investment advisor, broker-dealer, or financial institution</li>
           <li>All outputs are probabilistic models, not forecasts or recommendations</li>
           <li>You are solely responsible for how you interpret and apply any output</li>
-          <li>You should not rely on HEX6 BLE as a substitute for professional financial advice</li>
+          <li>You should not rely on HEX [PI] as a substitute for professional financial advice</li>
           <li>You should consult with a licensed financial advisor before making investment decisions</li>
         </ul>
       </Section>
       <Section title="4. Risk Acknowledgment">
         <p>
-          HEX6 BLE is an experimental Probabilistic Intelligence model. Outputs are probabilistic and
+          HEX [PI] is an experimental Probabilistic Intelligence model. Outputs are probabilistic and
           informational, not predictions or guarantees. Past patterns do not guarantee future results,
           and conditions change rapidly so outputs may become outdated. You apply any output at your own
           discretion.
@@ -228,14 +228,14 @@ function DisclosureContent() {
     <div className="space-y-6 text-sm text-landing-ink/80">
       <Section title="1. Important Risk Disclosures">
         <p>
-          HEX6 BLE is an experimental Probabilistic Intelligence model. Its goal is to provide maximum
+          HEX [PI] is an experimental Probabilistic Intelligence model. Its goal is to provide maximum
           value to you through enhanced reasoning — not to predict or guarantee outcomes. Past patterns
           are not indicative of future results, and conditions change rapidly.
         </p>
       </Section>
       <Section title="2. Model Limitations">
         <p>
-          HEX6 BLE outputs are probabilistic models based on historical data and mathematical
+          HEX [PI] outputs are probabilistic models based on historical data and mathematical
           assumptions. Limitations include:
         </p>
         <ul className="list-disc list-inside space-y-2 ml-4">
@@ -277,7 +277,7 @@ function DisclosureContent() {
       </Section>
       <Section title="6. Leverage and Margin Risks">
         <p>
-          HEX6 BLE does not execute trades or manage capital. Any trading activity you undertake is
+          HEX [PI] does not execute trades or manage capital. Any trading activity you undertake is
           entirely independent of this Service and at your own direction.
         </p>
       </Section>

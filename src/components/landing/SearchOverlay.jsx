@@ -7,8 +7,8 @@ import { X, Search } from 'lucide-react';
 // keyboard accessible (Esc closes, Enter opens first result), smooth-scrolls.
 const INDEX = [
   { title: 'The Model — Hero', keywords: 'probabilistic intelligence model hero welcome evrica', target: 'top' },
-  { title: 'Two Minds, One Model — HEX6-BLE', keywords: 'mirror reason understand operators hex6 cognitive', target: 'mirror' },
-  { title: 'See it live — HEX6 vs generic AI', keywords: 'comparison invitation live demo gpt generic side by side', target: 'invitation' },
+  { title: 'Two Minds, One Model — HEX [PI]', keywords: 'mirror reason understand operators hex hex6 cognitive', target: 'mirror' },
+  { title: 'See it live — HEX [PI] vs generic AI', keywords: 'comparison invitation live demo gpt generic side by side', target: 'invitation' },
   { title: 'Forefathers of Probability', keywords: 'founders thinkers pascal bayes markov history probability', target: 'founders' },
   { title: 'How It Works — The odds are in your favor', keywords: 'system comparison adaptability uncertainty regime radar chart', target: 'how-it-works' },
   { title: 'Structural Difference', keywords: 'uncertainty advantage structure prediction advisory black box', target: 'structural' },

@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import { secrets } from 'base44:runtime';
 
 // Public contact/inquiry endpoint — the landing page is public, so this
@@ -33,7 +33,9 @@ export default async function(req: Request): Promise<Response> {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            content: `📬 **New inquiry — HEX6 BLE**\n**From:** ${name} <${email}>\n**Subject:** ${subject}\n${message.slice(0, 1500)}`,
+            content: `📬 **New inquiry — HEX [PI]**\n**From:** ${name} <${email}>\n**Subject:** ${subject}\n${message.slice(0, 1500)}`,
+            // A public form must not be able to ping the whole server.
+            allowed_mentions: { parse: [] },
           }),
         });
       } catch (_e) { /* Discord mirror is best-effort; the inquiry is already stored */ }

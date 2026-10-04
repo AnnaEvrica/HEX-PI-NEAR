@@ -1,64 +1,33 @@
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
+import { Legend, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import { useState, useEffect, useRef } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { MEASURED_RESULTS, MEASURED_NOTE } from '@/lib/measuredResults';
+import { markAuthPending } from '@/lib/authPending';
 import MirrorSection from '@/components/landing/MirrorSection';
 import InvitationSection from '@/components/landing/InvitationSection';
 import FoundersSection from '@/components/landing/FoundersSection';
 import RoleModelTagline from '@/components/branding/RoleModelTagline';
 
-const DEFAULT_METRICS = {
-  systemComparison: {
-    hex6: { adaptability: 85, uncertaintyHandling: 90, regimeRobustness: 88, realtimeAdjustment: 92, mathTransparency: 95, drawdownControl: 87 },
-    quant: { adaptability: 60, uncertaintyHandling: 50, regimeRobustness: 55, realtimeAdjustment: 65, mathTransparency: 85, drawdownControl: 58 },
-    ai: { adaptability: 70, uncertaintyHandling: 65, regimeRobustness: 62, realtimeAdjustment: 75, mathTransparency: 30, drawdownControl: 52 },
-  },
-  evolution: [
-    { week: 'W1', decisionAccuracy: 58, drawdownControl: 50, sharpe: 0.8 },
-    { week: 'W2', decisionAccuracy: 62, drawdownControl: 53, sharpe: 0.9 },
-    { week: 'W3', decisionAccuracy: 65, drawdownControl: 56, sharpe: 1.0 },
-    { week: 'W4', decisionAccuracy: 68, drawdownControl: 59, sharpe: 1.1 },
-    { week: 'W5', decisionAccuracy: 72, drawdownControl: 62, sharpe: 1.3 },
-    { week: 'W6', decisionAccuracy: 75, drawdownControl: 65, sharpe: 1.5 },
-    { week: 'W7', decisionAccuracy: 78, drawdownControl: 68, sharpe: 1.7 },
-    { week: 'W8', decisionAccuracy: 80, drawdownControl: 71, sharpe: 1.8 },
-    { week: 'W9', decisionAccuracy: 82, drawdownControl: 74, sharpe: 1.9 },
-    { week: 'W10', decisionAccuracy: 84, drawdownControl: 77, sharpe: 2.0 },
-    { week: 'W11', decisionAccuracy: 86, drawdownControl: 80, sharpe: 2.1 },
-    { week: 'W12', decisionAccuracy: 88, drawdownControl: 82, sharpe: 2.2 },
-    { week: 'W13', decisionAccuracy: 89, drawdownControl: 84, sharpe: 2.3 },
-    { week: 'W14', decisionAccuracy: 90, drawdownControl: 86, sharpe: 2.35 },
-    { week: 'W15', decisionAccuracy: 91, drawdownControl: 87, sharpe: 2.4 },
-    { week: 'W16', decisionAccuracy: 92, drawdownControl: 88, sharpe: 2.4 },
-  ],
-  accuracyGrowth: { week1: 58, week4: 72, week16: 91 },
+// Illustrative positioning only — how HEX [PI] is designed to differ from two
+// other classes of system. These are not measurements.
+const SYSTEM_COMPARISON = {
+  hex6: { adaptability: 85, uncertaintyHandling: 90, regimeRobustness: 88, realtimeAdjustment: 92, mathTransparency: 95, drawdownControl: 87 },
+  quant: { adaptability: 60, uncertaintyHandling: 50, regimeRobustness: 55, realtimeAdjustment: 65, mathTransparency: 85, drawdownControl: 58 },
+  ai: { adaptability: 70, uncertaintyHandling: 65, regimeRobustness: 62, realtimeAdjustment: 75, mathTransparency: 30, drawdownControl: 52 },
 };
+const metrics = { systemComparison: SYSTEM_COMPARISON };
+const loading = false;
 
 // Discover — the full landing content, kept "as is", available only after
 // redirection from the hero's Discover CTA. Reads location.state.scrollTo to
 // deep-link from the header search overlay.
 export default function Discover() {
   const location = useLocation();
-  const [metrics, setMetrics] = useState(DEFAULT_METRICS);
-  const [loading, setLoading] = useState(false);
   const [visibleSections, setVisibleSections] = useState({});
   const sectionRefs = useRef({});
-
-  useEffect(() => {
-    const loadMetrics = async () => {
-      try {
-        const res = await base44.functions.invoke('generateLandingMetrics', {});
-        setMetrics(res.data);
-      } catch (err) {
-        console.log('Could not load metrics, using defaults');
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadMetrics();
-  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -100,7 +69,7 @@ export default function Discover() {
         style={{ paddingTop: 'env(safe-area-inset-top)' }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="text-lg sm:text-xl font-bold tracking-tight"><span className="text-accent">HEX6</span><span className="text-foreground"> BLE</span></Link>
+          <Link to="/" className="text-lg sm:text-xl font-bold tracking-tight"><span className="text-accent">HEX</span><span className="text-foreground"> [PI]</span></Link>
           <Link to="/" className="text-sm text-secondary hover:text-foreground transition-colors" style={{ minWidth: 'auto', minHeight: 'auto' }}>← Back to home</Link>
         </div>
       </nav>
@@ -112,7 +81,7 @@ export default function Discover() {
         </p>
       </div>
 
-      {/* Mirror — HEX6-BLE, two lenses on one mind */}
+      {/* Mirror — HEX [PI], two lenses on one mind */}
       <div id="mirror"><MirrorSection /></div>
 
       {/* Invitation — see it for yourself */}
@@ -135,7 +104,7 @@ export default function Discover() {
           transition={{ duration: 0.6 }}
         >
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">The odds are now in your favor</h2>
-          <p className="text-base sm:text-lg md:text-2xl font-semibold text-foreground max-w-3xl mx-auto leading-relaxed"><span className="font-bold">HEX6 BLE</span> — a new category of intelligence <br /> thriving in uncertainty, seeing patterns in chaos</p>
+          <p className="text-base sm:text-lg md:text-2xl font-semibold text-foreground max-w-3xl mx-auto leading-relaxed"><span className="font-bold">HEX [PI]</span> — a new category of intelligence <br /> thriving in uncertainty, seeing patterns in chaos</p>
         </motion.div>
 
         {/* System Comparison Chart */}
@@ -156,37 +125,37 @@ export default function Discover() {
               <RadarChart data={!metrics ? [] : [
                 {
                   metric: 'Adaptability',
-                  'HEX6 BLE': metrics.systemComparison?.hex6?.adaptability || 85,
+                  hex: metrics.systemComparison?.hex6?.adaptability || 85,
                   'Quant Models': metrics.systemComparison?.quant?.adaptability || 60,
                   'AI Models': metrics.systemComparison?.ai?.adaptability || 70,
                 },
                 {
                   metric: 'Uncertainty Handling',
-                  'HEX6 BLE': metrics.systemComparison?.hex6?.uncertaintyHandling || 90,
+                  hex: metrics.systemComparison?.hex6?.uncertaintyHandling || 90,
                   'Quant Models': metrics.systemComparison?.quant?.uncertaintyHandling || 50,
                   'AI Models': metrics.systemComparison?.ai?.uncertaintyHandling || 65,
                 },
                 {
                   metric: 'Regime Robustness',
-                  'HEX6 BLE': metrics.systemComparison?.hex6?.regimeRobustness || 88,
+                  hex: metrics.systemComparison?.hex6?.regimeRobustness || 88,
                   'Quant Models': metrics.systemComparison?.quant?.regimeRobustness || 55,
                   'AI Models': metrics.systemComparison?.ai?.regimeRobustness || 62,
                 },
                 {
                   metric: 'Real-time Adjustment',
-                  'HEX6 BLE': metrics.systemComparison?.hex6?.realtimeAdjustment || 92,
+                  hex: metrics.systemComparison?.hex6?.realtimeAdjustment || 92,
                   'Quant Models': metrics.systemComparison?.quant?.realtimeAdjustment || 65,
                   'AI Models': metrics.systemComparison?.ai?.realtimeAdjustment || 75,
                 },
                 {
                   metric: 'Mathematical Transparency',
-                  'HEX6 BLE': metrics.systemComparison?.hex6?.mathTransparency || 95,
+                  hex: metrics.systemComparison?.hex6?.mathTransparency || 95,
                   'Quant Models': metrics.systemComparison?.quant?.mathTransparency || 85,
                   'AI Models': metrics.systemComparison?.ai?.mathTransparency || 30,
                 },
                 {
                   metric: 'Drawdown Control',
-                  'HEX6 BLE': metrics.systemComparison?.hex6?.drawdownControl || 87,
+                  hex: metrics.systemComparison?.hex6?.drawdownControl || 87,
                   'Quant Models': metrics.systemComparison?.quant?.drawdownControl || 58,
                   'AI Models': metrics.systemComparison?.ai?.drawdownControl || 52,
                 },
@@ -194,13 +163,13 @@ export default function Discover() {
                 <PolarGrid stroke="currentColor" className="opacity-20" />
                 <PolarAngleAxis dataKey="metric" className="text-xs" />
                 <PolarRadiusAxis angle={90} domain={[0, 100]} className="text-xs" />
-                <Radar name="HEX6 BLE" dataKey="HEX6 BLE" stroke="#FF6B35" fill="#FF6B35" fillOpacity={0.25} isAnimationActive={true} />
+                <Radar name="HEX [PI]" dataKey="hex" stroke="#FF6B35" fill="#FF6B35" fillOpacity={0.25} isAnimationActive={true} />
                 <Radar name="Quant Models" dataKey="Quant Models" stroke="#666" fill="#666" fillOpacity={0.08} isAnimationActive={true} />
                 <Radar name="AI Models" dataKey="AI Models" stroke="#555" fill="#555" fillOpacity={0.04} isAnimationActive={true} />
                 <Legend wrapperStyle={{ paddingTop: '20px' }} />
               </RadarChart>
             </ResponsiveContainer>
-            <p className="text-xs text-secondary/60">* Illustrative scores from internal simulations across multi-regime sequential data. Comparative benchmarks reflect typical behavior of each system class, not specific implementations.</p>
+            <p className="text-xs text-secondary/60">* Illustrative positioning, not measured results. It shows how the design differs from each system class; the measured results are in the table below.</p>
             </div>
             </motion.div>
 
@@ -208,7 +177,7 @@ export default function Discover() {
         <div className="space-y-6 sm:space-y-8">
           <div className="space-y-2 sm:space-y-3">
             <h3 className="text-2xl sm:text-3xl font-bold">Universal Across Domains</h3>
-            <p className="text-base sm:text-lg text-secondary">HEX6 BLE doesn't care what the data represents — it reads the structure of any sequential signal*</p>
+            <p className="text-base sm:text-lg text-secondary">HEX [PI] doesn't care what the data represents — it reads the structure of any sequential signal*</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             {loading || !metrics ? [] : [
@@ -225,14 +194,14 @@ export default function Discover() {
                 metrics: [
                   { label: 'Shock Absorption', value: 'Strong', desc: 'Holds form during chaotic regime shifts*' },
                   { label: 'Exit Precision', value: 'High', desc: 'Disengages before adverse cascades*' },
-                  { label: 'Recovery Time', value: 'Fast', desc: 'Returns to confident state quickly*' },
+                  { label: 'Recovery Time', value: 'Fast', desc: 'Returns to a settled state quickly*' },
                 ],
               },
               {
                 title: 'Slow-Moving Systems',
                 metrics: [
                   { label: 'Trend Sensing', value: 'High', desc: 'Reads gradual environmental shifts*' },
-                  { label: 'Optimal Timing', value: 'High', desc: 'Engages and disengages with conviction*' },
+                  { label: 'Optimal Timing', value: 'High', desc: 'Engages and disengages as the odds shift*' },
                   { label: 'Curve Adaptation', value: 'Smooth', desc: 'Glides across slow regime evolutions*' },
                 ],
               },
@@ -241,7 +210,7 @@ export default function Discover() {
                 metrics: [
                   { label: 'Distribution Modeling', value: 'Robust', desc: 'Holds the entire outcome space at once*' },
                   { label: 'Correlation Tracking', value: 'High', desc: 'Detects co-movement across signals*' },
-                  { label: 'Decision Confidence', value: 'Calibrated', desc: 'Acts only when probability stabilizes*' },
+                  { label: 'Stated Probability', value: 'Calibrated', desc: 'A stated 60% has happened about 60% of the time*' },
                 ],
               },
             ].map((app, i) => (
@@ -261,45 +230,38 @@ export default function Discover() {
               </div>
             ))}
           </div>
-          <p className="text-xs text-secondary/60 pt-2">* Qualitative descriptors based on internal simulations of the HEX6 BLE engine across multi-regime sequential signals. Behavior generalizes across any domain where state transitions matter — markets, sports, biometrics, traffic, sensor data, language, anything sequential.</p>
+          <p className="text-xs text-secondary/60 pt-2">* Qualitative descriptions of how the engine is designed to behave, not measured results. Behavior generalizes across any domain where state transitions matter — markets, sports, biometrics, traffic, sensor data, language, anything sequential.</p>
         </div>
 
-        {/* Evolution & Progression Over Time */}
+        {/* Measured results */}
         <div className="space-y-8">
           <div className="space-y-3">
-            <h3 className="text-3xl font-bold">Learning & Evolution Over Time</h3>
-            <p className="text-lg text-secondary">How HEX6 BLE improves as you interact with it</p>
+            <h3 className="text-3xl font-bold">Measured Results</h3>
+            <p className="text-lg text-secondary">What the engine has been tested on, with every call made before its outcome was known</p>
           </div>
-          <div className="p-4 md:p-8 border border-border bg-background overflow-x-auto">
-            <ResponsiveContainer width="100%" height={380}>
-              <LineChart data={loading || !metrics ? [] : metrics.evolution}>
-                <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="opacity.10" />
-                <XAxis dataKey="week" className="text-xs" />
-                <YAxis yAxisId="left" domain={[0, 100]} className="text-xs" label={{ value: 'Accuracy %', angle: -90, position: 'insideLeft' }} />
-                <YAxis yAxisId="right" orientation="right" domain={[0, 3]} className="text-xs" label={{ value: 'Conviction Index', angle: 90, position: 'insideRight' }} />
-                <Tooltip contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #FF6B35' }} />
-                <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                <Line yAxisId="left" type="monotone" dataKey="decisionAccuracy" stroke="#FF6B35" strokeWidth={3} dot={{ fill: '#FF6B35', r: 5 }} name="Decision Accuracy %" />
-                <Line yAxisId="left" type="monotone" dataKey="drawdownControl" stroke="#999" strokeWidth={2} dot={{ fill: '#999' }} name="Loss Control %" strokeDasharray="5 5" />
-                <Line yAxisId="right" type="monotone" dataKey="sharpe" stroke="#666" strokeWidth={2} dot={{ fill: '#666' }} name="Conviction Index" strokeDasharray="5 5" />
-              </LineChart>
-            </ResponsiveContainer>
-            <p className="text-xs text-secondary/60 pt-2">* Illustrative learning curve from internal simulations. Adaptation pace varies with the volatility and complexity of the signal being observed.</p>
+          <div className="border border-border bg-background overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-border text-xs uppercase tracking-wide text-secondary">
+                  <th className="p-3 md:p-4 font-medium">Test</th>
+                  <th className="p-3 md:p-4 font-medium">What was predicted</th>
+                  <th className="p-3 md:p-4 font-medium text-right">HEX [PI]</th>
+                  <th className="p-3 md:p-4 font-medium text-right">Compared with</th>
+                </tr>
+              </thead>
+              <tbody>
+                {MEASURED_RESULTS.map((row) => (
+                  <tr key={row.test + row.event} className="border-b border-border/50 last:border-0">
+                    <td className="p-3 md:p-4 align-top">{row.test}</td>
+                    <td className="p-3 md:p-4 align-top text-secondary">{row.event}</td>
+                    <td className="p-3 md:p-4 align-top text-right font-bold text-accent whitespace-nowrap">{row.hex}</td>
+                    <td className="p-3 md:p-4 align-top text-right text-secondary whitespace-nowrap">{row.control}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 pt-4 md:pt-6">
-            {loading || !metrics ? [] : [
-              { label: 'Week 1 Baseline', metric: `${metrics.accuracyGrowth.week1}%`, desc: 'Initial decision accuracy' },
-              { label: 'Week 4 Progress', metric: `${metrics.accuracyGrowth.week4}%`, desc: `${metrics.accuracyGrowth.week4 - metrics.accuracyGrowth.week1}pp improvement` },
-              { label: 'Week 16 Mature', metric: `${metrics.accuracyGrowth.week16}%`, desc: 'Near-optimal accuracy' },
-              { label: 'Adaptation Speed', metric: 'Real-time', desc: 'Reclassifies as new data arrives' },
-            ].map((stat, i) => (
-              <div key={i} className="p-3 md:p-4 border border-border bg-background space-y-2">
-                <p className="text-xs text-secondary font-medium uppercase tracking-wide">{stat.label}</p>
-                <p className="text-2xl md:text-3xl font-bold text-accent">{stat.metric}</p>
-                <p className="text-xs text-secondary">{stat.desc}</p>
-              </div>
-            ))}
-          </div>
+          <p className="text-xs text-secondary/60">{MEASURED_NOTE}</p>
         </div>
       </section>
 
@@ -343,7 +305,7 @@ export default function Discover() {
                 <p className="font-medium">{item.feature}</p>
               </div>
               <div>
-                <p className="text-sm text-secondary mb-2">HEX6 BLE</p>
+                <p className="text-sm text-secondary mb-2">HEX [PI]</p>
                 <p className="font-medium text-accent">{item.hex6}</p>
               </div>
             </div>
@@ -370,7 +332,7 @@ export default function Discover() {
               <div className="p-4 font-bold text-sm border-b border-border bg-background">Dimension</div>
               <div className="p-4 font-bold text-sm border-b border-border bg-background">AI Models</div>
               <div className="p-4 font-bold text-sm border-b border-border bg-background">Quant Models</div>
-              <div className="p-4 font-bold text-sm border-b border-border bg-background text-accent">HEX6 BLE</div>
+              <div className="p-4 font-bold text-sm border-b border-border bg-background text-accent">HEX [PI]</div>
 
               {/* Row: What it does */}
               <div className="p-4 text-xs text-secondary font-medium">Primary Goal</div>
@@ -415,20 +377,20 @@ export default function Discover() {
             {
               label: 'High-Volatility Regimes',
               desc: 'When the underlying signal swings violently between extremes, traditional models remain continuously engaged regardless of clarity.',
-              result: 'Naive systems: stay exposed through chaos | HEX6 BLE: pulls back when probability collapses',
-              insight: 'HEX6 BLE disengages from statistically unfavorable states rather than averaging through them.',
+              result: 'Naive systems: stay exposed through chaos | HEX [PI]: pulls back when probability collapses',
+              insight: 'HEX [PI] disengages from statistically unfavorable states rather than averaging through them.',
             },
             {
               label: 'Trend + Chop Transitions',
               desc: 'In mixed regimes (steady trend → sideways drift → sudden spike), traditional models overfit to the most recent pattern.',
-              result: 'Fewer false moves, higher conviction-to-action ratio, less reactive thrashing',
-              insight: 'HEX6 BLE reduces engagement during low-confidence states, re-engages only when probability stabilizes.',
+              result: 'Fewer false moves, less reactive thrashing',
+              insight: 'HEX [PI] reduces engagement when the odds sit at their usual level, and re-engages when they shift.',
             },
             {
               label: 'Discontinuities & Shocks',
               desc: 'When the system fundamentally changes (regime breaks, structural shifts, new conditions), prediction systems collapse to outdated assumptions.',
               result: 'No false certainty, faster adaptation to the new regime',
-              insight: 'HEX6 BLE reclassifies system state and expands the uncertainty distribution rather than forcing an answer.',
+              insight: 'HEX [PI] reclassifies system state and expands the uncertainty distribution rather than forcing an answer.',
             },
           ].map((item, i) => (
             <div key={i} className="space-y-3 p-6 rounded-sm border border-border bg-muted/30">
@@ -448,7 +410,7 @@ export default function Discover() {
         {/* What You Actually Get */}
         <div className="space-y-4 border border-border bg-background p-8">
           <h3 className="text-lg font-bold">What You Actually Get: Calibration Over Time</h3>
-          <p className="text-secondary text-sm mb-6">The engine becomes more confident as it observes more of your signals and the patterns clarify.</p>
+          <p className="text-secondary text-sm mb-6">The engine's stated probabilities are checked against what happened, and corrected, as it observes more of a signal.</p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-3">
@@ -509,7 +471,7 @@ export default function Discover() {
           </div>
 
           <div className="border border-accent/40 bg-background p-6 space-y-3">
-            <p className="font-bold text-sm text-accent">HEX6 BLE Approach</p>
+            <p className="font-bold text-sm text-accent">HEX [PI] Approach</p>
             <ul className="space-y-2 text-xs text-secondary">
               <li className="flex gap-2"><span className="text-accent">✓</span> Models the current state distribution</li>
               <li className="flex gap-2"><span className="text-accent">✓</span> Preserves the full possibility space</li>
@@ -525,10 +487,10 @@ export default function Discover() {
       <section id="cta" className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-14 md:py-16 space-y-6 sm:space-y-8">
         <div className="space-y-4 sm:space-y-6">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold">Ready to observe how outcomes reorganize?</h2>
-          <p className="text-base sm:text-lg md:text-xl text-secondary">No credit card required. Reasoning through probability. Decisions through resonance.</p>
+          <p className="text-base sm:text-lg md:text-xl text-secondary">7 days free, then $19.99 a month. Reasoning through probability. Decisions through resonance.</p>
         </div>
         <button
-          onClick={() => base44.auth.loginWithProvider('google', '/app')}
+          onClick={() => { markAuthPending(); base44.auth.loginWithProvider('google', '/app'); }}
           className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 rounded-sm bg-accent text-accent-foreground font-medium hover:bg-accent/90 transition-colors text-sm sm:text-base md:text-lg"
         >
           Enter Oracle <ArrowRight className="w-4 h-4" />

@@ -9,6 +9,9 @@ export default function SubscriptionGate({ user, children }) {
   const [error, setError] = useState(null);
   const pollRef = useRef(null);
 
+  // One free trial per person; a returning subscriber goes straight to the plan.
+  const returning = !!user?.stripe_subscription_id || !!user?.trial_ends_at;
+
   const hasSubscription =
     user?.subscription_status === 'active' ||
     user?.subscription_status === 'trialing' ||
@@ -94,16 +97,16 @@ export default function SubscriptionGate({ user, children }) {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center px-6">
       <div className="max-w-md w-full text-center space-y-6">
-        <h1 className="text-3xl font-bold tracking-tight">Subscribe to Hex</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{returning ? 'Welcome back to HEX [PI]' : 'Start with HEX [PI]'}</h1>
         <p className="text-secondary leading-relaxed">
-          Activate your subscription to access the Hex probabilistic intelligence engine.
+          {returning ? '$19.99 a month. Cancel anytime.' : '7 days free, then $19.99 a month. Cancel anytime.'}
         </p>
 
         <div className="p-6 border border-border bg-muted/50 text-left space-y-3">
           <ul className="text-sm text-secondary space-y-2">
             <li>• Unlimited probabilistic analysis</li>
-            <li>• Real-time market intelligence</li>
-            <li>• Calibration scoring</li>
+            <li>• Any series: markets, weather, races, your own data</li>
+            <li>• Every probability shown beside its usual odds</li>
             <li>• Conversation memory</li>
           </ul>
         </div>
@@ -115,7 +118,7 @@ export default function SubscriptionGate({ user, children }) {
           disabled={loading}
           className="w-full px-6 py-3 bg-accent text-accent-foreground font-medium hover:bg-accent/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          {loading ? 'Redirecting...' : 'Subscribe Now'}
+          {loading ? 'Redirecting...' : returning ? 'Subscribe' : 'Start free trial'}
         </button>
 
         <button

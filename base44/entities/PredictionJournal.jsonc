@@ -10,14 +10,9 @@
       "type": "string",
       "enum": [
         "UP",
-        "DOWN",
-        "FLAT"
+        "DOWN"
       ],
       "description": "The call Hex made at the time"
-    },
-    "conviction": {
-      "type": "number",
-      "description": "HEX personal_call_strength at the time of the call (0-1)"
     },
     "entry_price": {
       "type": "number",
@@ -55,13 +50,13 @@
       "type": "boolean",
       "description": "Whether the call matched the realized direction"
     },
-    "archetype": {
-      "type": "string",
-      "description": "HEX state archetype label at the time of the call"
-    },
     "asked_by": {
       "type": "string",
       "description": "Email of the user whose question prompted the call"
+    },
+    "edge": {
+      "type": "number",
+      "description": "Distance of P(up) from the series' usual odds, in probability points (0-1). A statistic, not a confidence."
     }
   },
   "required": [
@@ -76,7 +71,11 @@
         "role": "admin"
       }
     },
-    "read": null,
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
     "update": {
       "user_condition": {
         "role": "admin"

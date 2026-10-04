@@ -1,69 +1,15 @@
 // ===========================================================================
-// LLM Model Pool — the "2A Switch" of The Model's Control Panel (backend-only).
+// Model router — the one place model IDs are named.
 //
-// Structure 1, Pillar 2 — the LLM Module. The Control Panel analyzes the
-// incoming signal and selects the realizing LLM from the Transformer Network
-// Model Pool. This decision is an internal bridge between signal interpretation
-// and generation; it is never exposed to the user.
+// Claude is the exclusive language layer: it interprets, triages and writes
+// every reply. To move to a newer Claude, change CLAUDE_MODEL (Base44 also
+// lists 'claude_opus_4_8' and 'claude-sonnet-5').
 //
-// Routing basis — Semantic Compression Ratio (SCR): Lexical Density / Context
-// Capacity. Dense long-context work needs trans-contextual coherence; light
-// interpretation benefits from sparse, compute-efficient activation.
-//
-// Pool:
-//   Gemini Flash — Sparse Mixture of Experts (MoE). Default interpretation of
-//                  input + web retrieval + default engine synthesis. Activates
-//                  a fraction of weights per token → high semantic processing
-//                  without massive compute.
-//   GPT (mini)   — Simplest general generator. Casual / low-stakes replies.
-//   Claude        — Dense & Hybrid Attention (Trans-Contextual Embedding, TCE).
-//                  Long legal & analytical workflows / article generation for
-//                  the Evrica Foundation. Maximizes semantic coherence over
-//                  long form. (No web search — Gemini fetches, Claude writes.)
+// One exception: Base44's `add_context_from_internet` (live web retrieval) is
+// only supported on Gemini models. WEB_MODEL fetches; Claude writes. Set
+// WEB_MODEL to CLAUDE_MODEL once Base44 supports web context on Claude.
 // ===========================================================================
 
-export const LLM_POOL = {
-  gemini: 'gemini_3_flash',     // MoE — interpretation, web fetch, default synthesis
-  gpt: 'gpt_5_mini',           // simplest — casual replies
-  claude: 'claude_sonnet_4_6',  // TCE — long-form research / articles
-};
+export const CLAUDE_MODEL = 'claude_sonnet_4_6';
+export const WEB_MODEL = 'gemini_3_flash';
 
-// The interpretation step always uses Gemini Flash (MoE) — the default
-// "interpretation of Input". Web retrieval also requires a Gemini model
-// (only gemini_* support add_context_from_internet).
-export const INTERPRETATION_MODEL = LLM_POOL.gemini;
-
-// The 2A Switch — chooses the realizing LLM from the pool based on the
-// Control Panel's task classification. Economically-balanced split: the cheap
-// MoE model handles the casual majority (chatter, low value-per-turn); the
-// dense TCE model handles value turns (signals, substantive reads) where
-// persona embodiment + engine calibration + charisma earn the higher cost.
-//   'casual'                              → Gemini Flash (cheap, MoE)
-//   'analytical' / 'inline' / 'research'   → Claude       (TCE, value turns)
-export function selectSynthesisModel(task) {
-  // Casual chatter (the majority of traffic) is low value-per-turn — Gemini
-  // Flash (MoE) handles it cheaply and holds the refresher persona well enough
-  // for one- and two-line exchanges. Substantive turns — engine signals, deep
-  // reads, research — are what subscribers pay for; route them to Claude so the
-  // signal lands with authority and the persona actually lives. This is the
-  // middle path between the two dead ends: not Claude-on-everything (cost) and
-  // not Gemini-on-substantive (charisma/signal collapse). Spend credits where
-  // they generate value; save them where they don't.
-  // gpt_5_mini stays excluded from synthesis — its context capacity can't hold
-  // even the refresher persona without diluting.
-  if (task === 'casual') return LLM_POOL.gemini;
-  return LLM_POOL.claude;
-}
-
-// Model-aware tone/resonance — the PI-US voice register adapts to the
-// methodology of the realizing LLM the Model selected. The Model leads; the LLM
-// is a tool, and the tone steers each tool toward the structural read rather
-// than letting the tool's native tendencies drift the answer.
-export function adaptVoiceForModel(baseVoice, model) {
-  if (model === LLM_POOL.claude)
-    return `${baseVoice}; lean into Claude's trans-contextual coherence — sustain the register across long form, let the structure carry, don't restate`;
-  if (model === LLM_POOL.gpt)
-    return `${baseVoice}; keep it textured and specific — favor one concrete image over generic phrasing`;
-  // Gemini Flash (MoE) — default realization tool
-  return `${baseVoice}; stay focused and precise — converge on the answer, don't let the mixture sprawl`;
-}

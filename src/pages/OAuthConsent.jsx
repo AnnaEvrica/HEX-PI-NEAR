@@ -11,6 +11,22 @@ import AuthLayout from "@/components/AuthLayout";
 // the categories of access being granted, and posts the approve/deny decision.
 // Do not change the fetch calls, headers, or the `ctx` handle handling — styling
 // and copy are safe to edit.
+// A login route supplied by the server is followed only if it is a path on
+// this site ("/login"), never another host or scheme.
+const safeLoginPath = (path) => (typeof path === "string" && /^\/(?![\/\\])/.test(path) ? path : "/login");
+
+// The client's return address may be https, or a native app scheme such as
+// cursor://. Script and data schemes are refused.
+const safeRedirect = (url) => {
+  if (typeof url !== "string" || !url) return null;
+  try {
+    const scheme = new URL(url, window.location.origin).protocol.toLowerCase();
+    return ["javascript:", "data:", "vbscript:", "file:", "blob:"].includes(scheme) ? null : url;
+  } catch {
+    return null;
+  }
+};
+
 export default function OAuthConsent() {
   const ctx = new URLSearchParams(window.location.search).get("ctx");
   const [info, setInfo] = useState(null);
@@ -67,7 +83,7 @@ export default function OAuthConsent() {
           const encoded = encodeURIComponent(returnTo);
           redirecting = true; // keep the spinner while the browser navigates
           window.location.href =
-            (data.login_path || "/login") + "?returnTo=" + encoded + "&from_url=" + encoded;
+            safeLoginPath(data.login_path) + "?returnTo=" + encoded + "&from_url=" + encoded;
           return;
         }
         setInfo(data);
@@ -103,7 +119,7 @@ export default function OAuthConsent() {
           const returnTo = window.location.pathname + "?ctx=" + encodeURIComponent(ctx);
           const encoded = encodeURIComponent(returnTo);
           window.location.href =
-            ((info && info.login_path) || "/login") + "?returnTo=" + encoded + "&from_url=" + encoded;
+            safeLoginPath(info && info.login_path) + "?returnTo=" + encoded + "&from_url=" + encoded;
           return;
         }
         // These all come AFTER the single-use handle is atomically consumed
@@ -120,8 +136,10 @@ export default function OAuthConsent() {
         throw new Error("Could not complete authorization. Please try again.");
       }
       const data = await res.json();
-      window.location.href = data.redirect_url;
-      if (!/^https?:/i.test(data.redirect_url)) {
+      const target = safeRedirect(data.redirect_url);
+      if (!target) throw new Error("Could not complete authorization. Please try again.");
+      window.location.href = target;
+      if (!/^https?:/i.test(target)) {
         // Custom-scheme redirect (native AI clients, e.g. cursor://): browsers
         // may block or not visibly navigate, so show a terminal state instead
         // of an eternal spinner.
@@ -184,7 +202,7 @@ export default function OAuthConsent() {
     );
   }
 
-  const tools = Array.isArray(info.tools) ? info.tools : [];
+  const tools = Array.isArray(info?.tools) ? info.tools : [];
 
   return (
     <AuthLayout

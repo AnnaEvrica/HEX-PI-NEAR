@@ -1,40 +1,16 @@
 // ===========================================================================
-// STAKES — "how much does getting this right matter to this person?"
+// STAKES — how much does getting this right matter to this person?
 //
-// THE ARCHITECTURAL PROBLEM THIS SOLVES:
-// The chat loop had ONE routing axis — triage's data-need question ("does
-// answering this require fresh prices / news / a time series?"). That single
-// answer was being used to decide TWO unrelated things:
-//   1. whether to run web fetch + the engine   (data-need — correct use)
-//   2. which persona tier and which model      (human stakes — wrong use)
+// Triage decides whether a message needs fresh data. That is a different
+// question from how much care the reply needs: "my marriage is ending" needs
+// no market data and all of the care. A message that scores high here gets
+// the full persona and retrieval even when triage calls it casual.
 //
-// Those axes are orthogonal. "My marriage is ending and I don't know who I am
-// anymore" needs no market data at all, so triage correctly says casual — and
-// the old code therefore handed the most important message a person will ever
-// send this product to the cheapest model with the compressed persona, where
-// the ban on machine-metaphor is stated most briefly and holds weakest.
+// The primary detector is grammatical, not a word list: the shape of
+// self-disclosure ("I'm <state verb> ...") fires whatever the topic noun is.
+// Word lists remain as boosters for known heavy domains.
 //
-// This module supplies the SECOND axis. Triage keeps deciding data-need.
-// Stakes decides how much care the answer gets.
-//
-// DESIGN PRINCIPLE — SHAPE OVER VOCABULARY:
-// The first two versions of this file were word lists, and both shipped with
-// holes found only when a human read a bad reply: "recovering from adderall"
-// scored zero because the list had nouns ("addiction", "sober") and people
-// speak in verbs ("recovering from", "coming off"). At 25k users a word list
-// is guaranteed to keep missing, and every miss is a person getting the cold
-// answer at the exact moment they opened up.
-//
-// So the primary detector is now GRAMMATICAL, not lexical: the shape of
-// self-disclosure ("I'm <state-verb> <anything>") fires regardless of the
-// topic noun. The word lists remain as boosters for known-heavy domains, but
-// they are no longer the thing standing between a vulnerable person and a
-// decent reply.
-//
-// COST: zero LLM calls. Pure lexical/structural computation on strings that
-// are already in memory. The credits it does spend are spent deliberately —
-// a real question about someone's life gets the model that can hold the
-// persona; greetings and throwaway follow-ups stay cheap.
+// No model calls. String computation on text already in memory.
 // ===========================================================================
 
 // Direct emotional / vulnerability disclosure.

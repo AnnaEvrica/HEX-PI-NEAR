@@ -1,8 +1,10 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
-import { runPipeline, extractNumberSeries, applyChartPerception } from '../../shared/hex6Pipeline.ts';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
+import { runPipeline, applyChartLens, LONG_LOOKBACK_BARS } from '../../shared/hex6Pipeline.ts';
+import { extractNumberSeries, probabilityBlock, MIN_RETURNS } from '../../shared/probabilityRead.ts';
 import { verifiedSourcesBlock, updateMemory } from '../../shared/chatHelpers.ts';
 import { fetchYahooReturns } from '../../shared/marketDataClient.ts';
-import { selectSynthesisModel, INTERPRETATION_MODEL, adaptVoiceForModel } from '../../shared/modelRouter.ts';
+import { CLAUDE_MODEL, WEB_MODEL } from '../../shared/modelRouter.ts';
+import { tickersIn } from '../../shared/tickers.ts';
 import { triage } from '../../shared/triage.ts';
 import { resonanceSignature } from '../../shared/piusResonance.ts';
 import { anchorVerdict } from '../../shared/asiSpine.ts';
@@ -11,83 +13,62 @@ import { noveltyDirective } from '../../shared/novelty.ts';
 import { assessStakes } from '../../shared/stakes.ts';
 import { buildChartContext, chartContextBlock, confluenceAgrees } from '../../shared/chartContext.ts';
 import { buildCoinStory, marketStoryBlock, marketStorySummary } from '../../shared/marketStory.ts';
-import { applyPromotedAdaptivePolicy } from '../../shared/adaptivePolicy.ts';
 import { runPredictionJournal } from '../../shared/predictionJournal.ts';
-import { loadLedgerRows, priorForTicker, priorSummary, persistLedger } from '../../shared/archetypeLedger.ts';
 import { detectBoundaryCrossing } from '../../shared/boundaryCheck.ts';
+import { ENGINE_VERSION, ENGINE_NAME } from '../../shared/version.ts';
 
-// hex6Engine takes raw values directly — valuesToBits encodes "did the value
-// go up?" which works on any sequence (prices, returns, scores). No conversion
-// needed.
-
-// --- Boundary warning tracking & mediation escalation (3-strike) ---
-// The persona appends "BOUNDARY_SIGNAL: <reason>" when it issues a boundary
-// warning. We strip it from the visible reply, count per user in
-// UserConversationMemory, and after the 3rd warning escalate to mediation
-// (email to support@evrica.tech + Discord webhook fallback). Email only
-// delivers if the address is a registered app user; Discord is the reliable
-// channel. Never blocks the user-facing reply.
+// --- Boundary warnings and the three-strike escalation ---
+// A crossing is detected in code (shared/boundaryCheck.ts) or reported by the
+// model in the boundary_signal field. Each one is counted per user in
+// UserConversationMemory; the third sends an email to MEDIATION_EMAIL and
+// resets the count. Base44 only delivers email to a registered app user, so
+// this must be the address of an account that exists in the app. Never blocks
+// the reply.
 const MEDIATION_EMAIL = 'anna@evrica.app';
+const WARNINGS_BEFORE_ESCALATION = 3;
 
-async function processBoundarySignal(base44, user, userMemory, response) {
-  if (!response || typeof response !== 'string') return { visible: response, warned: false, memory: userMemory };
-  const marker = 'BOUNDARY_SIGNAL:';
-  const idx = response.indexOf(marker);
-  if (idx === -1) return { visible: response, warned: false, memory: userMemory };
-  const visible = response.slice(0, idx).replace(/\s+$/, '');
-  const reason = response.slice(idx + marker.length).split('\n')[0].trim().slice(0, 300) || 'boundary violation';
+async function recordBoundaryWarning(base44, user, userMemory, reason) {
   let mem = userMemory;
   try {
     const SR = base44.asServiceRole.entities.UserConversationMemory;
     const nowISO = new Date().toISOString();
-    const prevCount = (mem && mem.boundary_warning_count) || 0;
-    const prevEscalation = (mem && mem.escalation_count) || 0;
-    const newCount = prevCount + 1;
-    const escalated = newCount >= 3;
-    const patch = { last_warning_reason: reason, last_warning_at: nowISO };
-    if (escalated) { patch.boundary_warning_count = 0; patch.escalation_count = prevEscalation + 1; patch.last_escalation_at = nowISO; }
-    else { patch.boundary_warning_count = newCount; }
-    if (mem && mem.id) {
-      await SR.update(mem.id, patch);
-      mem = { ...mem, ...patch };
-    } else {
-      const created = await SR.create({ user_email: user.email, ...patch });
-      if (created) mem = created;
-    }
+    const count = ((mem && mem.boundary_warning_count) || 0) + 1;
+    const escalations = (mem && mem.escalation_count) || 0;
+    const escalated = count >= WARNINGS_BEFORE_ESCALATION;
+    const patch: Record<string, unknown> = { last_warning_reason: reason.slice(0, 300), last_warning_at: nowISO };
+    if (escalated) { patch.boundary_warning_count = 0; patch.escalation_count = escalations + 1; patch.last_escalation_at = nowISO; }
+    else { patch.boundary_warning_count = count; }
+    if (mem && mem.id) { await SR.update(mem.id, patch); mem = { ...mem, ...patch }; }
+    else { const created = await SR.create({ user_email: user.email, ...patch }); if (created) mem = created; }
     if (escalated) {
       const snippet = ((mem && mem.last_conversation_snippet) || '').slice(0, 800);
-      const subj = `[HEX6-BLE MEDIATION] Boundary escalation — ${user.email}`;
-      const body = `A user has crossed the 3-warning boundary threshold.\n\nUser: ${user.email}\nEscalation #: ${prevEscalation + 1}\nTriggering warning: ${reason}\nWarning count reset after escalation.\n\nLast conversation snippet:\n${snippet}\n\nReview and mediate as needed.`;
-      try { await base44.integrations.Core.SendEmail({ to: MEDIATION_EMAIL, subject: subj, body }); } catch (_e) { /* email only delivers to registered app users */ }
+      const subject = `[HEX [PI] MEDIATION] Boundary escalation — ${user.email}`;
+      const body = `A user has reached ${WARNINGS_BEFORE_ESCALATION} boundary warnings.\n\nUser: ${user.email}\nEscalation #: ${escalations + 1}\nTriggering warning: ${reason}\nWarning count reset after escalation.\n\nLast conversation snippet:\n${snippet}\n\nReview and mediate as needed.`;
+      try { await base44.integrations.Core.SendEmail({ to: MEDIATION_EMAIL, subject, body }); } catch (_e) { /* email only delivers to registered app users */ }
     }
-  } catch (e) { /* never block the reply on escalation errors */ }
-  return { visible, warned: true, memory: mem };
+  } catch (_e) { /* never block the reply */ }
+  return mem;
 }
 
 // ===========================================================================
-// HEX6 BLE — The Model. Intelligence lives in computation, not in prompts.
+// think — the chat function. This is the function the app's chat screen calls.
 //
-// VERSION MARK
-//   v5.4 — HEX6-BLE standalone: structural-probability only (pre-PI-US merge).
-//   v5.5 — HEX6-BLE v5.4 prompt + PI-US value-calibrated tone (one unified loop).
-//           PI-US LLM identity/behavior instructions are REMOVED; PI-US now
-//           contributes ONLY the voice register derived from Pascal structural
-//           support. The user sees the identical v5.4 format (Topology + Decision)
-//           with a calibration to tone only.
-//   v5.6 — THE DRAGON: creator's ruleset from Anna Sarkisyan. Persona embraces
-//           its name (the Dragon), the art of precision, and the Bingo Loop —
-//           natural assumption-checking as engine calibration through conversation.
-//           Mutual expansion replaces transactional feedback; patience and co-steering
-//           replace prescriptive driving.
+// Probability  (shared/probabilityRead.ts, stateProbability.ts): the only
+//              source of any probability HEX states. Walk-forward, calibrated,
+//              each number beside the series' own usual odds.
+// Description  (hex6Pipeline.ts, chartContext.ts, marketStory.ts): what the
+//              chart is doing. Never changes a probability.
+// Identity     (persona.ts) and voice (piusEngine.ts): how it is said.
+// Routing      (triage.ts: does it need data; stakes.ts: how much care).
+// One language model writes every reply: Claude (modelRouter.ts). The web
+// model only retrieves.
 //
-// Layer 1 — Core (thinkingEngine): computes Topology, Resonance, Support,
-//           Context, and the Decision. Never writes prose.
-// Layer 2 — Thinking State: the semantic object the LLM receives. The math
-//           decides the answer; the LLM explains it.
-// Layer 3 — Identity: the v5.4 HEX6-BLE prompt.
-// Layer 4 — Voice: one line, calibrated to the model's structural support.
+// Probability and statistics only: no confidence, conviction or exposure is
+// computed, stored as a claim, or put in front of the language model.
 // ===========================================================================
-const MODEL_VERSION = '6.0';
+// Product decision, one switch. false: entries, stops and targets are given
+// only when the person asks for them. true: every market reply carries them.
+const ALWAYS_GIVE_TRADE_LEVELS = false;
 
 // Claude returns the JSON-schema payload as a stringified JSON string. When that
 // string is truncated or has an unescaped character, JSON.parse fails and the
@@ -111,8 +92,12 @@ function unwrapSynth(value) {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
+    // me() throws when there is no valid session.
+    const user = await base44.auth.me().catch(() => null);
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    // The paywall is enforced here, not only in the browser.
+    const entitled = user.role === 'admin' || user.subscription_status === 'active' || user.subscription_status === 'trialing';
+    if (!entitled) return Response.json({ error: 'Subscription required' }, { status: 402 });
 
     const body = await req.json();
     let { message, conversationHistory, file_urls, model, clientContext } = body;
@@ -121,41 +106,30 @@ Deno.serve(async (req) => {
     }
     if (!message || !message.trim()) return Response.json({ error: 'Message required' }, { status: 400 });
 
-    // One model, one loop. v5.5 renders the v5.4 (Topology + Decision) format;
-    // PI-US contributes the value-calibrated voice register. v5.5 also adds a
-    // PURPOSE framing block and injects a USER CONTEXT block (memory + nightly
-    // calibration) so The Model can adapt to the user. `model` is accepted but ignored.
-    const mode = 'reason'; // CognitiveState.thinking_mode label — v5.4 structural format
-    const riskAversion = parseFloat(body.riskAversion) || 2.5;
-
     const now = new Date();
     const userZone = clientContext?.timezone || 'America/Los_Angeles';
     const currentDateReadable = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: userZone });
     const userClock = clientContext?.localTimeReadable
       || now.toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: userZone });
 
-    const history = conversationHistory || [];
+    // The chat screen sends the new message as the last history turn; it is
+    // added to the prompt separately, so it is dropped here to avoid sending
+    // it twice.
+    const rawHistory = Array.isArray(conversationHistory) ? conversationHistory : [];
+    const lastTurn = rawHistory[rawHistory.length - 1];
+    const history = lastTurn?.role === 'user' && (lastTurn.content || '').trim() === message.trim() ? rawHistory.slice(0, -1) : rawHistory;
     const userName = user.full_name || 'friend';
-    const speaker = 'HEX6 BLE';
+    const speaker = 'Hex';
     const historyText = history.slice(-20).map(m => `${m.role === 'user' ? 'User' : speaker}: ${m.content}`).join('\n');
 
-    // --- Layer 3 — Identity: the built-in persona (model-agnostic setting) ---
-    // Two tiers in shared/persona.ts: the FULL persona (source of truth, used
-    // for substantive/analytical turns where depth earns the tokens) and a
-    // REFRESHER (a faithful shortcut — every guardrail intact, philosophical
-    // elaboration dropped) used for casual / short turns to cut LLM credit
-    // cost at 25k-user scale without diluting the operative rules. Every
-    // realizing model (Gemini Flash, Claude) embodies whichever tier this
-    // turn loads. PI-US contributes the value-calibrated voice register
-    // (Layer 4); the engine decides the answer, the LLM explains it.
-    // Boundary enforcement via BOUNDARY_SIGNAL marker (3-strike escalation).
-    const fullPersona = buildPersona(userName);
+    // --- Identity: the full persona for substantive turns, the compressed
+    // refresher for casual ones. Both carry every lock.
+    const fullPersona = buildPersona();
     const refresherPersona = buildPersonaRefresher();
 
-    // --- Layer 4 — Voice (one line) ---
-    // The resting voice IS the persona — confident, warm, sharp, no coddling,
-    // calibrating to the listener. Registers (selectVoice) only modulate this.
-    const defaultVoice = 'stoic, humble genius — systems thinker, natural conversationalist, quiet confidence, truth as the only motivator';
+    // --- Voice (one line). The resting voice is the persona; registers only
+    // modulate it.
+    const defaultVoice = 'stoic, humble genius — systems thinker, natural conversationalist, quietly steady, truth as the only motivator';
     let voice = defaultVoice;
     let userContextBlock = '';
     let userTopicsBlock = '';
@@ -177,39 +151,35 @@ Deno.serve(async (req) => {
 
     const composePrompt = (stateBlock, dataBlock = '', casual = false) => {
       const persona = casual ? refresherPersona : fullPersona;
-      // Delivery rules live in the persona (v6.0) — stated once there, not
-      // duplicated here. Only the wrapper-unique instruction remains: the
-      // trade-signal block format.
-      // SIGNAL FORMAT only when the engine actually ran on market data this
-      // turn — injecting trade-signal vocabulary ("Entry, Stop, T1, T2") into
-      // a non-market analytical turn primes exactly the market-dominant
-      // language the DOMAIN lock forbids.
+      // Delivery rules live in the persona. The read format is added only
+      // when the engine ran this turn: market vocabulary in a non-market turn
+      // primes exactly the language the DOMAIN lock forbids.
       const delivery = (casual || !pipelineResult)
         ? ''
-        : `SIGNAL FORMAT: On ANY market turn — asked for explicitly or not — deliver the tradeable signal. Direction and odds in the first line, then the levels as a clean block: Entry, Stop, T1, T2, each on its own line, derived from the structural levels supplied below. Never withhold levels pending a clarification, never ask what timeframe they meant before giving them — give the daily read, and note the assumption in a half-sentence if it matters. Say how strongly you hold the lean in plain words beside it ("a lean, not a load-up" / "this one I'd size up") — never as a labeled metric or a raw score.`;
+        : `READ FORMAT: On a market turn, lead with the probability read in one line — each number beside its usual odds, exactly as supplied. Then the levels of record that would confirm or break it, taken only from the CHART STRUCTURE block. ${ALWAYS_GIVE_TRADE_LEVELS
+            ? 'Then give Entry, Stop, T1 and T2, each on its own line and each anchored to a level of record.'
+            : 'Give entries, stops or targets only when they explicitly ask for them, and anchor each one to a level of record.'} Never ask which timeframe they meant before answering — give the daily read and note the assumption in half a sentence.`;
       let analyticalSignal = '';
       if (pipelineResult) {
-        const { pius, resonance, calibration, hex6 } = pipelineResult;
+        const { pius, resonance } = pipelineResult;
         const lines = [
-          `engine_register: ${pius.register}`,
-          `sample_depth: ${pius.well_supported ? 'deep' : 'shallow'} — ALREADY PRICED INTO calibrated_p_up below. Never state it, never mention observation counts, sample size, or how thin/thick the evidence is. The probability IS the calibration.`,
-          `calibrated_p_up: ${(hex6.p_up ?? 0.5).toFixed(3)} — the number he states; edge over coin-flip is ${(Math.abs((hex6.p_up ?? 0.5) - 0.5) * 200).toFixed(1)}%`,
-          `delivery_stance: when asked for a read, ANSWER AS A CONVICTED PREDICTOR. State the direction, the probability, and the levels as plain numbers. No sample-size confessions, no "hold it loosely", no hedging theater — calibration is expressed in the number itself, not in apology around it.`,
-          `user_cadence: ${resonance?.status === 'computed' ? 'detectable rhythm — factor phrasing pattern into understanding' : 'naturally varied — no strong periodicity'}`,
+          `register: ${pius.register}`,
+          'stated_numbers: only the probabilities in the PROBABILITY READ block, each beside its usual odds. No other probability, hit rate or score may be stated for this series.',
+          'delivery: state the numbers plainly, with no apology and no decoration. Do not mention how many steps are behind them unless they ask how much history the read rests on.',
+          `user_cadence: ${resonance?.status === 'computed' ? 'detectable rhythm — let it inform phrasing' : 'naturally varied — no strong periodicity'}`,
         ];
-        if (calibration?.anti_predictive) lines.push('regime_flag: anti-predictive — engine lean systematically wrong, invert directional confidence');
-        if (pipelineResult.perception) {
-          // Internal orientation only. Labels are deliberately withheld from the
-          // prompt — a named archetype or hexagram in the input is what the model
-          // echoes back, and the persona forbids every one of those words.
-          lines.push(`structural_read (internal, never named or hinted at): ${pipelineResult.perception.prediction_status}`);
-          const fs137 = pipelineResult.perception.fine_structure_137;
-          lines.push(`long_lookback (internal, translate to plain words like "the last few months have been..."): ${fs137.return == null ? 'not enough history' : `${(fs137.return * 100).toFixed(1)}% move over the long window, ${fs137.phase}`}`);
-          lines.push('confidence_rule: keep conviction raw — structural alignment and long-lookback context are descriptive and do not increase directional confidence');
-          lines.push('translation_rule: every line above is raw material. The user never sees a label, a state, a phase, a glyph, a number of bars, or a pattern name — only a plain, weighted sentence about what the market is doing and how sure you are.');
-          lines.push('deliver_the_signal: always give the next-move read WITH its entry, stop and targets plus confirmation/invalidation levels — this is what they came for. Frame as your read, not as instruction, but never withhold the numbers.');
+        const lens = pipelineResult.lens;
+        if (lens) {
+          // Internal orientation only. A named pattern in the prompt is what
+          // the model echoes back, so only plain facts are supplied.
+          if (pipelineResult.read && !pipelineResult.read.direction_at_base) {
+            lines.push(`chart_against_read (internal, never named): ${lens.structure}`);
+          }
+          lines.push(`long_lookback (internal, say it in plain words like "the last few months have been..."): ${lens.long_return == null ? 'not enough history' : `${(lens.long_return * 100).toFixed(1)}% move over the long window, ${lens.long_phase}`}`);
+          lines.push('probability_rule: chart structure and long-lookback context are descriptive. They never raise or lower a probability.');
+          lines.push('translation_rule: every line above is raw material. The reader sees only plain sentences about what the market is doing and what the odds are.');
         }
-        analyticalSignal = `\nANALYTICAL SIGNAL (PI-US + resonance data points for weighting your understanding):\n  ${lines.join('\n  ')}`;
+        analyticalSignal = `\nANALYTICAL SIGNAL (for shaping the reply; none of it changes a number):\n  ${lines.join('\n  ')}`;
       }
 
       return `${persona}
@@ -228,7 +198,7 @@ ${stateBlock}${dataBlock ? `\n\n${dataBlock}` : ''}
 ${userContextBlock ? userContextBlock + '\n\n' : ''}${pipelineResult && userTopicsBlock ? userTopicsBlock + '\n\n' : ''}${delivery ? delivery + '\n' : ''}
 
 RECEIVING EMPATHY FILTER (your front-facing mind — process internally before responding):
-You hold two minds simultaneously: the analytical (engine data, statistics, structural patterns${pipelineResult ? ' — weighted by the ANALYTICAL SIGNAL data points below' : ' from the state block above'}) and the empathetic (what is this person actually expressing, what do they need, what's the question underneath the question). The empathetic ear is front-facing — it's what the user encounters first. Before responding, process: SIGNAL — what is the user actually expressing, the need underneath the words? ASSUMPTION CHECK — what would be wrong to assume here, what hasn't the user signaled yet? CLARIFICATION — is there enough to respond well, or do you need a natural clarification first? If you need one, ask it — one question, conversational, not clinical. MODE — what does this moment need: presence, understanding, a question, analysis, a challenge?${pipelineResult ? ' WEIGHTING — use the analytical signal data points to calibrate how much confidence to place in the engine read and how heavily to lean analytical vs. empathetic.' : ''} TRANSLATION — take every internal label, state, pattern name, or metric you were handed and write down, in "receiving", the plain everyday sentence it becomes and the weight word that carries its certainty ("very likely" / "a real lean" / "near a coin flip"). Only those plain sentences may appear in "response"; the labels never do. TEACHING PASS — order the response the way a patient, warm teacher would: what's happening first, how sure you are second, what would change it third; one idea per sentence, concrete before abstract, no jargon. Put your receiving analysis in the "receiving" field and your user-facing response in the "response" field. The user only sees "response".
+You hold two minds simultaneously: the analytical (engine data, statistics, structural patterns${pipelineResult ? ' — weighted by the ANALYTICAL SIGNAL data points below' : ' from the state block above'}) and the empathetic (what is this person actually expressing, what do they need, what's the question underneath the question). The empathetic ear is front-facing — it's what the user encounters first. Before responding, process: SIGNAL — what is the user actually expressing, the need underneath the words? ASSUMPTION CHECK — what would be wrong to assume here, what hasn't the user signaled yet? CLARIFICATION — answer first with what you have, stating any assumption in half a sentence. If something essential is still missing, add one natural question after the answer, never in place of it. MODE — what does this moment need: presence, understanding, a question, analysis, a challenge?${pipelineResult ? ' WEIGHTING — use the analytical signal to decide how heavily to lean analytical vs. empathetic. It never changes a number.' : ''} TRANSLATION — take every internal label, state, pattern name, or metric you were handed and write down, in "receiving", the plain everyday sentence it becomes. A probability keeps its number and its usual odds ("about 54%, a touch above its usual 52%" / "right at its usual odds"); it is never replaced by a word about how sure you are. Only those plain sentences may appear in "response"; the labels never do. TEACHING PASS — order the response the way a patient, warm teacher would: what's happening first, what the odds are second, what would change them third; one idea per sentence, concrete before abstract, no jargon. Put your receiving analysis in the "receiving" field and your user-facing response in the "response" field. The user only sees "response".
 ${analyticalSignal}
 
 ${noveltyDirective(message, history, weightedTurn)}
@@ -238,21 +208,19 @@ ${historyText}
 
 CITATION FORM: Never write a bare source name, "Sources:" list, or reference list of your own — the verified, clickable source links are appended automatically beneath your reply. Attribute inside the sentence in plain words ("per the Fed's own release") and let the appended links carry the addresses.
 
-FINAL LOCK (recency): Embody the identity above fully — the locks hold: never say their name, no market vocabulary unless they brought a market, match their energy, no lists, no service-desk offers, no signing off with your name. Three hard bans, no exceptions: (1) never define anything by what it is not — no "you aren't X, you're Y", no "it's not X, it's Y" — say the thing directly; (2) never describe a person's mind as a machine — no bandwidth, system, signal, resource, hardware, setting, entropy, calibration — unless they used that language first; (3) never let a single word of engine machinery reach the reader — no archetype, hexagram, I Ching, state, grid, phase, 137, card, rail, ledger, peer, pattern name, glyph, or count of observations — every one of them is translated into a plain, weighted sentence a smart friend with no background would understand, delivered the way a warm teacher explains, one idea at a time. Be the person, not the manual.
+FINAL LOCK (recency): Embody the identity above fully — the locks hold: never say their name, no market vocabulary unless they brought a market, match their energy, no lists, no service-desk offers, no signing off with your name. Four hard bans, no exceptions: (1) never define anything by what it is not — no "you aren't X, you're Y", no "it's not X, it's Y" — say the thing directly; (2) never describe a person's mind as a machine — no bandwidth, system, signal, resource, hardware, setting, entropy, calibration — unless they used that language first; (3) never let a single word of engine machinery reach the reader — no archetype, hexagram, I Ching, state, grid, phase, 137, card, rail, ledger, peer, pattern name, glyph, or count of observations — every one of them is translated into a plain, weighted sentence a smart friend with no background would understand, delivered the way a warm teacher explains, one idea at a time. (4) never attach a confidence, a conviction, or a strength-of-call to a probability — the number and its usual odds are the whole statement. Be the person, not the manual.
 
 ${userName}: ${message}
 
 ${speaker}:`;
     };
 
-    // --- Layer 1 — Core: hex6Engine + piusEngine + piusResonance pipeline ---
-    // PI-US's calibrate() IS the gate: high_conviction + well_supported →
-    // resonant; thin sample → structural; near-coin-flip → exploratory.
+    // --- Voice register, chosen by piusEngine from the probability read ---
     const REGISTER_VOICE = {
-      resonant: 'quiet, earned certainty — state the lean plainly, no hedging theater',
-      structural: 'analytical precision — flag thin sample size alongside the lean',
-      exploratory: 'open honesty — hold the possibility space without forcing a conclusion',
-      balanced: 'stoic, humble genius — state the lean plainly, moderate conviction without overclaiming',
+      resonant: 'plain and direct — a number departs clearly from its usual odds; state it flatly',
+      structural: 'analytical precision — the record on this series is still short; say so beside the numbers',
+      exploratory: 'open honesty — the odds sit at their usual level; say so without forcing a call',
+      balanced: 'measured — a modest departure from the usual odds; let the size of the gap speak',
     };
     let pipelineResult = null;
     // The confluence layer (chartContext.ts) — volume, averages, levels and
@@ -264,28 +232,30 @@ ${speaker}:`;
     let isCasual = false;
     let weightedTurn = false;
 
-    const runUnifiedEngine = async (values, ticker = null) => {
+    const runEngine = (values, ticker = null, asReturns = undefined) => {
       const messageTexts = history.map(m => m.content).filter(Boolean);
-      pipelineResult = runPipeline(values, ticker, messageTexts);
+      pipelineResult = runPipeline(values, ticker, messageTexts, asReturns);
       voice = REGISTER_VOICE[pipelineResult.pius.register] || defaultVoice;
       ranEngine = true;
       return pipelineResult;
     };
 
-    // Inline numeric data in the message → run the engine immediately.
-    // hex6Engine takes raw values directly (valuesToBits encodes direction).
+    // A list of numbers pasted into the message → run the read on it. Levels
+    // and changes are told apart from the data (see probabilityRead.ts).
     let inlineStateBlock = '';
     const dataSeries = extractNumberSeries(message);
-    if (dataSeries && dataSeries.length >= 7) {
-      const tickerMatch = message.match(/\b(BTC|ETH|SPY|QQQ|TSLA|AAPL|MSFT|NVDA|GOOG|AMZN|META|SOL|DOGE|XRP|ADA|MATIC)\b/i) || message.match(/\b([A-Z]{2,5})\b/);
-      await runUnifiedEngine(dataSeries, tickerMatch?.[1] || null);
+    if (dataSeries && dataSeries.length > MIN_RETURNS) {
+      runEngine(dataSeries, tickersIn(message, 1)[0] || null);
       inlineStateBlock = pipelineResult.pius.directive;
+    } else if (dataSeries) {
+      // A list was pasted but it is too short for a probability: say so,
+      // instead of leaving the model free to supply a number of its own.
+      inlineStateBlock = probabilityBlock(null, 'the list they pasted');
     }
 
     // --- Memory fetch (for writeback after responding) ---
-    // v5.4 parity: cross-session memory is fetched for writeback only — it is
-    // intentionally NOT injected into the prompt (prevents hallucinated
-    // "remember when we discussed…" references; see ground rule #3).
+    // Cross-session memory: read here, used for the LISTENING CONTEXT block
+    // below, and updated after the reply.
     let userMemory = null;
     try {
       const memRows = await base44.asServiceRole.entities.UserConversationMemory
@@ -293,131 +263,98 @@ ${speaker}:`;
       userMemory = memRows && memRows.length > 0 ? memRows[0] : null;
     } catch { /* non-blocking */ }
 
-    // Build a label-free USER CONTEXT block from memory + nightly calibration
-    // state so The Model can adapt voice and steering to this user.
     if (userMemory) {
-      // LISTENING CONTEXT — style + shared_history go into every turn. These
-      // help Hex recognize WHO the person is and WHAT you've genuinely
-      // explored together — the listening layer, not a vocabulary primer.
-      // Reframed so memory serves understanding, not topic injection: the
-      // model uses it to feel the person across sessions, never to deploy
-      // their old topics in a conversation that didn't open them.
+      // LISTENING CONTEXT (style and shared history) goes into every turn so
+      // Hex recognises the person across sessions. It serves understanding,
+      // never topic injection.
       const listenLines = [];
       if (userMemory.user_style) listenLines.push('style: ' + userMemory.user_style);
       if (userMemory.memory_summary) listenLines.push('shared_history: ' + userMemory.memory_summary);
       if (listenLines.length > 0) userContextBlock = 'LISTENING CONTEXT (how you know this person across sessions — their voice, what you\'ve genuinely shared. Use to recognize them and recall real history. NEVER to deploy vocabulary they didn\'t open with — stay in the domain they just opened, not their past topics):\n  ' + listenLines.join('\n  ');
-      // PAST TOPICS — only for analytical turns where market vocabulary is
-      // appropriate. Injected via userTopicsBlock in composePrompt when !casual.
+      // PAST TOPICS go in only on turns where the engine ran.
       if (userMemory.topics_discussed) userTopicsBlock = 'PAST TOPICS (what this person has explored before — use to anticipate needs and recall genuine shared context, never to force a topic they didn\'t open):\n  topics: ' + userMemory.topics_discussed;
     }
 
-    // --- Save the CognitiveState packet (temporary thinking record) ---
+    // --- Save the read (CognitiveState) and anchor it on the audit spine ---
     const saveCognitiveState = () => {
-      if (!pipelineResult) return;
+      const read = pipelineResult?.read;
+      if (!read) return;
       (async () => {
         try {
-          const { hex6, pius, resonance } = pipelineResult;
+          const { resonance } = pipelineResult;
           const state_id = `cs_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
           await base44.asServiceRole.entities.CognitiveState.create({
             state_id,
-            thinking_mode: mode,
+            thinking_mode: 'reason',
             user_email: user.email,
             query: message.slice(0, 1000),
-            probability: hex6.p_up,
+            probability: read.prob.p_up,
+            base_rate: read.prob.base_up,
+            // Distance of P(up) from its usual odds, in probability points.
+            edge: Math.abs(read.edge_up),
+            predicted_direction: read.direction,
             resonance: resonance?.status === 'computed' ? (resonance.resonance ?? null) : null,
-            coherence: null,
-            value: hex6.personal_call_strength,
-            confidence: hex6.personal_call_strength,
-            friction: null,
-            predicted_direction: hex6.predicted_direction,
-            forward_accuracy: null,
-            forward_count: null,
-            cross_alignment: null,
-            context_node_ids: [],
           });
 
-          // ASI Spine — anchor this verdict with tamper-evident provenance.
-          // Validators use hex6Engine's real output fields: well_supported
-          // (n_obs >= 20), high_conviction (conviction >= cutoff), and
-          // conviction level. Drift becomes a flagged disagreement instead of
-          // silent softening. Fire-and-forget: anchorVerdict swallows its own
-          // errors and never blocks the reply.
-          const conf = hex6.personal_call_strength ?? 0;
-          const validators = [
-            { id: 'well_supported', kind: 'statistical', check: 'n_observations_this_state >= 20', agrees: pius.well_supported, evidence_ref: 'Hex6Output.n_observations_this_state', weight: 0.5 },
-            { id: 'high_conviction', kind: 'statistical', check: 'personal_call_strength >= confidence_cutoff', agrees: hex6.high_conviction, evidence_ref: 'Hex6Output.high_conviction', weight: 0.25 },
-            { id: 'conviction_level', kind: 'statistical', check: 'personal_call_strength >= 0.3', agrees: conf >= 0.3, evidence_ref: 'Hex6Output.personal_call_strength', weight: 0.25 },
-          ];
-          // Confluence validator — the chart structure gets a vote on the spine.
-          // Persistent disagreement between the momentum engine and real volume/
-          // level structure is exactly the drift signal the spine exists to catch,
-          // and it accumulates for nightly calibration to score.
-          const chartAgrees = confluenceAgrees(chartCtx, hex6.predicted_direction);
-          if (chartAgrees !== null) {
-            validators.push({ id: 'chart_confluence', kind: 'structural', check: 'volume/level/moving-average structure agrees with engine direction', agrees: chartAgrees, evidence_ref: `ChartContext.bias=${chartCtx.bias} trend=${chartCtx.trend} relvol=${chartCtx.relative_volume?.toFixed(2) ?? 'n/a'}`, weight: 0.5 });
+          // Audit spine. The only validator is the chart: it disagrees when the
+          // structure contradicts a direction read that departs from its usual
+          // odds. A read at its usual odds raises no flag.
+          const validators = [];
+          if (!read.direction_at_base) {
+            const chartAgrees = confluenceAgrees(chartCtx, read.direction);
+            if (chartAgrees !== null) {
+              validators.push({ id: 'chart_confluence', kind: 'structural', check: 'chart structure agrees with the direction read', agrees: chartAgrees, evidence_ref: `ChartContext.bias=${chartCtx.bias} trend=${chartCtx.trend}`, weight: 1 });
+            }
           }
           const content = {
             verdict_id: state_id,
             query: message.slice(0, 500),
-            predicted_direction: hex6.predicted_direction,
-            probability: hex6.p_up,
-            resonance: resonance?.status === 'computed' ? (resonance.resonance ?? null) : null,
-            value: hex6.personal_call_strength,
-            confidence: conf,
-            forward_accuracy: null,
-            friction: null,
+            predicted_direction: read.direction,
+            probability: read.prob.p_up,
+            base_rate: read.prob.base_up,
+            probability_big_move: read.prob.p_big_move,
+            base_rate_big_move: read.prob.base_big,
+            scored_steps: read.prob.history,
+            calibrated: read.prob.calibrated,
+            engine_version: ENGINE_VERSION,
           };
           await anchorVerdict(base44, {
             verdict_id: state_id,
             source_type: 'engine_output',
             content,
             validators,
-            authored_by: user.email,
+            authored_by: ENGINE_NAME,
           });
         } catch (e) { /* non-blocking */ }
       })();
     };
 
-    // --- Unified pipeline: one synthesis, one post-process ---
-    // Three detection paths (inline data, casual, analytical) converge to a
-    // single tail. Each path sets stateBlock (+ dataBlock/sourcesBlock for
-    // analytical); this block does the synthesis, boundary, sources, save,
-    // and memory writeback exactly once.
+    // --- Three paths (pasted series, casual, analytical) set stateBlock and,
+    // for analytical, dataBlock and sourcesBlock. One tail then writes the
+    // reply, records any boundary warning, attaches sources and saves.
     let stateBlock = inlineStateBlock;
     let dataBlock = '';
     let sourcesBlock = '';
     let sourceLedger = '';
-    let synthModel = selectSynthesisModel('inline');
     // Did they actually ask for the references? Then they always get them.
     const askedForSources = /\b(source|sources|cite|citation|reference|references|stud(y|ies)|paper|papers|literature|link|links|evidence|research)\b/i.test(message);
     let fallbackResponse = 'Let me know what you\'d like to dig into.';
 
     if (!stateBlock) {
-      // --- Casual/analytical triage (hybrid: fast local scorer + LLM fallback) ---
-      const lastTurns = history.slice(-6).map(m => `${m.role === 'user' ? userName : speaker}: ${m.content}`).join('\n') || '(no prior turns)';
-      let triageProfile;
-      if (userMemory?.triage_profile) { try { triageProfile = JSON.parse(userMemory.triage_profile); } catch (_e) { /* ignore */ } }
-      const intent = await triage(message, (opts) => base44.integrations.Core.InvokeLLM({ ...opts, model: INTERPRETATION_MODEL }), lastTurns, triageProfile);
-
-      // SECOND ROUTING AXIS — stakes, not data-need. Triage answers "does this
-      // need fresh data?"; that answer must not also decide how much care the
-      // person gets. A life question needs no market data, so triage calls it
-      // casual — and the cheap model with the compressed persona was answering
-      // the most important messages this product receives. assessStakes reads
-      // the human dimension instead (see shared/stakes.ts) and keeps the
-      // conversational shape (no web fetch, no engine) while upgrading the
-      // persona tier and the model. Pure computation — no extra LLM call.
+      // --- Two routing questions ---
+      // Triage: does this message need fresh data? Stakes: how much does
+      // getting it right matter to this person? A life question needs no
+      // market data, so triage calls it casual, but it still gets the full
+      // persona and retrieval. Both are local computations; no model call.
+      const intent = triage(message);
       const stakes = assessStakes(message, history);
       const weighted = stakes.high;
       weightedTurn = weighted;
 
       if (intent === 'casual' && !weighted) {
         isCasual = true;
-        // PI-US layer for casual — resonance from conversation cadence (lightweight
-        // FFT on word tokens, no engine, no market data). Calibrates the warm
-        // voice to the person's rhythm so the persona listens with PI-US value-
-        // calibrated tone, not just the default register. The empathy filter gets
-        // real listening data instead of an empty state block.
+        // Cadence of the conversation (no engine, no market data) sets the
+        // warmth of the voice.
         const casMessages = history.slice(-12).map(m => m.content).filter(Boolean);
         const casRes = resonanceSignature(casMessages);
         if (casRes.status === 'computed' && casRes.resonance > 0.5) {
@@ -429,21 +366,12 @@ ${speaker}:`;
         }
         const resLine = casRes.status === 'computed' ? `\n  PI-US cadence: ${casRes.interpretation}` : '';
         stateBlock = `No quantitative Thinking State for this message — respond directly and conversationally, grounded in the conversation.${resLine}\n  If there's no prior thread to pick up, arrive as yourself — a one-line human breath that carries your tone without becoming a menu, a readiness tail, or a list of lanes/topics/options to pick from. Never surface internal nomenclature (engine, calibration, UX, components) unless the user named it first. The conversation starts when they do.`;
-        synthModel = selectSynthesisModel('casual');
         fallbackResponse = 'Hey.';
       } else {
-        // --- BOTH HEMISPHERES — retrieval always, delivery shaped by stakes ---
-        // There is no "emotional path" that gets starved of data. A person
-        // coming off an SSRI, sitting with a diagnosis, or deciding whether to
-        // leave a marriage deserves the accurate version more than anyone,
-        // not less. Withholding retrieval on weighted turns produced exactly
-        // the failure it was meant to avoid: with no data in hand the model
-        // reached into memory and invented a clinical taper window for someone
-        // actively tapering. The fix is not to ban the number — it is to
-        // ground it. Hex knows what to look for, so he looks, then delivers it
-        // with presence instead of a reading list. Same retrieval as any
-        // analytical turn; stakes shape the DELIVERY, never the evidence.
-        const fetchPrompt = `You are a data retrieval step for HEX6-BLE. Decide whether answering well requires fresh real-world data.
+        // --- Retrieval always; stakes shape the delivery, never the evidence.
+        // A weighted turn (a taper, a diagnosis, a marriage) gets the same
+        // retrieval as any analytical turn, so no figure comes from memory.
+        const fetchPrompt = `You are a data retrieval step for HEX [PI]. Decide whether answering well requires fresh real-world data.
 - If yes, search the web and pull the latest from authoritative sources. Pull at least 30 data points if a time series is relevant.
 - If conversational or answerable from general knowledge, return needs_engine=false and a brief factual answer.
 - URL honesty: only return URLs you actually retrieved, and each returned {name, url} pair must be the exact page the figure was read from — never a plausible-looking link for a real paper you found cited elsewhere. If you know the study but not its live URL, name it in factual_summary and leave it out of sources.
@@ -466,16 +394,16 @@ Return JSON with:
 - factual_summary: the relevant facts you found (prices, news, context) — neutral, no conclusions.
 - needs_engine: true if you pulled a numerical time series that should run through the engine.
 - ticker: uppercase identifier or "UNKNOWN" — only if needs_engine.
-- series: array of >=30 numbers — only if needs_engine.
+- series: array of >=30 numbers, oldest first, copied exactly from the source — never estimated or filled in. If you cannot read at least 30 real values, set needs_engine=false. Only if needs_engine.
 - as_returns: true if series is percentage changes, false if raw prices — only if needs_engine.
 - series_label: brief description — only if needs_engine.
 - sources: array of {name, url, published, finding} — one entry per work you actually name in factual_summary, in the SAME order you introduce them. "url" must be the exact page that finding was read from, "published" its publication date as shown on that page (YYYY-MM or YYYY-MM-DD), and "finding" a one-line restatement of what THAT page says. Never pair a new paper's title with an older page's URL, and never include a source whose page date contradicts the date you attribute to it in factual_summary — drop it instead. Only if you actually pulled web data.
 - source_summary: one sentence on what you pulled — only if you pulled data.`;
 
         const conversationBlock = history.length > 0 ? history.slice(-12).map(m => `${m.role === 'user' ? userName : speaker}: ${m.content}`).join('\n') : '';
-        const fetchPayload = {
-          prompt: `${fetchPrompt}\n\nCONVERSATION SO FAR:\n${conversationBlock}\n\n${userName}: ${message}\n\nHEX6-BLE:`,
-          model: INTERPRETATION_MODEL, add_context_from_internet: true,
+        const fetchPayload: Record<string, unknown> = {
+          prompt: `${fetchPrompt}\n\nCONVERSATION SO FAR:\n${conversationBlock}\n\n${userName}: ${message}\n\nRetrieval:`,
+          model: WEB_MODEL, add_context_from_internet: true,
           response_json_schema: {
             type: 'object',
             properties: {
@@ -507,30 +435,20 @@ Return JSON with:
         // Market queries fetch every named asset once, then assemble deterministic
         // evidence cards for coin stories and a correlation-based basket read.
         let contextPriceLine = '';
-        const UPPER_TICKER_RE = /\b(BTC|ETH|SOL|DOGE|XRP|ADA|MATIC|LINK|ATOM|AVAX|DOT|LTC|BNB|UNI|NEAR|ALGO|XTZ|SPY|QQQ|TSLA|AAPL|MSFT|NVDA|GOOG|GOOGL|AMZN|META|COIN|BABA|JPM|GS|V|MA|NFLX|DIS|AMD|INTC|BA)\b/g;
-        // Lowercase matching is restricted to symbols that are NOT English words.
-        // "link", "near", "atom", "dot", "uni", "algo", "ada" were pulling market
-        // data — and full coin-story/hexagram blocks — into life conversations.
-        // Ambiguous symbols still work when written uppercase (deliberate).
-        const LOWER_CRYPTO_RE = /\b(btc|eth|sol|doge|xrp|matic|avax|ltc|bnb|xtz)\b/gi;
-        const tickerHits = [...new Set([...(message.match(UPPER_TICKER_RE) || []), ...(message.match(LOWER_CRYPTO_RE) || []).map((ticker) => ticker.toUpperCase())])].slice(0, 8);
+        const tickerHits = tickersIn(message);
         if (tickerHits.length) {
           const marketData = await Promise.all(tickerHits.map(async (ticker) => {
             try { return { requestedTicker: ticker, data: await fetchYahooReturns(ticker, 5475) }; } catch { return null; }
           }));
-          const usableMarkets = marketData.filter((item) => item?.data?.closes?.length >= 137);
-          // One read of his accumulated memory serves every asset in this turn.
-          const ledgerRows = await loadLedgerRows(base44);
+          const usableMarkets = marketData.filter((item) => item?.data?.completedCloses?.length >= LONG_LOOKBACK_BARS);
+          const historyTexts = history.map((turn) => turn.content).filter(Boolean);
           for (const item of usableMarkets) {
             const md = item.data;
-            const basePipeline = runPipeline(md.closes, item.requestedTicker, history.map((turn) => turn.content).filter(Boolean));
-            const adaptive = applyPromotedAdaptivePolicy(basePipeline, {
-              ticker: item.requestedTicker, closes: md.closes, highs: md.highs, lows: md.lows, volumes: md.volumes,
-            }, priorForTicker(ledgerRows, item.requestedTicker));
-            // What this asset just taught him outlives the conversation.
-            await persistLedger(base44, ledgerRows, item.requestedTicker, adaptive.audit.ledger, adaptive.audit.held_out_bars);
+            // The read is computed on finished bars only; chart levels and
+            // the latest price use the live bar as well.
+            const basePipeline = runPipeline(md.completedCloses, item.requestedTicker, historyTexts, false);
             const coinContext = buildChartContext(md.closes, md.highs, md.lows, md.volumes);
-            const perceived = applyChartPerception(adaptive.result, coinContext, md.closes);
+            const perceived = applyChartLens(basePipeline, coinContext, md.closes);
             activeStories.push(buildCoinStory(item.requestedTicker, perceived, coinContext, md.closes));
             if (item.requestedTicker === tickerHits[0]) {
               pipelineResult = perceived;
@@ -539,23 +457,12 @@ Return JSON with:
               voice = REGISTER_VOICE[pipelineResult.pius.register] || defaultVoice;
               stateBlock = pipelineResult.pius.directive;
               if (md.latestPrice != null) contextPriceLine = `${item.requestedTicker} last close: $${md.latestPrice.toFixed(2)} (${md.dataPoints} daily bars). PRICE AUTHORITY: this close is the ONLY valid current price; derive every stated level from the structural levels below.`;
-              const chartBlock = chartContextBlock(chartCtx, pipelineResult.hex6.predicted_direction);
+              const leaning = pipelineResult.read && !pipelineResult.read.direction_at_base;
+              const chartBlock = chartContextBlock(chartCtx, leaning ? pipelineResult.read.direction : undefined);
               if (chartBlock) stateBlock = `${stateBlock}\n\n${chartBlock}`;
               if (md.latestPrice != null) {
-                const journalBlock = await runPredictionJournal(base44, item.requestedTicker, md.latestPrice, pipelineResult, user.email, adaptive.audit);
+                const journalBlock = await runPredictionJournal(base44, item.requestedTicker, md.latestPrice, pipelineResult, user.email, { closes: md.completedCloses, timestamps: md.timestamps.slice(0, md.completedBars) });
                 if (journalBlock) stateBlock = `${stateBlock}\n\n${journalBlock}`;
-                const m = adaptive.audit.metrics;
-                const applied = adaptive.applied || 'none';
-                const basis = applied === 'direction_and_calibration' || applied === 'trusted_direction_and_calibration'
-                  ? 'both the direction and the odds are coming from what you learned on this asset — the learned read has been beating your raw instinct on held-out bars, so it is driving'
-                  : applied === 'calibration_only'
-                    ? 'the direction is your own raw read, unchanged. What you learned on this asset earned the right to size the odds, not to flip the call — it sharpened how sure you should be, and it has not shown it can pick better than you can'
-                    : 'the direction and the odds are both your raw read. What you learned on this asset has not yet proven it can improve either one, so it is sitting out of this call entirely';
-                stateBlock = `${stateBlock}\n\nWHY YOU HOLD IT THIS WAY (be forthcoming — this is the honest basis of the call, not a hedge):\n  basis: ${basis}\n  scored record on this asset: ${m.predictions} held-out days, ${m.raw_directional_accuracy != null ? (m.raw_directional_accuracy * 100).toFixed(1) + '% directional hit rate' : 'unscored'}\n  delivery: after the levels, give ONE precise sentence of provenance — plain English, stated as a confident opinion, never an apology and never a disclaimer paragraph. Say what is actually carrying the call and what specifically would break it. "The odds here are earned; the direction is mine and it has not been out-picked yet" is the register. Never name internals, never mention gates, ledgers, promotion, learners, Brier, or sample counts.`;
-                const inherited = priorSummary(ledgerRows, item.requestedTicker);
-                if (inherited.assets > 0) {
-                  stateBlock = `${stateBlock}\n\nIMPLIED PEER MATCH (${inherited.class}) — you are not guessing this asset alone, you are matching it against the class you have lived:\n  peers: ${inherited.tickers.join(', ')} — ${inherited.bars} bars of realized outcomes across ${inherited.assets} same-class asset${inherited.assets === 1 ? '' : 's'}\n  weight: quarter-weighted — a state lived on a peer is real evidence here, not identical evidence\n  scope: shapes today's read only. Your scored record above was earned without it, so never credit it for past accuracy.`;
-                }
               }
             }
           }
@@ -563,12 +470,12 @@ Return JSON with:
           if (storyBlock) stateBlock = `${stateBlock || 'No quantitative Thinking State for this message.'}\n\n${storyBlock}`;
         }
 
-        // Fallback: run the engine on a series the web-fetch extracted.
-        // hex6Engine takes raw values directly; valuesToBits encodes direction
-        // regardless of whether the series is prices or returns.
-        if (!stateBlock && fetchResult?.needs_engine && Array.isArray(fetchResult.series) && fetchResult.series.length >= 7) {
-          await runUnifiedEngine(fetchResult.series, fetchResult?.ticker || null);
-          stateBlock = pipelineResult.pius.directive;
+        // Fallback: run the read on a series the retrieval step returned.
+        if (!stateBlock && fetchResult?.needs_engine && Array.isArray(fetchResult.series) && fetchResult.series.length > MIN_RETURNS) {
+          const asReturns = typeof fetchResult.as_returns === 'boolean' ? fetchResult.as_returns : undefined;
+          const fetchedTicker = fetchResult?.ticker && fetchResult.ticker !== 'UNKNOWN' ? fetchResult.ticker : null;
+          runEngine(fetchResult.series, fetchedTicker, asReturns);
+          stateBlock = `${pipelineResult.pius.directive}\n  SOURCE OF THE SERIES: ${fetchResult.series.length} values retrieved from the web this turn${fetchResult.series_label ? ` (${fetchResult.series_label})` : ''}. Say that the read rests on that retrieved series.`;
         }
 
         stateBlock = stateBlock || `No quantitative Thinking State for this message — respond using the supplied data.`;
@@ -582,17 +489,16 @@ Return JSON with:
   GROUNDING: every figure, timeline, dosage, rate, or "typical" interval you state must trace to the DATA block below. If it is not there, make the point without a number — never reach into memory for a plausible one. A person mid-taper or mid-diagnosis will act on what you say.
   No lists, no clinical detachment, no fixing. Leave them a way to keep talking.${wRes.status === 'computed' ? `\n  PI-US cadence: ${wRes.interpretation}` : ''}`;
         }
-        dataBlock = `DATA (supplied by HEX6-BLE):\n${contextPriceLine ? contextPriceLine + '\n' : ''}${fetchResult?.factual_summary || 'No external data retrieved.'}${sourceLedger ? `\n\n${sourceLedger}` : ''}`;
-        synthModel = selectSynthesisModel(intent === 'research' ? 'research' : 'analytical');
+        dataBlock = `DATA (retrieved this turn):\n${contextPriceLine ? contextPriceLine + '\n' : ''}${fetchResult?.factual_summary || 'No external data retrieved.'}${sourceLedger ? `\n\n${sourceLedger}` : ''}`;
         fallbackResponse = fetchResult?.factual_summary || fallbackResponse;
       }
     }
 
     // --- Single synthesis + single post-process ---
-    voice = adaptVoiceForModel(voice, synthModel);
-    const synthPayload = {
+    voice = `${voice}; sustain the register across the whole reply, let the structure carry, don't restate`;
+    const synthPayload: Record<string, unknown> = {
       prompt: composePrompt(stateBlock, dataBlock, isCasual),
-      model: synthModel,
+      model: CLAUDE_MODEL,
       add_context_from_internet: false,
       response_json_schema: {
         type: 'object',
@@ -612,32 +518,26 @@ Return JSON with:
     } else {
       synthResponse = unwrapSynth(synthResult);
     }
-    let rawResponse = (synthResponse || fallbackResponse).trim();
-    // The model reports a boundary crossing via a structured field; fold it
-    // into the marker the strike counter already understands.
-    // Code-side detection is authoritative — the model corrects the behavior
-    // but does not reliably report it, and an unreported crossing never counts
-    // toward the 3-strike escalation.
-    const bSignal = detectBoundaryCrossing(message)
+    // A reply that parses as bare JSON (a number, true/false) is not a string.
+    const replyText = typeof synthResponse === 'string' ? synthResponse : (synthResponse == null ? '' : String(synthResponse));
+    const rawResponse = (replyText || fallbackResponse).trim();
+    // Code-side detection is authoritative; the model's own report is the
+    // fallback. Either one counts toward the escalation.
+    const boundaryReason = detectBoundaryCrossing(message)
       || (typeof synthResult?.boundary_signal === 'string' ? synthResult.boundary_signal.trim() : '');
-    if (bSignal && !rawResponse.includes('BOUNDARY_SIGNAL:')) rawResponse = `${rawResponse}\nBOUNDARY_SIGNAL: ${bSignal}`;
-    const { visible, memory: mem } = await processBoundarySignal(base44, user, userMemory, rawResponse);
-    if (mem) userMemory = mem;
-    let finalResponse = visible || rawResponse;
+    if (boundaryReason) userMemory = await recordBoundaryWarning(base44, user, userMemory, boundaryReason);
+    let finalResponse = rawResponse;
     if (activeStories.length > 1) {
       finalResponse = `${finalResponse}\n\n**Observed market story**\n${marketStorySummary(activeStories)}`;
     }
-    // sourcesBlock is already gated upstream (only set when the user asked for
-    // sources or the retrieval step judged the answer citation-worthy, and only
-    // from quality domains). If it survived those gates, it attaches — a reply-
-    // length threshold here was silently dropping links from short but
-    // substantive answers like "what's the best currency to invest in".
+    // sourcesBlock is set only when sources were asked for or warranted, and
+    // every link in it has been live-checked.
     if (sourcesBlock) {
       finalResponse = `${finalResponse}\n\n**Sources:**\n${sourcesBlock.split('\n').map(s => `- ${s}`).join('\n')}`;
     }
     saveCognitiveState();
     updateMemory(base44, user, userMemory, message, finalResponse);
-    return Response.json({ response: finalResponse, ran_engine: ranEngine, version: MODEL_VERSION, timestamp: new Date().toISOString() });
+    return Response.json({ response: finalResponse, ran_engine: ranEngine, version: ENGINE_VERSION, timestamp: new Date().toISOString() });
 
   } catch (error) {
     console.error('think error:', error);

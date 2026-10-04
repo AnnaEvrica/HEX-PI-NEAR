@@ -1,10 +1,53 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.41';
-import { fetchYahooReturns } from '../../shared/marketDataClient.ts';
-import { runArchetypeWalkForward, summarizeWalkForward } from '../../shared/archetypeWalkForward.ts';
+// walkForwardAccuracy — run the engine's own walk-forward test on live data.
+//
+// For each ticker it replays the calibrated probability read one bar at a
+// time: every call is made before its outcome is known, and learning happens
+// only afterwards. It reports, per ticker and pooled, the Brier score, the
+// Brier skill against the series' own base rate, and stated-versus-observed
+// frequencies, on whatever tickers you pass.
+//
+// POST { tickers?: string[], ticker?: string, lookbackDays?: number }
 
-// Broad crypto basket with liquid proof-of-stake networks. Staking yield is
-// not modelled as a price return; each asset is tested on unadjusted USD OHLCV.
-const DEFAULT_BASKET = ['BTC', 'ETH', 'SOL', 'ADA', 'DOT', 'ATOM', 'AVAX', 'NEAR', 'ALGO', 'XTZ'];
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
+import { fetchYahooReturns } from '../../shared/marketDataClient.ts';
+import { walkStateProbability, stateProbability } from '../../shared/stateProbability.ts';
+import { ENGINE_VERSION } from '../../shared/version.ts';
+
+const DEFAULT_BASKET = ['BTC', 'ETH', 'SOL', 'SPY', 'QQQ'];
+
+// The first steps of each series are warm-up and are not scored.
+const WARMUP = 250;
+
+function score(pairs) {
+  const n = pairs.length;
+  if (!n) return null;
+  let bp = 0, bb = 0, hits = 0;
+  for (const x of pairs) {
+    bp += (x.p - x.y) ** 2;
+    bb += (x.b - x.y) ** 2;
+    if ((x.p >= 0.5 ? 1 : 0) === x.y) hits++;
+  }
+  const edges = [0, 0.4, 0.45, 0.55, 0.6, 1.0001];
+  const bins = [];
+  for (let k = 0; k < edges.length - 1; k++) {
+    const inBin = pairs.filter((x) => x.p >= edges[k] && x.p < edges[k + 1]);
+    if (!inBin.length) continue;
+    bins.push({
+      stated: `${Math.round(edges[k] * 100)}–${Math.min(100, Math.round(edges[k + 1] * 100))}%`,
+      mean_stated: Number((inBin.reduce((s, x) => s + x.p, 0) / inBin.length).toFixed(4)),
+      observed: Number((inBin.reduce((s, x) => s + x.y, 0) / inBin.length).toFixed(4)),
+      n: inBin.length,
+    });
+  }
+  return {
+    n,
+    brier: Number((bp / n).toFixed(5)),
+    brier_base_rate: Number((bb / n).toFixed(5)),
+    brier_skill: bb > 0 ? Number((1 - bp / bb).toFixed(4)) : null,
+    hit_rate: Number((hits / n).toFixed(4)),
+    reliability: bins,
+  };
+}
 
 export default async function(req: Request): Promise<Response> {
   try {
@@ -12,65 +55,38 @@ export default async function(req: Request): Promise<Response> {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const body = await req.json();
-    const tickers = Array.isArray(body.tickers) && body.tickers.length
-      ? body.tickers.map((ticker: unknown) => String(ticker).trim().toUpperCase()).filter(Boolean)
-      : body.ticker ? [String(body.ticker).trim().toUpperCase()] : DEFAULT_BASKET;
-    const lookbackDays = Math.max(365, Math.min(Number(body.lookbackDays) || 5475, 7300));
-    const trainRatio = Math.max(0.5, Math.min(Number(body.trainRatio) || 0.6, 0.85));
-    const summaryOnly = body.summaryOnly === true;
+    const body = await req.json().catch(() => ({}));
+    const tickers: string[] = (Array.isArray(body.tickers) && body.tickers.length
+      ? body.tickers.map((t: unknown) => String(t).trim().toUpperCase()).filter(Boolean)
+      : body.ticker ? [String(body.ticker).trim().toUpperCase()] : DEFAULT_BASKET).slice(0, 12);
+    const lookbackDays = Math.max(730, Math.min(Number(body.lookbackDays) || 5475, 7300));
 
-    const fetched = await Promise.all(tickers.map(async (ticker: string) => {
-      try {
-        const data = await fetchYahooReturns(ticker, lookbackDays);
-        return data.closes.length >= 180 ? { ticker, ...data } : null;
-      } catch { return null; }
-    }));
-    const usable = fetched.filter(Boolean);
-    if (!usable.length) return Response.json({ error: 'No requested assets returned enough historical OHLCV data.' }, { status: 422 });
-
-    const results = usable.map((data: any) => runArchetypeWalkForward({
-      ticker: data.ticker, closes: data.closes, highs: data.highs, lows: data.lows, volumes: data.volumes,
-    }, trainRatio));
+    const perTicker: Record<string, unknown> = {};
+    const pooledUp = [], pooledBig = [];
+    for (const ticker of tickers) {
+      let md = null;
+      try { md = await fetchYahooReturns(ticker, lookbackDays); } catch { perTicker[ticker] = { error: 'no data' }; continue; }
+      if (!md?.returns || md.returns.length < WARMUP + 100) { perTicker[ticker] = { error: 'not enough history' }; continue; }
+      // Raw walk-forward steps (before the isotonic step, which is fitted on
+      // earlier calls at read time). Each step was made before its outcome.
+      const { steps } = walkStateProbability(md.returns);
+      const scoredSteps = steps.slice(WARMUP);
+      const up = scoredSteps.map((s) => ({ p: s.p_up, b: s.b_up, y: s.y_up }));
+      const big = scoredSteps.filter((s) => s.p_big !== null && s.y_big !== null).map((s) => ({ p: s.p_big as number, b: s.b_big, y: s.y_big as number }));
+      pooledUp.push(...up); pooledBig.push(...big);
+      // Which pre-trained family the series came to resemble, worked out from
+      // the series alone.
+      const now = stateProbability(md.returns);
+      perTicker[ticker] = { bars: md.dataPoints, direction: score(up), move_size: score(big), behaves_like: { direction: now?.family_up, move_size: now?.family_big } };
+    }
 
     return Response.json({
-      promotion_verdicts: Object.fromEntries(results.map((result) => [result.ticker, {
-        direction_live: result.promotion.live,
-        calibration_live: result.promotion.calibration.live,
-        brier_improvement: result.promotion.brier_improvement,
-        directional_trust_now: result.directional_trust,
-        raw_accuracy: result.metrics.raw_directional_accuracy,
-        trust_gated_accuracy: result.metrics.trust_gated_directional_accuracy,
-        trust_gated_lift: result.metrics.trust_gated_lift,
-        trusted_share: result.metrics.trusted_share,
-      }])),
-      mode: 'PREQUENTIAL_ARCHETYPE_WALK_FORWARD',
-      data_source: 'Yahoo Finance daily OHLCV',
-      protocol: {
-        historical_window_days: lookbackDays,
-        held_out_fraction: 1 - trainRatio,
-        rule: 'Each prediction sees only bars available at that timestamp. Its archetype ledger updates after, never before, the realized next daily close.',
-        confidence: 'HEX personal_call_strength is recorded unchanged and never used as an archetype learning target or gate.',
-        adjustment: 'All observed structural tools (HEX state, family, momentum shape, volume regime, value location, and 137-bar phase) may blend into directional probability through global → family → state → full-archetype shrinkage; direction may change only when the adjusted ratio crosses 50%.',
-        live_calibration_promotion: 'Learned probability is live per asset when the walk-forward shows at least 400 predictions, a Brier improvement of 0.002 or better, and a final-quarter Brier that still improves. It sizes certainty only; the HEX directional call is never moved, and a contrary ledger pulls the read toward 50% rather than inverting it.',
-        live_promotion: 'Adaptive direction is live only when a per-asset walk-forward clears all pre-registered gates: at least 400 predictions, +1.5 percentage-point accuracy lift, at least 0.002 Brier improvement, and no final-quarter accuracy deterioration. HEX conviction remains unchanged.',
-        fine_structure_137: 'A fixed 137-calendar-bar trailing log-return observation is a structural archetype input. It never changes HEX conviction; it may influence the adaptive directional ratio only after the complete promotion gate clears. Staking yield is excluded; results are USD spot-price direction only.'
-      },
-      aggregate: summarizeWalkForward(results),
-      asset_summary: results.map((result) => ({
-        ticker: result.ticker,
-        predictions: result.metrics.predictions,
-        raw_directional_accuracy: result.metrics.raw_directional_accuracy,
-        archetype_adjusted_directional_accuracy: result.metrics.archetype_adjusted_directional_accuracy,
-        raw_brier: result.metrics.raw_brier,
-        archetype_adjusted_brier: result.metrics.archetype_adjusted_brier,
-        promotion: result.promotion,
-      })), 
-      assets: summaryOnly ? undefined : results,
-      unavailable_tickers: tickers.filter((ticker: string) => !usable.some((data: any) => data.ticker === ticker || data.ticker === `${ticker}-USD`)),
-      timestamp: new Date().toISOString(),
+      engine_version: ENGINE_VERSION,
+      method: 'walk-forward: each call precedes its outcome; first 250 steps of each series unscored; skill is against the series own decayed base rate',
+      tickers: perTicker,
+      pooled: { direction: score(pooledUp), move_size: score(pooledBig) },
     });
   } catch (error) {
-    return Response.json({ error: error.message || 'Walk-forward test failed' }, { status: 500 });
+    return Response.json({ error: (error as Error).message }, { status: 500 });
   }
 }

@@ -1,21 +1,12 @@
 // ===========================================================================
-// CHART CONTEXT — the confluence layer ("Reading the Chart", Chapters 4–9).
+// CHART CONTEXT — what the chart is doing: volume, averages, prior levels and
+// value area, computed from the daily bars the market fetch already returns.
 //
-// WHY THIS IS A SEPARATE LAYER AND NOT PART OF THE STATE ENCODING:
-// hex6Engine's TRAINED_TABLES are a frozen artifact — up[s]/down[s] indexed by
-// a 6-bit momentum state built from closes alone. Folding volume or levels into
-// encodeState() would renumber every state and silently detach the tables from
-// the statistics they were trained on. The engine's directional lean must keep
-// coming from exactly the input it was validated on.
+// It is a second, independent description. It never changes a probability:
+// it either lines up with the direction read or points the other way, and
+// both are said plainly.
 //
-// So this module is the SECOND opinion, computed from the OHLCV the market
-// fetch already returns and previously discarded. It never overrides the
-// engine — it either corroborates the lean or contradicts it, which is
-// Chapter 9's confluence principle: independent signals agreeing at the same
-// price is what turns a read into a high-probability read.
-//
-// Everything here is arithmetic on data already in memory. Zero LLM calls,
-// zero extra fetches.
+// Arithmetic on data already in memory. No model calls, no extra fetches.
 // ===========================================================================
 
 export interface ChartContext {
@@ -174,10 +165,12 @@ export function confluenceAgrees(ctx: ChartContext | null, direction: 'UP' | 'DO
 export function chartContextBlock(ctx: ChartContext | null, engineDirection?: 'UP' | 'DOWN'): string {
   if (!ctx) return '';
   const agree = engineDirection ? confluenceAgrees(ctx, engineDirection) : null;
-  const verdict = agree === true
-    ? 'CONFLUENCE: the chart structure agrees with the engine lean — independent signals lining up, which is what raises a read from a guess to a probability.'
+  const verdict = !engineDirection
+    ? 'The direction read sits at its usual odds, so there is no direction to compare the chart against. Describe the structure on its own.'
+    : agree === true
+    ? 'The chart structure lines up with the direction read. This is descriptive: it does not change the probability.'
     : agree === false
-      ? 'CONFLICT: the chart structure disagrees with the engine lean. Say so plainly rather than picking a side quietly — a contested read is real information, and hiding it is the failure mode.'
+      ? 'The chart structure points the other way from the direction read. Say both plainly rather than picking a side quietly; the probability does not change.'
       : 'The chart structure is mixed — no strong corroboration either way.';
   const levels: string[] = [];
   if (ctx.sma20 != null) levels.push(`20-avg ${ctx.sma20.toFixed(2)}`);

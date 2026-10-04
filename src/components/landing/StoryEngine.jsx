@@ -3,7 +3,7 @@ import RavenArt from './RavenArt';
 
 const STEPS = [
   { eyebrow: '01 / Prediction', h2: <>Signal decays.<br /><em>The raven listens.</em></>, p: 'Every signal fades. Hex inverts the model — finding and enhancing patterns through semantic weighting where others validate. The decay is where the signal lives.' },
-  { eyebrow: '02 / Confidence', h2: <>How sure is <em>&ldquo;sure&rdquo;?</em></>, p: 'The engine makes confidence explicit, so persuasive language can no longer masquerade as certainty.' },
+  { eyebrow: '02 / Probability', h2: <>How sure is <em>&ldquo;sure&rdquo;?</em></>, p: 'The engine states the probability beside its usual odds, so persuasive language can no longer masquerade as certainty.' },
   { eyebrow: '03 / Outcomes', h2: <>One forecast becomes <em>many futures.</em></>, p: 'Possible outcomes receive probabilities. A single answer becomes a decision landscape.' },
   { eyebrow: '04 / Risk', h2: <>A good forecast can be a <em>bad move.</em></>, p: 'Probability meets downside, constraints, and consequence. Being likely is not the same as being worth it.' },
   { eyebrow: '05 / Decision', h2: <>Act. Wait.<br /><em>Walk away.</em></>, p: 'Hex converts the signal into a bounded action: what to do, when to do it, and how much to risk.' },
@@ -13,7 +13,7 @@ const STEPS = [
 ];
 
 const SCORES = [
-  ['target', 'precision'], ['42%', 'confidence'], ['63%', 'leading path'], ['71%', 'risk adjusted'],
+  ['target', 'precision'], ['42%', 'probability'], ['63%', 'leading path'], ['71%', 'risk adjusted'],
   ['ACT', 'decision'], ['✓', 'observed'], ['PI', 'calibrated'], ['PI', 'resolved'],
 ];
 const FACET_OFFSETS = [[-24, -22, -8], [18, -24, 7], [-18, 18, -5], [25, -4, 8], [16, 18, 5]];

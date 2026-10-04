@@ -6,9 +6,9 @@ export default function LegalModal({ open, onClose }) {
   const policies = [
     {
       title: 'Terms of Service',
-      content: `HEX6 BLE, developed by Evrica Technologies Inc., is an experimental Probabilistic Intelligence model, provided "as-is" for informational and exploratory purposes. By accessing this platform, you agree that:
+      content: `HEX [PI], developed by Evrica Technologies Inc., is an experimental Probabilistic Intelligence model, provided "as-is" for informational and exploratory purposes. By accessing this platform, you agree that:
 
-• HEX6 BLE is an experimental framework; its goal is to provide maximum value to you through enhanced reasoning and insight
+• HEX [PI] is an experimental framework; its goal is to provide maximum value to you through enhanced reasoning and insight
 • It does not provide investment advice, financial recommendations, or portfolio management services
 • Outputs are probabilistic and informational, not predictions or guarantees, and may be incorrect
 • You are solely responsible for how you interpret and apply any output
@@ -27,9 +27,9 @@ export default function LegalModal({ open, onClose }) {
     },
     {
       title: 'Risk Disclosure',
-      content: `HEX6 BLE is an experimental Probabilistic Intelligence model. Its goal is to provide maximum value to you through enhanced reasoning and insight — not to predict or guarantee outcomes. Important disclosures:
+      content: `HEX [PI] is an experimental Probabilistic Intelligence model. Its goal is to provide maximum value to you through enhanced reasoning and insight — not to predict or guarantee outcomes. Important disclosures:
 
-• HEX6 BLE is an experimental framework; outputs are probabilistic and informational, not predictions or guarantees
+• HEX [PI] is an experimental framework; outputs are probabilistic and informational, not predictions or guarantees
 • Past patterns do not guarantee future results
 • Models are based on historical data which may not repeat
 • Conditions change rapidly; outputs may become outdated
@@ -39,7 +39,7 @@ export default function LegalModal({ open, onClose }) {
     },
     {
       title: 'Acceptable Use',
-      content: `By using HEX6 BLE, developed by Evrica Technologies Inc., you agree not to:
+      content: `By using HEX [PI], developed by Evrica Technologies Inc., you agree not to:
 
 • Use the platform for illegal activities or to circumvent regulations
 • Attempt to reverse-engineer, hack, or interfere with our systems

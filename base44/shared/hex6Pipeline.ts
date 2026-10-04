@@ -1,172 +1,87 @@
 // ===========================================================================
-// HEX6 PIPELINE — the unified entry point for the validated engine stack.
+// HEX PIPELINE — the single entry point from a numeric series to what the
+// language model is told.
 //
-// One universe, two engines, one pipeline:
-//   HEX6-BLE (hex6Engine.ts)     — Loop 1: pre-trained, market-agnostic
-//     directional probability from 6-bit momentum states. Real statistics from
-//     real outcomes. This is the loop that gets backtested.
-//   PI-US (piusEngine.ts)        — Loop 2: tone/context calibration. Takes
-//     HEX6-BLE's real output and calibrates HOW an LLM should talk about it.
-//     No predictions of its own — a deterministic translation from real numbers
-//     to communication guidance.
-//   PI-US Resonance (piusResonance.ts) — descriptive linguistic cadence FFT.
-//   Self-Calibration (this file) — the live forward learning loop. Walks the
-//     last 60 bars of the input series, predicts each step, and tracks rolling
-//     directional accuracy. When the engine is anti-predictive (< 45% over the
-//     last 30 bars), flips the prediction — the engine is in an inverted
-//     regime where its lean is systematically wrong. This is the same logic
-//     validated in walkForwardAccuracy, now running live in production.
-//
-// This module replaces the old thinkingEngine.ts + adaptiveGate.ts +
-// zeroScope.ts + geneticRiskEngine.ts accessory stack. Those were coupled to
-// the old SCEFM engine's mu/sigma output and are redundant with hex6Engine's
-// p_up / conviction / n_obs fields, since PI-US's calibrate() already handles
-// the gate (high_conviction + well_supported).
+//   1. Probability  (probabilityRead.ts -> stateProbability.ts)
+//      The only numbers HEX states: P(next move up) and P(next move larger
+//      than usual), each beside the series' own usual odds.
+//   2. Voice        (piusEngine.ts, piusResonance.ts)
+//      How to speak about the read. No numbers of its own.
+//   3. Chart lens   (chartContext.ts)
+//      Whether the chart structure lines up with the direction read, and the
+//      move over a long lookback. Descriptive; it never changes a probability.
 // ===========================================================================
 
-import { predictFromSequence, Hex6Output } from './hex6Engine.ts';
+import { readProbability, seriesToReturns, ProbabilityRead } from './probabilityRead.ts';
 import { calibrate, PiUsResult } from './piusEngine.ts';
-import { resonanceSignature } from './piusResonance.ts';
-import type { ChartContext } from './chartContext.ts';
-import { classifyHybridArchetype, PerceptionLens } from './hybridArchetypes.ts';
+import { resonanceSignature, ResonanceSignature } from './piusResonance.ts';
+import { confluenceAgrees, ChartContext } from './chartContext.ts';
 
-// Map a ticker to the closest pre-trained domain. hex6Engine has validated
-// tables for NFL, BTC, HORSE_RACING, and WEATHER. For equities and other
-// financial markets without a dedicated table, BTC is the closest
-// financial-market proxy — the 6-bit momentum structure captures universal
-// market microstructure that transfers across assets.
-export function mapTickerToDomain(ticker: string | null): string {
-  if (!ticker) return 'BTC';
-  const t = ticker.toUpperCase();
-  if (['BTC','ETH','SOL','DOGE','XRP','ADA','MATIC','BNB','LTC','UNI','LINK','ATOM','AVAX','DOT'].includes(t)) return 'BTC';
-  if (t.startsWith('WEATHER') || t === 'TEMP') return 'WEATHER';
-  if (t === 'NFL') return 'NFL';
-  if (t.startsWith('HORSE') || t === 'RACING') return 'HORSE_RACING';
-  return 'BTC'; // default financial-market proxy
-}
+/** Bars in the long lookback described to the model in plain words. */
+export const LONG_LOOKBACK_BARS = 137;
 
-// Extract a numerical series from free text (for inline-data detection).
-// Moved here from thinkingEngine.ts so callers don't depend on the retired
-// engine.
-export function extractNumberSeries(text: string): number[] | null {
-  const matches = text.match(/-?\d+(\.\d+)?/g);
-  if (!matches || matches.length < 7) return null;
-  return matches.map(Number);
-}
-
-export interface CalibrationResult {
-  anti_predictive: boolean;
-  rolling_accuracy: number | null;
-  recent_n: number;
-  flipped: boolean;
+export interface ChartLens {
+  /** Chart structure against the direction read. */
+  structure: 'aligned' | 'mixed' | 'contested';
+  /** Move over the long lookback, or null when there is not enough history. */
+  long_return: number | null;
+  long_phase: 'upward' | 'downward' | 'neutral' | 'insufficient_history';
 }
 
 export interface Hex6PipelineResult {
-  hex6: Hex6Output;
+  /** The probabilities HEX may state. Null when the series is too short. */
+  read: ProbabilityRead | null;
   pius: PiUsResult;
-  resonance: ReturnType<typeof resonanceSignature>;
-  domain: string;
-  calibration: CalibrationResult;
-  perception?: PerceptionLens;
+  resonance: ResonanceSignature | { status: 'insufficient_data'; n_tokens: number };
+  lens?: ChartLens;
 }
 
-// Self-calibration: the live forward learning loop. Walks the last 60 bars
-// of the input series, predicts each step using the pre-trained tables, and
-// tracks rolling directional accuracy over a 30-bar window. When accuracy
-// falls below 45% (anti-predictive), the engine is in an inverted regime —
-// its directional lean is systematically wrong and should be flipped.
-//
-// This is the EXACT same logic validated in walkForwardAccuracy's forward
-// learning loop, now running live. Same threshold (45%), same window (30),
-// same mechanism. The only difference: the test applies the flip out-of-sample
-// across the full test set; here we apply it to the single current prediction
-// based on the most recent rolling track record.
-//
-// Precision-seeking: the engine doesn't just predict — it checks whether its
-// predictions have been landing, and inverts itself when they're systematically
-// wrong. This is the self-correction that lifted accuracy from ~52% to ~59%
-// across all tested assets.
-function selfCalibrate(domain: string, values: number[]): CalibrationResult {
-  const n = values.length;
-  if (n < 37) return { anti_predictive: false, rolling_accuracy: null, recent_n: 0, flipped: false };
-
-  const lookback = Math.min(60, n - 7);
-  const recentErrors: number[] = [];
-  const windowSize = 30;
-
-  for (let i = n - lookback; i < n - 1; i++) {
-    const recentCloses = values.slice(Math.max(0, i - 6), i + 1);
-    if (recentCloses.length < 7) continue;
-
-    const pred = predictFromSequence(domain, recentCloses);
-    const rawDir = pred.predicted_direction === 'UP' ? 1 : -1;
-    const actualDir = values[i + 1] > values[i] ? 1 : values[i + 1] < values[i] ? -1 : 0;
-
-    if (rawDir !== 0 && actualDir !== 0) {
-      recentErrors.push(rawDir === actualDir ? 1 : 0);
-      if (recentErrors.length > windowSize) recentErrors.shift();
-    }
-  }
-
-  if (recentErrors.length < 15) {
-    return { anti_predictive: false, rolling_accuracy: null, recent_n: recentErrors.length, flipped: false };
-  }
-
-  const rollingAccuracy = recentErrors.reduce((s, x) => s + x, 0) / recentErrors.length;
-  return {
-    anti_predictive: rollingAccuracy < 0.45,
-    rolling_accuracy: rollingAccuracy,
-    recent_n: recentErrors.length,
-    flipped: false,
-  };
-}
-
-export function applySelfCalibration(domain: string, values: number[]) {
-  const raw = predictFromSequence(domain, values);
-  const calibration = selfCalibrate(domain, values);
-  const hex6 = calibration.anti_predictive
-    ? { ...raw, predicted_direction: raw.predicted_direction === 'UP' ? 'DOWN' : 'UP', p_up: 1 - raw.p_up }
-    : raw;
-  calibration.flipped = calibration.anti_predictive;
-  return { hex6, calibration };
-}
-
-// Run the full pipeline: hex6Engine → self-calibration → piusResonance → piusEngine.calibrate.
-//
-// values: 7+ recent raw values (prices, temperatures, scores — any sequence).
-//   hex6Engine's valuesToBits encodes "did the value go up?" so the units
-//   don't matter, only the ordering. Pass CLOSES (not returns) for market
-//   data — the pre-trained tables were built on price-level bits.
-// ticker: optional ticker for domain mapping.
-// messageHistory: optional chronological user messages for resonance analysis.
+// values:    the raw series, oldest first: levels (prices, temperatures,
+//            scores) or step-to-step changes.
+// label:     how the series is named to the model ("BTC", "this series").
+// messageHistory: the person's earlier messages, for cadence.
+// asReturns: true if `values` are already changes, false if levels, undefined
+//            to decide from the data (strictly positive = levels).
 export function runPipeline(
   values: number[],
-  ticker: string | null = null,
+  label: string | null = null,
   messageHistory: string[] = [],
+  asReturns?: boolean,
 ): Hex6PipelineResult {
-  const domain = mapTickerToDomain(ticker);
-  const { hex6, calibration } = applySelfCalibration(domain, values);
-
+  const clean = (values || []).filter((v) => Number.isFinite(v));
+  const read = readProbability(seriesToReturns(clean, asReturns));
   const resonance = messageHistory.length >= 2
     ? resonanceSignature(messageHistory)
     : { status: 'insufficient_data' as const, n_tokens: 0 };
-
-  const pius = calibrate(hex6, resonance.status === 'computed' ? resonance : null);
-
-  return { hex6, pius, resonance, domain, calibration };
+  const pius = calibrate(read, resonance.status === 'computed' ? resonance : null, label || 'this series');
+  return { read, pius, resonance };
 }
 
-// Add the OHLCV perception lens without rewriting the frozen 64-state tables.
-// The next-move prediction remains visible; only independently corroborated
-// calls receive qualified confidence.
-export function applyChartPerception(result: Hex6PipelineResult, ctx: ChartContext | null, closes: number[] = []): Hex6PipelineResult {
-  const perception = classifyHybridArchetype(
-    result.hex6.state, ctx, result.hex6.predicted_direction, result.hex6.personal_call_strength, closes,
-  );
-  const note = perception.prediction_status === 'STRUCTURE_ALIGNED'
-    ? ` Perception lens: chart structure ALIGNS with the raw HEX next-move lean; this describes the market setup but does not raise directional confidence. Hybrid archetype ${perception.archetype_id}, grid ${perception.grid.label}.`
-    : perception.prediction_status === 'STRUCTURE_CONTESTED'
-      ? ` Perception lens: chart structure CONTESTS the raw HEX next-move lean; preserve both observations without quietly overriding either. Hybrid archetype ${perception.archetype_id}, grid ${perception.grid.label}.`
-      : ` Perception lens: chart structure is MIXED around the raw HEX lean. Hybrid archetype ${perception.archetype_id}, grid ${perception.grid.label}.`;
-  return { ...result, perception, pius: { ...result.pius, directive: result.pius.directive + note } };
+function longLookback(closes: number[]): Pick<ChartLens, 'long_return' | 'long_phase'> {
+  if (closes.length < LONG_LOOKBACK_BARS) return { long_return: null, long_phase: 'insufficient_history' };
+  const w = closes.slice(-LONG_LOOKBACK_BARS);
+  const steps = w.slice(1).map((p, i) => Math.log(p / w[i]));
+  const mean = steps.reduce((s, x) => s + x, 0) / steps.length;
+  const sd = Math.sqrt(steps.reduce((s, x) => s + (x - mean) ** 2, 0) / steps.length);
+  const total = Math.log(w[w.length - 1] / w[0]);
+  // The move measured in units of what a drift-free series of this
+  // variability would typically cover over the same number of bars.
+  const scaled = sd > 0 ? total / (sd * Math.sqrt(steps.length)) : 0;
+  return { long_return: Math.exp(total) - 1, long_phase: scaled > 0.5 ? 'upward' : scaled < -0.5 ? 'downward' : 'neutral' };
+}
+
+// Add the chart lens. It describes the setup around the read and never
+// changes a probability.
+export function applyChartLens(result: Hex6PipelineResult, ctx: ChartContext | null, closes: number[] = []): Hex6PipelineResult {
+  const leaning = !!result.read && !result.read.direction_at_base;
+  const agrees = leaning ? confluenceAgrees(ctx, result.read!.direction) : null;
+  const structure = agrees === true ? 'aligned' : agrees === false ? 'contested' : 'mixed';
+  const note = !leaning
+    ? ' Chart structure (internal, descriptive only): the direction read sits at its usual odds, so describe what the chart is doing without presenting a direction as a call.'
+    : structure === 'aligned'
+      ? ' Chart structure (internal, descriptive only): it lines up with the direction read. This describes the setup and does not change any probability.'
+      : structure === 'contested'
+        ? ' Chart structure (internal, descriptive only): it points the other way from the direction read. Say both plainly; neither overrides the other and no probability changes.'
+        : ' Chart structure (internal, descriptive only): mixed around the direction read. No probability changes.';
+  return { ...result, lens: { structure, ...longLookback(closes) }, pius: { ...result.pius, directive: result.pius.directive + note } };
 }

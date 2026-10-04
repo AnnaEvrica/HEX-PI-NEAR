@@ -9,7 +9,7 @@
 // HTTP overhead. This endpoint exists for manual/admin anchoring and for the
 // verify/latest operations the drift dashboard will use.
 
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import { anchorVerdict, verifyChain } from '../../shared/asiSpine.ts';
 
 export default async function(req) {

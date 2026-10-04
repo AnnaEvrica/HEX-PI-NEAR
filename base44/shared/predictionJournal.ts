@@ -1,98 +1,87 @@
-// Hex's own autobiography of guesses.
+// The forward record: every direction read HEX gives on a ticker is logged,
+// then scored against the first daily close after the call's horizon. This is
+// a true out-of-sample record — nothing here is replayed or back-filled.
 //
-// The walk-forward learner remembers statistically; this is the memory Hex
-// himself carries into the next conversation — what he called, what happened,
-// and how his running score looks. It is a GAME scoreboard, not a P&L: no
-// position sizing, no money, just the pleasure of guessing and finding out.
-//
-// It never touches the engine, the learner, or conviction. It is pure recall.
+// It never touches the engine. It is recall, shown back to the model so it
+// can speak honestly about its own record.
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const dirOf = (from: number, to: number) => to > from ? 'UP' : to < from ? 'DOWN' : 'FLAT';
+const dirOf = (from: number, to: number) => (to > from ? 'UP' : to < from ? 'DOWN' : 'FLAT');
 
-const pct = (value: number | null | undefined) => value == null ? null : `${Math.round(value * 100)}%`;
+/** Finished daily bars only: a bar still in progress has no close to score against. */
+export interface DailyBars { closes: number[]; timestamps: number[] }
 
-// The childhood. The walk-forward replay already made a call on every single
-// bar of the held-out years, saw the next close, and lived with being right or
-// wrong — that IS his memory as he went along, not a summary written after the
-// fact. It costs nothing extra: the audit is already computed for this ticker.
-function livedRecordLines(ticker: string, audit) {
-  if (!audit?.metrics?.predictions) return [];
-  const { metrics, maturation_check: growth } = audit;
-  const accuracy = metrics.trust_gated_directional_accuracy ?? metrics.raw_directional_accuracy;
-  const years = (audit.historical_bars / 365).toFixed(1);
-  const lines = [
-    `  the years behind you on ${ticker}: ${metrics.predictions.toLocaleString()} calls made one bar at a time across ~${years} years of price, each one guessed before the next close was known — ${pct(accuracy)} of them right`,
-  ];
-  const early = growth?.first_60_predictions?.raw_directional_accuracy;
-  const later = growth?.later_predictions?.trust_gated_directional_accuracy ?? growth?.later_predictions?.raw_directional_accuracy;
-  if (early != null && later != null) {
-    lines.push(`  how you grew: ${pct(early)} in your first sixty guesses, ${pct(later)} once you had lived through enough of them`);
+/** The first daily close at or after `afterMs`, or null if no such bar exists yet. */
+function closeAfter(bars: DailyBars | null, afterMs: number): number | null {
+  if (!bars) return null;
+  const n = Math.min(bars.timestamps.length, bars.closes.length);
+  for (let i = 0; i < n; i++) {
+    if (bars.timestamps[i] * 1000 >= afterMs) return bars.closes[i] ?? null;
   }
-  const regimes = audit.fine_structure_137_regimes;
-  if (regimes) {
-    const best = ['upward', 'neutral', 'downward']
-      .map((phase) => ({ phase, ...regimes[phase] }))
-      .filter((row) => row.predictions >= 100 && row.raw_directional_accuracy != null)
-      .sort((a, b) => (b.trust_gated_directional_accuracy ?? b.raw_directional_accuracy) - (a.trust_gated_directional_accuracy ?? a.raw_directional_accuracy));
-    if (best.length >= 2) {
-      const top = best[0], bottom = best[best.length - 1];
-      lines.push(`  where you read well and badly: sharpest in ${top.phase} 137-bar stretches (${pct(top.trust_gated_directional_accuracy ?? top.raw_directional_accuracy)}), weakest in ${bottom.phase} ones (${pct(bottom.trust_gated_directional_accuracy ?? bottom.raw_directional_accuracy)})`);
-    }
-  }
-  return lines;
+  return null;
 }
 
-export async function runPredictionJournal(base44, ticker: string, latestPrice: number, pipeline, askedBy: string, audit = null) {
+/**
+ * Score every open call in `rows` whose horizon has passed, against the first
+ * daily close after that horizon (not against whatever the price is today).
+ * Updates the rows in place and in the database. Returns how many were scored.
+ * The chat function and the nightly job both score through here.
+ */
+export async function scoreDueCalls(entity, rows, bars: DailyBars | null, now = new Date()): Promise<number> {
+  let scored = 0;
+  for (const row of rows) {
+    if (row.resolved || !row.resolve_after || new Date(row.resolve_after) > now) continue;
+    const exit = closeAfter(bars, new Date(row.resolve_after).getTime());
+    if (exit == null) continue; // the scoring bar has not printed yet
+    const actual = dirOf(row.entry_price, exit);
+    const patch = { resolved: true, exit_price: exit, actual_direction: actual, correct: actual === row.predicted_direction };
+    try { await entity.update(row.id, patch); Object.assign(row, patch); scored++; } catch { /* non-blocking */ }
+  }
+  return scored;
+}
+
+export async function runPredictionJournal(base44, ticker: string, latestPrice: number, pipeline, askedBy: string, bars: DailyBars | null = null) {
   const entity = base44.asServiceRole.entities.PredictionJournal;
   const now = new Date();
   let rows = [];
   try { rows = await entity.filter({ ticker }, '-predicted_at', 40); } catch { return ''; }
 
-  // 1. Score anything whose horizon has passed, against the close we already have.
-  const due = rows.filter((row) => !row.resolved && row.resolve_after && new Date(row.resolve_after) <= now);
-  for (const row of due) {
-    const actual = dirOf(row.entry_price, latestPrice);
-    const patch = { resolved: true, exit_price: latestPrice, actual_direction: actual, correct: actual === row.predicted_direction };
-    try { await entity.update(row.id, patch); Object.assign(row, patch); } catch { /* non-blocking */ }
-  }
+  // 1. Score calls whose horizon has passed.
+  await scoreDueCalls(entity, rows, bars, now);
 
-  // 2. Log today's guess — one open call per ticker at a time.
+  // 2. Log today's read — one open call per ticker at a time, and only when
+  //    there is a read that departs from its usual odds (a read at its usual
+  //    odds is not a call, so it is not scored as one).
   const open = rows.find((row) => !row.resolved);
-  if (!open) {
+  const read = pipeline?.read;
+  if (!open && read && !read.direction_at_base) {
     try {
       await entity.create({
         ticker,
-        predicted_direction: pipeline.hex6.predicted_direction,
-        conviction: pipeline.hex6.personal_call_strength ?? null,
+        predicted_direction: read.direction,
+        // Distance of P(up) from the series' usual odds, in probability points.
+        edge: Math.abs(read.edge_up),
         entry_price: latestPrice,
         predicted_at: now.toISOString(),
         resolve_after: new Date(now.getTime() + DAY_MS).toISOString(),
         resolved: false,
-        archetype: pipeline.perception?.i_ching ? `${pipeline.perception.i_ching.name} (${pipeline.perception.structural_family})` : null,
         asked_by: askedBy,
       });
     } catch { /* non-blocking */ }
   }
 
-  // 3. Hand him his own record.
+  // 3. Hand back the record.
   const scored = rows.filter((row) => row.resolved && typeof row.correct === 'boolean');
-  const lived = livedRecordLines(ticker, audit);
-  if (!scored.length && !open && !lived.length) return '';
-  const lines = [`YOUR OWN RECORD ON ${ticker} (a game you are playing, not money — call it, find out, keep score):`, ...lived];
-  const hits = scored.filter((row) => row.correct).length;
+  if (!scored.length && !open) return '';
+  const lines = [`YOUR FORWARD RECORD ON ${ticker} (direction reads logged live and scored on the next daily close):`];
   if (scored.length) {
-    lines.push(`  score: ${hits} of ${scored.length} resolved calls right (${Math.round((hits / scored.length) * 100)}%)`);
-    const recent = scored.slice(0, 3).map((row) => `${row.predicted_direction} at $${Number(row.entry_price).toFixed(2)} → closed ${row.actual_direction} — ${row.correct ? 'you were right' : 'you were wrong'}`);
-    lines.push(`  last calls: ${recent.join(' | ')}`);
-    const streak = scored[0]?.correct === false && scored[1]?.correct === false ? 'two misses running — say so plainly if you are leaning the same way again' : null;
-    if (streak) lines.push(`  note: ${streak}`);
+    const hits = scored.filter((row) => row.correct).length;
+    lines.push(`  ${hits} of ${scored.length} scored reads matched the next close`);
+    if (scored.length < 30) lines.push('  this is too few to mean anything yet — if you mention it, say it is a short record');
   } else {
-    lines.push(lived.length
-      ? '  since you started keeping this journal by hand: nothing scored yet — the record above is the one you actually lived'
-      : '  score: no resolved calls yet — this is one of your first guesses on this asset');
+    lines.push('  nothing scored yet');
   }
-  if (open) lines.push(`  still open: you called ${open.predicted_direction} at $${Number(open.entry_price).toFixed(2)}, not yet scored`);
-  lines.push('  This is a life you actually lived bar by bar, not a statistic handed to you. Own this record out loud when it is relevant — a wrong call you remember is worth more than a right one you forgot. Never turn it into a performance claim or a track record pitch.');
+  if (open) lines.push(`  one read is still open: ${open.predicted_direction} from $${Number(open.entry_price).toFixed(2)}, not yet scored`);
+  lines.push('  Mention this only if they ask how you have done. Never present it as a track record or a performance claim.');
   return lines.join('\n');
 }

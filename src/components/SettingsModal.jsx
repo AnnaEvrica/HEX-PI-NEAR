@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, LogOut as LogOutIcon, Copy, Download, Lock, Key, Shield, Eye, Clock, Bell, TrendingUp, Zap, AlertTriangle, Check } from 'lucide-react';
+import { X, Copy, Download, Key, Shield, Check } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
 function generateSystemID() {
@@ -18,10 +18,8 @@ export default function SettingsModal({ open, onClose }) {
   const [user, setUser] = useState(null);
   const [systemID, setSystemID] = useState(null);
   const [twoFAEnabled, setTwoFAEnabled] = useState(false);
-  const [modelTraining, setModelTraining] = useState(true);
-  const [analyticalDepth, setAnalyticalDepth] = useState('executive');
-  const [riskAversion, setRiskAversion] = useState(2.5);
-  const [baseCurrency, setBaseCurrency] = useState('USD');
+  // Off unless the person turned it on, here or during onboarding.
+  const [modelTraining, setModelTraining] = useState(false);
   const [consentTimestamp, setConsentTimestamp] = useState(null);
 
 
@@ -42,14 +40,11 @@ export default function SettingsModal({ open, onClose }) {
         }
 
         // Load user preferences
-        const prefs = localStorage.getItem('hex6_user_prefs');
-        if (prefs) {
-          const p = JSON.parse(prefs);
-          setAnalyticalDepth(p.analyticalDepth || 'executive');
-          setRiskAversion(p.riskAversion || 2.5);
-          setBaseCurrency(p.baseCurrency || 'USD');
-          setModelTraining(p.modelTraining !== false);
-        }
+        // The choice made during onboarding (hex6_consent_choices) and any
+        // later change made here (hex6_user_prefs) are the same setting.
+        const prefs = JSON.parse(localStorage.getItem('hex6_user_prefs') || '{}');
+        const onboarding = JSON.parse(localStorage.getItem('hex6_consent_choices') || '{}');
+        setModelTraining(typeof prefs.modelTraining === 'boolean' ? prefs.modelTraining : onboarding.modelTraining === true);
 
         // Get consent timestamp
         const timestamp = localStorage.getItem('hex6_consent_timestamp');
@@ -65,6 +60,8 @@ export default function SettingsModal({ open, onClose }) {
 
   const savePreferences = (prefs) => {
     localStorage.setItem('hex6_user_prefs', JSON.stringify(prefs));
+    const onboarding = JSON.parse(localStorage.getItem('hex6_consent_choices') || '{}');
+    localStorage.setItem('hex6_consent_choices', JSON.stringify({ ...onboarding, modelTraining: prefs.modelTraining }));
   };
 
   const handlePasswordReset = async () => {
@@ -147,7 +144,6 @@ export default function SettingsModal({ open, onClose }) {
         <div className="flex border-b border-border shrink-0 overflow-x-auto">
           {[
             { id: 'account', label: 'Account' },
-            { id: 'parameters', label: 'Parameters' },
             { id: 'legal', label: 'Legal' },
           ].map((tab) => (
             <button
@@ -290,94 +286,13 @@ export default function SettingsModal({ open, onClose }) {
             </div>
           )}
 
-          {/* PARAMETERS */}
-          {activeSection === 'parameters' && (
-            <div className="space-y-6">
-              <p className="text-sm text-secondary">Customize how HEX6 responds to you.</p>
-
-              {/* Analytical Depth */}
-              <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-4">
-                <p className="text-sm font-medium">Analytical Depth</p>
-                <div className="space-y-2">
-                  {[
-                    { id: 'executive', label: 'Executive Summary', desc: 'Plain English, high-level strategy' },
-                    { id: 'deep', label: 'Deep Quant', desc: 'Raw μ math, variance metrics, Kelly fractions' },
-                  ].map((opt) => (
-                    <label key={opt.id} className="flex items-start gap-3 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="depth"
-                        value={opt.id}
-                        checked={analyticalDepth === opt.id}
-                        onChange={(e) => {
-                          setAnalyticalDepth(e.target.value);
-                          savePreferences({ analyticalDepth: e.target.value, riskAversion, baseCurrency, modelTraining });
-                        }}
-                        className="mt-1"
-                      />
-                      <div>
-                        <p className="text-sm font-medium">{opt.label}</p>
-                        <p className="text-xs text-secondary">{opt.desc}</p>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Output Risk Tolerance */}
-              <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-4">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium">Output Risk Confidence</p>
-                  <span className="text-lg font-bold text-accent">{riskAversion.toFixed(1)}</span>
-                </div>
-                <input
-                  type="range"
-                  min="1"
-                  max="5"
-                  step="0.1"
-                  value={riskAversion}
-                  onChange={(e) => {
-                    const val = parseFloat(e.target.value);
-                    setRiskAversion(val);
-                    savePreferences({ analyticalDepth, riskAversion: val, baseCurrency, modelTraining });
-                  }}
-                  className="w-full accent-accent"
-                />
-                <p className="text-xs text-secondary">
-                  <strong>1–2:</strong> High-conviction, aggressive probability outputs emphasizing upside potential.{' '}
-                  <strong>2–3:</strong> Balanced analysis with both bullish and bearish scenarios.{' '}
-                  <strong>3–5:</strong> Conservative outputs prioritizing downside protection and caution.
-                </p>
-              </div>
-
-              {/* Base Currency */}
-              <div className="p-4 bg-muted/30 rounded-sm border border-border space-y-3">
-                <p className="text-sm font-medium">Base Currency Display</p>
-                <select
-                  value={baseCurrency}
-                  onChange={(e) => {
-                    setBaseCurrency(e.target.value);
-                    savePreferences({ analyticalDepth, riskAversion, baseCurrency: e.target.value, modelTraining });
-                  }}
-                  className="w-full px-3 py-2 rounded-sm border border-border bg-black/20 text-sm text-white"
-                >
-                  {['USD', 'EUR', 'USDC'].map((c) => (
-                    <option key={c} value={c} className="bg-black">
-                      {c}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          )}
-
           {/* LEGAL */}
           {activeSection === 'legal' && (
             <div className="space-y-6">
               {/* System Role */}
               <div className="p-4 bg-muted/30 rounded-sm border border-border">
                 <p className="text-sm font-medium mb-2">System Role Status</p>
-                <p className="text-sm text-secondary">HEX6 is an analytics engine. Not a fiduciary or advisor.</p>
+                <p className="text-sm text-secondary">HEX [PI] is an analytics engine. Not a fiduciary or advisor.</p>
               </div>
 
               {/* Active Consents */}
@@ -406,7 +321,7 @@ export default function SettingsModal({ open, onClose }) {
                     <button
                       onClick={() => {
                         setModelTraining(!modelTraining);
-                        savePreferences({ analyticalDepth, riskAversion, baseCurrency, modelTraining: !modelTraining });
+                        savePreferences({ modelTraining: !modelTraining });
                       }}
                       className={`relative w-12 h-6 rounded-full transition-colors ${
                         modelTraining ? 'bg-accent' : 'bg-border'
@@ -426,8 +341,8 @@ export default function SettingsModal({ open, onClose }) {
               <div className="space-y-3">
                 <p className="text-sm font-bold">Legal Disclosures</p>
                 {[
-                  { title: 'Risk & Model Disclosure v1.2', content: 'Trading and investing involve substantial risk of loss. HEX6 models are probabilistic and may be incorrect.' },
-                  { title: 'Terms of Use v1.2', content: 'By using HEX6 BLE, you agree to our terms of service and acknowledge you are responsible for all investment decisions.' },
+                  { title: 'Risk & Model Disclosure v1.2', content: 'Trading and investing involve substantial risk of loss. HEX [PI] models are probabilistic and may be incorrect.' },
+                  { title: 'Terms of Use v1.2', content: 'By using HEX [PI], you agree to our terms of service and acknowledge you are responsible for all investment decisions.' },
                   { title: 'Privacy Policy v1.2', content: 'Your data is encrypted and stored securely. We do not sell personal information to third parties.' },
                 ].map((doc, i) => (
                   <details key={i} className="p-3 bg-muted/30 rounded-sm border border-border cursor-pointer group">

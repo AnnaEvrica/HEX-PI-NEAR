@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Send, Upload, Menu, Settings, LogOut, Plus, MessageCircle, Zap, Mic, MicOff, BookOpen, X, Image, Copy, Check, Volume2, VolumeX } from 'lucide-react';
+import { CLAUDE_MODEL } from '@/lib/models';
+import { Send, Menu, Plus, Mic, Image, Copy, Check, Volume2, VolumeX } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import SettingsModal from '@/components/SettingsModal';
 import LegalModal from '@/components/LegalModal';
@@ -12,7 +13,7 @@ export default function HEX6ChatInterface() {
   const welcomeMessage = {
     id: 'welcome',
     role: 'assistant',
-    content: `Hi, I'm Hex.\n\nBring me anything — a market, a decision, a question you've been circling. I'll tell you what the data actually supports, and how strongly.\n\nWhat's on your mind?`,
+    content: `Hi, I'm Hex.\n\nBring me anything — a market, a decision, a question you've been circling. I'll tell you what the data actually supports, and what the odds are.\n\nWhat's on your mind?`,
   };
 
   // Loading copy — only "Thinking..." for fast chat replies.
@@ -125,7 +126,7 @@ export default function HEX6ChatInterface() {
         const sanitized = parsed.map(c => {
           let messages = (c.messages || []).map(m =>
             typeof m?.content === 'string'
-              ? { ...m, content: m.content.replace(/Evrica Intelligence/g, 'HEX6 BLE') }
+              ? { ...m, content: m.content.replace(/Evrica Intelligence/g, 'HEX [PI]') }
               : m
           );
           if (messages[0]?.role === 'assistant' && messages[0]?.content !== welcomeMessage.content) {
@@ -294,7 +295,7 @@ export default function HEX6ChatInterface() {
       try {
         const polished = await base44.integrations.Core.InvokeLLM({
           prompt: `Fix grammar, punctuation, and capitalization for this dictated text. Keep the meaning and wording identical — only correct punctuation, capitalization, and obvious transcription errors. Return ONLY the corrected text, nothing else.\n\nText: "${liveValue}"`,
-          model: 'gemini_3_flash',
+          model: CLAUDE_MODEL,
         });
         if (typeof polished === 'string' && polished.trim().length > 0) {
           polishedInput = polished.trim().replace(/^["']|["']$/g, '');
@@ -361,13 +362,9 @@ export default function HEX6ChatInterface() {
       }, 5000);
     }, 18000);
 
-    // Get user preferences from localStorage
-    const prefs = JSON.parse(localStorage.getItem('hex6_user_prefs') || '{}');
     const payload = {
       message: polishedInput,
       conversationHistory: newMessages.filter(m => !m.isThinking).slice(-20),
-      analyticalDepth: prefs.analyticalDepth || 'executive',
-      riskAversion: prefs.riskAversion || 2.5,
       // Continuous awareness — Hex reads the same clock and place the user is in.
       clientContext: {
         localTime: new Date().toISOString(),
@@ -417,7 +414,7 @@ export default function HEX6ChatInterface() {
           if (newMessages.filter((m) => m.role === 'user').length === 1) {
             base44.integrations.Core.InvokeLLM({
               prompt: `Name this conversation in 3-5 words — your own read of where it's heading, not a summary of the words used. No quotes, no punctuation at the end.\n\nUser: ${polishedInput}\n\nYou: ${replyText.slice(0, 600)}`,
-              model: 'gemini_3_flash',
+              model: CLAUDE_MODEL,
             }).then((t) => {
               const title = typeof t === 'string' ? t.trim().replace(/^["']|["']$/g, '').slice(0, 48) : '';
               if (title) {
@@ -428,7 +425,15 @@ export default function HEX6ChatInterface() {
         }
       })
       .catch((err) => {
-        console.error('hex6Chat request failed:', err);
+        console.error('think request failed:', err);
+        // Never leave the person looking at silence: say what happened.
+        const status = err?.status ?? err?.response?.status;
+        const content = status === 402
+          ? 'Your subscription is not active, so I could not answer that. Reopen the app to restart it.'
+          : status === 401
+            ? 'Your session has expired. Please sign in again.'
+            : 'That did not go through on my end. Please send it again.';
+        setMessages((prev) => [...prev, { id: `${Date.now()}-error`, role: 'assistant', content }]);
       })
       .finally(() => {
         clearTimeout(slowStartTimeoutRef.current);

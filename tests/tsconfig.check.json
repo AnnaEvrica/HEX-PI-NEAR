@@ -1,0 +1,2 @@
+{ "compilerOptions": { "target":"ES2022","module":"ESNext","moduleResolution":"Bundler","allowImportingTsExtensions":true,"noEmit":true,"strict":false,"noImplicitAny":false,"skipLibCheck":true,"lib":["ES2022","DOM"],"types":[] },
+  "include": ["../base44/functions/**/*.ts","../base44/shared/**/*.ts","_stubs.d.ts"] }

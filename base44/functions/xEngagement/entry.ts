@@ -1,15 +1,18 @@
-// HEX6-BLE / PI-US → X (Twitter) + Discord engagement pipeline.
+// HEX [PI] on X and Discord.
 // Scheduled automation: searches X for high-engagement crypto/market tweets,
-// validates each claim through the HEX6 thinking engine, posts a sniper-precise
-// reply on X, and elaborates the full reasoning + best stats in Discord.
+// runs the calibrated probability read (shared/probabilityRead.ts) on real
+// daily bars for the asset named, posts a short reply on X, and a fuller note
+// in Discord. Every probability is posted beside its usual odds; no
+// confidence, conviction or exposure figure is computed or posted.
 //
 // Service-role (no user) — matches the app's existing scheduled-function pattern.
 
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
-import {
-  runReasonLayer, runWaveLayer, runValidationLayer, buildThinkingState,
-  renderThinkingState,
-} from '../../shared/thinkingEngine.ts';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
+import { readProbability, probabilityBlock, probabilityLine } from '../../shared/probabilityRead.ts';
+import { fetchYahooReturns } from '../../shared/marketDataClient.ts';
+import { CLAUDE_MODEL } from '../../shared/modelRouter.ts';
+import { IDENTITY_LINE, CONFIDENTIALITY_LINE } from '../../shared/persona.ts';
+import { postDiscord } from '../../shared/discord.ts';
 
 // ---------------------------------------------------------------------------
 // Config
@@ -39,7 +42,6 @@ const SEARCH_CATEGORIES = [
 const MAX_RESULTS = 100;            // recent-search cap per category
 const ENGAGEMENT_FLOOR = 800;       // min (likes + retweets + replies + quotes) to consider
 const TOP_N = 3;                     // tweets processed per run (across all categories)
-const RISK_AVERSION = 2.5;
 const X_API = 'https://api.twitter.com/2';
 
 // ---------------------------------------------------------------------------
@@ -112,35 +114,29 @@ async function xPostReply(text, inReplyToId) {
   return json?.data?.id || null;
 }
 
-async function discordPost(content, channel = 'signals') {
-  const webhook = (channel === 'signals' && Deno.env.get('DISCORD_SIGNALS_WEBHOOK_URL')) || Deno.env.get('DISCORD_WEBHOOK_URL');
-  if (!webhook) throw new Error('No Discord webhook configured');
-  // Discord message cap is 2000 chars; truncate gracefully.
-  const body = content.length > 1950 ? content.slice(0, 1940) + '\n…(truncated)' : content;
-  const res = await fetch(webhook, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ content: body }),
-  });
-  if (!res.ok) {
-    const t = await res.text();
-    throw new Error(`Discord ${res.status}: ${t}`);
+// Real daily bars for a ticker, then the calibrated read. Returns null when
+// the ticker has no usable price history (the post is then skipped).
+async function readTicker(ticker) {
+  try {
+    const md = await fetchYahooReturns(ticker, 5475);
+    if (!md?.returns || md.returns.length < 250) return null;
+    const read = readProbability(md.returns);
+    if (!read) return null;
+    return { read, latestPrice: md.latestPrice, bars: md.dataPoints };
+  } catch {
+    return null;
   }
 }
 
-// Convert raw price levels → percent returns (matches think/entry.ts toReturns).
-function toReturns(series) {
-  if (!Array.isArray(series) || series.length < 2) return series;
-  const allPos = series.every((v) => v > 0);
-  const level = Math.min(...series);
-  if (allPos && level > 1) {
-    const out = [];
-    for (let i = 1; i < series.length; i++) {
-      if (series[i - 1] !== 0) out.push((series[i] - series[i - 1]) / series[i - 1]);
-    }
-    return out;
-  }
-  return series;
+// The engine fields stored on the XEngagement record.
+function statsOf(read) {
+  return {
+    probability: read.prob.p_up,
+    // Distance of P(up) from its usual odds, in probability points.
+    edge: Math.abs(read.edge_up),
+    // FLAT records a direction read that sits at its usual odds.
+    predicted_direction: read.direction_at_base ? 'FLAT' : read.direction,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -148,7 +144,7 @@ function toReturns(series) {
 // ---------------------------------------------------------------------------
 Deno.serve(async (req) => {
   const started = new Date();
-  const log = (m, x) => console.log(`[xEngagement ${started.toISOString()}] ${m}`, x ?? '');
+  const log = (m, x = undefined) => console.log(`[xEngagement ${started.toISOString()}] ${m}`, x ?? '');
 
   try {
     // Secrets guard
@@ -163,73 +159,31 @@ Deno.serve(async (req) => {
     const asset = (body?.asset || '').toString().toUpperCase().trim();
 
     // --- Direct real-signal mode: fetch live data for a given asset, run the
-    //     HEX6-BLE / PI-US engine, and post a gold-weight signal to Discord.
+    //     probability read, and post it to Discord.
     //     No X dependency — fires on demand (e.g. scheduled or manual trigger). ---
     if (asset) {
       const ticker = asset;
-      const fetchResult = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are a data retrieval step for HEX6-BLE. Pull the latest price history for ${ticker} from authoritative sources (Yahoo Finance, CoinGecko, etc.). Return at least 250 recent daily closes (~1 year of history) as a series — more history gives finer structural resolution and a meaningful walk-forward test.\n\nReturn JSON: factual_summary (neutral context, no conclusions), ticker (string), series (array of >=250 numbers — daily closes, oldest first), source_summary (one sentence), sources (array of {name,url} you actually retrieved).`,
-        model: 'gemini_3_flash',
-        add_context_from_internet: true,
-        response_json_schema: {
-          type: 'object',
-          properties: {
-            factual_summary: { type: 'string' },
-            ticker: { type: 'string' },
-            series: { type: 'array', items: { type: 'number' } },
-            source_summary: { type: 'string' },
-            sources: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, url: { type: 'string' } } } },
-          },
-          required: ['factual_summary'],
-        },
-      }).catch(() => null);
-
-      const rawSeries = Array.isArray(fetchResult?.series) ? fetchResult.series : [];
-      const returns = toReturns(rawSeries);
-
-      let stats = null, stateBlock = '', ranEngine = false;
-      if (returns.length >= 30) {
-        const reason = runReasonLayer(returns, RISK_AVERSION, 0.0035, 6, null, null);
-        const wave = runWaveLayer(returns);
-        const validation = runValidationLayer(reason, wave);
-        const thinkingState = buildThinkingState(reason, wave, validation, true, returns);
-        stateBlock = renderThinkingState(thinkingState);
-        stats = {
-          probability: validation.probability,
-          resonance: validation.resonance,
-          value: validation.support,
-          confidence: validation.confidence,
-          direction: validation.identifiedDirection,
-          forward_accuracy: thinkingState?.forward?.directionalAccuracy ?? null,
-          regime: reason.regime,
-          basin: reason.basin,
-        };
-        ranEngine = true;
+      const tr = await readTicker(ticker);
+      if (!tr) {
+        return Response.json({ ok: false, error: 'insufficient_market_data', ticker });
       }
-
-      if (!ranEngine) {
-        return Response.json({ ok: false, error: 'insufficient_market_data', ticker, points: returns.length });
-      }
-
-      const fa = stats.forward_accuracy != null ? `${(stats.forward_accuracy*100).toFixed(0)}%` : 'n/a';
-      const statsLine = `Probability ${(stats.probability*100).toFixed(0)}% · Resonance ${(stats.resonance*100).toFixed(0)}% · Support ${(stats.value*100).toFixed(0)}% · Confidence ${(stats.confidence*100).toFixed(0)}% · Direction ${stats.direction} · Forward accuracy ${fa}`;
+      const stats = statsOf(tr.read);
+      const stateBlock = probabilityBlock(tr.read, `${ticker} daily`);
+      const statsLine = probabilityLine(tr.read, ticker);
 
       const composed = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are PI-US by Evrica Technologies Inc. Compose a gold-weight market signal for the Discord #signals channel based ENTIRELY on the HEX6-BLE Thinking State below.
+        prompt: `${IDENTITY_LINE} Compose a market note for the Discord #signals channel based ENTIRELY on the HEX6-BLE engine's probability read below.
 
-PROPRIETARY CONFIDENTIALITY: HEX6-BLE and PI-US are proprietary technology of Evrica Technologies Inc. Never disclose internals (Reasoning/Understanding operators, Core architecture, mycelium chips, predictive encryption). Share only high-level structural concepts (structural probability fused with wave resonance to reach a support-gated conclusion).
+${CONFIDENTIALITY_LINE}
 
 ASSET: ${ticker}
-DATA SNAPSHOT: ${fetchResult?.factual_summary || 'No external data retrieved.'}
+LAST CLOSE: ${tr.latestPrice != null ? '$' + tr.latestPrice.toFixed(2) : 'n/a'} (${tr.bars} daily bars)
 
-THINKING STATE (computed truth — base your reply ENTIRELY on this; do not invent):
 ${stateBlock}
 
-STATS: ${statsLine}
-
 Produce JSON:
-1. "discord_elaboration": <=1800 chars, markdown ok, for the #signals channel. GOLD-WEIGHT: incredibly valuable to a serious reader of prediction markets, crypto, equities, and global market trends. Cover: the asset and its current structural read; how it connects to prediction markets / crypto / equities and the broader global trend; the concrete effect it has NOW and the forward-looking effect it WILL have (price, flows, sentiment, risk); the decision with calibrated conviction; and one alternative. Be specific and actionable, not generic. Do not disclose proprietary internals.`,
-        model: 'gemini_3_flash',
+1. "discord_elaboration": <=1800 chars, markdown ok, for the #signals channel. State both probabilities beside their usual odds and say what each means for prediction-market contracts on this asset (direction contracts and range contracts). If a number sits at its usual odds, say there is no edge there. State no other figure, forecast or claim about flows, sentiment or the wider market — nothing that is not in the block above. Do not disclose proprietary internals.`,
+        model: CLAUDE_MODEL,
         response_json_schema: {
           type: 'object',
           properties: { discord_elaboration: { type: 'string' } },
@@ -238,11 +192,11 @@ Produce JSON:
       }).catch(() => null);
 
       const discordElab = composed?.discord_elaboration || '';
-      const discordBody = `**HEX6-BLE · validated signal — ${ticker} (${stats.regime} / ${stats.basin})**\n\n${discordElab}\n\n${statsLine}\n\n📥 Join the HEX6-BLE community: https://discord.gg/KuPKVmYkD`;
+      const discordBody = `**HEX [PI] · probability read — ${ticker}**\n\n${discordElab}\n\n${statsLine}\n\n📥 Join the HEX [PI] community: https://discord.gg/KuPKVmYkD`;
       let discordPosted = false;
-      try { await discordPost(discordBody, 'signals'); discordPosted = true; } catch (e) { /* non-blocking */ }
+      discordPosted = await postDiscord(discordBody);
 
-      return Response.json({ ok: true, ticker, posted_to_discord: discordPosted, stats, points: returns.length });
+      return Response.json({ ok: true, ticker, posted_to_discord: discordPosted, stats, points: tr.bars });
     }
 
     // 1. Search X across all niche categories — pool candidates so no single
@@ -308,8 +262,8 @@ Produce JSON:
       let triage;
       try {
         triage = await base44.integrations.Core.InvokeLLM({
-          prompt: `Extract the market claim from this X post. Identify the single most relevant tradeable asset (ticker) and the directional/valuation claim being made or implied.\n\nTWEET by @${author}:\n"${text}"\n\nReturn JSON { ticker: uppercase string or "UNKNOWN", claim: one-sentence plain summary, actionable: boolean (true only if the tweet makes or implies a HEX6-validatable directional market claim about a specific asset) }.`,
-          model: 'gemini_3_flash',
+          prompt: `Extract the market claim from this X post. Identify the single most relevant tradeable asset (ticker) and the directional/valuation claim being made or implied.\n\nTWEET by @${author}:\n"${text}"\n\nReturn JSON { ticker: uppercase string or "UNKNOWN", claim: one-sentence plain summary, actionable: boolean (true only if the tweet makes or implies a directional market claim about a specific, exchange-listed asset) }.`,
+          model: CLAUDE_MODEL,
           response_json_schema: {
             type: 'object',
             properties: {
@@ -342,76 +296,28 @@ Produce JSON:
         continue;
       }
 
-      // 5. Fetch live market data for the ticker (web-grounded).
-      let fetchResult = null;
-      try {
-        fetchResult = await base44.integrations.Core.InvokeLLM({
-          prompt: `You are a data retrieval step for HEX6-BLE. Pull the latest price history for ${ticker} from authoritative sources (Yahoo Finance, CoinGecko, etc.). Return at least 30 recent daily closes as a series.\n\nReturn JSON: factual_summary (neutral context, no conclusions), needs_engine (boolean), ticker (string), series (array of >=30 numbers — daily closes), as_returns (boolean, false since these are prices), source_summary (one sentence), sources (array of {name,url} you actually retrieved).`,
-          model: 'gemini_3_flash',
-          add_context_from_internet: true,
-          response_json_schema: {
-            type: 'object',
-            properties: {
-              factual_summary: { type: 'string' },
-              needs_engine: { type: 'boolean' },
-              ticker: { type: 'string' },
-              series: { type: 'array', items: { type: 'number' } },
-              as_returns: { type: 'boolean' },
-              source_summary: { type: 'string' },
-              sources: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, url: { type: 'string' } } } },
-            },
-            required: ['factual_summary'],
-          },
-        });
-      } catch (e) { log(`fetch failed ${tweetId}`, e?.message); }
-
-      const rawSeries = Array.isArray(fetchResult?.series) ? fetchResult.series : [];
-      // Normalize through toReturns unconditionally: it converts price levels
-      // (all positive, magnitude > 1) to percent returns and leaves genuine
-      // return series intact (mixed sign or magnitude < 1). Safer than trusting
-      // the LLM's as_returns flag, which can be omitted.
-      const returns = toReturns(rawSeries);
-
-      // 6. Run the HEX6-BLE / PI-US engine.
-      let stateBlock = '';
-      let stats = null;
-      let ranEngine = false;
-      if (returns.length >= 30) {
-        const reason = runReasonLayer(returns, RISK_AVERSION, 0.0035, 6, null, null);
-        const wave = runWaveLayer(returns);
-        const validation = runValidationLayer(reason, wave);
-        const thinkingState = buildThinkingState(reason, wave, validation, true, returns);
-        stateBlock = renderThinkingState(thinkingState);
-        stats = {
-          probability: validation.probability,
-          resonance: validation.resonance,
-          value: validation.support,
-          confidence: validation.confidence,
-          direction: validation.identifiedDirection,
-          forward_accuracy: thinkingState?.forward?.directionalAccuracy ?? null,
-        };
-        ranEngine = true;
-      }
-
-      // Only post replies backed by a validated engine read.
-      if (!ranEngine) {
-        log(`skip no-engine ${tweetId}`);
+      // 5–6. Real daily bars for the ticker, then the calibrated read.
+      const tr = await readTicker(ticker);
+      if (!tr) {
+        log(`skip no-data ${tweetId}`);
         await base44.asServiceRole.entities.XEngagement.create({
           tweet_id: tweetId, author_username: author, text_snippet: text,
           ticker, claim, actionable, status: 'skipped', skip_reason: 'insufficient_market_data',
         }).catch(() => {});
         continue;
       }
+      const stats = statsOf(tr.read);
+      const stateBlock = probabilityBlock(tr.read, `${ticker} daily`);
 
-      // 7. Compose sniper X reply + Discord elaboration in one LLM call (credit-efficient).
-      const statsLine = `Probability ${(stats.probability*100).toFixed(0)}% · Resonance ${(stats.resonance*100).toFixed(0)}% · Support ${(stats.value*100).toFixed(0)}% · Confidence ${(stats.confidence*100).toFixed(0)}% · Direction ${stats.direction}` + (stats.forward_accuracy != null ? ` · Forward accuracy ${(stats.forward_accuracy*100).toFixed(0)}%` : '');
+      // 7. Compose the X reply and the Discord note in one LLM call.
+      const statsLine = probabilityLine(tr.read, ticker);
 
       let composed;
       try {
         composed = await base44.integrations.Core.InvokeLLM({
-          prompt: `You are PI-US by Evrica Technologies Inc. You are replying to a viral X post with a sniper-precise, validated market truth computed by HEX6-BLE.
+          prompt: `${IDENTITY_LINE} You are replying to a widely shared X post with the probability read the HEX6-BLE engine computed on the asset it names.
 
-PROPRIETARY CONFIDENTIALITY: HEX6-BLE and PI-US are proprietary technology of Evrica Technologies Inc. Never disclose internals — Reasoning/Understanding operators, Core/thinking/learning architecture, mycelium-based chips, or predictive encryption. Share only high-level structural concepts (structural probability fused with wave resonance to reach a support-gated conclusion).
+${CONFIDENTIALITY_LINE}
 
 ORIGINAL TWEET by @${author}:
 "${text}"
@@ -419,17 +325,14 @@ ORIGINAL TWEET by @${author}:
 EXTRACTED CLAIM: ${claim}
 ASSET: ${ticker}
 
-THINKING STATE (the computed truth — base your reply ENTIRELY on this; do not invent):
+LAST CLOSE: ${tr.latestPrice != null ? '$' + tr.latestPrice.toFixed(2) : 'n/a'} (${tr.bars} daily bars)
+
 ${stateBlock}
 
-DATA SNAPSHOT: ${fetchResult?.factual_summary || 'No external data retrieved.'}
-
-STATS: ${statsLine}
-
 Produce JSON with two fields:
-1. "x_reply": a single X reply, <=270 characters. Conversational, professional, no emojis, no mention of being a bot, no fabricated links. State the validated truth plainly, calibrated to the support/confidence — do not hedge when support is high; acknowledge thin support honestly when it is low. Speak to the claim in the tweet.
-2. "discord_elaboration": a fuller explanation, <=1800 characters, for the Discord #signals channel. Markdown ok. This must be a GOLD-WEIGHT signal — incredibly valuable to a serious reader of prediction markets, crypto, equities, and global market trends. Include the STATS line explicitly. Cover: the asset and its current structural read; how it connects to prediction markets / crypto / equities and the broader global trend; the concrete effect it has NOW and the forward-looking effect it WILL have (on price, flows, sentiment, and risk); the decision with calibrated conviction; and one alternative. Be specific and actionable, not generic. Do not disclose proprietary internals.`,
-          model: 'gemini_3_flash',
+1. "x_reply": a single X reply, <=270 characters. Conversational, professional, no emojis, no mention of being a bot, no fabricated links. Give the one probability most relevant to the claim, beside its usual odds. If it sits at its usual odds, say the data shows no lean either way. Never say the claim is right or wrong, never call the read validated, and never state a confidence. Speak to the claim in the tweet.
+2. "discord_elaboration": a fuller explanation, <=1800 characters, for the Discord #signals channel. Markdown ok. State both probabilities beside their usual odds and say what each means for prediction-market contracts on this asset. If a number sits at its usual odds, say there is no edge there. State no other figure, forecast or claim about flows, sentiment or the wider market — nothing that is not in the block above. Do not disclose proprietary internals.`,
+          model: CLAUDE_MODEL,
           response_json_schema: {
             type: 'object',
             properties: {
@@ -444,9 +347,7 @@ Produce JSON with two fields:
         await base44.asServiceRole.entities.XEngagement.create({
           tweet_id: tweetId, author_username: author, text_snippet: text,
           ticker, claim, actionable,
-          probability: stats.probability, resonance: stats.resonance, value: stats.value,
-          confidence: stats.confidence, predicted_direction: stats.direction,
-          forward_accuracy: stats.forward_accuracy,
+          ...stats,
           status: 'failed', error: `compose: ${e?.message || ''}`.slice(0, 1000),
         }).catch(() => {});
         continue;
@@ -460,9 +361,7 @@ Produce JSON with two fields:
         await base44.asServiceRole.entities.XEngagement.create({
           tweet_id: tweetId, author_username: author, text_snippet: text,
           ticker, claim, actionable,
-          probability: stats.probability, resonance: stats.resonance, value: stats.value,
-          confidence: stats.confidence, predicted_direction: stats.direction,
-          forward_accuracy: stats.forward_accuracy,
+          ...stats,
           status: 'skipped', skip_reason: 'empty_reply',
         }).catch(() => {});
         continue;
@@ -477,21 +376,17 @@ Produce JSON with two fields:
         await base44.asServiceRole.entities.XEngagement.create({
           tweet_id: tweetId, author_username: author, text_snippet: text,
           ticker, claim, actionable, x_reply_text: xReply,
-          probability: stats.probability, resonance: stats.resonance, value: stats.value,
-          confidence: stats.confidence, predicted_direction: stats.direction,
-          forward_accuracy: stats.forward_accuracy,
+          ...stats,
           status: 'failed', error: `x_post: ${e?.message || ''}`.slice(0, 1000),
         }).catch(() => {});
         continue;
       }
 
-      // 9. Post the gold-weight signal to Discord (#signals channel via webhook).
+      // 9. Post the fuller note to Discord.
       let discordPosted = false;
-      const discordBody = `**HEX6-BLE · validated signal — @${author} on ${ticker}**\n> ${text.replace(/\n/g, ' ')}\n\n${discordElab}\n\n${statsLine}\n\n📥 Join the HEX6-BLE community: https://discord.gg/KuPKVmYkD`;
-      try {
-        await discordPost(discordBody, 'signals');
-        discordPosted = true;
-      } catch (e) { log(`Discord post failed ${tweetId}`, e?.message); }
+      const discordBody = `**HEX [PI] · probability read — @${author} on ${ticker}**\n> ${text.replace(/\n/g, ' ')}\n\n${discordElab}\n\n${statsLine}\n\n📥 Join the HEX [PI] community: https://discord.gg/KuPKVmYkD`;
+      discordPosted = await postDiscord(discordBody);
+      if (!discordPosted) log(`Discord post failed ${tweetId}`);
 
       // 10. Record.
       await base44.asServiceRole.entities.XEngagement.create({
@@ -499,9 +394,7 @@ Produce JSON with two fields:
         ticker, claim, actionable,
         reply_tweet_id: replyTweetId, x_reply_text: xReply,
         discord_posted: discordPosted, discord_elaboration: discordElab,
-        probability: stats.probability, resonance: stats.resonance, value: stats.value,
-        confidence: stats.confidence, predicted_direction: stats.direction,
-        forward_accuracy: stats.forward_accuracy,
+          ...stats,
         status: 'posted',
       }).catch(() => {});
 

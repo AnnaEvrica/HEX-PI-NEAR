@@ -13,6 +13,9 @@ async function verifyStripeSignature(
   if (!tPart || sigs.length === 0) return false;
 
   const timestamp = tPart.slice(2);
+  // Reject events older than five minutes, so a captured request cannot be replayed.
+  const ageSeconds = Math.abs(Date.now() / 1000 - Number(timestamp));
+  if (!Number.isFinite(ageSeconds) || ageSeconds > 300) return false;
   const signedPayload = `${timestamp}.${body}`;
 
   const encoder = new TextEncoder();
@@ -32,7 +35,14 @@ async function verifyStripeSignature(
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
 
-  return sigs.some((s) => s === expected);
+  // Constant-time comparison.
+  const same = (a: string, b: string) => {
+    if (a.length !== b.length) return false;
+    let diff = 0;
+    for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+    return diff === 0;
+  };
+  return sigs.some((s) => same(s, expected));
 }
 
 const VALID_STATUSES = ['trialing', 'active', 'past_due', 'canceled', 'incomplete'];
@@ -40,7 +50,8 @@ const VALID_STATUSES = ['trialing', 'active', 'past_due', 'canceled', 'incomplet
 function normalizeStatus(stripeStatus: string): string {
   if (VALID_STATUSES.includes(stripeStatus)) return stripeStatus;
   if (stripeStatus === 'incomplete_expired' || stripeStatus === 'unpaid') return 'past_due';
-  if (stripeStatus === 'paused') return 'active';
+  // A paused subscription is not collecting payment, so it does not grant access.
+  if (stripeStatus === 'paused') return 'past_due';
   return 'canceled';
 }
 
@@ -111,7 +122,9 @@ export default async function(req: Request): Promise<Response> {
         const email = s.customer_details?.email || s.metadata?.user_email;
         if (email) {
           await syncUserSubscription(base44, email, {
-            status: 'active',
+            // A checkout that starts a free trial takes no payment; the
+            // subscription events that follow carry the exact status and dates.
+            status: s.payment_status === 'no_payment_required' ? 'trialing' : 'active',
             customerId: s.customer,
             subscriptionId: s.subscription,
             currentPeriodEnd: null,
@@ -121,6 +134,7 @@ export default async function(req: Request): Promise<Response> {
         }
         break;
       }
+      case 'customer.subscription.created':
       case 'customer.subscription.updated':
       case 'customer.subscription.deleted': {
         const sub = event.data.object;

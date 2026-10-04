@@ -1,8 +1,7 @@
 // ---------------------------------------------------------------------------
-// marketDataClient — Yahoo Finance OHLCV fetcher shared by the marketData
-// HTTP function and the think engine. One source for real price/return series
-// so the Model can collapse a directional read on actual data, not on
-// LLM-narrated stats.
+// marketDataClient — Yahoo Finance daily bars, shared by the chat function
+// and the scheduled posts. One source of real daily bars, so
+// every probability is computed on actual data.
 // ---------------------------------------------------------------------------
 
 // Crypto tickers need the -USD suffix for Yahoo Finance chart endpoints.
@@ -20,7 +19,8 @@ export function resolveYahooTicker(raw: string): string {
 }
 
 /**
- * Fetch daily closes from Yahoo Finance and compute log returns.
+ * Fetch daily bars from Yahoo Finance and compute log returns over the
+ * finished bars.
  * @param rawTicker  e.g. "BTC", "ETH", "SPY", "AAPL"
  * @param lookbackDays  how many calendar days of history to pull (default 730 = 2yr)
  */
@@ -56,13 +56,28 @@ export async function fetchYahooReturns(rawTicker: string, lookbackDays = 730) {
     volumes.push(q.volume?.[i] ?? 0);
     timestamps.push(rawTimestamps[i] ?? 0);
   }
+  // Yahoo's last daily bar is usually the day still in progress. A bar that
+  // has not finished is not a step the engine may learn from or count as an
+  // outcome, so `returns` (and `completedCloses`) stop at the last finished
+  // bar. `closes` keeps the live bar so chart levels and the latest price stay
+  // current.
+  const nowSec = Date.now() / 1000;
+  const sessionEnd = Number(result.meta?.currentTradingPeriod?.regular?.end);
+  const lastTs = timestamps[timestamps.length - 1] ?? 0;
+  const lastBarFinished = Number.isFinite(sessionEnd) && sessionEnd > lastTs
+    ? nowSec >= sessionEnd
+    : nowSec >= lastTs + 86400;
+  const completedBars = lastBarFinished ? closes.length : Math.max(0, closes.length - 1);
+  const completedCloses = closes.slice(0, completedBars);
   const returns: number[] = [];
-  for (let i = 1; i < closes.length; i++) {
-    if (closes[i] && closes[i - 1]) returns.push(Math.log(closes[i] / closes[i - 1]));
+  for (let i = 1; i < completedCloses.length; i++) {
+    if (completedCloses[i] && completedCloses[i - 1]) returns.push(Math.log(completedCloses[i] / completedCloses[i - 1]));
   }
   return {
     ticker,
     closes,
+    completedCloses,
+    completedBars,
     highs,
     lows,
     volumes,
@@ -70,34 +85,5 @@ export async function fetchYahooReturns(rawTicker: string, lookbackDays = 730) {
     returns,
     latestPrice: closes[closes.length - 1] ?? null,
     dataPoints: closes.length,
-  };
-}
-
-/**
- * Fetch daily max temperatures from Open-Meteo and compute day-over-day
- * changes (the "returns" of temperature). Tests the engine on a non-financial
- * domain — weather is a physical signal with real cyclicality.
- */
-export async function fetchWeatherReturns(lat = 40.71, lon = -74.01, days = 730) {
-  const endDate = new Date();
-  const startDate = new Date(endDate.getTime() - days * 86400000);
-  const fmt = (d: Date) => d.toISOString().slice(0, 10);
-  const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${fmt(startDate)}&end_date=${fmt(endDate)}&daily=temperature_2m_max&timezone=auto`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Open-Meteo error: ${res.status}`);
-  const json = await res.json();
-  const temps: number[] = (json?.daily?.temperature_2m_max || []).filter(
-    (t: number | null) => t !== null && t !== undefined,
-  ) as number[];
-  const returns: number[] = [];
-  for (let i = 1; i < temps.length; i++) {
-    returns.push(temps[i] - temps[i - 1]);
-  }
-  return {
-    ticker: 'WEATHER_NYC',
-    closes: temps,
-    returns,
-    latestPrice: temps[temps.length - 1] ?? null,
-    dataPoints: temps.length,
   };
 }

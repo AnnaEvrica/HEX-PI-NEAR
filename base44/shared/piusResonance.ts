@@ -1,21 +1,12 @@
 // ===========================================================================
-// PI-US RESONANCE — finds a real, quantifiable rhythm in a user's word sequence
-// over time. Ported faithfully from pi_us_resonance.py.
+// PI-US RESONANCE — measures how regular the rhythm of a person's wording is.
 //
-// IMPORTANT DISTINCTION: this exact FFT mechanism was tested three separate ways
-// as a PRICE-PREDICTION signal earlier in this project and failed real
-// out-of-sample validation each time. That failure was about using resonance to
-// FORECAST future price direction. This is a different use of the same real
-// math: DESCRIBING a user's linguistic cadence, not predicting anything. There
-// is no clean ground-truth "accuracy" for "did we correctly detect someone's
-// linguistic signature" — so this is verified to run correctly and produce
-// sensible, interpretable output, not backtested. Different claim, honestly scoped.
+// It describes cadence and is used only to shape voice. It predicts nothing:
+// the same calculation failed out-of-sample as a price signal and is not used
+// as one.
 //
-// TOKENIZER: pluggable, not hardcoded. Real transformer tokenizers (tiktoken,
-// HuggingFace) need network access to download vocab files this sandbox can't
-// reach. The default here is a real, deterministic word-level tokenizer — an
-// honest stand-in, not true BPE — structured so a real tokenizer can be swapped
-// in via the tokenize_fn parameter without touching any of the resonance math.
+// The tokenizer is a deterministic word-level one and can be swapped through
+// the tokenizeFn parameter without touching the calculation.
 // ===========================================================================
 
 export type TokenizeFn = (text: string) => number[];

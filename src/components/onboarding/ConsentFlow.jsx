@@ -6,7 +6,7 @@ const STEPS = [
   {
     id: 'system-framing',
     title: 'System Definition',
-    subtitle: 'What HEX6 is and isn\'t',
+    subtitle: 'What HEX [PI] is and isn\'t',
     skippable: false,
   },
   {
@@ -34,11 +34,11 @@ function Step1SystemFraming({ onContinue }) {
     <div className="max-w-2xl mx-auto space-y-8">
       <div>
         <h2 className="text-2xl font-bold mb-2">System Definition</h2>
-        <p className="text-secondary">What HEX6 is and isn't — Read carefully</p>
+        <p className="text-secondary">What HEX [PI] is and isn't — Read carefully</p>
       </div>
 
       <div className="space-y-4 p-6 rounded-sm bg-muted border border-border">
-        <p className="font-medium">HEX6 BLE is a computational system that:</p>
+        <p className="font-medium">HEX [PI] is a computational system that:</p>
         <ul className="space-y-2 text-sm text-secondary">
           <li className="flex gap-3">
             <span className="text-accent font-bold">•</span>
@@ -100,7 +100,7 @@ function Step2RiskAcknowledgment({ onContinue }) {
         {[
           {
             key: 'probabilistic',
-            label: 'I understand HEX6 outputs are probabilistic and may be incorrect',
+            label: 'I understand HEX [PI] outputs are probabilistic and may be incorrect',
           },
           {
             key: 'independent',
@@ -108,7 +108,7 @@ function Step2RiskAcknowledgment({ onContinue }) {
           },
           {
             key: 'notAdvisor',
-            label: 'I am not relying on HEX6 as a financial advisor or fiduciary',
+            label: 'I am not relying on HEX [PI] as a financial advisor or fiduciary',
           },
           {
             key: 'bearLoss',
@@ -168,13 +168,13 @@ function Step3ModularConsent({ onContinue }) {
           {
             key: 'dataProcessing',
             label: 'Data Processing',
-            desc: 'Required to run HEX6 BLE. Your inputs and market queries are processed to generate probabilistic analysis.',
+            desc: 'Required to run HEX [PI]. Your inputs and market queries are processed to generate probabilistic analysis.',
             required: true,
           },
           {
             key: 'modelTraining',
             label: 'Model Training',
-            desc: 'Optional. Anonymized patterns from your sessions help improve HEX6\'s accuracy. You can disable this anytime in Settings.',
+            desc: 'Optional. Anonymized patterns from your sessions help improve HEX [PI]\'s accuracy. You can disable this anytime in Settings.',
             required: false,
           },
         ].map(({ key, label, desc, required }) => (
@@ -235,21 +235,21 @@ function Step4LegalAcceptance({ onContinue }) {
         <section className="space-y-2">
           <h3 className="font-bold">System Definition</h3>
           <p className="text-secondary leading-relaxed">
-            HEX6 BLE is an experimental Probabilistic Intelligence model that generates probabilistic, informational outputs to support enhanced reasoning. It is NOT an investment advisor, broker, fiduciary, or financial institution.
+            HEX [PI] is an experimental Probabilistic Intelligence model that generates probabilistic, informational outputs to support enhanced reasoning. It is NOT an investment advisor, broker, fiduciary, or financial institution.
           </p>
         </section>
 
         <section className="space-y-2 border-t border-border pt-4">
           <h3 className="font-bold">No Advisory or Predictive Services</h3>
           <p className="text-secondary leading-relaxed">
-            All outputs are informational and probabilistic only. HEX6 does not predict markets, provide investment recommendations, financial advice, or portfolio management services. You are solely responsible for how you interpret and apply any output.
+            All outputs are informational and probabilistic only. HEX [PI] does not predict markets, provide investment recommendations, financial advice, or portfolio management services. You are solely responsible for how you interpret and apply any output.
           </p>
         </section>
 
         <section className="space-y-2 border-t border-border pt-4">
           <h3 className="font-bold">Risk Acknowledgment</h3>
           <p className="text-secondary leading-relaxed">
-            HEX6 BLE is an experimental Probabilistic Intelligence model. Outputs may be incorrect or become outdated. Conditions change rapidly and historical patterns do not guarantee future results. The goal is maximum value to you through enhanced reasoning — you apply any output at your own discretion.
+            HEX [PI] is an experimental Probabilistic Intelligence model. Outputs may be incorrect or become outdated. Conditions change rapidly and historical patterns do not guarantee future results. The goal is maximum value to you through enhanced reasoning — you apply any output at your own discretion.
           </p>
         </section>
 
@@ -263,7 +263,7 @@ function Step4LegalAcceptance({ onContinue }) {
         <section className="space-y-2 border-t border-border pt-4">
           <h3 className="font-bold">Regulatory Compliance</h3>
           <p className="text-secondary leading-relaxed">
-            You are responsible for compliance with all applicable laws in your jurisdiction. HEX6 is not registered with any financial authority and offers no regulatory protection. Consult a licensed financial advisor for your specific situation.
+            You are responsible for compliance with all applicable laws in your jurisdiction. HEX [PI] is not registered with any financial authority and offers no regulatory protection. Consult a licensed financial advisor for your specific situation.
           </p>
         </section>
 
@@ -283,7 +283,7 @@ function Step4LegalAcceptance({ onContinue }) {
           className="w-5 h-5 rounded-sm accent-accent mt-0.5"
         />
         <span className="text-sm">
-          I accept the HEX6 BLE Terms of Use, Privacy Policy, Risk Disclosure, and Regulatory Compliance requirements
+          I accept the HEX [PI] Terms of Use, Privacy Policy, Risk Disclosure, and Regulatory Compliance requirements
         </span>
       </label>
 
@@ -319,7 +319,7 @@ export default function ConsentFlow({ onComplete }) {
       <div className="border-b border-border">
         <div className="max-w-4xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl font-bold">HEX6 Setup</h1>
+            <h1 className="text-xl font-bold">HEX [PI] Setup</h1>
             <span className="text-sm text-secondary">
               Step {currentStep + 1} of {STEPS.length}
             </span>

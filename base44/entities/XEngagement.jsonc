@@ -25,7 +25,7 @@
     "actionable": {
       "type": "boolean",
       "default": false,
-      "description": "Whether the tweet made a HEX6-validatable directional market claim"
+      "description": "Whether the tweet made a directional market claim the engine can read"
     },
     "reply_tweet_id": {
       "type": "string",
@@ -45,19 +45,7 @@
     },
     "probability": {
       "type": "number",
-      "description": "HEX6-BLE structural probability (0-1)"
-    },
-    "resonance": {
-      "type": "number",
-      "description": "PI-US resonance (0-1)"
-    },
-    "value": {
-      "type": "number",
-      "description": "Pascal structural support (0-1)"
-    },
-    "confidence": {
-      "type": "number",
-      "description": "Overall confidence (0-1)"
+      "description": "P(next move up) from the engine (0-1)"
     },
     "predicted_direction": {
       "type": "string",
@@ -65,11 +53,8 @@
         "UP",
         "DOWN",
         "FLAT"
-      ]
-    },
-    "forward_accuracy": {
-      "type": "number",
-      "description": "Walk-forward directional accuracy on held-out tail (0-1)"
+      ],
+      "description": "FLAT records a direction read that sits at its usual odds"
     },
     "status": {
       "type": "string",
@@ -87,6 +72,10 @@
     "error": {
       "type": "string",
       "description": "Error message if status=failed"
+    },
+    "edge": {
+      "type": "number",
+      "description": "Distance of P(up) from the series' usual odds, in probability points (0-1). A statistic, not a confidence."
     }
   },
   "required": [

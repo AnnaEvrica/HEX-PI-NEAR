@@ -13,31 +13,28 @@
     },
     "predictions_evaluated": {
       "type": "number",
-      "description": "Number of past engine outputs scored"
+      "description": "Number of logged direction reads scored so far"
     },
     "directional_accuracy": {
       "type": "number",
-      "description": "Pct of times engine direction (mu sign) matched realized return sign (0-1)"
-    },
-    "exposure_correlation": {
-      "type": "number",
-      "description": "Pearson correlation between recommended exposure and realized returns"
+      "description": "Share of scored direction reads that matched the next daily close (0-1)"
     },
     "avg_realized_return": {
       "type": "number",
-      "description": "Average realized return across evaluated predictions"
+      "description": "Average log change between entry and scoring close across scored reads"
     },
     "calibration_grade": {
       "type": "string",
       "enum": [
+        "INSUFFICIENT_DATA",
+        "UNGRADED",
         "A",
         "B",
         "C",
         "D",
-        "F",
-        "INSUFFICIENT_DATA"
+        "F"
       ],
-      "description": "Overall calibration grade for this period"
+      "description": "INSUFFICIENT_DATA below 100 scored reads, otherwise UNGRADED. Letter values exist only on rows written before engine 6.1."
     },
     "notes": {
       "type": "string",
@@ -53,7 +50,11 @@
         "role": "admin"
       }
     },
-    "read": null,
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
     "update": {
       "user_condition": {
         "role": "admin"

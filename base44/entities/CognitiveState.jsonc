@@ -12,15 +12,11 @@
         "reason",
         "understand"
       ],
-      "description": "Which thinking mode produced this state"
+      "description": "Always \"reason\" since engine 6.1"
     },
     "user_email": {
       "type": "string",
       "description": "Email of the user whose query produced this cognitive state"
-    },
-    "conversation_id": {
-      "type": "string",
-      "description": "Reference to the conversation that produced this state"
     },
     "query": {
       "type": "string",
@@ -28,60 +24,27 @@
     },
     "probability": {
       "type": "number",
-      "description": "HEX6-BLE probability score (0-1)"
+      "description": "P(next move up) stated for the series (0-1)"
     },
     "resonance": {
       "type": "number",
-      "description": "PI-US resonance score (0-1)"
-    },
-    "coherence": {
-      "type": "number",
-      "description": "Agreement between probability and resonance (0-1)"
-    },
-    "value": {
-      "type": "number",
-      "description": "Pascal structural support score (Evidence x Agreement x Consistency x Coverage)"
-    },
-    "confidence": {
-      "type": "number",
-      "description": "Overall confidence of the thinking cycle (0-1)"
+      "description": "Cadence regularity of the person's messages (0-1); null when not computed"
     },
     "predicted_direction": {
       "type": "string",
       "enum": [
         "UP",
-        "DOWN",
-        "FLAT"
+        "DOWN"
       ],
-      "description": "The direction the engine predicted for the next step"
+      "description": "The side P(up) favours"
     },
-    "forward_accuracy": {
+    "base_rate": {
       "type": "number",
-      "description": "Walk-forward directional accuracy on the held-out tail of the input series (0-1); null if not tested"
+      "description": "The series' usual odds of an up move (0-1)"
     },
-    "forward_count": {
+    "edge": {
       "type": "number",
-      "description": "Number of held-out predictions in the forward test"
-    },
-    "cross_alignment": {
-      "type": "string",
-      "description": "HEX6-BLE <-> PI-US directional alignment: aligned / neutral / conflicting"
-    },
-    "friction": {
-      "type": "number",
-      "description": "Prediction-vs-reality friction score, filled when outcome is known"
-    },
-    "context_node_ids": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "default": [],
-      "description": "CoreNode IDs that formed the knowledge context for this cycle"
-    },
-    "resolved_outcome": {
-      "type": "string",
-      "description": "The realized outcome, filled when known (drives the Learning phase)"
+      "description": "Distance of P(up) from the series' usual odds, in probability points (0-1). A statistic, not a confidence."
     }
   },
   "required": [

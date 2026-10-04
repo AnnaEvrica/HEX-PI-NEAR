@@ -1,0 +1,144 @@
+// Backend smoke test. Runs every function locally against real BTC daily bars,
+// with the Base44 client, the language model and outside services stubbed.
+//   node tests/backend-smoke/build.mjs && node tests/backend-smoke/run.mjs
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+const here = path.dirname(fileURLToPath(import.meta.url));
+// ---- real BTC bars served as a Yahoo chart response
+const rows = fs.readFileSync(path.join(here, 'BTC_daily.csv'),'utf8').trim().split('\n').slice(1).map(l=>l.split(','));
+const yahoo = () => ({ chart: { result: [{ timestamp: rows.map(r=>Math.floor(new Date(r[0]).getTime()/1000)),
+  indicators: { quote: [{ close: rows.map(r=>+r[4]), high: rows.map(r=>+r[2]), low: rows.map(r=>+r[3]), volume: rows.map(r=>+r[5]) }] } }] } });
+const posted = [];
+globalThis.fetch = async (url, opts={}) => {
+  const u = String(url);
+  if (u.includes('finance.yahoo.com')) return new Response(JSON.stringify(yahoo()), { status: 200 });
+  if (u.includes('discord') ) { posted.push({u, body: opts.body}); return new Response('{}', {status:200}); }
+  return new Response('{}', { status: 200 });
+};
+const llmCalls = [];
+const writes = [];
+const mkBase44 = (user) => {
+  const entity = new Proxy({}, { get: (_, m) => async (...a) => { writes.push({ m, a }); return (m === 'create' ? { id: 'x1', ...a[0] } : m === 'update' ? {} : []); } });
+  const entities = new Proxy({}, { get: () => entity });
+  const InvokeLLM = async (o) => {
+    llmCalls.push(o);
+    const props = o.response_json_schema?.properties || {};
+    if (props.intent) return { intent: 'analytical' };
+    if (props.factual_summary) return { factual_summary: 'stub facts', needs_engine: false, sources: [], warrants_citation: false };
+    if (props.response) return { receiving: 'r', response: 'STUB REPLY', boundary_signal: '' };
+    if (props.message) return { message: 'stub discord message' };
+    if (props.discord_elaboration) return { discord_elaboration: 'stub elaboration', x_reply: 'stub' };
+    if (props.memory_summary) return { memory_summary: 'm', topics_discussed: 't', user_style: 's' };
+    return 'stub';
+  };
+  return { auth: { me: async () => { if (!user) { const e = new Error('unauth'); e.status = 401; throw e; } return user; } },
+    entities, asServiceRole: { entities, functions: { invoke: async () => ({ data: {} }) } },
+    integrations: { Core: { InvokeLLM, SendEmail: async () => ({}) } } };
+};
+let handler = null;
+globalThis.Deno = { serve: (h) => { handler = h; }, env: { get: (k) => ({ DISCORD_SIGNALS_WEBHOOK_URL: 'https://discord.test/hook', DISCORD_WEBHOOK_URL: 'https://discord.test/hook2', X_BEARER_TOKEN:'a',X_API_KEY:'a',X_API_SECRET:'a',X_ACCESS_TOKEN:'a',X_ACCESS_TOKEN_SECRET:'a' })[k] } };
+const load = async (fn) => { handler = null; const m = await import(`${path.join(here, 'out', fn + '.mjs')}?${Math.random()}`); return handler || m.default; };
+const call = async (h, user, body) => { globalThis.__base44 = mkBase44(user); llmCalls.length = 0;
+  const res = await h(new Request('https://app.test/fn', { method: 'POST', headers: { 'content-type': 'application/json', origin: 'https://evil.example' }, body: JSON.stringify(body) }));
+  return { status: res.status, json: await res.json() }; };
+const sub = { email: 'u@test.com', full_name: 'Test User', role: 'user', subscription_status: 'active' };
+const out = (label, v) => console.log(`\n=== ${label}\n${typeof v === 'string' ? v : JSON.stringify(v, null, 1)}`);
+const synthPrompt = () => (llmCalls.find(c => c.response_json_schema?.properties?.response)?.prompt || '');
+let fails = 0; const check = (name, ok) => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}`); if (!ok) fails++; };
+
+const think = await load('think');
+let r = await call(think, { ...sub, subscription_status: 'canceled' }, { message: 'hi' });
+check('think: no subscription -> 402', r.status === 402);
+r = await call(think, sub, { message: 'hey' });
+check('think: casual -> 200, engine not run', r.status === 200 && r.json.ran_engine === false && r.json.version === '6.2');
+r = await call(think, sub, { message: "what's your read on BTC right now?" });
+let p = synthPrompt();
+check('think: ticker -> engine ran', r.status === 200 && r.json.ran_engine === true);
+check('think: prompt carries PROBABILITY READ', p.includes('PROBABILITY READ (BTC'));
+check('think: persona names the software HEX [PI] and the engine HEX6-BLE', p.includes('You are HEX [PI]') && p.includes('HEX6-BLE engine'));
+check('think: every "conviction" mention is a prohibition', p.split('\n').filter(l => /convict/i.test(l)).every(l => /never|no confidence/i.test(l)));
+const confLines = p.split('\n').filter(l => /confidence/i.test(l));
+check('think: every "confidence" mention is a prohibition', confLines.every(l => /never|no confidence|not |without/i.test(l)));
+out('BTC state block as sent to the model', p.slice(p.indexOf('(Internal directive'), p.indexOf('RECEIVING EMPATHY FILTER')).slice(0, 3200));
+out('lines mentioning confidence', confLines.map(l => l.slice(0, 200)));
+const series = rows.slice(-150).map(r => r[4]).join(', ');
+r = await call(think, sub, { message: `here are closes: ${series}` });
+check('think: pasted list of 150 prices -> engine ran', r.json.ran_engine === true && synthPrompt().includes('PROBABILITY READ'));
+r = await call(think, sub, { message: 'On 12/03/2026 I paid 4 bills of 120, 45, 300 and 18 dollars over 2 weeks.' });
+check('think: stray numbers in a sentence -> engine NOT run', r.json.ran_engine === false);
+r = await call(think, sub, { message: 'series: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10' });
+check('think: 10-point list -> too short, engine NOT run', r.json.ran_engine === false);
+check('think: short list -> model told to state no probability', synthPrompt().includes('PROBABILITY READ: none'));
+r = await call(think, sub, { message: 'what about ETH?', conversationHistory: [{ role: 'user', content: 'hi' }, { role: 'assistant', content: 'hello' }, { role: 'user', content: 'what about ETH?' }] });
+check('think: the new message is not sent twice', (synthPrompt().match(/what about ETH\?/g) || []).length === 1);
+r = await call(think, null, { message: 'hi' });
+check('think: signed out -> error status', r.status >= 400);
+
+const discord = await load('discordMorningSignal');
+r = await call(discord, null, { dryRun: true });
+check('discordMorningSignal: dry run ok', r.status === 200 && r.json.success === true);
+p = llmCalls[0]?.prompt || '';
+check('discordMorningSignal: prompt has no Conviction/flip wording', !/Conviction \d|ANTI-PREDICTIVE|THIN SAMPLE/.test(p));
+out('Discord data block', p.slice(p.indexOf('SESSION:')).slice(0, 1500));
+
+const x = await load('xEngagement');
+r = await call(x, null, { asset: 'BTC' });
+check('xEngagement: asset mode ok', r.status === 200 && r.json.ok === true);
+check('xEngagement: Discord post has no "Confidence" figure', posted.length > 0 && !/Confidence \d|Resonance \d|validated signal/.test(posted.at(-1).body));
+out('xEngagement Discord body', JSON.parse(posted.at(-1).body).content);
+
+const wf = await load('walkForwardAccuracy');
+r = await call(wf, sub, { ticker: 'BTC' });
+check('walkForwardAccuracy ok', r.status === 200 && !!r.json.pooled?.move_size);
+check('walkForwardAccuracy: reports which family the series behaves like', typeof r.json.tickers?.BTC?.behaves_like?.direction?.markets === 'number');
+out('BTC behaves like', r.json.tickers.BTC.behaves_like);
+out('walk-forward on BTC (live function)', { direction: { ...r.json.pooled.direction, reliability: undefined }, move_size: r.json.pooled.move_size });
+
+const cal = await load('calibrateCognition');
+r = await call(cal, null, {});
+check('calibrateCognition ok', r.status === 200 && r.json.ok === true);
+
+const co = await load('stripeCheckout');
+globalThis.__secrets = { STRIPE_SECRET_KEY: 'sk', STRIPE_PRICE_ID: 'price', STRIPE_WEBHOOK_SECRET: 'whsec' };
+let sent = null; const f0 = globalThis.fetch;
+globalThis.fetch = async (u, o) => { if (String(u).includes('stripe.com')) { sent = String(o.body); return new Response(JSON.stringify({ url: 'https://checkout.stripe.com/x' })); } return f0(u, o); };
+r = await call(co, sub, {});
+check('stripeCheckout: forged Origin is ignored', r.status === 200 && sent.includes(encodeURIComponent('https://hex6-ble.base44.app/app?checkout=success')) && !sent.includes('evil'));
+check('stripeCheckout: new subscriber gets the 7-day trial', decodeURIComponent(sent).includes('subscription_data[trial_period_days]=7'));
+r = await call(co, { ...sub, stripe_subscription_id: 'sub_old', stripe_customer_id: 'cus_1' }, {});
+check('stripeCheckout: returning subscriber gets no second trial', !decodeURIComponent(sent).includes('trial_period_days') && decodeURIComponent(sent).includes('customer=cus_1'));
+const wh = await load('stripeWebhook');
+globalThis.__base44 = mkBase44(null);
+const sign = async (t, body) => { const k = await crypto.subtle.importKey('raw', new TextEncoder().encode('whsec'), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const s = await crypto.subtle.sign('HMAC', k, new TextEncoder().encode(`${t}.${body}`)); return [...new Uint8Array(s)].map(b => b.toString(16).padStart(2, '0')).join(''); };
+const ev = JSON.stringify({ type: 'ping', data: { object: {} } });
+const now = Math.floor(Date.now() / 1000);
+const post = async (t, sig) => (await wh(new Request('https://app.test/wh', { method: 'POST', headers: { 'stripe-signature': `t=${t},v1=${sig}` }, body: ev }))).status;
+check('stripeWebhook: valid fresh signature accepted', await post(now, await sign(now, ev)) === 200);
+check('stripeWebhook: valid but old signature rejected (replay)', await post(now - 3600, await sign(now - 3600, ev)) === 400);
+check('stripeWebhook: wrong signature rejected', await post(now, 'deadbeef') === 400);
+
+// ---- clean-up checks (6.2.2)
+{
+  const t = await load('think');
+  writes.length = 0;
+  let q = await call(t, sub, { message: "you're a useless machine. what's your read on BTC?" });
+  const warned = writes.find(w => w.m === 'create' && w.a[0]?.boundary_warning_count === 1);
+  check('think: an insult is recorded as one boundary warning', q.status === 200 && !!warned);
+  check('think: no boundary marker text reaches the reply', !/BOUNDARY_SIGNAL/.test(q.json.response));
+  const models = llmCalls.map(c => c.model);
+  check('think: Claude writes; only the retrieval call uses the web model', llmCalls.filter(c => c.add_context_from_internet).every(c => c.model !== llmCalls.find(x => x.response_json_schema?.properties?.response).model) && llmCalls.filter(c => !c.add_context_from_internet).every(c => /claude/.test(c.model)));
+  const sp = synthPrompt();
+  check('think: no model call is spent on triage', !llmCalls.some(c => c.response_json_schema?.properties?.intent));
+  check('think: prompt carries no state, hexagram or archetype data', !/King Wen \(|HEX state \d|archetype_id|fs137|structural_read/.test(sp) && sp.includes('long_lookback'));
+  const cs = writes.find(w => w.m === 'create' && w.a[0]?.state_id);
+  check('think: saved read has edge and base_rate, no confidence field', !!cs && 'edge' in cs.a[0] && 'base_rate' in cs.a[0] && !('confidence' in cs.a[0]) && !('value' in cs.a[0]));
+  q = await call(t, sub, { message: 'i think the link you sent is near the top' });
+  check('think: "link" and "near" in a sentence are not tickers', q.json.ran_engine === false);
+  const lc = await load('landingComparison');
+  q = await call(lc, null, {});
+  check('landingComparison: web model retrieves, Claude writes', llmCalls.length === 2 && llmCalls[0].add_context_from_internet === true && /claude/.test(llmCalls[1].model) && !llmCalls[1].add_context_from_internet);
+}
+console.log(`\n${fails ? fails + ' FAILED' : 'ALL PASSED'}`);
+process.exit(fails ? 1 : 0);

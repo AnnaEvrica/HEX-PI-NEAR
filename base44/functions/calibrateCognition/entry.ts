@@ -1,111 +1,82 @@
-// Cognition Calibration Scorer — closes the loop for the PI-US value layer.
+// Nightly forward-record scorer.
 //
-// ACCOUNTABILITY SPLIT (do not cross the hemispheres):
-//   HEX6-BLE (reason)  OWNS direction  → graded on directional accuracy elsewhere
-//                                          (nightlyCalibration, per brain_id).
-//   PI-US (wave+value) OWNS value       → graded HERE on support calibration:
-//     does higher Pascal support rank higher realized directional quality?
+// Every direction read HEX gives in chat that departs from its usual odds is
+// logged in PredictionJournal (shared/predictionJournal.ts). This job scores
+// the ones whose horizon has passed against the first real daily close after
+// that horizon, then writes one CalibrationScore row per ticker and one
+// GLOBAL row. It is the live, out-of-sample record of the engine: nothing is
+// replayed or back-filled.
 //
-// The `forward_accuracy` on each CognitiveState comes from runForwardTest, which
-// calls runReasonLayer only — so that number is HEX6-BLE's directional hit-rate,
-// NOT PI-US's. Grading PI-US on it was a category error that always landed near
-// coin-flip (a D) because PI-US never predicted direction in the first place.
-//
-// This scorer now grades PI-US on exposure_correlation = Pearson(support,
-// forward_accuracy): when PI-US says support is high, does accuracy actually go
-// up? directional_accuracy is kept in the record as a HEX6-BLE reference only.
-//
-// Self-contained (DB-only — no external market fetch).
+// Runs from the "Nightly Cognition Calibration" workflow.
 
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.39';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
+import { fetchYahooReturns } from '../../shared/marketDataClient.ts';
+import { scoreDueCalls } from '../../shared/predictionJournal.ts';
+import { ENGINE_VERSION } from '../../shared/version.ts';
 
-function pearson(a, b) {
-  const n = Math.min(a.length, b.length);
-  if (n < 3) return 0;
-  const ma = a.reduce((s, x) => s + x, 0) / n;
-  const mb = b.reduce((s, x) => s + x, 0) / n;
-  let num = 0, da = 0, db = 0;
-  for (let i = 0; i < n; i++) { num += (a[i] - ma) * (b[i] - mb); da += (a[i] - ma) ** 2; db += (b[i] - mb) ** 2; }
-  return (da === 0 || db === 0) ? 0 : num / Math.sqrt(da * db);
-}
-
-// Grade PI-US on its actual job — value calibration: how well does Pascal
-// support rank realized directional quality? Pearson(support, forward_accuracy).
-// A negative correlation (high support → low accuracy) is an F (anti-calibration).
-function gradeFromCalibration(corr) {
-  if (corr >= 0.50) return 'A';
-  if (corr >= 0.35) return 'B';
-  if (corr >= 0.20) return 'C';
-  if (corr >= 0.10) return 'D';
-  return 'F';
-}
+// With fewer scored reads than this, a hit rate means nothing and is not graded.
+const MIN_TO_GRADE = 100;
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+    const J = base44.asServiceRole.entities.PredictionJournal;
     const today = new Date().toISOString().split('T')[0];
+    const now = Date.now();
 
-    const recent = await base44.asServiceRole.entities.CognitiveState.list('-created_date', 1000).catch(() => []);
-    const runs = (recent || []).filter(r => r.forward_accuracy != null && r.forward_count > 0);
+    const rows = await J.list('-predicted_at', 2000).catch(() => []);
+    const due = (rows || []).filter((r) => !r.resolved && r.resolve_after && new Date(r.resolve_after).getTime() <= now);
 
-    if (runs.length === 0) {
-      await base44.asServiceRole.entities.CalibrationScore.create({
+    // 1. Score what is due, one price fetch per ticker.
+    const byTicker = new Map();
+    for (const r of due) {
+      if (!byTicker.has(r.ticker)) byTicker.set(r.ticker, []);
+      byTicker.get(r.ticker).push(r);
+    }
+    let newlyScored = 0;
+    for (const [ticker, list] of byTicker) {
+      let md = null;
+      try { md = await fetchYahooReturns(ticker, 120); } catch { continue; }
+      // Finished bars only: the bar still in progress has no close yet.
+      newlyScored += await scoreDueCalls(J, list, { closes: md.completedCloses, timestamps: md.timestamps.slice(0, md.completedBars) });
+    }
+
+    // 2. Summarise the whole scored record.
+    const scored = (rows || []).filter((r) => r.resolved && typeof r.correct === 'boolean');
+    const summarise = (list) => {
+      const n = list.length;
+      const hits = list.filter((r) => r.correct).length;
+      const moves = list.filter((r) => r.entry_price > 0 && r.exit_price > 0).map((r) => Math.log(r.exit_price / r.entry_price));
+      return {
+        n,
+        accuracy: n ? hits / n : 0,
+        avgMove: moves.length ? moves.reduce((s, x) => s + x, 0) / moves.length : 0,
+      };
+    };
+    const CS = base44.asServiceRole.entities.CalibrationScore;
+    const write = async (ticker, list) => {
+      const { n, accuracy, avgMove } = summarise(list);
+      await CS.create({
         score_date: today,
-        ticker: 'PI-US',
-        predictions_evaluated: 0,
-        directional_accuracy: 0,
-        exposure_correlation: 0,
-        avg_realized_return: 0,
-        calibration_grade: 'INSUFFICIENT_DATA',
-        notes: 'No CognitiveState forward-test records available to score yet.',
-      });
-      return Response.json({ ok: true, message: 'No cognition runs to score yet.' });
-    }
+        ticker,
+        predictions_evaluated: n,
+        directional_accuracy: Number(accuracy.toFixed(4)),
+        avg_realized_return: Number(avgMove.toFixed(6)),
+        // No letter grade is given. The field says only whether there are
+        // enough scored reads for the hit rate to be read at all.
+        calibration_grade: n < MIN_TO_GRADE ? 'INSUFFICIENT_DATA' : 'UNGRADED',
+        notes: n < MIN_TO_GRADE
+          ? `Forward record, engine ${ENGINE_VERSION}: ${n} scored direction reads so far (${(accuracy * 100).toFixed(1)}% matched the next close). Too few to draw a conclusion; at least ${MIN_TO_GRADE} are needed.`
+          : `Forward record, engine ${ENGINE_VERSION}: ${n} scored direction reads, ${(accuracy * 100).toFixed(1)}% matched the next close.`,
+      }).catch(() => {});
+    };
+    const tickers = [...new Set(scored.map((r) => r.ticker))];
+    for (const t of tickers) await write(t, scored.filter((r) => r.ticker === t));
+    await write('GLOBAL', scored);
 
-    let totalPred = 0;
-    const supports = [], accs = [];
-    const buckets = { high: { n: 0, c: 0 }, mid: { n: 0, c: 0 }, low: { n: 0, c: 0 } };
-
-    for (const r of runs) {
-      const cnt = r.forward_count || 0;
-      const acc = r.forward_accuracy || 0;
-      totalPred += cnt;
-      supports.push(r.value || 0); // support is stored in the `value` field
-      accs.push(acc);
-      const b = (r.value || 0) > 0.05 ? 'high' : (r.value || 0) > 0.01 ? 'mid' : 'low';
-      buckets[b].n += cnt;
-      buckets[b].c += acc * cnt;
-    }
-
-    const supCorr = pearson(supports, accs);
-    const bucketAcc = (bk) => bk.n > 0 ? +(bk.c / bk.n).toFixed(3) : null;
-    // PI-US is graded on VALUE calibration (support → realized quality), not
-    // direction. Directional accuracy is HEX6-BLE's domain, validated by the
-    // dedicated walkForwardAccuracy backtest (full pipeline) — never this scorer.
-    const grade = totalPred < 10 ? 'INSUFFICIENT_DATA' : gradeFromCalibration(supCorr);
-
-    const notes = `PI-US value calibration across ${runs.length} runs, ${totalPred} held-out predictions. Support→quality correlation ${supCorr.toFixed(2)} (grade ${grade}): higher Pascal support ranks higher realized directional quality. Support buckets — high ${bucketAcc(buckets.high)}, mid ${bucketAcc(buckets.mid)}, low ${bucketAcc(buckets.low)}. Directional accuracy is HEX6-BLE's domain (walkForwardAccuracy), not measured here.`;
-
-    await base44.asServiceRole.entities.CalibrationScore.create({
-      score_date: today,
-      ticker: 'PI-US',
-      predictions_evaluated: totalPred,
-      directional_accuracy: 0,
-      exposure_correlation: parseFloat(supCorr.toFixed(4)),
-      avg_realized_return: 0,
-      calibration_grade: grade,
-      notes,
-    });
-
-    return Response.json({
-      ok: true,
-      runs_scored: runs.length,
-      predictions_evaluated: totalPred,
-      support_correlation: parseFloat(supCorr.toFixed(4)),
-      calibration_grade: grade,
-    });
-  } catch (e) {
-    console.error('calibrateCognition error:', e);
-    return Response.json({ error: e.message }, { status: 500 });
+    return Response.json({ ok: true, newly_scored: newlyScored, total_scored: scored.length, tickers: tickers.length, engine_version: ENGINE_VERSION });
+  } catch (error) {
+    console.error('calibrateCognition error:', error);
+    return Response.json({ error: error.message }, { status: 500 });
   }
 });

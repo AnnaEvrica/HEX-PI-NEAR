@@ -1,5 +1,5 @@
 // spineAlert — fires automatically when a VerdictSpine record is created with
-// disagreement_flag=true (a verdict the validators don't fully back). Posts a
+// disagreement_flag=true (a direction read the chart structure contradicts). Posts a
 // rich Discord alert to the signals channel. Runs straight off the automation
 // payload — no DB round-trip, no LLM, so the alert cost scales with drift,
 // not with verdict volume.
@@ -26,12 +26,11 @@ export default async function(req) {
     const f = (name, val) => ({ name, value: String(val == null ? '—' : val), inline: true });
     const embed = {
       title: 'ASI Spine — drift flagged',
-      description: "A verdict was anchored that the validators don't fully back. Review before it softens downstream.",
+      description: "A direction read was anchored that the chart structure contradicts.",
       color: 16753920, // accent orange
       fields: [
         f('Verdict', data.verdict_id),
         f('Source', data.source_type),
-        f('Authored by', data.authored_by || 'HEX6_ENGINE'),
         {
           name: 'Disagreeing validators',
           value: disagree.length
