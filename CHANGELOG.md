@@ -41,7 +41,7 @@ calls on 43 series. Bits per call over the null, 95% interval:
 | Markets, move size (17 series) | 57.9% | 57.2% | +0.0043 [0.0030, 0.0056] |
 | Markets, direction | 51.4% | 51.2% | 0.0000 [−0.0007, 0.0006] |
 | Never used before: 10 currencies, move size | 62.1% | 61.2% | +0.0082 [0.0060, 0.0106] |
-| Never used before: 3 temperature stations, direction | 61.0% | 54.6% | +0.0465 [0.0430, 0.0499] |
+| Never used before: 3 temperature stations, direction | 61.0% | 54.6% | +0.0466 [0.0430, 0.0499] |
 | Chicago temperature, direction | 62.9% | 50.7% | +0.0644 [0.0598, 0.0689] |
 | Racing, direction | 74.8% | 75.0% | −0.0017 [−0.0020, −0.0014] |
 

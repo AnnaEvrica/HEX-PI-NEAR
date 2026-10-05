@@ -293,8 +293,8 @@ $10^{-13}$ (`tests/parity.mjs`).
 | Markets, direction | 46,478 | 51.4% | 51.2% | 0.0000 [−0.0007, 0.0006] | 0.0000 [−0.0007, 0.0006] |
 | *Never used before:* 10 currencies, move size | 26,540 | 62.1% | 61.2% | +0.0082 [0.0060, 0.0106] | +0.0035 [0.0018, 0.0053] |
 | *Never used before:* 10 currencies, direction | 26,540 | 54.2% | 54.0% | +0.0011 [−0.0002, 0.0025] | +0.0001 [−0.0013, 0.0014] |
-| *Never used before:* 3 temperature stations, direction | 29,408 | 61.0% | 54.6% | +0.0465 [0.0430, 0.0499] | +0.0310 [0.0278, 0.0342] |
-| *Never used before:* 3 temperature stations, move size | 29,408 | 63.1% | 61.6% | +0.0186 [0.0158, 0.0212] | +0.0130 [0.0109, 0.0153] |
+| *Never used before:* 3 temperature stations, direction | 29,408 | 61.0% | 54.6% | +0.0466 [0.0430, 0.0499] | +0.0310 [0.0278, 0.0342] |
+| *Never used before:* 3 temperature stations, move size | 29,408 | 63.1% | 61.6% | +0.0186 [0.0158, 0.0212] | +0.0130 [0.0109, 0.0152] |
 | Chicago temperature, direction | 24,678 | 62.9% | 50.7% | +0.0644 [0.0598, 0.0689] | +0.0417 [0.0375, 0.0459] |
 | Racing, direction | 13,022 | 74.8% | 75.0% | −0.0017 [−0.0020, −0.0014] | −0.0008 [−0.0015, −0.0003] |
 

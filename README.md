@@ -33,7 +33,7 @@ HEX gave what happened more probability than the series' own record did.
 | Markets, direction | 46,478 | 51.4% | 51.2% | 0.0000 [−0.0007, 0.0006] | no verified edge |
 | *Never used before:* 10 currencies, move size | 26,540 | 62.1% | 61.2% | +0.0082 [0.0060, 0.0106] | verified |
 | *Never used before:* 10 currencies, direction | 26,540 | 54.2% | 54.0% | +0.0011 [−0.0002, 0.0025] | no verified edge |
-| *Never used before:* 3 temperature stations, direction | 29,408 | 61.0% | 54.6% | +0.0465 [0.0430, 0.0499] | verified |
+| *Never used before:* 3 temperature stations, direction | 29,408 | 61.0% | 54.6% | +0.0466 [0.0430, 0.0499] | verified |
 | *Never used before:* 3 temperature stations, move size | 29,408 | 63.1% | 61.6% | +0.0186 [0.0158, 0.0212] | verified |
 | Chicago temperature, direction | 24,678 | 62.9% | 50.7% | +0.0644 [0.0598, 0.0689] | verified |
 | Racing, direction | 13,022 | 74.8% | 75.0% | −0.0017 [−0.0020, −0.0014] | no verified edge |
