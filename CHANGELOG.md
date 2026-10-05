@@ -1,5 +1,13 @@
 # Changelog
 
+## 6.4.3 — 4 October 2026: move size is shown from 6.4 from day one
+
+- `DEFAULT_LIVE` now shows 6.4 for move size before the ledger has a record
+  of its own. The promotion rule already chose it on ten years of replayed
+  market history and never took it down, and it is right at least as often
+  as 6.2 in every domain measured. Direction still starts on 6.2. The ledger
+  scores both from the first night and can change either.
+
 ## 6.4.2 — 4 October 2026: HEX makes the call, calibration only restates its strength
 
 - **Calibration can no longer change a call.** In both versions the map was

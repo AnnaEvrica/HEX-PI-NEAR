@@ -40,7 +40,16 @@ export interface LiveEngines {
   /** Pooled calibration maps for 6.4 on daily market series; absent until the nightly job has fitted them. */
   calibration?: { MOVE?: Knots | null; RANGE?: Knots | null };
 }
-export const DEFAULT_LIVE: LiveEngines = { MOVE: CONTROL_ENGINE, RANGE: CONTROL_ENGINE };
+/**
+ * What is shown before the ledger has a record of its own.
+ * Move size starts on 6.4: on ten years of market history replayed night by
+ * night the promotion rule chose it and never took it down
+ * (validation/loop_sim_side.py), and it is right at least as often as 6.2 in
+ * every domain measured. Direction starts on 6.2: on that record the rule
+ * never chose 6.4. From the first night the ledger keeps score either way and
+ * can change both.
+ */
+export const DEFAULT_LIVE: LiveEngines = { MOVE: CONTROL_ENGINE, RANGE: CANDIDATE_ENGINE };
 
 /** The same selection without the stored calibration: for series that are not daily market bars. */
 export const withoutCalibration = (live: LiveEngines): LiveEngines => ({ MOVE: live.MOVE, RANGE: live.RANGE });

@@ -15,7 +15,7 @@ the Base44 Builder, and the live app changes when you press **Publish** there.
 | Chat function | `base44/functions/think/` | Builds the prompt, calls the engine and the language model |
 | Engines | `base44/shared/engines.ts` | The one place the two versions of HEX meet; the only source of any probability shown to a user |
 | HEX | `hex.ts` | The 64-state engine as an explicit model with no hand-set numbers (6.4). It makes every call. The mathematics is in `docs/MODEL.md` |
-| HEX, control | `stateProbability.ts`, `pretrainedTables.ts` | Version 6.2, frozen. What people see until 6.4 is promoted |
+| HEX, control | `stateProbability.ts`, `pretrainedTables.ts` | Version 6.2. Shown for direction; the yardstick 6.4 is scored against |
 | Observer | `observer.ts` | Watches the series and reports its baseline. Never makes a call |
 | The loop | `ledger.ts`, `universe.ts`, `isotonic.ts`, `functions/calibrateCognition/` | Ledger of every call, nightly scoring, pooled calibration, promotion |
 | Read and wording | `base44/shared/probabilityRead.ts` | Turns a series into the two probabilities and the rules for stating them |
@@ -77,6 +77,11 @@ holds for both versions.
    night's decision rests on the whole record, kept as a running tally. The
    result is one `EngineStatus` row per read, which every function loads
    before showing a number.
+
+**Starting point.** Move size is shown from 6.4 from the first day, because
+the rule below already chose it on ten years of replayed history. Direction
+is shown from 6.2. The ledger scores both versions from the first night and
+can change either.
 
 Started from nothing on 1 January 2016 on 17 market series
 (`validation/loop_sim_side.py`: empty ledger, no history before that date,
