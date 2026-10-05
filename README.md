@@ -84,7 +84,7 @@ for 6.2 alone, with 6.4 promoted once, in September 2018, and never taken
 down. The learning shows in two places: accuracy rises over a series' first
 250 to 500 steps (51.3% in the first 100, 59.2% between 250 and 500), and
 the strongest tenth of calls goes from stated 69.0% / right 59.6% in 2016 to
-within about three points from 2023 on. It does not show as a climb year
+within four points from 2023 on. It does not show as a climb year
 after year. Direction stays at chance throughout.
 
 ### Backend functions
