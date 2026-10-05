@@ -1,11 +1,34 @@
 # Changelog
 
+## 6.4.2 — 4 October 2026: HEX makes the call, calibration only restates its strength
+
+- **Calibration can no longer change a call.** In both versions the map was
+  applied to the whole probability and the side was read off the result, so
+  a call could be turned round. In the ten-year simulation it turned 5.6% of
+  6.4's move-size calls and 20% of its direction calls (6.2: 9.4% and 17.5%),
+  and those calls were right less often afterwards. The map is now fitted from
+  the strength stated for the side called to how often such calls were right,
+  and applied to the strength only, with a floor just above 50%
+  (`isotonic.ts`: `fitStrength`, `strengthKnots`, `restate`, `applyStrength`).
+  This changes what 6.2 states: its calls are its own again, and its
+  per-series map only restates their strength.
+- **Scoring is a reward for closeness.** Each scored call earns
+  1 − (probability − outcome)², between 0 and 1. `CallLedger` stores `reward`
+  and `reward_baseline` in place of the log-loss fields, and promotion compares
+  mean reward. The mixture inside HEX is unchanged.
+- **Simulated** (`validation/loop_sim_side.py`): move size right 57.3% (57.1%
+  before this change), strongest tenth stated 69.9% / right 67.7% (71.3% /
+  67.1% before); one promotion for move size, none for direction.
+- `validation/loop_sim.py` tests how far back the nightly update should look;
+  the cold-start figures quoted in the README come from `loop_sim_side.py`.
+- Five new checks in `tests/loop.mjs`, including that a map fitted to a record
+  of all-wrong calls still leaves every side alone.
+
 ## 6.4.1 — 4 October 2026: decisions rest on the whole record
 
 - **Ten-year cold start** (`validation/loop_sim.py`). The loop run from an
   empty ledger on 1 January 2016 on 17 market series, with calibration and
-  promotion applied night by night. Results in the README and in
-  `validation/loop_sim_0.json`.
+  promotion applied night by night (`validation/loop_sim_0.json`).
 - **Defect found and fixed.** The nightly update decided from the most recent
   5,000 scored rows only. In the simulation that made the shown version flip:
   three changes for move size and five for direction over ten years

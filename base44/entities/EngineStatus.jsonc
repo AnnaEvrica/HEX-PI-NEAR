@@ -28,7 +28,7 @@
     },
     "gain": {
       "type": "number",
-      "description": "Mean log loss of 6.2 minus 6.4, nats per call. Positive: 6.4 better"
+      "description": "Mean reward of 6.4 minus 6.2 on the same calls. Positive: 6.4 came closer"
     },
     "gain_low": {
       "type": "number",
@@ -77,7 +77,7 @@
     },
     "calibration": {
       "type": "string",
-      "description": "JSON: pooled calibration map for 6.4 on this read"
+      "description": "JSON: pooled map for 6.4 on this read, from the strength it stated to how often such calls were right. Applied to strength only; never changes a call"
     },
     "calibration_steps": {
       "type": "number",

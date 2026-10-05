@@ -53,7 +53,7 @@ for (const read of ['MOVE', 'RANGE']) {
 }
 // ---- the rule itself, on made-up rows
 const mk = (n, days, dCtl, dCand) => { const rows = []; for (let i = 0; i < n; i++) { const day = `2026-01-${String(1 + (i % days)).padStart(2, '0')}-${i % days}`; const j = (i * 7919) % 100 / 100 - 0.5;
-  for (const [engine, ll] of [['state-6.2', 0.69 + dCtl + j * 0.05], ['state-6.4', 0.69 + dCand + j * 0.05 + ((i * 31) % 10 - 4.5) * 0.002]]) rows.push({ series_id: 'S' + (i % 5), read: 'RANGE', engine, call_date: day + '|' + Math.floor(i / days), scored: true, outcome: 1, probability: 0.6, baseline: 0.55, log_loss: ll }); } return rows; };
+  for (const [engine, ll] of [['state-6.2', 0.69 + dCtl + j * 0.05], ['state-6.4', 0.69 + dCand + j * 0.05 + ((i * 31) % 10 - 4.5) * 0.002]]) rows.push({ series_id: 'S' + (i % 5), read: 'RANGE', engine, call_date: day + '|' + Math.floor(i / days), scored: true, outcome: 1, probability: 0.6, baseline: 0.55, reward: 0.75 - (ll - 0.69) }); } return rows; };
 const lessOften = mk(400, 80, 0, -0.02).map((r, i) => (r.engine === 'state-6.4' && i % 6 < 2 ? { ...r, probability: 0.4 } : r));
 check('rule: better probabilities but right less often -> hold', M.summarise('RANGE', lessOften, 'state-6.2').decision === 'hold');
 check('rule: too few calls -> hold', M.summarise('RANGE', mk(200, 70, 0, -0.02), 'state-6.2').decision === 'hold');
@@ -80,8 +80,16 @@ check('rule: promoted and still better -> stays', M.summarise('RANGE', mk(400, 8
 const map = M.pooledCalibration(lastRun.candidateSteps.RANGE);
 check('calibration map is fitted and monotone', !!map && map.y.every((v, i) => i === 0 || v >= map.y[i - 1] - 1e-12) && map.x.every((v, i) => i === 0 || v > map.x[i - 1]));
 check('too few steps -> no map', M.pooledCalibration(lastRun.candidateSteps.RANGE.slice(0, 500)) === null);
-const f = M.fitIsotonic(lastRun.candidateSteps.RANGE.map((s) => s.p), lastRun.candidateSteps.RANGE.map((s) => s.y));
-check('stored map reproduces the fitted curve', [0.2, 0.35, 0.5, 0.62, 0.8].every((p) => Math.abs(M.applyKnots(map, p) - f(p)) < 1e-4));
+const f = M.fitStrength(lastRun.candidateSteps.RANGE.map((s) => s.p), lastRun.candidateSteps.RANGE.map((s) => s.y));
+const grid = Array.from({ length: 197 }, (_, i) => 0.01 + i * 0.005);
+check('stored map reproduces the fitted curve', grid.every((p) => Math.abs(M.applyStrength(map, p) - M.restate(p, f)) < 1e-4));
+check('calibration never changes the side of a call', grid.every((p) => (M.applyStrength(map, p) >= 0.5) === (p >= 0.5)));
+check('calibration never states less than 50% for the side called', grid.every((p) => Math.max(M.applyStrength(map, p), 1 - M.applyStrength(map, p)) >= 0.5001 - 1e-12));
+{ // a map that says every call was wrong still cannot turn a call round
+  const wrong = M.strengthKnots(grid, grid.map((p) => (p >= 0.5 ? 0 : 1)));
+  check('even a record of all wrong calls leaves the side alone', grid.every((p) => (M.applyStrength(wrong, p) >= 0.5) === (p >= 0.5)));
+}
+check('reward: 1 for certain and right, 0.75 for a coin flip, never negative', M.reward(1, 1) === 1 && M.reward(0.5, 1) === 0.75 && M.reward(0.5, 0) === 0.75 && M.reward(1, 0) === 0);
 console.log(`  calibration map: ${map.x.length} knots from ${map.n} steps`);
 
 // ---- loadLive

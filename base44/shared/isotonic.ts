@@ -1,6 +1,15 @@
-// Isotonic calibration (pool adjacent violators): a monotone map from a stated
-// probability to the frequency actually observed at that stated level. Both
-// engines use it, always fitted on calls made before the one being calibrated.
+// Calibration. HEX makes the call; calibration never changes it.
+//
+// A call has a side (the event, or not) and a strength (the probability stated
+// for that side, 50% to 99%). The side is HEX's own and is fixed. The map
+// here is fitted, on calls made earlier, from the strength HEX stated to how
+// often calls of that strength were right, and is applied to the strength
+// only. It cannot state less than 50% for the side called, so it can never
+// turn a call round.
+//
+// The fit is isotonic regression (pool adjacent violators): among all
+// non-decreasing maps it is the one that would have earned the most reward
+// on the record, under every proper score at once.
 const clip = (p: number) => Math.min(0.99, Math.max(0.01, p));
 
 function fitBlocks(ps: number[], ys: number[]) {
@@ -46,6 +55,28 @@ export function isotonicKnots(ps: number[], ys: number[]): Knots {
   };
   for (const b of fitBlocks(ps, ys)) { add(b.x0, b.sum / b.n); if (b.x1 > b.x0) add(b.x1, b.sum / b.n); }
   return { x, y, n: ps.length };
+}
+
+/** The least and most that can be stated for the side called. */
+export const STRENGTH_FLOOR = 0.5001, STRENGTH_CEIL = 0.99;
+const strength = (p: number) => Math.max(p, 1 - p);
+const isUp = (p: number) => p >= 0.5;
+
+/** Strength map from past calls: stated strength -> share of such calls that were right. */
+export function fitStrength(ps: number[], ys: number[]): (s: number) => number {
+  return fitIsotonic(ps.map(strength), ps.map((p, i) => ((isUp(p) ? 1 : 0) === ys[i] ? 1 : 0)));
+}
+/** The same map as knots, to store. */
+export function strengthKnots(ps: number[], ys: number[]): Knots {
+  return isotonicKnots(ps.map(strength), ps.map((p, i) => ((isUp(p) ? 1 : 0) === ys[i] ? 1 : 0)));
+}
+/** Restate the strength of a call; the side stays where HEX put it. */
+export function restate(p: number, map: (s: number) => number): number {
+  const s = Math.min(STRENGTH_CEIL, Math.max(STRENGTH_FLOOR, map(strength(p))));
+  return isUp(p) ? s : 1 - s;
+}
+export function applyStrength(k: Knots | null | undefined, p: number): number {
+  return !k || !k.x?.length ? p : restate(p, (s) => applyKnots(k, s));
 }
 
 export function applyKnots(k: Knots | null | undefined, p: number): number {

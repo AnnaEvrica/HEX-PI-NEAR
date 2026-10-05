@@ -27,7 +27,7 @@
 // ===========================================================================
 
 import { observeBaseline, ReadName } from './observer.ts';
-import { applyKnots, Knots } from './isotonic.ts';
+import { applyStrength, Knots } from './isotonic.ts';
 
 const S = 64;
 const RHOS = [0, 0.125, 0.25, 0.5];
@@ -142,8 +142,8 @@ export function hexProbability(returns: number[], calibration?: { MOVE?: Knots |
   const mv = walkHex(r, 'MOVE', observeBaseline(r, 'MOVE')), rg = walkHex(r, 'RANGE', observeBaseline(r, 'RANGE'));
   if (!mv.final || !rg.final) return null;
   return {
-    p_up: Number(applyKnots(calibration?.MOVE, mv.final.p).toFixed(4)), base_up: Number(mv.final.b.toFixed(4)),
-    p_big_move: Number(applyKnots(calibration?.RANGE, rg.final.p).toFixed(4)), base_big: Number(rg.final.b.toFixed(4)),
+    p_up: Number(applyStrength(calibration?.MOVE, mv.final.p).toFixed(4)), base_up: Number(mv.final.b.toFixed(4)),
+    p_big_move: Number(applyStrength(calibration?.RANGE, rg.final.p).toFixed(4)), base_big: Number(rg.final.b.toFixed(4)),
     history: mv.steps.length,
     steps: { MOVE: mv.steps.map((s) => ({ p: s.p, y: s.y })), RANGE: rg.steps.map((s) => ({ p: s.p, y: s.y })) },
   };

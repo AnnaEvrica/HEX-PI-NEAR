@@ -202,8 +202,8 @@ VOICE: plain and direct — a number departs clearly from its usual odds; state 
 
 (Internal directive — do not describe this process or narrate it to the reader.)
 PROBABILITY READ (BTC; walk-forward):
-  next move up: 50.1% — usual odds 50.3% — at its usual odds — there is no measured lean in direction right now; say it is close to its usual odds and do not present a direction as a call
-  next move larger than usual: 32.3% — usual odds 42.9% — 10.5 points below its usual odds — a quieter-than-usual move is more likely than normal
+  next move up: 50.0% — usual odds 50.3% — at its usual odds — there is no measured lean in direction right now; say it is close to its usual odds and do not present a direction as a call
+  next move larger than usual: 33.6% — usual odds 42.9% — 9.3 points below its usual odds — a quieter-than-usual move is more likely than normal
   scored steps behind these numbers: 5353
 HOW TO SPEAK ABOUT IT:
   - These are the only probabilities you may state for BTC. State each one next to its usual odds, in plain words ("about 54%, against a usual 52%"). "Usual odds" here means what this series' own recent behaviour and present position already imply.

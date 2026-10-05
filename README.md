@@ -52,8 +52,13 @@ strengths, pre-trained tables). **6.4** is HEX written as an explicit model
 (`docs/MODEL.md`): each of those numbers is a family, and 96 candidates are
 averaged with Bayesian weights. That gives a guarantee 6.2 never had: on any
 series, its total log loss is within ln 96 of the best single setting chosen
-in hindsight. Its stated probability is then calibrated by a map fitted from
-the ledger.
+in hindsight.
+
+**HEX makes the call; calibration never changes it.** A call has a side and
+a strength (the probability stated for that side). The side is HEX's own.
+Calibration restates the strength only, from how often past calls of that
+strength were right, and cannot state less than 50% for the side called. This
+holds for both versions.
 
 ### The learning loop
 
@@ -61,31 +66,41 @@ the ledger.
    to `CallLedger` before its outcome exists: baseline, probability, and what
    counts as the event.
 2. **Nightly update** (`calibrateCognition`). Scores yesterday's calls on the
-   bar that has now finished, logs today's, and refits the calibration map,
-   pooled across every tracked series.
+   bar that has now finished, logs today's, and refits the strength map,
+   pooled across every tracked series. Each call earns a reward for how close
+   its stated probability came to what happened: 1 − (probability − outcome)²,
+   which is 1 when certain and right, 0.75 for a coin flip, and never below 0.
 3. **Promotion.** For each read, 6.4 is shown once it has at least 300 calls
-   over 60 days scored beside 6.2, its probabilities beat 6.2's by a margin
-   whose 95% interval excludes zero, and it is right at least as often. It is
-   taken back down when the margin the other way excludes zero. Each night's
-   decision rests on the whole record, kept as a running tally. The result is
-   one `EngineStatus` row per read, which every function loads before showing
-   a number.
+   over 60 days scored beside 6.2, it has earned more reward per call by a
+   margin whose 95% interval excludes zero, and it is right at least as often.
+   It is taken back down when the margin the other way excludes zero. Each
+   night's decision rests on the whole record, kept as a running tally. The
+   result is one `EngineStatus` row per read, which every function loads
+   before showing a number.
 
-Replayed on 17 market series, 2016–2026 (`validation/loop_replay_hex.py`): the
-loop promoted 6.4 for move size after 284 days and never demoted it. Share of
-move-size calls right: 58.8% for 6.2, 59.9% for 6.4. Next-day direction stays
-at chance for both. On market move size the gain comes from the observer's
+Started from nothing on 1 January 2016 on 17 market series
+(`validation/loop_sim_side.py`: empty ledger, no history before that date,
+the loop applied night by night), move size, 46,495 calls:
+
+| | Right | Reward per call | Strongest tenth: stated / right |
+|---|---|---|---|
+| Shown to users | 57.3% | 0.7579 | 69.9% / 67.7% |
+| 6.2 alone | 55.9% | 0.7539 | 69.0% / 63.5% |
+| Baseline rule alone | 57.2% | 0.7580 | 71.9% / 68.7% |
+
+6.4 was promoted once, in August 2018, and never taken down. Reward per call
+rises with the age of a series: 0.742 in its first 100 steps, 0.753 from 100
+to 250, 0.758 from 250 to 2,000, 0.761 beyond; over the same span the
+strongest tenth goes from stated 70.7% / right 53.2% to 72.2% / 72.7%. It
+does not rise year after year. Direction stays at chance (51.4%) and 6.4 is
+never promoted for it. On market move size the gain comes from the observer's
 baseline, not from the 64 states (`docs/MODEL.md`, section 10).
 
-Started from nothing on 1 January 2016 (`validation/loop_sim.py`: empty
-ledger, no history before that date, calibration and promotion applied night
-by night): 57.1% of move-size calls right over the ten years against 55.1%
-for 6.2 alone, with 6.4 promoted once, in September 2018, and never taken
-down. The learning shows in two places: accuracy rises over a series' first
-250 to 500 steps (51.3% in the first 100, 59.2% between 250 and 500), and
-the strongest tenth of calls goes from stated 69.0% / right 59.6% in 2016 to
-within four points from 2023 on. It does not show as a climb year
-after year. Direction stays at chance throughout.
+The same simulation is why calibration is confined to strength. Applied to
+the whole probability, the map turned 5.6% of 6.4's move-size calls and 20%
+of its direction calls round, and 9.4% and 17.5% of 6.2's; the calls it
+turned were right less often afterwards (6.2 move size: 54.1% before, 45.9%
+after).
 
 ### Backend functions
 

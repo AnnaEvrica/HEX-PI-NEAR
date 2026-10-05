@@ -158,15 +158,40 @@ $\ln M$ of the best single memory.
 
 ## 7. Calibration
 
-**Definition.** The stated probability is passed through one monotone map
-per read, fitted by isotonic regression (pool adjacent violators; Ayer et
-al., 1955) on calls whose outcomes are already known, pooled across every
-tracked series, and refitted nightly from the ledger.
+**Principle.** HEX makes the call; calibration never changes it. Write a
+stated probability $p$ as a side $a=\mathbb 1[p\ge\tfrac12]$ and a strength
+$s=\max(p,1-p)\in[\tfrac12,1)$. The side is left as HEX stated it.
 
-**Measured.** Pooled across series this map lowers log loss on market series
-(by 1.3 thousandths of a nat per call, interval clear of zero) and narrows
-the overstatement on the strongest tenth of calls. A map fitted on one series
-alone does not lower log loss.
+**Definition.** Let $r=\mathbb 1[a=y]$ record whether a past call was right.
+One non-decreasing map $g$ per read is fitted by isotonic regression of $r$
+on $s$ (pool adjacent violators; Ayer et al., 1955) on calls whose outcomes
+are already known, pooled across every tracked series, and refitted nightly
+from the ledger. The stated strength becomes
+$s'=\min(0.99,\max(0.5001,g(s)))$ and the stated probability $s'$ if $a=1$,
+$1-s'$ otherwise. Since $s'>\tfrac12$, the side cannot change. Version 6.2
+uses the same construction with a map fitted on the one series.
+
+**Why isotonic.** Among non-decreasing maps the isotonic fit maximises the
+total of every proper score on the fitting record at once (Brümmer and du
+Preez, 2013): it is the restatement of strength that would have earned most.
+
+**Reward.** A scored call earns $1-(p-y)^2$: 1 when certain and right, 0.75
+for a coin flip, never below 0. It is the Brier score turned round, and
+proper: the expected reward is greatest when the true probability is stated
+(Brier, 1950; Gneiting and Raftery, 2007). Promotion (README) compares the
+two versions' mean reward on the same calls, with days as the unit of
+uncertainty. Inside HEX each candidate's weight is multiplied by the
+probability it gave to what happened (§6), which is also a reward for
+closeness; nothing in the engine subtracts.
+
+**Measured** (`validation/loop_sim_side.py`, ten-year cold start, 17 market
+series). A map applied to the whole probability turned 5.6% of 6.4's
+move-size calls and 20.0% of its direction calls round (6.2's own map: 9.4%
+and 17.5%), and the calls it turned were right less often afterwards (6.4
+move size 51.2% to 48.8%; 6.2 move size 54.1% to 45.9%). Confined to
+strength it turns none. On 6.4 move size the strongest tenth of calls is
+stated 73.7% and right 68.9% before the map, 69.1% and 68.4% after, at the
+same reward (0.7581).
 
 ## 8. What remains a choice
 
@@ -188,6 +213,8 @@ alternatives or a convention, and each is stated so it can be challenged:
 - The estimator is a posterior mean under a local, discounted likelihood. It
   is not the posterior of a full joint model over all 64 states.
 - No guarantee of calibration is proved; calibration is measured (§7).
+- The promotion rule's interval is a normal approximation over days; it is a
+  decision rule, not a proof that one version is better.
 - Only the binary structure of the six lines is used: the cube, Hamming
   distance and the complement. Richer castings of the lines were tested as
   hypotheses and added nothing (`validation/core7.py`).
@@ -327,6 +354,9 @@ interfere.
 ## References
 
 - Ayer, M., Brunk, H. D., Ewing, G. M., Reid, W. T. and Silverman, E. (1955). An empirical distribution function for sampling with incomplete information. *Annals of Mathematical Statistics*, 26, 641–647.
+- Brier, G. W. (1950). Verification of forecasts expressed in terms of probability. *Monthly Weather Review*, 78, 1–3.
+- Brümmer, N. and du Preez, J. (2013). The PAV algorithm optimizes binary proper scoring rules. arXiv:1304.2331.
+- Gneiting, T. and Raftery, A. E. (2007). Strictly proper scoring rules, prediction, and estimation. *Journal of the American Statistical Association*, 102, 359–378.
 - Christandl, M., Datta, N., Ekert, A. and Landahl, A. J. (2004). Perfect state transfer in quantum spin networks. *Physical Review Letters*, 92, 187902.
 - Cesa-Bianchi, N. and Lugosi, G. (2006). *Prediction, Learning, and Games*. Cambridge University Press.
 - Dawid, A. P. (1984). Statistical theory: the prequential approach. *Journal of the Royal Statistical Society A*, 147, 278–292.

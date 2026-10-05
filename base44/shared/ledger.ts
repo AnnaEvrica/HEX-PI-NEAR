@@ -23,7 +23,7 @@
 // ===========================================================================
 
 import { CANDIDATE_ENGINE, CONTROL_ENGINE, DEFAULT_LIVE, ENGINES, EngineId, EngineRun, LiveEngines, READS, ReadName } from './engines.ts';
-import { isotonicKnots, Knots } from './isotonic.ts';
+import { strengthKnots, Knots } from './isotonic.ts';
 import type { ScoredStep } from './hex.ts';
 import { ENGINE_VERSION } from './version.ts';
 
@@ -39,8 +39,13 @@ export const SETTLE_DAYS = 5;
 /** Pooled calibration needs at least this many scored steps. */
 export const MIN_CALIBRATION_STEPS = 2000;
 
-const clip = (p: number) => Math.min(0.99, Math.max(0.01, p));
-const logLoss = (p: number, y: number) => -Math.log(y ? clip(p) : 1 - clip(p));
+/**
+ * The reward for one call: how close the stated probability came to what
+ * happened. 1 when it was certain and right, 0.75 for a coin flip, never
+ * below 0. It is a proper score: stating the true probability earns the most
+ * on average, so there is nothing to gain by overstating or hedging.
+ */
+export const reward = (p: number, y: number) => 1 - (p - y) ** 2;
 const dateOf = (tsSec: number) => new Date(tsSec * 1000).toISOString().slice(0, 10);
 
 /** Finished daily bars, oldest first. */
@@ -60,7 +65,7 @@ export interface LedgerRow {
   baseline: number; probability: number; shown: boolean; source: string;
   made_at: string; engine_version: string;
   scored?: boolean; outcome?: number; scored_at?: string;
-  log_loss?: number; log_loss_baseline?: number;
+  reward?: number; reward_baseline?: number;
 }
 
 /** The rows one read of one series produces: both engines, both reads. */
@@ -114,8 +119,8 @@ export async function scoreOpenCalls(base44, seriesId: string, bars: Bars): Prom
       const outcome = row.read === 'MOVE' ? (change > 0 ? 1 : 0) : (Math.abs(change) > row.threshold ? 1 : 0);
       await L.update(row.id, {
         scored: true, outcome, scored_at: new Date().toISOString(),
-        log_loss: Number(logLoss(row.probability, outcome).toFixed(6)),
-        log_loss_baseline: Number(logLoss(row.baseline, outcome).toFixed(6)),
+        reward: Number(reward(row.probability, outcome).toFixed(6)),
+        reward_baseline: Number(reward(row.baseline, outcome).toFixed(6)),
       });
       scored++;
     }
@@ -128,7 +133,7 @@ export interface ReadStatus {
   read: ReadName;
   live_engine: EngineId;
   paired_calls: number; paired_days: number;
-  /** Mean log loss of 6.2 minus 6.4 on the same calls, nats. Positive = 6.4 better. */
+  /** Mean reward of 6.4 minus 6.2 on the same calls. Positive = 6.4 came closer. */
   gain: number | null; gain_low: number | null; gain_high: number | null;
   /** Share of calls right, on the paired calls. */
   hit_control: number | null; hit_candidate: number | null; hit_baseline: number | null;
@@ -179,8 +184,8 @@ export function foldDays(tally: Tally, read: ReadName, rows: LedgerRow[], throug
   for (const date of [...byDay.keys()].sort()) {
     const pairs = [...byDay.get(date)!.values()].filter((p) => p[CONTROL_ENGINE] && p[CANDIDATE_ENGINE]) as Record<EngineId, LedgerRow>[];
     if (!pairs.length) continue;
-    const gains = pairs.map((p) => (p[CONTROL_ENGINE].log_loss ?? logLoss(p[CONTROL_ENGINE].probability, p[CONTROL_ENGINE].outcome!))
-      - (p[CANDIDATE_ENGINE].log_loss ?? logLoss(p[CANDIDATE_ENGINE].probability, p[CANDIDATE_ENGINE].outcome!)));
+    const gains = pairs.map((p) => (p[CANDIDATE_ENGINE].reward ?? reward(p[CANDIDATE_ENGINE].probability, p[CANDIDATE_ENGINE].outcome!))
+      - (p[CONTROL_ENGINE].reward ?? reward(p[CONTROL_ENGINE].probability, p[CONTROL_ENGINE].outcome!)));
     const hd = pairs.map((p) => right(p[CANDIDATE_ENGINE]) - right(p[CONTROL_ENGINE]));
     const g = mean(gains), h = mean(hd);
     t.calls += pairs.length; t.days += 1;
@@ -220,20 +225,20 @@ export function decide(read: ReadName, t: Tally, current: EngineId): ReadStatus 
   if (!enough) {
     st.reason = `${st.paired_calls} of ${MIN_PAIRED_CALLS} paired calls over ${st.paired_days} of ${MIN_PAIRED_DAYS} days: no decision yet`;
   } else if (current === CONTROL_ENGINE && st.gain_low! > 0 && t.hits_candidate < t.hits_control) {
-    st.reason = `6.4 states better probabilities (gain ${(g * 1000).toFixed(1)}) but is right less often (${(st.hit_candidate! * 100).toFixed(1)}% against ${(st.hit_control! * 100).toFixed(1)}%), so 6.2 stays`;
+    st.reason = `6.4 earns more reward (by ${(g * 1000).toFixed(1)} thousandths per call) but is right less often (${(st.hit_candidate! * 100).toFixed(1)}% against ${(st.hit_control! * 100).toFixed(1)}%), so 6.2 stays`;
   } else if (current === CONTROL_ENGINE && st.gain_low! > 0) {
     st.decision = 'promote'; st.live_engine = CANDIDATE_ENGINE;
-    st.reason = `6.4 beat 6.2 by ${(g * 1000).toFixed(1)} thousandths of a nat per call; the interval excludes zero`;
+    st.reason = `6.4 came closer than 6.2: ${(g * 1000).toFixed(1)} thousandths more reward per call; the interval excludes zero`;
   } else if (current === CANDIDATE_ENGINE && st.gain_high! < 0) {
     st.decision = 'demote'; st.live_engine = CONTROL_ENGINE;
-    st.reason = `6.4 trailed 6.2 by ${(-g * 1000).toFixed(1)} thousandths of a nat per call; the interval excludes zero`;
+    st.reason = `6.2 came closer than 6.4: ${(-g * 1000).toFixed(1)} thousandths more reward per call; the interval excludes zero`;
   } else if (current === CANDIDATE_ENGINE && hitHigh < 0) {
     st.decision = 'demote'; st.live_engine = CONTROL_ENGINE;
     st.reason = `6.4 was right less often than 6.2 (${(st.hit_candidate! * 100).toFixed(1)}% against ${(st.hit_control! * 100).toFixed(1)}%); the interval excludes zero`;
   } else if (current === CONTROL_ENGINE) {
-    st.reason = `gain ${(g * 1000).toFixed(1)} thousandths of a nat per call ${span}: not clearly better, so 6.2 stays`;
+    st.reason = `reward difference ${(g * 1000).toFixed(1)} thousandths per call ${span}: not clearly closer, so 6.2 stays`;
   } else {
-    st.reason = `gain ${(g * 1000).toFixed(1)} thousandths of a nat per call ${span}: not clearly worse, so 6.4 stays`;
+    st.reason = `reward difference ${(g * 1000).toFixed(1)} thousandths per call ${span}: not clearly further, so 6.4 stays`;
   }
   return st;
 }
@@ -246,7 +251,7 @@ export function summarise(read: ReadName, rows: LedgerRow[], current: EngineId):
 /** One calibration map per read for 6.4, pooled across series. Null until there are enough steps. */
 export function pooledCalibration(steps: ScoredStep[]): Knots | null {
   if (steps.length < MIN_CALIBRATION_STEPS) return null;
-  return isotonicKnots(steps.map((s) => s.p), steps.map((s) => s.y));
+  return strengthKnots(steps.map((s) => s.p), steps.map((s) => s.y));
 }
 
 // ---- what every function reads before it shows a number --------------------

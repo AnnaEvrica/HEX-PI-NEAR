@@ -30,17 +30,17 @@
 // ===========================================================================
 
 import { PRETRAINED_FAMILIES, PRETRAINED_DIRECTION, PRETRAINED_SIZE } from './pretrainedTables.ts';
-import { fitIsotonic } from './isotonic.ts';
+import { fitStrength, restate } from './isotonic.ts';
 
 export interface StateProbability {
-  p_up: number;            // P(next move is up), calibrated
-  p_big_move: number;      // P(next move larger than its usual size), calibrated
+  p_up: number;            // P(next move is up): the side is the engine's, its strength restated from the record
+  p_big_move: number;      // P(next move larger than its usual size): likewise
   base_up: number;         // series' own decayed base rate for "up"
   base_big: number;        // ... and for "big move"
   history: number;         // forward-scored steps behind these numbers
   brier_skill_up: number | null;   // in-series walk-forward Brier skill vs base rate
   brier_skill_big: number | null;
-  calibrated: boolean;     // isotonic step applied (needs ≥ 200 scored steps)
+  calibrated: boolean;     // strength restated (needs ≥ 200 scored steps)
   field_up: number;        // current symmetry-field strength α (weighted) on direction
   field_big: number;       // ... and on move size
   /** Which pre-trained family this series behaves like, by weight: none, markets, weather, racing. */
@@ -208,8 +208,8 @@ export function stateProbability(returns: number[]): StateProbability | null {
     return bb > 0 ? Number((1 - bp / bb).toFixed(4)) : null;
   };
   let p_up = final.p_up, p_big = final.p_big, calibrated = false;
-  if (up.length >= MIN_CAL) { p_up = fitIsotonic(up.map((s) => s.p_up), up.map((s) => s.y_up))(p_up); calibrated = true; }
-  if (big.length >= MIN_CAL) p_big = fitIsotonic(big.map((s) => s.p_big as number), big.map((s) => s.y_big as number))(p_big);
+  if (up.length >= MIN_CAL) { p_up = restate(p_up, fitStrength(up.map((s) => s.p_up), up.map((s) => s.y_up))); calibrated = true; }
+  if (big.length >= MIN_CAL) p_big = restate(p_big, fitStrength(big.map((s) => s.p_big as number), big.map((s) => s.y_big as number)));
   return {
     p_up: Number(p_up.toFixed(4)),
     p_big_move: Number(p_big.toFixed(4)),
