@@ -94,7 +94,11 @@
     },
     "reward": {
       "type": "number",
-      "description": "Progress: this call's closeness minus the average closeness of the same engine's earlier calls on this series and read"
+      "description": "Progress against the same engine's record on this series and read (average closeness of its earlier calls), when the call came closer; otherwise 0. Never negative"
+    },
+    "lesson": {
+      "type": "number",
+      "description": "How far the call fell short of that record, when it did. Analysis only: never subtracted from anything"
     },
     "record_calls": {
       "type": "number",

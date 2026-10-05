@@ -96,14 +96,17 @@ for (const engine of ['state-6.2', 'state-6.4']) for (const read of ['MOVE', 'RA
   let sum = 0, ok = true;
   rs.forEach((r, i) => {
     const before = i ? sum / i : M.START_CLOSENESS;
-    if (Math.abs(r.reward - (r.closeness - before)) > 2e-6 || r.record_calls !== i + 1) ok = false;
+    const d = r.closeness - before;
+    if (Math.abs(r.reward - Math.max(0, d)) > 2e-6 || Math.abs(r.lesson - Math.max(0, -d)) > 2e-6 || r.reward < 0 || r.lesson < 0 || r.record_calls !== i + 1) ok = false;
     sum += r.closeness;
     if (Math.abs(r.record_closeness - sum / (i + 1)) > 1e-6) ok = false;
   });
-  check(`${engine} ${read}: each call's reward is its closeness minus the record before it`, ok && rs.length === NIGHTS);
+  check(`${engine} ${read}: reward is progress against the record before it, never negative; a shortfall is kept as a lesson`, ok && rs.length === NIGHTS);
 }
-check('reward: the same call earns more against a lower record', M.progress(0.8, 0.70) > M.progress(0.8, 0.78) && M.progress(0.8, 0.8) === 0);
-{ const st = M.summarise('RANGE', L, 'state-6.2'); check('status carries each version\'s mean progress', Number.isFinite(st.progress_control) && Number.isFinite(st.progress_candidate)); }
+check('reward: the same call earns more against a lower record', M.rewardOf(0.8, 0.70) > M.rewardOf(0.8, 0.78) && M.rewardOf(0.8, 0.8) === 0);
+check('reward: falling short earns nothing, not a negative; the distance is a lesson', M.rewardOf(0.6, 0.76) === 0 && Math.abs(M.lessonOf(0.6, 0.76) - 0.16) < 1e-12 && M.lessonOf(0.8, 0.76) === 0);
+check('a call that falls short still enters the record', L.filter((r) => r.scored && r.lesson > 0).every((r) => r.record_calls >= 1 && Number.isFinite(r.record_closeness)) && L.some((r) => r.lesson > 0));
+{ const st = M.summarise('RANGE', L, 'state-6.2'); check('status carries each version\'s mean reward (never negative) and mean lesson', st.progress_control >= 0 && st.progress_candidate >= 0 && st.lesson_control >= 0 && st.lesson_candidate >= 0); }
 console.log(`  calibration map: ${map.x.length} knots from ${map.n} steps`);
 
 // ---- loadLive

@@ -1,9 +1,9 @@
-# Reward as progress: closeness of a call minus the average closeness of the same
+# Reward as progress, never negative (a shortfall is a lesson, kept for analysis only): closeness of a call minus the average closeness of the same
 # version's earlier calls on the same series (0.75, a coin flip, before the first).
 # Same ten-year cold start as loop_sim_side.py (reads its cache).
 import numpy as np, pandas as pd, json, os, pickle
 from sklearn.isotonic import IsotonicRegression
-HERE=os.path.dirname(os.path.abspath(__file__)); FR=pickle.load(open(os.path.join(HERE,'loop_sim_side_cache2.pkl'),'rb'))   # written by loop_sim_side.py; START=pd.Timestamp('2016-01-01'); OUT={}
+HERE=os.path.dirname(os.path.abspath(__file__)); FR=pickle.load(open(os.path.join(HERE,'loop_sim_side_cache2.pkl'),'rb')); START=pd.Timestamp('2016-01-01'); OUT={}
 def prog(L,c):
     cl=1-(L[c].values-L.y.values)**2; g=L.g.values; out=np.empty(len(L))
     for k in np.unique(g):
@@ -19,7 +19,7 @@ for read in ('RANGE','MOVE'):
     e={}
     for nm,c in (('6.4','kept'),('6.2','ctl_kept')):
         L['p_'+c],L['c_'+c]=prog(L,c)
-        e[nm]={'mean closeness':round(float(L['c_'+c].mean()),4),'mean progress x1000':round(float(L['p_'+c].mean())*1000,2),'total progress per series':round(float(L.groupby('g')['p_'+c].sum().mean()),2),
+        R=np.maximum(L['p_'+c].values,0); e[nm]={'mean reward x1000 (no negatives)':round(float(R.mean())*1000,2),'share of calls rewarded %':round(float((R>0).mean())*100,1),'mean lesson x1000':round(float(np.maximum(-L['p_'+c].values,0).mean())*1000,2),'reward by age x1000':{lab:round(float(np.maximum(L['p_'+c].values[((L.i>=lo)&(L.i<hi)).values],0).mean())*1000,1) for lab,lo,hi in (('first 100',0,100),('100-250',100,250),('250-500',250,500),('500-1000',500,1000),('1000-2000',1000,2000),('2000+',2000,10**9))},'mean closeness':round(float(L['c_'+c].mean()),4),'mean progress x1000':round(float(L['p_'+c].mean())*1000,2),'total progress per series':round(float(L.groupby('g')['p_'+c].sum().mean()),2),
                'by age':{lab:{'closeness':round(float(D['c_'+c].mean()),4),'progress x1000':round(float(D['p_'+c].mean())*1000,2)} for lab,lo,hi in (('first 100',0,100),('100-250',100,250),('250-500',250,500),('500-1000',500,1000),('1000-2000',1000,2000),('2000+',2000,10**9)) for D in [L[(L.i>=lo)&(L.i<hi)]]},
                'by year':{int(yv):{'closeness':round(float(D['c_'+c].mean()),4),'progress x1000':round(float(D['p_'+c].mean())*1000,2)} for yv,D in L.groupby(L.date.dt.year)}}
     OUT[read]=e; print(read); [print(' ',k,{a:b for a,b in v.items() if a not in('by age','by year')},'\n   age',v['by age'],'\n   year',v['by year']) for k,v in e.items()]

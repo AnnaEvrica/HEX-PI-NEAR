@@ -47,14 +47,22 @@ export const closeness = (p: number, y: number) => 1 - (p - y) ** 2;
 /** Closeness of a coin flip: the record a version starts from, before its first call. */
 export const START_CLOSENESS = 0.75;
 /**
- * The reward for one call is its PROGRESS: its closeness minus the average
- * closeness of the same version's earlier calls on the same series and read.
- * Positive when the call came closer than the version's own record, whatever
- * the level of that record. The record is fixed before the call is scored, so
- * the most reward is still earned by stating the true probability: nothing
- * is gained by overstating or hedging.
+ * Progress of one call: its closeness minus the average closeness of the same
+ * version's earlier calls on the same series and read.
  */
 export const progress = (c: number, recordBefore: number) => c - recordBefore;
+/**
+ * The reward is the progress when the call came closer than the version's
+ * own record, and nothing otherwise. There is no negative reward.
+ */
+export const rewardOf = (c: number, recordBefore: number) => Math.max(0, progress(c, recordBefore));
+/**
+ * When a call falls short of the record, the distance is kept as a lesson:
+ * for analysis only. It is never subtracted from a reward or from anything
+ * else. The call itself still goes into the record, the calibration map and
+ * HEX's own memory like every other call; that is the learning.
+ */
+export const lessonOf = (c: number, recordBefore: number) => Math.max(0, -progress(c, recordBefore));
 const dateOf = (tsSec: number) => new Date(tsSec * 1000).toISOString().slice(0, 10);
 
 /** Finished daily bars, oldest first. */
@@ -75,8 +83,10 @@ export interface LedgerRow {
   made_at: string; engine_version: string;
   scored?: boolean; outcome?: number; scored_at?: string;
   closeness?: number; closeness_baseline?: number;
-  /** Progress: closeness minus the version's record on this series before this call. */
+  /** Progress against the version's record on this series, when positive; otherwise 0. Never negative. */
   reward?: number;
+  /** How far the call fell short of that record, when it did. Analysis only. */
+  lesson?: number;
   /** The version's record on this series and read after this call: calls scored and their mean closeness. */
   record_calls?: number; record_closeness?: number;
 }
@@ -148,7 +158,8 @@ export async function scoreOpenCalls(base44, seriesId: string, bars: Bars): Prom
         scored: true, outcome, scored_at: new Date().toISOString(),
         closeness: Number(c.toFixed(6)),
         closeness_baseline: Number(closeness(row.baseline, outcome).toFixed(6)),
-        reward: Number(progress(c, rec.mean).toFixed(6)),
+        reward: Number(rewardOf(c, rec.mean).toFixed(6)),
+        lesson: Number(lessonOf(c, rec.mean).toFixed(6)),
         record_calls: after.n, record_closeness: Number(after.mean.toFixed(8)),
       });
       record.set(`${row.read}|${row.engine}`, after);
@@ -169,8 +180,10 @@ export interface ReadStatus {
   hit_control: number | null; hit_candidate: number | null; hit_baseline: number | null;
   /** Mean probability stated for the side called: compare with the hit rate. */
   stated_control: number | null; stated_candidate: number | null;
-  /** Mean reward (progress against its own record) per call, each version. */
+  /** Mean reward per call, each version: progress against its own record, never negative. */
   progress_control: number | null; progress_candidate: number | null;
+  /** Mean lesson per call, each version: how far calls fell short of the record. Analysis only. */
+  lesson_control: number | null; lesson_candidate: number | null;
   decision: 'hold' | 'promote' | 'demote';
   reason: string;
 }
@@ -190,10 +203,11 @@ export interface Tally {
   hits_control: number; hits_candidate: number; hits_baseline: number;
   stated_control: number; stated_candidate: number;
   progress_control: number; progress_candidate: number;
+  lesson_control: number; lesson_candidate: number;
   /** Last call date already counted; later days are still open. */
   last_day: string;
 }
-export const EMPTY_TALLY: Tally = { calls: 0, days: 0, gain_sum: 0, day_gain: 0, day_gain_sq: 0, day_hit: 0, day_hit_sq: 0, hits_control: 0, hits_candidate: 0, hits_baseline: 0, stated_control: 0, stated_candidate: 0, progress_control: 0, progress_candidate: 0, last_day: '' };
+export const EMPTY_TALLY: Tally = { calls: 0, days: 0, gain_sum: 0, day_gain: 0, day_gain_sq: 0, day_hit: 0, day_hit_sq: 0, hits_control: 0, hits_candidate: 0, hits_baseline: 0, stated_control: 0, stated_candidate: 0, progress_control: 0, progress_candidate: 0, lesson_control: 0, lesson_candidate: 0, last_day: '' };
 
 const mean = (v: number[]) => v.reduce((s, x) => s + x, 0) / v.length;
 const right = (r: LedgerRow) => ((r.probability >= 0.5 ? 1 : 0) === r.outcome ? 1 : 0);
@@ -230,6 +244,7 @@ export function foldDays(tally: Tally, read: ReadName, rows: LedgerRow[], throug
       t.stated_control += Math.max(p[CONTROL_ENGINE].probability, 1 - p[CONTROL_ENGINE].probability);
       t.stated_candidate += Math.max(p[CANDIDATE_ENGINE].probability, 1 - p[CANDIDATE_ENGINE].probability);
       t.progress_control += p[CONTROL_ENGINE].reward ?? 0; t.progress_candidate += p[CANDIDATE_ENGINE].reward ?? 0;
+      t.lesson_control += p[CONTROL_ENGINE].lesson ?? 0; t.lesson_candidate += p[CANDIDATE_ENGINE].lesson ?? 0;
     }
     t.last_day = date;
   }
@@ -241,7 +256,7 @@ export function decide(read: ReadName, t: Tally, current: EngineId): ReadStatus 
   const st: ReadStatus = {
     read, live_engine: current, paired_calls: t.calls, paired_days: t.days,
     gain: null, gain_low: null, gain_high: null, hit_control: null, hit_candidate: null, hit_baseline: null,
-    stated_control: null, stated_candidate: null, progress_control: null, progress_candidate: null, decision: 'hold', reason: '',
+    stated_control: null, stated_candidate: null, progress_control: null, progress_candidate: null, lesson_control: null, lesson_candidate: null, decision: 'hold', reason: '',
   };
   if (!t.calls) { st.reason = 'no scored calls yet'; return st; }
   const g = t.gain_sum / t.calls, m = t.day_gain / t.days, hm = t.day_hit / t.days;
@@ -254,6 +269,7 @@ export function decide(read: ReadName, t: Tally, current: EngineId): ReadStatus 
   st.hit_control = r4(t.hits_control / t.calls); st.hit_candidate = r4(t.hits_candidate / t.calls); st.hit_baseline = r4(t.hits_baseline / t.calls);
   st.stated_control = r4(t.stated_control / t.calls); st.stated_candidate = r4(t.stated_candidate / t.calls);
   st.progress_control = Number((t.progress_control / t.calls).toFixed(5)); st.progress_candidate = Number((t.progress_candidate / t.calls).toFixed(5));
+  st.lesson_control = Number((t.lesson_control / t.calls).toFixed(5)); st.lesson_candidate = Number((t.lesson_candidate / t.calls).toFixed(5));
 
   const enough = st.paired_calls >= MIN_PAIRED_CALLS && st.paired_days >= MIN_PAIRED_DAYS && st.gain_low !== null;
   const span = `[${((st.gain_low ?? 0) * 1000).toFixed(1)}, ${((st.gain_high ?? 0) * 1000).toFixed(1)}]`;

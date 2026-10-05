@@ -60,9 +60,17 @@
     },
     "progress_control": {
       "type": "number",
-      "description": "6.2: mean reward per call, where reward is progress against its own record"
+      "description": "6.2: mean reward per call. Reward is progress against its own record, never negative"
     },
     "progress_candidate": {
+      "type": "number",
+      "description": "6.4: the same"
+    },
+    "lesson_control": {
+      "type": "number",
+      "description": "6.2: mean shortfall per call against its own record. Analysis only"
+    },
+    "lesson_candidate": {
       "type": "number",
       "description": "6.4: the same"
     },

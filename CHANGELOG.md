@@ -1,18 +1,21 @@
 # Changelog
 
-## 6.4.4 — 4 October 2026: reward is progress, not accuracy
+## 6.4.4 — 4 October 2026: reward is progress, never negative
 
-- Each scored call's reward is its closeness minus the average closeness of
+- A scored call's progress is its closeness minus the average closeness of
   the same version's earlier calls on the same series and read (a coin flip,
-  0.75, before the first). `CallLedger` now stores `closeness`,
-  `closeness_baseline`, `reward`, `record_calls`, `record_closeness`;
-  `EngineStatus` adds `progress_control` and `progress_candidate`.
-- Which version is shown is still decided on closeness: a steady version
-  earns zero progress on average however near it is, so deciding on progress
-  would favour one that started worse.
-- Simulated (`validation/progress_sim.py`): move size, 6.4 earns 2.8
-  thousandths per call and 6.2 earns 1.2; most of it in a series' first 500
-  steps.
+  0.75, before the first). When positive it is the call's **reward**. When
+  negative the reward is zero and the distance is kept as a **lesson**, for
+  analysis only. Every call enters the record and the engine's memory either
+  way.
+- `CallLedger` stores `closeness`, `closeness_baseline`, `reward`, `lesson`,
+  `record_calls`, `record_closeness`. `EngineStatus` adds `progress_control`,
+  `progress_candidate`, `lesson_control`, `lesson_candidate`.
+- No decision is taken on reward. Which version is shown is still decided on
+  closeness: with no negatives, a bolder version collects more reward without
+  being nearer.
+- Simulated (`validation/progress_sim.py`): 6.4 is rewarded on 55.9% of its
+  move-size calls, 6.2 on 53.1%.
 
 ## 6.4.3 — 4 October 2026: move size is shown from 6.4 from day one
 

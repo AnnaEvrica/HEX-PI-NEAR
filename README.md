@@ -69,12 +69,15 @@ holds for both versions.
    bar that has now finished, logs today's, and refits the strength map,
    pooled across every tracked series.
 
-   **Reward is progress.** Each call has a closeness, 1 − (probability −
-   outcome)²: 1 when certain and right, 0.75 for a coin flip. Its reward is
-   that closeness minus the average closeness of the same version's earlier
-   calls on the same series: what it earns is how much nearer it came than
-   its own record, not how accurate it is. The record is fixed before the
-   call is scored, so stating the true probability still earns the most.
+   **Reward is progress, and never negative.** Each call has a closeness,
+   1 − (probability − outcome)²: 1 when certain and right, 0.75 for a coin
+   flip. When a call comes closer than the average of the same version's
+   earlier calls on the same series, the difference is its reward. When it
+   falls short, the reward is zero and the distance is kept as a lesson, for
+   analysis only: it is never subtracted from anything. Either way the call
+   goes into the record, the strength map and HEX's own memory, which is the
+   learning. Reward is a record of the engine's progress; no decision is
+   taken on it.
 3. **Promotion.** For each read, 6.4 is shown once it has at least 300 calls
    over 60 days scored beside 6.2, it has come closer per call by a
    margin whose 95% interval excludes zero, and it is right at least as often.
@@ -106,12 +109,12 @@ does not rise year after year. Direction stays at chance (51.4%) and 6.4 is
 never promoted for it. On market move size the gain comes from the observer's
 baseline, not from the 64 states (`docs/MODEL.md`, section 10).
 
-Reward, in thousandths per call (`validation/progress_sim.py`): on move size
-6.4 earns 2.8 and 6.2 earns 1.2 over the ten years. It is largest while a
-series is young (8.8 in the first 100 steps for 6.4, 5.0 to 6.4 up to 500)
-and stays positive at every age for 6.4. Which version is shown is decided
-on closeness, not on reward: a version that started badly and improved
-would otherwise outrank one that was nearer all along.
+On that simulation (`validation/progress_sim.py`) 6.4 was rewarded on 55.9%
+of its move-size calls and 6.2 on 53.1%. Which version is shown is decided on
+closeness, not on reward: with no negatives a bolder version collects more
+reward without being nearer (on direction 6.2 collects more than 6.4 at the
+same closeness), and a steady version earns little progress however near it
+is.
 
 The same simulation is why calibration is confined to strength. Applied to
 the whole probability, the map turned 5.6% of 6.4's move-size calls and 20%
