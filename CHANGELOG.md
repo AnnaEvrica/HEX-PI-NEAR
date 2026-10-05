@@ -1,5 +1,99 @@
 # Changelog
 
+## 7.0 — 5 October 2026: HEX as a residual on the null
+
+### What changed
+
+- **A new engine** (`base44/shared/hex7.ts`): `logit p = logit q0 + beta . Z`.
+  `q0` is the null, unchanged. `Z` is where the present value sits among its
+  surroundings: its midrank in windows of 2 to 64 values and in all history,
+  for the level and for the size of the change. `beta` is learned online, one
+  outcome at a time, at nine prior scales mixed by likelihood. It starts at
+  zero, so a new series starts at the null. The null and two residual models
+  are mixed with reversible influence (fixed share at five rates).
+- **6.5 is frozen** (`hex.ts`) and runs beside 7.0 on every call as the
+  comparator. **6.2 is retired** (`stateProbability.ts` and
+  `pretrainedTables.ts` are removed).
+- **One measure.** Information gain over the null, `ln p(y) - ln q0(y)`, in
+  bits per call, with days as the unit of uncertainty (`cycle.ts`). Which
+  version is shown is decided on it, and a read has a verified edge only when
+  the shown version's gain over the null is clear of zero. A read without one
+  is presented as having no verified edge.
+- **The loop is stated in its order**: reveal, score, learn, predict, commit
+  (`functions/calibrateCognition`). The nightly response carries timings.
+- **Ledger.** `CallLedger` gains `log_score`, `info_gain`, `learned`;
+  `part_state` becomes `part_structure`; `engine` is `state-6.5` or
+  `hex-7.0`. `EngineStatus` gains `verified`, the bits-per-call fields with
+  their intervals, `closeness_*` and `calibration_control`.
+- **Reasons for a miss** now read `structure`, `change`, `blip`, `outvoted`,
+  `unseen`.
+- **Docs.** `README.md`, `docs/MODEL.md` (the mathematics with plain-word
+  reasoning and the code beside every equation), `docs/OPERATIONS.md` (cost,
+  scaling, what to watch), `validation/README.md`.
+
+### Measured (`validation/replay.py`, predictions in `prereg_replay.md`)
+
+One pass, every call before its outcome, every series from nothing: 280,252
+calls on 43 series. Bits per call over the null, 95% interval:
+
+| | 7.0 right | Expected | Bits per call |
+|---|---|---|---|
+| Markets, move size (17 series) | 57.9% | 57.2% | +0.0043 [0.0030, 0.0056] |
+| Markets, direction | 51.4% | 51.2% | 0.0000 [−0.0007, 0.0006] |
+| Never used before: 10 currencies, move size | 62.1% | 61.2% | +0.0082 [0.0060, 0.0106] |
+| Never used before: 3 temperature stations, direction | 61.0% | 54.6% | +0.0465 [0.0430, 0.0499] |
+| Chicago temperature, direction | 62.9% | 50.7% | +0.0644 [0.0598, 0.0689] |
+| Racing, direction | 74.8% | 75.0% | −0.0017 [−0.0020, −0.0014] |
+
+Over 6.5 on market move size: +0.0037 [0.0025, 0.0050]. Learning against the
+same engine frozen after 500 calls: +0.0036 [0.0025, 0.0048].
+
+| # | Prediction | Outcome |
+|---|---|---|
+| 1 | Market move size: 0.002 to 0.006 bits per call, clear of zero | Held (0.0043) |
+| 2 | Market direction: under 0.0015 | Held (0.0000) |
+| 3 | 7.0 over 6.5 on market move size: positive, clear of zero | Held |
+| 4 | Learning gain positive on move size; within 0.001 of zero on direction | Held (0.0036; 0.0006) |
+| 5 | Unused currencies: move size positive, direction not clear | Held |
+| 6 | Temperature replication: direction gain positive and at least 58% right at each station | Held (63.1%, 64.5%, 60.5%) |
+| 7 | The strength map does not lower information gain on move size | Neither way: −0.0002 [−0.0010, 0.0007]. It brings the strongest tenth from stated 74.0% / right 69.6% to 69.8% / 68.8% |
+
+### Found and fixed while checking the product code against the reference
+
+When a price returned exactly to an earlier price, the rank of that tie was
+being decided by the last binary digit of a sum of log changes. Levels are
+now rounded to nine decimals before they are ranked, in the engine and in the
+null's position rule. With that, the product's 92,888 calls on the 17 market
+series match the reference replay's to 10⁻¹⁴. The racing null improved as a
+side effect (it has many exact ties), which is why racing direction now
+shows HEX slightly behind the null instead of level with it.
+
+### Tested and left out (`validation/hex7.py`)
+
+Products of coordinates admitted on prospective evidence, calibration allowed
+to change a call, and an amplitude (interference) mixture: none added
+information. The text, letter-number and ontology layers are not part of
+7.0; there is no frozen text source or question stream to score them on.
+
+### Needs a decision
+
+- A licence. The repository is public and has none yet.
+- Whether to remove the fourteen entities the backend does not use.
+
+## 6.5 — 5 October 2026: one cycle for every call; the two reads coupled
+
+- `cycle.ts`: every call goes through call, outcome, score, reason, learn.
+  Each engine writes down what every part of its memory said before the
+  outcome, and the reason for a miss is found from that.
+- The two reads see each other's lines: three six-line patterns (own, other,
+  three of each), 288 settings mixed (`hex.ts`, `validation/hexcoupled.py`).
+  Tested with predictions first (`core10.py`, `core10b.py`): direction on the
+  Chicago temperature series 56.2% to 57.9% right, a control with the read's
+  own three lines gained nothing, markets unchanged.
+- Run night by night with the product code on ten years of 17 markets
+  (`validation/timesim/`). 6.5 was superseded by 7.0 the same day and is kept
+  as its comparator.
+
 ## 6.4.4 — 4 October 2026: reward is progress, never negative
 
 - A scored call's progress is its closeness minus the average closeness of

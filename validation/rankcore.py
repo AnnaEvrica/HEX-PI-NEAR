@@ -42,7 +42,7 @@ def walk(r, read, null='three', final=False):
     final=True also returns the call for the step after the last one: (null, core, p)."""
     r=np.asarray(r,float); n=len(r); x=np.cumsum(r); a=np.abs(r)
     if read=='MOVE':
-        F=rank_feats(x); sx=pd.Series(x); cnt=np.arange(1,n+1)
+        F=rank_feats(x); sx=pd.Series(np.floor(x*1e9+0.5)/1e9); cnt=np.arange(1,n+1)   # rounded so that an exact return to an earlier level ranks as a tie
         qrank=clip((cnt-sx.expanding().rank(method='max').values+1)/(cnt+1))
     else:
         F=rank_feats(a); med=pd.Series(a).expanding(MIN_MED).median().values

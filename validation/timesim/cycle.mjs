@@ -18,7 +18,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const [callsDir, outFile] = process.argv.slice(2);
 const entry = path.join(callsDir, '_entry_c.ts'), bundle = path.join(callsDir, '_code_c.mjs');
 const sh = path.join(here, '..', '..', 'base44', 'shared');
-fs.writeFileSync(entry, ['ledger', 'engines', 'isotonic', 'hex', 'observer', 'cycle'].map((m) => `export * from '${path.join(sh, m + '.ts')}';`).join('\n'));
+fs.writeFileSync(entry, ['ledger', 'engines', 'isotonic', 'hex7', 'observer', 'cycle'].map((m) => `export * from '${path.join(sh, m + '.ts')}';`).join('\n'));
 await build({ entryPoints: [entry], bundle: true, format: 'esm', outfile: bundle, logLevel: 'error' });
 const M = await import(bundle);
 
@@ -62,7 +62,7 @@ for (const name of names) { const r = fs.readFileSync(path.join(csvDir, name + '
   bars[name] = { dates: r.map((x) => x[0]), closes: r.map((x) => +x[1]), timestamps: r.map((x) => Math.floor(Date.parse(x[0] + 'T00:00:00Z') / 1000)) }; }
 const calendar = [...new Set(names.flatMap((n) => series[n].map((x) => x.date)))].sort();
 const cursor = Object.fromEntries(names.map((n) => [n, 0]));
-const pooled = { MOVE: [], RANGE: [] }, counted = new Set(), events = [];
+const pooled = Object.fromEntries(M.ENGINES.map((e) => [e, { MOVE: [], RANGE: [] }])), counted = new Set(), events = [];
 let thresholdMismatch = 0, mapFirst = { MOVE: null, RANGE: null };
 console.log(`${names.length} series, ${calendar.length} calendar days, ${names.reduce((s, n) => s + series[n].length, 0)} series-nights`);
 
@@ -78,9 +78,9 @@ for (const day of calendar) {
     // 2-4: outcome, score, reason for the calls that can now be scored
     await M.scoreOpenCalls(base44, name, known);
     // 1: tonight's calls. 6.2 as it stated them; 6.5's strength restated by the map in force tonight
-    const run = { calls: {}, live: { MOVE: live.MOVE, RANGE: live.RANGE } };
+    const run = { calls: {}, live: { MOVE: live.MOVE, RANGE: live.RANGE }, verified: live.verified || {}, learned: night.learned };
     for (const e of M.ENGINES) { run.calls[e] = {}; for (const read of M.READS) { const c = night.calls[e][read];
-      run.calls[e][read] = { p: e === M.CANDIDATE_ENGINE ? M.stated(c.views.raw, live.calibration?.[read]) : c.p, baseline: c.baseline, views: c.views }; } }
+      run.calls[e][read] = { p: M.stated(c.views.raw, live.calibration?.[e]?.[read]), baseline: c.baseline, views: c.views }; } }
     const returns = []; for (let i = 1; i < end; i++) returns.push(Math.log(known.closes[i] / known.closes[i - 1]));
     const rows = M.rowsFor(name, known, returns, run, 'nightly');
     if (Math.abs((rows.find((r) => r.read === 'RANGE').threshold ?? 0) - (night.threshold ?? 0)) > 1e-12) thresholdMismatch++;
@@ -88,7 +88,7 @@ for (const day of calendar) {
   }
   // 6.5's scored steps so far, for the pooled map (each counted once)
   const recent = await db.CallLedger.filter({ scored: true }, '-call_date', 5000);
-  for (const r of recent) if (r.engine === M.CANDIDATE_ENGINE && !counted.has(r.id)) { counted.add(r.id); pooled[r.read].push({ p: r.raw, y: r.outcome }); }
+  for (const r of recent) if (!counted.has(r.id)) { counted.add(r.id); pooled[r.engine][r.read].push({ p: r.raw, y: r.outcome }); }
   // the nightly update (functions/calibrateCognition)
   const through = new Date(Date.parse(day + 'T00:00:00Z') - M.SETTLE_DAYS * 86400000).toISOString().slice(0, 10);
   for (const read of M.READS) {
@@ -96,10 +96,11 @@ for (const day of calendar) {
     let tally = M.EMPTY_TALLY; if (prev?.tally) tally = { ...M.EMPTY_TALLY, ...JSON.parse(prev.tally) };
     tally = M.foldDays(tally, read, recent, through);
     const st = M.decide(read, tally, live[read]);
-    const map = M.pooledCalibration(pooled[read]);
+    const map = M.pooledCalibration(pooled[M.CANDIDATE_ENGINE][read]), mapControl = M.pooledCalibration(pooled[M.CONTROL_ENGINE][read]);
     if (map && !mapFirst[read]) mapFirst[read] = day;
     if (st.decision !== 'hold') events.push({ day, read, decision: st.decision, reason: st.reason });
-    const row = { ...st, tally: JSON.stringify(tally), calibration: map ? JSON.stringify(map) : (prev?.calibration ?? null), calibration_steps: map ? map.n : (prev?.calibration_steps ?? 0) };
+    const row = { ...st, verified: st.verified ?? (typeof prev?.verified === 'boolean' ? prev.verified : live.verified?.[read] ?? null), tally: JSON.stringify(tally), calibration: map ? JSON.stringify(map) : (prev?.calibration ?? null), calibration_control: mapControl ? JSON.stringify(mapControl) : (prev?.calibration_control ?? null), calibration_steps: map ? map.n : (prev?.calibration_steps ?? 0) };
+    if (prev && prev.verified !== row.verified) events.push({ day, read, verified: row.verified });
     if (prev) await db.EngineStatus.update(prev.id, row); else await db.EngineStatus.create(row);
   }
   if (day.endsWith('-01-04') || day.endsWith('-07-01')) console.log(day, `${db.CallLedger.rows.length} rows`, `${((Date.now() - t0) / 60000).toFixed(1)} min`, JSON.stringify(Object.fromEntries(M.READS.map((r) => [r, db.EngineStatus.rows.find((x) => x.read === r)?.live_engine]))));
@@ -114,19 +115,19 @@ function stats(rows) {
   const order = rows.map((_, i) => i).sort((a, b) => str[b] - str[a]).slice(0, Math.max(1, Math.round(rows.length / 10)));
   const missed = rows.filter((r) => r.reason), reasons = {}; for (const r of missed) reasons[r.reason] = (reasons[r.reason] || 0) + 1;
   return {
-    calls: rows.length, right: pct(mean(hit)), closeness: r4(mean(rows.map((r) => r.closeness))), stated: pct(mean(str)),
+    calls: rows.length, bits_per_call_over_null: Number((mean(rows.map((r) => r.info_gain)) / Math.log(2)).toFixed(5)), right: pct(mean(hit)), closeness: r4(mean(rows.map((r) => r.closeness))), stated: pct(mean(str)),
     strongest_tenth: { stated: pct(mean(order.map((i) => str[i]))), right: pct(mean(order.map((i) => hit[i]))) },
     baseline_right: pct(mean(rows.map((r) => (side(r.baseline) === r.outcome ? 1 : 0)))),
     rewarded: pct(mean(rows.map((r) => (r.reward > 0 ? 1 : 0)))), reward: r4(mean(rows.map((r) => r.reward))), lesson: r4(mean(rows.map((r) => r.lesson))),
-    parts: { coin_flip: 0.75, baseline: r4(mean(rows.map((r) => r.part_baseline))), state: r4(mean(rows.map((r) => r.part_state))), strength: r4(mean(rows.map((r) => r.part_strength))) },
+    parts: { coin_flip: 0.75, baseline: r4(mean(rows.map((r) => r.part_baseline))), structure: r4(mean(rows.map((r) => r.part_structure))), strength: r4(mean(rows.map((r) => r.part_strength))) },
     misses: missed.length, reasons: Object.fromEntries(M.REASONS.map((k) => [k, pct((reasons[k] || 0) / Math.max(1, missed.length))])),
   };
 }
 const year = (r) => r.call_date.slice(0, 4);
 const AGES = [['first 100', 0, 100], ['100-250', 100, 250], ['250-500', 250, 500], ['500-1000', 500, 1000], ['1000-2000', 1000, 2000], ['2000+', 2000, 1e9]];
-const scopes = { shown: (r) => r.shown, 'state-6.2': (r) => r.engine === 'state-6.2', 'state-6.5': (r) => r.engine === 'state-6.5' };
+const scopes = { shown: (r) => r.shown, 'state-6.5': (r) => r.engine === 'state-6.5', 'hex-7.0': (r) => r.engine === 'hex-7.0' };
 const OUT = { started: calendar[0], ended: calendar.at(-1), series: names.length, series_nights: names.reduce((s, n) => s + series[n].length, 0), scored_rows: R.length,
-  threshold_mismatches: thresholdMismatch, events, map_first_fitted: mapFirst, final_status: Object.fromEntries(M.READS.map((read) => { const s = db.EngineStatus.rows.find((x) => x.read === read); return [read, { live_engine: s.live_engine, paired_calls: s.paired_calls, paired_days: s.paired_days, gain: s.gain, gain_low: s.gain_low, gain_high: s.gain_high, hit_control: s.hit_control, hit_candidate: s.hit_candidate, reasons_control: s.reasons_control, reasons_candidate: s.reasons_candidate, reason: s.reason }]; })) };
+  threshold_mismatches: thresholdMismatch, events, map_first_fitted: mapFirst, final_status: Object.fromEntries(M.READS.map((read) => { const s = db.EngineStatus.rows.find((x) => x.read === read); return [read, { live_engine: s.live_engine, paired_calls: s.paired_calls, paired_days: s.paired_days, verified: s.verified, gain: s.gain, gain_low: s.gain_low, gain_high: s.gain_high, bits_candidate: s.bits_candidate, bits_candidate_low: s.bits_candidate_low, bits_candidate_high: s.bits_candidate_high, bits_control: s.bits_control, hit_control: s.hit_control, hit_candidate: s.hit_candidate, reasons_control: s.reasons_control, reasons_candidate: s.reasons_candidate, reason: s.reason }]; })) };
 for (const read of M.READS) {
   const e = OUT[read] = {};
   for (const [nm, f] of Object.entries(scopes)) {
@@ -137,7 +138,7 @@ for (const read of M.READS) {
   // step 5 checked: after a miss, did trust move toward the parts of memory that had it right?
   // and the coherence test: does the reason for one call tell you anything about the next?
   const follow = {}, next = {};
-  for (const [nm, f] of [['state-6.5', scopes['state-6.5']], ['shown', scopes.shown]]) {
+  for (const [nm, f] of [['hex-7.0', scopes['hex-7.0']], ['shown', scopes.shown]]) {
     next[nm] = {};
     for (const name of names) {
       const rows = db.CallLedger.rows.filter((r) => r.series_id === name && r.read === read && f(r));
@@ -145,9 +146,9 @@ for (const read of M.READS) {
         const a = rows[i], b = rows[i + 1]; if (!a.scored) continue;
         const key = a.reason || 'right';
         if (b.scored) { const k = next[nm][key] ??= { n: 0, right: 0, closeness: 0, same: 0 }; k.n++; k.right += side(b.probability) === b.outcome ? 1 : 0; k.closeness += b.closeness; k.stated = (k.stated || 0) + Math.max(b.probability, 1 - b.probability); k.same += b.reason === a.reason && a.reason ? 1 : 0; }
-        if (nm === 'state-6.5' && a.reason && a.reason !== 'unseen' && a.reason !== 'state') {
+        if (nm === 'hex-7.0' && a.reason && (a.reason === 'change' || a.reason === 'blip')) {
           const now = JSON.parse(a.views), then = JSON.parse(b.views), ok = new Set(M.rightViews(now, a.outcome)); let moved = 0;
-          for (const g of ['memories', 'readings']) for (let j = 0; j < now[g].length; j++) if (ok.has(now[g][j].label)) moved += then[g][j].w - now[g][j].w;
+          for (const g of ['memories']) for (let j = 0; j < now[g].length; j++) if (ok.has(now[g][j].label)) moved += then[g][j].w - now[g][j].w;
           const k = follow[a.reason] ??= { misses: 0, moved: 0, toward: 0 }; k.misses++; k.moved += moved; if (moved > -1e-4) k.toward++;
         }
       }
@@ -159,5 +160,5 @@ for (const read of M.READS) {
 }
 fs.writeFileSync(outFile, JSON.stringify(OUT, null, 1));
 // the ledger itself, one line per scored call, for further analysis
-fs.writeFileSync(outFile.replace(/\.json$/, '_ledger.csv'), 'series,date,read,engine,shown,stated,raw,baseline,outcome,reason,record_calls,closeness,reward,lesson\n' + R.map((r) => [r.series_id, r.call_date, r.read, r.engine, r.shown ? 1 : 0, r.probability, r.raw, r.baseline, r.outcome, r.reason, r.record_calls, r.closeness, r.reward, r.lesson].join(',')).join('\n') + '\n');
+fs.writeFileSync(outFile.replace(/\.json$/, '_ledger.csv'), 'series,date,read,engine,shown,stated,raw,baseline,outcome,reason,record_calls,closeness,reward,lesson,info_gain\n' + R.map((r) => [r.series_id, r.call_date, r.read, r.engine, r.shown ? 1 : 0, r.probability, r.raw, r.baseline, r.outcome, r.reason, r.record_calls, r.closeness, r.reward, r.lesson, r.info_gain].join(',')).join('\n') + '\n');
 console.log(`done in ${((Date.now() - t0) / 60000).toFixed(1)} min; ${R.length} scored rows; events: ${JSON.stringify(events)}`);

@@ -1,5 +1,6 @@
 // ===========================================================================
-// HEX — state-6.5. The engine as an explicit model, with no hand-set numbers.
+// HEX — state-6.5, frozen. The previous engine, kept unchanged as the
+// comparator for 7.0 (hex7.ts). Evidence is filed under six-line states.
 // Reference: validation/hexcoupled.py, built on validation/hexmodel.py
 // (parity test: tests/parity.mjs). The mathematics is in docs/MODEL.md.
 //
@@ -33,7 +34,7 @@
 // ===========================================================================
 
 import { observe, ReadName, View } from './observer.ts';
-import { applyStrength, Knots } from './isotonic.ts';
+import type { Knots } from './isotonic.ts';
 import type { Views } from './cycle.ts';
 
 const S = 64;
@@ -69,7 +70,7 @@ for (const rho of RHOS) for (const sym of SYMMETRIES) {
 }
 const DISCOUNT = HALF_LIVES.map((h) => (h === null ? 1 : 0.5 ** (1 / h)));
 
-export interface HexStep { i: number; p: number; b: number; y: number }
+export interface HexStep { i: number; p: number; b: number; y: number; readings?: View[] }
 
 /**
  * What each reading of the state said on its own: the candidates grouped by
@@ -104,7 +105,7 @@ function readingsOf(P: Float64Array, w: Float64Array, patterns: number): View[] 
  * `coupled = false` reads the read's own pattern only: state-6.4, kept so the
  * estimator can still be checked against its first reference.
  */
-export function walkHex(returns: number[], read: ReadName, baseline: Float64Array, coupled = true): { steps: HexStep[]; final: { p: number; b: number; readings: View[] } | null; weights: Float64Array } {
+export function walkHex(returns: number[], read: ReadName, baseline: Float64Array, coupled = true, detail = false): { steps: HexStep[]; final: { p: number; b: number; readings: View[] } | null; weights: Float64Array } {
   const n = returns.length;
   const a = returns.map(Math.abs);
   // median of |change| over steps before j, and through j
@@ -153,7 +154,7 @@ export function walkHex(returns: number[], read: ReadName, baseline: Float64Arra
     if (i === n - 1) { final = { p, b, readings: readingsOf(P, w, G) }; break; }
     if (read === 'RANGE' && Number.isNaN(med[i])) continue;
     const y = read === 'MOVE' ? (returns[i + 1] > 0 ? 1 : 0) : (a[i + 1] > med[i] ? 1 : 0);
-    steps.push({ i, p, b, y });
+    steps.push(detail ? { i, p, b, y, readings: readingsOf(P, w, G) } : { i, p, b, y });
     // learn only now that the outcome is known
     for (let e = 0; e < total; e++) L[e] += Math.log(y ? P[e] : 1 - P[e]);
     for (let g = 0; g < G; g++) for (let h = 0; h < NH; h++) { const f = DISCOUNT[h], Dh = D[g][h], Nh = N[g][h]; for (let j = 0; j < S; j++) { Dh[j] *= f; Nh[j] *= f; } Dh[st[g]] += y - b; Nh[st[g]] += 1; }
@@ -162,11 +163,9 @@ export function walkHex(returns: number[], read: ReadName, baseline: Float64Arra
   return { steps, final, weights: w };
 }
 
-/** What is stated for a call: HEX's own probability with its strength restated from the record. The side never changes. */
-export const stated = (raw: number, map?: Knots | null) => Number(applyStrength(map, raw).toFixed(4));
+import { stated } from './hex7.ts';
 
-/** One scored step: the raw probability and what happened. */
-export interface ScoredStep { p: number; y: number }
+import type { ScoredStep } from './hex7.ts';
 
 export interface HexProbability {
   p_up: number; base_up: number;

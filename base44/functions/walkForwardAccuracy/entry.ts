@@ -1,33 +1,39 @@
-// walkForwardAccuracy — run both engines' walk-forward test on live data.
+// walkForwardAccuracy — the one-pass test, on live data, on demand.
 //
-// For each ticker it replays the calibrated probability read one bar at a
-// time: every call is made before its outcome is known, and learning happens
-// only afterwards. It reports, per ticker and pooled, the Brier score, the
-// Brier skill against the series' own base rate, and stated-versus-observed
-// frequencies, on whatever tickers you pass.
+// For each ticker both versions of HEX walk the series one bar at a time:
+// every call is made before its outcome is known and learning happens only
+// afterwards. Reported per ticker and pooled, for 7.0 and for 6.5:
+//   - information gain over the null, in bits per call (the canonical measure)
+//   - share of calls right beside the share the null alone gets right
+//   - Brier skill over the null, and stated against observed frequencies
+// Probabilities here are each engine's own, before any strength map.
 //
 // POST { tickers?: string[], ticker?: string, lookbackDays?: number }
 
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import { fetchYahooReturns } from '../../shared/marketDataClient.ts';
-import { walkStateProbability, stateProbability } from '../../shared/stateProbability.ts';
 import { observeBaseline } from '../../shared/observer.ts';
 import { walkHex } from '../../shared/hex.ts';
+import { walkHex7 } from '../../shared/hex7.ts';
+import { informationGain } from '../../shared/cycle.ts';
 import { ENGINE_VERSION } from '../../shared/version.ts';
 
 const DEFAULT_BASKET = ['BTC', 'ETH', 'SOL', 'SPY', 'QQQ'];
 
-// The first steps of each series are warm-up and are not scored.
+// The first steps of each series are the engine's first experience of it and
+// are reported separately from the rest.
 const WARMUP = 250;
 
 function score(pairs) {
   const n = pairs.length;
   if (!n) return null;
-  let bp = 0, bb = 0, hits = 0;
+  let bp = 0, bb = 0, hits = 0, hitsNull = 0, gain = 0;
   for (const x of pairs) {
     bp += (x.p - x.y) ** 2;
     bb += (x.b - x.y) ** 2;
+    gain += informationGain(x.p, x.b, x.y);
     if ((x.p >= 0.5 ? 1 : 0) === x.y) hits++;
+    if ((x.b >= 0.5 ? 1 : 0) === x.y) hitsNull++;
   }
   const edges = [0, 0.4, 0.45, 0.55, 0.6, 1.0001];
   const bins = [];
@@ -43,10 +49,12 @@ function score(pairs) {
   }
   return {
     n,
+    bits_per_call_over_null: Number((gain / n / Math.log(2)).toFixed(5)),
+    right: Number((hits / n).toFixed(4)),
+    expected_right: Number((hitsNull / n).toFixed(4)),
     brier: Number((bp / n).toFixed(5)),
-    brier_base_rate: Number((bb / n).toFixed(5)),
+    brier_null: Number((bb / n).toFixed(5)),
     brier_skill: bb > 0 ? Number((1 - bp / bb).toFixed(4)) : null,
-    hit_rate: Number((hits / n).toFixed(4)),
     reliability: bins,
   };
 }
@@ -63,35 +71,36 @@ export default async function(req: Request): Promise<Response> {
       : body.ticker ? [String(body.ticker).trim().toUpperCase()] : DEFAULT_BASKET).slice(0, 12);
     const lookbackDays = Math.max(730, Math.min(Number(body.lookbackDays) || 5475, 7300));
 
+    const started = Date.now();
     const perTicker: Record<string, unknown> = {};
-    const pooledUp = [], pooledBig = [], rankUp = [], rankBig = [];
+    const pooled = { hex_7_0: { MOVE: [], RANGE: [] }, state_6_5: { MOVE: [], RANGE: [] } };
     for (const ticker of tickers) {
       let md = null;
       try { md = await fetchYahooReturns(ticker, lookbackDays); } catch { perTicker[ticker] = { error: 'no data' }; continue; }
       if (!md?.returns || md.returns.length < WARMUP + 100) { perTicker[ticker] = { error: 'not enough history' }; continue; }
-      // Raw walk-forward steps (before the isotonic step, which is fitted on
-      // earlier calls at read time). Each step was made before its outcome.
-      const { steps } = walkStateProbability(md.returns);
-      const scoredSteps = steps.slice(WARMUP);
-      const up = scoredSteps.map((s) => ({ p: s.p_up, b: s.b_up, y: s.y_up }));
-      const big = scoredSteps.filter((s) => s.p_big !== null && s.y_big !== null).map((s) => ({ p: s.p_big as number, b: s.b_big, y: s.y_big as number }));
-      pooledUp.push(...up); pooledBig.push(...big);
-      // state-6.5 (HEX as an explicit model) on the same steps, uncalibrated.
-      const from = WARMUP + 12;
-      const w64 = (read) => walkHex(md.returns, read, observeBaseline(md.returns, read)).steps.filter((s) => s.i >= from).map((s) => ({ p: s.p, b: s.b, y: s.y }));
-      const rUp = w64('MOVE'), rBig = w64('RANGE');
-      rankUp.push(...rUp); rankBig.push(...rBig);
-      // Which pre-trained family the series came to resemble, worked out from
-      // the series alone.
-      const now = stateProbability(md.returns);
-      perTicker[ticker] = { bars: md.dataPoints, direction: score(up), move_size: score(big), state_6_5: { direction: score(rUp), move_size: score(rBig) }, behaves_like: { direction: now?.family_up, move_size: now?.family_big } };
+      const t0 = Date.now();
+      const out = { bars: md.dataPoints, hex_7_0: {}, state_6_5: {}, first_250_steps: {} };
+      for (const read of ['MOVE', 'RANGE'] as const) {
+        const baseline = observeBaseline(md.returns, read);
+        const s7 = walkHex7(md.returns, read, baseline).steps, s65 = walkHex(md.returns, read, baseline).steps;
+        const name = read === 'MOVE' ? 'direction' : 'move_size';
+        const later = (steps) => steps.slice(WARMUP);
+        out.hex_7_0[name] = score(later(s7)); out.state_6_5[name] = score(later(s65));
+        out.first_250_steps[name] = score(s7.slice(0, WARMUP));
+        pooled.hex_7_0[read].push(...later(s7)); pooled.state_6_5[read].push(...later(s65));
+      }
+      perTicker[ticker] = { ...out, walk_ms: Date.now() - t0 };
     }
 
     return Response.json({
       engine_version: ENGINE_VERSION,
-      method: 'walk-forward: each call precedes its outcome; first 250 steps of each series unscored; skill is against the baseline each version uses; state_6_5 is uncalibrated here',
+      method: 'one pass: each call precedes its outcome and learning follows it; the first 250 calls on each series are reported separately; gain and skill are against the null; probabilities are before any strength map',
       tickers: perTicker,
-      pooled: { direction: score(pooledUp), move_size: score(pooledBig), state_6_5: { direction: score(rankUp), move_size: score(rankBig) } },
+      pooled: {
+        hex_7_0: { direction: score(pooled.hex_7_0.MOVE), move_size: score(pooled.hex_7_0.RANGE) },
+        state_6_5: { direction: score(pooled.state_6_5.MOVE), move_size: score(pooled.state_6_5.RANGE) },
+      },
+      elapsed_ms: Date.now() - started,
     });
   } catch (error) {
     return Response.json({ error: (error as Error).message }, { status: 500 });
