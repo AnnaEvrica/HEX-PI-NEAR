@@ -136,6 +136,7 @@ const grid = Array.from({ length: 197 }, (_, i) => 0.01 + i * 0.005);
 check('stored map reproduces the fitted curve', grid.every((p) => Math.abs(M.applyStrength(map, p) - M.restate(p, f)) < 1e-4));
 check('calibration never changes the side of a call', grid.every((p) => (M.applyStrength(map, p) >= 0.5) === (p >= 0.5)));
 check('calibration never states less than 50% for the side called', grid.every((p) => Math.max(M.applyStrength(map, p), 1 - M.applyStrength(map, p)) >= 0.5001 - 1e-12));
+check('rounding to four decimals never changes the side of a call', [0.01, 0.49994, 0.49995, 0.4999999, 0.5, 0.50004, 0.99].every((p) => (M.stated(p) >= 0.5) === (p >= 0.5) && (M.stated(p, map) >= 0.5) === (p >= 0.5)) && M.stated(0.4999999) === 0.4999);
 { // a map that says every call was wrong still cannot turn a call round
   const wrong = M.strengthKnots(grid, grid.map((p) => (p >= 0.5 ? 0 : 1)));
   check('even a record of all wrong calls leaves the side alone', grid.every((p) => (M.applyStrength(wrong, p) >= 0.5) === (p >= 0.5)));

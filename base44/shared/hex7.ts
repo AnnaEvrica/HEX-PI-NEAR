@@ -182,8 +182,8 @@ export function walkHex7(returns: number[], read: ReadName, baseline: Float64Arr
   return { steps, final };
 }
 
-/** What is stated for a call: HEX's own probability with its strength restated from the record. The side never changes. */
-export const stated = (raw: number, map?: Knots | null) => Number(applyStrength(map, raw).toFixed(4));
+/** What is stated for a call: HEX's own probability with its strength restated from the record. The side never changes: rounding to four decimals may not carry a call across one half. */
+export const stated = (raw: number, map?: Knots | null) => { const s = Number(applyStrength(map, raw).toFixed(4)); return raw < 0.5 && s >= 0.5 ? 0.4999 : s; };
 
 /** One scored step: the engine's own probability and what happened. */
 export interface ScoredStep { p: number; y: number }

@@ -37,7 +37,7 @@ $p$ & HEX's call & \texttt{hex7.ts: walkHex7}\\\bottomrule\end{tabular}\end{cent
 \begin{plain}
 The engine never looks at raw values. It looks at how much each value changed from the one before, and how big that change was compared with what is usual for the series. It asks two yes-or-no questions about the next step: \emph{will the value go up?} and \emph{will the change be bigger than usual?}
 \end{plain}
-An adapter turns a series $x_0,x_1,\dots$ into changes $r_t$: $\ln(x_t/x_{t-1})$ when every value is positive, $x_t-x_{t-1}$ otherwise (\texttt{probabilityRead.ts: seriesToReturns}). Everything after the adapter is the same for every kind of series. With $a_t=|r_t|$ and $m_t=\med(a_1,\dots,a_t)$ for $t\ge20$:
+An adapter turns a series $x_0,x_1,\dots$ into changes $r_t$: $\ln(x_t/x_{t-1})$ for positive levels such as prices, $x_t-x_{t-1}$ for levels that can be zero or negative; a series already given as changes is used as it is (\texttt{probabilityRead.ts: seriesToReturns}). Everything after the adapter is the same for every kind of series. With $a_t=|r_t|$ and $m_t=\med(a_1,\dots,a_t)$ for $t\ge20$:
 \[ \textsc{move}:\; y_{t+1}=\mathbb 1[r_{t+1}>0],\qquad \textsc{range}:\; y_{t+1}=\mathbb 1[a_{t+1}>m_t]. \]
 Everything computed at step $t$ uses values up to $x_t$ only.
 

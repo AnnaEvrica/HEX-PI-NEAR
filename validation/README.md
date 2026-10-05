@@ -56,7 +56,7 @@ Not in the repository. All of it is public.
 - `data_replication/` (series never used before 7.0's replay):
   - `daily-max-temperatures.csv` — Melbourne 1981–1990, from
     `github.com/jbrownlee/Datasets`
-  - `2016-weather-data-seattle.csv` — Seattle 1948–2017, from
+  - `2016-weather-data-seattle.csv` — Seattle 1948–2015, from
     `github.com/plotly/datasets`
   - `weather.csv` — New York 2012–2015, from `github.com/vega/vega-datasets`
   - the ten currencies come from the exchange-rate file already in `data/`:

@@ -31,8 +31,10 @@ about the next step: *will the value go up?* and *will the change be bigger
 than usual?*
 
 **Exactly.** An adapter turns a series $x_0,x_1,\dots$ into changes $r_t$:
-the log change $\ln(x_t/x_{t-1})$ when every value is positive, the plain
-difference $x_t-x_{t-1}$ otherwise (`probabilityRead.ts: seriesToReturns`).
+the log change $\ln(x_t/x_{t-1})$ for positive levels such as prices, the
+plain difference $x_t-x_{t-1}$ for levels that can be zero or negative; a
+series already given as changes is used as it is
+(`probabilityRead.ts: seriesToReturns`).
 Everything after the adapter is the same for every kind of series. With
 $a_t=|r_t|$ and $m_t=\operatorname{median}(a_1,\dots,a_t)$ for $t\ge 20$, the
 two reads and their outcomes $y_{t+1}\in\{0,1\}$ are
@@ -164,7 +166,8 @@ $$p=\sum_\alpha o_\alpha\sum_kw_{\alpha,k}V_k .$$
 from 50%). The side is HEX's and is never changed. The strength is checked
 against history: of all earlier calls stated at about 70%, how many were
 right? If 66% were, a new 70% is shown as 66%. The shown strength can never
-go below 50%, so the side cannot flip.
+go below 50%, so the side cannot flip. Rounding the shown value to four
+decimals may not carry it across one half either (`hex7.ts: stated`).
 
 **Exactly** (`isotonic.ts`). With $a=\mathbb 1[p\ge\tfrac12]$ and
 $s=\max(p,1-p)$, let $G$ be the isotonic regression of
@@ -173,7 +176,7 @@ known, pooled across tracked series and refitted nightly (at least 2,000
 calls). Then $s'=\min(0.99,\max(0.5001,G(s)))$ and the shown probability is
 $s'$ if $a=1$, else $1-s'$. In the replay this left information gain
 unchanged within noise and brought the strongest tenth of move-size calls
-from stated 74.0% / right 69.6% to 69.8% / 68.8%. A map allowed to change the
+from stated 74.0% / right 69.6% to 69.8% / 68.7%. A map allowed to change the
 side was tested and rejected: the calls it changed were right less often
 afterwards (`validation/hex7.py`).
 
@@ -292,9 +295,9 @@ $10^{-13}$ (`tests/parity.mjs`).
 | Markets, move size (17 series, 2016–2026) | 46,478 | 57.9% | 57.2% | +0.0043 [0.0030, 0.0056] | +0.0037 [0.0025, 0.0050] |
 | Markets, direction | 46,478 | 51.4% | 51.2% | 0.0000 [−0.0007, 0.0006] | 0.0000 [−0.0007, 0.0006] |
 | *Never used before:* 10 currencies, move size | 26,540 | 62.1% | 61.2% | +0.0082 [0.0060, 0.0106] | +0.0035 [0.0018, 0.0053] |
-| *Never used before:* 10 currencies, direction | 26,540 | 54.2% | 54.0% | +0.0011 [−0.0002, 0.0025] | +0.0001 [−0.0013, 0.0014] |
+| *Never used before:* 10 currencies, direction | 26,540 | 54.2% | 54.0% | +0.0011 [−0.0002, 0.0025] | +0.0001 [−0.0013, 0.0015] |
 | *Never used before:* 3 temperature stations, direction | 29,408 | 61.0% | 54.6% | +0.0466 [0.0430, 0.0499] | +0.0310 [0.0278, 0.0342] |
-| *Never used before:* 3 temperature stations, move size | 29,408 | 63.1% | 61.6% | +0.0186 [0.0158, 0.0212] | +0.0130 [0.0109, 0.0152] |
+| *Never used before:* 3 temperature stations, move size | 29,408 | 63.1% | 61.6% | +0.0186 [0.0158, 0.0212] | +0.0130 [0.0109, 0.0153] |
 | Chicago temperature, direction | 24,678 | 62.9% | 50.7% | +0.0644 [0.0598, 0.0689] | +0.0417 [0.0375, 0.0459] |
 | Racing, direction | 13,022 | 74.8% | 75.0% | −0.0017 [−0.0020, −0.0014] | −0.0008 [−0.0015, −0.0003] |
 

@@ -56,7 +56,7 @@ same engine frozen after 500 calls: +0.0036 [0.0025, 0.0048].
 | 4 | Learning gain positive on move size; within 0.001 of zero on direction | Held (0.0036; 0.0006) |
 | 5 | Unused currencies: move size positive, direction not clear | Held |
 | 6 | Temperature replication: direction gain positive and at least 58% right at each station | Held (63.1%, 64.5%, 60.5%) |
-| 7 | The strength map does not lower information gain on move size | Neither way: −0.0002 [−0.0010, 0.0007]. It brings the strongest tenth from stated 74.0% / right 69.6% to 69.8% / 68.8% |
+| 7 | The strength map does not lower information gain on move size | Neither way: −0.0001 [−0.0010, 0.0007]. It brings the strongest tenth from stated 74.0% / right 69.6% to 69.8% / 68.7% |
 
 ### Found and fixed while checking the product code against the reference
 
@@ -67,6 +67,22 @@ null's position rule. With that, the product's 92,888 calls on the 17 market
 series match the reference replay's to 10⁻¹⁴. The racing null improved as a
 side effect (it has many exact ties), which is why racing direction now
 shows HEX slightly behind the null instead of level with it.
+
+### Found and fixed in an independent check of the documents
+
+- **Rounding could move a call across one half.** With no strength map in
+  force, a probability between 0.49995 and 0.5 was stored as 0.5000 and read
+  as the other side. `stated` (`hex7.ts`) now keeps the side; `tests/loop.mjs`
+  checks it. No replay number changes: the replay scores the unrounded
+  probability.
+- **Last digits.** Four interval bounds had been rounded twice (racing move
+  size, and three "over 6.5" bounds); the strongest tenth after the strength
+  map is right 68.7% of the time, not 68.8%; the strength map's effect is
+  −0.0001 bits per call, not −0.0002.
+- **Seattle.** The temperature file ends in 2015, not 2017.
+- **The adapter.** Positive levels give log changes; levels that can be zero
+  or negative give differences; a series already given as changes is used as
+  it is. The earlier wording merged the last two.
 
 ### Tested and left out (`validation/hex7.py`)
 
