@@ -282,14 +282,58 @@ patterns as its own unrelated case received 0–3% of the weight on these
 reads. **The six lines carry their information one at a time. The pattern as
 a whole adds almost nothing beyond the sum of its lines.**
 
+## 12. The quantum form
+
+Six two-valued lines are six qubits, and the 64 patterns are a basis of a
+64-dimensional state space. Let $X_i$ flip line $i$ and
+
+$$H = \sum_{i=1}^{6} (1 - X_i).$$
+
+$H$ is the Laplacian of the cube, and its eigenvectors are the Walsh
+characters with eigenvalue $2k$ on terms involving $k$ lines.
+
+**Result (the engine is the thermal half).** The diffusion kernel of §5 is
+$e^{-\beta H}$, evolution in imaginary time: the thermal state of six
+non-interacting two-level systems at inverse temperature $\beta$.
+
+**Result (the other half is a quantum walk).** Evolution in real time,
+$e^{-iHt}$, is the continuous-time quantum walk on the cube. The probability
+of finding pattern $j$ after starting in $s$ is
+
+$$q_t(s, j) = (\cos^2 t)^{\,6 - d(s,j)}\, (\sin^2 t)^{\,d(s,j)}.$$
+
+Unlike diffusion it is not monotone in distance. At $t = \pi/4$ every
+pattern is equally likely; at $t = \pi/2$ the walk is on the mirror pattern
+with certainty (perfect state transfer: Christandl et al., 2004; Moore and
+Russell, 2002). On a term involving $k$ lines its eigenvalue is
+$\cos(2t)^k$, negative for odd $k$ once $t > \pi/4$, which no diffusion
+produces. The mirror relation the engine uses is the endpoint of this walk.
+All three statements were checked numerically to rounding.
+
+**Measured** (`validation/core9.py`, `prereg_core9.md`). Quantum-walk kernels
+at $t = \pi/8, \pi/4, 3\pi/8, \pi/2$, and the signed real part of the
+amplitude, were added to the candidates on the MOVE read and left to compete
+with the diffusion kernels. The combined model is within 0.4 thousandths of a
+nat of state-6.4 on every domain. On weather, the one domain where the
+patterns carry clear information, the quantum kernels received no weight.
+
+So the quantum formalism applies exactly and adds no predictive information
+on these data. The reason is §11: the information sits in single lines,
+which in this language means the six lines behave as unentangled. A quantum
+walk differs from diffusion through interference between paths that involve
+several lines at once, and there is almost nothing at that level to
+interfere.
+
 ## References
 
 - Ayer, M., Brunk, H. D., Ewing, G. M., Reid, W. T. and Silverman, E. (1955). An empirical distribution function for sampling with incomplete information. *Annals of Mathematical Statistics*, 26, 641–647.
+- Christandl, M., Datta, N., Ekert, A. and Landahl, A. J. (2004). Perfect state transfer in quantum spin networks. *Physical Review Letters*, 92, 187902.
 - Cesa-Bianchi, N. and Lugosi, G. (2006). *Prediction, Learning, and Games*. Cambridge University Press.
 - Dawid, A. P. (1984). Statistical theory: the prequential approach. *Journal of the Royal Statistical Society A*, 147, 278–292.
 - Ibrahim, J. G. and Chen, M.-H. (2000). Power prior distributions for regression models. *Statistical Science*, 15, 46–60.
 - Kac, M. (1947). Random walk and the theory of Brownian motion. *American Mathematical Monthly*, 54, 369–391.
 - Kondor, R. I. and Lafferty, J. (2002). Diffusion kernels on graphs and other discrete structures. *Proceedings of the 19th International Conference on Machine Learning*, 315–322.
+- Moore, C. and Russell, A. (2002). Quantum walks on the hypercube. *Proceedings of RANDOM 2002*, Lecture Notes in Computer Science 2483, 164–178.
 - Tibshirani, R. and Hastie, T. (1987). Local likelihood estimation. *Journal of the American Statistical Association*, 82, 559–567.
 - Vovk, V. (1990). Aggregating strategies. *Proceedings of the 3rd Workshop on Computational Learning Theory*, 371–383.
 - Vovk, V., Gammerman, A. and Shafer, G. (2005). *Algorithmic Learning in a Random World*. Springer.

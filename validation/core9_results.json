@@ -1,0 +1,67 @@
+{
+ "identities": {
+  "transition probability formula": true,
+  "perfect transfer to the mirror pattern at t = pi/2": true,
+  "Walsh eigenvalue cos(2t)^k": true
+ },
+ "weather MOVE": {
+  "calls": 9030,
+  "right %": {
+   "b": 51.24,
+   "classical": 56.22,
+   "quantum": 56.38,
+   "both": 56.22
+  },
+  "quantum kernels alone over diffusion kernels (x1000 nats)": [
+   -0.42,
+   -0.98,
+   0.13
+  ],
+  "both over diffusion alone": [
+   -0.0,
+   -0.0,
+   0.0
+  ],
+  "final weight on the quantum kernels when both compete (mean over series; they are 7 of 15 kernels)": 0.0
+ },
+ "racing MOVE": {
+  "calls": 13022,
+  "right %": {
+   "b": 74.88,
+   "classical": 74.97,
+   "quantum": 74.89,
+   "both": 74.96
+  },
+  "quantum kernels alone over diffusion kernels (x1000 nats)": [
+   0.58,
+   0.25,
+   1.05
+  ],
+  "both over diffusion alone": [
+   0.36,
+   0.15,
+   0.71
+  ],
+  "final weight on the quantum kernels when both compete (mean over series; they are 7 of 15 kernels)": 0.604
+ },
+ "markets MOVE": {
+  "calls": 46937,
+  "right %": {
+   "b": 50.89,
+   "classical": 51.06,
+   "quantum": 50.98,
+   "both": 51.06
+  },
+  "quantum kernels alone over diffusion kernels (x1000 nats)": [
+   -0.32,
+   -0.49,
+   -0.16
+  ],
+  "both over diffusion alone": [
+   -0.09,
+   -0.15,
+   -0.03
+  ],
+  "final weight on the quantum kernels when both compete (mean over series; they are 7 of 15 kernels)": 0.219
+ }
+}

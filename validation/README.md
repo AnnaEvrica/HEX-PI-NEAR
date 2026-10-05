@@ -15,6 +15,7 @@ before the run (`prereg_*.md`) and its results beside it (`*_results.json`).
 | `core6.py` | 6.4 against 6.2 and 6.3 on every domain and read; cold start |
 | `core7.py` | Three richer castings of the six lines as hypotheses: four-valued lines with a derived second pattern, separate sharing for the older and newer three lines, and pairing each pattern with its reversal. None added predictive information |
 | `spectral.py`, `core8.py` | The exact posterior under the cube's diffusion prior, in the Walsh basis; how much of the fitted effect involves one line, two lines, and so on |
+| `core9.py` | The quantum walk on the six lines: its identities, and its kernels competing with the diffusion kernels |
 | `loop_replay_hex.py` | The shipped loop replayed on 2016-2026 with 6.4 |
 
 The data files (about 23 MB of public daily prices, Chicago temperatures and
