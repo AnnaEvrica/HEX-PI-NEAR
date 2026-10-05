@@ -1,5 +1,20 @@
 # Changelog
 
+## 6.4.1 — 4 October 2026: decisions rest on the whole record
+
+- **Ten-year cold start** (`validation/loop_sim.py`). The loop run from an
+  empty ledger on 1 January 2016 on 17 market series, with calibration and
+  promotion applied night by night. Results in the README and in
+  `validation/loop_sim_0.json`.
+- **Defect found and fixed.** The nightly update decided from the most recent
+  5,000 scored rows only. In the simulation that made the shown version flip:
+  three changes for move size and five for direction over ten years
+  (`validation/loop_sim_1250.json`). `EngineStatus` now keeps a running tally
+  of every settled day (`foldDays`, `decide` in `ledger.ts`), a day is counted
+  once, five days after its call, and the rule is applied to the whole record.
+  With that, move size changes once and direction never.
+- New `tally` field on `EngineStatus`. Three new checks in `tests/loop.mjs`.
+
 ## 6.4 — 4 October 2026: HEX as an explicit model
 
 ### What changed

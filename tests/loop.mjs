@@ -64,6 +64,18 @@ const rightLess = mk(400, 80, 0, -0.001).map((r, i) => (r.engine === 'state-6.4'
 check('rule: promoted but right clearly less often -> demote', M.summarise('RANGE', rightLess, 'state-6.4').decision === 'demote');
 check('rule: promoted and still better -> stays', M.summarise('RANGE', mk(400, 80, 0, -0.02), 'state-6.4').live_engine === 'state-6.4');
 
+// ---- the running tally: folding night by night equals folding once, and no day is counted twice
+{
+  const days = [...new Set(L.filter((r) => r.scored).map((r) => r.call_date))].sort();
+  let t = M.EMPTY_TALLY;
+  for (const cut of [days[40], days[41], days[120], days[days.length - 1]]) t = M.foldDays(t, 'RANGE', L, cut);
+  const again = M.foldDays(t, 'RANGE', L, days[days.length - 1]);
+  const once = M.foldDays(M.EMPTY_TALLY, 'RANGE', L, '9999-12-31');
+  check('tally: folded in four batches equals folded once', t.calls === once.calls && t.days === once.days && Math.abs(t.gain_sum - once.gain_sum) < 1e-9 && Math.abs(t.day_gain_sq - once.day_gain_sq) < 1e-9);
+  check('tally: folding the same days again adds nothing', again.calls === t.calls && again.days === t.days);
+  check('tally: decision from the tally equals decision from the rows', JSON.stringify(M.decide('RANGE', once, 'state-6.2')) === JSON.stringify(M.summarise('RANGE', L, 'state-6.2')));
+}
+
 // ---- pooled calibration
 const map = M.pooledCalibration(lastRun.candidateSteps.RANGE);
 check('calibration map is fitted and monotone', !!map && map.y.every((v, i) => i === 0 || v >= map.y[i - 1] - 1e-12) && map.x.every((v, i) => i === 0 || v > map.x[i - 1]));

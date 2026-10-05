@@ -66,7 +66,8 @@ the ledger.
 3. **Promotion.** For each read, 6.4 is shown once it has at least 300 calls
    over 60 days scored beside 6.2, its probabilities beat 6.2's by a margin
    whose 95% interval excludes zero, and it is right at least as often. It is
-   taken back down when the margin the other way excludes zero. The result is
+   taken back down when the margin the other way excludes zero. Each night's
+   decision rests on the whole record, kept as a running tally. The result is
    one `EngineStatus` row per read, which every function loads before showing
    a number.
 
@@ -75,6 +76,16 @@ loop promoted 6.4 for move size after 284 days and never demoted it. Share of
 move-size calls right: 58.8% for 6.2, 59.9% for 6.4. Next-day direction stays
 at chance for both. On market move size the gain comes from the observer's
 baseline, not from the 64 states (`docs/MODEL.md`, section 10).
+
+Started from nothing on 1 January 2016 (`validation/loop_sim.py`: empty
+ledger, no history before that date, calibration and promotion applied night
+by night): 57.1% of move-size calls right over the ten years against 55.1%
+for 6.2 alone, with 6.4 promoted once, in September 2018, and never taken
+down. The learning shows in two places: accuracy rises over a series' first
+250 to 500 steps (51.3% in the first 100, 59.2% between 250 and 500), and
+the strongest tenth of calls goes from stated 69.0% / right 59.6% in 2016 to
+within about three points from 2023 on. It does not show as a climb year
+after year. Direction stays at chance throughout.
 
 ### Backend functions
 

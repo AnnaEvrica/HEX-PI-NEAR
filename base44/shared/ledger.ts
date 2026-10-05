@@ -13,7 +13,9 @@
 //   2. PROMOTION  6.4 is shown for a read once its probabilities there
 //                 beat 6.2's by a margin that excludes zero AND it is right
 //                 at least as often; it is taken back down when it is worse
-//                 on either count by a margin that excludes zero
+//                 on either count by a margin that excludes zero. Every
+//                 night's decision rests on the whole record (a running
+//                 tally), not on the most recent calls
 //   3. CALIBRATION  one map per read from stated to observed frequency for
 //                 6.4, pooled across every tracked series
 // The result is one EngineStatus row per read, which every function reads
@@ -32,6 +34,8 @@ export const MIN_PAIRED_CALLS = 300;
 export const MIN_PAIRED_DAYS = 60;
 /** Width of the interval, in standard errors (1.96 = 95%). */
 export const Z = 1.96;
+/** A day is added to the tally once it is this many days old, so its scoring is complete. */
+export const SETTLE_DAYS = 5;
 /** Pooled calibration needs at least this many scored steps. */
 export const MIN_CALIBRATION_STEPS = 2000;
 
@@ -134,61 +138,88 @@ export interface ReadStatus {
   reason: string;
 }
 
-const mean = (v: number[]) => v.reduce((s, x) => s + x, 0) / v.length;
-
 /**
- * Summarise scored rows for one read and apply the promotion rule.
+ * The whole record for one read, kept as running sums so that every night's
+ * decision rests on all of it. (A ten-year simulation showed that deciding
+ * from only the most recent calls makes the shown version flip back and
+ * forth; with the whole record it changed once.)
  * Days are the unit of uncertainty: calls on the same day move together.
  */
-export function summarise(read: ReadName, rows: LedgerRow[], current: EngineId): ReadStatus {
-  const byKey = new Map<string, Partial<Record<EngineId, LedgerRow>>>();
+export interface Tally {
+  calls: number; days: number;
+  gain_sum: number;                     // over calls
+  day_gain: number; day_gain_sq: number;   // over days: sum and sum of squares of the day's mean gain
+  day_hit: number; day_hit_sq: number;     // over days: the day's mean (candidate right - control right)
+  hits_control: number; hits_candidate: number; hits_baseline: number;
+  stated_control: number; stated_candidate: number;
+  /** Last call date already counted; later days are still open. */
+  last_day: string;
+}
+export const EMPTY_TALLY: Tally = { calls: 0, days: 0, gain_sum: 0, day_gain: 0, day_gain_sq: 0, day_hit: 0, day_hit_sq: 0, hits_control: 0, hits_candidate: 0, hits_baseline: 0, stated_control: 0, stated_candidate: 0, last_day: '' };
+
+const mean = (v: number[]) => v.reduce((s, x) => s + x, 0) / v.length;
+const right = (r: LedgerRow) => ((r.probability >= 0.5 ? 1 : 0) === r.outcome ? 1 : 0);
+
+/**
+ * Add to the tally every day after `tally.last_day` and up to `through`
+ * (inclusive) on which both versions have a scored call on the same series.
+ * A day is counted once; pass a `through` old enough that its scoring is done.
+ */
+export function foldDays(tally: Tally, read: ReadName, rows: LedgerRow[], through: string): Tally {
+  const byDay = new Map<string, Map<string, Partial<Record<EngineId, LedgerRow>>>>();
   for (const r of rows) {
     if (r.read !== read || !r.scored || typeof r.outcome !== 'number') continue;
-    const k = `${r.series_id}|${r.call_date}`;
-    if (!byKey.has(k)) byKey.set(k, {});
-    byKey.get(k)![r.engine] = r;
+    if (r.call_date <= tally.last_day || r.call_date > through) continue;
+    if (!byDay.has(r.call_date)) byDay.set(r.call_date, new Map());
+    const day = byDay.get(r.call_date)!;
+    if (!day.has(r.series_id)) day.set(r.series_id, {});
+    day.get(r.series_id)![r.engine] = r;
   }
-  const pairs = [...byKey.values()].filter((p) => p[CONTROL_ENGINE] && p[CANDIDATE_ENGINE]) as Record<EngineId, LedgerRow>[];
+  const t = { ...tally };
+  for (const date of [...byDay.keys()].sort()) {
+    const pairs = [...byDay.get(date)!.values()].filter((p) => p[CONTROL_ENGINE] && p[CANDIDATE_ENGINE]) as Record<EngineId, LedgerRow>[];
+    if (!pairs.length) continue;
+    const gains = pairs.map((p) => (p[CONTROL_ENGINE].log_loss ?? logLoss(p[CONTROL_ENGINE].probability, p[CONTROL_ENGINE].outcome!))
+      - (p[CANDIDATE_ENGINE].log_loss ?? logLoss(p[CANDIDATE_ENGINE].probability, p[CANDIDATE_ENGINE].outcome!)));
+    const hd = pairs.map((p) => right(p[CANDIDATE_ENGINE]) - right(p[CONTROL_ENGINE]));
+    const g = mean(gains), h = mean(hd);
+    t.calls += pairs.length; t.days += 1;
+    t.gain_sum += gains.reduce((x, y) => x + y, 0);
+    t.day_gain += g; t.day_gain_sq += g * g; t.day_hit += h; t.day_hit_sq += h * h;
+    for (const p of pairs) {
+      t.hits_control += right(p[CONTROL_ENGINE]); t.hits_candidate += right(p[CANDIDATE_ENGINE]);
+      t.hits_baseline += (p[CANDIDATE_ENGINE].baseline >= 0.5 ? 1 : 0) === p[CANDIDATE_ENGINE].outcome ? 1 : 0;
+      t.stated_control += Math.max(p[CONTROL_ENGINE].probability, 1 - p[CONTROL_ENGINE].probability);
+      t.stated_candidate += Math.max(p[CANDIDATE_ENGINE].probability, 1 - p[CANDIDATE_ENGINE].probability);
+    }
+    t.last_day = date;
+  }
+  return t;
+}
+
+/** Apply the promotion rule to the whole record. */
+export function decide(read: ReadName, t: Tally, current: EngineId): ReadStatus {
   const st: ReadStatus = {
-    read, live_engine: current, paired_calls: pairs.length, paired_days: 0,
+    read, live_engine: current, paired_calls: t.calls, paired_days: t.days,
     gain: null, gain_low: null, gain_high: null, hit_control: null, hit_candidate: null, hit_baseline: null,
     stated_control: null, stated_candidate: null, decision: 'hold', reason: '',
   };
-  if (!pairs.length) { st.reason = 'no scored calls yet'; return st; }
-  const byDay = new Map<string, number[]>();
-  const hitByDay = new Map<string, number[]>();
-  const right = (r: LedgerRow) => ((r.probability >= 0.5 ? 1 : 0) === r.outcome ? 1 : 0);
-  for (const p of pairs) {
-    const d = (p[CONTROL_ENGINE].log_loss ?? logLoss(p[CONTROL_ENGINE].probability, p[CONTROL_ENGINE].outcome!))
-      - (p[CANDIDATE_ENGINE].log_loss ?? logLoss(p[CANDIDATE_ENGINE].probability, p[CANDIDATE_ENGINE].outcome!));
-    const day = p[CONTROL_ENGINE].call_date;
-    if (!byDay.has(day)) { byDay.set(day, []); hitByDay.set(day, []); }
-    byDay.get(day)!.push(d);
-    hitByDay.get(day)!.push(right(p[CANDIDATE_ENGINE]) - right(p[CONTROL_ENGINE]));
-  }
-  const dayMeans = [...byDay.values()].map(mean);
-  const g = mean([...byDay.values()].flat());
-  const m = mean(dayMeans);
-  const se = dayMeans.length > 1 ? Math.sqrt(dayMeans.reduce((s, x) => s + (x - m) ** 2, 0) / (dayMeans.length - 1) / dayMeans.length) : Infinity;
-  // the same interval for the difference in hit rate (candidate minus control)
-  const hd = [...hitByDay.values()].map(mean), hm = mean(hd);
-  const hse = hd.length > 1 ? Math.sqrt(hd.reduce((s, x) => s + (x - hm) ** 2, 0) / (hd.length - 1) / hd.length) : Infinity;
-  const hitHigh = hm + Z * hse;
-  const hit = (e: EngineId) => mean(pairs.map((p) => ((p[e].probability >= 0.5 ? 1 : 0) === p[e].outcome ? 1 : 0)));
-  const stated = (e: EngineId) => mean(pairs.map((p) => Math.max(p[e].probability, 1 - p[e].probability)));
+  if (!t.calls) { st.reason = 'no scored calls yet'; return st; }
+  const g = t.gain_sum / t.calls, m = t.day_gain / t.days, hm = t.day_hit / t.days;
+  const se = (sum: number, sq: number) => (t.days > 1 ? Math.sqrt(Math.max(0, sq / t.days - (sum / t.days) ** 2) * t.days / (t.days - 1) / t.days) : Infinity);
+  const gse = se(t.day_gain, t.day_gain_sq), hitHigh = hm + Z * se(t.day_hit, t.day_hit_sq);
   const r4 = (v: number) => Number(v.toFixed(4));
-  st.paired_days = dayMeans.length;
   st.gain = Number(g.toFixed(5));
-  st.gain_low = Number.isFinite(se) ? Number((m - Z * se).toFixed(5)) : null;
-  st.gain_high = Number.isFinite(se) ? Number((m + Z * se).toFixed(5)) : null;
-  st.hit_control = r4(hit(CONTROL_ENGINE)); st.hit_candidate = r4(hit(CANDIDATE_ENGINE));
-  st.hit_baseline = r4(mean(pairs.map((p) => ((p[CANDIDATE_ENGINE].baseline >= 0.5 ? 1 : 0) === p[CANDIDATE_ENGINE].outcome ? 1 : 0))));
-  st.stated_control = r4(stated(CONTROL_ENGINE)); st.stated_candidate = r4(stated(CANDIDATE_ENGINE));
+  st.gain_low = Number.isFinite(gse) ? Number((m - Z * gse).toFixed(5)) : null;
+  st.gain_high = Number.isFinite(gse) ? Number((m + Z * gse).toFixed(5)) : null;
+  st.hit_control = r4(t.hits_control / t.calls); st.hit_candidate = r4(t.hits_candidate / t.calls); st.hit_baseline = r4(t.hits_baseline / t.calls);
+  st.stated_control = r4(t.stated_control / t.calls); st.stated_candidate = r4(t.stated_candidate / t.calls);
 
   const enough = st.paired_calls >= MIN_PAIRED_CALLS && st.paired_days >= MIN_PAIRED_DAYS && st.gain_low !== null;
+  const span = `[${((st.gain_low ?? 0) * 1000).toFixed(1)}, ${((st.gain_high ?? 0) * 1000).toFixed(1)}]`;
   if (!enough) {
     st.reason = `${st.paired_calls} of ${MIN_PAIRED_CALLS} paired calls over ${st.paired_days} of ${MIN_PAIRED_DAYS} days: no decision yet`;
-  } else if (current === CONTROL_ENGINE && st.gain_low! > 0 && st.hit_candidate! < st.hit_control!) {
+  } else if (current === CONTROL_ENGINE && st.gain_low! > 0 && t.hits_candidate < t.hits_control) {
     st.reason = `6.4 states better probabilities (gain ${(g * 1000).toFixed(1)}) but is right less often (${(st.hit_candidate! * 100).toFixed(1)}% against ${(st.hit_control! * 100).toFixed(1)}%), so 6.2 stays`;
   } else if (current === CONTROL_ENGINE && st.gain_low! > 0) {
     st.decision = 'promote'; st.live_engine = CANDIDATE_ENGINE;
@@ -200,11 +231,16 @@ export function summarise(read: ReadName, rows: LedgerRow[], current: EngineId):
     st.decision = 'demote'; st.live_engine = CONTROL_ENGINE;
     st.reason = `6.4 was right less often than 6.2 (${(st.hit_candidate! * 100).toFixed(1)}% against ${(st.hit_control! * 100).toFixed(1)}%); the interval excludes zero`;
   } else if (current === CONTROL_ENGINE) {
-    st.reason = `gain ${(g * 1000).toFixed(1)} thousandths of a nat per call [${(st.gain_low! * 1000).toFixed(1)}, ${(st.gain_high! * 1000).toFixed(1)}]: not clearly better, so 6.2 stays`;
+    st.reason = `gain ${(g * 1000).toFixed(1)} thousandths of a nat per call ${span}: not clearly better, so 6.2 stays`;
   } else {
-    st.reason = `gain ${(g * 1000).toFixed(1)} thousandths of a nat per call [${(st.gain_low! * 1000).toFixed(1)}, ${(st.gain_high! * 1000).toFixed(1)}]: not clearly worse, so 6.4 stays`;
+    st.reason = `gain ${(g * 1000).toFixed(1)} thousandths of a nat per call ${span}: not clearly worse, so 6.4 stays`;
   }
   return st;
+}
+
+/** The rule applied to a set of rows in one go (every scored day counted). */
+export function summarise(read: ReadName, rows: LedgerRow[], current: EngineId): ReadStatus {
+  return decide(read, foldDays(EMPTY_TALLY, read, rows, '9999-12-31'), current);
 }
 
 /** One calibration map per read for 6.4, pooled across series. Null until there are enough steps. */

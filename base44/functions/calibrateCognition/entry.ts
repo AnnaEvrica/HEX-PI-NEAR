@@ -7,8 +7,8 @@
 //   2. write down today's calls from both versions of HEX, before their outcome
 // Then, across all series:
 //   3. refit 6.4's calibration map, pooled over every tracked series
-//   4. summarise each engine's record on the same calls and apply the
-//      promotion rule (shared/ledger.ts)
+//   4. add the newly settled days to each read's running tally and apply
+//      the promotion rule to the whole record (shared/ledger.ts)
 //   5. store one EngineStatus row per read: the engine to show, its record,
 //      and the calibration map. Every function reads that row before it
 //      shows a number.
@@ -16,7 +16,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import { fetchYahooReturns } from '../../shared/marketDataClient.ts';
 import { runEngines, READS, CANDIDATE_ENGINE } from '../../shared/engines.ts';
-import { loadLive, logCalls, rowsFor, scoreOpenCalls, summarise, pooledCalibration } from '../../shared/ledger.ts';
+import { loadLive, logCalls, rowsFor, scoreOpenCalls, foldDays, decide, pooledCalibration, EMPTY_TALLY, SETTLE_DAYS } from '../../shared/ledger.ts';
 import { UNIVERSE, MAX_EXTRA_SERIES, HISTORY_DAYS } from '../../shared/universe.ts';
 import { ENGINE_VERSION } from '../../shared/version.ts';
 
@@ -53,15 +53,22 @@ Deno.serve(async (req) => {
       for (const read of READS) pooled[read].push(...run.candidateSteps[read]);
     }
 
+    // Recently scored rows. Days already in the tally are skipped inside
+    // foldDays, so only the new ones matter here.
     const rows = await L.filter({ scored: true }, '-call_date', 5000).catch(() => []);
     const existing = await S.list('-updated_date', 10).catch(() => []);
+    const through = new Date(Date.now() - SETTLE_DAYS * 86400000).toISOString().slice(0, 10);
     const status = {};
     for (const read of READS) {
-      const st = summarise(read, rows || [], live[read]);
-      const map = pooledCalibration(pooled[read]);
       const prev = (existing || []).find((r) => r.read === read);
+      let tally = EMPTY_TALLY;
+      if (prev?.tally) { try { tally = { ...EMPTY_TALLY, ...JSON.parse(prev.tally) }; } catch { /* start again */ } }
+      tally = foldDays(tally, read, rows || [], through);
+      const st = decide(read, tally, live[read]);
+      const map = pooledCalibration(pooled[read]);
       const row = {
         ...st,
+        tally: JSON.stringify(tally),
         calibration: map ? JSON.stringify(map) : (prev?.calibration ?? null),
         calibration_steps: map ? map.n : (prev?.calibration_steps ?? 0),
         promoted_at: st.decision === 'promote' ? new Date().toISOString() : (st.live_engine === CANDIDATE_ENGINE ? prev?.promoted_at ?? null : null),
@@ -69,7 +76,7 @@ Deno.serve(async (req) => {
       };
       if (prev?.id) await S.update(prev.id, row).catch(() => {});
       else await S.create(row).catch(() => {});
-      status[read] = { live_engine: st.live_engine, decision: st.decision, reason: st.reason, paired_calls: st.paired_calls, gain: st.gain, hit_control: st.hit_control, hit_candidate: st.hit_candidate, calibration_steps: row.calibration_steps };
+      status[read] = { live_engine: st.live_engine, decision: st.decision, reason: st.reason, paired_calls: st.paired_calls, paired_days: st.paired_days, gain: st.gain, hit_control: st.hit_control, hit_candidate: st.hit_candidate, calibration_steps: row.calibration_steps };
     }
 
     return Response.json({ ok: true, engine_version: ENGINE_VERSION, series: tickers.length, failed, newly_scored: scored, newly_logged: logged, status });

@@ -1,0 +1,521 @@
+{
+ "window": 1250,
+ "RANGE": {
+  "events": [
+   [
+    "2018-07-11",
+    "promote"
+   ],
+   [
+    "2024-11-08",
+    "demote"
+   ],
+   [
+    "2025-08-02",
+    "promote"
+   ]
+  ],
+  "calibration first fitted": "2016-08-01",
+  "all years": {
+   "calls": 46495,
+   "shown": 57.1,
+   "6.2": 55.1,
+   "6.4": 57.2,
+   "baseline rule": 57.2,
+   "shown: stated %": 57.7,
+   "shown, strongest tenth: stated, right": [
+    71.3,
+    67.0
+   ],
+   "share of days 6.4 was shown %": 70.0
+  },
+  "by year": {
+   "2016": {
+    "calls": 3939,
+    "shown": 53.3,
+    "6.2": 53.3,
+    "6.4": 54.7,
+    "baseline rule": 52.9,
+    "shown: stated %": 56.6,
+    "shown, strongest tenth: stated, right": [
+     69.0,
+     59.6
+    ],
+    "share of days 6.4 was shown %": 0.0
+   },
+   "2017": {
+    "calls": 4369,
+    "shown": 60.2,
+    "6.2": 60.2,
+    "6.4": 60.2,
+    "baseline rule": 60.3,
+    "shown: stated %": 59.3,
+    "shown, strongest tenth: stated, right": [
+     73.3,
+     68.6
+    ],
+    "share of days 6.4 was shown %": 0.0
+   },
+   "2018": {
+    "calls": 4353,
+    "shown": 55.5,
+    "6.2": 55.2,
+    "6.4": 55.3,
+    "baseline rule": 55.6,
+    "shown: stated %": 58.8,
+    "shown, strongest tenth: stated, right": [
+     71.3,
+     63.4
+    ],
+    "share of days 6.4 was shown %": 47.0
+   },
+   "2019": {
+    "calls": 4362,
+    "shown": 58.8,
+    "6.2": 57.8,
+    "6.4": 58.8,
+    "baseline rule": 58.2,
+    "shown: stated %": 57.0,
+    "shown, strongest tenth: stated, right": [
+     65.1,
+     64.1
+    ],
+    "share of days 6.4 was shown %": 100.0
+   },
+   "2020": {
+    "calls": 4377,
+    "shown": 55.1,
+    "6.2": 51.1,
+    "6.4": 55.1,
+    "baseline rule": 55.5,
+    "shown: stated %": 58.1,
+    "shown, strongest tenth: stated, right": [
+     73.5,
+     72.0
+    ],
+    "share of days 6.4 was shown %": 100.0
+   },
+   "2021": {
+    "calls": 4360,
+    "shown": 54.2,
+    "6.2": 52.8,
+    "6.4": 54.2,
+    "baseline rule": 54.4,
+    "shown: stated %": 55.2,
+    "shown, strongest tenth: stated, right": [
+     64.2,
+     62.2
+    ],
+    "share of days 6.4 was shown %": 100.0
+   },
+   "2022": {
+    "calls": 4374,
+    "shown": 59.4,
+    "6.2": 55.8,
+    "6.4": 59.4,
+    "baseline rule": 60.2,
+    "shown: stated %": 58.3,
+    "shown, strongest tenth: stated, right": [
+     69.3,
+     66.0
+    ],
+    "share of days 6.4 was shown %": 100.0
+   },
+   "2023": {
+    "calls": 4358,
+    "shown": 57.1,
+    "6.2": 55.2,
+    "6.4": 57.1,
+    "baseline rule": 57.1,
+    "shown: stated %": 57.7,
+    "shown, strongest tenth: stated, right": [
+     68.0,
+     67.6
+    ],
+    "share of days 6.4 was shown %": 100.0
+   },
+   "2024": {
+    "calls": 4392,
+    "shown": 59.2,
+    "6.2": 53.3,
+    "6.4": 59.5,
+    "baseline rule": 59.6,
+    "shown: stated %": 59.1,
+    "shown, strongest tenth: stated, right": [
+     81.5,
+     79.5
+    ],
+    "share of days 6.4 was shown %": 86.0
+   },
+   "2025": {
+    "calls": 4372,
+    "shown": 57.5,
+    "6.2": 56.1,
+    "6.4": 57.2,
+    "baseline rule": 57.1,
+    "shown: stated %": 57.2,
+    "shown, strongest tenth: stated, right": [
+     70.7,
+     63.8
+    ],
+    "share of days 6.4 was shown %": 41.0
+   },
+   "2026": {
+    "calls": 3239,
+    "shown": 57.0,
+    "6.2": 55.1,
+    "6.4": 57.0,
+    "baseline rule": 57.9,
+    "shown: stated %": 57.8,
+    "shown, strongest tenth: stated, right": [
+     69.2,
+     65.5
+    ],
+    "share of days 6.4 was shown %": 100.0
+   }
+  },
+  "by age of the series (steps since its first)": {
+   "first 100": {
+    "calls": 1258,
+    "shown": 51.3,
+    "6.2": 51.3,
+    "6.4": 50.7,
+    "baseline rule": 50.0,
+    "shown: stated %": 57.2,
+    "shown, strongest tenth: stated, right": [
+     70.7,
+     53.2
+    ],
+    "share of days 6.4 was shown %": 0.0
+   },
+   "100-250": {
+    "calls": 2550,
+    "shown": 54.1,
+    "6.2": 54.1,
+    "6.4": 56.4,
+    "baseline rule": 54.1,
+    "shown: stated %": 56.4,
+    "shown, strongest tenth: stated, right": [
+     67.7,
+     62.4
+    ],
+    "share of days 6.4 was shown %": 0.0
+   },
+   "250-500": {
+    "calls": 4250,
+    "shown": 59.2,
+    "6.2": 59.2,
+    "6.4": 59.3,
+    "baseline rule": 59.3,
+    "shown: stated %": 58.4,
+    "shown, strongest tenth: stated, right": [
+     70.5,
+     62.6
+    ],
+    "share of days 6.4 was shown %": 0.0
+   },
+   "500-1000": {
+    "calls": 8500,
+    "shown": 57.6,
+    "6.2": 57.1,
+    "6.4": 57.5,
+    "baseline rule": 57.4,
+    "shown: stated %": 58.3,
+    "shown, strongest tenth: stated, right": [
+     71.5,
+     65.0
+    ],
+    "share of days 6.4 was shown %": 70.0
+   },
+   "1000-2000": {
+    "calls": 17000,
+    "shown": 56.3,
+    "6.2": 53.5,
+    "6.4": 56.3,
+    "baseline rule": 56.6,
+    "shown: stated %": 57.2,
+    "shown, strongest tenth: stated, right": [
+     69.5,
+     67.9
+    ],
+    "share of days 6.4 was shown %": 100.0
+   },
+   "2000+": {
+    "calls": 12937,
+    "shown": 58.1,
+    "6.2": 55.1,
+    "6.4": 58.1,
+    "baseline rule": 58.4,
+    "shown: stated %": 58.1,
+    "shown, strongest tenth: stated, right": [
+     74.0,
+     70.6
+    ],
+    "share of days 6.4 was shown %": 76.0
+   }
+  }
+ },
+ "MOVE": {
+  "events": [
+   [
+    "2017-05-26",
+    "promote"
+   ],
+   [
+    "2017-12-04",
+    "demote"
+   ],
+   [
+    "2020-08-17",
+    "promote"
+   ],
+   [
+    "2021-08-21",
+    "demote"
+   ],
+   [
+    "2022-09-21",
+    "promote"
+   ]
+  ],
+  "calibration first fitted": "2016-08-01",
+  "all years": {
+   "calls": 46495,
+   "shown": 51.2,
+   "6.2": 51.1,
+   "6.4": 50.6,
+   "baseline rule": 51.1,
+   "shown: stated %": 52.3,
+   "shown, strongest tenth: stated, right": [
+    60.4,
+    53.8
+   ],
+   "share of days 6.4 was shown %": 52.0
+  },
+  "by year": {
+   "2016": {
+    "calls": 3939,
+    "shown": 50.8,
+    "6.2": 50.8,
+    "6.4": 49.4,
+    "baseline rule": 50.5,
+    "shown: stated %": 55.5,
+    "shown, strongest tenth: stated, right": [
+     65.0,
+     47.5
+    ],
+    "share of days 6.4 was shown %": 0.0
+   },
+   "2017": {
+    "calls": 4369,
+    "shown": 50.9,
+    "6.2": 51.7,
+    "6.4": 51.4,
+    "baseline rule": 52.1,
+    "shown: stated %": 53.7,
+    "shown, strongest tenth: stated, right": [
+     63.8,
+     56.4
+    ],
+    "share of days 6.4 was shown %": 52.0
+   },
+   "2018": {
+    "calls": 4353,
+    "shown": 50.7,
+    "6.2": 50.7,
+    "6.4": 48.8,
+    "baseline rule": 49.9,
+    "shown: stated %": 53.1,
+    "shown, strongest tenth: stated, right": [
+     60.6,
+     55.2
+    ],
+    "share of days 6.4 was shown %": 0.0
+   },
+   "2019": {
+    "calls": 4362,
+    "shown": 51.6,
+    "6.2": 51.6,
+    "6.4": 49.6,
+    "baseline rule": 51.1,
+    "shown: stated %": 52.7,
+    "shown, strongest tenth: stated, right": [
+     58.7,
+     57.2
+    ],
+    "share of days 6.4 was shown %": 0.0
+   },
+   "2020": {
+    "calls": 4377,
+    "shown": 51.9,
+    "6.2": 50.4,
+    "6.4": 50.7,
+    "baseline rule": 51.7,
+    "shown: stated %": 51.8,
+    "shown, strongest tenth: stated, right": [
+     56.8,
+     53.6
+    ],
+    "share of days 6.4 was shown %": 37.0
+   },
+   "2021": {
+    "calls": 4360,
+    "shown": 51.9,
+    "6.2": 51.7,
+    "6.4": 51.5,
+    "baseline rule": 51.6,
+    "shown: stated %": 52.0,
+    "shown, strongest tenth: stated, right": [
+     57.4,
+     52.2
+    ],
+    "share of days 6.4 was shown %": 64.0
+   },
+   "2022": {
+    "calls": 4374,
+    "shown": 51.2,
+    "6.2": 50.6,
+    "6.4": 50.9,
+    "baseline rule": 51.5,
+    "shown: stated %": 52.9,
+    "shown, strongest tenth: stated, right": [
+     65.1,
+     54.6
+    ],
+    "share of days 6.4 was shown %": 27.0
+   },
+   "2023": {
+    "calls": 4358,
+    "shown": 51.4,
+    "6.2": 51.4,
+    "6.4": 51.4,
+    "baseline rule": 51.4,
+    "shown: stated %": 51.1,
+    "shown, strongest tenth: stated, right": [
+     54.3,
+     54.3
+    ],
+    "share of days 6.4 was shown %": 100.0
+   },
+   "2024": {
+    "calls": 4392,
+    "shown": 51.0,
+    "6.2": 51.5,
+    "6.4": 51.0,
+    "baseline rule": 51.1,
+    "shown: stated %": 51.1,
+    "shown, strongest tenth: stated, right": [
+     54.0,
+     53.6
+    ],
+    "share of days 6.4 was shown %": 100.0
+   },
+   "2025": {
+    "calls": 4372,
+    "shown": 51.2,
+    "6.2": 50.3,
+    "6.4": 51.2,
+    "baseline rule": 50.0,
+    "shown: stated %": 51.0,
+    "shown, strongest tenth: stated, right": [
+     53.5,
+     56.8
+    ],
+    "share of days 6.4 was shown %": 100.0
+   },
+   "2026": {
+    "calls": 3239,
+    "shown": 51.0,
+    "6.2": 52.2,
+    "6.4": 51.0,
+    "baseline rule": 51.4,
+    "shown: stated %": 51.0,
+    "shown, strongest tenth: stated, right": [
+     54.1,
+     55.9
+    ],
+    "share of days 6.4 was shown %": 100.0
+   }
+  },
+  "by age of the series (steps since its first)": {
+   "first 100": {
+    "calls": 1258,
+    "shown": 49.3,
+    "6.2": 49.3,
+    "6.4": 49.8,
+    "baseline rule": 50.4,
+    "shown: stated %": 56.4,
+    "shown, strongest tenth: stated, right": [
+     67.6,
+     50.8
+    ],
+    "share of days 6.4 was shown %": 0.0
+   },
+   "100-250": {
+    "calls": 2550,
+    "shown": 51.2,
+    "6.2": 51.2,
+    "6.4": 48.9,
+    "baseline rule": 50.3,
+    "shown: stated %": 54.8,
+    "shown, strongest tenth: stated, right": [
+     63.5,
+     48.2
+    ],
+    "share of days 6.4 was shown %": 0.0
+   },
+   "250-500": {
+    "calls": 4250,
+    "shown": 50.8,
+    "6.2": 51.5,
+    "6.4": 51.4,
+    "baseline rule": 52.1,
+    "shown: stated %": 53.7,
+    "shown, strongest tenth: stated, right": [
+     63.4,
+     57.1
+    ],
+    "share of days 6.4 was shown %": 49.0
+   },
+   "500-1000": {
+    "calls": 8500,
+    "shown": 51.3,
+    "6.2": 51.4,
+    "6.4": 49.3,
+    "baseline rule": 50.6,
+    "shown: stated %": 52.9,
+    "shown, strongest tenth: stated, right": [
+     60.5,
+     55.8
+    ],
+    "share of days 6.4 was shown %": 2.0
+   },
+   "1000-2000": {
+    "calls": 17000,
+    "shown": 51.6,
+    "6.2": 51.0,
+    "6.4": 51.1,
+    "baseline rule": 51.6,
+    "shown: stated %": 52.0,
+    "shown, strongest tenth: stated, right": [
+     59.1,
+     52.9
+    ],
+    "share of days 6.4 was shown %": 55.0
+   },
+   "2000+": {
+    "calls": 12937,
+    "shown": 51.1,
+    "6.2": 51.3,
+    "6.4": 51.0,
+    "baseline rule": 50.7,
+    "shown: stated %": 51.1,
+    "shown, strongest tenth: stated, right": [
+     54.4,
+     54.0
+    ],
+    "share of days 6.4 was shown %": 97.0
+   }
+  }
+ }
+}

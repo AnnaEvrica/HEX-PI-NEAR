@@ -71,6 +71,10 @@
       "type": "string",
       "description": "The decision in words"
     },
+    "tally": {
+      "type": "string",
+      "description": "JSON: running sums over every settled day, so each decision rests on the whole record"
+    },
     "calibration": {
       "type": "string",
       "description": "JSON: pooled calibration map for 6.4 on this read"
