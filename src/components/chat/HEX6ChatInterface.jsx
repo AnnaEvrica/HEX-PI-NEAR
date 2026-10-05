@@ -1,13 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { CLAUDE_MODEL } from '@/lib/models';
-import { Send, Menu, Plus, Mic, Image, Copy, Check, Volume2, VolumeX } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
+import { Send, Menu, Plus, Mic, Image } from 'lucide-react';
 import SettingsModal from '@/components/SettingsModal';
 import LegalModal from '@/components/LegalModal';
 import ConversationDayList from '@/components/chat/ConversationDayList';
 import ChatClock from '@/components/chat/ChatClock';
 import SidebarActions from '@/components/chat/SidebarActions';
+import ChatMessage from '@/components/chat/ChatMessage';
 
 export default function HEX6ChatInterface() {
   const welcomeMessage = {
@@ -563,72 +563,14 @@ export default function HEX6ChatInterface() {
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-3 md:px-4 py-3 md:py-5 space-y-3 md:space-y-4">
           {messages.map((message) => (
-            <div
+            <ChatMessage
               key={message.id}
-              className={`flex group ${
-                message.role === 'user' ? 'justify-end' : 'justify-start'
-              }`}
-            >
-              <div className={`max-w-[85%] md:max-w-2xl ${message.role === 'user' ? 'mr-2' : 'ml-2'}`}>
-                {message.file_urls && message.file_urls.length > 0 && (
-                  <div className="mb-2 flex flex-wrap gap-2">
-                    {message.file_urls.map((url, idx) => (
-                      <img
-                        key={idx}
-                        src={url}
-                        alt="uploaded"
-                        className="max-w-xs rounded-lg border border-border"
-                      />
-                    ))}
-                  </div>
-                )}
-                <div
-                  className="bg-muted/60 text-foreground border border-foreground/20 px-3 py-2 text-[13px] md:text-sm"
-                >
-                  <ReactMarkdown 
-                    className="prose prose-sm dark:prose-invert max-w-none text-foreground [&>*]:my-0 [&>p]:my-1 [&>ul]:my-1 [&>ol]:my-1 [&>li]:my-0"
-                    components={{
-                      p: ({ node, ...props }) => <p {...props} />,
-                      ul: ({ node, ...props }) => <ul className="list-disc list-inside" {...props} />,
-                      ol: ({ node, ...props }) => <ol className="list-decimal list-inside" {...props} />,
-                      li: ({ node, ...props }) => <li {...props} />,
-                      a: ({ node, ...props }) => (
-                        <a
-                          {...props}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline hover:opacity-80 break-all text-accent"
-                        />
-                      ),
-                    }}
-                  >
-                    {message.content}
-                  </ReactMarkdown>
-                </div>
-
-                {/* Action buttons — sit under the bubble, only show on hover (or always on touch devices) */}
-                <div className={`flex gap-0.5 mt-1 px-1 opacity-60 hover:opacity-100 transition-opacity ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <button
-                    onClick={() => handleCopy(message)}
-                    className="p-1 rounded-md hover:bg-muted text-secondary hover:text-foreground transition-colors flex items-center justify-center"
-                    style={{ minWidth: '24px', minHeight: '24px' }}
-                    title="Copy message"
-                  >
-                    {copiedId === message.id ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  </button>
-                  {message.role === 'assistant' && (
-                    <button
-                      onClick={() => handleSpeak(message)}
-                      className={`p-1 rounded-md hover:bg-muted transition-colors flex items-center justify-center ${speakingId === message.id ? 'text-accent' : 'text-secondary hover:text-foreground'}`}
-                      style={{ minWidth: '24px', minHeight: '24px' }}
-                      title={speakingId === message.id ? 'Stop speaking' : 'Read aloud'}
-                    >
-                      {speakingId === message.id ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
+              message={message}
+              copiedId={copiedId}
+              speakingId={speakingId}
+              onCopy={handleCopy}
+              onSpeak={handleSpeak}
+            />
           ))}
           {loading && (
             <div className="flex justify-start">

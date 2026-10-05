@@ -509,8 +509,12 @@ Return JSON with:
     voice = `${voice}; sustain the register across the whole reply, let the structure carry, don't restate`;
     const synthPayload: Record<string, unknown> = {
       prompt: composePrompt(stateBlock, dataBlock, isCasual),
-      model: CLAUDE_MODEL,
-      add_context_from_internet: false,
+      // Live browsing: gemini_3_1_pro supports add_context_from_internet, so
+      // Hex can search the web while writing its reply. Claude doesn't support
+      // web context, so the synthesis model moves to Gemini. The persona
+      // prompt carries the voice.
+      model: 'gemini_3_1_pro',
+      add_context_from_internet: true,
       response_json_schema: {
         type: 'object',
         properties: {
