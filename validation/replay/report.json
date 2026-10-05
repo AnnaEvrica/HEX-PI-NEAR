@@ -1,0 +1,1856 @@
+{
+ "ledger rows": 280252,
+ "meta": {
+  "rows": 280252,
+  "series": 43,
+  "code_hash": "0e39fd5d3e17793c",
+  "one-pass check: truncated reruns": 258,
+  "largest difference": 0.0,
+  "currency eligibility": {
+   "Brazil": {
+    "observations": 2682,
+    "share of days with a change": 0.994,
+    "included": true
+   },
+   "China": {
+    "observations": 2682,
+    "share of days with a change": 0.943,
+    "included": true
+   },
+   "Denmark": {
+    "observations": 2682,
+    "share of days with a change": 0.999,
+    "included": true
+   },
+   "Hong Kong": {
+    "observations": 2682,
+    "share of days with a change": 0.944,
+    "included": true
+   },
+   "Malaysia": {
+    "observations": 2682,
+    "share of days with a change": 0.926,
+    "included": true
+   },
+   "Singapore": {
+    "observations": 2682,
+    "share of days with a change": 0.99,
+    "included": true
+   },
+   "South Korea": {
+    "observations": 2682,
+    "share of days with a change": 0.99,
+    "included": true
+   },
+   "Taiwan": {
+    "observations": 2682,
+    "share of days with a change": 0.919,
+    "included": true
+   },
+   "Thailand": {
+    "observations": 2682,
+    "share of days with a change": 0.944,
+    "included": true
+   },
+   "Venezuela": {
+    "observations": 2682,
+    "share of days with a change": 0.698,
+    "included": true
+   }
+  },
+  "seconds": 217
+ },
+ "markets, development (17 series, 2016-2026)": {
+  "RANGE": {
+   "calls": 46478,
+   "right %": 57.86,
+   "expected (the null) right %": 57.18,
+   "6.5 right %": 57.44,
+   "Brier skill over the null %": 0.62,
+   "calibration error": 0.013,
+   "strongest tenth: stated, right %": [
+    74.0,
+    69.6
+   ],
+   "information gain over the null": {
+    "bits per call": 0.00432,
+    "95% interval": [
+     0.00299,
+     0.00561
+    ],
+    "total bits": 200.6,
+    "macro-average over series": 0.00424,
+    "macro 95% interval": [
+     0.0029,
+     0.00553
+    ],
+    "calls": 46478,
+    "series": 17
+   },
+   "over 6.5": {
+    "bits per call": 0.00374,
+    "95% interval": [
+     0.00249,
+     0.00497
+    ],
+    "total bits": 173.9,
+    "macro-average over series": 0.00366,
+    "macro 95% interval": [
+     0.00238,
+     0.0049
+    ],
+    "calls": 46478,
+    "series": 17
+   },
+   "learning gain (learning against frozen after 500 calls)": {
+    "bits per call": 0.00363,
+    "95% interval": [
+     0.00252,
+     0.00481
+    ],
+    "total bits": 137.9,
+    "macro-average over series": 0.00361,
+    "macro 95% interval": [
+     0.0025,
+     0.00478
+    ],
+    "calls": 37978,
+    "series": 17
+   },
+   "by series": {
+    "BRENT": {
+     "calls": 2698,
+     "bits per call over the null": 0.00619,
+     "over 6.5": 0.00567,
+     "right %": 59.0,
+     "expected right %": 57.4
+    },
+    "BTC-USD": {
+     "calls": 3898,
+     "bits per call over the null": 0.00618,
+     "over 6.5": 0.00591,
+     "right %": 60.4,
+     "expected right %": 59.8
+    },
+    "FX-Australia": {
+     "calls": 2654,
+     "bits per call over the null": -0.00106,
+     "over 6.5": -0.00075,
+     "right %": 56.0,
+     "expected right %": 56.3
+    },
+    "FX-Canada": {
+     "calls": 2654,
+     "bits per call over the null": -0.00094,
+     "over 6.5": -0.00065,
+     "right %": 59.5,
+     "expected right %": 59.7
+    },
+    "FX-Euro": {
+     "calls": 2654,
+     "bits per call over the null": -0.00055,
+     "over 6.5": -0.00097,
+     "right %": 56.6,
+     "expected right %": 56.6
+    },
+    "FX-India": {
+     "calls": 2654,
+     "bits per call over the null": 0.00358,
+     "over 6.5": 0.00341,
+     "right %": 60.6,
+     "expected right %": 60.1
+    },
+    "FX-Japan": {
+     "calls": 2654,
+     "bits per call over the null": 0.0035,
+     "over 6.5": 0.00344,
+     "right %": 60.2,
+     "expected right %": 59.2
+    },
+    "FX-Mexico": {
+     "calls": 2654,
+     "bits per call over the null": 0.01497,
+     "over 6.5": 0.01183,
+     "right %": 59.0,
+     "expected right %": 57.0
+    },
+    "FX-NewZealand": {
+     "calls": 2654,
+     "bits per call over the null": -0.00106,
+     "over 6.5": -0.00132,
+     "right %": 57.5,
+     "expected right %": 57.5
+    },
+    "FX-Norway": {
+     "calls": 2654,
+     "bits per call over the null": 0.00038,
+     "over 6.5": 0.0009,
+     "right %": 55.6,
+     "expected right %": 55.4
+    },
+    "FX-SouthAfrica": {
+     "calls": 2654,
+     "bits per call over the null": 0.00158,
+     "over 6.5": 0.00149,
+     "right %": 54.6,
+     "expected right %": 54.8
+    },
+    "FX-Sweden": {
+     "calls": 2654,
+     "bits per call over the null": 0.00011,
+     "over 6.5": 3e-05,
+     "right %": 54.0,
+     "expected right %": 54.4
+    },
+    "FX-Switzerland": {
+     "calls": 2654,
+     "bits per call over the null": 0.00112,
+     "over 6.5": 0.00135,
+     "right %": 54.2,
+     "expected right %": 53.9
+    },
+    "FX-UnitedKingdom": {
+     "calls": 2654,
+     "bits per call over the null": -0.00095,
+     "over 6.5": -0.00054,
+     "right %": 57.8,
+     "expected right %": 58.1
+    },
+    "NATGAS": {
+     "calls": 2676,
+     "bits per call over the null": 0.00072,
+     "over 6.5": 0.00099,
+     "right %": 60.1,
+     "expected right %": 59.5
+    },
+    "VIX": {
+     "calls": 2700,
+     "bits per call over the null": 0.03177,
+     "over 6.5": 0.02554,
+     "right %": 58.6,
+     "expected right %": 54.2
+    },
+    "WTI": {
+     "calls": 2658,
+     "bits per call over the null": 0.00648,
+     "over 6.5": 0.00588,
+     "right %": 58.8,
+     "expected right %": 57.0
+    }
+   },
+   "by experience": {
+    "1-100": {
+     "calls": 1700,
+     "bits per call over the null": -0.01101,
+     "Brier skill %": -1.17,
+     "right % minus expected": -0.06,
+     "calibration error": 0.0618
+    },
+    "101-250": {
+     "calls": 2550,
+     "bits per call over the null": 0.00202,
+     "Brier skill %": 0.29,
+     "right % minus expected": 0.2,
+     "calibration error": 0.0431
+    },
+    "251-500": {
+     "calls": 4250,
+     "bits per call over the null": 0.00031,
+     "Brier skill %": 0.06,
+     "right % minus expected": 0.0,
+     "calibration error": 0.0144
+    },
+    "501-1000": {
+     "calls": 8500,
+     "bits per call over the null": 0.00403,
+     "Brier skill %": 0.58,
+     "right % minus expected": 0.42,
+     "calibration error": 0.0196
+    },
+    "1001+": {
+     "calls": 29478,
+     "bits per call over the null": 0.00606,
+     "Brier skill %": 0.85,
+     "right % minus expected": 0.94,
+     "calibration error": 0.0146
+    }
+   }
+  },
+  "MOVE": {
+   "calls": 46478,
+   "right %": 51.38,
+   "expected (the null) right %": 51.18,
+   "6.5 right %": 51.28,
+   "Brier skill over the null %": 0.01,
+   "calibration error": 0.0158,
+   "strongest tenth: stated, right %": [
+    60.5,
+    56.0
+   ],
+   "information gain over the null": {
+    "bits per call": -1e-05,
+    "95% interval": [
+     -0.0007,
+     0.00062
+    ],
+    "total bits": -0.4,
+    "macro-average over series": -5e-05,
+    "macro 95% interval": [
+     -0.00076,
+     0.00057
+    ],
+    "calls": 46478,
+    "series": 17
+   },
+   "over 6.5": {
+    "bits per call": -3e-05,
+    "95% interval": [
+     -0.0007,
+     0.00062
+    ],
+    "total bits": -1.6,
+    "macro-average over series": -6e-05,
+    "macro 95% interval": [
+     -0.00075,
+     0.0006
+    ],
+    "calls": 46478,
+    "series": 17
+   },
+   "learning gain (learning against frozen after 500 calls)": {
+    "bits per call": 0.00062,
+    "95% interval": [
+     0.00013,
+     0.00111
+    ],
+    "total bits": 23.6,
+    "macro-average over series": 0.00064,
+    "macro 95% interval": [
+     0.00016,
+     0.00113
+    ],
+    "calls": 37978,
+    "series": 17
+   },
+   "by series": {
+    "BRENT": {
+     "calls": 2698,
+     "bits per call over the null": -0.00067,
+     "over 6.5": -0.00022,
+     "right %": 52.1,
+     "expected right %": 52.3
+    },
+    "BTC-USD": {
+     "calls": 3898,
+     "bits per call over the null": 0.00105,
+     "over 6.5": 0.00066,
+     "right %": 52.9,
+     "expected right %": 51.1
+    },
+    "FX-Australia": {
+     "calls": 2654,
+     "bits per call over the null": -0.00127,
+     "over 6.5": -0.0015,
+     "right %": 50.8,
+     "expected right %": 50.9
+    },
+    "FX-Canada": {
+     "calls": 2654,
+     "bits per call over the null": -0.00112,
+     "over 6.5": -0.00061,
+     "right %": 49.2,
+     "expected right %": 48.1
+    },
+    "FX-Euro": {
+     "calls": 2654,
+     "bits per call over the null": -0.00107,
+     "over 6.5": -0.001,
+     "right %": 49.0,
+     "expected right %": 49.7
+    },
+    "FX-India": {
+     "calls": 2654,
+     "bits per call over the null": 0.00023,
+     "over 6.5": 0.00034,
+     "right %": 51.3,
+     "expected right %": 50.3
+    },
+    "FX-Japan": {
+     "calls": 2654,
+     "bits per call over the null": -0.00124,
+     "over 6.5": -0.00069,
+     "right %": 50.9,
+     "expected right %": 51.1
+    },
+    "FX-Mexico": {
+     "calls": 2654,
+     "bits per call over the null": -0.00103,
+     "over 6.5": -0.00111,
+     "right %": 52.9,
+     "expected right %": 52.8
+    },
+    "FX-NewZealand": {
+     "calls": 2654,
+     "bits per call over the null": -0.00127,
+     "over 6.5": -0.00093,
+     "right %": 48.8,
+     "expected right %": 49.0
+    },
+    "FX-Norway": {
+     "calls": 2654,
+     "bits per call over the null": -0.00112,
+     "over 6.5": -0.00016,
+     "right %": 49.8,
+     "expected right %": 49.8
+    },
+    "FX-SouthAfrica": {
+     "calls": 2654,
+     "bits per call over the null": -0.00043,
+     "over 6.5": -0.00172,
+     "right %": 51.7,
+     "expected right %": 51.7
+    },
+    "FX-Sweden": {
+     "calls": 2654,
+     "bits per call over the null": -0.00128,
+     "over 6.5": -0.0007,
+     "right %": 49.1,
+     "expected right %": 49.5
+    },
+    "FX-Switzerland": {
+     "calls": 2654,
+     "bits per call over the null": -0.001,
+     "over 6.5": -0.00137,
+     "right %": 51.6,
+     "expected right %": 51.2
+    },
+    "FX-UnitedKingdom": {
+     "calls": 2654,
+     "bits per call over the null": -0.00111,
+     "over 6.5": -0.00061,
+     "right %": 48.2,
+     "expected right %": 49.4
+    },
+    "NATGAS": {
+     "calls": 2676,
+     "bits per call over the null": 0.00076,
+     "over 6.5": 0.00028,
+     "right %": 55.4,
+     "expected right %": 55.4
+    },
+    "VIX": {
+     "calls": 2700,
+     "bits per call over the null": 0.01077,
+     "over 6.5": 0.0093,
+     "right %": 56.5,
+     "expected right %": 54.8
+    },
+    "WTI": {
+     "calls": 2658,
+     "bits per call over the null": -0.00103,
+     "over 6.5": -0.00103,
+     "right %": 52.3,
+     "expected right %": 53.0
+    }
+   },
+   "by experience": {
+    "1-100": {
+     "calls": 1700,
+     "bits per call over the null": -0.013,
+     "Brier skill %": -1.39,
+     "right % minus expected": -1.06,
+     "calibration error": 0.0812
+    },
+    "101-250": {
+     "calls": 2550,
+     "bits per call over the null": -0.00212,
+     "Brier skill %": -0.28,
+     "right % minus expected": -0.63,
+     "calibration error": 0.0371
+    },
+    "251-500": {
+     "calls": 4250,
+     "bits per call over the null": -0.00019,
+     "Brier skill %": -0.03,
+     "right % minus expected": 0.28,
+     "calibration error": 0.0121
+    },
+    "501-1000": {
+     "calls": 8500,
+     "bits per call over the null": 0.00068,
+     "Brier skill %": 0.09,
+     "right % minus expected": 0.89,
+     "calibration error": 0.0183
+    },
+    "1001+": {
+     "calls": 29478,
+     "bits per call over the null": 0.00075,
+     "Brier skill %": 0.1,
+     "right % minus expected": 0.13,
+     "calibration error": 0.0104
+    }
+   }
+  }
+ },
+ "currencies never used before (10 series, 2016-2026)": {
+  "RANGE": {
+   "calls": 26540,
+   "right %": 62.09,
+   "expected (the null) right %": 61.18,
+   "6.5 right %": 61.5,
+   "Brier skill over the null %": 1.15,
+   "calibration error": 0.0091,
+   "strongest tenth: stated, right %": [
+    90.1,
+    89.1
+   ],
+   "information gain over the null": {
+    "bits per call": 0.00819,
+    "95% interval": [
+     0.00599,
+     0.01061
+    ],
+    "total bits": 217.2,
+    "macro-average over series": 0.00819,
+    "macro 95% interval": [
+     0.00599,
+     0.01061
+    ],
+    "calls": 26540,
+    "series": 10
+   },
+   "over 6.5": {
+    "bits per call": 0.00348,
+    "95% interval": [
+     0.00179,
+     0.00526
+    ],
+    "total bits": 92.5,
+    "macro-average over series": 0.00348,
+    "macro 95% interval": [
+     0.00179,
+     0.00526
+    ],
+    "calls": 26540,
+    "series": 10
+   },
+   "learning gain (learning against frozen after 500 calls)": {
+    "bits per call": 0.00961,
+    "95% interval": [
+     0.00706,
+     0.01215
+    ],
+    "total bits": 207.0,
+    "macro-average over series": 0.00961,
+    "macro 95% interval": [
+     0.00706,
+     0.01215
+    ],
+    "calls": 21540,
+    "series": 10
+   },
+   "by series": {
+    "FX-Brazil": {
+     "calls": 2654,
+     "bits per call over the null": 0.0001,
+     "over 6.5": 0.00072,
+     "right %": 59.3,
+     "expected right %": 58.8
+    },
+    "FX-China": {
+     "calls": 2654,
+     "bits per call over the null": 0.01594,
+     "over 6.5": 0.01158,
+     "right %": 61.2,
+     "expected right %": 59.8
+    },
+    "FX-Denmark": {
+     "calls": 2654,
+     "bits per call over the null": -0.00093,
+     "over 6.5": -0.00105,
+     "right %": 56.6,
+     "expected right %": 56.2
+    },
+    "FX-HongKong": {
+     "calls": 2654,
+     "bits per call over the null": 0.04884,
+     "over 6.5": 0.01974,
+     "right %": 69.5,
+     "expected right %": 65.6
+    },
+    "FX-Malaysia": {
+     "calls": 2654,
+     "bits per call over the null": 0.00438,
+     "over 6.5": 0.00393,
+     "right %": 60.1,
+     "expected right %": 59.0
+    },
+    "FX-Singapore": {
+     "calls": 2654,
+     "bits per call over the null": 0.00115,
+     "over 6.5": 0.00159,
+     "right %": 57.2,
+     "expected right %": 56.5
+    },
+    "FX-SouthKorea": {
+     "calls": 2654,
+     "bits per call over the null": -0.0008,
+     "over 6.5": -0.00046,
+     "right %": 54.5,
+     "expected right %": 54.8
+    },
+    "FX-Taiwan": {
+     "calls": 2654,
+     "bits per call over the null": 0.00361,
+     "over 6.5": 0.00313,
+     "right %": 57.4,
+     "expected right %": 57.0
+    },
+    "FX-Thailand": {
+     "calls": 2654,
+     "bits per call over the null": 0.00099,
+     "over 6.5": 0.00152,
+     "right %": 59.6,
+     "expected right %": 59.5
+    },
+    "FX-Venezuela": {
+     "calls": 2654,
+     "bits per call over the null": 0.00857,
+     "over 6.5": -0.00587,
+     "right %": 85.6,
+     "expected right %": 84.6
+    }
+   },
+   "by experience": {
+    "1-100": {
+     "calls": 1000,
+     "bits per call over the null": -0.00479,
+     "Brier skill %": -0.45,
+     "right % minus expected": 1.0,
+     "calibration error": 0.0488
+    },
+    "101-250": {
+     "calls": 1500,
+     "bits per call over the null": -0.00083,
+     "Brier skill %": -0.09,
+     "right % minus expected": -0.53,
+     "calibration error": 0.0336
+    },
+    "251-500": {
+     "calls": 2500,
+     "bits per call over the null": 0.00515,
+     "Brier skill %": 0.76,
+     "right % minus expected": 0.84,
+     "calibration error": 0.0333
+    },
+    "501-1000": {
+     "calls": 5000,
+     "bits per call over the null": 0.0098,
+     "Brier skill %": 1.32,
+     "right % minus expected": 1.26,
+     "calibration error": 0.0167
+    },
+    "1001+": {
+     "calls": 16540,
+     "bits per call over the null": 0.00976,
+     "Brier skill %": 1.35,
+     "right % minus expected": 0.94,
+     "calibration error": 0.0134
+    }
+   }
+  },
+  "MOVE": {
+   "calls": 26540,
+   "right %": 54.19,
+   "expected (the null) right %": 54.03,
+   "6.5 right %": 54.15,
+   "Brier skill over the null %": 0.15,
+   "calibration error": 0.017,
+   "strongest tenth: stated, right %": [
+    80.3,
+    77.7
+   ],
+   "information gain over the null": {
+    "bits per call": 0.00113,
+    "95% interval": [
+     -0.00019,
+     0.00248
+    ],
+    "total bits": 30.1,
+    "macro-average over series": 0.00113,
+    "macro 95% interval": [
+     -0.00019,
+     0.00248
+    ],
+    "calls": 26540,
+    "series": 10
+   },
+   "over 6.5": {
+    "bits per call": 7e-05,
+    "95% interval": [
+     -0.00128,
+     0.00145
+    ],
+    "total bits": 1.9,
+    "macro-average over series": 7e-05,
+    "macro 95% interval": [
+     -0.00128,
+     0.00145
+    ],
+    "calls": 26540,
+    "series": 10
+   },
+   "learning gain (learning against frozen after 500 calls)": {
+    "bits per call": 0.00221,
+    "95% interval": [
+     0.00082,
+     0.00347
+    ],
+    "total bits": 47.6,
+    "macro-average over series": 0.00221,
+    "macro 95% interval": [
+     0.00082,
+     0.00347
+    ],
+    "calls": 21540,
+    "series": 10
+   },
+   "by series": {
+    "FX-Brazil": {
+     "calls": 2654,
+     "bits per call over the null": -0.0012,
+     "over 6.5": -0.00065,
+     "right %": 49.3,
+     "expected right %": 50.9
+    },
+    "FX-China": {
+     "calls": 2654,
+     "bits per call over the null": 0.0036,
+     "over 6.5": 0.00322,
+     "right %": 53.7,
+     "expected right %": 52.2
+    },
+    "FX-Denmark": {
+     "calls": 2654,
+     "bits per call over the null": -0.00106,
+     "over 6.5": -0.00065,
+     "right %": 50.8,
+     "expected right %": 51.3
+    },
+    "FX-HongKong": {
+     "calls": 2654,
+     "bits per call over the null": 0.00065,
+     "over 6.5": -0.00011,
+     "right %": 51.0,
+     "expected right %": 51.5
+    },
+    "FX-Malaysia": {
+     "calls": 2654,
+     "bits per call over the null": -1e-05,
+     "over 6.5": -0.00016,
+     "right %": 51.6,
+     "expected right %": 51.4
+    },
+    "FX-Singapore": {
+     "calls": 2654,
+     "bits per call over the null": -1e-05,
+     "over 6.5": -8e-05,
+     "right %": 50.3,
+     "expected right %": 51.2
+    },
+    "FX-SouthKorea": {
+     "calls": 2654,
+     "bits per call over the null": -0.00107,
+     "over 6.5": -0.00068,
+     "right %": 50.0,
+     "expected right %": 50.7
+    },
+    "FX-Taiwan": {
+     "calls": 2654,
+     "bits per call over the null": 0.00211,
+     "over 6.5": 0.00099,
+     "right %": 53.1,
+     "expected right %": 50.7
+    },
+    "FX-Thailand": {
+     "calls": 2654,
+     "bits per call over the null": 0.00138,
+     "over 6.5": 0.00025,
+     "right %": 53.8,
+     "expected right %": 53.0
+    },
+    "FX-Venezuela": {
+     "calls": 2654,
+     "bits per call over the null": 0.00694,
+     "over 6.5": -0.0014,
+     "right %": 78.3,
+     "expected right %": 77.4
+    }
+   },
+   "by experience": {
+    "1-100": {
+     "calls": 1000,
+     "bits per call over the null": -0.00565,
+     "Brier skill %": -0.58,
+     "right % minus expected": 0.8,
+     "calibration error": 0.0574
+    },
+    "101-250": {
+     "calls": 1500,
+     "bits per call over the null": 0.00102,
+     "Brier skill %": 0.16,
+     "right % minus expected": -0.6,
+     "calibration error": 0.0371
+    },
+    "251-500": {
+     "calls": 2500,
+     "bits per call over the null": -0.00345,
+     "Brier skill %": -0.51,
+     "right % minus expected": -0.6,
+     "calibration error": 0.0285
+    },
+    "501-1000": {
+     "calls": 5000,
+     "bits per call over the null": 0.00395,
+     "Brier skill %": 0.46,
+     "right % minus expected": 0.7,
+     "calibration error": 0.0208
+    },
+    "1001+": {
+     "calls": 16540,
+     "bits per call over the null": 0.0014,
+     "Brier skill %": 0.19,
+     "right % minus expected": 0.13,
+     "calibration error": 0.0161
+    }
+   }
+  }
+ },
+ "temperature, development (Chicago)": {
+  "RANGE": {
+   "calls": 24678,
+   "right %": 55.12,
+   "expected (the null) right %": 54.1,
+   "6.5 right %": 54.45,
+   "Brier skill over the null %": 0.65,
+   "calibration error": 0.0175,
+   "strongest tenth: stated, right %": [
+    68.1,
+    63.0
+   ],
+   "information gain over the null": {
+    "bits per call": 0.00476,
+    "95% interval": [
+     0.00348,
+     0.00607
+    ],
+    "total bits": 117.4,
+    "macro-average over series": 0.00476,
+    "macro 95% interval": [
+     0.00348,
+     0.00607
+    ],
+    "calls": 24678,
+    "series": 1
+   },
+   "over 6.5": {
+    "bits per call": 0.00378,
+    "95% interval": [
+     0.00268,
+     0.00489
+    ],
+    "total bits": 93.3,
+    "macro-average over series": 0.00378,
+    "macro 95% interval": [
+     0.00268,
+     0.00489
+    ],
+    "calls": 24678,
+    "series": 1
+   },
+   "learning gain (learning against frozen after 500 calls)": {
+    "bits per call": 0.00417,
+    "95% interval": [
+     0.003,
+     0.00535
+    ],
+    "total bits": 100.7,
+    "macro-average over series": 0.00417,
+    "macro 95% interval": [
+     0.003,
+     0.00535
+    ],
+    "calls": 24178,
+    "series": 1
+   },
+   "by series": {
+    "Chicago": {
+     "calls": 24678,
+     "bits per call over the null": 0.00476,
+     "over 6.5": 0.00378,
+     "right %": 55.1,
+     "expected right %": 54.1
+    }
+   },
+   "by experience": {
+    "1-100": {
+     "calls": 100,
+     "bits per call over the null": 0.00683,
+     "Brier skill %": 1.24,
+     "right % minus expected": 9.0,
+     "calibration error": 0.0953
+    },
+    "101-250": {
+     "calls": 150,
+     "bits per call over the null": -0.01435,
+     "Brier skill %": -1.99,
+     "right % minus expected": -4.0,
+     "calibration error": 0.1034
+    },
+    "251-500": {
+     "calls": 250,
+     "bits per call over the null": -0.00233,
+     "Brier skill %": -0.31,
+     "right % minus expected": -1.2,
+     "calibration error": 0.0575
+    },
+    "501-1000": {
+     "calls": 500,
+     "bits per call over the null": 0.00412,
+     "Brier skill %": 0.59,
+     "right % minus expected": 2.8,
+     "calibration error": 0.0217
+    },
+    "1001+": {
+     "calls": 23678,
+     "bits per call over the null": 0.00496,
+     "Brier skill %": 0.68,
+     "right % minus expected": 1.0,
+     "calibration error": 0.017
+    }
+   }
+  },
+  "MOVE": {
+   "calls": 24678,
+   "right %": 62.93,
+   "expected (the null) right %": 50.67,
+   "6.5 right %": 57.65,
+   "Brier skill over the null %": 8.67,
+   "calibration error": 0.0095,
+   "strongest tenth: stated, right %": [
+    75.3,
+    75.4
+   ],
+   "information gain over the null": {
+    "bits per call": 0.06444,
+    "95% interval": [
+     0.05977,
+     0.06894
+    ],
+    "total bits": 1590.2,
+    "macro-average over series": 0.06444,
+    "macro 95% interval": [
+     0.05977,
+     0.06894
+    ],
+    "calls": 24678,
+    "series": 1
+   },
+   "over 6.5": {
+    "bits per call": 0.04167,
+    "95% interval": [
+     0.03754,
+     0.0459
+    ],
+    "total bits": 1028.2,
+    "macro-average over series": 0.04167,
+    "macro 95% interval": [
+     0.03754,
+     0.0459
+    ],
+    "calls": 24678,
+    "series": 1
+   },
+   "learning gain (learning against frozen after 500 calls)": {
+    "bits per call": 0.00653,
+    "95% interval": [
+     0.00489,
+     0.00823
+    ],
+    "total bits": 157.8,
+    "macro-average over series": 0.00653,
+    "macro 95% interval": [
+     0.00489,
+     0.00823
+    ],
+    "calls": 24178,
+    "series": 1
+   },
+   "by series": {
+    "Chicago": {
+     "calls": 24678,
+     "bits per call over the null": 0.06444,
+     "over 6.5": 0.04167,
+     "right %": 62.9,
+     "expected right %": 50.7
+    }
+   },
+   "by experience": {
+    "1-100": {
+     "calls": 100,
+     "bits per call over the null": 0.01414,
+     "Brier skill %": 2.23,
+     "right % minus expected": 6.0,
+     "calibration error": 0.0683
+    },
+    "101-250": {
+     "calls": 150,
+     "bits per call over the null": 0.06448,
+     "Brier skill %": 8.93,
+     "right % minus expected": 16.67,
+     "calibration error": 0.1034
+    },
+    "251-500": {
+     "calls": 250,
+     "bits per call over the null": 0.04743,
+     "Brier skill %": 6.36,
+     "right % minus expected": 16.4,
+     "calibration error": 0.0223
+    },
+    "501-1000": {
+     "calls": 500,
+     "bits per call over the null": 0.06077,
+     "Brier skill %": 8.2,
+     "right % minus expected": 12.4,
+     "calibration error": 0.0327
+    },
+    "1001+": {
+     "calls": 23678,
+     "bits per call over the null": 0.06491,
+     "Brier skill %": 8.73,
+     "right % minus expected": 12.21,
+     "calibration error": 0.0097
+    }
+   }
+  }
+ },
+ "temperature never used before (3 stations)": {
+  "RANGE": {
+   "calls": 29408,
+   "right %": 63.11,
+   "expected (the null) right %": 61.64,
+   "6.5 right %": 62.07,
+   "Brier skill over the null %": 2.68,
+   "calibration error": 0.0228,
+   "strongest tenth: stated, right %": [
+    78.4,
+    72.2
+   ],
+   "information gain over the null": {
+    "bits per call": 0.01856,
+    "95% interval": [
+     0.01577,
+     0.02124
+    ],
+    "total bits": 545.8,
+    "macro-average over series": 0.02451,
+    "macro 95% interval": [
+     0.0194,
+     0.02951
+    ],
+    "calls": 29408,
+    "series": 3
+   },
+   "over 6.5": {
+    "bits per call": 0.01304,
+    "95% interval": [
+     0.01086,
+     0.01525
+    ],
+    "total bits": 383.5,
+    "macro-average over series": 0.0191,
+    "macro 95% interval": [
+     0.01463,
+     0.02339
+    ],
+    "calls": 29408,
+    "series": 3
+   },
+   "learning gain (learning against frozen after 500 calls)": {
+    "bits per call": 0.00843,
+    "95% interval": [
+     0.00662,
+     0.01026
+    ],
+    "total bits": 235.4,
+    "macro-average over series": 0.00782,
+    "macro 95% interval": [
+     0.00505,
+     0.01082
+    ],
+    "calls": 27908,
+    "series": 3
+   },
+   "by series": {
+    "Melbourne": {
+     "calls": 3622,
+     "bits per call over the null": 0.05028,
+     "over 6.5": 0.04431,
+     "right %": 64.8,
+     "expected right %": 59.0
+    },
+    "NewYork": {
+     "calls": 1433,
+     "bits per call over the null": 0.00882,
+     "over 6.5": 0.00408,
+     "right %": 58.0,
+     "expected right %": 58.5
+    },
+    "Seattle": {
+     "calls": 24353,
+     "bits per call over the null": 0.01441,
+     "over 6.5": 0.00891,
+     "right %": 63.2,
+     "expected right %": 62.2
+    }
+   },
+   "by experience": {
+    "1-100": {
+     "calls": 300,
+     "bits per call over the null": -0.01097,
+     "Brier skill %": -1.34,
+     "right % minus expected": 2.0,
+     "calibration error": 0.0764
+    },
+    "101-250": {
+     "calls": 450,
+     "bits per call over the null": 0.00619,
+     "Brier skill %": 0.81,
+     "right % minus expected": -0.22,
+     "calibration error": 0.0378
+    },
+    "251-500": {
+     "calls": 750,
+     "bits per call over the null": 0.01772,
+     "Brier skill %": 2.37,
+     "right % minus expected": 3.33,
+     "calibration error": 0.0438
+    },
+    "501-1000": {
+     "calls": 1500,
+     "bits per call over the null": 0.01694,
+     "Brier skill %": 2.53,
+     "right % minus expected": 1.0,
+     "calibration error": 0.0264
+    },
+    "1001+": {
+     "calls": 26408,
+     "bits per call over the null": 0.01922,
+     "Brier skill %": 2.77,
+     "right % minus expected": 1.47,
+     "calibration error": 0.0241
+    }
+   }
+  },
+  "MOVE": {
+   "calls": 29408,
+   "right %": 61.04,
+   "expected (the null) right %": 54.6,
+   "6.5 right %": 56.95,
+   "Brier skill over the null %": 6.29,
+   "calibration error": 0.0095,
+   "strongest tenth: stated, right %": [
+    73.8,
+    77.0
+   ],
+   "information gain over the null": {
+    "bits per call": 0.04655,
+    "95% interval": [
+     0.04301,
+     0.0499
+    ],
+    "total bits": 1369.0,
+    "macro-average over series": 0.0607,
+    "macro 95% interval": [
+     0.05393,
+     0.06766
+    ],
+    "calls": 29408,
+    "series": 3
+   },
+   "over 6.5": {
+    "bits per call": 0.03103,
+    "95% interval": [
+     0.02784,
+     0.03416
+    ],
+    "total bits": 912.4,
+    "macro-average over series": 0.04665,
+    "macro 95% interval": [
+     0.0397,
+     0.05346
+    ],
+    "calls": 29408,
+    "series": 3
+   },
+   "learning gain (learning against frozen after 500 calls)": {
+    "bits per call": 0.00679,
+    "95% interval": [
+     0.00538,
+     0.00822
+    ],
+    "total bits": 189.5,
+    "macro-average over series": 0.0111,
+    "macro 95% interval": [
+     0.00835,
+     0.01405
+    ],
+    "calls": 27908,
+    "series": 3
+   },
+   "by series": {
+    "Melbourne": {
+     "calls": 3622,
+     "bits per call over the null": 0.0651,
+     "over 6.5": 0.05001,
+     "right %": 63.1,
+     "expected right %": 54.0
+    },
+    "NewYork": {
+     "calls": 1433,
+     "bits per call over the null": 0.07486,
+     "over 6.5": 0.06364,
+     "right %": 64.5,
+     "expected right %": 45.4
+    },
+    "Seattle": {
+     "calls": 24353,
+     "bits per call over the null": 0.04213,
+     "over 6.5": 0.02628,
+     "right %": 60.5,
+     "expected right %": 55.2
+    }
+   },
+   "by experience": {
+    "1-100": {
+     "calls": 300,
+     "bits per call over the null": -0.00788,
+     "Brier skill %": 0.01,
+     "right % minus expected": 1.0,
+     "calibration error": 0.062
+    },
+    "101-250": {
+     "calls": 450,
+     "bits per call over the null": 0.04238,
+     "Brier skill %": 5.78,
+     "right % minus expected": 7.78,
+     "calibration error": 0.06
+    },
+    "251-500": {
+     "calls": 750,
+     "bits per call over the null": 0.04009,
+     "Brier skill %": 5.5,
+     "right % minus expected": 9.47,
+     "calibration error": 0.0319
+    },
+    "501-1000": {
+     "calls": 1500,
+     "bits per call over the null": 0.06423,
+     "Brier skill %": 8.7,
+     "right % minus expected": 13.0,
+     "calibration error": 0.0319
+    },
+    "1001+": {
+     "calls": 26408,
+     "bits per call over the null": 0.04642,
+     "Brier skill %": 6.25,
+     "right % minus expected": 6.02,
+     "calibration error": 0.0111
+    }
+   }
+  }
+ },
+ "racing, development": {
+  "RANGE": {
+   "calls": 13022,
+   "right %": 52.9,
+   "expected (the null) right %": 49.69,
+   "6.5 right %": 51.63,
+   "Brier skill over the null %": 1.65,
+   "calibration error": 0.0228,
+   "strongest tenth: stated, right %": [
+    69.0,
+    65.8
+   ],
+   "information gain over the null": {
+    "bits per call": 0.01225,
+    "95% interval": [
+     0.00011,
+     0.02955
+    ],
+    "total bits": 159.5,
+    "macro-average over series": 0.00907,
+    "macro 95% interval": [
+     5e-05,
+     0.01663
+    ],
+    "calls": 13022,
+    "series": 12
+   },
+   "over 6.5": {
+    "bits per call": 0.00676,
+    "95% interval": [
+     0.00054,
+     0.01415
+    ],
+    "total bits": 88.0,
+    "macro-average over series": 0.00586,
+    "macro 95% interval": [
+     0.00038,
+     0.01054
+    ],
+    "calls": 13022,
+    "series": 12
+   },
+   "learning gain (learning against frozen after 500 calls)": {
+    "bits per call": 0.00145,
+    "95% interval": [
+     -0.00027,
+     0.00379
+    ],
+    "total bits": 10.2,
+    "macro-average over series": 0.00159,
+    "macro 95% interval": [
+     -0.00061,
+     0.00351
+    ],
+    "calls": 7060,
+    "series": 11
+   },
+   "by series": {
+    "jockey B Prebble": {
+     "calls": 1320,
+     "bits per call over the null": 0.00064,
+     "over 6.5": 0.00144,
+     "right %": 51.5,
+     "expected right %": 47.6
+    },
+    "jockey C K Tong": {
+     "calls": 523,
+     "bits per call over the null": 0.03496,
+     "over 6.5": 0.03186,
+     "right %": 59.5,
+     "expected right %": 50.5
+    },
+    "jockey C Schofield": {
+     "calls": 847,
+     "bits per call over the null": -0.00226,
+     "over 6.5": -0.00258,
+     "right %": 49.6,
+     "expected right %": 49.0
+    },
+    "jockey J Moreira": {
+     "calls": 1920,
+     "bits per call over the null": 0.06206,
+     "over 6.5": 0.02978,
+     "right %": 61.5,
+     "expected right %": 49.7
+    },
+    "jockey K C Leung": {
+     "calls": 1386,
+     "bits per call over the null": -0.00056,
+     "over 6.5": 0.00014,
+     "right %": 51.2,
+     "expected right %": 50.6
+    },
+    "jockey M Chadwick": {
+     "calls": 936,
+     "bits per call over the null": -0.00164,
+     "over 6.5": -0.00117,
+     "right %": 48.8,
+     "expected right %": 49.6
+    },
+    "jockey N Callan": {
+     "calls": 1535,
+     "bits per call over the null": 0.00153,
+     "over 6.5": 0.0011,
+     "right %": 50.9,
+     "expected right %": 50.0
+    },
+    "jockey N Rawiller": {
+     "calls": 1044,
+     "bits per call over the null": -0.00133,
+     "over 6.5": -0.00107,
+     "right %": 48.6,
+     "expected right %": 49.1
+    },
+    "jockey O Doleuze": {
+     "calls": 798,
+     "bits per call over the null": -0.00294,
+     "over 6.5": -0.00206,
+     "right %": 47.9,
+     "expected right %": 48.4
+    },
+    "jockey S Clipperton": {
+     "calls": 462,
+     "bits per call over the null": -0.0034,
+     "over 6.5": -0.0025,
+     "right %": 49.4,
+     "expected right %": 47.6
+    },
+    "jockey Y T Cheng": {
+     "calls": 668,
+     "bits per call over the null": 0.00674,
+     "over 6.5": 0.00731,
+     "right %": 51.8,
+     "expected right %": 49.9
+    },
+    "jockey Z Purton": {
+     "calls": 1583,
+     "bits per call over the null": 0.01508,
+     "over 6.5": 0.00804,
+     "right %": 55.9,
+     "expected right %": 52.0
+    }
+   },
+   "by experience": {
+    "1-100": {
+     "calls": 1200,
+     "bits per call over the null": -0.01011,
+     "Brier skill %": -1.23,
+     "right % minus expected": -0.17,
+     "calibration error": 0.0736
+    },
+    "101-250": {
+     "calls": 1800,
+     "bits per call over the null": 0.0053,
+     "Brier skill %": 0.7,
+     "right % minus expected": 2.44,
+     "calibration error": 0.036
+    },
+    "251-500": {
+     "calls": 2962,
+     "bits per call over the null": 0.01515,
+     "Brier skill %": 2.03,
+     "right % minus expected": 3.38,
+     "calibration error": 0.017
+    },
+    "501-1000": {
+     "calls": 4272,
+     "bits per call over the null": 0.00882,
+     "Brier skill %": 1.19,
+     "right % minus expected": 2.34,
+     "calibration error": 0.0253
+    },
+    "1001+": {
+     "calls": 2788,
+     "bits per call over the null": 0.02852,
+     "Brier skill %": 3.82,
+     "right % minus expected": 6.31,
+     "calibration error": 0.0229
+    }
+   }
+  },
+  "MOVE": {
+   "calls": 13022,
+   "right %": 74.79,
+   "expected (the null) right %": 74.96,
+   "6.5 right %": 74.93,
+   "Brier skill over the null %": -0.25,
+   "calibration error": 0.0138,
+   "strongest tenth: stated, right %": [
+    99.0,
+    100.0
+   ],
+   "information gain over the null": {
+    "bits per call": -0.00167,
+    "95% interval": [
+     -0.00197,
+     -0.0014
+    ],
+    "total bits": -21.7,
+    "macro-average over series": -0.00182,
+    "macro 95% interval": [
+     -0.00204,
+     -0.00158
+    ],
+    "calls": 13022,
+    "series": 12
+   },
+   "over 6.5": {
+    "bits per call": -0.00084,
+    "95% interval": [
+     -0.00146,
+     -0.00031
+    ],
+    "total bits": -11.0,
+    "macro-average over series": -0.00099,
+    "macro 95% interval": [
+     -0.00146,
+     -0.00048
+    ],
+    "calls": 13022,
+    "series": 12
+   },
+   "learning gain (learning against frozen after 500 calls)": {
+    "bits per call": 0.00038,
+    "95% interval": [
+     -0.00048,
+     0.00168
+    ],
+    "total bits": 2.7,
+    "macro-average over series": 0.00014,
+    "macro 95% interval": [
+     -0.00084,
+     0.00098
+    ],
+    "calls": 7060,
+    "series": 11
+   },
+   "by series": {
+    "jockey B Prebble": {
+     "calls": 1320,
+     "bits per call over the null": -0.00134,
+     "over 6.5": -0.00204,
+     "right %": 73.9,
+     "expected right %": 74.3
+    },
+    "jockey C K Tong": {
+     "calls": 523,
+     "bits per call over the null": -0.00268,
+     "over 6.5": -0.00348,
+     "right %": 72.8,
+     "expected right %": 72.3
+    },
+    "jockey C Schofield": {
+     "calls": 847,
+     "bits per call over the null": -0.00231,
+     "over 6.5": -0.00079,
+     "right %": 73.7,
+     "expected right %": 73.9
+    },
+    "jockey J Moreira": {
+     "calls": 1920,
+     "bits per call over the null": -0.00135,
+     "over 6.5": 5e-05,
+     "right %": 77.8,
+     "expected right %": 78.0
+    },
+    "jockey K C Leung": {
+     "calls": 1386,
+     "bits per call over the null": -0.0013,
+     "over 6.5": -0.00116,
+     "right %": 75.1,
+     "expected right %": 75.5
+    },
+    "jockey M Chadwick": {
+     "calls": 936,
+     "bits per call over the null": -0.00126,
+     "over 6.5": 8e-05,
+     "right %": 75.9,
+     "expected right %": 76.1
+    },
+    "jockey N Callan": {
+     "calls": 1535,
+     "bits per call over the null": -0.00185,
+     "over 6.5": -0.00123,
+     "right %": 74.5,
+     "expected right %": 74.5
+    },
+    "jockey N Rawiller": {
+     "calls": 1044,
+     "bits per call over the null": -0.00222,
+     "over 6.5": -0.00073,
+     "right %": 73.7,
+     "expected right %": 73.8
+    },
+    "jockey O Doleuze": {
+     "calls": 798,
+     "bits per call over the null": -0.00242,
+     "over 6.5": -0.0023,
+     "right %": 72.8,
+     "expected right %": 72.8
+    },
+    "jockey S Clipperton": {
+     "calls": 462,
+     "bits per call over the null": -0.00219,
+     "over 6.5": -4e-05,
+     "right %": 72.7,
+     "expected right %": 72.9
+    },
+    "jockey Y T Cheng": {
+     "calls": 668,
+     "bits per call over the null": -0.00191,
+     "over 6.5": -0.00065,
+     "right %": 73.2,
+     "expected right %": 73.2
+    },
+    "jockey Z Purton": {
+     "calls": 1583,
+     "bits per call over the null": -0.00102,
+     "over 6.5": 0.00038,
+     "right %": 75.6,
+     "expected right %": 75.7
+    }
+   },
+   "by experience": {
+    "1-100": {
+     "calls": 1200,
+     "bits per call over the null": -0.00761,
+     "Brier skill %": -0.96,
+     "right % minus expected": -0.25,
+     "calibration error": 0.0318
+    },
+    "101-250": {
+     "calls": 1800,
+     "bits per call over the null": -0.00272,
+     "Brier skill %": -0.45,
+     "right % minus expected": -0.44,
+     "calibration error": 0.0203
+    },
+    "251-500": {
+     "calls": 2962,
+     "bits per call over the null": -0.001,
+     "Brier skill %": -0.16,
+     "right % minus expected": 0.3,
+     "calibration error": 0.015
+    },
+    "501-1000": {
+     "calls": 4272,
+     "bits per call over the null": -0.00025,
+     "Brier skill %": -0.07,
+     "right % minus expected": -0.3,
+     "calibration error": 0.0152
+    },
+    "1001+": {
+     "calls": 2788,
+     "bits per call over the null": -0.0013,
+     "Brier skill %": -0.14,
+     "right % minus expected": -0.25,
+     "calibration error": 0.0263
+    }
+   }
+  }
+ },
+ "strength map over the engine's own probability (markets, development)": {
+  "RANGE": {
+   "bits per call": -0.00015,
+   "95% interval": [
+    -0.00104,
+    0.00074
+   ],
+   "total bits": -6.8,
+   "macro-average over series": -6e-05,
+   "macro 95% interval": [
+    -0.00092,
+    0.00082
+   ],
+   "calls": 46478,
+   "series": 17
+  },
+  "MOVE": {
+   "bits per call": 0.00044,
+   "95% interval": [
+    -0.00028,
+    0.0011
+   ],
+   "total bits": 20.6,
+   "macro-average over series": 0.00045,
+   "macro 95% interval": [
+    -0.00026,
+    0.00111
+   ],
+   "calls": 46478,
+   "series": 17
+  }
+ },
+ "by year (markets, development)": {
+  "RANGE": {
+   "2016": {
+    "calls": 3939,
+    "bits per call over the null": -0.00399,
+    "over 6.5": -0.00486,
+    "right %": 53.2,
+    "expected right %": 52.9
+   },
+   "2017": {
+    "calls": 4369,
+    "bits per call over the null": 0.00023,
+    "over 6.5": 0.00135,
+    "right %": 60.2,
+    "expected right %": 60.4
+   },
+   "2018": {
+    "calls": 4353,
+    "bits per call over the null": 0.00443,
+    "over 6.5": 0.00456,
+    "right %": 55.3,
+    "expected right %": 55.3
+   },
+   "2019": {
+    "calls": 4362,
+    "bits per call over the null": 0.00649,
+    "over 6.5": 0.0058,
+    "right %": 59.5,
+    "expected right %": 58.2
+   },
+   "2020": {
+    "calls": 4377,
+    "bits per call over the null": 0.01282,
+    "over 6.5": 0.01021,
+    "right %": 57.4,
+    "expected right %": 55.6
+   },
+   "2021": {
+    "calls": 4360,
+    "bits per call over the null": 0.00823,
+    "over 6.5": 0.00812,
+    "right %": 56.5,
+    "expected right %": 54.4
+   },
+   "2022": {
+    "calls": 4374,
+    "bits per call over the null": 0.00107,
+    "over 6.5": 0.0008,
+    "right %": 60.3,
+    "expected right %": 60.4
+   },
+   "2023": {
+    "calls": 4358,
+    "bits per call over the null": 0.00174,
+    "over 6.5": 0.00089,
+    "right %": 57.2,
+    "expected right %": 57.0
+   },
+   "2024": {
+    "calls": 4392,
+    "bits per call over the null": 0.00629,
+    "over 6.5": 0.00576,
+    "right %": 60.5,
+    "expected right %": 59.5
+   },
+   "2025": {
+    "calls": 4372,
+    "bits per call over the null": 0.00563,
+    "over 6.5": 0.00396,
+    "right %": 57.9,
+    "expected right %": 57.2
+   },
+   "2026": {
+    "calls": 3222,
+    "bits per call over the null": 0.00351,
+    "over 6.5": 0.00371,
+    "right %": 58.0,
+    "expected right %": 57.7
+   }
+  },
+  "MOVE": {
+   "2016": {
+    "calls": 3939,
+    "bits per call over the null": -0.00706,
+    "over 6.5": -0.00659,
+    "right %": 50.4,
+    "expected right %": 51.2
+   },
+   "2017": {
+    "calls": 4369,
+    "bits per call over the null": 5e-05,
+    "over 6.5": 0.00079,
+    "right %": 52.2,
+    "expected right %": 52.0
+   },
+   "2018": {
+    "calls": 4353,
+    "bits per call over the null": -2e-05,
+    "over 6.5": 0.00029,
+    "right %": 50.7,
+    "expected right %": 50.1
+   },
+   "2019": {
+    "calls": 4362,
+    "bits per call over the null": 0.00143,
+    "over 6.5": 0.00138,
+    "right %": 52.6,
+    "expected right %": 51.1
+   },
+   "2020": {
+    "calls": 4377,
+    "bits per call over the null": 0.0006,
+    "over 6.5": 0.00031,
+    "right %": 51.8,
+    "expected right %": 51.5
+   },
+   "2021": {
+    "calls": 4360,
+    "bits per call over the null": 0.00011,
+    "over 6.5": 7e-05,
+    "right %": 51.4,
+    "expected right %": 51.8
+   },
+   "2022": {
+    "calls": 4374,
+    "bits per call over the null": 0.00031,
+    "over 6.5": 0.00078,
+    "right %": 51.0,
+    "expected right %": 51.4
+   },
+   "2023": {
+    "calls": 4358,
+    "bits per call over the null": 0.0015,
+    "over 6.5": 0.00025,
+    "right %": 52.0,
+    "expected right %": 51.4
+   },
+   "2024": {
+    "calls": 4392,
+    "bits per call over the null": 0.00073,
+    "over 6.5": 0.00054,
+    "right %": 51.0,
+    "expected right %": 51.3
+   },
+   "2025": {
+    "calls": 4372,
+    "bits per call over the null": 0.00128,
+    "over 6.5": 0.00131,
+    "right %": 50.5,
+    "expected right %": 49.9
+   },
+   "2026": {
+    "calls": 3222,
+    "bits per call over the null": 0.00041,
+    "over 6.5": -0.00018,
+    "right %": 51.7,
+    "expected right %": 51.3
+   }
+  }
+ },
+ "which version the ledger would show, starting from 6.5 (markets, development)": {
+  "RANGE": {
+   "events": [
+    [
+     "2019-10-29",
+     "7.0 shown"
+    ]
+   ],
+   "shown at the end": "7.0",
+   "7.0 over 6.5, bits per call": 0.00374,
+   "interval by the rule": [
+    0.0027,
+    0.00479
+   ]
+  },
+  "MOVE": {
+   "events": [],
+   "shown at the end": "6.5",
+   "7.0 over 6.5, bits per call": -3e-05,
+   "interval by the rule": [
+    -0.0007,
+    0.00064
+   ]
+  }
+ },
+ "status": {
+  "RANGE": "verified signal",
+  "MOVE": "no verified signal"
+ }
+}

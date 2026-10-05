@@ -1,0 +1,247 @@
+\documentclass[10.5pt]{article}
+\usepackage[a4paper,margin=2.2cm,bottom=2.4cm]{geometry}
+\usepackage[T1]{fontenc}\usepackage[utf8]{inputenc}
+\usepackage{mathpazo,courier,amsmath,amssymb,booktabs,array,xcolor,enumitem,titlesec,fancyhdr,listings,graphicx}
+\usepackage[most]{tcolorbox}\usepackage[hidelinks]{hyperref}
+\definecolor{ink}{HTML}{1F2A44}\definecolor{soft}{HTML}{F3F5F9}\definecolor{rule}{HTML}{9AA5BD}\definecolor{codebg}{HTML}{FAFAF7}\definecolor{com}{HTML}{6B7280}
+\titleformat{\section}{\Large\bfseries\color{ink}}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\large\bfseries\color{ink}}{\thesubsection}{0.6em}{}
+\setlength{\parindent}{0pt}\setlength{\parskip}{0.5em}
+\newtcolorbox{plain}{enhanced,breakable,before upper={\setlength{\parskip}{0.45em}},colback=soft,colframe=rule,boxrule=0.4pt,arc=2pt,left=8pt,right=8pt,top=6pt,bottom=6pt,title={In plain words},fonttitle=\bfseries\small,coltitle=ink,colbacktitle=soft,titlerule=0pt,attach boxed title to top left={yshift=-2mm,xshift=4mm},boxed title style={colframe=rule,boxrule=0.4pt,arc=2pt}}
+\lstset{basicstyle=\ttfamily\fontsize{6.4}{8.0}\selectfont,breaklines=true,breakatwhitespace=false,columns=fullflexible,keepspaces=true,numbers=left,numberstyle=\tiny\color{rule},numbersep=6pt,backgroundcolor=\color{codebg},frame=single,rulecolor=\color{rule},framerule=0.3pt,xleftmargin=1.6em,framexleftmargin=1.4em,commentstyle=\color{com},morecomment=[l]{//},morecomment=[s]{/*}{*/},showstringspaces=false,postbreak=\mbox{\textcolor{rule}{$\hookrightarrow$}\space}}
+\newcommand{\codehead}[1]{\vspace{2pt}{\footnotesize\color{com}\textsf{In code.} \texttt{#1}}\vspace{-4pt}}
+\pagestyle{fancy}\fancyhf{}\renewcommand{\headrulewidth}{0pt}
+\fancyfoot[L]{\footnotesize\color{rule} HEX [PI] 7.0 on HEX6-BLE: mathematics, code and the learning loop}\fancyfoot[R]{\footnotesize\color{rule}\thepage}
+\newcommand{\logit}{\operatorname{logit}}\newcommand{\med}{\operatorname{median}}
+\begin{document}
+\begin{center}
+{\LARGE\bfseries\color{ink} HEX [PI] 7.0\par}\vspace{4pt}
+{\Large\color{ink} The mathematics, the code that computes it,\\ and the learning loop\par}
+\vspace{8pt}
+Anna Maria Sarkisyan \,$\cdot$\, Evrica Technologies Inc.\\
+5 October 2026 \,$\cdot$\, engine version 7.0 on HEX6-BLE \,$\cdot$\, open source
+\end{center}
+
+\textbf{How to read this.} Every step appears three times. The shaded box says what the step does and why, in ordinary language, with a worked number. The text under it states the same thing exactly. Then the code that computes it is printed as it stands in the repository, with its file and line numbers, so that the equation and the implementation can be checked against each other. The engine's Python reference and this TypeScript agree to $10^{-13}$ on identical inputs (\texttt{tests/parity.mjs}).
+
+The whole engine is one equation and one loop:
+\[ \boxed{\;\logit p_t=\logit q_{0,t}+\beta_t^{\top}Z_t\;}\qquad\qquad \boxed{\;\text{reveal}\rightarrow\text{score}\rightarrow\text{learn}\rightarrow\text{predict}\rightarrow\text{commit}\;} \]
+\begin{center}\begin{tabular}{@{}lll@{}}\toprule
+Symbol & In plain words & Code\\\midrule
+$q_0$ & the null: what the series' own record already implies, its usual odds & \texttt{observer.ts}\\
+$Z$ & where the present value sits among its surroundings & \texttt{hex7.ts: ranks}\\
+$\beta$ & what HEX has learned on this series & \texttt{hex7.ts: Residual}\\
+$p$ & HEX's call & \texttt{hex7.ts: walkHex7}\\\bottomrule\end{tabular}\end{center}
+
+\section{The data and the two questions}
+\begin{plain}
+The engine never looks at raw values. It looks at how much each value changed from the one before, and how big that change was compared with what is usual for the series. It asks two yes-or-no questions about the next step: \emph{will the value go up?} and \emph{will the change be bigger than usual?}
+\end{plain}
+An adapter turns a series $x_0,x_1,\dots$ into changes $r_t$: $\ln(x_t/x_{t-1})$ when every value is positive, $x_t-x_{t-1}$ otherwise (\texttt{probabilityRead.ts: seriesToReturns}). Everything after the adapter is the same for every kind of series. With $a_t=|r_t|$ and $m_t=\med(a_1,\dots,a_t)$ for $t\ge20$:
+\[ \textsc{move}:\; y_{t+1}=\mathbb 1[r_{t+1}>0],\qquad \textsc{range}:\; y_{t+1}=\mathbb 1[a_{t+1}>m_t]. \]
+Everything computed at step $t$ uses values up to $x_t$ only.
+
+\section{The null: what the series' own record implies}
+\begin{plain}
+Before anything else the engine asks: how often has this event happened on this series? ``How often lately'' and ``how often ever'' can differ, so it keeps seven running tallies, each forgetting the past at a different speed, and trusts each in proportion to how well it has predicted. The trusted blend is the \textbf{null}, $q_0$: the series' usual odds.
+
+The null never makes a call. It is what every call is measured against, so that HEX gets no credit for what was already obvious.
+\end{plain}
+For half-lives $h\in\{32,64,128,256,512,1024,\infty\}$ with $\rho_h=2^{-1/h}$:
+\[ U_h\leftarrow\rho_hU_h+y,\qquad N_h\leftarrow\rho_hN_h+1,\qquad e_h=\frac{U_h+1}{N_h+2}\ \text{(kept within $[0.01,0.99]$)}. \]
+For \textsc{move} one more estimate is added, the position rule: if $A$ of the $n$ values so far lie above the present one, $e_{\rm pos}=(A+1)/(n+1)$, the exact probability that the next value is higher when the order of the values carries no information. Each estimate has a log-trust $\ell_k$, starting at zero:
+\[ \ell_k\leftarrow\ell_k+\ln e_k(y),\qquad v_k=\frac{e^{\ell_k}}{\sum_je^{\ell_j}},\qquad q_0=\sum_kv_ke_k, \]
+with $e_k(y)=e_k$ if $y=1$ and $1-e_k$ otherwise. This is a Bayesian mixture with a uniform prior: on any series its total log loss exceeds that of the best single memory by at most $\ln M$, $M=7$ or $8$ (Vovk, 1990).
+
+\codehead{base44/shared/observer.ts, from line 60: the seven memories, the position rule, and their mixture}
+\lstinputlisting[firstnumber=60]{snip/null.ts}
+
+\section{Where the present sits: the coordinates $Z$}
+\begin{plain}
+Is today's value high or low \emph{compared with its recent surroundings}? Take the last 8 values and ask where today's ranks among them: lowest, highest, or in between. Do the same for the last 2, 4, 16, 32 and 64 values, and for the whole history. That gives seven numbers between $-1$ (the lowest in its window) and $+1$ (the highest). They are computed for two things: the level of the series, and the size of its latest change.
+
+A bitcoin price, a temperature and a finishing position all become the same kind of number: \emph{where does this sit relative to what came before?}
+
+Example: today's value is the 7th smallest of the last 8. Its coordinate at that scale is $2(7-\tfrac12)/8-1=0.625$.
+\end{plain}
+For window $w\in\{2,4,8,16,32,64\}$ let $R_{t,w}$ be the midrank of $v_t$ among $v_{t-w+1},\dots,v_t$ (ties share the average of their positions), and $R_{t,\infty}$ its midrank among $v_1,\dots,v_t$:
+\[ u_{t,w}=\frac{R_{t,w}-\tfrac12}{w},\qquad z_{t,w}=2u_{t,w}-1\in(-1,1). \]
+A window that is not yet full gives 0. Values are rounded to nine decimals before ranking, so that a level returning exactly to an earlier level ranks as a tie whatever arithmetic produced it. Two observables are ranked: the level $v_t=\sum_{s\le t}r_s$ and the size $v_t=a_t$. For \textsc{move} the level is the read's own observable and the size is the other; for \textsc{range} the reverse. $Z_t\in\mathbb R^{14}$ is the own seven followed by the other seven.
+
+If the series were exchangeable inside a window, $u_{t,w}$ would be uniform: it is a probability integral transform, which is why the same coordinates serve every kind of series. The sign $\mathbb 1[z>0]$ is a binary line; earlier engines kept only the sign.
+
+\codehead{base44/shared/hex7.ts, from line 59: the coordinates}
+\lstinputlisting[firstnumber=59]{snip/ranks.ts}
+
+\section{What HEX learns: the residual}
+\begin{plain}
+The null says 55\%. HEX asks whether where the value sits changes that. It learns one number per coordinate: how much being high at that scale has pushed the odds up or down on this series. All of it starts at zero, so on a new series HEX starts exactly at the null and departs from it only as evidence arrives. The adjustment is made in odds, not percentage points, so the result can never leave 0--100\%.
+
+Example: the null says 55\%, which is odds of $0.55/0.45=1.22$. HEX has learned a coefficient of $-0.3$ at the 8-step scale, and today's coordinate there is $0.625$. The odds are multiplied by $e^{-0.3\times0.625}=0.83$, giving $1.01$, or 50.3\%: on this series, sitting high in the recent range has been followed by fewer rises.
+\end{plain}
+Two models: own ranks only ($\beta\in\mathbb R^7$) and own with the other observable ($\beta\in\mathbb R^{14}$). Each is Bayesian logistic regression with offset $\logit q_0$, updated one outcome at a time by the second-order (assumed-density) step. With prior $\beta\sim N(0,\tau I)$, covariance $P$ starting at $\tau I$, and $q=\sigma(\logit q_0+\beta^\top Z)$ kept within $[0.01,0.99]$:
+\[ P\leftarrow P-\frac{q(1-q)\,PZZ^{\top}P}{1+q(1-q)\,Z^{\top}PZ},\qquad \beta\leftarrow\beta+PZ\,(y-q). \]
+There is no learning rate to choose. The one free quantity, the prior scale $\tau$, is a family: nine copies run at $\tau\in\{2^{-4},\dots,2^{4}\}$ and are mixed by likelihood exactly as in Section 2. The model's probability is that mixture; the coefficients in force are the copies' coefficients averaged by their weights.
+
+\codehead{base44/shared/hex7.ts, from line 109: one residual model: predict, update, and the coefficients in force}
+\lstinputlisting[firstnumber=109]{snip/residual.ts}
+
+\section{HEX's call: reversible influence}
+\begin{plain}
+Three voices answer every question: the null alone, the model that reads the read's own coordinates, and the model that also reads the other observable. HEX's call is their weighted average. A voice gains influence by giving high probability to what actually happened.
+
+Influence is never locked in. After every outcome a small slice of everyone's influence is shared out equally, so a voice that has been wrong for a long time can come back quickly when the series changes. What a voice has learned is never erased; only its present say in the call moves.
+\end{plain}
+For experts $V=(q_0,m_1,m_2)$ and a share rate $\alpha$ (fixed share; Herbster and Warmuth, 1998):
+\[ w_k\leftarrow(1-\alpha)\,\frac{w_kV_k(y)}{\sum_jw_jV_j(y)}+\frac{\alpha}{3},\qquad p=\sum_\alpha o_\alpha\sum_kw_{\alpha,k}V_k . \]
+Five rates $\alpha\in\{0,0.001,0.005,0.02,0.05\}$ run side by side and are mixed by likelihood with weights $o_\alpha$; $\alpha=0$ is the plain Bayesian mixture, so the plain mixture is one of the things HEX can fall back on, at a cost of at most $\ln5$ in total log loss.
+
+\codehead{base44/shared/hex7.ts, from line 84: the mixture with reversible influence}
+\lstinputlisting[firstnumber=84]{snip/share.ts}
+
+\section{The walk: one pass, in order}
+\begin{plain}
+All of the above happens in one loop over the series, and the order inside the loop is the whole discipline: \emph{predict; then the outcome arrives; then learn}. Nothing is ever learned from an outcome before the call for it has been made.
+\end{plain}
+\codehead{base44/shared/hex7.ts, from line 156: predict, outcome, learn, for every step of a series}
+\lstinputlisting[firstnumber=156]{snip/walk.ts}
+
+\section{Strength: restated from the record, never changing the call}
+\begin{plain}
+A call has a side (yes or no) and a strength (how far from 50\%). The side is HEX's and is never changed. The strength is checked against history: of all earlier calls stated at about 70\%, how many were right? If 66\% were, a new 70\% is shown as 66\%. The shown strength can never go below 50\%, so the side cannot flip.
+\end{plain}
+With $a=\mathbb 1[p\ge\tfrac12]$ and $s=\max(p,1-p)$, let $G$ be the isotonic regression of $\mathbb 1[\text{call was right}]$ on $s$ over calls whose outcomes are known, pooled across tracked series and refitted nightly (at least 2{,}000 calls). Then $s'=\min(0.99,\max(0.5001,G(s)))$ and the shown probability is $s'$ if $a=1$, else $1-s'$. A map allowed to change the side was tested and rejected: the calls it changed were right less often afterwards.
+
+\codehead{base44/shared/isotonic.ts, from line 66: the strength map}
+\lstinputlisting[firstnumber=66]{snip/strength.ts}
+
+\section{The measure: information gain}
+\begin{plain}
+Counting right and wrong treats a 51\% call and a 99\% call the same. The engine is judged instead by how much probability it gave to what actually happened, compared with how much the null gave. If HEX said 62\% and the null said 55\% and the event happened, HEX gained $\log_2(0.62/0.55)=0.17$ bits; if it did not happen, HEX lost $0.24$ bits.
+
+Added up over every call, this is the information HEX has contributed beyond the obvious. Positive and clear of zero means a \textbf{verified edge}. Not clear of zero means \textbf{no verified edge}, and the product says so.
+\end{plain}
+\[ g=\ln p(y)-\ln q_0(y),\qquad G_T=\sum_{t\le T}g_t,\qquad \bar g=\frac{G_T}{T\ln2}\ \text{bits per call}. \]
+This is a proper score: its expectation is greatest when the true probability is stated. Calls on the same day move together, so days are the unit of uncertainty. For day totals $S_d$ over $n_d$ calls, $D$ days, $N=\sum_dn_d$:
+\[ m=\frac{\sum_dS_d}{N},\qquad \operatorname{se}=\frac1N\sqrt{\frac{D}{D-1}\sum_d\,(S_d-m\,n_d)^2},\qquad \text{interval}=m\pm1.96\,\operatorname{se}. \]
+Only four running sums are needed ($\sum S_d$, $\sum S_d^2$, $\sum S_dn_d$, $\sum n_d^2$), so every decision uses the whole record without rereading it.
+
+\codehead{base44/shared/cycle.ts, from line 70: the log score, information gain, and the day-clustered interval}
+\lstinputlisting[firstnumber=70]{snip/gain.ts}
+
+Recorded beside it for every call: \textbf{closeness} $c=1-(p-y)^2$ and the identity
+\[ c=0.75+\underbrace{[c(q_0)-0.75]}_{\text{null}}+\underbrace{[c(p)-c(q_0)]}_{\text{what HEX added}}+\underbrace{[c(p_{\rm shown})-c(p)]}_{\text{strength}}; \]
+\textbf{reward} $\max(0,c-\bar c)$, the progress over the version's own average closeness on that series, never negative; \textbf{lesson} $\max(0,\bar c-c)$, kept for analysis and subtracted from nothing (no decision is taken on reward, because cutting off the downside would pay for boldness); and the \textbf{reason for a miss}.
+
+\codehead{base44/shared/cycle.ts, from line 158: everything recorded for one scored call}
+\lstinputlisting[firstnumber=158]{snip/score.ts}
+
+\section{The reason for a miss}
+\begin{plain}
+At the moment of the call the engine writes down not only its answer but what every voice said on its own: each of the seven tallies, the position rule, and each of its two models. When a call turns out wrong, those notes show where it went wrong, with no hindsight, because they were written before the outcome.
+\end{plain}
+\begin{center}\begin{tabular}{@{}p{2.0cm}p{12.8cm}@{}}\toprule
+\textbf{structure} & the null was on the right side; what HEX added turned the call.\\
+\textbf{change} & some memories were right and they were, on average, the shorter ones: the series had changed.\\
+\textbf{blip} & some memories were right and they were, on average, the longer ones: the recent stretch was unusual.\\
+\textbf{outvoted} & no memory was right, but the position rule or one of HEX's models was, with too little influence.\\
+\textbf{unseen} & nothing the engine remembers about this series pointed the right way.\\\bottomrule\end{tabular}\end{center}
+\codehead{base44/shared/cycle.ts, from line 109: the reason, from what was written down before the outcome}
+\lstinputlisting[firstnumber=109]{snip/reason.ts}
+
+\section{The learning loop}
+\begin{plain}
+Every night, for every series: see what happened; score last night's calls; let memory take it in; make tonight's calls; write them down before their outcomes exist. Then, across all series: refit the strength map, decide which version people see, and decide which reads have a verified edge.
+
+The engine keeps nothing between nights. Each night it walks every series again from its first value, so what it knows is exactly what one pass through that series' history teaches it. There is no stored state to corrupt.
+\end{plain}
+\begin{enumerate}[leftmargin=1.4em,itemsep=1pt]
+\item \textbf{Reveal.} For each open call whose next bar has printed, compute $y$.
+\item \textbf{Score.} Information gain, closeness, reward, lesson, reason (Sections 8 and 9).
+\item \textbf{Learn.} The walk of Section 6 takes every outcome into $U,N,\ell$, into $P,\beta$ and the prior-scale weights, and into the influences $w,o$.
+\item \textbf{Predict.} Tonight's calls from both versions, with what each voice said and, for 7.0, the coefficients and influences in force.
+\item \textbf{Commit.} Written to the ledger before the outcome exists.
+\item \textbf{Strength map.} Refit $G$ per read and version from every scored step.
+\item \textbf{Which version is shown.} 7.0 and the frozen 6.5 run side by side. On the same calls, with $m$ and its interval for $\ln p_{7.0}(y)-\ln p_{6.5}(y)$: 7.0 is switched in once there are 300 paired calls over 60 days, the interval is above zero, and 7.0 is right at least as often. It is taken down when the interval is below zero, or it is right less often by a margin clear of zero.
+\item \textbf{Verified edge.} For the version shown, $m$ and its interval for information gain over the null. The status starts from the replay (market move size verified, market direction not). The ledger's own record changes it only when it is decisive: to verified when the lower bound is above zero, to not verified when the upper bound is below zero.
+\end{enumerate}
+\codehead{base44/functions/calibrateCognition/entry.ts, from line 52: steps 1 to 5 for every tracked series, in that order}
+\lstinputlisting[firstnumber=52]{snip/nightly.ts}
+\codehead{base44/shared/ledger.ts, from line 284: steps 7 and 8: the version rule and the verified-edge test}
+\lstinputlisting[firstnumber=284]{snip/decide.ts}
+
+\section{The precision metrics the loop keeps}
+\begin{plain}
+The loop does not just learn the series; it keeps a running account of how well it is doing, per read, and every decision above is read off that account. These are the numbers to monitor.
+\end{plain}
+One \texttt{EngineStatus} row per read:
+\begin{center}\small\begin{tabular}{@{}p{5.6cm}p{9.4cm}@{}}\toprule
+\texttt{bits\_candidate}, \texttt{\_low}, \texttt{\_high} & 7.0's information gain over the null, bits per call, with its 95\% interval\\
+\texttt{bits\_control}, \texttt{\_low}, \texttt{\_high} & the same for 6.5\\
+\texttt{gain}, \texttt{gain\_low}, \texttt{gain\_high} & 7.0 over 6.5 on the same calls, nats per call\\
+\texttt{verified} & whether the shown version has a verified edge over the null\\
+\texttt{hit\_candidate}, \texttt{hit\_control}, \texttt{hit\_baseline} & share of calls right: 7.0, 6.5, and what the null alone gets (expected)\\
+\texttt{stated\_candidate}, \texttt{stated\_control} & mean stated strength, to set beside the share right\\
+\texttt{closeness\_*}, \texttt{progress\_*}, \texttt{lesson\_*} & mean closeness, reward and lesson per call\\
+\texttt{reasons\_candidate}, \texttt{reasons\_control} & misses counted by reason\\
+\texttt{paired\_calls}, \texttt{paired\_days}, \texttt{live\_engine}, \texttt{decision}, \texttt{reason} & the record's size and the version decision in words\\
+\texttt{tally} & the running sums behind all of the above\\\bottomrule\end{tabular}\end{center}
+Per call, in \texttt{CallLedger}: \texttt{info\_gain}, \texttt{log\_score}, \texttt{closeness}, \texttt{reward}, \texttt{lesson}, \texttt{reason}, the three parts of closeness, \texttt{views} (what each voice said) and \texttt{learned} (7.0's coefficients and influences).
+
+\subsection*{What those metrics read after ten years}
+The product's own code and ledger functions were run night by night on 17 market series from January 2016 to September 2026, starting with an empty ledger and an engine that knew nothing (46,461 series-nights; \texttt{validation/timesim}). The final \texttt{EngineStatus} rows:
+\begin{center}\begin{tabular}{@{}lcc@{}}\toprule
+ & Move size (\textsc{range}) & Direction (\textsc{move})\\\midrule
+Version shown & 7.0 & 6.5\\
+Verified edge & yes & no\\
+Paired calls / days & 46,436 / 3,892 & 46,436 / 3,892\\
+7.0: bits per call over the null & +0.00421 & +0.00043\\
+\quad 95\% interval & [+0.00306, +0.00535] & [$-$0.00038, +0.00123]\\
+6.5: bits per call over the null & +0.00036 & +0.00044\\
+7.0 over 6.5, nats per call & +0.00266 & $-$0.00001\\
+\quad 95\% interval  & [+0.00191, +0.00342] & [$-$0.00034, +0.00032]\\
+7.0 right / 6.5 right & 57.9\% / 57.4\% & 51.4\% / 51.3\%\\
+\bottomrule\end{tabular}\end{center}
+Version and status changes over the ten years: 2016-04-04 direction: 6.5 switched in; 2016-05-22 move size: 6.5 switched in; 2017-07-03 move size: not verified; 2019-05-20 move size: 7.0 switched in; 2020-03-25 move size: verified. In this cold start both reads begin on 7.0, which is behind for its first weeks on a series it has never seen; the rule takes it down within months, switches move size back to 7.0 once the record is decisive, and verifies it in 2020. In the product the engine is not cold: each series is walked from the start of its history.
+
+Why calls missed, over the same run:
+\begin{center}\begin{tabular}{@{}lrccccc@{}}\toprule
+ & Misses & unseen & blip & change & structure & outvoted\\\midrule
+Move size, 7.0 & 19,570 & 47.0\% & 32.0\% & 6.2\% & 9.2\% & 5.7\%\\
+Move size, 6.5 & 19,775 & 51.9\% & 34.5\% & 6.9\% & 4.3\% & 2.5\%\\
+Direction, 7.0 & 22,581 & 17.9\% & 7.2\% & 21.5\% & 14.9\% & 38.5\%\\
+Direction, 6.5 & 22,629 & 16.5\% & 8.2\% & 21.5\% & 10.6\% & 43.1\%\\
+\bottomrule\end{tabular}\end{center}
+Where closeness came from, by the identity of Section 8 (mean per call):
+\begin{center}\begin{tabular}{@{}lcccc@{}}\toprule
+ & Closeness & from the null & from what HEX added & from strength\\\midrule
+Move size, 7.0 & 0.7595 & +0.0080 & +0.0015 & 0.0000\\
+Move size, 6.5 & 0.7582 & +0.0080 & +0.0002 & 0.0000\\
+Direction, 7.0 & 0.7501 & $-$0.0001 & 0.0000 & +0.0001\\
+Direction, 6.5 & 0.7501 & $-$0.0001 & 0.0000 & +0.0001\\
+\bottomrule\end{tabular}\end{center}
+After every miss whose reason was \emph{change} or \emph{blip}, trust in the memories that had been on the right side rose by the next call: 13,934 such misses, 100\% of them.
+
+The full results of the one-pass replay on 43 series, including series never used before, are in the companion document, \emph{HEX [PI] 7.0: the ten-year replay and how to run the system}.
+
+\section{What is not claimed}
+\begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+\item No guarantee of accuracy on any future series. Finite history cannot prove the future.
+\item The interval rules use a normal approximation over days. They are decision rules, not proofs.
+\item Next-day market direction has no verified edge. Nothing in 7.0 fixes that, and the product does not pretend otherwise.
+\item Interaction terms, calibration that may change a call, and an interference (amplitude) mixture were each tested and added no information; none is in 7.0. Text, letter-number and ontology layers are not part of 7.0.
+\end{itemize}
+
+\section*{References}
+{\small
+Ayer, Brunk, Ewing, Reid and Silverman (1955). An empirical distribution function for sampling with incomplete information. \emph{Ann.\ Math.\ Statist.} 26.\\
+Dawid (1984). Statistical theory: the prequential approach. \emph{J.\ Roy.\ Statist.\ Soc.\ A} 147.\\
+Gneiting and Raftery (2007). Strictly proper scoring rules, prediction, and estimation. \emph{J.\ Amer.\ Statist.\ Assoc.} 102.\\
+Herbster and Warmuth (1998). Tracking the best expert. \emph{Machine Learning} 32.\\
+Opper (1998). A Bayesian approach to on-line learning. In \emph{On-line Learning in Neural Networks}, Cambridge University Press.\\
+Vovk (1990). Aggregating strategies. \emph{Proc.\ COLT}.
+}
+
+\vfill
+{\footnotesize\color{rule} \copyright\ 2026 Evrica Technologies Inc. \,$\cdot$\, anna@evrica.tech \,$\cdot$\, source: github.com/EvricaTechnologiesInc/HEX-PI}
+\end{document}

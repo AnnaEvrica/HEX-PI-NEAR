@@ -1,391 +1,360 @@
-# HEX — the model
+# HEX [PI] 7.0: the mathematics, with the learning loop
 
-This is the mathematics of the engine in `base44/shared/hex.ts` (state-6.4)
-and of its observer in `base44/shared/observer.ts`. The reference
-implementations are `validation/hexmodel.py` and `validation/rankcore.py`;
-`tests/parity.mjs` checks that the code that runs matches them to rounding.
+Anna Maria Sarkisyan · Evrica Technologies Inc. · engine version 7.0 on HEX6-BLE
 
-Every statement below is one of three kinds, and is marked: **definition**
-(a choice), **result** (follows from the definitions, with the argument or a
-citation), or **measured** (from the walk-forward tests in `validation/`).
+Every step is given twice: first in plain words, then exactly, with the file
+and function that computes it. Nothing in the plain-word paragraphs is a
+simplification that the formal text contradicts. The same document, typeset,
+is `docs/HEX-PI-7.0-mathematics.pdf`.
 
-## 1. Data and reads
+The whole engine is one equation,
 
-A series is a sequence of real values $x_0, x_1, \dots$ with changes
-$r_t = x_t - x_{t-1}$ (for strictly positive series, changes of $\ln x$) and
-sizes $a_t = |r_t|$. Two binary outcomes are predicted one step ahead
-(**definition**):
+$$\operatorname{logit} p_t \;=\; \operatorname{logit} q_{0,t} \;+\; \beta_t^\top Z_t ,$$
 
-- **MOVE**: $y_{t+1} = \mathbf 1[r_{t+1} > 0]$.
-- **RANGE**: $y_{t+1} = \mathbf 1[a_{t+1} > m_t]$, where $m_t$ is the median
-  of $a_0, \dots, a_t$ (at least 20 values).
+and one loop: **reveal, score, learn, predict, commit**.
 
-Everything computed at step $t$ uses the series up to $t$ only, and nothing
-is updated with $y_{t+1}$ until it is known.
-
-## 2. The observer's baseline
-
-Let $y_1, y_2, \dots$ be the outcomes of one read. For a half-life $h$, with
-$\gamma_h = 2^{-1/h}$, the discounted base rate is (**definition**)
-
-$$b^{(h)}_t = \frac{1 + \sum_{u \le t} \gamma_h^{\,t-u} y_u}{2 + \sum_{u \le t} \gamma_h^{\,t-u}}, \qquad h \in \{32, 64, 128, 256, 512, 1024, \infty\}.$$
-
-For MOVE one more predictor is added, the exchangeable rank rule: if $g_t$
-earlier values are at or below $x_t$ among the $t+1$ values so far (counting
-$x_t$), then $q^{\mathrm{rank}}_t = (t + 2 - g_t)/(t + 2)$.
-
-**Result.** If $x_0, \dots, x_{t+1}$ are exchangeable and almost surely
-distinct, $x_{t+1}$ is equally likely to fall in each of the $t + 2$ gaps
-between the ordered earlier values, so
-$P(x_{t+1} > x_t) = q^{\mathrm{rank}}_t$ exactly. Calling the likelier side
-is then right with probability tending to $\mathbb E\max(U, 1 - U) = 3/4$ for
-$U$ uniform. This is why a 75% hit rate on "next value higher" is not
-evidence of structure (Vovk, Gammerman and Shafer, 2005).
-
-The baseline is the Bayesian mixture of these $M$ predictors ($M = 7$ for
-RANGE, $8$ for MOVE) from a uniform start (**definition**):
-
-$$b_t = \sum_{m} w_{m,t}\, q_{m,t}, \qquad w_{m,t} \propto \prod_{u \le t} q_{m,u-1}(y_u).$$
-
-**Result.** For every sequence of outcomes, the cumulative log loss of $b$
-exceeds that of the best single predictor in the mixture by at most $\ln M$
-(Vovk, 1990; Cesa-Bianchi and Lugosi, 2006, §9.1). The observer therefore
-tracks whichever memory fits the series, at a cost bounded for all time.
-
-The observer never issues a call. It supplies $b_t$.
-
-## 3. The state
-
-**Definition.** Each step has one line. For MOVE the line is
-$\mathbf 1[r_t > 0]$; for RANGE it is $\mathbf 1[a_t > m_{t-1}]$. The state
-$s_t \in \{0,1\}^6$ is the last six lines, oldest first: one of 64 patterns,
-the vertices of the 6-cube $Q_6$. Write $d(s, j)$ for the Hamming distance
-(the number of lines in which two patterns differ) and $\bar s$ for the
-complement of $s$ (all six lines flipped), so $d(s, \bar s) = 6$.
-
-## 4. The model and its estimator
-
-**Definition (model).** Given the state, the next outcome is Bernoulli:
-
-$$y_{t+1} \mid s_t = s \;\sim\; \mathrm{Bernoulli}(b_t + \delta_s).$$
-
-$\delta_s$ is how far the state moves the probability from the baseline.
-
-**Definition (estimator).** With a kernel $k$ on the cube, a discount
-$\gamma$ and a prior strength $K$, keep for each state $j$
-
-$$D_j = \sum_{u:\, s_u = j} \gamma^{\,t-u}\,(y_{u+1} - b_u), \qquad N_j = \sum_{u:\, s_u = j} \gamma^{\,t-u},$$
-
-and predict
-
-$$p_t = b_t + \frac{\sum_j k(s_t, j)\, D_j}{\sum_j |k(s_t, j)|\, N_j + K}, \qquad \text{clipped to } [0.01, 0.99].$$
-
-**Result (what this estimator is).** Take $b$ constant and a non-negative
-kernel. Put the prior $\theta_s \sim \mathrm{Beta}(Kb,\, K(1-b))$ on the
-probability in state $s$, and let an outcome seen in state $j$ at age
-$t - u$ enter the likelihood for state $s$ with weight
-$\omega_u = \gamma^{\,t-u} k(s, j)$ (a local likelihood: Tibshirani and
-Hastie, 1987; with discounting as a power prior: Ibrahim and Chen, 2000; West
-and Harrison, 1997). The posterior is
-$\mathrm{Beta}(Kb + \sum \omega_u y_{u+1},\; K(1-b) + \sum \omega_u (1 - y_{u+1}))$
-and its mean is
-
-$$\frac{Kb + \sum_u \omega_u y_{u+1}}{K + \sum_u \omega_u} = b + \frac{\sum_u \omega_u (y_{u+1} - b)}{K + \sum_u \omega_u},$$
-
-which is the estimator above. So $p_t$ is a Beta-Bernoulli posterior mean
-under a kernel-weighted, discounted likelihood, with $K$ the number of
-pseudo-observations behind the prior belief that the state changes nothing.
-When $b$ varies with time the same expression is used with each outcome
-measured against the baseline in force when it was predicted; that step is a
-definition, not a derivation.
-
-A negative kernel weight has a plain meaning: since
-$-(y - b) = (1 - y) - (1 - b)$, an outcome seen in state $j$ with
-$k(s, j) < 0$ counts as evidence for the opposite outcome in state $s$.
-
-## 5. The kernel
-
-**Definition.** Two kernels are used, each with a parameter
-$\rho \in [0, 1)$:
-
-$$k^{\mathrm{plain}}_\rho(s, j) = \rho^{\,d(s,j)}, \qquad k^{\mathrm{odd}}_\rho(s, j) = \rho^{\,d(s,j)} - \rho^{\,6 - d(s,j)},$$
-
-with $0^0 = 1$, so $\rho = 0$ gives no sharing (plain) or sharing with the
-mirror state only (odd).
-
-**Result.** $k^{\mathrm{plain}}_\rho$ is the diffusion kernel of the cube.
-The heat kernel $e^{-\beta L}$ of the graph Laplacian $L$ of $Q_6$ factorises
-over the six coordinates and equals a constant times $(\tanh\beta)^{d(s,j)}$,
-so $\rho = \tanh\beta$ (Kondor and Lafferty, 2002). It is positive definite. In
-words: evidence is allowed to diffuse along the edges of the cube for a time
-$\beta$.
-
-**Result.** $k^{\mathrm{odd}}_\rho(s, j) = k^{\mathrm{plain}}_\rho(s, j) - k^{\mathrm{plain}}_\rho(s, \bar\jmath)$
-is, up to the factor $\tfrac12$, the same kernel restricted to odd functions
-on the cube, those with $\delta_{\bar s} = -\delta_s$. It encodes the
-assumption that the mirror pattern pulls the opposite way, and it remains
-positive semi-definite because it is a projection of a positive definite
-kernel onto a subspace.
-
-The absolute value in the denominator of the estimator, and dropping the
-factor $\tfrac12$, are normalisation **definitions**.
-
-## 6. No hand-set numbers: the mixture
-
-**Definition.** Every quantity that was a fixed number in 6.2 is a family:
-
-| Quantity | Family | In 6.2 |
+| Symbol | Plain words | Code |
 |---|---|---|
-| Sharing between states, $\rho$ | $0, \tfrac18, \tfrac14, \tfrac12$ | weights $1/d^2$ to distance 2, four strengths |
-| Symmetry | plain, odd | mirror for direction only |
-| Prior strength, $K$ | 16, 64, 256 | 100 |
-| Half-life of evidence | 64, 256, 1024, none | factor 0.999 |
+| $q_0$ | The null: what the series' own record already implies. Its usual odds | `observer.ts` |
+| $Z$ | Where the present value sits among its surroundings | `hex7.ts: ranks` |
+| $\beta$ | What HEX has learned on this series | `hex7.ts: Residual` |
+| $p$ | HEX's call | `hex7.ts: walkHex7` |
 
-That is $4 \times 2 \times 3 \times 4 = 96$ candidates $p^{(e)}$. The stated
-probability is their Bayesian mixture from a uniform start:
+---
 
-$$p_t = \sum_{e} w_{e,t}\, p^{(e)}_t, \qquad w_{e,t} \propto \prod_{u \le t} p^{(e)}_{u-1}(y_u).$$
+## 1. The data and the two questions
 
-**Result.** For every sequence of outcomes, the cumulative log loss of the
-mixture exceeds that of the best single candidate by at most $\ln 96 \approx 4.56$
-nats in total (same theorem as in §2). Per step this vanishes as $1/T$. The
-engine therefore does as well, in the long run and on any series, as the best
-fixed setting of $\rho$, symmetry, $K$ and half-life chosen in hindsight.
+**In plain words.** The engine never looks at raw values. It looks at how
+much each value changed from the one before, and how big that change was
+compared with what is usual for the series. It asks two yes-or-no questions
+about the next step: *will the value go up?* and *will the change be bigger
+than usual?*
 
-Together with §2: the total log loss of HEX is within $\ln 96$ of its best
-candidate, each of which is built on a baseline that is itself within
-$\ln M$ of the best single memory.
+**Exactly.** An adapter turns a series $x_0,x_1,\dots$ into changes $r_t$:
+the log change $\ln(x_t/x_{t-1})$ when every value is positive, the plain
+difference $x_t-x_{t-1}$ otherwise (`probabilityRead.ts: seriesToReturns`).
+Everything after the adapter is the same for every kind of series. With
+$a_t=|r_t|$ and $m_t=\operatorname{median}(a_1,\dots,a_t)$ for $t\ge 20$, the
+two reads and their outcomes $y_{t+1}\in\{0,1\}$ are
 
-## 7. Calibration
+$$\textsf{MOVE}:\ y_{t+1}=\mathbb 1[r_{t+1}>0],\qquad \textsf{RANGE}:\ y_{t+1}=\mathbb 1[a_{t+1}>m_t].$$
 
-**Principle.** HEX makes the call; calibration never changes it. Write a
-stated probability $p$ as a side $a=\mathbb 1[p\ge\tfrac12]$ and a strength
-$s=\max(p,1-p)\in[\tfrac12,1)$. The side is left as HEX stated it.
+Everything computed at step $t$ uses values up to $x_t$ only (section 9
+says how this is checked).
 
-**Definition.** Let $r=\mathbb 1[a=y]$ record whether a past call was right.
-One non-decreasing map $g$ per read is fitted by isotonic regression of $r$
-on $s$ (pool adjacent violators; Ayer et al., 1955) on calls whose outcomes
-are already known, pooled across every tracked series, and refitted nightly
-from the ledger. The stated strength becomes
-$s'=\min(0.99,\max(0.5001,g(s)))$ and the stated probability $s'$ if $a=1$,
-$1-s'$ otherwise. Since $s'>\tfrac12$, the side cannot change. Version 6.2
-uses the same construction with a map fitted on the one series.
+## 2. The null: what the series' own record implies
 
-**Why isotonic.** Among non-decreasing maps the isotonic fit maximises the
-total of every proper score on the fitting record at once (Brümmer and du
-Preez, 2013): it is the restatement of strength that would have earned most.
+**In plain words.** Before anything else, the engine asks: how often has
+this event happened on this series? "How often lately" and "how often ever"
+can differ, so it keeps seven running tallies, each forgetting the past at a
+different speed, and trusts each in proportion to how well it has predicted.
+The trusted blend is the **null**, $q_0$: the series' usual odds. The null
+never makes a call. It is what every call is measured against, so that HEX
+gets no credit for what was already obvious.
 
-**Closeness and reward.** A scored call has closeness $c_t=1-(p_t-y_t)^2$:
-1 when certain and right, 0.75 for a coin flip. It is the Brier score turned
-round, and proper: its expectation is greatest when the true probability is
-stated (Brier, 1950; Gneiting and Raftery, 2007).
+**Exactly** (`observer.ts: observe`). For half-lives
+$h\in\{32,64,128,256,512,1024,\infty\}$ with $\rho_h=2^{-1/h}$:
 
-Progress is measured against the version's own record on that series and
-read:
-$$d_t = c_t-\bar c_{t-1},\qquad \bar c_{t-1}=\tfrac1{t-1}\sum_{u<t}c_u,\quad \bar c_0=0.75 .$$
-The reward is $r_t=\max(0,d_t)$ and the lesson is $\ell_t=\max(0,-d_t)$, so
-$d_t=r_t-\ell_t$ and neither is ever negative. The reward is proportional to
-how much nearer the call came than the version's earlier calls, not to its
-accuracy. The lesson is kept for analysis and is subtracted from nothing.
-Every call, rewarded or not, updates the record
-($\bar c_t=\bar c_{t-1}+d_t/t$), the strength map and the mixture weights:
-that is the learning.
+$$U_h\leftarrow\rho_hU_h+y,\qquad N_h\leftarrow\rho_hN_h+1,\qquad e_h=\frac{U_h+1}{N_h+2}.$$
 
-**What the reward is not.** $d_t$ is a proper score, because $\bar c_{t-1}$
-is fixed before $y_t$ is known. $r_t$ is not: cutting off the downside pays
-for boldness. So no decision is taken on reward. Which version is shown is
-decided on closeness (README: mean closeness of the two versions on the same
-calls, days as the unit of uncertainty). Inside HEX each candidate's weight
-is multiplied by the probability it gave to what happened (§6); nothing in
-the engine subtracts.
+Every estimate is kept within $[0.01,0.99]$.
 
-**Measured** (`validation/progress_sim.py`, same cold start). Move size:
-6.4 is rewarded on 55.9% of calls, mean reward 35.5 thousandths, mean lesson
-32.7; 6.2 on 53.1%, 31.2 and 30.0. Direction: 6.4 6.4 and 5.3, 6.2 10.1 and
-9.4, at the same closeness (0.7501): 6.2 collects more reward there only by
-stating stronger probabilities, which is the reason above.
+For MOVE one more estimate is added, the position rule: if $A$ of the $n$
+values so far lie above the present one, $e_{\rm pos}=(A+1)/(n+1)$, the exact
+probability that the next value is higher when the order of the values
+carries no information. Each estimate has a log-trust $\ell_k$, starting at
+zero:
 
-**Measured** (`validation/loop_sim_side.py`, ten-year cold start, 17 market
-series). A map applied to the whole probability turned 5.6% of 6.4's
-move-size calls and 20.0% of its direction calls round (6.2's own map: 9.4%
-and 17.5%), and the calls it turned were right less often afterwards (6.4
-move size 51.2% to 48.8%; 6.2 move size 54.1% to 45.9%). Confined to
-strength it turns none. On 6.4 move size the strongest tenth of calls is
-stated 73.7% and right 68.9% before the map, 69.1% and 68.4% after, at the
-same closeness (0.7581).
+$$\ell_k\leftarrow\ell_k+\ln e_k(y),\qquad v_k=\frac{e^{\ell_k}}{\sum_je^{\ell_j}},\qquad q_0=\sum_kv_ke_k,$$
 
-## 8. What remains a choice
+where $e_k(y)$ is $e_k$ if $y=1$ and $1-e_k$ otherwise. This is a Bayesian
+mixture with a uniform prior: on any series its total log loss exceeds that
+of the best single memory by at most $\ln M$, $M=7$ or $8$ (Vovk, 1990).
 
-These are definitions without a derivation. Each is a small set of
-alternatives or a convention, and each is stated so it can be challenged:
+## 3. Where the present sits: the coordinates $Z$
 
-1. Six lines, hence 64 states.
-2. The line for RANGE compares with the median of all earlier changes.
-3. The grids for $\rho$, $K$ and the half-lives (dyadic or near-dyadic).
-4. The clip to $[0.01, 0.99]$, which bounds every loss by $\ln 100$.
-5. The first step predicted (26) and the 20 values needed for a median.
-6. Exponential form of the discount.
+**In plain words.** Is today's value high or low *compared with its recent
+surroundings*? Take the last 8 values and ask where today's ranks among
+them: lowest, highest, or in between. Do the same for the last 2, 4, 16, 32
+and 64 values, and for the whole history. That gives seven numbers between
+−1 (the lowest in its window) and +1 (the highest). They are computed for two
+things: the level of the series, and the size of its latest change. A bitcoin
+price, a temperature and a finishing position all become the same kind of
+number: *where does this sit relative to what came before?*
 
-## 9. What is not claimed
+Example: today's value is the 7th smallest of the last 8. Its coordinate at
+that scale is $2(7-\tfrac12)/8-1=0.625$.
 
-- No theorem says the outcome really is Bernoulli with probability
-  $b + \delta_s$. The model is a working description; the guarantees in §2
-  and §6 hold whether or not it is true.
-- The estimator is a posterior mean under a local, discounted likelihood. It
-  is not the posterior of a full joint model over all 64 states.
-- No guarantee of calibration is proved; calibration is measured (§7).
-- The promotion rule's interval is a normal approximation over days; it is a
-  decision rule, not a proof that one version is better.
-- Only the binary structure of the six lines is used: the cube, Hamming
-  distance and the complement. Richer castings of the lines were tested as
-  hypotheses and added nothing (`validation/core7.py`).
+**Exactly** (`hex7.ts: ranks`). For window $w\in\{2,4,8,16,32,64\}$ let
+$R_{t,w}$ be the midrank of $v_t$ among $v_{t-w+1},\dots,v_t$ (ties share the
+average of their positions), and for all history $R_{t,\infty}$ its midrank
+among $v_1,\dots,v_t$:
 
-## 10. Measured results
+$$u_{t,w}=\frac{R_{t,w}-\tfrac12}{w},\qquad z_{t,w}=2u_{t,w}-1\in(-1,1).$$
 
-Walk-forward, every call made before its outcome; markets are 17 series over
-2016–2026 (46,954 calls per read). Gains are thousandths of a nat per call
-with a 95% interval (`validation/core6.py`, `prereg_core6.md`).
+A window that is not yet full gives $0$. Values are rounded to nine decimals
+before ranking, so that a level returning exactly to an earlier level ranks
+as a tie whatever arithmetic produced it. Two observables are ranked: the
+level $v_t=\sum_{s\le t}r_s$ and the size $v_t=a_t$. For MOVE the level is
+the read's own observable and the size is the other; for RANGE the reverse.
+$Z_t\in\mathbb R^{14}$ is the own seven followed by the other seven.
 
-| Read, domain | 6.2 right | 6.4 right | Baseline rule right | 6.4 over its baseline |
-|---|---|---|---|---|
-| RANGE, markets | 58.8% | 59.9% | 59.7% | −0.1 [−0.4, 0.2] |
-| MOVE, markets | 51.5% | 50.8% | 50.9% | +0.4 [0.2, 0.7] |
-| MOVE, weather | 56.4% | 56.2% | 51.2% | +11.1 [8.8, 13.3] |
-| RANGE, weather | 55.6% | 55.9% | 55.7% | +0.8 [0.2, 1.4] |
-| MOVE, racing | 64.9% | 75.0% | 74.9% | +2.2 [−0.1, 5.2] |
-| RANGE, racing | 50.8% | 50.6% | 49.7% | +1.2 [−0.5, 4.1] |
+If the series were exchangeable inside a window, $u_{t,w}$ would be uniform:
+it is a probability integral transform, which is why the same coordinates
+serve every kind of series. The sign $\mathbb 1[z>0]$ is a binary line; the
+earlier engines kept only the sign and discarded the rest.
 
-Three things follow, and they are stated plainly because they bear on any
-claim made for the engine:
+## 4. What HEX learns: the residual
 
-1. **6.4 matches the hand-tuned 6.3 everywhere** (largest difference 0.7,
-   in 6.4's favour), with no pre-trained tables and no fixed numbers, and it
-   starts faster on a new series.
-2. **On market move size the 64 states add nothing measurable beyond the
-   baseline.** The gain over 6.2 there (58.8% to 59.9%) comes from the
-   observer's baseline following recent behaviour, not from the patterns.
-3. **The states carry real information on weather direction** (+11.1) and a
-   little elsewhere. Market direction stays at chance.
+**In plain words.** The null says 55%. HEX asks whether where the value sits
+changes that. It learns one number per coordinate: how much being high at
+that scale has pushed the odds up or down on this series. All of it starts at
+zero, so on a new series HEX starts exactly at the null and departs from it
+only as evidence arrives. The adjustment is made in odds, not percentage
+points, so the result can never leave 0–100%.
 
-## 11. The spectral form: why the pieces fit together
+Example: the null says 55%, which is odds of 0.55/0.45 = 1.22. HEX has
+learned a coefficient of −0.3 at the 8-step scale, and today's coordinate
+there is 0.625. The odds are multiplied by $e^{-0.3\times0.625}=0.83$, giving
+1.01, or 50.3%: on this series, sitting high in the recent range has been
+followed by fewer rises.
 
-The estimator, the kernel, the discount and the mixture are one construction
-seen from different sides. This section states it and reports what it shows.
+**Exactly** (`hex7.ts: Residual`). Two models: own ranks only ($\beta\in\mathbb R^7$)
+and own with the other observable ($\beta\in\mathbb R^{14}$). Each is
+Bayesian logistic regression with offset $\operatorname{logit}q_0$, updated
+one outcome at a time by the second-order (assumed-density) step. With prior
+$\beta\sim N(0,\tau I)$, covariance $P$ starting at $\tau I$, and
+$q=\sigma(\operatorname{logit}q_0+\beta^\top Z)$ kept within $[0.01,0.99]$:
 
-**Walsh characters.** For a set $A$ of lines let
-$\chi_A(s) = (-1)^{\#\{i \in A:\, s_i = 1\}}$. The 64 characters are an
-orthogonal basis for functions on the cube, so any state effect is
-$\delta_s = \sum_A c_A \chi_A(s)$. The size $|A|$ is the number of lines the
-term depends on: $|A| = 1$ is "this line alone", $|A| = 2$ is "these two
-lines together", up to $|A| = 6$, the whole pattern at once.
+$$P\leftarrow P-\frac{q(1-q)\,PZZ^\top P}{1+q(1-q)\,Z^\top PZ},\qquad \beta\leftarrow\beta+PZ\,(y-q).$$
 
-**Result (the kernel is a price on complexity).** The diffusion kernel is
-diagonal in this basis:
+There is no learning rate to choose. The one free quantity, the prior scale
+$\tau$, is a family: nine copies run at $\tau\in\{2^{-4},\dots,2^{4}\}$ and
+are mixed by likelihood exactly as in section 2. The model's probability is
+that mixture; the coefficients in force are the copies' coefficients
+averaged by their weights (`Residual.beta`).
 
-$$\sum_j \rho^{\,d(s,j)}\, \chi_A(j) = (1+\rho)^6\, \lambda^{|A|}\, \chi_A(s), \qquad \lambda = \frac{1-\rho}{1+\rho} = e^{-2\beta}.$$
+## 5. HEX's call: reversible influence
 
-So sharing evidence between neighbouring states is the same thing as a prior
-in which every additional line a pattern depends on costs one more factor of
-$\lambda$. The odd kernel keeps exactly the terms with $|A|$ odd, the even
-kernel those with $|A|$ even. (Checked numerically to rounding,
-`validation/core8.py`.)
+**In plain words.** Three voices answer every question: the null alone, the
+model that reads the read's own coordinates, and the model that also reads
+the other observable. HEX's call is their weighted average. A voice gains
+influence by giving high probability to what actually happened. Influence is
+never locked in: after every outcome a small slice of everyone's influence is
+shared out equally, so a voice that has been wrong for a long time can come
+back quickly when the series changes. What a voice has learned is never
+erased; only its present say in the call moves.
 
-**Result (the ladder).** The walk that flips one line at a time has
-eigenvalues $1 - 2k/6$ on the terms with $|A| = k$: seven evenly spaced
-levels. The weight $\lambda^k = e^{-2\beta k}$ is a Boltzmann factor on that
-ladder with $\beta$ as inverse temperature. This is the exact sense in which
-the six-line system resembles a harmonic oscillator; it is a property of six
-binary lines and involves no quantum mechanics.
+**Exactly** (`hex7.ts: Share`). For experts $V=(q_0,m_1,m_2)$ and a share
+rate $\alpha$:
 
-**Result (space and time are the same operation).** The discount
-$\gamma^{\,t-u} = e^{-(t-u)\ln 2/h}$ is the same exponential smoothing applied
-along time that $\rho^d$ applies along the edges of the cube. Evidence
-spreads between similar patterns at rate $\beta$ and fades at rate $1/h$. The
-mixture over $(\rho, h, K)$ is Bayesian selection of both scales. The
-observer's baseline is the $|A| = 0$ term, the part of the outcome that does
-not depend on the pattern, tracked at dyadic memories.
+$$w_k\leftarrow(1-\alpha)\,\frac{w_kV_k(y)}{\sum_jw_jV_j(y)}+\frac{\alpha}{3}$$
 
-**The exact posterior.** With independent priors
-$c_A \sim N(0, \tau^2 \lambda^{|A|})$ and $y - b = \delta_s + \varepsilon$,
-$\operatorname{Var}\varepsilon = b(1 - b)$, the posterior over all 64
-coefficients is a Kalman update, with forgetting as a relaxation of the
-coefficients toward zero. This is the full joint model of which §4 is the
-state-by-state approximation.
+(fixed share; Herbster and Warmuth, 1998). Five rates
+$\alpha\in\{0,0.001,0.005,0.02,0.05\}$ run side by side and are mixed by
+likelihood; $\alpha=0$ is the plain Bayesian mixture, so the plain mixture is
+one of the things HEX can fall back on, at a cost of at most $\ln 5$ in total
+log loss. The call is
 
-**Measured** (`validation/core8.py`, `prereg_core8.md`). The exact posterior
-ties state-6.4 on every read (largest difference 1.2 thousandths of a nat),
-so the approximation in §4 loses nothing and the simpler form ships. It also
-shows where the information is. Share of the fitted effect by how many lines
-a term involves:
+$$p=\sum_\alpha o_\alpha\sum_kw_{\alpha,k}V_k .$$
 
-| Read, domain | One line | Two lines | Three or more |
-|---|---|---|---|
-| MOVE, weather | 98% | 1% | under 1% |
-| RANGE, weather | 100% | 0% | 0% |
-| MOVE, markets | 95% | 1% | 2% |
-| RANGE, markets | 91% | 4% | 1% |
+## 6. Strength: restated from the record, never changing the call
 
-(The remainder is the constant term.) Candidates that treat each of the 64
-patterns as its own unrelated case received 0–3% of the weight on these
-reads. **The six lines carry their information one at a time. The pattern as
-a whole adds almost nothing beyond the sum of its lines.**
+**In plain words.** A call has a side (yes or no) and a strength (how far
+from 50%). The side is HEX's and is never changed. The strength is checked
+against history: of all earlier calls stated at about 70%, how many were
+right? If 66% were, a new 70% is shown as 66%. The shown strength can never
+go below 50%, so the side cannot flip.
 
-## 12. The quantum form
+**Exactly** (`isotonic.ts`). With $a=\mathbb 1[p\ge\tfrac12]$ and
+$s=\max(p,1-p)$, let $G$ be the isotonic regression of
+$\mathbb 1[\text{call was right}]$ on $s$ over calls whose outcomes are
+known, pooled across tracked series and refitted nightly (at least 2,000
+calls). Then $s'=\min(0.99,\max(0.5001,G(s)))$ and the shown probability is
+$s'$ if $a=1$, else $1-s'$. In the replay this left information gain
+unchanged within noise and brought the strongest tenth of move-size calls
+from stated 74.0% / right 69.6% to 69.8% / 68.8%. A map allowed to change the
+side was tested and rejected: the calls it changed were right less often
+afterwards (`validation/hex7.py`).
 
-Six two-valued lines are six qubits, and the 64 patterns are a basis of a
-64-dimensional state space. Let $X_i$ flip line $i$ and
+## 7. The measure: information gain
 
-$$H = \sum_{i=1}^{6} (1 - X_i).$$
+**In plain words.** Counting right and wrong treats a 51% call and a 99% call
+the same. The engine is judged instead by how much probability it gave to
+what actually happened, compared with how much the null gave. If HEX said 62%
+and the null said 55% and the event happened, HEX gained; if it did not
+happen, HEX lost. Added up over every call this is the information HEX has
+contributed beyond the obvious, in bits. Positive and clear of zero means a
+verified edge. Not clear of zero means **no verified edge**, and the product
+says so.
 
-$H$ is the Laplacian of the cube, and its eigenvectors are the Walsh
-characters with eigenvalue $2k$ on terms involving $k$ lines.
+**Exactly** (`cycle.ts: informationGain, clusteredMean`). For a call with
+outcome $y$:
 
-**Result (the engine is the thermal half).** The diffusion kernel of §5 is
-$e^{-\beta H}$, evolution in imaginary time: the thermal state of six
-non-interacting two-level systems at inverse temperature $\beta$.
+$$g=\ln p(y)-\ln q_0(y),\qquad G_T=\sum_{t\le T}g_t,\qquad \bar g=\frac{G_T}{T\ln 2}\ \text{bits per call}.$$
 
-**Result (the other half is a quantum walk).** Evolution in real time,
-$e^{-iHt}$, is the continuous-time quantum walk on the cube. The probability
-of finding pattern $j$ after starting in $s$ is
+This is a proper score: its expectation is greatest when the true
+probability is stated. Calls on the same day move together, so days are the
+unit of uncertainty. For day totals $S_d$ over $n_d$ calls, $D$ days,
+$N=\sum n_d$:
 
-$$q_t(s, j) = (\cos^2 t)^{\,6 - d(s,j)}\, (\sin^2 t)^{\,d(s,j)}.$$
+$$m=\frac{\sum_dS_d}{N},\qquad \operatorname{se}=\frac1N\sqrt{\frac{D}{D-1}\sum_d(S_d-m\,n_d)^2},\qquad \text{interval}=m\pm1.96\,\operatorname{se}.$$
 
-Unlike diffusion it is not monotone in distance. At $t = \pi/4$ every
-pattern is equally likely; at $t = \pi/2$ the walk is on the mirror pattern
-with certainty (perfect state transfer: Christandl et al., 2004; Moore and
-Russell, 2002). On a term involving $k$ lines its eigenvalue is
-$\cos(2t)^k$, negative for odd $k$ once $t > \pi/4$, which no diffusion
-produces. The mirror relation the engine uses is the endpoint of this walk.
-All three statements were checked numerically to rounding.
+The sums $\sum S_d,\ \sum S_d^2,\ \sum S_dn_d,\ \sum n_d^2$ are kept running,
+so every decision uses the whole record without rereading it. The validation
+report uses a block bootstrap over 20-day blocks instead; the two agree.
 
-**Measured** (`validation/core9.py`, `prereg_core9.md`). Quantum-walk kernels
-at $t = \pi/8, \pi/4, 3\pi/8, \pi/2$, and the signed real part of the
-amplitude, were added to the candidates on the MOVE read and left to compete
-with the diffusion kernels. The combined model is within 0.4 thousandths of a
-nat of state-6.4 on every domain. On weather, the one domain where the
-patterns carry clear information, the quantum kernels received no weight.
+Recorded beside it for each call (`cycle.ts: scoreCall`):
 
-So the quantum formalism applies exactly and adds no predictive information
-on these data. The reason is §11: the information sits in single lines,
-which in this language means the six lines behave as unentangled. A quantum
-walk differs from diffusion through interference between paths that involve
-several lines at once, and there is almost nothing at that level to
-interfere.
+- **closeness** $c=1-(p-y)^2$ (1 certain and right, 0.75 a coin flip), and the
+  identity $c=0.75+[c(q_0)-0.75]+[c(p)-c(q_0)]+[c(p_{\rm shown})-c(p)]$:
+  how much came from the null, from what HEX added, and from restating the
+  strength;
+- **reward** $\max(0,\,c-\bar c)$, the progress over the version's own
+  average closeness $\bar c$ on that series, never negative; and **lesson**
+  $\max(0,\,\bar c-c)$, kept for analysis and subtracted from nothing. No
+  decision is taken on reward, because cutting off the downside would pay
+  for boldness;
+- **the reason for a miss**, from what each voice said before the outcome:
+  `structure` (the null had it; what HEX added turned the call), `change`
+  (shorter memories had it), `blip` (longer memories had it), `outvoted` (the
+  position rule or one of HEX's models had it with too little influence),
+  `unseen` (nothing the engine remembers pointed that way).
+
+## 8. The loop
+
+**In plain words.** Every night, for every series: see what happened; score
+last night's calls; let memory take it in; make tonight's calls; write them
+down before their outcomes exist. Then, across all series: refit the strength
+map, decide which version people see, and decide which reads have a verified
+edge.
+
+**Exactly** (`functions/calibrateCognition`, `ledger.ts`).
+
+1. **Reveal.** For each open call whose next bar has printed, compute $y$.
+2. **Score.** Information gain, closeness, reward, lesson, reason
+   (`scoreOpenCalls` → `scoreCall`).
+3. **Learn.** The engine walks the series from its first bar, one step at a
+   time (`walkHex7`): at each step it predicts, then takes the outcome into
+   $U,N,\ell$ (section 2), $P,\beta$ and the prior-scale weights (section 4)
+   and the influences $w,o$ (section 5). What it knows tonight is exactly
+   what one pass through the series' history teaches it. Nothing else is
+   stored between nights, so there is no state to corrupt or migrate.
+4. **Predict.** Tonight's calls from both versions, with what each voice
+   said and, for 7.0, the coefficients and influences in force.
+5. **Commit.** Written to `CallLedger` before the outcome exists
+   (`rowsFor`, `logCalls`).
+6. **Strength map.** Refit $G$ per read and version from every scored step.
+7. **Which version is shown.** Two versions run side by side: 7.0 and the
+   frozen 6.5. On the same calls, with $m$ and its interval (section 7)
+   computed for $\ln p_{7.0}(y)-\ln p_{6.5}(y)$: 7.0 is shown once there are
+   at least 300 paired calls over 60 days, the interval is above zero, and
+   7.0 is right at least as often. It is taken back down when the interval is
+   below zero, or it is right less often by a margin clear of zero
+   (`foldDays`, `decide`).
+8. **Verified edge.** For the version shown, $m$ and its interval for
+   information gain over the null. The status starts from the replay of
+   section 9 (market move size verified, market direction not). The ledger's
+   own record changes it only when it is decisive: to verified when the lower
+   bound is above zero, to not verified when the upper bound is below zero.
+   A read that is not verified is presented as having no verified edge
+   (`probabilityRead.ts: verifiedLines`).
+
+The precision metrics the loop keeps, per read, in one `EngineStatus` row:
+
+| Field | Meaning |
+|---|---|
+| `bits_candidate`, `_low`, `_high` | 7.0's information gain over the null, bits per call, with its 95% interval |
+| `bits_control`, `_low`, `_high` | the same for 6.5 |
+| `gain`, `gain_low`, `gain_high` | 7.0 over 6.5 on the same calls, nats per call |
+| `verified` | whether the shown version has a verified edge over the null (rule 8) |
+| `hit_candidate`, `hit_control`, `hit_baseline` | share of calls right: 7.0, 6.5, and what the null alone gets (expected) |
+| `stated_candidate`, `stated_control` | mean stated strength, to set beside the share right |
+| `closeness_*`, `progress_*`, `lesson_*` | mean closeness, reward and lesson per call |
+| `reasons_candidate`, `reasons_control` | misses counted by reason |
+| `paired_calls`, `paired_days`, `live_engine`, `decision`, `reason` | the record's size and the version decision in words |
+
+And per call, in `CallLedger`: `info_gain`, `log_score`, `closeness`,
+`reward`, `lesson`, `reason`, the three parts of closeness, `views` (what
+each voice said) and `learned` (7.0's coefficients and influences).
+
+## 9. What has been measured
+
+One-pass replay (`validation/replay.py`, specification and predictions in
+`validation/prereg_replay.md`): every call made before its outcome, in order,
+each series started from nothing. 280,252 calls on 43 series. Rerunning the
+engine on truncated histories at 258 sampled points reproduced the ledger
+with a largest difference of zero. The product code matches the reference to
+$10^{-13}$ (`tests/parity.mjs`).
+
+| | Calls | 7.0 right | Expected | Bits per call over the null [95%] | Over 6.5 [95%] |
+|---|---|---|---|---|---|
+| Markets, move size (17 series, 2016–2026) | 46,478 | 57.9% | 57.2% | +0.0043 [0.0030, 0.0056] | +0.0037 [0.0025, 0.0050] |
+| Markets, direction | 46,478 | 51.4% | 51.2% | 0.0000 [−0.0007, 0.0006] | 0.0000 [−0.0007, 0.0006] |
+| *Never used before:* 10 currencies, move size | 26,540 | 62.1% | 61.2% | +0.0082 [0.0060, 0.0106] | +0.0035 [0.0018, 0.0053] |
+| *Never used before:* 10 currencies, direction | 26,540 | 54.2% | 54.0% | +0.0011 [−0.0002, 0.0025] | +0.0001 [−0.0013, 0.0014] |
+| *Never used before:* 3 temperature stations, direction | 29,408 | 61.0% | 54.6% | +0.0466 [0.0430, 0.0499] | +0.0310 [0.0278, 0.0342] |
+| *Never used before:* 3 temperature stations, move size | 29,408 | 63.1% | 61.6% | +0.0186 [0.0158, 0.0212] | +0.0130 [0.0109, 0.0152] |
+| Chicago temperature, direction | 24,678 | 62.9% | 50.7% | +0.0644 [0.0598, 0.0689] | +0.0417 [0.0375, 0.0459] |
+| Racing, direction | 13,022 | 74.8% | 75.0% | −0.0017 [−0.0020, −0.0014] | −0.0008 [−0.0015, −0.0003] |
+
+- **Status.** Market move size: verified. Market direction: no verified edge.
+- **Learning gain** (the engine left to learn against itself frozen after its
+  first 500 calls on a series; the null keeps moving in both): +0.0036 bits
+  per call [0.0025, 0.0048] on market move size, +0.0006 [0.0001, 0.0011] on
+  market direction.
+- **Experience.** Market move size, bits per call over the null by the number
+  of calls already made on the series: −0.011 (1–100), +0.002 (101–250),
+  +0.000 (251–500), +0.004 (501–1,000), +0.006 (1,001+). The first hundred
+  calls on a new series cost information; the engine is level with the null
+  by 500 and ahead after.
+- **Which version the ledger shows.** The rule of section 8 switches market
+  move size from 6.5 to 7.0 in late October 2019 and never back; it never switches
+  market direction.
+- **Racing direction** is the one read where HEX is behind the null: 7.0 by
+  0.0017 bits per call and 6.5 by 0.0009. The null is already right three
+  times in four there, and what either engine adds costs a little.
+
+The 17-market run is a development backtest: those series were used while
+designing every version. The ten currencies and three temperature stations
+were never used before, and the rule for including them was written before
+any run. Live calls from the release of 7.0 are the third test, and the
+ledger collects them from the first night.
+
+## 10. What is not claimed
+
+- No guarantee of accuracy on any future series. Finite history cannot prove
+  the future.
+- The interval rules use a normal approximation over days. They are decision
+  rules, not proofs.
+- Market direction has no verified edge. Nothing in 7.0 fixes that, and the
+  product does not pretend otherwise.
+- The temperature replication is three stations; the currency replication
+  includes one pegged-band currency and one in crisis, which were kept
+  because the inclusion rule written beforehand kept them.
+- Text, letter-number and ontology layers are not part of 7.0. No interaction
+  term, call-changing calibration or interference model is either: each was
+  tested (`validation/hex7.py`) and none added information.
+
+## 11. The frozen comparator: 6.5
+
+`hex.ts` is the previous engine, unchanged: each step leaves a binary line
+per read; the last six lines form one of 64 states; evidence for the shift
+$\delta_s$ in $p=q_0+\delta_s$ is filed under the state, shared between
+neighbouring states by a kernel $\rho^{d}$ or its odd part
+$\rho^d-\rho^{6-d}$ (a signed kernel shrinkage estimator), discounted, and
+288 settings are mixed by likelihood. It runs beside 7.0 on every call so
+that the comparison in section 8 is always paired and prospective. On market
+move size its information gain over the null is +0.0006 bits per call; 7.0's
+is +0.0043.
 
 ## References
 
-- Ayer, M., Brunk, H. D., Ewing, G. M., Reid, W. T. and Silverman, E. (1955). An empirical distribution function for sampling with incomplete information. *Annals of Mathematical Statistics*, 26, 641–647.
-- Brier, G. W. (1950). Verification of forecasts expressed in terms of probability. *Monthly Weather Review*, 78, 1–3.
-- Brümmer, N. and du Preez, J. (2013). The PAV algorithm optimizes binary proper scoring rules. arXiv:1304.2331.
-- Gneiting, T. and Raftery, A. E. (2007). Strictly proper scoring rules, prediction, and estimation. *Journal of the American Statistical Association*, 102, 359–378.
-- Christandl, M., Datta, N., Ekert, A. and Landahl, A. J. (2004). Perfect state transfer in quantum spin networks. *Physical Review Letters*, 92, 187902.
-- Cesa-Bianchi, N. and Lugosi, G. (2006). *Prediction, Learning, and Games*. Cambridge University Press.
-- Dawid, A. P. (1984). Statistical theory: the prequential approach. *Journal of the Royal Statistical Society A*, 147, 278–292.
-- Ibrahim, J. G. and Chen, M.-H. (2000). Power prior distributions for regression models. *Statistical Science*, 15, 46–60.
-- Kac, M. (1947). Random walk and the theory of Brownian motion. *American Mathematical Monthly*, 54, 369–391.
-- Kondor, R. I. and Lafferty, J. (2002). Diffusion kernels on graphs and other discrete structures. *Proceedings of the 19th International Conference on Machine Learning*, 315–322.
-- Moore, C. and Russell, A. (2002). Quantum walks on the hypercube. *Proceedings of RANDOM 2002*, Lecture Notes in Computer Science 2483, 164–178.
-- Tibshirani, R. and Hastie, T. (1987). Local likelihood estimation. *Journal of the American Statistical Association*, 82, 559–567.
-- Vovk, V. (1990). Aggregating strategies. *Proceedings of the 3rd Workshop on Computational Learning Theory*, 371–383.
-- Vovk, V., Gammerman, A. and Shafer, G. (2005). *Algorithmic Learning in a Random World*. Springer.
-- West, M. and Harrison, J. (1997). *Bayesian Forecasting and Dynamic Models*, 2nd edition. Springer.
+- Ayer, Brunk, Ewing, Reid and Silverman (1955). An empirical distribution function for sampling with incomplete information. *Ann. Math. Statist.* 26.
+- Brier (1950). Verification of forecasts expressed in terms of probability. *Monthly Weather Review* 78.
+- Cesa-Bianchi and Lugosi (2006). *Prediction, Learning, and Games*. Cambridge University Press.
+- Dawid (1984). Statistical theory: the prequential approach. *J. Roy. Statist. Soc. A* 147.
+- Gneiting and Raftery (2007). Strictly proper scoring rules, prediction, and estimation. *J. Amer. Statist. Assoc.* 102.
+- Herbster and Warmuth (1998). Tracking the best expert. *Machine Learning* 32.
+- Opper (1998). A Bayesian approach to on-line learning. In *On-line Learning in Neural Networks*, Cambridge University Press.
+- Vovk (1990). Aggregating strategies. *Proc. COLT*.

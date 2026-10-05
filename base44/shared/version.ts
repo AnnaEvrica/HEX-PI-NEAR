@@ -9,9 +9,15 @@
 // 6.3 — HEX in two versions on every call (state-6.2 shown, state-6.3 with
 //       the observer's baseline beside it), a ledger of every call, a nightly
 //       update and a promotion rule.
-// 6.4 — the second version is HEX written as an explicit model with no
-//       hand-set numbers (hex.ts, docs/MODEL.md).
-export const ENGINE_VERSION = '6.4';
+// 6.4 — HEX written as an explicit model with no hand-set numbers.
+// 6.5 — one cycle for every call (call, outcome, score, reason, learn);
+//       calibration restates strength and never changes a call; the two
+//       reads coupled. Now the frozen comparator.
+// 7.0 — HEX as a residual on the null: logit p = logit q0 + beta . Z, with
+//       continuous ranks for Z, learned online, influence reversible
+//       (hex7.ts, docs/MODEL.md). Information gain over the null is the
+//       measure every decision rests on.
+export const ENGINE_VERSION = '7.0';
 /** The software people use. */
 export const PRODUCT_NAME = 'HEX [PI]';
 /** The engine it runs on (and the name of the hardware server). */

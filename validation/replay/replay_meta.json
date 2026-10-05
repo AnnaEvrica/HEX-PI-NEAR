@@ -1,0 +1,60 @@
+{
+ "rows": 280252,
+ "series": 43,
+ "code_hash": "0e39fd5d3e17793c",
+ "one-pass check: truncated reruns": 258,
+ "largest difference": 0.0,
+ "currency eligibility": {
+  "Brazil": {
+   "observations": 2682,
+   "share of days with a change": 0.994,
+   "included": true
+  },
+  "China": {
+   "observations": 2682,
+   "share of days with a change": 0.943,
+   "included": true
+  },
+  "Denmark": {
+   "observations": 2682,
+   "share of days with a change": 0.999,
+   "included": true
+  },
+  "Hong Kong": {
+   "observations": 2682,
+   "share of days with a change": 0.944,
+   "included": true
+  },
+  "Malaysia": {
+   "observations": 2682,
+   "share of days with a change": 0.926,
+   "included": true
+  },
+  "Singapore": {
+   "observations": 2682,
+   "share of days with a change": 0.99,
+   "included": true
+  },
+  "South Korea": {
+   "observations": 2682,
+   "share of days with a change": 0.99,
+   "included": true
+  },
+  "Taiwan": {
+   "observations": 2682,
+   "share of days with a change": 0.919,
+   "included": true
+  },
+  "Thailand": {
+   "observations": 2682,
+   "share of days with a change": 0.944,
+   "included": true
+  },
+  "Venezuela": {
+   "observations": 2682,
+   "share of days with a change": 0.698,
+   "included": true
+  }
+ },
+ "seconds": 217
+}

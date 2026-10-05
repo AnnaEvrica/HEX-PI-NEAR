@@ -1,0 +1,142 @@
+{
+ "weather MOVE": {
+  "calls": 9030,
+  "right %": {
+   "hex": 56.22,
+   "three_of_each": 57.87,
+   "three_own_only": 56.22
+  },
+  "three of each over 6.4": [
+   2.44,
+   1.04,
+   3.86
+  ],
+  "three own only over 6.4": [
+   -0.0,
+   -0.0,
+   0.0
+  ],
+  "three of each, first half of each series": [
+   1.4,
+   -0.48,
+   3.38
+  ],
+  "three of each, second half": [
+   3.48,
+   1.54,
+   5.32
+  ]
+ },
+ "markets RANGE": {
+  "calls": 46937,
+  "right %": {
+   "hex": 59.83,
+   "three_of_each": 59.9,
+   "three_own_only": 59.98
+  },
+  "three of each over 6.4": [
+   0.29,
+   0.18,
+   0.42
+  ],
+  "three own only over 6.4": [
+   0.23,
+   0.11,
+   0.36
+  ],
+  "three of each, first half of each series": [
+   0.14,
+   -0.02,
+   0.3
+  ],
+  "three of each, second half": [
+   0.44,
+   0.26,
+   0.64
+  ]
+ },
+ "markets MOVE": {
+  "calls": 46937,
+  "right %": {
+   "hex": 51.06,
+   "three_of_each": 50.86,
+   "three_own_only": 51.12
+  },
+  "three of each over 6.4": [
+   -0.05,
+   -0.13,
+   0.04
+  ],
+  "three own only over 6.4": [
+   -0.02,
+   -0.05,
+   0.02
+  ],
+  "three of each, first half of each series": [
+   -0.05,
+   -0.17,
+   0.06
+  ],
+  "three of each, second half": [
+   -0.04,
+   -0.16,
+   0.08
+  ]
+ },
+ "racing MOVE": {
+  "calls": 13022,
+  "right %": {
+   "hex": 74.97,
+   "three_of_each": 74.93,
+   "three_own_only": 74.96
+  },
+  "three of each over 6.4": [
+   -0.03,
+   -0.09,
+   0.03
+  ],
+  "three own only over 6.4": [
+   0.1,
+   -0.03,
+   0.25
+  ],
+  "three of each, first half of each series": [
+   -0.05,
+   -0.14,
+   0.03
+  ],
+  "three of each, second half": [
+   -0.0,
+   -0.1,
+   0.07
+  ]
+ },
+ "weather RANGE": {
+  "calls": 9030,
+  "right %": {
+   "hex": 55.92,
+   "three_of_each": 55.89,
+   "three_own_only": 56.0
+  },
+  "three of each over 6.4": [
+   -0.01,
+   -0.19,
+   0.16
+  ],
+  "three own only over 6.4": [
+   0.03,
+   -0.06,
+   0.13
+  ],
+  "three of each, first half of each series": [
+   0.08,
+   -0.19,
+   0.35
+  ],
+  "three of each, second half": [
+   -0.1,
+   -0.32,
+   0.15
+  ]
+ }
+}

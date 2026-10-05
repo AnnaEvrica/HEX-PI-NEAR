@@ -13,14 +13,18 @@
     "live_engine": {
       "type": "string",
       "enum": [
-        "state-6.2",
-        "state-6.4"
+        "state-6.5",
+        "hex-7.0"
       ],
-      "description": "The engine shown for this read"
+      "description": "The version shown for this read"
+    },
+    "verified": {
+      "type": "boolean",
+      "description": "Whether the shown version's information gain over the null is clear of zero. Starts from the replay; the ledger changes it only when its own record is decisive either way. A read that is not verified is presented as having no verified edge"
     },
     "paired_calls": {
       "type": "number",
-      "description": "Calls scored for both engines on the same series and day"
+      "description": "Calls scored for both versions on the same series and day"
     },
     "paired_days": {
       "type": "number",
@@ -28,51 +32,93 @@
     },
     "gain": {
       "type": "number",
-      "description": "Mean closeness of 6.4 minus 6.2 on the same calls. Positive: 6.4 came closer"
+      "description": "Information gain of 7.0 over 6.5 on the same calls, nats per call. Positive: 7.0 gave what happened more probability"
     },
     "gain_low": {
       "type": "number",
-      "description": "Lower end of the 95% interval, by day"
+      "description": "Lower end of its 95% interval, days as the unit of uncertainty"
     },
     "gain_high": {
       "type": "number",
-      "description": "Upper end of the 95% interval, by day"
+      "description": "Upper end of its 95% interval"
     },
-    "hit_control": {
+    "bits_candidate": {
       "type": "number",
-      "description": "Share of 6.2 calls right on the paired calls (0-1)"
+      "description": "7.0: information gain over the null, bits per call"
+    },
+    "bits_candidate_low": {
+      "type": "number",
+      "description": "Lower end of its 95% interval"
+    },
+    "bits_candidate_high": {
+      "type": "number",
+      "description": "Upper end of its 95% interval"
+    },
+    "bits_control": {
+      "type": "number",
+      "description": "6.5: information gain over the null, bits per call"
+    },
+    "bits_control_low": {
+      "type": "number",
+      "description": "Lower end of its 95% interval"
+    },
+    "bits_control_high": {
+      "type": "number",
+      "description": "Upper end of its 95% interval"
     },
     "hit_candidate": {
       "type": "number",
-      "description": "Share of 6.4 calls right on the paired calls (0-1)"
+      "description": "7.0: share of calls right on the paired calls (0-1)"
+    },
+    "hit_control": {
+      "type": "number",
+      "description": "6.5: share of calls right on the paired calls (0-1)"
     },
     "hit_baseline": {
       "type": "number",
-      "description": "Share right for the baseline rule on the same calls (0-1)"
-    },
-    "stated_control": {
-      "type": "number",
-      "description": "Mean probability 6.2 stated for the side it called"
+      "description": "Share right if the null alone had made every call: what is expected without HEX"
     },
     "stated_candidate": {
       "type": "number",
-      "description": "Mean probability 6.4 stated for the side it called"
+      "description": "7.0: mean probability stated for the side it called; compare with hit_candidate"
     },
-    "progress_control": {
+    "stated_control": {
       "type": "number",
-      "description": "6.2: mean reward per call. Reward is progress against its own record, never negative"
+      "description": "6.5: the same"
+    },
+    "closeness_candidate": {
+      "type": "number",
+      "description": "7.0: mean closeness per call, 1 - (probability - outcome)^2"
+    },
+    "closeness_control": {
+      "type": "number",
+      "description": "6.5: the same"
     },
     "progress_candidate": {
       "type": "number",
-      "description": "6.4: the same"
+      "description": "7.0: mean reward per call. Reward is progress against its own record, never negative. Recorded; no decision is taken on it"
     },
-    "lesson_control": {
+    "progress_control": {
       "type": "number",
-      "description": "6.2: mean shortfall per call against its own record. Analysis only"
+      "description": "6.5: the same"
     },
     "lesson_candidate": {
       "type": "number",
-      "description": "6.4: the same"
+      "description": "7.0: mean shortfall per call against its own record. Analysis only"
+    },
+    "lesson_control": {
+      "type": "number",
+      "description": "6.5: the same"
+    },
+    "reasons_candidate": {
+      "type": "object",
+      "description": "7.0: misses by reason over the whole record (structure, change, blip, outvoted, unseen)",
+      "additionalProperties": true
+    },
+    "reasons_control": {
+      "type": "object",
+      "description": "6.5: the same",
+      "additionalProperties": true
     },
     "decision": {
       "type": "string",
@@ -85,7 +131,7 @@
     },
     "reason": {
       "type": "string",
-      "description": "The decision in words"
+      "description": "The decision in one sentence, with its numbers"
     },
     "tally": {
       "type": "string",
@@ -93,16 +139,20 @@
     },
     "calibration": {
       "type": "string",
-      "description": "JSON: pooled map for 6.4 on this read, from the strength it stated to how often such calls were right. Applied to strength only; never changes a call"
+      "description": "JSON: 7.0's pooled strength map for this read, from the strength it stated to how often such calls were right. Applied to strength only; never changes a call"
+    },
+    "calibration_control": {
+      "type": "string",
+      "description": "JSON: the same for 6.5"
     },
     "calibration_steps": {
       "type": "number",
-      "description": "Scored steps the map was fitted on"
+      "description": "Scored steps 7.0's map was fitted on"
     },
     "promoted_at": {
       "type": "string",
       "format": "date-time",
-      "description": "When 6.4 was last promoted for this read"
+      "description": "When 6.5 was last promoted for this read"
     },
     "engine_version": {
       "type": "string",

@@ -39,20 +39,37 @@ class Sorted {
   median(): number { const s = this.s, m = s.length; return m % 2 ? s[(m - 1) / 2] : (s[m / 2 - 1] + s[m / 2]) / 2; }
 }
 
+/** What one part of memory said on its own about the step that has not happened, and how much it is trusted. */
+export interface View { label: string; p: number; w: number }
+const MEMORY_LABELS = HALF_LIVES.map((h) => (h === null ? 'memory:all' : `memory:${h}`));
+
 /**
  * The baseline at every step of a series of step-to-step changes, NaN where
  * there is none yet. Entry i uses the series up to step i only; the last
  * entry is the baseline for the step that has not happened.
  */
 export function observeBaseline(returns: number[], read: ReadName): Float64Array {
+  return observe(returns, read).baseline;
+}
+
+/**
+ * The same, with what each memory said on its own about the step that has not
+ * happened. `detail = true` also keeps what each memory said at every earlier
+ * step (`history[i]`), for replaying the cycle through time.
+ */
+export function observe(returns: number[], read: ReadName, detail = false): { baseline: Float64Array; memories: View[]; history?: View[][] } {
   const n = returns.length;
+  const memories: View[] = [];
+  const history: View[][] | undefined = detail ? [] : undefined;
   const out = new Float64Array(n).fill(NaN);
   const a = returns.map(Math.abs);
   // MOVE: rank of the present level among all levels so far
   const rankMax = new Float64Array(n);
   // RANGE: median of |change| through step i
   const med = new Float64Array(n).fill(NaN);
-  if (read === 'MOVE') { const s = new Sorted(); let x = 0; for (let i = 0; i < n; i++) { x += returns[i]; rankMax[i] = s.push(x); } }
+  // The level is rounded to nine decimals before it is ranked, so that a level returning exactly to an
+  // earlier level counts as a tie whatever arithmetic produced the changes.
+  if (read === 'MOVE') { const s = new Sorted(); let x = 0; for (let i = 0; i < n; i++) { x += returns[i]; rankMax[i] = s.push(Math.floor(x * 1e9 + 0.5) / 1e9); } }
   else { const s = new Sorted(); for (let i = 0; i < n; i++) { s.push(a[i]); if (s.size >= MIN_MEDIAN) med[i] = s.median(); } }
 
   const H = HALF_LIVES.length;
@@ -69,10 +86,15 @@ export function observeBaseline(returns: number[], read: ReadName): Float64Array
     let num = 0, den = 0;
     for (let k = 0; k < ne; k++) { const w = Math.exp(ll[k] - m); num += w * ex[k]; den += w; }
     out[i] = num / den;
-    if (i === n - 1) break;
+    if (i === n - 1 || history) {
+      const now: View[] = [];
+      for (let k = 0; k < ne; k++) now.push({ label: k < H ? MEMORY_LABELS[k] : 'position', p: ex[k], w: Math.exp(ll[k] - m) / den });
+      if (history) history[i] = now;
+      if (i === n - 1) { memories.push(...now); break; }
+    }
     const y = read === 'MOVE' ? (returns[i + 1] > 0 ? 1 : 0) : (a[i + 1] > med[i] ? 1 : 0);
     for (let k = 0; k < ne; k++) ll[k] += Math.log(y ? ex[k] : 1 - ex[k]);
     for (let h = 0; h < H; h++) { U[h] = rho[h] * U[h] + y; N[h] = rho[h] * N[h] + 1; }
   }
-  return out;
+  return { baseline: out, memories, ...(history ? { history } : {}) };
 }

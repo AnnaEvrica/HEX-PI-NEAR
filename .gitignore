@@ -34,3 +34,9 @@ base44/.app.jsonc
 # Local test output
 tests/backend-smoke/out
 __pycache__
+
+# validation: raw data and the full-width ledger are not kept in the repository
+validation/data/
+validation/data_replication/
+validation/replay/hex7_ledger_full.parquet
+__pycache__/

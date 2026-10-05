@@ -17,8 +17,8 @@
     "engine": {
       "type": "string",
       "enum": [
-        "state-6.2",
-        "state-6.4"
+        "state-6.5",
+        "hex-7.0"
       ],
       "description": "Which engine made the call"
     },
@@ -46,6 +46,18 @@
     "probability": {
       "type": "number",
       "description": "The engine's probability at call time (0-1)"
+    },
+    "raw": {
+      "type": "number",
+      "description": "The engine's own probability before its strength is restated"
+    },
+    "views": {
+      "type": "string",
+      "description": "JSON, written before the outcome: what each part of the engine's memory said on its own, and how much it was trusted"
+    },
+    "learned": {
+      "type": "string",
+      "description": "7.0 only. JSON, written before the outcome: the coefficients it had learned on this series and the share of the call held by the null and by each of its models"
     },
     "shown": {
       "type": "boolean",
@@ -79,6 +91,14 @@
       "type": "number",
       "description": "1 if the event happened, 0 if not"
     },
+    "log_score": {
+      "type": "number",
+      "description": "ln of the probability given to what happened"
+    },
+    "info_gain": {
+      "type": "number",
+      "description": "Information gain over the null, in nats: ln p(outcome) - ln null(outcome). Divide by ln 2 for bits. The measure every decision rests on"
+    },
     "scored_at": {
       "type": "string",
       "format": "date-time",
@@ -99,6 +119,22 @@
     "lesson": {
       "type": "number",
       "description": "How far the call fell short of that record, when it did. Analysis only: never subtracted from anything"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Why the call missed, found from the views: structure, change, blip, outvoted or unseen. Empty when the call was on the right side"
+    },
+    "part_baseline": {
+      "type": "number",
+      "description": "What the series' own record (the null) added to closeness over a coin flip"
+    },
+    "part_structure": {
+      "type": "number",
+      "description": "What HEX added to that"
+    },
+    "part_strength": {
+      "type": "number",
+      "description": "What restating the strength added. closeness = 0.75 + the three parts"
     },
     "record_calls": {
       "type": "number",

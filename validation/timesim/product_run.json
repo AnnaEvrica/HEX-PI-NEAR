@@ -1,0 +1,3480 @@
+{
+ "started": "2016-01-29",
+ "ended": "2026-09-29",
+ "series": 17,
+ "series_nights": 46461,
+ "scored_rows": 185776,
+ "threshold_mismatches": 0,
+ "events": [
+  {
+   "day": "2016-04-04",
+   "read": "MOVE",
+   "decision": "demote",
+   "reason": "6.5 gains 23.0 thousandths of a bit per call over 7.0; the interval excludes zero"
+  },
+  {
+   "day": "2016-05-22",
+   "read": "RANGE",
+   "decision": "demote",
+   "reason": "6.5 gains 14.3 thousandths of a bit per call over 7.0; the interval excludes zero"
+  },
+  {
+   "day": "2017-07-03",
+   "read": "RANGE",
+   "verified": false
+  },
+  {
+   "day": "2019-05-20",
+   "read": "RANGE",
+   "decision": "promote",
+   "reason": "7.0 gains 2.4 thousandths of a bit per call over 6.5 [0.0, 4.8]; the interval excludes zero"
+  },
+  {
+   "day": "2020-03-25",
+   "read": "RANGE",
+   "verified": true
+  }
+ ],
+ "map_first_fitted": {
+  "MOVE": "2016-07-26",
+  "RANGE": "2016-07-26"
+ },
+ "final_status": {
+  "MOVE": {
+   "live_engine": "state-6.5",
+   "paired_calls": 46436,
+   "paired_days": 3892,
+   "verified": false,
+   "gain": -0.00001,
+   "gain_low": -0.00034,
+   "gain_high": 0.00032,
+   "bits_candidate": 0.00043,
+   "bits_candidate_low": -0.00038,
+   "bits_candidate_high": 0.00123,
+   "bits_control": 0.00044,
+   "hit_control": 0.5127,
+   "hit_candidate": 0.5137,
+   "reasons_control": {
+    "outvoted": 9763,
+    "unseen": 3729,
+    "change": 4868,
+    "structure": 2403,
+    "blip": 1866
+   },
+   "reasons_candidate": {
+    "outvoted": 8702,
+    "structure": 3374,
+    "unseen": 4035,
+    "change": 4844,
+    "blip": 1625
+   },
+   "reason": "7.0 over 6.5: -0.0 thousandths of a bit per call [-0.5, 0.5]: not clearly ahead, so 6.5 stays"
+  },
+  "RANGE": {
+   "live_engine": "hex-7.0",
+   "paired_calls": 46436,
+   "paired_days": 3892,
+   "verified": true,
+   "gain": 0.00266,
+   "gain_low": 0.00191,
+   "gain_high": 0.00342,
+   "bits_candidate": 0.00421,
+   "bits_candidate_low": 0.00306,
+   "bits_candidate_high": 0.00535,
+   "bits_control": 0.00036,
+   "hit_control": 0.5742,
+   "hit_candidate": 0.5786,
+   "reasons_control": {
+    "unseen": 10256,
+    "blip": 6816,
+    "outvoted": 487,
+    "structure": 854,
+    "change": 1361
+   },
+   "reasons_candidate": {
+    "unseen": 9203,
+    "structure": 1797,
+    "blip": 6254,
+    "outvoted": 1106,
+    "change": 1209
+   },
+   "reason": "7.0 over 6.5: 3.8 thousandths of a bit per call [2.8, 4.9]: not clearly behind, so 7.0 stays"
+  }
+ },
+ "MOVE": {
+  "shown": {
+   "all": {
+    "calls": 46444,
+    "bits_per_call_over_null": 0.00014,
+    "right": 51.2,
+    "closeness": 0.75,
+    "stated": 51.2,
+    "strongest_tenth": {
+     "stated": 56.7,
+     "right": 54.2
+    },
+    "baseline_right": 51.2,
+    "rewarded": 62.7,
+    "reward": 0.0066,
+    "lesson": 0.0057,
+    "parts": {
+     "coin_flip": 0.75,
+     "baseline": -0.0001,
+     "structure": -0.0001,
+     "strength": 0.0001
+    },
+    "misses": 22643,
+    "reasons": {
+     "structure": 10.8,
+     "change": 21.5,
+     "blip": 8.2,
+     "outvoted": 43.1,
+     "unseen": 16.3
+    }
+   },
+   "by_year": {
+    "2016": {
+     "calls": 3922,
+     "bits_per_call_over_null": -0.00245,
+     "right": 50.5,
+     "closeness": 0.746,
+     "stated": 54.1,
+     "strongest_tenth": {
+      "stated": 68.6,
+      "right": 52.3
+     },
+     "baseline_right": 51.1,
+     "rewarded": 70,
+     "reward": 0.0238,
+     "lesson": 0.0203,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": -0.0035,
+      "structure": -0.001,
+      "strength": 0.0005
+     },
+     "misses": 1940,
+     "reasons": {
+      "structure": 8.7,
+      "change": 6.8,
+      "blip": 4.6,
+      "outvoted": 58.1,
+      "unseen": 21.9
+     }
+    },
+    "2017": {
+     "calls": 4369,
+     "bits_per_call_over_null": -0.001,
+     "right": 52.3,
+     "closeness": 0.7508,
+     "stated": 51.3,
+     "strongest_tenth": {
+      "stated": 56.1,
+      "right": 54.5
+     },
+     "baseline_right": 52.1,
+     "rewarded": 73.7,
+     "reward": 0.0083,
+     "lesson": 0.0058,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0011,
+      "structure": -0.0003,
+      "strength": -0.0001
+     },
+     "misses": 2084,
+     "reasons": {
+      "structure": 9.7,
+      "change": 14.9,
+      "blip": 9.3,
+      "outvoted": 57.8,
+      "unseen": 8.3
+     }
+    },
+    "2018": {
+     "calls": 4353,
+     "bits_per_call_over_null": 0.00224,
+     "right": 50.1,
+     "closeness": 0.7503,
+     "stated": 51,
+     "strongest_tenth": {
+      "stated": 55.7,
+      "right": 56.3
+     },
+     "baseline_right": 50,
+     "rewarded": 64.8,
+     "reward": 0.0059,
+     "lesson": 0.0048,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": -0.0004,
+      "structure": -0.0001,
+      "strength": 0.0009
+     },
+     "misses": 2173,
+     "reasons": {
+      "structure": 10,
+      "change": 21.2,
+      "blip": 7.8,
+      "outvoted": 45.7,
+      "unseen": 15.3
+     }
+    },
+    "2019": {
+     "calls": 4362,
+     "bits_per_call_over_null": 0.00063,
+     "right": 51,
+     "closeness": 0.7506,
+     "stated": 50.8,
+     "strongest_tenth": {
+      "stated": 55.9,
+      "right": 57.6
+     },
+     "baseline_right": 51,
+     "rewarded": 78.9,
+     "reward": 0.0048,
+     "lesson": 0.0038,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0004,
+      "structure": 0,
+      "strength": 0.0002
+     },
+     "misses": 2139,
+     "reasons": {
+      "structure": 12.2,
+      "change": 17.8,
+      "blip": 8.3,
+      "outvoted": 43.7,
+      "unseen": 18
+     }
+    },
+    "2020": {
+     "calls": 4377,
+     "bits_per_call_over_null": 0.00021,
+     "right": 51.9,
+     "closeness": 0.7504,
+     "stated": 50.6,
+     "strongest_tenth": {
+      "stated": 54.8,
+      "right": 56.2
+     },
+     "baseline_right": 51.5,
+     "rewarded": 79.9,
+     "reward": 0.0036,
+     "lesson": 0.003,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0003,
+      "structure": 0.0001,
+      "strength": 0
+     },
+     "misses": 2106,
+     "reasons": {
+      "structure": 11,
+      "change": 23.5,
+      "blip": 13.1,
+      "outvoted": 33.6,
+      "unseen": 18.9
+     }
+    },
+    "2021": {
+     "calls": 4360,
+     "bits_per_call_over_null": 0.00018,
+     "right": 51.6,
+     "closeness": 0.7502,
+     "stated": 51.2,
+     "strongest_tenth": {
+      "stated": 54.8,
+      "right": 50.5
+     },
+     "baseline_right": 51.8,
+     "rewarded": 53.9,
+     "reward": 0.0059,
+     "lesson": 0.0057,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0001,
+      "structure": 0,
+      "strength": 0
+     },
+     "misses": 2111,
+     "reasons": {
+      "structure": 5.7,
+      "change": 22.5,
+      "blip": 3.2,
+      "outvoted": 51.1,
+      "unseen": 17.5
+     }
+    },
+    "2022": {
+     "calls": 4374,
+     "bits_per_call_over_null": -0.00009,
+     "right": 51.2,
+     "closeness": 0.7502,
+     "stated": 50.8,
+     "strongest_tenth": {
+      "stated": 53.3,
+      "right": 50.6
+     },
+     "baseline_right": 51.4,
+     "rewarded": 54.5,
+     "reward": 0.0042,
+     "lesson": 0.004,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0002,
+      "structure": -0.0002,
+      "strength": 0.0001
+     },
+     "misses": 2135,
+     "reasons": {
+      "structure": 10.9,
+      "change": 24.9,
+      "blip": 7.9,
+      "outvoted": 37.8,
+      "unseen": 18.5
+     }
+    },
+    "2023": {
+     "calls": 4358,
+     "bits_per_call_over_null": 0.0006,
+     "right": 52.5,
+     "closeness": 0.7504,
+     "stated": 50.9,
+     "strongest_tenth": {
+      "stated": 53.3,
+      "right": 53.7
+     },
+     "baseline_right": 51.4,
+     "rewarded": 54.1,
+     "reward": 0.0048,
+     "lesson": 0.0044,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0002,
+      "structure": 0.0004,
+      "strength": -0.0002
+     },
+     "misses": 2069,
+     "reasons": {
+      "structure": 9.7,
+      "change": 24.6,
+      "blip": 9.2,
+      "outvoted": 45,
+      "unseen": 11.5
+     }
+    },
+    "2024": {
+     "calls": 4392,
+     "bits_per_call_over_null": 0.00056,
+     "right": 50.8,
+     "closeness": 0.7502,
+     "stated": 51,
+     "strongest_tenth": {
+      "stated": 53.4,
+      "right": 52.2
+     },
+     "baseline_right": 51.4,
+     "rewarded": 51.9,
+     "reward": 0.0052,
+     "lesson": 0.005,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0,
+      "structure": 0.0001,
+      "strength": 0.0001
+     },
+     "misses": 2160,
+     "reasons": {
+      "structure": 12.6,
+      "change": 25.4,
+      "blip": 5.4,
+      "outvoted": 38.8,
+      "unseen": 17.8
+     }
+    },
+    "2025": {
+     "calls": 4372,
+     "bits_per_call_over_null": 0.00088,
+     "right": 49.5,
+     "closeness": 0.75,
+     "stated": 50.7,
+     "strongest_tenth": {
+      "stated": 53,
+      "right": 53.3
+     },
+     "baseline_right": 49.9,
+     "rewarded": 51.1,
+     "reward": 0.0035,
+     "lesson": 0.0035,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": -0.0003,
+      "structure": 0,
+      "strength": 0.0003
+     },
+     "misses": 2206,
+     "reasons": {
+      "structure": 13.3,
+      "change": 33.5,
+      "blip": 6.7,
+      "outvoted": 29.6,
+      "unseen": 17
+     }
+    },
+    "2026": {
+     "calls": 3205,
+     "bits_per_call_over_null": -0.00062,
+     "right": 52.6,
+     "closeness": 0.7506,
+     "stated": 50.7,
+     "strongest_tenth": {
+      "stated": 53.5,
+      "right": 55.8
+     },
+     "baseline_right": 51.3,
+     "rewarded": 56.2,
+     "reward": 0.0039,
+     "lesson": 0.0034,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0008,
+      "structure": 0.0002,
+      "strength": -0.0004
+     },
+     "misses": 1520,
+     "reasons": {
+      "structure": 16.2,
+      "change": 18.9,
+      "blip": 17.8,
+      "outvoted": 32.5,
+      "unseen": 14.7
+     }
+    }
+   },
+   "by_age": {
+    "first 100": {
+     "calls": 1700,
+     "bits_per_call_over_null": -0.00846,
+     "right": 49.5,
+     "closeness": 0.7401,
+     "stated": 57.7,
+     "strongest_tenth": {
+      "stated": 75,
+      "right": 51.8
+     },
+     "baseline_right": 50.7,
+     "rewarded": 58,
+     "reward": 0.0405,
+     "lesson": 0.0388,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": -0.0078,
+      "structure": -0.0021,
+      "strength": 0
+     },
+     "misses": 858,
+     "reasons": {
+      "structure": 8.6,
+      "change": 3.8,
+      "blip": 3,
+      "outvoted": 53.5,
+      "unseen": 31
+     }
+    },
+    "100-250": {
+     "calls": 2550,
+     "bits_per_call_over_null": 0.00257,
+     "right": 50.9,
+     "closeness": 0.7504,
+     "stated": 51.2,
+     "strongest_tenth": {
+      "stated": 57.6,
+      "right": 56.1
+     },
+     "baseline_right": 51,
+     "rewarded": 81.6,
+     "reward": 0.0101,
+     "lesson": 0.0053,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": -0.0005,
+      "structure": 0,
+      "strength": 0.0009
+     },
+     "misses": 1252,
+     "reasons": {
+      "structure": 9.6,
+      "change": 10.1,
+      "blip": 5.9,
+      "outvoted": 60.7,
+      "unseen": 13.7
+     }
+    },
+    "250-500": {
+     "calls": 4250,
+     "bits_per_call_over_null": -0.00212,
+     "right": 52.8,
+     "closeness": 0.7511,
+     "stated": 51.2,
+     "strongest_tenth": {
+      "stated": 56,
+      "right": 55.8
+     },
+     "baseline_right": 52.6,
+     "rewarded": 72.5,
+     "reward": 0.0081,
+     "lesson": 0.0052,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0018,
+      "structure": -0.0002,
+      "strength": -0.0005
+     },
+     "misses": 2005,
+     "reasons": {
+      "structure": 9.2,
+      "change": 14.5,
+      "blip": 9.5,
+      "outvoted": 58.2,
+      "unseen": 8.6
+     }
+    },
+    "500-1000": {
+     "calls": 8500,
+     "bits_per_call_over_null": 0.0019,
+     "right": 50.4,
+     "closeness": 0.7504,
+     "stated": 50.9,
+     "strongest_tenth": {
+      "stated": 56.1,
+      "right": 56.5
+     },
+     "baseline_right": 50.3,
+     "rewarded": 74.7,
+     "reward": 0.0053,
+     "lesson": 0.0044,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": -0.0003,
+      "structure": -0.0001,
+      "strength": 0.0008
+     },
+     "misses": 4220,
+     "reasons": {
+      "structure": 11.2,
+      "change": 19.7,
+      "blip": 6.9,
+      "outvoted": 44.3,
+      "unseen": 17.8
+     }
+    },
+    "1000-2000": {
+     "calls": 17000,
+     "bits_per_call_over_null": -0.00001,
+     "right": 51.8,
+     "closeness": 0.7503,
+     "stated": 50.9,
+     "strongest_tenth": {
+      "stated": 54.3,
+      "right": 54.3
+     },
+     "baseline_right": 51.7,
+     "rewarded": 59.5,
+     "reward": 0.0048,
+     "lesson": 0.0044,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0003,
+      "structure": 0.0001,
+      "strength": -0.0001
+     },
+     "misses": 8188,
+     "reasons": {
+      "structure": 9.4,
+      "change": 24.8,
+      "blip": 6.2,
+      "outvoted": 42.7,
+      "unseen": 16.9
+     }
+    },
+    "2000+": {
+     "calls": 12444,
+     "bits_per_call_over_null": 0.0006,
+     "right": 50.8,
+     "closeness": 0.7502,
+     "stated": 50.8,
+     "strongest_tenth": {
+      "stated": 53.3,
+      "right": 54.1
+     },
+     "baseline_right": 50.7,
+     "rewarded": 52.4,
+     "reward": 0.0041,
+     "lesson": 0.0041,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0,
+      "structure": 0.0001,
+      "strength": 0.0001
+     },
+     "misses": 6120,
+     "reasons": {
+      "structure": 13.4,
+      "change": 25.4,
+      "blip": 12.6,
+      "outvoted": 33,
+      "unseen": 15.6
+     }
+    }
+   }
+  },
+  "state-6.5": {
+   "all": {
+    "calls": 46444,
+    "bits_per_call_over_null": 0.00044,
+    "right": 51.3,
+    "closeness": 0.7501,
+    "stated": 51.2,
+    "strongest_tenth": {
+     "stated": 56.6,
+     "right": 54.3
+    },
+    "baseline_right": 51.2,
+    "rewarded": 62.7,
+    "reward": 0.0066,
+    "lesson": 0.0056,
+    "parts": {
+     "coin_flip": 0.75,
+     "baseline": -0.0001,
+     "structure": 0,
+     "strength": 0.0001
+    },
+    "misses": 22629,
+    "reasons": {
+     "structure": 10.6,
+     "change": 21.5,
+     "blip": 8.2,
+     "outvoted": 43.1,
+     "unseen": 16.5
+    }
+   },
+   "by_year": {
+    "2016": {
+     "calls": 3922,
+     "bits_per_call_over_null": 0.001,
+     "right": 50.9,
+     "closeness": 0.7469,
+     "stated": 54,
+     "strongest_tenth": {
+      "stated": 67.4,
+      "right": 52
+     },
+     "baseline_right": 51.1,
+     "rewarded": 70.1,
+     "reward": 0.0232,
+     "lesson": 0.0196,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": -0.0035,
+      "structure": -0.0002,
+      "strength": 0.0005
+     },
+     "misses": 1926,
+     "reasons": {
+      "structure": 6.5,
+      "change": 7,
+      "blip": 4.6,
+      "outvoted": 58.2,
+      "unseen": 23.7
+     }
+    },
+    "2017": {
+     "calls": 4369,
+     "bits_per_call_over_null": -0.001,
+     "right": 52.3,
+     "closeness": 0.7508,
+     "stated": 51.3,
+     "strongest_tenth": {
+      "stated": 56.1,
+      "right": 54.5
+     },
+     "baseline_right": 52.1,
+     "rewarded": 73.7,
+     "reward": 0.0083,
+     "lesson": 0.0058,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0011,
+      "structure": -0.0003,
+      "strength": -0.0001
+     },
+     "misses": 2084,
+     "reasons": {
+      "structure": 9.7,
+      "change": 14.9,
+      "blip": 9.3,
+      "outvoted": 57.8,
+      "unseen": 8.3
+     }
+    },
+    "2018": {
+     "calls": 4353,
+     "bits_per_call_over_null": 0.00224,
+     "right": 50.1,
+     "closeness": 0.7503,
+     "stated": 51,
+     "strongest_tenth": {
+      "stated": 55.7,
+      "right": 56.3
+     },
+     "baseline_right": 50,
+     "rewarded": 64.8,
+     "reward": 0.0059,
+     "lesson": 0.0048,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": -0.0004,
+      "structure": -0.0001,
+      "strength": 0.0009
+     },
+     "misses": 2173,
+     "reasons": {
+      "structure": 10,
+      "change": 21.2,
+      "blip": 7.8,
+      "outvoted": 45.7,
+      "unseen": 15.3
+     }
+    },
+    "2019": {
+     "calls": 4362,
+     "bits_per_call_over_null": 0.00063,
+     "right": 51,
+     "closeness": 0.7506,
+     "stated": 50.8,
+     "strongest_tenth": {
+      "stated": 55.9,
+      "right": 57.6
+     },
+     "baseline_right": 51,
+     "rewarded": 78.9,
+     "reward": 0.0048,
+     "lesson": 0.0038,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0004,
+      "structure": 0,
+      "strength": 0.0002
+     },
+     "misses": 2139,
+     "reasons": {
+      "structure": 12.2,
+      "change": 17.8,
+      "blip": 8.3,
+      "outvoted": 43.7,
+      "unseen": 18
+     }
+    },
+    "2020": {
+     "calls": 4377,
+     "bits_per_call_over_null": 0.00021,
+     "right": 51.9,
+     "closeness": 0.7504,
+     "stated": 50.6,
+     "strongest_tenth": {
+      "stated": 54.8,
+      "right": 56.2
+     },
+     "baseline_right": 51.5,
+     "rewarded": 79.9,
+     "reward": 0.0036,
+     "lesson": 0.003,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0003,
+      "structure": 0.0001,
+      "strength": 0
+     },
+     "misses": 2106,
+     "reasons": {
+      "structure": 11,
+      "change": 23.5,
+      "blip": 13.1,
+      "outvoted": 33.6,
+      "unseen": 18.9
+     }
+    },
+    "2021": {
+     "calls": 4360,
+     "bits_per_call_over_null": 0.00018,
+     "right": 51.6,
+     "closeness": 0.7502,
+     "stated": 51.2,
+     "strongest_tenth": {
+      "stated": 54.8,
+      "right": 50.5
+     },
+     "baseline_right": 51.8,
+     "rewarded": 53.9,
+     "reward": 0.0059,
+     "lesson": 0.0057,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0001,
+      "structure": 0,
+      "strength": 0
+     },
+     "misses": 2111,
+     "reasons": {
+      "structure": 5.7,
+      "change": 22.5,
+      "blip": 3.2,
+      "outvoted": 51.1,
+      "unseen": 17.5
+     }
+    },
+    "2022": {
+     "calls": 4374,
+     "bits_per_call_over_null": -0.00009,
+     "right": 51.2,
+     "closeness": 0.7502,
+     "stated": 50.8,
+     "strongest_tenth": {
+      "stated": 53.3,
+      "right": 50.6
+     },
+     "baseline_right": 51.4,
+     "rewarded": 54.5,
+     "reward": 0.0042,
+     "lesson": 0.004,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0002,
+      "structure": -0.0002,
+      "strength": 0.0001
+     },
+     "misses": 2135,
+     "reasons": {
+      "structure": 10.9,
+      "change": 24.9,
+      "blip": 7.9,
+      "outvoted": 37.8,
+      "unseen": 18.5
+     }
+    },
+    "2023": {
+     "calls": 4358,
+     "bits_per_call_over_null": 0.0006,
+     "right": 52.5,
+     "closeness": 0.7504,
+     "stated": 50.9,
+     "strongest_tenth": {
+      "stated": 53.3,
+      "right": 53.7
+     },
+     "baseline_right": 51.4,
+     "rewarded": 54.1,
+     "reward": 0.0048,
+     "lesson": 0.0044,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0002,
+      "structure": 0.0004,
+      "strength": -0.0002
+     },
+     "misses": 2069,
+     "reasons": {
+      "structure": 9.7,
+      "change": 24.6,
+      "blip": 9.2,
+      "outvoted": 45,
+      "unseen": 11.5
+     }
+    },
+    "2024": {
+     "calls": 4392,
+     "bits_per_call_over_null": 0.00056,
+     "right": 50.8,
+     "closeness": 0.7502,
+     "stated": 51,
+     "strongest_tenth": {
+      "stated": 53.4,
+      "right": 52.2
+     },
+     "baseline_right": 51.4,
+     "rewarded": 51.9,
+     "reward": 0.0052,
+     "lesson": 0.005,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0,
+      "structure": 0.0001,
+      "strength": 0.0001
+     },
+     "misses": 2160,
+     "reasons": {
+      "structure": 12.6,
+      "change": 25.4,
+      "blip": 5.4,
+      "outvoted": 38.8,
+      "unseen": 17.8
+     }
+    },
+    "2025": {
+     "calls": 4372,
+     "bits_per_call_over_null": 0.00088,
+     "right": 49.5,
+     "closeness": 0.75,
+     "stated": 50.7,
+     "strongest_tenth": {
+      "stated": 53,
+      "right": 53.3
+     },
+     "baseline_right": 49.9,
+     "rewarded": 51.1,
+     "reward": 0.0035,
+     "lesson": 0.0035,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": -0.0003,
+      "structure": 0,
+      "strength": 0.0003
+     },
+     "misses": 2206,
+     "reasons": {
+      "structure": 13.3,
+      "change": 33.5,
+      "blip": 6.7,
+      "outvoted": 29.6,
+      "unseen": 17
+     }
+    },
+    "2026": {
+     "calls": 3205,
+     "bits_per_call_over_null": -0.00062,
+     "right": 52.6,
+     "closeness": 0.7506,
+     "stated": 50.7,
+     "strongest_tenth": {
+      "stated": 53.5,
+      "right": 55.8
+     },
+     "baseline_right": 51.3,
+     "rewarded": 56.2,
+     "reward": 0.0039,
+     "lesson": 0.0034,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0008,
+      "structure": 0.0002,
+      "strength": -0.0004
+     },
+     "misses": 1520,
+     "reasons": {
+      "structure": 16.2,
+      "change": 18.9,
+      "blip": 17.8,
+      "outvoted": 32.5,
+      "unseen": 14.7
+     }
+    }
+   },
+   "by_age": {
+    "first 100": {
+     "calls": 1700,
+     "bits_per_call_over_null": -0.00049,
+     "right": 50.4,
+     "closeness": 0.742,
+     "stated": 57.4,
+     "strongest_tenth": {
+      "stated": 72.4,
+      "right": 51.2
+     },
+     "baseline_right": 50.7,
+     "rewarded": 58.3,
+     "reward": 0.039,
+     "lesson": 0.0373,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": -0.0078,
+      "structure": -0.0002,
+      "strength": 0
+     },
+     "misses": 844,
+     "reasons": {
+      "structure": 3.7,
+      "change": 4.3,
+      "blip": 3,
+      "outvoted": 53.7,
+      "unseen": 35.4
+     }
+    },
+    "100-250": {
+     "calls": 2550,
+     "bits_per_call_over_null": 0.00257,
+     "right": 50.9,
+     "closeness": 0.7504,
+     "stated": 51.2,
+     "strongest_tenth": {
+      "stated": 57.6,
+      "right": 56.1
+     },
+     "baseline_right": 51,
+     "rewarded": 81.6,
+     "reward": 0.0101,
+     "lesson": 0.0053,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": -0.0005,
+      "structure": 0,
+      "strength": 0.0009
+     },
+     "misses": 1252,
+     "reasons": {
+      "structure": 9.6,
+      "change": 10.1,
+      "blip": 5.9,
+      "outvoted": 60.7,
+      "unseen": 13.7
+     }
+    },
+    "250-500": {
+     "calls": 4250,
+     "bits_per_call_over_null": -0.00212,
+     "right": 52.8,
+     "closeness": 0.7511,
+     "stated": 51.2,
+     "strongest_tenth": {
+      "stated": 56,
+      "right": 55.8
+     },
+     "baseline_right": 52.6,
+     "rewarded": 72.5,
+     "reward": 0.0081,
+     "lesson": 0.0052,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0018,
+      "structure": -0.0002,
+      "strength": -0.0005
+     },
+     "misses": 2005,
+     "reasons": {
+      "structure": 9.2,
+      "change": 14.5,
+      "blip": 9.5,
+      "outvoted": 58.2,
+      "unseen": 8.6
+     }
+    },
+    "500-1000": {
+     "calls": 8500,
+     "bits_per_call_over_null": 0.0019,
+     "right": 50.4,
+     "closeness": 0.7504,
+     "stated": 50.9,
+     "strongest_tenth": {
+      "stated": 56.1,
+      "right": 56.5
+     },
+     "baseline_right": 50.3,
+     "rewarded": 74.7,
+     "reward": 0.0053,
+     "lesson": 0.0044,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": -0.0003,
+      "structure": -0.0001,
+      "strength": 0.0008
+     },
+     "misses": 4220,
+     "reasons": {
+      "structure": 11.2,
+      "change": 19.7,
+      "blip": 6.9,
+      "outvoted": 44.3,
+      "unseen": 17.8
+     }
+    },
+    "1000-2000": {
+     "calls": 17000,
+     "bits_per_call_over_null": -0.00001,
+     "right": 51.8,
+     "closeness": 0.7503,
+     "stated": 50.9,
+     "strongest_tenth": {
+      "stated": 54.3,
+      "right": 54.3
+     },
+     "baseline_right": 51.7,
+     "rewarded": 59.5,
+     "reward": 0.0048,
+     "lesson": 0.0044,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0003,
+      "structure": 0.0001,
+      "strength": -0.0001
+     },
+     "misses": 8188,
+     "reasons": {
+      "structure": 9.4,
+      "change": 24.8,
+      "blip": 6.2,
+      "outvoted": 42.7,
+      "unseen": 16.9
+     }
+    },
+    "2000+": {
+     "calls": 12444,
+     "bits_per_call_over_null": 0.0006,
+     "right": 50.8,
+     "closeness": 0.7502,
+     "stated": 50.8,
+     "strongest_tenth": {
+      "stated": 53.3,
+      "right": 54.1
+     },
+     "baseline_right": 50.7,
+     "rewarded": 52.4,
+     "reward": 0.0041,
+     "lesson": 0.0041,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0,
+      "structure": 0.0001,
+      "strength": 0.0001
+     },
+     "misses": 6120,
+     "reasons": {
+      "structure": 13.4,
+      "change": 25.4,
+      "blip": 12.6,
+      "outvoted": 33,
+      "unseen": 15.6
+     }
+    }
+   }
+  },
+  "hex-7.0": {
+   "all": {
+    "calls": 46444,
+    "bits_per_call_over_null": 0.00043,
+    "right": 51.4,
+    "closeness": 0.7501,
+    "stated": 51.4,
+    "strongest_tenth": {
+     "stated": 56.9,
+     "right": 55
+    },
+    "baseline_right": 51.2,
+    "rewarded": 60.7,
+    "reward": 0.0078,
+    "lesson": 0.0063,
+    "parts": {
+     "coin_flip": 0.75,
+     "baseline": -0.0001,
+     "structure": 0,
+     "strength": 0.0001
+    },
+    "misses": 22581,
+    "reasons": {
+     "structure": 14.9,
+     "change": 21.5,
+     "blip": 7.2,
+     "outvoted": 38.5,
+     "unseen": 17.9
+    }
+   },
+   "by_year": {
+    "2016": {
+     "calls": 3922,
+     "bits_per_call_over_null": -0.00488,
+     "right": 50.4,
+     "closeness": 0.7452,
+     "stated": 54.3,
+     "strongest_tenth": {
+      "stated": 69.4,
+      "right": 52
+     },
+     "baseline_right": 51.1,
+     "rewarded": 69.1,
+     "reward": 0.0252,
+     "lesson": 0.02,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": -0.0035,
+      "structure": -0.002,
+      "strength": 0.0007
+     },
+     "misses": 1947,
+     "reasons": {
+      "structure": 13.5,
+      "change": 6.8,
+      "blip": 3.9,
+      "outvoted": 55.8,
+      "unseen": 20
+     }
+    },
+    "2017": {
+     "calls": 4369,
+     "bits_per_call_over_null": -0.00089,
+     "right": 52.2,
+     "closeness": 0.7508,
+     "stated": 50.9,
+     "strongest_tenth": {
+      "stated": 54.3,
+      "right": 54.2
+     },
+     "baseline_right": 52.1,
+     "rewarded": 84.9,
+     "reward": 0.0077,
+     "lesson": 0.004,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0011,
+      "structure": 0,
+      "strength": -0.0003
+     },
+     "misses": 2090,
+     "reasons": {
+      "structure": 14.5,
+      "change": 14.5,
+      "blip": 7.8,
+      "outvoted": 54,
+      "unseen": 9.2
+     }
+    },
+    "2018": {
+     "calls": 4353,
+     "bits_per_call_over_null": 0.00235,
+     "right": 50.7,
+     "closeness": 0.7504,
+     "stated": 51,
+     "strongest_tenth": {
+      "stated": 55.1,
+      "right": 56.1
+     },
+     "baseline_right": 50,
+     "rewarded": 67.5,
+     "reward": 0.006,
+     "lesson": 0.0042,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": -0.0004,
+      "structure": 0,
+      "strength": 0.0008
+     },
+     "misses": 2148,
+     "reasons": {
+      "structure": 11.4,
+      "change": 21.5,
+      "blip": 7.3,
+      "outvoted": 43.7,
+      "unseen": 16.2
+     }
+    },
+    "2019": {
+     "calls": 4362,
+     "bits_per_call_over_null": 0.00091,
+     "right": 52.6,
+     "closeness": 0.7507,
+     "stated": 51,
+     "strongest_tenth": {
+      "stated": 54.9,
+      "right": 57.6
+     },
+     "baseline_right": 51,
+     "rewarded": 58.2,
+     "reward": 0.0058,
+     "lesson": 0.0042,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0004,
+      "structure": 0.0005,
+      "strength": -0.0002
+     },
+     "misses": 2069,
+     "reasons": {
+      "structure": 16.2,
+      "change": 18.4,
+      "blip": 6.8,
+      "outvoted": 37.9,
+      "unseen": 20.6
+     }
+    },
+    "2020": {
+     "calls": 4377,
+     "bits_per_call_over_null": 0.00103,
+     "right": 51.8,
+     "closeness": 0.7507,
+     "stated": 51.1,
+     "strongest_tenth": {
+      "stated": 55.6,
+      "right": 58
+     },
+     "baseline_right": 51.5,
+     "rewarded": 55.6,
+     "reward": 0.006,
+     "lesson": 0.0048,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0003,
+      "structure": 0.0002,
+      "strength": 0.0001
+     },
+     "misses": 2111,
+     "reasons": {
+      "structure": 20.1,
+      "change": 23,
+      "blip": 10.4,
+      "outvoted": 24.4,
+      "unseen": 22.1
+     }
+    },
+    "2021": {
+     "calls": 4360,
+     "bits_per_call_over_null": 0.00107,
+     "right": 51.4,
+     "closeness": 0.7505,
+     "stated": 51.4,
+     "strongest_tenth": {
+      "stated": 55.9,
+      "right": 55.5
+     },
+     "baseline_right": 51.8,
+     "rewarded": 53.6,
+     "reward": 0.0075,
+     "lesson": 0.0068,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0001,
+      "structure": 0,
+      "strength": 0.0003
+     },
+     "misses": 2119,
+     "reasons": {
+      "structure": 16.6,
+      "change": 18.3,
+      "blip": 2.5,
+      "outvoted": 45.5,
+      "unseen": 17.2
+     }
+    },
+    "2022": {
+     "calls": 4374,
+     "bits_per_call_over_null": 0.00068,
+     "right": 51,
+     "closeness": 0.7504,
+     "stated": 51.2,
+     "strongest_tenth": {
+      "stated": 54.8,
+      "right": 54.9
+     },
+     "baseline_right": 51.4,
+     "rewarded": 54.1,
+     "reward": 0.0063,
+     "lesson": 0.0057,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0002,
+      "structure": 0.0001,
+      "strength": 0.0001
+     },
+     "misses": 2145,
+     "reasons": {
+      "structure": 15.3,
+      "change": 24.9,
+      "blip": 6.4,
+      "outvoted": 34.4,
+      "unseen": 19
+     }
+    },
+    "2023": {
+     "calls": 4358,
+     "bits_per_call_over_null": 0.00137,
+     "right": 52,
+     "closeness": 0.7507,
+     "stated": 51.1,
+     "strongest_tenth": {
+      "stated": 53.5,
+      "right": 55
+     },
+     "baseline_right": 51.4,
+     "rewarded": 55.1,
+     "reward": 0.0059,
+     "lesson": 0.0051,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0002,
+      "structure": 0.0005,
+      "strength": 0
+     },
+     "misses": 2092,
+     "reasons": {
+      "structure": 13.5,
+      "change": 25.6,
+      "blip": 6.5,
+      "outvoted": 39.2,
+      "unseen": 15.1
+     }
+    },
+    "2024": {
+     "calls": 4392,
+     "bits_per_call_over_null": 0.00084,
+     "right": 51,
+     "closeness": 0.7503,
+     "stated": 51.2,
+     "strongest_tenth": {
+      "stated": 53.6,
+      "right": 52.2
+     },
+     "baseline_right": 51.4,
+     "rewarded": 55,
+     "reward": 0.0062,
+     "lesson": 0.0059,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0,
+      "structure": 0.0003,
+      "strength": 0
+     },
+     "misses": 2154,
+     "reasons": {
+      "structure": 15.2,
+      "change": 26.2,
+      "blip": 5.4,
+      "outvoted": 32.7,
+      "unseen": 20.5
+     }
+    },
+    "2025": {
+     "calls": 4372,
+     "bits_per_call_over_null": 0.00175,
+     "right": 50.5,
+     "closeness": 0.7503,
+     "stated": 51.1,
+     "strongest_tenth": {
+      "stated": 53.6,
+      "right": 53.3
+     },
+     "baseline_right": 49.9,
+     "rewarded": 56,
+     "reward": 0.0054,
+     "lesson": 0.0051,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": -0.0003,
+      "structure": 0.0004,
+      "strength": 0.0002
+     },
+     "misses": 2163,
+     "reasons": {
+      "structure": 11.3,
+      "change": 36.4,
+      "blip": 6.7,
+      "outvoted": 26,
+      "unseen": 19.5
+     }
+    },
+    "2026": {
+     "calls": 3205,
+     "bits_per_call_over_null": -0.00025,
+     "right": 51.9,
+     "closeness": 0.7507,
+     "stated": 51,
+     "strongest_tenth": {
+      "stated": 53.5,
+      "right": 58.6
+     },
+     "baseline_right": 51.3,
+     "rewarded": 59.3,
+     "reward": 0.0051,
+     "lesson": 0.0045,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0008,
+      "structure": 0.0002,
+      "strength": -0.0002
+     },
+     "misses": 1543,
+     "reasons": {
+      "structure": 17.5,
+      "change": 17.4,
+      "blip": 18.3,
+      "outvoted": 29.7,
+      "unseen": 17
+     }
+    }
+   },
+   "by_age": {
+    "first 100": {
+     "calls": 1700,
+     "bits_per_call_over_null": -0.01322,
+     "right": 49.7,
+     "closeness": 0.7385,
+     "stated": 58,
+     "strongest_tenth": {
+      "stated": 75.4,
+      "right": 53.5
+     },
+     "baseline_right": 50.7,
+     "rewarded": 58.6,
+     "reward": 0.0426,
+     "lesson": 0.0398,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": -0.0078,
+      "structure": -0.0037,
+      "strength": 0
+     },
+     "misses": 855,
+     "reasons": {
+      "structure": 12.5,
+      "change": 3,
+      "blip": 2.7,
+      "outvoted": 55.4,
+      "unseen": 26.3
+     }
+    },
+    "100-250": {
+     "calls": 2550,
+     "bits_per_call_over_null": 0.00245,
+     "right": 50.3,
+     "closeness": 0.7503,
+     "stated": 51.2,
+     "strongest_tenth": {
+      "stated": 57.6,
+      "right": 56.1
+     },
+     "baseline_right": 51,
+     "rewarded": 80.9,
+     "reward": 0.0111,
+     "lesson": 0.0041,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": -0.0005,
+      "structure": -0.0007,
+      "strength": 0.0015
+     },
+     "misses": 1268,
+     "reasons": {
+      "structure": 15,
+      "change": 10.6,
+      "blip": 5,
+      "outvoted": 55.1,
+      "unseen": 14.2
+     }
+    },
+    "250-500": {
+     "calls": 4250,
+     "bits_per_call_over_null": -0.00287,
+     "right": 52.8,
+     "closeness": 0.7509,
+     "stated": 50.9,
+     "strongest_tenth": {
+      "stated": 54.2,
+      "right": 54.4
+     },
+     "baseline_right": 52.6,
+     "rewarded": 82.7,
+     "reward": 0.0073,
+     "lesson": 0.0036,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0018,
+      "structure": 0,
+      "strength": -0.001
+     },
+     "misses": 2004,
+     "reasons": {
+      "structure": 14,
+      "change": 14.2,
+      "blip": 7.7,
+      "outvoted": 54.6,
+      "unseen": 9.4
+     }
+    },
+    "500-1000": {
+     "calls": 8500,
+     "bits_per_call_over_null": 0.00245,
+     "right": 51.2,
+     "closeness": 0.7505,
+     "stated": 51,
+     "strongest_tenth": {
+      "stated": 55,
+      "right": 56.4
+     },
+     "baseline_right": 50.3,
+     "rewarded": 63.2,
+     "reward": 0.006,
+     "lesson": 0.0044,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": -0.0003,
+      "structure": 0.0002,
+      "strength": 0.0006
+     },
+     "misses": 4147,
+     "reasons": {
+      "structure": 14.1,
+      "change": 20.5,
+      "blip": 5.8,
+      "outvoted": 40.1,
+      "unseen": 19.4
+     }
+    },
+    "1000-2000": {
+     "calls": 17000,
+     "bits_per_call_over_null": 0.00076,
+     "right": 51.7,
+     "closeness": 0.7506,
+     "stated": 51.2,
+     "strongest_tenth": {
+      "stated": 55.1,
+      "right": 56.9
+     },
+     "baseline_right": 51.7,
+     "rewarded": 54.6,
+     "reward": 0.0063,
+     "lesson": 0.0055,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0003,
+      "structure": 0.0002,
+      "strength": 0.0001
+     },
+     "misses": 8219,
+     "reasons": {
+      "structure": 15.5,
+      "change": 23.9,
+      "blip": 5,
+      "outvoted": 36.9,
+      "unseen": 18.7
+     }
+    },
+    "2000+": {
+     "calls": 12444,
+     "bits_per_call_over_null": 0.00117,
+     "right": 51.1,
+     "closeness": 0.7504,
+     "stated": 51.1,
+     "strongest_tenth": {
+      "stated": 53.9,
+      "right": 53.7
+     },
+     "baseline_right": 50.7,
+     "rewarded": 55.9,
+     "reward": 0.0058,
+     "lesson": 0.0055,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0,
+      "structure": 0.0004,
+      "strength": 0
+     },
+     "misses": 6088,
+     "reasons": {
+      "structure": 15.4,
+      "change": 26,
+      "blip": 11.9,
+      "outvoted": 28.6,
+      "unseen": 18
+     }
+    }
+   }
+  },
+  "learning_follows_reason": {
+   "change": {
+    "misses": 4844,
+    "moved": 0.0032,
+    "toward": 100
+   },
+   "blip": {
+    "misses": 1626,
+    "moved": 0.0069,
+    "toward": 100
+   }
+  },
+  "next_call_after": {
+   "hex-7.0": {
+    "outvoted": {
+     "n": 8701,
+     "right": 51.1,
+     "closeness": 0.7501,
+     "same": 37.3,
+     "stated": 51.7
+    },
+    "structure": {
+     "n": 3374,
+     "right": 51.1,
+     "closeness": 0.7495,
+     "same": 29.1,
+     "stated": 50.7
+    },
+    "unseen": {
+     "n": 4033,
+     "right": 52.5,
+     "closeness": 0.7513,
+     "same": 35.7,
+     "stated": 52
+    },
+    "right": {
+     "n": 23850,
+     "right": 51.3,
+     "closeness": 0.7499,
+     "same": 0,
+     "stated": 51.4
+    },
+    "change": {
+     "n": 4843,
+     "right": 51.5,
+     "closeness": 0.7504,
+     "same": 41.6,
+     "stated": 50.8
+    },
+    "blip": {
+     "n": 1626,
+     "right": 51.2,
+     "closeness": 0.7503,
+     "same": 32,
+     "stated": 50.8
+    }
+   },
+   "shown": {
+    "outvoted": {
+     "n": 9767,
+     "right": 51.5,
+     "closeness": 0.7501,
+     "same": 37.9,
+     "stated": 51.6
+    },
+    "structure": {
+     "n": 2446,
+     "right": 50.4,
+     "closeness": 0.7493,
+     "same": 14,
+     "stated": 50.4
+    },
+    "unseen": {
+     "n": 3695,
+     "right": 53,
+     "closeness": 0.7507,
+     "same": 32.5,
+     "stated": 51.5
+    },
+    "right": {
+     "n": 23788,
+     "right": 50.9,
+     "closeness": 0.7498,
+     "same": 0,
+     "stated": 51.2
+    },
+    "change": {
+     "n": 4864,
+     "right": 51.9,
+     "closeness": 0.7503,
+     "same": 37.9,
+     "stated": 50.5
+    },
+    "blip": {
+     "n": 1867,
+     "right": 50.8,
+     "closeness": 0.7501,
+     "same": 32.2,
+     "stated": 50.4
+    }
+   }
+  }
+ },
+ "RANGE": {
+  "shown": {
+   "all": {
+    "calls": 46444,
+    "bits_per_call_over_null": 0.00307,
+    "right": 57.9,
+    "closeness": 0.7592,
+    "stated": 57.8,
+    "strongest_tenth": {
+     "stated": 70.3,
+     "right": 69.1
+    },
+    "baseline_right": 57.2,
+    "rewarded": 56.1,
+    "reward": 0.0389,
+    "lesson": 0.0356,
+    "parts": {
+     "coin_flip": 0.75,
+     "baseline": 0.008,
+     "structure": 0.0012,
+     "strength": 0
+    },
+    "misses": 19575,
+    "reasons": {
+     "structure": 8.5,
+     "change": 6.2,
+     "blip": 32.4,
+     "outvoted": 4.1,
+     "unseen": 48.8
+    }
+   },
+   "by_year": {
+    "2016": {
+     "calls": 3922,
+     "bits_per_call_over_null": -0.00497,
+     "right": 53.9,
+     "closeness": 0.7482,
+     "stated": 55.8,
+     "strongest_tenth": {
+      "stated": 69.4,
+      "right": 53.6
+     },
+     "baseline_right": 53,
+     "rewarded": 61.4,
+     "reward": 0.0332,
+     "lesson": 0.0267,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": -0.0007,
+      "structure": -0.0009,
+      "strength": -0.0002
+     },
+     "misses": 1807,
+     "reasons": {
+      "structure": 8.7,
+      "change": 7,
+      "blip": 4.6,
+      "outvoted": 8.7,
+      "unseen": 70.9
+     }
+    },
+    "2017": {
+     "calls": 4369,
+     "bits_per_call_over_null": -0.00784,
+     "right": 60.2,
+     "closeness": 0.7615,
+     "stated": 57.7,
+     "strongest_tenth": {
+      "stated": 69,
+      "right": 68.9
+     },
+     "baseline_right": 60.4,
+     "rewarded": 60.7,
+     "reward": 0.0406,
+     "lesson": 0.0324,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.013,
+      "structure": -0.0003,
+      "strength": -0.0012
+     },
+     "misses": 1738,
+     "reasons": {
+      "structure": 3.2,
+      "change": 4.4,
+      "blip": 3.8,
+      "outvoted": 3.6,
+      "unseen": 85
+     }
+    },
+    "2018": {
+     "calls": 4353,
+     "bits_per_call_over_null": 0.00142,
+     "right": 55.5,
+     "closeness": 0.7551,
+     "stated": 56.8,
+     "strongest_tenth": {
+      "stated": 68,
+      "right": 64.8
+     },
+     "baseline_right": 55.3,
+     "rewarded": 56.2,
+     "reward": 0.0323,
+     "lesson": 0.0329,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0047,
+      "structure": 0,
+      "strength": 0.0005
+     },
+     "misses": 1939,
+     "reasons": {
+      "structure": 4.3,
+      "change": 12.6,
+      "blip": 13.7,
+      "outvoted": 2.5,
+      "unseen": 66.9
+     }
+    },
+    "2019": {
+     "calls": 4362,
+     "bits_per_call_over_null": 0.00198,
+     "right": 58.7,
+     "closeness": 0.7591,
+     "stated": 56.9,
+     "strongest_tenth": {
+      "stated": 65.4,
+      "right": 67.7
+     },
+     "baseline_right": 58.3,
+     "rewarded": 57,
+     "reward": 0.0348,
+     "lesson": 0.0318,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0084,
+      "structure": 0.001,
+      "strength": -0.0004
+     },
+     "misses": 1803,
+     "reasons": {
+      "structure": 6.5,
+      "change": 5.9,
+      "blip": 17.3,
+      "outvoted": 4.9,
+      "unseen": 65.4
+     }
+    },
+    "2020": {
+     "calls": 4377,
+     "bits_per_call_over_null": 0.01235,
+     "right": 57.4,
+     "closeness": 0.7601,
+     "stated": 58.1,
+     "strongest_tenth": {
+      "stated": 70.6,
+      "right": 72.8
+     },
+     "baseline_right": 55.6,
+     "rewarded": 52.8,
+     "reward": 0.0397,
+     "lesson": 0.037,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.006,
+      "structure": 0.0042,
+      "strength": -0.0001
+     },
+     "misses": 1864,
+     "reasons": {
+      "structure": 12.7,
+      "change": 7,
+      "blip": 44.6,
+      "outvoted": 4.2,
+      "unseen": 31.5
+     }
+    },
+    "2021": {
+     "calls": 4360,
+     "bits_per_call_over_null": 0.00916,
+     "right": 56.5,
+     "closeness": 0.7563,
+     "stated": 56.8,
+     "strongest_tenth": {
+      "stated": 66.7,
+      "right": 66.1
+     },
+     "baseline_right": 54.4,
+     "rewarded": 52.9,
+     "reward": 0.0322,
+     "lesson": 0.0333,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0032,
+      "structure": 0.0028,
+      "strength": 0.0003
+     },
+     "misses": 1897,
+     "reasons": {
+      "structure": 12.7,
+      "change": 9.8,
+      "blip": 36.5,
+      "outvoted": 4.4,
+      "unseen": 36.7
+     }
+    },
+    "2022": {
+     "calls": 4374,
+     "bits_per_call_over_null": 0.00219,
+     "right": 60.3,
+     "closeness": 0.7649,
+     "stated": 59.7,
+     "strongest_tenth": {
+      "stated": 70.7,
+      "right": 67.7
+     },
+     "baseline_right": 60.3,
+     "rewarded": 57.6,
+     "reward": 0.0495,
+     "lesson": 0.0423,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0142,
+      "structure": 0.0004,
+      "strength": 0.0003
+     },
+     "misses": 1736,
+     "reasons": {
+      "structure": 10.7,
+      "change": 7.4,
+      "blip": 47.2,
+      "outvoted": 3.9,
+      "unseen": 30.9
+     }
+    },
+    "2023": {
+     "calls": 4358,
+     "bits_per_call_over_null": 0.00329,
+     "right": 57.2,
+     "closeness": 0.7571,
+     "stated": 58.5,
+     "strongest_tenth": {
+      "stated": 69.2,
+      "right": 67.7
+     },
+     "baseline_right": 57,
+     "rewarded": 54.9,
+     "reward": 0.04,
+     "lesson": 0.0411,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.006,
+      "structure": 0.0006,
+      "strength": 0.0005
+     },
+     "misses": 1866,
+     "reasons": {
+      "structure": 7,
+      "change": 4.9,
+      "blip": 56.1,
+      "outvoted": 2.7,
+      "unseen": 29.4
+     }
+    },
+    "2024": {
+     "calls": 4392,
+     "bits_per_call_over_null": 0.00513,
+     "right": 60.5,
+     "closeness": 0.7678,
+     "stated": 59.5,
+     "strongest_tenth": {
+      "stated": 79.3,
+      "right": 80.2
+     },
+     "baseline_right": 59.5,
+     "rewarded": 56.8,
+     "reward": 0.047,
+     "lesson": 0.038,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0159,
+      "structure": 0.0021,
+      "strength": -0.0001
+     },
+     "misses": 1735,
+     "reasons": {
+      "structure": 9.3,
+      "change": 2.9,
+      "blip": 47.1,
+      "outvoted": 2.2,
+      "unseen": 38.4
+     }
+    },
+    "2025": {
+     "calls": 4372,
+     "bits_per_call_over_null": 0.00568,
+     "right": 57.9,
+     "closeness": 0.7596,
+     "stated": 57.6,
+     "strongest_tenth": {
+      "stated": 69.1,
+      "right": 68
+     },
+     "baseline_right": 57.2,
+     "rewarded": 53.6,
+     "reward": 0.0367,
+     "lesson": 0.0363,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0077,
+      "structure": 0.0018,
+      "strength": 0
+     },
+     "misses": 1842,
+     "reasons": {
+      "structure": 10.1,
+      "change": 1.9,
+      "blip": 42.8,
+      "outvoted": 4.5,
+      "unseen": 40.8
+     }
+    },
+    "2026": {
+     "calls": 3205,
+     "bits_per_call_over_null": 0.00514,
+     "right": 57.9,
+     "closeness": 0.7606,
+     "stated": 58.6,
+     "strongest_tenth": {
+      "stated": 70.7,
+      "right": 67.9
+     },
+     "baseline_right": 57.6,
+     "rewarded": 53.7,
+     "reward": 0.0417,
+     "lesson": 0.0403,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0089,
+      "structure": 0.0014,
+      "strength": 0.0003
+     },
+     "misses": 1348,
+     "reasons": {
+      "structure": 7.9,
+      "change": 3.2,
+      "blip": 45.8,
+      "outvoted": 3,
+      "unseen": 40.1
+     }
+    }
+   },
+   "by_age": {
+    "first 100": {
+     "calls": 1700,
+     "bits_per_call_over_null": -0.01076,
+     "right": 52.8,
+     "closeness": 0.7427,
+     "stated": 58.2,
+     "strongest_tenth": {
+      "stated": 73.6,
+      "right": 55.3
+     },
+     "baseline_right": 52.2,
+     "rewarded": 60.6,
+     "reward": 0.0482,
+     "lesson": 0.0385,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": -0.0044,
+      "structure": -0.0029,
+      "strength": 0
+     },
+     "misses": 803,
+     "reasons": {
+      "structure": 10.3,
+      "change": 3.6,
+      "blip": 2.7,
+      "outvoted": 11.7,
+      "unseen": 71.6
+     }
+    },
+    "100-250": {
+     "calls": 2550,
+     "bits_per_call_over_null": 0.00061,
+     "right": 55.1,
+     "closeness": 0.7531,
+     "stated": 53.8,
+     "strongest_tenth": {
+      "stated": 60.5,
+      "right": 59.6
+     },
+     "baseline_right": 53.9,
+     "rewarded": 61.4,
+     "reward": 0.0212,
+     "lesson": 0.0165,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0029,
+      "structure": 0.0004,
+      "strength": -0.0002
+     },
+     "misses": 1144,
+     "reasons": {
+      "structure": 6.9,
+      "change": 10.6,
+      "blip": 6.8,
+      "outvoted": 5.8,
+      "unseen": 69.9
+     }
+    },
+    "250-500": {
+     "calls": 4250,
+     "bits_per_call_over_null": -0.00508,
+     "right": 59.2,
+     "closeness": 0.7589,
+     "stated": 57.3,
+     "strongest_tenth": {
+      "stated": 64.3,
+      "right": 64.9
+     },
+     "baseline_right": 59.4,
+     "rewarded": 59.8,
+     "reward": 0.0381,
+     "lesson": 0.0322,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0101,
+      "structure": -0.0001,
+      "strength": -0.0011
+     },
+     "misses": 1736,
+     "reasons": {
+      "structure": 3.1,
+      "change": 4.8,
+      "blip": 2.9,
+      "outvoted": 3.7,
+      "unseen": 85.5
+     }
+    },
+    "500-1000": {
+     "calls": 8500,
+     "bits_per_call_over_null": -0.00005,
+     "right": 58,
+     "closeness": 0.759,
+     "stated": 57.2,
+     "strongest_tenth": {
+      "stated": 68.9,
+      "right": 69.8
+     },
+     "baseline_right": 57.8,
+     "rewarded": 58,
+     "reward": 0.0363,
+     "lesson": 0.0326,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0086,
+      "structure": 0.0006,
+      "strength": -0.0002
+     },
+     "misses": 3570,
+     "reasons": {
+      "structure": 5,
+      "change": 8.4,
+      "blip": 14,
+      "outvoted": 3.7,
+      "unseen": 68.8
+     }
+    },
+    "1000-2000": {
+     "calls": 17000,
+     "bits_per_call_over_null": 0.00668,
+     "right": 57.5,
+     "closeness": 0.7592,
+     "stated": 58.1,
+     "strongest_tenth": {
+      "stated": 69.8,
+      "right": 69.2
+     },
+     "baseline_right": 56.4,
+     "rewarded": 53.9,
+     "reward": 0.0396,
+     "lesson": 0.038,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0069,
+      "structure": 0.002,
+      "strength": 0.0002
+     },
+     "misses": 7230,
+     "reasons": {
+      "structure": 11.2,
+      "change": 7.9,
+      "blip": 46.5,
+      "outvoted": 3.6,
+      "unseen": 30.8
+     }
+    },
+    "2000+": {
+     "calls": 12444,
+     "bits_per_call_over_null": 0.00546,
+     "right": 59.1,
+     "closeness": 0.7629,
+     "stated": 58.7,
+     "strongest_tenth": {
+      "stated": 73.2,
+      "right": 72.8
+     },
+     "baseline_right": 58.4,
+     "rewarded": 55.1,
+     "reward": 0.0422,
+     "lesson": 0.0391,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0111,
+      "structure": 0.0018,
+      "strength": 0.0001
+     },
+     "misses": 5092,
+     "reasons": {
+      "structure": 9,
+      "change": 2.2,
+      "blip": 45.6,
+      "outvoted": 3.5,
+      "unseen": 39.7
+     }
+    }
+   }
+  },
+  "state-6.5": {
+   "all": {
+    "calls": 46444,
+    "bits_per_call_over_null": 0.00036,
+    "right": 57.4,
+    "closeness": 0.7582,
+    "stated": 57.3,
+    "strongest_tenth": {
+     "stated": 69.1,
+     "right": 68.4
+    },
+    "baseline_right": 57.2,
+    "rewarded": 56.4,
+    "reward": 0.0362,
+    "lesson": 0.0332,
+    "parts": {
+     "coin_flip": 0.75,
+     "baseline": 0.008,
+     "structure": 0.0002,
+     "strength": 0
+    },
+    "misses": 19775,
+    "reasons": {
+     "structure": 4.3,
+     "change": 6.9,
+     "blip": 34.5,
+     "outvoted": 2.5,
+     "unseen": 51.9
+    }
+   },
+   "by_year": {
+    "2016": {
+     "calls": 3922,
+     "bits_per_call_over_null": -0.00044,
+     "right": 53.8,
+     "closeness": 0.7494,
+     "stated": 55.3,
+     "strongest_tenth": {
+      "stated": 66.4,
+      "right": 55.1
+     },
+     "baseline_right": 53,
+     "rewarded": 61.6,
+     "reward": 0.0306,
+     "lesson": 0.0239,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": -0.0007,
+      "structure": 0.0003,
+      "strength": -0.0002
+     },
+     "misses": 1813,
+     "reasons": {
+      "structure": 5.9,
+      "change": 7,
+      "blip": 4.8,
+      "outvoted": 5.5,
+      "unseen": 76.8
+     }
+    },
+    "2017": {
+     "calls": 4369,
+     "bits_per_call_over_null": -0.00784,
+     "right": 60.2,
+     "closeness": 0.7615,
+     "stated": 57.7,
+     "strongest_tenth": {
+      "stated": 69,
+      "right": 68.9
+     },
+     "baseline_right": 60.4,
+     "rewarded": 60.7,
+     "reward": 0.0406,
+     "lesson": 0.0324,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.013,
+      "structure": -0.0003,
+      "strength": -0.0012
+     },
+     "misses": 1738,
+     "reasons": {
+      "structure": 3.2,
+      "change": 4.4,
+      "blip": 3.8,
+      "outvoted": 3.6,
+      "unseen": 85
+     }
+    },
+    "2018": {
+     "calls": 4353,
+     "bits_per_call_over_null": 0.00142,
+     "right": 55.5,
+     "closeness": 0.7551,
+     "stated": 56.8,
+     "strongest_tenth": {
+      "stated": 68,
+      "right": 64.8
+     },
+     "baseline_right": 55.3,
+     "rewarded": 56.2,
+     "reward": 0.0323,
+     "lesson": 0.0329,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0047,
+      "structure": 0,
+      "strength": 0.0005
+     },
+     "misses": 1939,
+     "reasons": {
+      "structure": 4.3,
+      "change": 12.6,
+      "blip": 13.7,
+      "outvoted": 2.5,
+      "unseen": 66.9
+     }
+    },
+    "2019": {
+     "calls": 4362,
+     "bits_per_call_over_null": 0.00019,
+     "right": 58.5,
+     "closeness": 0.7585,
+     "stated": 56.6,
+     "strongest_tenth": {
+      "stated": 64.6,
+      "right": 65.4
+     },
+     "baseline_right": 58.3,
+     "rewarded": 56.6,
+     "reward": 0.0335,
+     "lesson": 0.0308,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0084,
+      "structure": 0.0002,
+      "strength": -0.0002
+     },
+     "misses": 1809,
+     "reasons": {
+      "structure": 4.3,
+      "change": 5.7,
+      "blip": 19,
+      "outvoted": 2.4,
+      "unseen": 68.7
+     }
+    },
+    "2020": {
+     "calls": 4377,
+     "bits_per_call_over_null": 0.00423,
+     "right": 55.9,
+     "closeness": 0.7574,
+     "stated": 57.9,
+     "strongest_tenth": {
+      "stated": 72.1,
+      "right": 71.5
+     },
+     "baseline_right": 55.6,
+     "rewarded": 52.4,
+     "reward": 0.0382,
+     "lesson": 0.0374,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.006,
+      "structure": 0.001,
+      "strength": 0.0004
+     },
+     "misses": 1931,
+     "reasons": {
+      "structure": 4.2,
+      "change": 10.9,
+      "blip": 47.7,
+      "outvoted": 2,
+      "unseen": 35.1
+     }
+    },
+    "2021": {
+     "calls": 4360,
+     "bits_per_call_over_null": 0.00114,
+     "right": 55,
+     "closeness": 0.7535,
+     "stated": 55.6,
+     "strongest_tenth": {
+      "stated": 64.2,
+      "right": 61.7
+     },
+     "baseline_right": 54.4,
+     "rewarded": 50.8,
+     "reward": 0.0259,
+     "lesson": 0.0286,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0032,
+      "structure": 0.0001,
+      "strength": 0.0003
+     },
+     "misses": 1962,
+     "reasons": {
+      "structure": 5.2,
+      "change": 10.6,
+      "blip": 39.6,
+      "outvoted": 1.9,
+      "unseen": 42.7
+     }
+    },
+    "2022": {
+     "calls": 4374,
+     "bits_per_call_over_null": -0.00084,
+     "right": 60.7,
+     "closeness": 0.7639,
+     "stated": 58.3,
+     "strongest_tenth": {
+      "stated": 68,
+      "right": 65.2
+     },
+     "baseline_right": 60.3,
+     "rewarded": 58.1,
+     "reward": 0.0431,
+     "lesson": 0.0357,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0142,
+      "structure": 0.0001,
+      "strength": -0.0004
+     },
+     "misses": 1718,
+     "reasons": {
+      "structure": 4.1,
+      "change": 8.3,
+      "blip": 50.5,
+      "outvoted": 2,
+      "unseen": 35.1
+     }
+    },
+    "2023": {
+     "calls": 4358,
+     "bits_per_call_over_null": 0.00267,
+     "right": 57.3,
+     "closeness": 0.7569,
+     "stated": 57.8,
+     "strongest_tenth": {
+      "stated": 68.1,
+      "right": 65.4
+     },
+     "baseline_right": 57,
+     "rewarded": 55.7,
+     "reward": 0.0373,
+     "lesson": 0.0375,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.006,
+      "structure": 0.0003,
+      "strength": 0.0006
+     },
+     "misses": 1863,
+     "reasons": {
+      "structure": 3.2,
+      "change": 5.3,
+      "blip": 59.3,
+      "outvoted": 0.8,
+      "unseen": 31.5
+     }
+    },
+    "2024": {
+     "calls": 4392,
+     "bits_per_call_over_null": 0.00056,
+     "right": 59.6,
+     "closeness": 0.7662,
+     "stated": 59,
+     "strongest_tenth": {
+      "stated": 78.7,
+      "right": 78.1
+     },
+     "baseline_right": 59.5,
+     "rewarded": 58.4,
+     "reward": 0.0444,
+     "lesson": 0.036,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0159,
+      "structure": 0.0002,
+      "strength": 0.0001
+     },
+     "misses": 1774,
+     "reasons": {
+      "structure": 3.2,
+      "change": 3.4,
+      "blip": 50,
+      "outvoted": 1.6,
+      "unseen": 41.9
+     }
+    },
+    "2025": {
+     "calls": 4372,
+     "bits_per_call_over_null": 0.00145,
+     "right": 57.4,
+     "closeness": 0.7582,
+     "stated": 56.9,
+     "strongest_tenth": {
+      "stated": 68.3,
+      "right": 70.9
+     },
+     "baseline_right": 57.2,
+     "rewarded": 55,
+     "reward": 0.0331,
+     "lesson": 0.0329,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0077,
+      "structure": 0.0006,
+      "strength": -0.0001
+     },
+     "misses": 1863,
+     "reasons": {
+      "structure": 5.3,
+      "change": 2.2,
+      "blip": 45.7,
+      "outvoted": 2.7,
+      "unseen": 44.2
+     }
+    },
+    "2026": {
+     "calls": 3205,
+     "bits_per_call_over_null": 0.00166,
+     "right": 57.4,
+     "closeness": 0.7594,
+     "stated": 58,
+     "strongest_tenth": {
+      "stated": 68.7,
+      "right": 67.6
+     },
+     "baseline_right": 57.6,
+     "rewarded": 54.2,
+     "reward": 0.0388,
+     "lesson": 0.0374,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0089,
+      "structure": 0,
+      "strength": 0.0005
+     },
+     "misses": 1365,
+     "reasons": {
+      "structure": 4.5,
+      "change": 3.7,
+      "blip": 47.4,
+      "outvoted": 2.2,
+      "unseen": 42.2
+     }
+    }
+   },
+   "by_age": {
+    "first 100": {
+     "calls": 1700,
+     "bits_per_call_over_null": -0.00045,
+     "right": 52.4,
+     "closeness": 0.7455,
+     "stated": 57,
+     "strongest_tenth": {
+      "stated": 69.2,
+      "right": 52.4
+     },
+     "baseline_right": 52.2,
+     "rewarded": 61,
+     "reward": 0.0422,
+     "lesson": 0.0322,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": -0.0044,
+      "structure": -0.0001,
+      "strength": 0
+     },
+     "misses": 810,
+     "reasons": {
+      "structure": 4.1,
+      "change": 3.6,
+      "blip": 3.2,
+      "outvoted": 4.7,
+      "unseen": 84.4
+     }
+    },
+    "100-250": {
+     "calls": 2550,
+     "bits_per_call_over_null": 0.0007,
+     "right": 55.2,
+     "closeness": 0.7531,
+     "stated": 53.8,
+     "strongest_tenth": {
+      "stated": 60.4,
+      "right": 58.8
+     },
+     "baseline_right": 53.9,
+     "rewarded": 61.5,
+     "reward": 0.0212,
+     "lesson": 0.0164,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0029,
+      "structure": 0.0004,
+      "strength": -0.0002
+     },
+     "misses": 1143,
+     "reasons": {
+      "structure": 6.8,
+      "change": 10.6,
+      "blip": 6.8,
+      "outvoted": 5.6,
+      "unseen": 70.2
+     }
+    },
+    "250-500": {
+     "calls": 4250,
+     "bits_per_call_over_null": -0.00508,
+     "right": 59.2,
+     "closeness": 0.7589,
+     "stated": 57.3,
+     "strongest_tenth": {
+      "stated": 64.3,
+      "right": 64.9
+     },
+     "baseline_right": 59.4,
+     "rewarded": 59.8,
+     "reward": 0.0381,
+     "lesson": 0.0322,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0101,
+      "structure": -0.0001,
+      "strength": -0.0011
+     },
+     "misses": 1736,
+     "reasons": {
+      "structure": 3.1,
+      "change": 4.8,
+      "blip": 2.9,
+      "outvoted": 3.7,
+      "unseen": 85.5
+     }
+    },
+    "500-1000": {
+     "calls": 8500,
+     "bits_per_call_over_null": -0.00156,
+     "right": 57.9,
+     "closeness": 0.7585,
+     "stated": 57.1,
+     "strongest_tenth": {
+      "stated": 68.2,
+      "right": 68
+     },
+     "baseline_right": 57.8,
+     "rewarded": 57.7,
+     "reward": 0.0354,
+     "lesson": 0.0321,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0086,
+      "structure": 0,
+      "strength": -0.0001
+     },
+     "misses": 3576,
+     "reasons": {
+      "structure": 3.8,
+      "change": 8.4,
+      "blip": 15.1,
+      "outvoted": 2.1,
+      "unseen": 70.6
+     }
+    },
+    "1000-2000": {
+     "calls": 17000,
+     "bits_per_call_over_null": 0.00208,
+     "right": 56.8,
+     "closeness": 0.7576,
+     "stated": 57.3,
+     "strongest_tenth": {
+      "stated": 68.8,
+      "right": 68.2
+     },
+     "baseline_right": 56.4,
+     "rewarded": 53.8,
+     "reward": 0.0354,
+     "lesson": 0.0343,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0069,
+      "structure": 0.0004,
+      "strength": 0.0003
+     },
+     "misses": 7336,
+     "reasons": {
+      "structure": 4.6,
+      "change": 9.5,
+      "blip": 49.6,
+      "outvoted": 1.8,
+      "unseen": 34.6
+     }
+    },
+    "2000+": {
+     "calls": 12444,
+     "bits_per_call_over_null": 0.0012,
+     "right": 58.4,
+     "closeness": 0.7615,
+     "stated": 58.1,
+     "strongest_tenth": {
+      "stated": 72.1,
+      "right": 72.4
+     },
+     "baseline_right": 58.4,
+     "rewarded": 56.1,
+     "reward": 0.0393,
+     "lesson": 0.0364,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0111,
+      "structure": 0.0002,
+      "strength": 0.0002
+     },
+     "misses": 5174,
+     "reasons": {
+      "structure": 4.2,
+      "change": 2.6,
+      "blip": 48.1,
+      "outvoted": 2.2,
+      "unseen": 43
+     }
+    }
+   }
+  },
+  "hex-7.0": {
+   "all": {
+    "calls": 46444,
+    "bits_per_call_over_null": 0.0042,
+    "right": 57.9,
+    "closeness": 0.7595,
+    "stated": 57.8,
+    "strongest_tenth": {
+     "stated": 69.9,
+     "right": 68.7
+    },
+    "baseline_right": 57.2,
+    "rewarded": 57,
+    "reward": 0.0388,
+    "lesson": 0.0352,
+    "parts": {
+     "coin_flip": 0.75,
+     "baseline": 0.008,
+     "structure": 0.0015,
+     "strength": 0
+    },
+    "misses": 19570,
+    "reasons": {
+     "structure": 9.2,
+     "change": 6.2,
+     "blip": 32,
+     "outvoted": 5.7,
+     "unseen": 47
+    }
+   },
+   "by_year": {
+    "2016": {
+     "calls": 3922,
+     "bits_per_call_over_null": -0.00293,
+     "right": 53.3,
+     "closeness": 0.7486,
+     "stated": 55.5,
+     "strongest_tenth": {
+      "stated": 69.6,
+      "right": 53.6
+     },
+     "baseline_right": 53,
+     "rewarded": 66.1,
+     "reward": 0.0333,
+     "lesson": 0.0252,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": -0.0007,
+      "structure": -0.001,
+      "strength": 0.0003
+     },
+     "misses": 1831,
+     "reasons": {
+      "structure": 11.7,
+      "change": 6.7,
+      "blip": 4.7,
+      "outvoted": 13.1,
+      "unseen": 63.9
+     }
+    },
+    "2017": {
+     "calls": 4369,
+     "bits_per_call_over_null": -0.00463,
+     "right": 60.2,
+     "closeness": 0.7615,
+     "stated": 57.1,
+     "strongest_tenth": {
+      "stated": 65.1,
+      "right": 68.6
+     },
+     "baseline_right": 60.4,
+     "rewarded": 63.6,
+     "reward": 0.0384,
+     "lesson": 0.0296,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.013,
+      "structure": 0.0001,
+      "strength": -0.0016
+     },
+     "misses": 1739,
+     "reasons": {
+      "structure": 4,
+      "change": 4.4,
+      "blip": 3.5,
+      "outvoted": 9.5,
+      "unseen": 78.6
+     }
+    },
+    "2018": {
+     "calls": 4353,
+     "bits_per_call_over_null": 0.00535,
+     "right": 55.3,
+     "closeness": 0.7565,
+     "stated": 56.8,
+     "strongest_tenth": {
+      "stated": 67.3,
+      "right": 69.4
+     },
+     "baseline_right": 55.3,
+     "rewarded": 57.8,
+     "reward": 0.0331,
+     "lesson": 0.0323,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0047,
+      "structure": 0.0015,
+      "strength": 0.0003
+     },
+     "misses": 1945,
+     "reasons": {
+      "structure": 7,
+      "change": 12.4,
+      "blip": 12,
+      "outvoted": 7,
+      "unseen": 61.5
+     }
+    },
+    "2019": {
+     "calls": 4362,
+     "bits_per_call_over_null": 0.005,
+     "right": 59.5,
+     "closeness": 0.7601,
+     "stated": 57,
+     "strongest_tenth": {
+      "stated": 65.7,
+      "right": 67.9
+     },
+     "baseline_right": 58.3,
+     "rewarded": 57.8,
+     "reward": 0.0357,
+     "lesson": 0.0318,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0084,
+      "structure": 0.0022,
+      "strength": -0.0005
+     },
+     "misses": 1767,
+     "reasons": {
+      "structure": 7.4,
+      "change": 6,
+      "blip": 14.9,
+      "outvoted": 7,
+      "unseen": 64.7
+     }
+    },
+    "2020": {
+     "calls": 4377,
+     "bits_per_call_over_null": 0.01235,
+     "right": 57.4,
+     "closeness": 0.7601,
+     "stated": 58.1,
+     "strongest_tenth": {
+      "stated": 70.6,
+      "right": 72.8
+     },
+     "baseline_right": 55.6,
+     "rewarded": 52.8,
+     "reward": 0.0397,
+     "lesson": 0.037,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.006,
+      "structure": 0.0042,
+      "strength": -0.0001
+     },
+     "misses": 1864,
+     "reasons": {
+      "structure": 12.7,
+      "change": 7,
+      "blip": 44.6,
+      "outvoted": 4.2,
+      "unseen": 31.5
+     }
+    },
+    "2021": {
+     "calls": 4360,
+     "bits_per_call_over_null": 0.00916,
+     "right": 56.5,
+     "closeness": 0.7563,
+     "stated": 56.8,
+     "strongest_tenth": {
+      "stated": 66.7,
+      "right": 66.1
+     },
+     "baseline_right": 54.4,
+     "rewarded": 52.9,
+     "reward": 0.0322,
+     "lesson": 0.0333,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0032,
+      "structure": 0.0028,
+      "strength": 0.0003
+     },
+     "misses": 1897,
+     "reasons": {
+      "structure": 12.7,
+      "change": 9.8,
+      "blip": 36.5,
+      "outvoted": 4.4,
+      "unseen": 36.7
+     }
+    },
+    "2022": {
+     "calls": 4374,
+     "bits_per_call_over_null": 0.00219,
+     "right": 60.3,
+     "closeness": 0.7649,
+     "stated": 59.7,
+     "strongest_tenth": {
+      "stated": 70.7,
+      "right": 67.7
+     },
+     "baseline_right": 60.3,
+     "rewarded": 57.6,
+     "reward": 0.0495,
+     "lesson": 0.0423,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0142,
+      "structure": 0.0004,
+      "strength": 0.0003
+     },
+     "misses": 1736,
+     "reasons": {
+      "structure": 10.7,
+      "change": 7.4,
+      "blip": 47.2,
+      "outvoted": 3.9,
+      "unseen": 30.9
+     }
+    },
+    "2023": {
+     "calls": 4358,
+     "bits_per_call_over_null": 0.00329,
+     "right": 57.2,
+     "closeness": 0.7571,
+     "stated": 58.5,
+     "strongest_tenth": {
+      "stated": 69.2,
+      "right": 67.7
+     },
+     "baseline_right": 57,
+     "rewarded": 54.9,
+     "reward": 0.04,
+     "lesson": 0.0411,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.006,
+      "structure": 0.0006,
+      "strength": 0.0005
+     },
+     "misses": 1866,
+     "reasons": {
+      "structure": 7,
+      "change": 4.9,
+      "blip": 56.1,
+      "outvoted": 2.7,
+      "unseen": 29.4
+     }
+    },
+    "2024": {
+     "calls": 4392,
+     "bits_per_call_over_null": 0.00513,
+     "right": 60.5,
+     "closeness": 0.7678,
+     "stated": 59.5,
+     "strongest_tenth": {
+      "stated": 79.3,
+      "right": 80.2
+     },
+     "baseline_right": 59.5,
+     "rewarded": 56.8,
+     "reward": 0.047,
+     "lesson": 0.038,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0159,
+      "structure": 0.0021,
+      "strength": -0.0001
+     },
+     "misses": 1735,
+     "reasons": {
+      "structure": 9.3,
+      "change": 2.9,
+      "blip": 47.1,
+      "outvoted": 2.2,
+      "unseen": 38.4
+     }
+    },
+    "2025": {
+     "calls": 4372,
+     "bits_per_call_over_null": 0.00568,
+     "right": 57.9,
+     "closeness": 0.7596,
+     "stated": 57.6,
+     "strongest_tenth": {
+      "stated": 69.1,
+      "right": 68
+     },
+     "baseline_right": 57.2,
+     "rewarded": 53.6,
+     "reward": 0.0367,
+     "lesson": 0.0363,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0077,
+      "structure": 0.0018,
+      "strength": 0
+     },
+     "misses": 1842,
+     "reasons": {
+      "structure": 10.1,
+      "change": 1.9,
+      "blip": 42.8,
+      "outvoted": 4.5,
+      "unseen": 40.8
+     }
+    },
+    "2026": {
+     "calls": 3205,
+     "bits_per_call_over_null": 0.00514,
+     "right": 57.9,
+     "closeness": 0.7606,
+     "stated": 58.6,
+     "strongest_tenth": {
+      "stated": 70.7,
+      "right": 67.9
+     },
+     "baseline_right": 57.6,
+     "rewarded": 53.7,
+     "reward": 0.0417,
+     "lesson": 0.0403,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0089,
+      "structure": 0.0014,
+      "strength": 0.0003
+     },
+     "misses": 1348,
+     "reasons": {
+      "structure": 7.9,
+      "change": 3.2,
+      "blip": 45.8,
+      "outvoted": 3,
+      "unseen": 40.1
+     }
+    }
+   },
+   "by_age": {
+    "first 100": {
+     "calls": 1700,
+     "bits_per_call_over_null": -0.0109,
+     "right": 52.1,
+     "closeness": 0.7427,
+     "stated": 58.2,
+     "strongest_tenth": {
+      "stated": 73.8,
+      "right": 56.5
+     },
+     "baseline_right": 52.2,
+     "rewarded": 61.6,
+     "reward": 0.0489,
+     "lesson": 0.0383,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": -0.0044,
+      "structure": -0.0029,
+      "strength": 0
+     },
+     "misses": 814,
+     "reasons": {
+      "structure": 12.8,
+      "change": 3.3,
+      "blip": 2.7,
+      "outvoted": 14.7,
+      "unseen": 66.5
+     }
+    },
+    "100-250": {
+     "calls": 2550,
+     "bits_per_call_over_null": 0.00185,
+     "right": 54.2,
+     "closeness": 0.7535,
+     "stated": 53.3,
+     "strongest_tenth": {
+      "stated": 61.5,
+      "right": 62.4
+     },
+     "baseline_right": 53.9,
+     "rewarded": 71.5,
+     "reward": 0.0209,
+     "lesson": 0.0141,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0029,
+      "structure": 0.0007,
+      "strength": -0.0001
+     },
+     "misses": 1169,
+     "reasons": {
+      "structure": 9.8,
+      "change": 10.2,
+      "blip": 6.9,
+      "outvoted": 11.6,
+      "unseen": 61.5
+     }
+    },
+    "250-500": {
+     "calls": 4250,
+     "bits_per_call_over_null": -0.00217,
+     "right": 59.4,
+     "closeness": 0.7594,
+     "stated": 57,
+     "strongest_tenth": {
+      "stated": 63.7,
+      "right": 62.1
+     },
+     "baseline_right": 59.4,
+     "rewarded": 60.3,
+     "reward": 0.0372,
+     "lesson": 0.0305,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0101,
+      "structure": 0.0002,
+      "strength": -0.0009
+     },
+     "misses": 1727,
+     "reasons": {
+      "structure": 4.2,
+      "change": 4.6,
+      "blip": 2.7,
+      "outvoted": 9.9,
+      "unseen": 78.5
+     }
+    },
+    "500-1000": {
+     "calls": 8500,
+     "bits_per_call_over_null": 0.00327,
+     "right": 58.2,
+     "closeness": 0.7597,
+     "stated": 57.2,
+     "strongest_tenth": {
+      "stated": 66.9,
+      "right": 69.3
+     },
+     "baseline_right": 57.8,
+     "rewarded": 59.4,
+     "reward": 0.0365,
+     "lesson": 0.0321,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0086,
+      "structure": 0.0014,
+      "strength": -0.0003
+     },
+     "misses": 3553,
+     "reasons": {
+      "structure": 6.6,
+      "change": 8.6,
+      "blip": 12.2,
+      "outvoted": 6.7,
+      "unseen": 65.9
+     }
+    },
+    "1000-2000": {
+     "calls": 17000,
+     "bits_per_call_over_null": 0.0072,
+     "right": 57.6,
+     "closeness": 0.7594,
+     "stated": 58.1,
+     "strongest_tenth": {
+      "stated": 69.7,
+      "right": 69.4
+     },
+     "baseline_right": 56.4,
+     "rewarded": 53.9,
+     "reward": 0.0396,
+     "lesson": 0.0379,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0069,
+      "structure": 0.0022,
+      "strength": 0.0002
+     },
+     "misses": 7215,
+     "reasons": {
+      "structure": 11.3,
+      "change": 7.8,
+      "blip": 46.4,
+      "outvoted": 3.6,
+      "unseen": 30.8
+     }
+    },
+    "2000+": {
+     "calls": 12444,
+     "bits_per_call_over_null": 0.00546,
+     "right": 59.1,
+     "closeness": 0.7629,
+     "stated": 58.7,
+     "strongest_tenth": {
+      "stated": 73.2,
+      "right": 72.8
+     },
+     "baseline_right": 58.4,
+     "rewarded": 55.1,
+     "reward": 0.0422,
+     "lesson": 0.0391,
+     "parts": {
+      "coin_flip": 0.75,
+      "baseline": 0.0111,
+      "structure": 0.0018,
+      "strength": 0.0001
+     },
+     "misses": 5092,
+     "reasons": {
+      "structure": 9,
+      "change": 2.2,
+      "blip": 45.6,
+      "outvoted": 3.5,
+      "unseen": 39.7
+     }
+    }
+   }
+  },
+  "learning_follows_reason": {
+   "blip": {
+    "misses": 6255,
+    "moved": 0.0028,
+    "toward": 100
+   },
+   "change": {
+    "misses": 1209,
+    "moved": 0.0102,
+    "toward": 100
+   }
+  },
+  "next_call_after": {
+   "hex-7.0": {
+    "unseen": {
+     "n": 9201,
+     "right": 57.5,
+     "closeness": 0.7577,
+     "same": 34.8,
+     "stated": 57.6
+    },
+    "right": {
+     "n": 26863,
+     "right": 59.6,
+     "closeness": 0.7626,
+     "same": 0,
+     "stated": 59
+    },
+    "outvoted": {
+     "n": 1105,
+     "right": 50.6,
+     "closeness": 0.7493,
+     "same": 14.4,
+     "stated": 52.7
+    },
+    "structure": {
+     "n": 1797,
+     "right": 51.5,
+     "closeness": 0.7495,
+     "same": 20.1,
+     "stated": 53.1
+    },
+    "blip": {
+     "n": 6252,
+     "right": 55.4,
+     "closeness": 0.7549,
+     "same": 37.8,
+     "stated": 55.9
+    },
+    "change": {
+     "n": 1209,
+     "right": 51.6,
+     "closeness": 0.7493,
+     "same": 33,
+     "stated": 52.3
+    }
+   },
+   "shown": {
+    "unseen": {
+     "n": 9559,
+     "right": 57.3,
+     "closeness": 0.7572,
+     "same": 36.5,
+     "stated": 57.6
+    },
+    "right": {
+     "n": 26858,
+     "right": 59.5,
+     "closeness": 0.7624,
+     "same": 0,
+     "stated": 59.1
+    },
+    "outvoted": {
+     "n": 796,
+     "right": 51.5,
+     "closeness": 0.7485,
+     "same": 10.9,
+     "stated": 52.8
+    },
+    "structure": {
+     "n": 1663,
+     "right": 51.9,
+     "closeness": 0.7488,
+     "same": 20.5,
+     "stated": 53
+    },
+    "blip": {
+     "n": 6334,
+     "right": 55.4,
+     "closeness": 0.7544,
+     "same": 38.1,
+     "stated": 55.9
+    },
+    "change": {
+     "n": 1217,
+     "right": 51.4,
+     "closeness": 0.7491,
+     "same": 33.4,
+     "stated": 52.5
+    }
+   }
+  }
+ }
+}

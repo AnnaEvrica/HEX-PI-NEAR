@@ -5,17 +5,15 @@
 //
 // Rules:
 //   - Probability and statistics only. Each probability is shown next to its
-//     baseline ("its usual odds"). There is no confidence, conviction or
-//     exposure.
+//     usual odds (the null). There is no confidence, conviction or exposure.
 //   - The numbers come from shared/engines.ts. HEX makes every call; two
-//     versions run and the ledger decides which is shown (6.2 until 6.4 is
-//     promoted).
+//     versions run and the ledger decides which is shown.
 //   - HEX is never told what kind of series it is reading.
-//   - Measured, walk-forward, 17 market series, 2016-2026 (46,937 days):
-//       next-day direction: at chance for both versions
-//       next-day move size: 58.8% of calls right (6.2), 59.9% (6.4)
-//     So the size read carries the measured edge; the direction read usually
-//     sits at its usual odds.
+//   - A read is presented as an edge only where the ledger says the edge is
+//     verified: where information gain over the usual odds is clear of zero.
+//     One-pass replay, 17 market series, 2016-2026 (validation/replay.py):
+//       next-day move size: verified (+0.0043 bits per call over the null)
+//       next-day direction: no verified edge
 // ===========================================================================
 
 import { runEngines, DEFAULT_LIVE, EngineRun, LiveEngines } from './engines.ts';
@@ -136,21 +134,14 @@ export function readProbability(returns: number[], live: LiveEngines = DEFAULT_L
 
 const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
 
-// What the engine has worked out about the KIND of series this is, from the
-// series alone (it is never told). Shown to the model as plain behaviour, so
-// it can describe the series without naming any internal family.
-const BEHAVIOUR: Record<string, string> = {
-  markets: 'direction is close to a coin flip from one step to the next, while large and small moves come in runs',
-  weather: 'after a run one way it tends to swing back, the way day-to-day temperature changes do',
-  racing: 'it swings back strongly after a run one way, the way a competitor\'s results do from one outing to the next',
-};
-function behaviourLine(p: EngineRun): string {
-  const top = (w: Record<string, number>) => Object.entries(w || {}).sort((a, b) => b[1] - a[1])[0];
-  const d = top(p.family_up), m = top(p.family_big);
-  const parts: string[] = [];
-  if (d && d[0] !== 'none' && d[1] >= 0.6) parts.push(`in direction, ${BEHAVIOUR[d[0]]}`);
-  if (m && m[0] === 'markets' && m[1] >= 0.6) parts.push('in size, large and small moves come in runs');
-  return parts.length ? `  how this series behaves (worked out from the series itself; say it in plain words, never name a category): ${parts.join('; ')}\n` : '';
+/** What the ledger has established about each read, where it has said. */
+function verifiedLines(run: EngineRun): string {
+  const say = (v: boolean | undefined, name: string) => v === true
+    ? `  record for ${name}: verified edge — on the tracked series this read has given what happened more probability than the usual odds did, by a margin clear of zero\n`
+    : v === false
+      ? `  record for ${name}: NO VERIFIED EDGE — on the tracked series this read has not beaten the usual odds by a margin clear of zero. Say plainly that there is no verified edge here and do not present it as a call\n`
+      : '';
+  return say(run.verified.MOVE, 'direction') + say(run.verified.RANGE, 'move size');
 }
 
 /**
@@ -172,10 +163,10 @@ export function probabilityBlock(read: ProbabilityRead | null, label = 'this ser
   next move up: ${pct(p.p_up)} — usual odds ${pct(p.base_up)} — ${dirLine}
   next move larger than usual: ${pct(p.p_big_move)} — usual odds ${pct(p.base_big)} — ${sizeLine}
   scored steps behind these numbers: ${p.history}
-${behaviourLine(read.run)}HOW TO SPEAK ABOUT IT:
+${verifiedLines(read.run)}HOW TO SPEAK ABOUT IT:
   - These are the only probabilities you may state for ${label}. State each one next to its usual odds, in plain words ("about 54%, against a usual 52%"). "Usual odds" here means what this series' own recent behaviour and present position already imply.
   - Probability and statistics only. Never state or imply a confidence level, a conviction, a strength-of-call, or how firmly you hold it. The number and its distance from the usual odds carry everything.
-  - The move-size read is where this method has measured skill. Next-move direction has tested at chance for markets, so when the direction number sits at its usual odds, say exactly that and lead with the size read.
+  - Where a record line above says NO VERIFIED EDGE, say so in plain words ("there is no verified edge in direction here") and lead with a read that has one. Where there is no record line, state the numbers without claiming a record either way.
   - Never round a number toward a stronger claim, and never present a direction as a prediction when it sits at its usual odds.`;
 }
 

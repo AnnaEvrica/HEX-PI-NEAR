@@ -1,0 +1,258 @@
+\documentclass[10.5pt]{article}
+\usepackage[a4paper,margin=2.2cm,bottom=2.4cm]{geometry}
+\usepackage[T1]{fontenc}\usepackage[utf8]{inputenc}
+\usepackage{mathpazo,courier,amsmath,amssymb,booktabs,array,xcolor,enumitem,titlesec,fancyhdr,graphicx}
+\usepackage[most]{tcolorbox}\usepackage[hidelinks]{hyperref}
+\definecolor{ink}{HTML}{1F2A44}\definecolor{soft}{HTML}{F3F5F9}\definecolor{rule}{HTML}{9AA5BD}\definecolor{warn}{HTML}{FBF3E4}\definecolor{warnrule}{HTML}{C9963A}
+\titleformat{\section}{\Large\bfseries\color{ink}}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\large\bfseries\color{ink}}{\thesubsection}{0.6em}{}
+\setlength{\parindent}{0pt}\setlength{\parskip}{0.5em}
+\newtcolorbox{plain}[1][In plain words]{enhanced,breakable,before upper={\setlength{\parskip}{0.45em}},colback=soft,colframe=rule,boxrule=0.4pt,arc=2pt,left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\bfseries\small,coltitle=ink,colbacktitle=soft,titlerule=0pt,attach boxed title to top left={yshift=-2mm,xshift=4mm},boxed title style={colframe=rule,boxrule=0.4pt,arc=2pt}}
+\newtcolorbox{caution}[1]{enhanced,breakable,before upper={\setlength{\parskip}{0.45em}},colback=warn,colframe=warnrule,boxrule=0.4pt,arc=2pt,left=8pt,right=8pt,top=6pt,bottom=6pt,title={#1},fonttitle=\bfseries\small,coltitle=ink,colbacktitle=warn,titlerule=0pt,attach boxed title to top left={yshift=-2mm,xshift=4mm},boxed title style={colframe=warnrule,boxrule=0.4pt,arc=2pt}}
+\pagestyle{fancy}\fancyhf{}\renewcommand{\headrulewidth}{0pt}
+\fancyfoot[L]{\footnotesize\color{rule} HEX [PI] 7.0 on HEX6-BLE: the ten-year replay and how to run the system}\fancyfoot[R]{\footnotesize\color{rule}\thepage}
+\begin{document}
+\begin{center}
+{\LARGE\bfseries\color{ink} HEX [PI] 7.0\par}\vspace{4pt}
+{\Large\color{ink} The ten-year replay: what was measured,\\ and how to run and watch the system\par}
+\vspace{8pt}
+Anna Maria Sarkisyan \,$\cdot$\, Evrica Technologies Inc.\\
+5 October 2026 \,$\cdot$\, engine version 7.0 on HEX6-BLE \,$\cdot$\, open source
+\end{center}
+
+\begin{plain}[The result in five lines]
+HEX [PI] 7.0 was run once through history, making every call before its outcome and starting every series from nothing: 280,252 calls on 43 series.
+
+On next-day \textbf{move size} it gave what happened more probability than the series' own record did, by a margin clear of zero, on the 17 markets it was developed on \emph{and} on ten currencies it had never seen. On \textbf{temperature} it did the same for direction at three stations it had never seen.
+
+On next-day \textbf{market direction} it has \textbf{no verified edge}, and the product says so.
+
+Learning itself adds value: the engine left to learn beats the same engine frozen after its first 500 calls.
+
+The code that was tested is the code that is deployed: the two agree to $10^{-13}$.
+\end{plain}
+
+\section{The measure}
+A call is scored by its \textbf{information gain} over the null: $g=\ln p(y)-\ln q_0(y)$, where $p$ is HEX's probability, $q_0$ is what the series' own record already implied, and $y$ is what happened. It is reported in bits per call. Positive means HEX gave what happened more probability than the obvious did. Beside it: the share of calls right, and ``expected'', the share right if the null alone had made every call. Intervals are 95\%, from a block bootstrap over 20-day blocks so that calls on neighbouring days are not treated as independent. A read is \textbf{verified} when the interval is above zero.
+
+\section{Headline results}
+\begin{center}\resizebox{\textwidth}{!}{\begin{tabular}{@{}lrcclc@{}}\toprule
+ & Calls & HEX right & Expected & Bits per call over the null [95\%] & Status\\\midrule
+Markets (17, 2016--2026), move size & 46,478 & 57.9\% & 57.2\% & +0.0043 [+0.0030, +0.0056] & verified\\
+Markets (17, 2016--2026), direction & 46,478 & 51.4\% & 51.2\% & 0.0000 [$-$0.0007, +0.0006] & no verified edge\\
+\emph{New:} 10 currencies, move size & 26,540 & 62.1\% & 61.2\% & +0.0082 [+0.0060, +0.0106] & verified\\
+\emph{New:} 10 currencies, direction & 26,540 & 54.2\% & 54.0\% & +0.0011 [$-$0.0002, +0.0025] & no verified edge\\
+\emph{New:} 3 temperature stations, move size & 29,408 & 63.1\% & 61.6\% & +0.0186 [+0.0158, +0.0212] & verified\\
+\emph{New:} 3 temperature stations, direction & 29,408 & 61.0\% & 54.6\% & +0.0466 [+0.0430, +0.0499] & verified\\
+Chicago temperature, move size & 24,678 & 55.1\% & 54.1\% & +0.0048 [+0.0035, +0.0061] & verified\\
+Chicago temperature, direction & 24,678 & 62.9\% & 50.7\% & +0.0644 [+0.0598, +0.0689] & verified\\
+Racing (12 series), move size & 13,022 & 52.9\% & 49.7\% & +0.0123 [+0.0001, +0.0295] & verified\\
+Racing (12 series), direction & 13,022 & 74.8\% & 75.0\% & $-$0.0017 [$-$0.0020, $-$0.0014] & no verified edge\\
+\bottomrule\end{tabular}}\end{center}
+\emph{New} marks series never used in any earlier experiment. The rule for including them was written before any run.
+
+\begin{center}\includegraphics[width=0.92\textwidth]{chart_gain_vs_null.png}\end{center}
+The curve can go down as well as up and cannot hide a bad period. Move size loses a little in 2016, while the engine has seen almost nothing, is flat to 2018, and then gains steadily. Direction ends where it started.
+
+\section{How the replay was run}
+\begin{enumerate}[leftmargin=1.4em,itemsep=1pt]
+\item \textbf{One pass, in order.} For each series and each timestamp: reveal the outcome, score, learn, predict, commit. No fitting on later data, no recalculating an earlier call.
+\item \textbf{From nothing.} Every series starts with no history. The 17 markets start on 1 January 2016.
+\item \textbf{A specification frozen first.} The engine, the data rules and seven predictions were written down before the run (\texttt{validation/prereg\_replay.md}).
+\item \textbf{A ledger of every call} (\texttt{validation/replay/hex7\_ledger.parquet}): the probabilities of the null, 7.0, the previous engine 6.5 and a frozen copy; the outcome; and hashes of the engine's state, of the code and of the data seen so far. The learned coefficients are kept every 25th call, and the final state of every series is kept too.
+\end{enumerate}
+\subsection*{Three checks}
+\begin{enumerate}[leftmargin=1.4em,itemsep=1pt]
+\item \textbf{No call saw its own future.} The engine was rerun on truncated histories at 258 sampled points and compared with the ledger: largest difference 0.
+\item \textbf{The product code is the tested code.} On identical inputs the TypeScript engines and their Python references agree to $10^{-13}$ (\texttt{tests/parity.mjs}).
+\item \textbf{The product's nightly path gives the same calls.} The nightly entry point was run on only what was known on 680 sampled nights: 2,720 calls, none different. And the product code's 92,888 calls on the 17 markets, computed from prices independently of the reference, match the replay's to $10^{-14}$.
+\end{enumerate}
+\subsection*{What is development and what is new}
+\begin{caution}{Read the 17-market result as a development backtest}
+The 17 market series, the Chicago temperature series and the racing series were used while designing every version of the engine. A result on them shows how the final engine would have behaved; it is not an untouched test.
+
+The untouched tests are the ten currencies and the three temperature stations. Currencies: every country in the exchange-rate file other than the twelve already used, kept if it had at least 2,000 observations and a change on at least half its days. All ten passed: Brazil (99\%), China (94\%), Denmark (100\%), Hong Kong (94\%), Malaysia (93\%), Singapore (99\%), South Korea (99\%), Taiwan (92\%), Thailand (94\%), Venezuela (70\%) (share of days with a change). The list therefore includes a currency in a pegged band and one in crisis; they were kept because the rule written beforehand kept them. Temperature: every public daily series reachable with at least 1,000 days, daily maximum, one per station: Melbourne 1981--1990, Seattle 1948--2017, New York 2012--2015.
+
+The third test is live: calls made from the release of 7.0, which the ledger collects from the first night.
+\end{caution}
+
+\section{Full results}
+\begin{center}\resizebox{\textwidth}{!}{\begin{tabular}{@{}lclllccc@{}}\toprule
+ & 6.5 right & Over 6.5 [95\%] & Learning gain [95\%] & Macro & Brier skill & Cal.\ error & Top tenth\\\midrule
+Markets (17, 2016--2026), move size & 57.4\% & +0.0037 [+0.0025, +0.0050] & +0.0036 [+0.0025, +0.0048] & +0.0042 & 0.62\% & 0.013 & 74 / 70\\
+Markets (17, 2016--2026), direction & 51.3\% & 0.0000 [$-$0.0007, +0.0006] & +0.0006 [+0.0001, +0.0011] & $-$0.0001 & 0.01\% & 0.016 & 60 / 56\\
+\emph{New:} 10 currencies, move size & 61.5\% & +0.0035 [+0.0018, +0.0053] & +0.0096 [+0.0071, +0.0121] & +0.0082 & 1.15\% & 0.009 & 90 / 89\\
+\emph{New:} 10 currencies, direction & 54.1\% & +0.0001 [$-$0.0013, +0.0014] & +0.0022 [+0.0008, +0.0035] & +0.0011 & 0.15\% & 0.017 & 80 / 78\\
+\emph{New:} 3 temperature stations, move size & 62.1\% & +0.0130 [+0.0109, +0.0152] & +0.0084 [+0.0066, +0.0103] & +0.0245 & 2.68\% & 0.023 & 78 / 72\\
+\emph{New:} 3 temperature stations, direction & 57.0\% & +0.0310 [+0.0278, +0.0342] & +0.0068 [+0.0054, +0.0082] & +0.0607 & 6.29\% & 0.009 & 74 / 77\\
+Chicago temperature, move size & 54.5\% & +0.0038 [+0.0027, +0.0049] & +0.0042 [+0.0030, +0.0053] & +0.0048 & 0.65\% & 0.018 & 68 / 63\\
+Chicago temperature, direction & 57.6\% & +0.0417 [+0.0375, +0.0459] & +0.0065 [+0.0049, +0.0082] & +0.0644 & 8.67\% & 0.009 & 75 / 75\\
+Racing (12 series), move size & 51.6\% & +0.0068 [+0.0005, +0.0141] & +0.0014 [$-$0.0003, +0.0038] & +0.0091 & 1.65\% & 0.023 & 69 / 66\\
+Racing (12 series), direction & 74.9\% & $-$0.0008 [$-$0.0015, $-$0.0003] & +0.0004 [$-$0.0005, +0.0017] & $-$0.0018 & -0.25\% & 0.014 & 99 / 100\\
+\bottomrule\end{tabular}}\end{center}
+{\footnotesize \emph{Over 6.5}: bits per call gained over the previous engine on the same calls. \emph{Learning gain}: the engine left to learn against the same engine with its coefficients and influences frozen after its first 500 calls on a series (the null keeps moving in both). \emph{Macro}: bits per call over the null averaged over series, so that a long series does not outweigh a short one. \emph{Brier skill}: reduction in squared error against the null. \emph{Cal.\ error}: mean gap between stated probability and observed frequency over ten bins. \emph{Top tenth}: stated strength / share right, in percent, on the strongest tenth of calls.}
+
+\begin{center}\includegraphics[width=0.86\textwidth]{chart_gain_vs_65.png}\\[2pt]\includegraphics[width=0.86\textwidth]{chart_learning.png}\end{center}
+
+\subsection*{Is the edge alive now?}
+\begin{center}\includegraphics[width=0.86\textwidth]{chart_rolling.png}\end{center}
+Gain over the null across the latest 2,000 calls. For move size it is above zero for most of the period from 2019; it dips to zero in 2022--2023 and recovers.
+
+\subsection*{Does it get better with experience?}
+\begin{center}\includegraphics[width=0.86\textwidth]{chart_experience.png}\end{center}
+\begin{center}\small\begin{tabular}{@{}lrcccc|cc@{}}\toprule
+ & & \multicolumn{4}{c|}{Move size} & \multicolumn{2}{c}{Direction}\\
+Calls already made & Calls & Bits/call & Brier skill & Right $-$ expected & Cal.\ error & Bits/call & Cal.\ error\\\midrule
+1--100 & 1,700 & $-$0.0110 & -1.17\% & $-$0.06 & 0.062 & $-$0.0130 & 0.081\\
+101--250 & 2,550 & +0.0020 & 0.29\% & +0.20 & 0.043 & $-$0.0021 & 0.037\\
+251--500 & 4,250 & +0.0003 & 0.06\% & +0.00 & 0.014 & $-$0.0002 & 0.012\\
+501--1000 & 8,500 & +0.0040 & 0.58\% & +0.42 & 0.020 & +0.0007 & 0.018\\
+1001+ & 29,478 & +0.0061 & 0.85\% & +0.94 & 0.015 & +0.0008 & 0.010\\
+\bottomrule\end{tabular}\end{center}
+Aligning by experience instead of by calendar separates ``the world became easier'' from ``the engine became more experienced''. The first hundred calls on a new series cost information; the engine is level with the null by 500 and ahead after. Its stated probabilities also become more accurate: calibration error falls from 0.06 to 0.015.
+
+\subsection*{By year, 17 markets}
+\begin{center}\small\begin{tabular}{@{}lccc|ccc@{}}\toprule
+ & \multicolumn{3}{c|}{Move size} & \multicolumn{3}{c}{Direction}\\
+Year & Over null & Over 6.5 & Right / expected & Over null & Over 6.5 & Right / expected\\\midrule
+2016 & $-$0.0040 & $-$0.0049 & 53.2\% / 52.9\% & $-$0.0071 & $-$0.0066 & 50.4\% / 51.2\%\\
+2017 & +0.0002 & +0.0014 & 60.2\% / 60.4\% & +0.0001 & +0.0008 & 52.2\% / 52.0\%\\
+2018 & +0.0044 & +0.0046 & 55.3\% / 55.3\% & 0.0000 & +0.0003 & 50.7\% / 50.1\%\\
+2019 & +0.0065 & +0.0058 & 59.5\% / 58.2\% & +0.0014 & +0.0014 & 52.6\% / 51.1\%\\
+2020 & +0.0128 & +0.0102 & 57.4\% / 55.6\% & +0.0006 & +0.0003 & 51.8\% / 51.5\%\\
+2021 & +0.0082 & +0.0081 & 56.5\% / 54.4\% & +0.0001 & +0.0001 & 51.4\% / 51.8\%\\
+2022 & +0.0011 & +0.0008 & 60.3\% / 60.4\% & +0.0003 & +0.0008 & 51.0\% / 51.4\%\\
+2023 & +0.0017 & +0.0009 & 57.2\% / 57.0\% & +0.0015 & +0.0003 & 52.0\% / 51.4\%\\
+2024 & +0.0063 & +0.0058 & 60.5\% / 59.5\% & +0.0007 & +0.0005 & 51.0\% / 51.3\%\\
+2025 & +0.0056 & +0.0040 & 57.9\% / 57.2\% & +0.0013 & +0.0013 & 50.5\% / 49.9\%\\
+2026 & +0.0035 & +0.0037 & 58.0\% / 57.7\% & +0.0004 & $-$0.0002 & 51.7\% / 51.3\%\\
+\bottomrule\end{tabular}\end{center}
+
+\subsection*{By series}
+Bits per call over the null, and right / expected.
+\begin{center}\footnotesize\begin{tabular}{@{}lrcc|cc@{}}\toprule
+ & & \multicolumn{2}{c|}{Move size} & \multicolumn{2}{c}{Direction}\\
+Series & Calls & Bits/call & Right / expected & Bits/call & Right / expected\\\midrule
+\multicolumn{6}{@{}l}{\emph{Markets, development}}\\
+BRENT & 2,698 & +0.0062 & 59.0\% / 57.4\% & $-$0.0007 & 52.1\% / 52.3\%\\
+BTC & 3,898 & +0.0062 & 60.4\% / 59.8\% & +0.0010 & 52.9\% / 51.1\%\\
+Australia & 2,654 & $-$0.0011 & 56.0\% / 56.3\% & $-$0.0013 & 50.8\% / 50.9\%\\
+Canada & 2,654 & $-$0.0009 & 59.5\% / 59.7\% & $-$0.0011 & 49.2\% / 48.1\%\\
+Euro & 2,654 & $-$0.0006 & 56.6\% / 56.6\% & $-$0.0011 & 49.0\% / 49.7\%\\
+India & 2,654 & +0.0036 & 60.6\% / 60.1\% & +0.0002 & 51.3\% / 50.3\%\\
+Japan & 2,654 & +0.0035 & 60.2\% / 59.2\% & $-$0.0012 & 50.9\% / 51.1\%\\
+Mexico & 2,654 & +0.0150 & 59.0\% / 57.0\% & $-$0.0010 & 52.9\% / 52.8\%\\
+NewZealand & 2,654 & $-$0.0011 & 57.5\% / 57.5\% & $-$0.0013 & 48.8\% / 49.0\%\\
+Norway & 2,654 & +0.0004 & 55.6\% / 55.4\% & $-$0.0011 & 49.8\% / 49.8\%\\
+SouthAfrica & 2,654 & +0.0016 & 54.6\% / 54.8\% & $-$0.0004 & 51.7\% / 51.7\%\\
+Sweden & 2,654 & +0.0001 & 54.0\% / 54.4\% & $-$0.0013 & 49.1\% / 49.5\%\\
+Switzerland & 2,654 & +0.0011 & 54.2\% / 53.9\% & $-$0.0010 & 51.6\% / 51.2\%\\
+UnitedKingdom & 2,654 & $-$0.0009 & 57.8\% / 58.1\% & $-$0.0011 & 48.2\% / 49.4\%\\
+NATGAS & 2,676 & +0.0007 & 60.1\% / 59.5\% & +0.0008 & 55.4\% / 55.4\%\\
+VIX & 2,700 & +0.0318 & 58.6\% / 54.2\% & +0.0108 & 56.5\% / 54.8\%\\
+WTI & 2,658 & +0.0065 & 58.8\% / 57.0\% & $-$0.0010 & 52.3\% / 53.0\%\\
+\midrule\multicolumn{6}{@{}l}{\emph{Currencies never used before}}\\
+Brazil & 2,654 & +0.0001 & 59.3\% / 58.8\% & $-$0.0012 & 49.3\% / 50.9\%\\
+China & 2,654 & +0.0159 & 61.2\% / 59.8\% & +0.0036 & 53.7\% / 52.2\%\\
+Denmark & 2,654 & $-$0.0009 & 56.6\% / 56.2\% & $-$0.0011 & 50.8\% / 51.3\%\\
+HongKong & 2,654 & +0.0488 & 69.5\% / 65.6\% & +0.0006 & 51.0\% / 51.5\%\\
+Malaysia & 2,654 & +0.0044 & 60.1\% / 59.0\% & 0.0000 & 51.6\% / 51.4\%\\
+Singapore & 2,654 & +0.0011 & 57.2\% / 56.5\% & 0.0000 & 50.3\% / 51.2\%\\
+SouthKorea & 2,654 & $-$0.0008 & 54.5\% / 54.8\% & $-$0.0011 & 50.0\% / 50.7\%\\
+Taiwan & 2,654 & +0.0036 & 57.4\% / 57.0\% & +0.0021 & 53.1\% / 50.7\%\\
+Thailand & 2,654 & +0.0010 & 59.6\% / 59.5\% & +0.0014 & 53.8\% / 53.0\%\\
+Venezuela & 2,654 & +0.0086 & 85.6\% / 84.6\% & +0.0069 & 78.3\% / 77.4\%\\
+\midrule\multicolumn{6}{@{}l}{\emph{Temperature never used before}}\\
+Melbourne & 3,622 & +0.0503 & 64.8\% / 59.0\% & +0.0651 & 63.1\% / 54.0\%\\
+NewYork & 1,433 & +0.0088 & 58.0\% / 58.5\% & +0.0749 & 64.5\% / 45.4\%\\
+Seattle & 24,353 & +0.0144 & 63.2\% / 62.2\% & +0.0421 & 60.5\% / 55.2\%\\
+\bottomrule\end{tabular}\end{center}
+
+\section{Predictions written before the run}
+\begin{center}\small\begin{tabular}{@{}cp{8.2cm}p{5.8cm}@{}}\toprule
+ & Prediction & Outcome\\\midrule
+1 & Market move size: 0.002 to 0.006 bits per call, clear of zero & Held: +0.0043 [+0.0030, +0.0056]\\
+2 & Market direction: under 0.0015 & Held: 0.0000 [$-$0.0007, +0.0006]\\
+3 & 7.0 over 6.5 on market move size: positive, clear of zero & Held: +0.0037 [+0.0025, +0.0050]\\
+4 & Learning gain positive on move size; within 0.001 of zero on direction & Held: +0.0036 and +0.0006\\
+5 & Unused currencies: move size positive on the macro-average, direction not clear of zero & Held\\
+6 & Temperature replication: direction gain positive and at least 58\% right at every station & Held: 63.1\%, 64.5\%, 60.5\%\\
+7 & The strength map does not lower information gain on move size & Neither way: $-$0.0001 [$-$0.0010, +0.0007]\\\bottomrule\end{tabular}\end{center}
+\textbf{One amendment after the first run.} Comparing the product code's calls with the reference's showed differences on currencies quoted to four decimals. When a price returned exactly to an earlier price, the rank of that tie was being decided by the last binary digit of a sum of log changes. Levels are now rounded to nine decimals before they are ranked, in the engine and in the null. Everything was rerun; no prediction was changed. The racing null improved as a side effect (it has many exact ties), which is why racing direction shows HEX slightly behind the null.
+
+\section{The product's own loop, run through the same ten years}
+The product's code and its ledger functions were run night by night on the 17 markets with the database in memory (\texttt{validation/timesim}): score, state the calls with that night's strength maps, write them to the ledger, then the nightly update. It began exactly as the product is configured to begin, showing 7.0 for both reads, but with an engine that had seen nothing.
+
+\textbf{What the rules did:} 2016-04-04, direction: 6.5 switched in; 2016-05-22, move size: 6.5 switched in; 2017-07-03, move size: not verified; 2019-05-20, move size: 7.0 switched in; 2020-03-25, move size: verified.
+
+So from a cold start the system corrected itself: it took 7.0 down within months while it was still behind, switched move size back to 7.0 when the record was decisive, and verified it in 2020. It never switched direction back, and direction ended not verified. In the product the engine is not cold: each series is walked from the start of its history every night, so its calls are those of an engine with thousands of calls of experience.
+
+Final status rows: move size shows 7.0, verified, +0.00421 [+0.00306, +0.00535] bits per call over the null, right 57.9\% against 57.4\% for 6.5. Direction shows 6.5, not verified.
+
+\section{What can and cannot be said}
+\begin{plain}[The claim, worded as it should be]
+``HEX [PI] 7.0 demonstrated positive information gain over its pre-specified baseline on next-day move size, under one-pass walk-forward evaluation, on 17 market series from 2016 to 2026 and on ten currency series it had never been tested on; and on next-day direction of daily maximum temperature at three stations it had never been tested on. It has no verified edge on next-day market direction.''
+\end{plain}
+\begin{itemize}[leftmargin=1.2em,itemsep=1pt]
+\item Do not say ``proven accuracy''. Finite history cannot prove the future.
+\item The edge on market move size is small: about half a percentage point of calls right, 0.004 bits per call. It is real on this evidence and it is not large.
+\item The temperature replication is three stations. The currency replication is ten series from one source.
+\item Racing direction is slightly \emph{behind} the null. The null is already right three times in four there.
+\item Text, letter-number and ontology layers are not part of 7.0 and nothing here measures them.
+\end{itemize}
+
+\section{Running the system}
+\subsection*{What runs, and when}
+\begin{center}\small\begin{tabular}{@{}p{3.3cm}p{4.2cm}p{7.3cm}@{}}\toprule
+Job & Trigger & What it does\\\midrule
+Nightly update & daily, 10:00 UTC & \texttt{calibrateCognition}: the learning loop, then status\\
+Signal post & three times a day & \texttt{discordMorningSignal}: reads the tracked list, posts to Discord\\
+X engagement & every 30 minutes & \texttt{xEngagement}\\
+Chat & a user message & \texttt{think}: reads a series when needed; logs the call\\
+On demand & a signed-in user & \texttt{walkForwardAccuracy}: the one-pass test on live data, with timings\\\bottomrule\end{tabular}\end{center}
+\subsection*{State}
+\textbf{The engine stores no state between runs.} Each time it is asked, it walks the series from its first bar. There is no checkpoint to corrupt, migrate or roll back; the deployed engine and the replay are the same computation; a code change takes effect for every series on the next run.
+
+Two entities are written: \texttt{CallLedger} (one row per series, read, version and day, plus calls made in chat) and \texttt{EngineStatus} (one row per read: the version shown, the verified flag, the running tally, the strength maps, the precision metrics).
+\subsection*{Cost and scaling}
+\begin{center}\small\begin{tabular}{@{}p{9.0cm}p{5.8cm}@{}}\toprule
+One engine run for one series (both versions, both reads; 2,700 to 3,900 daily bars; two-core container) & 150 to 280 ms, mean 170 ms\\
+One nightly update, 7 tracked series & about 1.5 s of engine time, plus seven data fetches\\
+One nightly update at the cap of 27 series & about 6 s of engine time\\
+One chat read of a ticker & one engine run\\
+Ledger growth, 7 series (28 rows a night, about 1.5 kB each) & about 15 MB a year\\
+Ledger growth at the cap of 27 series & about 60 MB a year\\\bottomrule\end{tabular}\end{center}
+Time is linear in the length of a series (capped at 5,475 days) and in the number of series. If engine time ever matters (many more series, or intraday bars), the walk can be made incremental by saving each series' state after its last bar; the state is small. That would give up the ``no stored state'' property and would need its own parity test. Nothing today requires it.
+\subsection*{What to watch}
+{\sloppy The nightly update returns \texttt{ok}, \texttt{series}, \texttt{failed}, \texttt{newly\_scored}, \texttt{newly\_logged}, \texttt{elapsed\_ms}, \texttt{per\_series\_ms} and a \texttt{status} for each read.\par}
+\begin{center}\small\begin{tabular}{@{}p{4.6cm}p{3.4cm}p{6.8cm}@{}}\toprule
+Watch & Healthy & If not\\\midrule
+\texttt{ok} & true & the job threw; see the function log\\
+\texttt{failed} & empty & a ticker's data could not be fetched; it is skipped tonight\\
+\texttt{newly\_logged} & 4 $\times$ series & fewer: a rerun, or failures\\
+\texttt{newly\_scored} & about 4 $\times$ series & zero for several nights: bars are not arriving\\
+\texttt{elapsed\_ms}, \texttt{per\_series\_ms} & seconds & growth here is the scaling signal\\
+\texttt{live\_engine}, \texttt{decision} & \texttt{hex-7.0}, \texttt{hold} & \texttt{demote}: 6.5 is clearly ahead on the live record; read \texttt{reason}\\
+\texttt{verified} & move size true, direction false & a change means the live record became decisive\\
+\texttt{bits\_candidate} and its interval & positive for move size over time & the live measure of whether the edge is alive\\
+\texttt{hit\_candidate} beside \texttt{hit\_baseline} & at or above & share right against what the null alone gets\\\bottomrule\end{tabular}\end{center}
+Two limits: the nightly update reads the 5,000 most recently scored rows (46 nights at the cap of 27 series), so an outage longer than that leaves those days out of the tally (they are never double counted); and a day enters the tally five days after its calls.
+\subsection*{Before pressing Publish on Base44}
+\begin{enumerate}[leftmargin=1.4em,itemsep=1pt]
+\item \texttt{CallLedger} and \texttt{EngineStatus} exist with the fields in \texttt{base44/entities/}. New in 7.0 --- \texttt{CallLedger}: \texttt{log\_score}, \texttt{info\_gain}, \texttt{learned}, \texttt{part\_structure}. \texttt{EngineStatus}: \texttt{verified}, the six \texttt{bits\_*} fields, \texttt{closeness\_candidate}, \texttt{closeness\_control}, \texttt{calibration\_control}, \texttt{tally}. The engine names are now \texttt{state-6.5} and \texttt{hex-7.0}.
+\item The nightly workflow is active.
+\item Run \texttt{calibrateCognition} once by hand and read its response against the table above.
+\item Sign-in still works.
+\end{enumerate}
+Nothing in the ledger needs migrating: no earlier version has run live.
+\subsection*{Reproducing every number}
+\begin{verbatim}
+python3 validation/replay.py          # the one-pass replay (about 4 minutes)
+python3 validation/replay_report.py   # every number and chart, from the ledger
+node tests/parity.mjs                 # product code against the reference
+\end{verbatim}
+The data are public and are listed in \texttt{validation/README.md}.
+
+\vfill
+{\footnotesize\color{rule} \copyright\ 2026 Evrica Technologies Inc. \,$\cdot$\, anna@evrica.tech \,$\cdot$\, source: github.com/EvricaTechnologiesInc/HEX-PI}
+\end{document}
