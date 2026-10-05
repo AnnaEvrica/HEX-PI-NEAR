@@ -1,0 +1,314 @@
+{
+ "RANGE": {
+  "6.4": {
+   "mean closeness": 0.7581,
+   "mean progress x1000": 2.79,
+   "total progress per series": 7.64,
+   "by age": {
+    "first 100": {
+     "closeness": 0.743,
+     "progress x1000": 8.83
+    },
+    "100-250": {
+     "closeness": 0.7522,
+     "progress x1000": 5.02
+    },
+    "250-500": {
+     "closeness": 0.7588,
+     "progress x1000": 6.38
+    },
+    "500-1000": {
+     "closeness": 0.758,
+     "progress x1000": 2.9
+    },
+    "1000-2000": {
+     "closeness": 0.7576,
+     "progress x1000": 1.11
+    },
+    "2000+": {
+     "closeness": 0.7612,
+     "progress x1000": 2.72
+    }
+   },
+   "by year": {
+    "2016": {
+     "closeness": 0.7494,
+     "progress x1000": 6.2
+    },
+    "2017": {
+     "closeness": 0.7617,
+     "progress x1000": 8.34
+    },
+    "2018": {
+     "closeness": 0.7555,
+     "progress x1000": -0.4
+    },
+    "2019": {
+     "closeness": 0.7585,
+     "progress x1000": 2.58
+    },
+    "2020": {
+     "closeness": 0.7571,
+     "progress x1000": 0.36
+    },
+    "2021": {
+     "closeness": 0.7532,
+     "progress x1000": -3.01
+    },
+    "2022": {
+     "closeness": 0.7632,
+     "progress x1000": 6.85
+    },
+    "2023": {
+     "closeness": 0.7573,
+     "progress x1000": 0.29
+    },
+    "2024": {
+     "closeness": 0.7658,
+     "progress x1000": 8.22
+    },
+    "2025": {
+     "closeness": 0.7576,
+     "progress x1000": -0.21
+    },
+    "2026": {
+     "closeness": 0.7593,
+     "progress x1000": 1.4
+    }
+   }
+  },
+  "6.2": {
+   "mean closeness": 0.7539,
+   "mean progress x1000": 1.24,
+   "total progress per series": 3.38,
+   "by age": {
+    "first 100": {
+     "closeness": 0.742,
+     "progress x1000": 9.52
+    },
+    "100-250": {
+     "closeness": 0.7526,
+     "progress x1000": 5.77
+    },
+    "250-500": {
+     "closeness": 0.7578,
+     "progress x1000": 5.64
+    },
+    "500-1000": {
+     "closeness": 0.7547,
+     "progress x1000": 0.59
+    },
+    "1000-2000": {
+     "closeness": 0.7526,
+     "progress x1000": -0.67
+    },
+    "2000+": {
+     "closeness": 0.7553,
+     "progress x1000": 1.03
+    }
+   },
+   "by year": {
+    "2016": {
+     "closeness": 0.7495,
+     "progress x1000": 6.96
+    },
+    "2017": {
+     "closeness": 0.7609,
+     "progress x1000": 7.85
+    },
+    "2018": {
+     "closeness": 0.7507,
+     "progress x1000": -4.25
+    },
+    "2019": {
+     "closeness": 0.7558,
+     "progress x1000": 1.82
+    },
+    "2020": {
+     "closeness": 0.7482,
+     "progress x1000": -5.52
+    },
+    "2021": {
+     "closeness": 0.7521,
+     "progress x1000": -0.92
+    },
+    "2022": {
+     "closeness": 0.756,
+     "progress x1000": 2.98
+    },
+    "2023": {
+     "closeness": 0.7541,
+     "progress x1000": 0.74
+    },
+    "2024": {
+     "closeness": 0.7564,
+     "progress x1000": 2.82
+    },
+    "2025": {
+     "closeness": 0.7543,
+     "progress x1000": 0.63
+    },
+    "2026": {
+     "closeness": 0.7548,
+     "progress x1000": 0.98
+    }
+   }
+  }
+ },
+ "MOVE": {
+  "6.4": {
+   "mean closeness": 0.7501,
+   "mean progress x1000": 1.13,
+   "total progress per series": 3.08,
+   "by age": {
+    "first 100": {
+     "closeness": 0.7408,
+     "progress x1000": 6.5
+    },
+    "100-250": {
+     "closeness": 0.7495,
+     "progress x1000": 5.07
+    },
+    "250-500": {
+     "closeness": 0.7509,
+     "progress x1000": 2.9
+    },
+    "500-1000": {
+     "closeness": 0.7504,
+     "progress x1000": 1.03
+    },
+    "1000-2000": {
+     "closeness": 0.7504,
+     "progress x1000": 0.54
+    },
+    "2000+": {
+     "closeness": 0.7503,
+     "progress x1000": 0.08
+    }
+   },
+   "by year": {
+    "2016": {
+     "closeness": 0.7468,
+     "progress x1000": 5.35
+    },
+    "2017": {
+     "closeness": 0.7508,
+     "progress x1000": 2.63
+    },
+    "2018": {
+     "closeness": 0.7501,
+     "progress x1000": 0.95
+    },
+    "2019": {
+     "closeness": 0.7507,
+     "progress x1000": 1.11
+    },
+    "2020": {
+     "closeness": 0.7505,
+     "progress x1000": 0.74
+    },
+    "2021": {
+     "closeness": 0.7502,
+     "progress x1000": 0.26
+    },
+    "2022": {
+     "closeness": 0.7504,
+     "progress x1000": 0.5
+    },
+    "2023": {
+     "closeness": 0.7503,
+     "progress x1000": 0.3
+    },
+    "2024": {
+     "closeness": 0.7502,
+     "progress x1000": 0.18
+    },
+    "2025": {
+     "closeness": 0.7502,
+     "progress x1000": 0.17
+    },
+    "2026": {
+     "closeness": 0.7505,
+     "progress x1000": 0.41
+    }
+   }
+  },
+  "6.2": {
+   "mean closeness": 0.7501,
+   "mean progress x1000": 0.63,
+   "total progress per series": 1.72,
+   "by age": {
+    "first 100": {
+     "closeness": 0.745,
+     "progress x1000": 1.16
+    },
+    "100-250": {
+     "closeness": 0.7489,
+     "progress x1000": 2.05
+    },
+    "250-500": {
+     "closeness": 0.751,
+     "progress x1000": 2.38
+    },
+    "500-1000": {
+     "closeness": 0.7499,
+     "progress x1000": 0.38
+    },
+    "1000-2000": {
+     "closeness": 0.7505,
+     "progress x1000": 0.62
+    },
+    "2000+": {
+     "closeness": 0.75,
+     "progress x1000": -0.1
+    }
+   },
+   "by year": {
+    "2016": {
+     "closeness": 0.7478,
+     "progress x1000": 1.74
+    },
+    "2017": {
+     "closeness": 0.7505,
+     "progress x1000": 1.54
+    },
+    "2018": {
+     "closeness": 0.7496,
+     "progress x1000": 0.33
+    },
+    "2019": {
+     "closeness": 0.7506,
+     "progress x1000": 1.01
+    },
+    "2020": {
+     "closeness": 0.7503,
+     "progress x1000": 0.58
+    },
+    "2021": {
+     "closeness": 0.7502,
+     "progress x1000": 0.34
+    },
+    "2022": {
+     "closeness": 0.7503,
+     "progress x1000": 0.43
+    },
+    "2023": {
+     "closeness": 0.7508,
+     "progress x1000": 0.84
+    },
+    "2024": {
+     "closeness": 0.7496,
+     "progress x1000": -0.41
+    },
+    "2025": {
+     "closeness": 0.75,
+     "progress x1000": -0.01
+    },
+    "2026": {
+     "closeness": 0.7507,
+     "progress x1000": 0.65
+    }
+   }
+  }
+ }
+}

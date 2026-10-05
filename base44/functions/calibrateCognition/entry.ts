@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
       };
       if (prev?.id) await S.update(prev.id, row).catch(() => {});
       else await S.create(row).catch(() => {});
-      status[read] = { live_engine: st.live_engine, decision: st.decision, reason: st.reason, paired_calls: st.paired_calls, paired_days: st.paired_days, gain: st.gain, hit_control: st.hit_control, hit_candidate: st.hit_candidate, calibration_steps: row.calibration_steps };
+      status[read] = { live_engine: st.live_engine, decision: st.decision, reason: st.reason, paired_calls: st.paired_calls, paired_days: st.paired_days, gain: st.gain, hit_control: st.hit_control, hit_candidate: st.hit_candidate, progress_control: st.progress_control, progress_candidate: st.progress_candidate, calibration_steps: row.calibration_steps };
     }
 
     return Response.json({ ok: true, engine_version: ENGINE_VERSION, series: tickers.length, failed, newly_scored: scored, newly_logged: logged, status });

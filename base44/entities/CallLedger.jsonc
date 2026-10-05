@@ -84,13 +84,25 @@
       "format": "date-time",
       "description": "When it was scored"
     },
-    "reward": {
+    "closeness": {
       "type": "number",
-      "description": "How close the engine's probability came to what happened: 1 - (probability - outcome)^2"
+      "description": "How near the engine's probability came to what happened: 1 - (probability - outcome)^2"
     },
-    "reward_baseline": {
+    "closeness_baseline": {
       "type": "number",
       "description": "The same for the baseline"
+    },
+    "reward": {
+      "type": "number",
+      "description": "Progress: this call's closeness minus the average closeness of the same engine's earlier calls on this series and read"
+    },
+    "record_calls": {
+      "type": "number",
+      "description": "The engine's scored calls on this series and read, including this one"
+    },
+    "record_closeness": {
+      "type": "number",
+      "description": "Their average closeness: the record the next call is measured against"
     }
   },
   "required": [

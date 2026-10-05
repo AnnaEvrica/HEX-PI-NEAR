@@ -175,14 +175,33 @@ uses the same construction with a map fitted on the one series.
 total of every proper score on the fitting record at once (Brümmer and du
 Preez, 2013): it is the restatement of strength that would have earned most.
 
-**Reward.** A scored call earns $1-(p-y)^2$: 1 when certain and right, 0.75
-for a coin flip, never below 0. It is the Brier score turned round, and
-proper: the expected reward is greatest when the true probability is stated
-(Brier, 1950; Gneiting and Raftery, 2007). Promotion (README) compares the
-two versions' mean reward on the same calls, with days as the unit of
-uncertainty. Inside HEX each candidate's weight is multiplied by the
-probability it gave to what happened (§6), which is also a reward for
-closeness; nothing in the engine subtracts.
+**Closeness and reward.** A scored call has closeness $c_t=1-(p_t-y_t)^2$:
+1 when certain and right, 0.75 for a coin flip. It is the Brier score turned
+round, and proper: its expectation is greatest when the true probability is
+stated (Brier, 1950; Gneiting and Raftery, 2007).
+
+The reward is progress against the version's own record on that series and
+read:
+$$r_t = c_t-\bar c_{t-1},\qquad \bar c_{t-1}=\tfrac1{t-1}\sum_{u<t}c_u,\quad \bar c_0=0.75 .$$
+It is proportional to how much nearer the call came than the version's
+earlier calls, not to its accuracy. Because $\bar c_{t-1}$ is fixed before
+$y_t$ is known, $r_t$ differs from $c_t$ by a constant at the moment of the
+call and is proper too. Two consequences: $\bar c_t=\bar c_{t-1}+r_t/t$, so
+the record moves by exactly the reward divided by the number of calls; and
+a version whose closeness is steady earns zero on average however high its
+level.
+
+For that second reason, which version is shown is decided on closeness
+(README: mean closeness of the two versions on the same calls, days as the
+unit of uncertainty), and reward is recorded beside it. Inside HEX each
+candidate's weight is multiplied by the probability it gave to what happened
+(§6); nothing in the engine subtracts.
+
+**Measured** (`validation/progress_sim.py`, same cold start). Mean reward in
+thousandths per call, move size: 6.4 2.8, 6.2 1.2; by age of the series for
+6.4: 8.8, 5.0, 6.4, 2.9, 1.1, 2.7. Direction: 6.4 1.1, 6.2 0.6, with both at
+chance: 6.4's reward there is its overstatement shrinking, not its calls
+improving.
 
 **Measured** (`validation/loop_sim_side.py`, ten-year cold start, 17 market
 series). A map applied to the whole probability turned 5.6% of 6.4's
@@ -191,7 +210,7 @@ and 17.5%), and the calls it turned were right less often afterwards (6.4
 move size 51.2% to 48.8%; 6.2 move size 54.1% to 45.9%). Confined to
 strength it turns none. On 6.4 move size the strongest tenth of calls is
 stated 73.7% and right 68.9% before the map, 69.1% and 68.4% after, at the
-same reward (0.7581).
+same closeness (0.7581).
 
 ## 8. What remains a choice
 

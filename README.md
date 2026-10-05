@@ -67,11 +67,16 @@ holds for both versions.
    counts as the event.
 2. **Nightly update** (`calibrateCognition`). Scores yesterday's calls on the
    bar that has now finished, logs today's, and refits the strength map,
-   pooled across every tracked series. Each call earns a reward for how close
-   its stated probability came to what happened: 1 − (probability − outcome)²,
-   which is 1 when certain and right, 0.75 for a coin flip, and never below 0.
+   pooled across every tracked series.
+
+   **Reward is progress.** Each call has a closeness, 1 − (probability −
+   outcome)²: 1 when certain and right, 0.75 for a coin flip. Its reward is
+   that closeness minus the average closeness of the same version's earlier
+   calls on the same series: what it earns is how much nearer it came than
+   its own record, not how accurate it is. The record is fixed before the
+   call is scored, so stating the true probability still earns the most.
 3. **Promotion.** For each read, 6.4 is shown once it has at least 300 calls
-   over 60 days scored beside 6.2, it has earned more reward per call by a
+   over 60 days scored beside 6.2, it has come closer per call by a
    margin whose 95% interval excludes zero, and it is right at least as often.
    It is taken back down when the margin the other way excludes zero. Each
    night's decision rests on the whole record, kept as a running tally. The
@@ -87,19 +92,26 @@ Started from nothing on 1 January 2016 on 17 market series
 (`validation/loop_sim_side.py`: empty ledger, no history before that date,
 the loop applied night by night), move size, 46,495 calls:
 
-| | Right | Reward per call | Strongest tenth: stated / right |
+| | Right | Closeness per call | Strongest tenth: stated / right |
 |---|---|---|---|
 | Shown to users | 57.3% | 0.7579 | 69.9% / 67.7% |
 | 6.2 alone | 55.9% | 0.7539 | 69.0% / 63.5% |
 | Baseline rule alone | 57.2% | 0.7580 | 71.9% / 68.7% |
 
-6.4 was promoted once, in August 2018, and never taken down. Reward per call
+6.4 was promoted once, in August 2018, and never taken down. Closeness per call
 rises with the age of a series: 0.742 in its first 100 steps, 0.753 from 100
 to 250, 0.758 from 250 to 2,000, 0.761 beyond; over the same span the
 strongest tenth goes from stated 70.7% / right 53.2% to 72.2% / 72.7%. It
 does not rise year after year. Direction stays at chance (51.4%) and 6.4 is
 never promoted for it. On market move size the gain comes from the observer's
 baseline, not from the 64 states (`docs/MODEL.md`, section 10).
+
+Reward, in thousandths per call (`validation/progress_sim.py`): on move size
+6.4 earns 2.8 and 6.2 earns 1.2 over the ten years. It is largest while a
+series is young (8.8 in the first 100 steps for 6.4, 5.0 to 6.4 up to 500)
+and stays positive at every age for 6.4. Which version is shown is decided
+on closeness, not on reward: a version that started badly and improved
+would otherwise outrank one that was nearer all along.
 
 The same simulation is why calibration is confined to strength. Applied to
 the whole probability, the map turned 5.6% of 6.4's move-size calls and 20%

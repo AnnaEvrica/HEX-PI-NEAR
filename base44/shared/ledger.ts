@@ -40,12 +40,21 @@ export const SETTLE_DAYS = 5;
 export const MIN_CALIBRATION_STEPS = 2000;
 
 /**
- * The reward for one call: how close the stated probability came to what
- * happened. 1 when it was certain and right, 0.75 for a coin flip, never
- * below 0. It is a proper score: stating the true probability earns the most
- * on average, so there is nothing to gain by overstating or hedging.
+ * Closeness of one call: how near the stated probability came to what
+ * happened. 1 when certain and right, 0.75 for a coin flip, 0 at worst.
  */
-export const reward = (p: number, y: number) => 1 - (p - y) ** 2;
+export const closeness = (p: number, y: number) => 1 - (p - y) ** 2;
+/** Closeness of a coin flip: the record a version starts from, before its first call. */
+export const START_CLOSENESS = 0.75;
+/**
+ * The reward for one call is its PROGRESS: its closeness minus the average
+ * closeness of the same version's earlier calls on the same series and read.
+ * Positive when the call came closer than the version's own record, whatever
+ * the level of that record. The record is fixed before the call is scored, so
+ * the most reward is still earned by stating the true probability: nothing
+ * is gained by overstating or hedging.
+ */
+export const progress = (c: number, recordBefore: number) => c - recordBefore;
 const dateOf = (tsSec: number) => new Date(tsSec * 1000).toISOString().slice(0, 10);
 
 /** Finished daily bars, oldest first. */
@@ -65,7 +74,11 @@ export interface LedgerRow {
   baseline: number; probability: number; shown: boolean; source: string;
   made_at: string; engine_version: string;
   scored?: boolean; outcome?: number; scored_at?: string;
-  reward?: number; reward_baseline?: number;
+  closeness?: number; closeness_baseline?: number;
+  /** Progress: closeness minus the version's record on this series before this call. */
+  reward?: number;
+  /** The version's record on this series and read after this call: calls scored and their mean closeness. */
+  record_calls?: number; record_closeness?: number;
 }
 
 /** The rows one read of one series produces: both engines, both reads. */
@@ -109,19 +122,36 @@ export async function scoreOpenCalls(base44, seriesId: string, bars: Bars): Prom
   let scored = 0;
   try {
     const L = base44.asServiceRole.entities.CallLedger;
-    const open = await L.filter({ series_id: seriesId, scored: false });
-    for (const row of open || []) {
+    const open = ((await L.filter({ series_id: seriesId, scored: false })) || []).slice().sort((x, y) => x.bar_ts - y.bar_ts);
+    if (!open.length) return 0;
+    // Each version's record on this series so far, carried on its latest scored row.
+    const record = new Map<string, { n: number; mean: number }>();
+    const recordOf = async (row: LedgerRow) => {
+      const key = `${row.read}|${row.engine}`;
+      if (!record.has(key)) {
+        const done = (await L.filter({ series_id: seriesId, read: row.read, engine: row.engine, scored: true }, '-call_date', 50).catch(() => [])) || [];
+        const last = done.filter((r) => typeof r.record_calls === 'number').sort((x, y) => y.record_calls - x.record_calls)[0];
+        record.set(key, last ? { n: last.record_calls, mean: last.record_closeness } : { n: 0, mean: START_CLOSENESS });
+      }
+      return record.get(key)!;
+    };
+    for (const row of open) {
       const k = bars.timestamps.findIndex((t) => t > row.bar_ts);
       if (k < 1) continue; // the scoring bar has not printed, or the call bar is out of range
       const change = Math.log(bars.closes[k] / row.last_close);
       if (!Number.isFinite(change)) continue;
       if (row.read === 'RANGE' && !(row.threshold > 0)) continue;
       const outcome = row.read === 'MOVE' ? (change > 0 ? 1 : 0) : (Math.abs(change) > row.threshold ? 1 : 0);
+      const rec = await recordOf(row), c = closeness(row.probability, outcome);
+      const after = { n: rec.n + 1, mean: rec.n ? rec.mean + (c - rec.mean) / (rec.n + 1) : c };
       await L.update(row.id, {
         scored: true, outcome, scored_at: new Date().toISOString(),
-        reward: Number(reward(row.probability, outcome).toFixed(6)),
-        reward_baseline: Number(reward(row.baseline, outcome).toFixed(6)),
+        closeness: Number(c.toFixed(6)),
+        closeness_baseline: Number(closeness(row.baseline, outcome).toFixed(6)),
+        reward: Number(progress(c, rec.mean).toFixed(6)),
+        record_calls: after.n, record_closeness: Number(after.mean.toFixed(8)),
       });
+      record.set(`${row.read}|${row.engine}`, after);
       scored++;
     }
   } catch { /* non-blocking */ }
@@ -133,12 +163,14 @@ export interface ReadStatus {
   read: ReadName;
   live_engine: EngineId;
   paired_calls: number; paired_days: number;
-  /** Mean reward of 6.4 minus 6.2 on the same calls. Positive = 6.4 came closer. */
+  /** Mean closeness of 6.4 minus 6.2 on the same calls. Positive = 6.4 came closer. */
   gain: number | null; gain_low: number | null; gain_high: number | null;
   /** Share of calls right, on the paired calls. */
   hit_control: number | null; hit_candidate: number | null; hit_baseline: number | null;
   /** Mean probability stated for the side called: compare with the hit rate. */
   stated_control: number | null; stated_candidate: number | null;
+  /** Mean reward (progress against its own record) per call, each version. */
+  progress_control: number | null; progress_candidate: number | null;
   decision: 'hold' | 'promote' | 'demote';
   reason: string;
 }
@@ -157,10 +189,11 @@ export interface Tally {
   day_hit: number; day_hit_sq: number;     // over days: the day's mean (candidate right - control right)
   hits_control: number; hits_candidate: number; hits_baseline: number;
   stated_control: number; stated_candidate: number;
+  progress_control: number; progress_candidate: number;
   /** Last call date already counted; later days are still open. */
   last_day: string;
 }
-export const EMPTY_TALLY: Tally = { calls: 0, days: 0, gain_sum: 0, day_gain: 0, day_gain_sq: 0, day_hit: 0, day_hit_sq: 0, hits_control: 0, hits_candidate: 0, hits_baseline: 0, stated_control: 0, stated_candidate: 0, last_day: '' };
+export const EMPTY_TALLY: Tally = { calls: 0, days: 0, gain_sum: 0, day_gain: 0, day_gain_sq: 0, day_hit: 0, day_hit_sq: 0, hits_control: 0, hits_candidate: 0, hits_baseline: 0, stated_control: 0, stated_candidate: 0, progress_control: 0, progress_candidate: 0, last_day: '' };
 
 const mean = (v: number[]) => v.reduce((s, x) => s + x, 0) / v.length;
 const right = (r: LedgerRow) => ((r.probability >= 0.5 ? 1 : 0) === r.outcome ? 1 : 0);
@@ -184,8 +217,8 @@ export function foldDays(tally: Tally, read: ReadName, rows: LedgerRow[], throug
   for (const date of [...byDay.keys()].sort()) {
     const pairs = [...byDay.get(date)!.values()].filter((p) => p[CONTROL_ENGINE] && p[CANDIDATE_ENGINE]) as Record<EngineId, LedgerRow>[];
     if (!pairs.length) continue;
-    const gains = pairs.map((p) => (p[CANDIDATE_ENGINE].reward ?? reward(p[CANDIDATE_ENGINE].probability, p[CANDIDATE_ENGINE].outcome!))
-      - (p[CONTROL_ENGINE].reward ?? reward(p[CONTROL_ENGINE].probability, p[CONTROL_ENGINE].outcome!)));
+    const gains = pairs.map((p) => (p[CANDIDATE_ENGINE].closeness ?? closeness(p[CANDIDATE_ENGINE].probability, p[CANDIDATE_ENGINE].outcome!))
+      - (p[CONTROL_ENGINE].closeness ?? closeness(p[CONTROL_ENGINE].probability, p[CONTROL_ENGINE].outcome!)));
     const hd = pairs.map((p) => right(p[CANDIDATE_ENGINE]) - right(p[CONTROL_ENGINE]));
     const g = mean(gains), h = mean(hd);
     t.calls += pairs.length; t.days += 1;
@@ -196,6 +229,7 @@ export function foldDays(tally: Tally, read: ReadName, rows: LedgerRow[], throug
       t.hits_baseline += (p[CANDIDATE_ENGINE].baseline >= 0.5 ? 1 : 0) === p[CANDIDATE_ENGINE].outcome ? 1 : 0;
       t.stated_control += Math.max(p[CONTROL_ENGINE].probability, 1 - p[CONTROL_ENGINE].probability);
       t.stated_candidate += Math.max(p[CANDIDATE_ENGINE].probability, 1 - p[CANDIDATE_ENGINE].probability);
+      t.progress_control += p[CONTROL_ENGINE].reward ?? 0; t.progress_candidate += p[CANDIDATE_ENGINE].reward ?? 0;
     }
     t.last_day = date;
   }
@@ -207,7 +241,7 @@ export function decide(read: ReadName, t: Tally, current: EngineId): ReadStatus 
   const st: ReadStatus = {
     read, live_engine: current, paired_calls: t.calls, paired_days: t.days,
     gain: null, gain_low: null, gain_high: null, hit_control: null, hit_candidate: null, hit_baseline: null,
-    stated_control: null, stated_candidate: null, decision: 'hold', reason: '',
+    stated_control: null, stated_candidate: null, progress_control: null, progress_candidate: null, decision: 'hold', reason: '',
   };
   if (!t.calls) { st.reason = 'no scored calls yet'; return st; }
   const g = t.gain_sum / t.calls, m = t.day_gain / t.days, hm = t.day_hit / t.days;
@@ -219,26 +253,27 @@ export function decide(read: ReadName, t: Tally, current: EngineId): ReadStatus 
   st.gain_high = Number.isFinite(gse) ? Number((m + Z * gse).toFixed(5)) : null;
   st.hit_control = r4(t.hits_control / t.calls); st.hit_candidate = r4(t.hits_candidate / t.calls); st.hit_baseline = r4(t.hits_baseline / t.calls);
   st.stated_control = r4(t.stated_control / t.calls); st.stated_candidate = r4(t.stated_candidate / t.calls);
+  st.progress_control = Number((t.progress_control / t.calls).toFixed(5)); st.progress_candidate = Number((t.progress_candidate / t.calls).toFixed(5));
 
   const enough = st.paired_calls >= MIN_PAIRED_CALLS && st.paired_days >= MIN_PAIRED_DAYS && st.gain_low !== null;
   const span = `[${((st.gain_low ?? 0) * 1000).toFixed(1)}, ${((st.gain_high ?? 0) * 1000).toFixed(1)}]`;
   if (!enough) {
     st.reason = `${st.paired_calls} of ${MIN_PAIRED_CALLS} paired calls over ${st.paired_days} of ${MIN_PAIRED_DAYS} days: no decision yet`;
   } else if (current === CONTROL_ENGINE && st.gain_low! > 0 && t.hits_candidate < t.hits_control) {
-    st.reason = `6.4 earns more reward (by ${(g * 1000).toFixed(1)} thousandths per call) but is right less often (${(st.hit_candidate! * 100).toFixed(1)}% against ${(st.hit_control! * 100).toFixed(1)}%), so 6.2 stays`;
+    st.reason = `6.4 comes closer (by ${(g * 1000).toFixed(1)} thousandths per call) but is right less often (${(st.hit_candidate! * 100).toFixed(1)}% against ${(st.hit_control! * 100).toFixed(1)}%), so 6.2 stays`;
   } else if (current === CONTROL_ENGINE && st.gain_low! > 0) {
     st.decision = 'promote'; st.live_engine = CANDIDATE_ENGINE;
-    st.reason = `6.4 came closer than 6.2: ${(g * 1000).toFixed(1)} thousandths more reward per call; the interval excludes zero`;
+    st.reason = `6.4 came closer than 6.2 by ${(g * 1000).toFixed(1)} thousandths per call; the interval excludes zero`;
   } else if (current === CANDIDATE_ENGINE && st.gain_high! < 0) {
     st.decision = 'demote'; st.live_engine = CONTROL_ENGINE;
-    st.reason = `6.2 came closer than 6.4: ${(-g * 1000).toFixed(1)} thousandths more reward per call; the interval excludes zero`;
+    st.reason = `6.2 came closer than 6.4 by ${(-g * 1000).toFixed(1)} thousandths per call; the interval excludes zero`;
   } else if (current === CANDIDATE_ENGINE && hitHigh < 0) {
     st.decision = 'demote'; st.live_engine = CONTROL_ENGINE;
     st.reason = `6.4 was right less often than 6.2 (${(st.hit_candidate! * 100).toFixed(1)}% against ${(st.hit_control! * 100).toFixed(1)}%); the interval excludes zero`;
   } else if (current === CONTROL_ENGINE) {
-    st.reason = `reward difference ${(g * 1000).toFixed(1)} thousandths per call ${span}: not clearly closer, so 6.2 stays`;
+    st.reason = `closeness difference ${(g * 1000).toFixed(1)} thousandths per call ${span}: not clearly closer, so 6.2 stays`;
   } else {
-    st.reason = `reward difference ${(g * 1000).toFixed(1)} thousandths per call ${span}: not clearly further, so 6.4 stays`;
+    st.reason = `closeness difference ${(g * 1000).toFixed(1)} thousandths per call ${span}: not clearly further, so 6.4 stays`;
   }
   return st;
 }

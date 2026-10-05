@@ -1,5 +1,19 @@
 # Changelog
 
+## 6.4.4 — 4 October 2026: reward is progress, not accuracy
+
+- Each scored call's reward is its closeness minus the average closeness of
+  the same version's earlier calls on the same series and read (a coin flip,
+  0.75, before the first). `CallLedger` now stores `closeness`,
+  `closeness_baseline`, `reward`, `record_calls`, `record_closeness`;
+  `EngineStatus` adds `progress_control` and `progress_candidate`.
+- Which version is shown is still decided on closeness: a steady version
+  earns zero progress on average however near it is, so deciding on progress
+  would favour one that started worse.
+- Simulated (`validation/progress_sim.py`): move size, 6.4 earns 2.8
+  thousandths per call and 6.2 earns 1.2; most of it in a series' first 500
+  steps.
+
 ## 6.4.3 — 4 October 2026: move size is shown from 6.4 from day one
 
 - `DEFAULT_LIVE` now shows 6.4 for move size before the ledger has a record
@@ -21,9 +35,9 @@
   This changes what 6.2 states: its calls are its own again, and its
   per-series map only restates their strength.
 - **Scoring is a reward for closeness.** Each scored call earns
-  1 − (probability − outcome)², between 0 and 1. `CallLedger` stores `reward`
-  and `reward_baseline` in place of the log-loss fields, and promotion compares
-  mean reward. The mixture inside HEX is unchanged.
+  1 − (probability − outcome)², between 0 and 1, stored in `CallLedger` in
+  place of the log-loss fields, and promotion compares
+  mean closeness. The mixture inside HEX is unchanged.
 - **Simulated** (`validation/loop_sim_side.py`): move size right 57.3% (57.1%
   before this change), strongest tenth stated 69.9% / right 67.7% (71.3% /
   67.1% before); one promotion for move size, none for direction.

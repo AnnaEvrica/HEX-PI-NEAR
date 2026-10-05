@@ -28,7 +28,7 @@
     },
     "gain": {
       "type": "number",
-      "description": "Mean reward of 6.4 minus 6.2 on the same calls. Positive: 6.4 came closer"
+      "description": "Mean closeness of 6.4 minus 6.2 on the same calls. Positive: 6.4 came closer"
     },
     "gain_low": {
       "type": "number",
@@ -57,6 +57,14 @@
     "stated_candidate": {
       "type": "number",
       "description": "Mean probability 6.4 stated for the side it called"
+    },
+    "progress_control": {
+      "type": "number",
+      "description": "6.2: mean reward per call, where reward is progress against its own record"
+    },
+    "progress_candidate": {
+      "type": "number",
+      "description": "6.4: the same"
     },
     "decision": {
       "type": "string",

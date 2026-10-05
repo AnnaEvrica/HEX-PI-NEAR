@@ -53,7 +53,7 @@ for (const read of ['MOVE', 'RANGE']) {
 }
 // ---- the rule itself, on made-up rows
 const mk = (n, days, dCtl, dCand) => { const rows = []; for (let i = 0; i < n; i++) { const day = `2026-01-${String(1 + (i % days)).padStart(2, '0')}-${i % days}`; const j = (i * 7919) % 100 / 100 - 0.5;
-  for (const [engine, ll] of [['state-6.2', 0.69 + dCtl + j * 0.05], ['state-6.4', 0.69 + dCand + j * 0.05 + ((i * 31) % 10 - 4.5) * 0.002]]) rows.push({ series_id: 'S' + (i % 5), read: 'RANGE', engine, call_date: day + '|' + Math.floor(i / days), scored: true, outcome: 1, probability: 0.6, baseline: 0.55, reward: 0.75 - (ll - 0.69) }); } return rows; };
+  for (const [engine, ll] of [['state-6.2', 0.69 + dCtl + j * 0.05], ['state-6.4', 0.69 + dCand + j * 0.05 + ((i * 31) % 10 - 4.5) * 0.002]]) rows.push({ series_id: 'S' + (i % 5), read: 'RANGE', engine, call_date: day + '|' + Math.floor(i / days), scored: true, outcome: 1, probability: 0.6, baseline: 0.55, closeness: 0.75 - (ll - 0.69) }); } return rows; };
 const lessOften = mk(400, 80, 0, -0.02).map((r, i) => (r.engine === 'state-6.4' && i % 6 < 2 ? { ...r, probability: 0.4 } : r));
 check('rule: better probabilities but right less often -> hold', M.summarise('RANGE', lessOften, 'state-6.2').decision === 'hold');
 check('rule: too few calls -> hold', M.summarise('RANGE', mk(200, 70, 0, -0.02), 'state-6.2').decision === 'hold');
@@ -89,7 +89,21 @@ check('calibration never states less than 50% for the side called', grid.every((
   const wrong = M.strengthKnots(grid, grid.map((p) => (p >= 0.5 ? 0 : 1)));
   check('even a record of all wrong calls leaves the side alone', grid.every((p) => (M.applyStrength(wrong, p) >= 0.5) === (p >= 0.5)));
 }
-check('reward: 1 for certain and right, 0.75 for a coin flip, never negative', M.reward(1, 1) === 1 && M.reward(0.5, 1) === 0.75 && M.reward(0.5, 0) === 0.75 && M.reward(1, 0) === 0);
+check('closeness: 1 for certain and right, 0.75 for a coin flip, 0 at worst', M.closeness(1, 1) === 1 && M.closeness(0.5, 1) === 0.75 && M.closeness(0.5, 0) === 0.75 && M.closeness(1, 0) === 0);
+// ---- reward is progress against the version's own record
+for (const engine of ['state-6.2', 'state-6.4']) for (const read of ['MOVE', 'RANGE']) {
+  const rs = L.filter((r) => r.scored && r.engine === engine && r.read === read).sort((a, b) => a.bar_ts - b.bar_ts);
+  let sum = 0, ok = true;
+  rs.forEach((r, i) => {
+    const before = i ? sum / i : M.START_CLOSENESS;
+    if (Math.abs(r.reward - (r.closeness - before)) > 2e-6 || r.record_calls !== i + 1) ok = false;
+    sum += r.closeness;
+    if (Math.abs(r.record_closeness - sum / (i + 1)) > 1e-6) ok = false;
+  });
+  check(`${engine} ${read}: each call's reward is its closeness minus the record before it`, ok && rs.length === NIGHTS);
+}
+check('reward: the same call earns more against a lower record', M.progress(0.8, 0.70) > M.progress(0.8, 0.78) && M.progress(0.8, 0.8) === 0);
+{ const st = M.summarise('RANGE', L, 'state-6.2'); check('status carries each version\'s mean progress', Number.isFinite(st.progress_control) && Number.isFinite(st.progress_candidate)); }
 console.log(`  calibration map: ${map.x.length} knots from ${map.n} steps`);
 
 // ---- loadLive
