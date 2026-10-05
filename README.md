@@ -1,4 +1,4 @@
-# HEX [PI] — app and engine (version 6.3)
+# HEX [PI] — app and engine (version 6.4)
 
 HEX [PI] is the software. HEX6-BLE is the engine it runs on.
 
@@ -14,7 +14,8 @@ the Base44 Builder, and the live app changes when you press **Publish** there.
 | Chat screen | `src/components/chat/HEX6ChatInterface.jsx` | Sends each message to the `think` function |
 | Chat function | `base44/functions/think/` | Builds the prompt, calls the engine and the language model |
 | Engines | `base44/shared/engines.ts` | The one place the two versions of HEX meet; the only source of any probability shown to a user |
-| HEX | `stateProbability.ts`, `pretrainedTables.ts` | The 64-state engine. It makes every call. Version 6.2 is the control; 6.3 measures its evidence against the observer's baseline |
+| HEX | `hex.ts` | The 64-state engine as an explicit model with no hand-set numbers (6.4). It makes every call. The mathematics is in `docs/MODEL.md` |
+| HEX, control | `stateProbability.ts`, `pretrainedTables.ts` | Version 6.2, frozen. What people see until 6.4 is promoted |
 | Observer | `observer.ts` | Watches the series and reports its baseline. Never makes a call |
 | The loop | `ledger.ts`, `universe.ts`, `isotonic.ts`, `functions/calibrateCognition/` | Ledger of every call, nightly scoring, pooled calibration, promotion |
 | Read and wording | `base44/shared/probabilityRead.ts` | Turns a series into the two probabilities and the rules for stating them |
@@ -33,9 +34,10 @@ it larger than usual. Each answer is a probability beside its baseline ("its
 usual odds"). There is no confidence, conviction or exposure anywhere in the
 output.
 
-**HEX makes every call.** It reads the last six steps as one of 64 states and
-keeps decayed evidence per state, shared between related states by a symmetry
-field, with pre-trained tables as a starting point.
+**HEX makes every call.** It reads the last six steps as one of 64 states,
+the corners of a six-dimensional cube, and estimates how far each state moves
+the probability from the baseline. Evidence is shared between states that
+differ in few lines and older evidence counts for less.
 
 **The observer never makes a call.** It watches the series and reports one
 thing: the baseline, meaning what the series' recent behaviour and present
@@ -44,10 +46,14 @@ steps, and no forgetting) and weights them by how well each has predicted the
 series; for direction it also holds the rank of the present value among
 earlier ones.
 
-Two versions of HEX run on every read. In **6.2** each state's evidence is
-measured against one decayed base rate. In **6.3** it is measured against the
-observer's baseline, and the stated probability is calibrated by a map fitted
-from the ledger. Nothing else differs.
+Two versions of HEX run on every read. **6.2** is the control: the same idea
+with numbers set by hand (a decay of 0.999, a shrinkage of 100, four field
+strengths, pre-trained tables). **6.4** is HEX written as an explicit model
+(`docs/MODEL.md`): each of those numbers is a family, and 96 candidates are
+averaged with Bayesian weights. That gives a guarantee 6.2 never had: on any
+series, its total log loss is within ln 96 of the best single setting chosen
+in hindsight. Its stated probability is then calibrated by a map fitted from
+the ledger.
 
 ### The learning loop
 
@@ -57,17 +63,18 @@ from the ledger. Nothing else differs.
 2. **Nightly update** (`calibrateCognition`). Scores yesterday's calls on the
    bar that has now finished, logs today's, and refits the calibration map,
    pooled across every tracked series.
-3. **Promotion.** For each read, 6.3 is shown once it has at least 300 calls
+3. **Promotion.** For each read, 6.4 is shown once it has at least 300 calls
    over 60 days scored beside 6.2, its probabilities beat 6.2's by a margin
    whose 95% interval excludes zero, and it is right at least as often. It is
    taken back down when the margin the other way excludes zero. The result is
    one `EngineStatus` row per read, which every function loads before showing
    a number.
 
-Replayed on 17 market series, 2016–2026 (`validation/loop_replay_adaptive.py`):
-the loop promoted 6.3 for move size after 191 days and never demoted it. Share
-of move-size calls right: 58.8% for 6.2, 60.0% for 6.3. Next-day direction
-stays at chance for both.
+Replayed on 17 market series, 2016–2026 (`validation/loop_replay_hex.py`): the
+loop promoted 6.4 for move size after 284 days and never demoted it. Share of
+move-size calls right: 58.8% for 6.2, 59.9% for 6.4. Next-day direction stays
+at chance for both. On market move size the gain comes from the observer's
+baseline, not from the 64 states (`docs/MODEL.md`, section 10).
 
 ### Backend functions
 
@@ -92,6 +99,7 @@ npx vite build
 npx tsc -p tests/tsconfig.check.json          # backend type check
 node tests/backend-smoke/build.mjs && node tests/backend-smoke/run.mjs
 node tests/parity.mjs                         # HEX (both versions) and the observer against the Python references
+                                              # (the mathematics: docs/MODEL.md)
 node tests/loop.mjs                           # the loop, night by night, on real BTC bars
 node tests/render-prompt.mjs                  # regenerate docs/PROMPT.md after changing the prompt
 ```

@@ -10,9 +10,8 @@
 // mixture also holds the exchangeable rank rule (g+1)/(n+1): where the
 // present value ranks among everything before it.
 //
-// HEX measures each state's evidence against this baseline (state-6.3, in
-// stateProbability.ts). Reference: validation/rankcore.py ('null') and
-// validation/hexadaptive.py; parity test in tests/parity.mjs.
+// HEX measures each state's evidence against this baseline (hex.ts).
+// Reference: validation/rankcore.py ('null'); parity test in tests/parity.mjs.
 //
 // Reads:  MOVE   the next value is higher than this one
 //         RANGE  the next change is larger than the median of earlier changes

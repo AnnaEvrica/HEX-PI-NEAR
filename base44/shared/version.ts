@@ -9,7 +9,9 @@
 // 6.3 — HEX in two versions on every call (state-6.2 shown, state-6.3 with
 //       the observer's baseline beside it), a ledger of every call, a nightly
 //       update and a promotion rule.
-export const ENGINE_VERSION = '6.3';
+// 6.4 — the second version is HEX written as an explicit model with no
+//       hand-set numbers (hex.ts, docs/MODEL.md).
+export const ENGINE_VERSION = '6.4';
 /** The software people use. */
 export const PRODUCT_NAME = 'HEX [PI]';
 /** The engine it runs on (and the name of the hardware server). */

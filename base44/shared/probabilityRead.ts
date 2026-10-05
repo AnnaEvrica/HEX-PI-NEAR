@@ -8,12 +8,12 @@
 //     baseline ("its usual odds"). There is no confidence, conviction or
 //     exposure.
 //   - The numbers come from shared/engines.ts. HEX makes every call; two
-//     versions run and the ledger decides which is shown (6.2 until 6.3 is
+//     versions run and the ledger decides which is shown (6.2 until 6.4 is
 //     promoted).
 //   - HEX is never told what kind of series it is reading.
 //   - Measured, walk-forward, 17 market series, 2016-2026 (46,937 days):
 //       next-day direction: at chance for both versions
-//       next-day move size: 58.8% of calls right (6.2), 60.0% (6.3)
+//       next-day move size: 58.8% of calls right (6.2), 59.9% (6.4)
 //     So the size read carries the measured edge; the direction read usually
 //     sits at its usual odds.
 // ===========================================================================

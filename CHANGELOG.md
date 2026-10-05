@@ -1,6 +1,56 @@
 # Changelog
 
+## 6.4 — 4 October 2026: HEX as an explicit model
+
+### What changed
+
+- **`hex.ts` (state-6.4) replaces the hand-tuned second version.** The
+  engine is now written as a model: the next outcome is Bernoulli with
+  probability baseline + a per-state shift, estimated by a Beta-Bernoulli
+  posterior mean under a kernel-weighted, discounted likelihood on the
+  6-cube. The kernel is the cube's diffusion kernel, or its odd part.
+- **No hand-set numbers.** The decay (0.999), shrinkage (100), four field
+  strengths, the 1/d² neighbour weights, the consensus bit and the
+  pre-trained tables are gone from this version. Sharing, symmetry, prior
+  strength and half-life are families; 96 candidates are averaged with
+  Bayesian weights from a uniform start.
+- **A guarantee.** On any series the total log loss is within ln 96 of the
+  best single candidate, and the observer's baseline within ln 8 of its best
+  single memory.
+- **`docs/MODEL.md`** states every definition, every result with its argument
+  or citation, and every measured figure, and lists what is still a choice
+  and what is not claimed.
+- 6.2 is unchanged and stays the control. The intermediate 6.3 is removed.
+- Demotion now also triggers when the promoted version is right less often
+  by a margin that excludes zero.
+
+### Measured (`validation/core6.py`, `prereg_core6.md`)
+
+| Read, domain | 6.2 right | 6.4 right | 6.4 over its baseline (thousandths of a nat) |
+|---|---|---|---|
+| Move size, markets | 58.8% | 59.9% | −0.1 [−0.4, 0.2] |
+| Direction, markets | 51.5% | 50.8% | +0.4 [0.2, 0.7] |
+| Direction, weather | 56.4% | 56.2% | +11.1 [8.8, 13.3] |
+| Move size, weather | 55.6% | 55.9% | +0.8 [0.2, 1.4] |
+| Direction, racing | 64.9% | 75.0% | +2.2 [−0.1, 5.2] |
+
+6.4 matches the hand-tuned 6.3 on every read (largest difference 0.7
+thousandths of a nat, in 6.4's favour) and starts faster on a new series.
+
+On market move size the 64 states add nothing measurable beyond the
+observer's baseline. The gain over 6.2 there comes from the baseline.
+
+| # | Prediction | Outcome |
+|---|---|---|
+| 1 | Market move size: within 1 of 6.3 and at least 59.8% right | Held (−0.1; 59.9%) |
+| 2 | Weight goes to shared, plain kernels on market move size; to the odd kernel on racing direction | Failed: where the states add nothing the weights are spread; racing chose plain |
+| 3 | Dropping the consensus bit and the tables costs under 1 anywhere | Held |
+| 4 | Cold start within 2 of 6.3 | Held (better: 1.1 against 6.5 over the first 25 steps) |
+
 ## 6.3 — 4 October 2026: the learning loop
+
+(The second version of HEX described here, 6.3, was replaced by 6.4 the same
+day. The ledger, nightly update and promotion rule are unchanged.)
 
 ### What changed
 

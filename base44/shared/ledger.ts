@@ -10,19 +10,19 @@
 // The nightly job (functions/calibrateCognition) then does three things with
 // the scored rows:
 //   1. STATUS     how each engine has done on each read, on the same calls
-//   2. PROMOTION  6.3 is shown for a read once its probabilities there
+//   2. PROMOTION  6.4 is shown for a read once its probabilities there
 //                 beat 6.2's by a margin that excludes zero AND it is right
-//                 at least as often; it is taken back down when the margin
-//                 the other way excludes zero
+//                 at least as often; it is taken back down when it is worse
+//                 on either count by a margin that excludes zero
 //   3. CALIBRATION  one map per read from stated to observed frequency for
-//                 6.3, pooled across every tracked series
+//                 6.4, pooled across every tracked series
 // The result is one EngineStatus row per read, which every function reads
 // before it shows a number (loadLive).
 // ===========================================================================
 
 import { CANDIDATE_ENGINE, CONTROL_ENGINE, DEFAULT_LIVE, ENGINES, EngineId, EngineRun, LiveEngines, READS, ReadName } from './engines.ts';
 import { isotonicKnots, Knots } from './isotonic.ts';
-import type { ScoredStep } from './stateProbability.ts';
+import type { ScoredStep } from './hex.ts';
 import { ENGINE_VERSION } from './version.ts';
 
 // ---- the promotion rule, fixed in advance ---------------------------------
@@ -124,7 +124,7 @@ export interface ReadStatus {
   read: ReadName;
   live_engine: EngineId;
   paired_calls: number; paired_days: number;
-  /** Mean log loss of 6.2 minus 6.3 on the same calls, nats. Positive = 6.3 better. */
+  /** Mean log loss of 6.2 minus 6.4 on the same calls, nats. Positive = 6.4 better. */
   gain: number | null; gain_low: number | null; gain_high: number | null;
   /** Share of calls right, on the paired calls. */
   hit_control: number | null; hit_candidate: number | null; hit_baseline: number | null;
@@ -156,17 +156,24 @@ export function summarise(read: ReadName, rows: LedgerRow[], current: EngineId):
   };
   if (!pairs.length) { st.reason = 'no scored calls yet'; return st; }
   const byDay = new Map<string, number[]>();
+  const hitByDay = new Map<string, number[]>();
+  const right = (r: LedgerRow) => ((r.probability >= 0.5 ? 1 : 0) === r.outcome ? 1 : 0);
   for (const p of pairs) {
     const d = (p[CONTROL_ENGINE].log_loss ?? logLoss(p[CONTROL_ENGINE].probability, p[CONTROL_ENGINE].outcome!))
       - (p[CANDIDATE_ENGINE].log_loss ?? logLoss(p[CANDIDATE_ENGINE].probability, p[CANDIDATE_ENGINE].outcome!));
     const day = p[CONTROL_ENGINE].call_date;
-    if (!byDay.has(day)) byDay.set(day, []);
+    if (!byDay.has(day)) { byDay.set(day, []); hitByDay.set(day, []); }
     byDay.get(day)!.push(d);
+    hitByDay.get(day)!.push(right(p[CANDIDATE_ENGINE]) - right(p[CONTROL_ENGINE]));
   }
   const dayMeans = [...byDay.values()].map(mean);
   const g = mean([...byDay.values()].flat());
   const m = mean(dayMeans);
   const se = dayMeans.length > 1 ? Math.sqrt(dayMeans.reduce((s, x) => s + (x - m) ** 2, 0) / (dayMeans.length - 1) / dayMeans.length) : Infinity;
+  // the same interval for the difference in hit rate (candidate minus control)
+  const hd = [...hitByDay.values()].map(mean), hm = mean(hd);
+  const hse = hd.length > 1 ? Math.sqrt(hd.reduce((s, x) => s + (x - hm) ** 2, 0) / (hd.length - 1) / hd.length) : Infinity;
+  const hitHigh = hm + Z * hse;
   const hit = (e: EngineId) => mean(pairs.map((p) => ((p[e].probability >= 0.5 ? 1 : 0) === p[e].outcome ? 1 : 0)));
   const stated = (e: EngineId) => mean(pairs.map((p) => Math.max(p[e].probability, 1 - p[e].probability)));
   const r4 = (v: number) => Number(v.toFixed(4));
@@ -182,20 +189,25 @@ export function summarise(read: ReadName, rows: LedgerRow[], current: EngineId):
   if (!enough) {
     st.reason = `${st.paired_calls} of ${MIN_PAIRED_CALLS} paired calls over ${st.paired_days} of ${MIN_PAIRED_DAYS} days: no decision yet`;
   } else if (current === CONTROL_ENGINE && st.gain_low! > 0 && st.hit_candidate! < st.hit_control!) {
-    st.reason = `6.3 states better probabilities (gain ${(g * 1000).toFixed(1)}) but is right less often (${(st.hit_candidate! * 100).toFixed(1)}% against ${(st.hit_control! * 100).toFixed(1)}%), so 6.2 stays`;
+    st.reason = `6.4 states better probabilities (gain ${(g * 1000).toFixed(1)}) but is right less often (${(st.hit_candidate! * 100).toFixed(1)}% against ${(st.hit_control! * 100).toFixed(1)}%), so 6.2 stays`;
   } else if (current === CONTROL_ENGINE && st.gain_low! > 0) {
     st.decision = 'promote'; st.live_engine = CANDIDATE_ENGINE;
-    st.reason = `6.3 beat 6.2 by ${(g * 1000).toFixed(1)} thousandths of a nat per call; the interval excludes zero`;
+    st.reason = `6.4 beat 6.2 by ${(g * 1000).toFixed(1)} thousandths of a nat per call; the interval excludes zero`;
   } else if (current === CANDIDATE_ENGINE && st.gain_high! < 0) {
     st.decision = 'demote'; st.live_engine = CONTROL_ENGINE;
-    st.reason = `6.3 trailed 6.2 by ${(-g * 1000).toFixed(1)} thousandths of a nat per call; the interval excludes zero`;
+    st.reason = `6.4 trailed 6.2 by ${(-g * 1000).toFixed(1)} thousandths of a nat per call; the interval excludes zero`;
+  } else if (current === CANDIDATE_ENGINE && hitHigh < 0) {
+    st.decision = 'demote'; st.live_engine = CONTROL_ENGINE;
+    st.reason = `6.4 was right less often than 6.2 (${(st.hit_candidate! * 100).toFixed(1)}% against ${(st.hit_control! * 100).toFixed(1)}%); the interval excludes zero`;
+  } else if (current === CONTROL_ENGINE) {
+    st.reason = `gain ${(g * 1000).toFixed(1)} thousandths of a nat per call [${(st.gain_low! * 1000).toFixed(1)}, ${(st.gain_high! * 1000).toFixed(1)}]: not clearly better, so 6.2 stays`;
   } else {
-    st.reason = `gain ${(g * 1000).toFixed(1)} thousandths of a nat per call; the interval includes zero, so ${current} stays`;
+    st.reason = `gain ${(g * 1000).toFixed(1)} thousandths of a nat per call [${(st.gain_low! * 1000).toFixed(1)}, ${(st.gain_high! * 1000).toFixed(1)}]: not clearly worse, so 6.4 stays`;
   }
   return st;
 }
 
-/** One calibration map per read for 6.3, pooled across series. Null until there are enough steps. */
+/** One calibration map per read for 6.4, pooled across series. Null until there are enough steps. */
 export function pooledCalibration(steps: ScoredStep[]): Knots | null {
   if (steps.length < MIN_CALIBRATION_STEPS) return null;
   return isotonicKnots(steps.map((s) => s.p), steps.map((s) => s.y));
