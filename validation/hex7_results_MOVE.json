@@ -1,0 +1,755 @@
+{
+ "weather MOVE": {
+  "calls": 9030,
+  "methods": {
+   "null": {
+    "right %": 51.24,
+    "gain over the null (x1000 nats)": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "strongest tenth: stated, right": [
+     51.1,
+     46.3
+    ]
+   },
+   "null_share": {
+    "right %": 52.86,
+    "gain over the null (x1000 nats)": [
+     3.24,
+     1.24,
+     5.34
+    ],
+    "strongest tenth: stated, right": [
+     60.0,
+     60.5
+    ]
+   },
+   "hex62": {
+    "right %": 56.27,
+    "gain over the null (x1000 nats)": [
+     10.96,
+     8.55,
+     13.27
+    ],
+    "strongest tenth: stated, right": [
+     62.5,
+     63.5
+    ]
+   },
+   "hex64": {
+    "right %": 56.22,
+    "gain over the null (x1000 nats)": [
+     11.08,
+     8.69,
+     13.39
+    ],
+    "strongest tenth: stated, right": [
+     61.2,
+     63.9
+    ]
+   },
+   "hex65": {
+    "right %": 57.87,
+    "gain over the null (x1000 nats)": [
+     16.02,
+     12.66,
+     19.95
+    ],
+    "strongest tenth: stated, right": [
+     68.4,
+     65.9
+    ]
+   },
+   "rank": {
+    "right %": 62.52,
+    "gain over the null (x1000 nats)": [
+     40.62,
+     34.13,
+     46.8
+    ],
+    "strongest tenth: stated, right": [
+     75.8,
+     74.0
+    ]
+   },
+   "rank_inter": {
+    "right %": 62.52,
+    "gain over the null (x1000 nats)": [
+     41.3,
+     34.76,
+     47.51
+    ],
+    "strongest tenth: stated, right": [
+     76.8,
+     75.5
+    ]
+   },
+   "rank_cross": {
+    "right %": 62.57,
+    "gain over the null (x1000 nats)": [
+     41.25,
+     35.45,
+     47.24
+    ],
+    "strongest tenth: stated, right": [
+     75.9,
+     75.1
+    ]
+   },
+   "resonance": {
+    "right %": 62.4,
+    "gain over the null (x1000 nats)": [
+     41.71,
+     35.64,
+     47.92
+    ],
+    "strongest tenth: stated, right": [
+     76.2,
+     74.6
+    ]
+   },
+   "hex7_bayes": {
+    "right %": 62.52,
+    "gain over the null (x1000 nats)": [
+     41.3,
+     35.6,
+     47.8
+    ],
+    "strongest tenth: stated, right": [
+     76.8,
+     75.5
+    ]
+   },
+   "hex7": {
+    "right %": 62.56,
+    "gain over the null (x1000 nats)": [
+     41.31,
+     35.36,
+     47.73
+    ],
+    "strongest tenth: stated, right": [
+     76.8,
+     75.5
+    ]
+   },
+   "hex7_cal": {
+    "right %": 62.37,
+    "gain over the null (x1000 nats)": [
+     40.34,
+     33.34,
+     46.56
+    ],
+    "strongest tenth: stated, right": [
+     78.4,
+     73.8
+    ]
+   },
+   "hex7_cal_shadow": {
+    "right %": 62.56,
+    "gain over the null (x1000 nats)": [
+     41.31,
+     35.22,
+     47.51
+    ],
+    "strongest tenth: stated, right": [
+     76.8,
+     75.5
+    ]
+   },
+   "mixAB": {
+    "right %": 62.52,
+    "gain over the null (x1000 nats)": [
+     40.62,
+     34.31,
+     46.33
+    ],
+    "strongest tenth: stated, right": [
+     75.8,
+     74.0
+    ]
+   },
+   "amplitude": {
+    "right %": 62.52,
+    "gain over the null (x1000 nats)": [
+     40.62,
+     34.47,
+     46.77
+    ],
+    "strongest tenth: stated, right": [
+     75.8,
+     74.0
+    ]
+   }
+  },
+  "pairs (x1000 nats)": {
+   "7.0 over 6.5": [
+    25.28,
+    20.06,
+    30.31
+   ],
+   "7.0 over 6.4": [
+    30.23,
+    24.45,
+    35.59
+   ],
+   "fixed share over plain Bayes weights (top level)": [
+    0.01,
+    -0.02,
+    0.04
+   ],
+   "fixed share over plain Bayes weights (null)": [
+    3.24,
+    1.3,
+    5.16
+   ],
+   "admitted interaction over rank": [
+    0.68,
+    -0.1,
+    1.5
+   ],
+   "resonance over additive": [
+    0.46,
+    -0.4,
+    1.29
+   ],
+   "other observable over own only": [
+    0.63,
+    0.06,
+    1.22
+   ],
+   "amplitude over classical mixture": [
+    -0.0,
+    -0.0,
+    0.0
+   ],
+   "amplitude over classical interaction": [
+    -1.09,
+    -2.02,
+    -0.04
+   ],
+   "calibration over none": [
+    -0.97,
+    -2.33,
+    0.28
+   ],
+   "calibration in shadow over none": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  "calls calibration changed %": 1.47,
+  "those calls right %: before, after": [
+   56.4,
+   43.6
+  ],
+  "share of steps with an admitted product: own, cross": [
+   0.802,
+   0.807
+  ]
+ },
+ "racing MOVE": {
+  "calls": 13022,
+  "methods": {
+   "null": {
+    "right %": 74.88,
+    "gain over the null (x1000 nats)": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "strongest tenth: stated, right": [
+     97.6,
+     96.9
+    ]
+   },
+   "null_share": {
+    "right %": 74.83,
+    "gain over the null (x1000 nats)": [
+     -1.14,
+     -1.38,
+     -0.98
+    ],
+    "strongest tenth: stated, right": [
+     96.9,
+     97.0
+    ]
+   },
+   "hex62": {
+    "right %": 65.19,
+    "gain over the null (x1000 nats)": [
+     -139.35,
+     -151.64,
+     -123.72
+    ],
+    "strongest tenth: stated, right": [
+     72.6,
+     78.0
+    ]
+   },
+   "hex64": {
+    "right %": 74.97,
+    "gain over the null (x1000 nats)": [
+     2.19,
+     -0.15,
+     5.06
+    ],
+    "strongest tenth: stated, right": [
+     97.4,
+     97.1
+    ]
+   },
+   "hex65": {
+    "right %": 74.93,
+    "gain over the null (x1000 nats)": [
+     2.32,
+     0.14,
+     5.03
+    ],
+    "strongest tenth: stated, right": [
+     97.3,
+     97.4
+    ]
+   },
+   "rank": {
+    "right %": 74.76,
+    "gain over the null (x1000 nats)": [
+     -0.88,
+     -3.37,
+     2.69
+    ],
+    "strongest tenth: stated, right": [
+     97.9,
+     97.1
+    ]
+   },
+   "rank_inter": {
+    "right %": 74.74,
+    "gain over the null (x1000 nats)": [
+     1.48,
+     -2.99,
+     8.96
+    ],
+    "strongest tenth: stated, right": [
+     98.0,
+     98.0
+    ]
+   },
+   "rank_cross": {
+    "right %": 74.66,
+    "gain over the null (x1000 nats)": [
+     -2.42,
+     -4.95,
+     1.08
+    ],
+    "strongest tenth: stated, right": [
+     97.9,
+     97.1
+    ]
+   },
+   "resonance": {
+    "right %": 74.66,
+    "gain over the null (x1000 nats)": [
+     -2.42,
+     -4.93,
+     1.04
+    ],
+    "strongest tenth: stated, right": [
+     97.9,
+     97.1
+    ]
+   },
+   "hex7_bayes": {
+    "right %": 74.79,
+    "gain over the null (x1000 nats)": [
+     2.37,
+     -1.55,
+     8.89
+    ],
+    "strongest tenth: stated, right": [
+     97.9,
+     97.6
+    ]
+   },
+   "hex7": {
+    "right %": 74.74,
+    "gain over the null (x1000 nats)": [
+     2.07,
+     -1.8,
+     8.48
+    ],
+    "strongest tenth: stated, right": [
+     97.9,
+     97.7
+    ]
+   },
+   "hex7_cal": {
+    "right %": 74.23,
+    "gain over the null (x1000 nats)": [
+     -5.17,
+     -13.6,
+     4.58
+    ],
+    "strongest tenth: stated, right": [
+     99.0,
+     97.2
+    ]
+   },
+   "hex7_cal_shadow": {
+    "right %": 74.7,
+    "gain over the null (x1000 nats)": [
+     1.07,
+     -3.61,
+     8.25
+    ],
+    "strongest tenth: stated, right": [
+     98.7,
+     97.8
+    ]
+   },
+   "mixAB": {
+    "right %": 74.77,
+    "gain over the null (x1000 nats)": [
+     -0.68,
+     -3.0,
+     3.0
+    ],
+    "strongest tenth: stated, right": [
+     97.8,
+     97.0
+    ]
+   },
+   "amplitude": {
+    "right %": 74.71,
+    "gain over the null (x1000 nats)": [
+     -0.81,
+     -3.05,
+     2.56
+    ],
+    "strongest tenth: stated, right": [
+     97.8,
+     97.0
+    ]
+   }
+  },
+  "pairs (x1000 nats)": {
+   "7.0 over 6.5": [
+    -0.25,
+    -3.2,
+    3.66
+   ],
+   "7.0 over 6.4": [
+    -0.12,
+    -3.35,
+    3.92
+   ],
+   "fixed share over plain Bayes weights (top level)": [
+    -0.3,
+    -0.44,
+    -0.13
+   ],
+   "fixed share over plain Bayes weights (null)": [
+    -1.14,
+    -1.38,
+    -0.97
+   ],
+   "admitted interaction over rank": [
+    2.36,
+    0.03,
+    6.02
+   ],
+   "resonance over additive": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "other observable over own only": [
+    -1.54,
+    -2.17,
+    -0.82
+   ],
+   "amplitude over classical mixture": [
+    -0.14,
+    -0.2,
+    -0.08
+   ],
+   "amplitude over classical interaction": [
+    1.61,
+    1.33,
+    1.94
+   ],
+   "calibration over none": [
+    -7.24,
+    -11.76,
+    -3.14
+   ],
+   "calibration in shadow over none": [
+    -1.0,
+    -1.9,
+    -0.13
+   ]
+  },
+  "calls calibration changed %": 5.68,
+  "those calls right %: before, after": [
+   54.5,
+   45.5
+  ],
+  "share of steps with an admitted product: own, cross": [
+   0.15,
+   0.0
+  ]
+ },
+ "markets MOVE": {
+  "calls": 46937,
+  "methods": {
+   "null": {
+    "right %": 50.89,
+    "gain over the null (x1000 nats)": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "strongest tenth: stated, right": [
+     58.0,
+     53.7
+    ]
+   },
+   "null_share": {
+    "right %": 51.07,
+    "gain over the null (x1000 nats)": [
+     0.34,
+     0.16,
+     0.53
+    ],
+    "strongest tenth: stated, right": [
+     57.3,
+     55.1
+    ]
+   },
+   "hex62": {
+    "right %": 51.15,
+    "gain over the null (x1000 nats)": [
+     0.77,
+     0.36,
+     1.18
+    ],
+    "strongest tenth: stated, right": [
+     57.4,
+     56.3
+    ]
+   },
+   "hex64": {
+    "right %": 51.06,
+    "gain over the null (x1000 nats)": [
+     0.41,
+     0.19,
+     0.64
+    ],
+    "strongest tenth: stated, right": [
+     58.4,
+     55.7
+    ]
+   },
+   "hex65": {
+    "right %": 50.86,
+    "gain over the null (x1000 nats)": [
+     0.32,
+     0.09,
+     0.58
+    ],
+    "strongest tenth: stated, right": [
+     58.5,
+     55.7
+    ]
+   },
+   "rank": {
+    "right %": 51.28,
+    "gain over the null (x1000 nats)": [
+     0.47,
+     -0.06,
+     1.02
+    ],
+    "strongest tenth: stated, right": [
+     59.4,
+     57.0
+    ]
+   },
+   "rank_inter": {
+    "right %": 51.26,
+    "gain over the null (x1000 nats)": [
+     0.36,
+     -0.21,
+     0.9
+    ],
+    "strongest tenth: stated, right": [
+     59.7,
+     57.1
+    ]
+   },
+   "rank_cross": {
+    "right %": 51.6,
+    "gain over the null (x1000 nats)": [
+     0.09,
+     -0.56,
+     0.7
+    ],
+    "strongest tenth: stated, right": [
+     59.9,
+     56.4
+    ]
+   },
+   "resonance": {
+    "right %": 51.69,
+    "gain over the null (x1000 nats)": [
+     0.04,
+     -0.59,
+     0.6
+    ],
+    "strongest tenth: stated, right": [
+     60.0,
+     56.3
+    ]
+   },
+   "hex7_bayes": {
+    "right %": 51.26,
+    "gain over the null (x1000 nats)": [
+     0.6,
+     0.15,
+     1.03
+    ],
+    "strongest tenth: stated, right": [
+     60.0,
+     57.3
+    ]
+   },
+   "hex7": {
+    "right %": 51.43,
+    "gain over the null (x1000 nats)": [
+     0.69,
+     0.25,
+     1.1
+    ],
+    "strongest tenth: stated, right": [
+     59.2,
+     56.9
+    ]
+   },
+   "hex7_cal": {
+    "right %": 51.48,
+    "gain over the null (x1000 nats)": [
+     1.16,
+     0.74,
+     1.56
+    ],
+    "strongest tenth: stated, right": [
+     58.8,
+     57.3
+    ]
+   },
+   "hex7_cal_shadow": {
+    "right %": 51.48,
+    "gain over the null (x1000 nats)": [
+     0.7,
+     0.33,
+     1.13
+    ],
+    "strongest tenth: stated, right": [
+     59.2,
+     56.9
+    ]
+   },
+   "mixAB": {
+    "right %": 51.42,
+    "gain over the null (x1000 nats)": [
+     0.44,
+     -0.08,
+     0.96
+    ],
+    "strongest tenth: stated, right": [
+     59.9,
+     57.0
+    ]
+   },
+   "amplitude": {
+    "right %": 51.38,
+    "gain over the null (x1000 nats)": [
+     0.5,
+     0.02,
+     1.01
+    ],
+    "strongest tenth: stated, right": [
+     59.9,
+     57.0
+    ]
+   }
+  },
+  "pairs (x1000 nats)": {
+   "7.0 over 6.5": [
+    0.37,
+    -0.01,
+    0.74
+   ],
+   "7.0 over 6.4": [
+    0.28,
+    -0.1,
+    0.7
+   ],
+   "fixed share over plain Bayes weights (top level)": [
+    0.09,
+    -0.15,
+    0.33
+   ],
+   "fixed share over plain Bayes weights (null)": [
+    0.34,
+    0.16,
+    0.54
+   ],
+   "admitted interaction over rank": [
+    -0.12,
+    -0.27,
+    0.03
+   ],
+   "resonance over additive": [
+    -0.05,
+    -0.18,
+    0.08
+   ],
+   "other observable over own only": [
+    -0.39,
+    -0.65,
+    -0.11
+   ],
+   "amplitude over classical mixture": [
+    0.06,
+    0.03,
+    0.1
+   ],
+   "amplitude over classical interaction": [
+    0.46,
+    0.19,
+    0.76
+   ],
+   "calibration over none": [
+    0.47,
+    0.21,
+    0.75
+   ],
+   "calibration in shadow over none": [
+    0.01,
+    -0.05,
+    0.07
+   ]
+  },
+  "calls calibration changed %": 14.53,
+  "those calls right %: before, after": [
+   49.8,
+   50.2
+  ],
+  "share of steps with an admitted product: own, cross": [
+   0.173,
+   0.121
+  ]
+ }
+}
