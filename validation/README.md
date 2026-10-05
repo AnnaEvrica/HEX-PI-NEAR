@@ -13,7 +13,8 @@ before the run (`prereg_*.md`) and its results beside it (`*_results.json`).
 | `hexadaptive.py`, `loop_replay_adaptive.py` | HEX 6.2's formula against the observer's baseline (the intermediate 6.3) |
 | `hexmodel.py` | Reference implementation of state-6.4: HEX as an explicit model. `base44/shared/hex.ts` must match it (`parity_hex.py`, `tests/parity.mjs`). The mathematics is in `docs/MODEL.md` |
 | `core6.py` | 6.4 against 6.2 and 6.3 on every domain and read; cold start |
-| `core7.py` | The traditional casting as hypotheses: changing lines and the resulting hexagram, a trigram kernel, King Wen pairing. None added predictive information |
+| `core7.py` | Three richer castings of the six lines as hypotheses: four-valued lines with a derived second pattern, separate sharing for the older and newer three lines, and pairing each pattern with its reversal. None added predictive information |
+| `spectral.py`, `core8.py` | The exact posterior under the cube's diffusion prior, in the Walsh basis; how much of the fitted effect involves one line, two lines, and so on |
 | `loop_replay_hex.py` | The shipped loop replayed on 2016-2026 with 6.4 |
 
 The data files (about 23 MB of public daily prices, Chicago temperatures and

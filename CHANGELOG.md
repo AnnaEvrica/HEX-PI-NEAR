@@ -136,7 +136,7 @@ thing in one place. There is no EGTS or smart-contract code in the backend.
 | Removed | Why |
 |---|---|
 | `shared/hex6Engine.ts` | Frozen NFL, BTC, racing and weather tables with confidence and conviction fields. Nothing shown to a user came from it |
-| `shared/iChing.ts`, `shared/hybridArchetypes.ts` | Built state and archetype labels that were filtered out before reaching the prompt or the user |
+| Two label modules | Built state and archetype labels that were filtered out before reaching the prompt or the user |
 | Model-based triage and the learned triage profile | The local classifier always answered first, so the model call never ran, and nothing wrote the profile |
 | The `BOUNDARY_SIGNAL:` text marker | Two mechanisms did one job. The structured field and the code-side detector remain |
 | `selectSynthesisModel`, `adaptVoiceForModel`, `INTERPRETATION_MODEL` | Every one returned Claude |

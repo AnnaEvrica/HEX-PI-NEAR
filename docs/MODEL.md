@@ -188,9 +188,9 @@ alternatives or a convention, and each is stated so it can be challenged:
 - The estimator is a posterior mean under a local, discounted likelihood. It
   is not the posterior of a full joint model over all 64 states.
 - No guarantee of calibration is proved; calibration is measured (§7).
-- The King Wen sequence, the trigrams and the traditional meanings of the
-  hexagrams play no part. Only the binary structure of the six lines is used:
-  the cube, Hamming distance and the complement.
+- Only the binary structure of the six lines is used: the cube, Hamming
+  distance and the complement. Richer castings of the lines were tested as
+  hypotheses and added nothing (`validation/core7.py`).
 
 ## 10. Measured results
 
@@ -219,12 +219,76 @@ claim made for the engine:
 3. **The states carry real information on weather direction** (+11.1) and a
    little elsewhere. Market direction stays at chance.
 
+## 11. The spectral form: why the pieces fit together
+
+The estimator, the kernel, the discount and the mixture are one construction
+seen from different sides. This section states it and reports what it shows.
+
+**Walsh characters.** For a set $A$ of lines let
+$\chi_A(s) = (-1)^{\#\{i \in A:\, s_i = 1\}}$. The 64 characters are an
+orthogonal basis for functions on the cube, so any state effect is
+$\delta_s = \sum_A c_A \chi_A(s)$. The size $|A|$ is the number of lines the
+term depends on: $|A| = 1$ is "this line alone", $|A| = 2$ is "these two
+lines together", up to $|A| = 6$, the whole pattern at once.
+
+**Result (the kernel is a price on complexity).** The diffusion kernel is
+diagonal in this basis:
+
+$$\sum_j \rho^{\,d(s,j)}\, \chi_A(j) = (1+\rho)^6\, \lambda^{|A|}\, \chi_A(s), \qquad \lambda = \frac{1-\rho}{1+\rho} = e^{-2\beta}.$$
+
+So sharing evidence between neighbouring states is the same thing as a prior
+in which every additional line a pattern depends on costs one more factor of
+$\lambda$. The odd kernel keeps exactly the terms with $|A|$ odd, the even
+kernel those with $|A|$ even. (Checked numerically to rounding,
+`validation/core8.py`.)
+
+**Result (the ladder).** The walk that flips one line at a time has
+eigenvalues $1 - 2k/6$ on the terms with $|A| = k$: seven evenly spaced
+levels. The weight $\lambda^k = e^{-2\beta k}$ is a Boltzmann factor on that
+ladder with $\beta$ as inverse temperature. This is the exact sense in which
+the six-line system resembles a harmonic oscillator; it is a property of six
+binary lines and involves no quantum mechanics.
+
+**Result (space and time are the same operation).** The discount
+$\gamma^{\,t-u} = e^{-(t-u)\ln 2/h}$ is the same exponential smoothing applied
+along time that $\rho^d$ applies along the edges of the cube. Evidence
+spreads between similar patterns at rate $\beta$ and fades at rate $1/h$. The
+mixture over $(\rho, h, K)$ is Bayesian selection of both scales. The
+observer's baseline is the $|A| = 0$ term, the part of the outcome that does
+not depend on the pattern, tracked at dyadic memories.
+
+**The exact posterior.** With independent priors
+$c_A \sim N(0, \tau^2 \lambda^{|A|})$ and $y - b = \delta_s + \varepsilon$,
+$\operatorname{Var}\varepsilon = b(1 - b)$, the posterior over all 64
+coefficients is a Kalman update, with forgetting as a relaxation of the
+coefficients toward zero. This is the full joint model of which §4 is the
+state-by-state approximation.
+
+**Measured** (`validation/core8.py`, `prereg_core8.md`). The exact posterior
+ties state-6.4 on every read (largest difference 1.2 thousandths of a nat),
+so the approximation in §4 loses nothing and the simpler form ships. It also
+shows where the information is. Share of the fitted effect by how many lines
+a term involves:
+
+| Read, domain | One line | Two lines | Three or more |
+|---|---|---|---|
+| MOVE, weather | 98% | 1% | under 1% |
+| RANGE, weather | 100% | 0% | 0% |
+| MOVE, markets | 95% | 1% | 2% |
+| RANGE, markets | 91% | 4% | 1% |
+
+(The remainder is the constant term.) Candidates that treat each of the 64
+patterns as its own unrelated case received 0–3% of the weight on these
+reads. **The six lines carry their information one at a time. The pattern as
+a whole adds almost nothing beyond the sum of its lines.**
+
 ## References
 
 - Ayer, M., Brunk, H. D., Ewing, G. M., Reid, W. T. and Silverman, E. (1955). An empirical distribution function for sampling with incomplete information. *Annals of Mathematical Statistics*, 26, 641–647.
 - Cesa-Bianchi, N. and Lugosi, G. (2006). *Prediction, Learning, and Games*. Cambridge University Press.
 - Dawid, A. P. (1984). Statistical theory: the prequential approach. *Journal of the Royal Statistical Society A*, 147, 278–292.
 - Ibrahim, J. G. and Chen, M.-H. (2000). Power prior distributions for regression models. *Statistical Science*, 15, 46–60.
+- Kac, M. (1947). Random walk and the theory of Brownian motion. *American Mathematical Monthly*, 54, 369–391.
 - Kondor, R. I. and Lafferty, J. (2002). Diffusion kernels on graphs and other discrete structures. *Proceedings of the 19th International Conference on Machine Learning*, 315–322.
 - Tibshirani, R. and Hastie, T. (1987). Local likelihood estimation. *Journal of the American Statistical Association*, 82, 559–567.
 - Vovk, V. (1990). Aggregating strategies. *Proceedings of the 3rd Workshop on Computational Learning Theory*, 371–383.
