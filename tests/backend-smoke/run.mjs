@@ -13,7 +13,7 @@ const think = await load('think');
 let r = await call(think, { ...sub, subscription_status: 'canceled' }, { message: 'hi' });
 check('think: no subscription -> 402', r.status === 402);
 r = await call(think, sub, { message: 'hey' });
-check('think: casual -> 200, engine not run', r.status === 200 && r.json.ran_engine === false && r.json.version === '6.4');
+check('think: casual -> 200, engine not run', r.status === 200 && r.json.ran_engine === false && r.json.version === '6.5');
 r = await call(think, sub, { message: "what's your read on BTC right now?" });
 let p = synthPrompt();
 check('think: ticker -> engine ran', r.status === 200 && r.json.ran_engine === true);
@@ -103,7 +103,7 @@ check('stripeWebhook: wrong signature rejected', await post(now, 'deadbeef') ===
   check('landingComparison: web model retrieves, Claude writes', llmCalls.length === 2 && llmCalls[0].add_context_from_internet === true && /claude/.test(llmCalls[1].model) && !llmCalls[1].add_context_from_internet);
 }
 
-// ---- the loop (6.4)
+// ---- the loop (6.5)
 {
   const t = await load('think');
   writes.length = 0;
@@ -111,11 +111,11 @@ check('stripeWebhook: wrong signature rejected', await post(now, 'deadbeef') ===
   await new Promise((r) => setTimeout(r, 50));
   const led = writes.filter(w => w.m === 'create' && w.a[0]?.series_id === 'BTC' && w.a[0]?.engine);
   check('think: a ticker read writes four ledger rows (two reads, two engines) before the outcome', led.length === 4 && led.every(w => w.a[0].scored === false && w.a[0].source === 'chat') && led.filter(w => w.a[0].shown).length === 2);
-  check('think: before the ledger has a record, move size is shown from 6.4 and direction from 6.2', led.filter(w => w.a[0].shown).length > 0 && led.filter(w => w.a[0].shown).every(w => w.a[0].engine === (w.a[0].read === 'RANGE' ? 'state-6.4' : 'state-6.2')));
+  check('think: before the ledger has a record, move size is shown from 6.5 and direction from 6.2', led.filter(w => w.a[0].shown).length > 0 && led.filter(w => w.a[0].shown).every(w => w.a[0].engine === (w.a[0].read === 'RANGE' ? 'state-6.5' : 'state-6.2')));
   const nightly = await load('calibrateCognition');
   writes.length = 0;
   const q = await call(nightly, null, {});
-  check('nightly: logs calls for every tracked series and writes one status row per read', q.json.ok && q.json.series >= 7 && q.json.newly_logged >= 28 && q.json.status.MOVE?.live_engine === 'state-6.2' && q.json.status.RANGE?.live_engine === 'state-6.4' && ['MOVE', 'RANGE'].every(k => q.json.status[k].decision === 'hold'));
+  check('nightly: logs calls for every tracked series and writes one status row per read', q.json.ok && q.json.series >= 7 && q.json.newly_logged >= 28 && q.json.status.MOVE?.live_engine === 'state-6.2' && q.json.status.RANGE?.live_engine === 'state-6.5' && ['MOVE', 'RANGE'].every(k => q.json.status[k].decision === 'hold'));
   const stRows = writes.filter(w => w.m === 'create' && w.a[0]?.live_engine);
   check('nightly: the pooled calibration map is stored with the status', stRows.length === 2 && stRows.every(w => typeof w.a[0].calibration === 'string' && JSON.parse(w.a[0].calibration).x.length > 2));
 }

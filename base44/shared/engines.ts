@@ -2,7 +2,7 @@
 // ENGINES — the one place the two versions of HEX meet.
 //
 //   state-6.2   HEX with hand-set numbers (stateProbability.ts). The control.
-//   state-6.4   HEX as an explicit model with no hand-set numbers (hex.ts),
+//   state-6.5   HEX as an explicit model with no hand-set numbers (hex.ts),
 //               measured against the observer's baseline (observer.ts) and
 //               calibrated by the map the nightly job fits from the ledger.
 //
@@ -10,7 +10,7 @@
 // and the ledger supplies the calibration.
 //
 // Both versions run on every read. Which one a person sees is decided per
-// read by the record in the ledger (shared/ledger.ts): 6.4 is shown for a
+// read by the record in the ledger (shared/ledger.ts): 6.5 is shown for a
 // read only after the nightly job has promoted it there.
 //
 // Reads:  MOVE   the next value is higher than this one
@@ -22,31 +22,32 @@ import { stateProbability } from './stateProbability.ts';
 import { hexProbability, ScoredStep } from './hex.ts';
 import type { ReadName } from './observer.ts';
 import type { Knots } from './isotonic.ts';
+import type { Views } from './cycle.ts';
 
-export type EngineId = 'state-6.2' | 'state-6.4';
+export type EngineId = 'state-6.2' | 'state-6.5';
 export type { ReadName };
-export const ENGINES: EngineId[] = ['state-6.2', 'state-6.4'];
+export const ENGINES: EngineId[] = ['state-6.2', 'state-6.5'];
 export const READS: ReadName[] = ['MOVE', 'RANGE'];
 export const CONTROL_ENGINE: EngineId = 'state-6.2';
-export const CANDIDATE_ENGINE: EngineId = 'state-6.4';
+export const CANDIDATE_ENGINE: EngineId = 'state-6.5';
 
-/** One engine's answer to one read. */
-export interface EngineCall { p: number; baseline: number }
+/** One engine's answer to one read: what is stated, the baseline, and what each part of its memory said. */
+export interface EngineCall { p: number; baseline: number; views: Views }
 
-/** Which version is shown for each read, and the stored calibration for 6.4. */
+/** Which version is shown for each read, and the stored calibration for 6.5. */
 export interface LiveEngines {
   MOVE: EngineId;
   RANGE: EngineId;
-  /** Pooled calibration maps for 6.4 on daily market series; absent until the nightly job has fitted them. */
+  /** Pooled calibration maps for 6.5 on daily market series; absent until the nightly job has fitted them. */
   calibration?: { MOVE?: Knots | null; RANGE?: Knots | null };
 }
 /**
  * What is shown before the ledger has a record of its own.
- * Move size starts on 6.4: on ten years of market history replayed night by
+ * Move size starts on 6.5: on ten years of market history replayed night by
  * night the promotion rule chose it and never took it down
  * (validation/loop_sim_side.py), and it is right at least as often as 6.2 in
  * every domain measured. Direction starts on 6.2: on that record the rule
- * never chose 6.4. From the first night the ledger keeps score either way and
+ * never chose 6.5. From the first night the ledger keeps score either way and
  * can change both.
  */
 export const DEFAULT_LIVE: LiveEngines = { MOVE: CONTROL_ENGINE, RANGE: CANDIDATE_ENGINE };
@@ -64,7 +65,7 @@ export interface EngineRun {
   /** What kind of series this behaves like, worked out by 6.2 from the series alone. */
   family_up: Record<string, number>;
   family_big: Record<string, number>;
-  /** 6.4's scored steps, for the nightly pooled calibration. */
+  /** 6.5's scored steps, for the nightly pooled calibration. */
   candidateSteps: { MOVE: ScoredStep[]; RANGE: ScoredStep[] };
 }
 
@@ -75,8 +76,8 @@ export function runEngines(returns: number[], live: LiveEngines = DEFAULT_LIVE):
   if (!s || !k) return null;
   return {
     calls: {
-      'state-6.2': { MOVE: { p: s.p_up, baseline: s.base_up }, RANGE: { p: s.p_big_move, baseline: s.base_big } },
-      'state-6.4': { MOVE: { p: k.p_up, baseline: k.base_up }, RANGE: { p: k.p_big_move, baseline: k.base_big } },
+      'state-6.2': { MOVE: { p: s.p_up, baseline: s.base_up, views: { baseline: s.base_up, raw: s.raw_up } }, RANGE: { p: s.p_big_move, baseline: s.base_big, views: { baseline: s.base_big, raw: s.raw_big } } },
+      'state-6.5': { MOVE: { p: k.p_up, baseline: k.base_up, views: k.views.MOVE }, RANGE: { p: k.p_big_move, baseline: k.base_big, views: k.views.RANGE } },
     },
     live: { MOVE: live.MOVE, RANGE: live.RANGE },
     history: s.history,

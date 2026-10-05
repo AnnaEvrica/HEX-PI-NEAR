@@ -39,13 +39,23 @@ class Sorted {
   median(): number { const s = this.s, m = s.length; return m % 2 ? s[(m - 1) / 2] : (s[m / 2 - 1] + s[m / 2]) / 2; }
 }
 
+/** What one part of memory said on its own about the step that has not happened, and how much it is trusted. */
+export interface View { label: string; p: number; w: number }
+const MEMORY_LABELS = HALF_LIVES.map((h) => (h === null ? 'memory:all' : `memory:${h}`));
+
 /**
  * The baseline at every step of a series of step-to-step changes, NaN where
  * there is none yet. Entry i uses the series up to step i only; the last
  * entry is the baseline for the step that has not happened.
  */
 export function observeBaseline(returns: number[], read: ReadName): Float64Array {
+  return observe(returns, read).baseline;
+}
+
+/** The same, with what each memory said on its own about the step that has not happened. */
+export function observe(returns: number[], read: ReadName): { baseline: Float64Array; memories: View[] } {
   const n = returns.length;
+  const memories: View[] = [];
   const out = new Float64Array(n).fill(NaN);
   const a = returns.map(Math.abs);
   // MOVE: rank of the present level among all levels so far
@@ -69,10 +79,13 @@ export function observeBaseline(returns: number[], read: ReadName): Float64Array
     let num = 0, den = 0;
     for (let k = 0; k < ne; k++) { const w = Math.exp(ll[k] - m); num += w * ex[k]; den += w; }
     out[i] = num / den;
-    if (i === n - 1) break;
+    if (i === n - 1) {
+      for (let k = 0; k < ne; k++) memories.push({ label: k < H ? MEMORY_LABELS[k] : 'position', p: ex[k], w: Math.exp(ll[k] - m) / den });
+      break;
+    }
     const y = read === 'MOVE' ? (returns[i + 1] > 0 ? 1 : 0) : (a[i + 1] > med[i] ? 1 : 0);
     for (let k = 0; k < ne; k++) ll[k] += Math.log(y ? ex[k] : 1 - ex[k]);
     for (let h = 0; h < H; h++) { U[h] = rho[h] * U[h] + y; N[h] = rho[h] * N[h] + 1; }
   }
-  return out;
+  return { baseline: out, memories };
 }

@@ -6,7 +6,7 @@
 //      now finished
 //   2. write down today's calls from both versions of HEX, before their outcome
 // Then, across all series:
-//   3. refit 6.4's calibration map, pooled over every tracked series
+//   3. refit 6.5's calibration map, pooled over every tracked series
 //   4. add the newly settled days to each read's running tally and apply
 //      the promotion rule to the whole record (shared/ledger.ts)
 //   5. store one EngineStatus row per read: the engine to show, its record,
@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
       const run = runEngines(md.returns, live);
       if (!run) { failed.push(ticker); continue; }
       logged += await logCalls(base44, rowsFor(ticker, bars, md.returns, run, 'nightly'));
-      // 6.4's own scored steps on this series. Every outcome in them is
+      // 6.5's own scored steps on this series. Every outcome in them is
       // already known, so pooling them leaks nothing forward.
       for (const read of READS) pooled[read].push(...run.candidateSteps[read]);
     }

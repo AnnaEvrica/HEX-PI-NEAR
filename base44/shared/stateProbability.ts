@@ -40,6 +40,8 @@ export interface StateProbability {
   history: number;         // forward-scored steps behind these numbers
   brier_skill_up: number | null;   // in-series walk-forward Brier skill vs base rate
   brier_skill_big: number | null;
+  raw_up: number;          // the engine's own probability before its strength is restated
+  raw_big: number;
   calibrated: boolean;     // strength restated (needs ≥ 200 scored steps)
   field_up: number;        // current symmetry-field strength α (weighted) on direction
   field_big: number;       // ... and on move size
@@ -207,12 +209,14 @@ export function stateProbability(returns: number[]): StateProbability | null {
     for (const x of xs) { bp += (x.p - x.y) ** 2; bb += (x.b - x.y) ** 2; }
     return bb > 0 ? Number((1 - bp / bb).toFixed(4)) : null;
   };
+  const raw_up = final.p_up, raw_big = final.p_big;
   let p_up = final.p_up, p_big = final.p_big, calibrated = false;
   if (up.length >= MIN_CAL) { p_up = restate(p_up, fitStrength(up.map((s) => s.p_up), up.map((s) => s.y_up))); calibrated = true; }
   if (big.length >= MIN_CAL) p_big = restate(p_big, fitStrength(big.map((s) => s.p_big as number), big.map((s) => s.y_big as number)));
   return {
     p_up: Number(p_up.toFixed(4)),
     p_big_move: Number(p_big.toFixed(4)),
+    raw_up, raw_big,
     base_up: Number(final.b_up.toFixed(4)),
     base_big: Number(final.b_big.toFixed(4)),
     history: up.length,

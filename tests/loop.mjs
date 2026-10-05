@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const out = path.join(here, 'backend-smoke', 'out', 'loop.mjs');
 fs.writeFileSync(path.join(here, 'backend-smoke', 'out', '_loop_entry.ts'),
-  `export * from '../../../base44/shared/ledger.ts'; export * from '../../../base44/shared/engines.ts'; export * from '../../../base44/shared/isotonic.ts';`);
+  `export * from '../../../base44/shared/ledger.ts'; export * from '../../../base44/shared/engines.ts'; export * from '../../../base44/shared/isotonic.ts'; export * from '../../../base44/shared/hex.ts'; export * from '../../../base44/shared/observer.ts';`);
 await build({ entryPoints: [path.join(here, 'backend-smoke', 'out', '_loop_entry.ts')], bundle: true, format: 'esm', outfile: out, logLevel: 'error' });
 const M = await import(out);
 
@@ -47,22 +47,22 @@ check('MOVE outcome uses the next bar', mv.outcome === (closes[km + 1] > closes[
 
 for (const read of ['MOVE', 'RANGE']) {
   const st = M.summarise(read, L, 'state-6.2');
-  console.log(`  ${read}: ${st.paired_calls} paired calls over ${st.paired_days} days | right: 6.2 ${(st.hit_control * 100).toFixed(1)}%, 6.4 ${(st.hit_candidate * 100).toFixed(1)}%, baseline rule ${(st.hit_baseline * 100).toFixed(1)}% | gain ${(st.gain * 1000).toFixed(1)} [${(st.gain_low * 1000).toFixed(1)}, ${(st.gain_high * 1000).toFixed(1)}] | ${st.decision}: ${st.reason}`);
+  console.log(`  ${read}: ${st.paired_calls} paired calls over ${st.paired_days} days | right: 6.2 ${(st.hit_control * 100).toFixed(1)}%, 6.5 ${(st.hit_candidate * 100).toFixed(1)}%, baseline rule ${(st.hit_baseline * 100).toFixed(1)}% | gain ${(st.gain * 1000).toFixed(1)} [${(st.gain_low * 1000).toFixed(1)}, ${(st.gain_high * 1000).toFixed(1)}] | ${st.decision}: ${st.reason}`);
   check(`${read}: summary pairs every scored night`, st.paired_calls === NIGHTS && st.paired_days === NIGHTS);
   check(`${read}: decision follows the rule`, (st.decision === 'promote') === (st.gain_low > 0 && st.hit_candidate >= st.hit_control) && st.decision !== 'demote');
 }
 // ---- the rule itself, on made-up rows
 const mk = (n, days, dCtl, dCand) => { const rows = []; for (let i = 0; i < n; i++) { const day = `2026-01-${String(1 + (i % days)).padStart(2, '0')}-${i % days}`; const j = (i * 7919) % 100 / 100 - 0.5;
-  for (const [engine, ll] of [['state-6.2', 0.69 + dCtl + j * 0.05], ['state-6.4', 0.69 + dCand + j * 0.05 + ((i * 31) % 10 - 4.5) * 0.002]]) rows.push({ series_id: 'S' + (i % 5), read: 'RANGE', engine, call_date: day + '|' + Math.floor(i / days), scored: true, outcome: 1, probability: 0.6, baseline: 0.55, closeness: 0.75 - (ll - 0.69) }); } return rows; };
-const lessOften = mk(400, 80, 0, -0.02).map((r, i) => (r.engine === 'state-6.4' && i % 6 < 2 ? { ...r, probability: 0.4 } : r));
+  for (const [engine, ll] of [['state-6.2', 0.69 + dCtl + j * 0.05], ['state-6.5', 0.69 + dCand + j * 0.05 + ((i * 31) % 10 - 4.5) * 0.002]]) rows.push({ series_id: 'S' + (i % 5), read: 'RANGE', engine, call_date: day + '|' + Math.floor(i / days), scored: true, outcome: 1, probability: 0.6, baseline: 0.55, closeness: 0.75 - (ll - 0.69) }); } return rows; };
+const lessOften = mk(400, 80, 0, -0.02).map((r, i) => (r.engine === 'state-6.5' && i % 6 < 2 ? { ...r, probability: 0.4 } : r));
 check('rule: better probabilities but right less often -> hold', M.summarise('RANGE', lessOften, 'state-6.2').decision === 'hold');
 check('rule: too few calls -> hold', M.summarise('RANGE', mk(200, 70, 0, -0.02), 'state-6.2').decision === 'hold');
-check('rule: enough calls, 6.4 clearly better -> promote', M.summarise('RANGE', mk(400, 80, 0, -0.02), 'state-6.2').decision === 'promote');
+check('rule: enough calls, 6.5 clearly better -> promote', M.summarise('RANGE', mk(400, 80, 0, -0.02), 'state-6.2').decision === 'promote');
 check('rule: enough calls, no difference -> hold', M.summarise('RANGE', mk(400, 80, 0, 0), 'state-6.2').decision === 'hold');
-check('rule: promoted and clearly worse -> demote', M.summarise('RANGE', mk(400, 80, 0, 0.02), 'state-6.4').decision === 'demote');
-const rightLess = mk(400, 80, 0, -0.001).map((r, i) => (r.engine === 'state-6.4' && i % 6 < 3 ? { ...r, probability: 0.4 } : r));
-check('rule: promoted but right clearly less often -> demote', M.summarise('RANGE', rightLess, 'state-6.4').decision === 'demote');
-check('rule: promoted and still better -> stays', M.summarise('RANGE', mk(400, 80, 0, -0.02), 'state-6.4').live_engine === 'state-6.4');
+check('rule: promoted and clearly worse -> demote', M.summarise('RANGE', mk(400, 80, 0, 0.02), 'state-6.5').decision === 'demote');
+const rightLess = mk(400, 80, 0, -0.001).map((r, i) => (r.engine === 'state-6.5' && i % 6 < 3 ? { ...r, probability: 0.4 } : r));
+check('rule: promoted but right clearly less often -> demote', M.summarise('RANGE', rightLess, 'state-6.5').decision === 'demote');
+check('rule: promoted and still better -> stays', M.summarise('RANGE', mk(400, 80, 0, -0.02), 'state-6.5').live_engine === 'state-6.5');
 
 // ---- the running tally: folding night by night equals folding once, and no day is counted twice
 {
@@ -74,6 +74,35 @@ check('rule: promoted and still better -> stays', M.summarise('RANGE', mk(400, 8
   check('tally: folded in four batches equals folded once', t.calls === once.calls && t.days === once.days && Math.abs(t.gain_sum - once.gain_sum) < 1e-9 && Math.abs(t.day_gain_sq - once.day_gain_sq) < 1e-9);
   check('tally: folding the same days again adds nothing', again.calls === t.calls && again.days === t.days);
   check('tally: decision from the tally equals decision from the rows', JSON.stringify(M.decide('RANGE', once, 'state-6.2')) === JSON.stringify(M.summarise('RANGE', L, 'state-6.2')));
+}
+
+// ---- the cycle: call -> outcome -> score -> reason -> learn
+{
+  const done = L.filter((r) => r.scored), missed = done.filter((r) => (r.probability >= 0.5 ? 1 : 0) !== r.outcome);
+  check('cycle 1: every call carries its views, written before the outcome', L.every((r) => typeof r.raw === 'number' && typeof r.views === 'string') && L.filter((r) => !r.scored).length === 4);
+  check('cycle 1: 6.5 records what each memory and each reading of the state said', L.filter((r) => r.engine === 'state-6.5').every((r) => { const v = JSON.parse(r.views); return v.memories.length >= 7 && v.readings.length === 13 && Math.abs(v.memories.reduce((s, m) => s + m.w, 0) - 1) < 1e-3; }));
+  check('cycle 1: calibration left the side where the engine put it', L.every((r) => (r.probability >= 0.5) === (r.raw >= 0.5)));
+  check('cycle 3: closeness = 0.75 + baseline part + state part + strength part, on every call', done.every((r) => Math.abs(0.75 + r.part_baseline + r.part_state + r.part_strength - r.closeness) < 5e-6));
+  check('cycle 4: every miss has a reason and no right call has one', missed.length > 0 && missed.every((r) => M.REASONS.includes(r.reason)) && done.filter((r) => !missed.includes(r)).every((r) => r.reason === ''));
+  check('cycle 4: the reason is the one the stored views give', missed.every((r) => M.reasonFor(r.probability, JSON.parse(r.views), r.outcome) === r.reason));
+  const by = {}; for (const r of missed) by[r.reason] = (by[r.reason] || 0) + 1;
+  console.log('  misses by reason:', JSON.stringify(by));
+  // made-up views: each reason in turn
+  const V = (b, mem, rd) => ({ baseline: b, raw: 0.6, memories: mem.map((p, i) => ({ label: 'memory:' + [32, 64, 128][i], p, w: 1 / 3 })), readings: rd.map((p, i) => ({ label: 'evidence:' + i, p, w: 0.5 })) });
+  check('reason: right side -> none', M.reasonFor(0.6, V(0.6, [0.6, 0.6, 0.6], [0.6]), 1) === null);
+  check('reason: baseline had it, the state turned it -> state', M.reasonFor(0.6, V(0.4, [0.4, 0.4, 0.4], [0.6]), 0) === 'state');
+  check('reason: shorter memories had it -> change', M.reasonFor(0.6, V(0.55, [0.4, 0.45, 0.6], [0.6]), 0) === 'change');
+  check('reason: longer memories had it -> blip', M.reasonFor(0.6, V(0.55, [0.6, 0.55, 0.4], [0.6]), 0) === 'blip');
+  check('reason: only a reading of the state had it -> outvoted', M.reasonFor(0.6, V(0.55, [0.6, 0.6, 0.6], [0.6, 0.4]), 0) === 'outvoted');
+  check('reason: nothing had it -> unseen', M.reasonFor(0.6, V(0.55, [0.6, 0.6, 0.6], [0.6, 0.7]), 0) === 'unseen');
+  // 5: after a miss, trust moves toward the parts of memory that had it right
+  let moved = 0, n = 0, never = true;
+  for (const read of ['MOVE', 'RANGE']) { const c64 = L.filter((r) => r.engine === 'state-6.5' && r.read === read).sort((a, b) => a.bar_ts - b.bar_ts);
+  for (let i = 0; i + 1 < c64.length; i++) { const r = c64[i]; if (!r.scored || !r.reason || r.reason === 'unseen' || r.reason === 'state') continue; const before = moved;
+    const now = JSON.parse(r.views), next = JSON.parse(c64[i + 1].views), ok = new Set(M.rightViews(now, r.outcome));
+    for (const k of ['memories', 'readings']) for (let j = 0; j < now[k].length; j++) if (ok.has(now[k][j].label)) moved += next[k][j].w - now[k][j].w; n++; if (moved < before - 1e-4) never = false; } }
+  console.log(`  after ${n} misses with a reason, trust in the parts that had it right moved by ${(moved / Math.max(1, n)).toFixed(4)} per miss`);
+  check('cycle 5: after every such miss, trust moves toward the parts of memory that had it right', n > 0 && moved > 0 && never);
 }
 
 // ---- pooled calibration
@@ -91,7 +120,7 @@ check('calibration never states less than 50% for the side called', grid.every((
 }
 check('closeness: 1 for certain and right, 0.75 for a coin flip, 0 at worst', M.closeness(1, 1) === 1 && M.closeness(0.5, 1) === 0.75 && M.closeness(0.5, 0) === 0.75 && M.closeness(1, 0) === 0);
 // ---- reward is progress against the version's own record
-for (const engine of ['state-6.2', 'state-6.4']) for (const read of ['MOVE', 'RANGE']) {
+for (const engine of ['state-6.2', 'state-6.5']) for (const read of ['MOVE', 'RANGE']) {
   const rs = L.filter((r) => r.scored && r.engine === engine && r.read === read).sort((a, b) => a.bar_ts - b.bar_ts);
   let sum = 0, ok = true;
   rs.forEach((r, i) => {
@@ -110,8 +139,8 @@ check('a call that falls short still enters the record', L.filter((r) => r.score
 console.log(`  calibration map: ${map.x.length} knots from ${map.n} steps`);
 
 // ---- loadLive
-await db.EngineStatus.create({ read: 'RANGE', live_engine: 'state-6.4', calibration: JSON.stringify(map) });
+await db.EngineStatus.create({ read: 'RANGE', live_engine: 'state-6.5', calibration: JSON.stringify(map) });
 live = await M.loadLive(base44);
-check('loadLive returns the promoted engine and its map', live.RANGE === 'state-6.4' && live.MOVE === 'state-6.2' && live.calibration.RANGE.x.length === map.x.length);
+check('loadLive returns the promoted engine and its map', live.RANGE === 'state-6.5' && live.MOVE === 'state-6.2' && live.calibration.RANGE.x.length === map.x.length);
 console.log(`\n${fails ? fails + ' FAILED' : 'ALL PASSED'}`);
 process.exit(fails ? 1 : 0);

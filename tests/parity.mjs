@@ -24,12 +24,13 @@ for (const [name, r] of Object.entries(ref)) {
   const ok = d < 1e-9; if (!ok) bad++;
   console.log(ok ? 'PASS' : 'FAIL', name, `${steps.length} steps, ${n} size steps, max difference ${d.toExponential(2)}`, '| family weights (direction):', JSON.stringify(final.family_up));
 }
-// ---- the observer and state-6.4 against validation/hexmodel.py
+// ---- the observer and HEX against the references (validation/hexmodel.py, validation/hexcoupled.py)
 const outH = path.join(here, 'backend-smoke', 'out', 'hex.mjs');
 fs.writeFileSync(path.join(here, 'backend-smoke', 'out', '_hex_entry.ts'), `export * from '../../../base44/shared/hex.ts'; export * from '../../../base44/shared/observer.ts';`);
 await build({ entryPoints: [path.join(here, 'backend-smoke', 'out', '_hex_entry.ts')], bundle: true, format: 'esm', outfile: outH, logLevel: 'error' });
 const { walkHex, observeBaseline } = await import(outH);
-const refH = JSON.parse(fs.readFileSync(path.join(here, 'parity_hex_reference.json'), 'utf8'));
+for (const [label, file, coupled] of [['state-6.4 (own pattern only)', 'parity_hex_reference.json', false], ['state-6.5', 'parity_coupled_reference.json', true]]) {
+const refH = JSON.parse(fs.readFileSync(path.join(here, file), 'utf8'));
 for (const [name, e] of Object.entries(refH)) {
   for (const read of ['MOVE', 'RANGE']) {
     const q = e[read], baseline = observeBaseline(e.returns, read); let d = 0;
@@ -37,7 +38,8 @@ for (const [name, e] of Object.entries(refH)) {
       const ours = baseline[i], theirs = q.baseline[i];
       if ((theirs === null) !== Number.isNaN(ours)) d = 1; else if (theirs !== null) d = Math.max(d, Math.abs(ours - theirs));
     }
-    const { steps, final, weights } = walkHex(e.returns, read, baseline);
+    const { steps, final, weights } = walkHex(e.returns, read, baseline, coupled);
+    if (weights.length !== q.weights.length) d = 1;
     if (steps.length !== q.i.length) d = 1;
     for (let k = 0; k < Math.min(steps.length, q.i.length); k++) {
       if (steps[k].i !== q.i[k] || steps[k].y !== q.y[k]) d = 1;
@@ -47,8 +49,9 @@ for (const [name, e] of Object.entries(refH)) {
     for (let k = 0; k < weights.length; k++) d = Math.max(d, Math.abs(weights[k] - q.weights[k]));
     worst = Math.max(worst, d);
     const ok = d < 1e-9; if (!ok) bad++;
-    console.log(ok ? 'PASS' : 'FAIL', `state-6.4 ${name} ${read}`, `${steps.length} steps, 96 weights, max difference ${d.toExponential(2)}`);
+    console.log(ok ? 'PASS' : 'FAIL', `${label} ${name} ${read}`, `${steps.length} steps, ${weights.length} weights, max difference ${d.toExponential(2)}`);
   }
+}
 }
 console.log(bad ? `${bad} FAILED` : `ALL PASSED (largest difference ${worst.toExponential(2)})`);
 process.exit(bad ? 1 : 0);

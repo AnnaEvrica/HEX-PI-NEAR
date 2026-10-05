@@ -18,7 +18,7 @@
       "type": "string",
       "enum": [
         "state-6.2",
-        "state-6.4"
+        "state-6.5"
       ],
       "description": "Which engine made the call"
     },
@@ -46,6 +46,14 @@
     "probability": {
       "type": "number",
       "description": "The engine's probability at call time (0-1)"
+    },
+    "raw": {
+      "type": "number",
+      "description": "The engine's own probability before its strength is restated"
+    },
+    "views": {
+      "type": "string",
+      "description": "JSON, written before the outcome: what each part of the engine's memory said on its own, and how much it was trusted"
     },
     "shown": {
       "type": "boolean",
@@ -99,6 +107,22 @@
     "lesson": {
       "type": "number",
       "description": "How far the call fell short of that record, when it did. Analysis only: never subtracted from anything"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Why the call missed, found from the views: state, change, blip, outvoted or unseen. Empty when the call was on the right side"
+    },
+    "part_baseline": {
+      "type": "number",
+      "description": "What the series' own record added to closeness over a coin flip"
+    },
+    "part_state": {
+      "type": "number",
+      "description": "What the six-line state added to that"
+    },
+    "part_strength": {
+      "type": "number",
+      "description": "What restating the strength added. closeness = 0.75 + the three parts"
     },
     "record_calls": {
       "type": "number",

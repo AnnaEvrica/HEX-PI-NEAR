@@ -14,7 +14,7 @@
       "type": "string",
       "enum": [
         "state-6.2",
-        "state-6.4"
+        "state-6.5"
       ],
       "description": "The engine shown for this read"
     },
@@ -28,7 +28,7 @@
     },
     "gain": {
       "type": "number",
-      "description": "Mean closeness of 6.4 minus 6.2 on the same calls. Positive: 6.4 came closer"
+      "description": "Mean closeness of 6.5 minus 6.2 on the same calls. Positive: 6.5 came closer"
     },
     "gain_low": {
       "type": "number",
@@ -44,7 +44,7 @@
     },
     "hit_candidate": {
       "type": "number",
-      "description": "Share of 6.4 calls right on the paired calls (0-1)"
+      "description": "Share of 6.5 calls right on the paired calls (0-1)"
     },
     "hit_baseline": {
       "type": "number",
@@ -56,7 +56,7 @@
     },
     "stated_candidate": {
       "type": "number",
-      "description": "Mean probability 6.4 stated for the side it called"
+      "description": "Mean probability 6.5 stated for the side it called"
     },
     "progress_control": {
       "type": "number",
@@ -64,7 +64,7 @@
     },
     "progress_candidate": {
       "type": "number",
-      "description": "6.4: the same"
+      "description": "6.5: the same"
     },
     "lesson_control": {
       "type": "number",
@@ -72,7 +72,17 @@
     },
     "lesson_candidate": {
       "type": "number",
-      "description": "6.4: the same"
+      "description": "6.5: the same"
+    },
+    "reasons_control": {
+      "type": "object",
+      "description": "6.2: misses by reason over the whole record",
+      "additionalProperties": true
+    },
+    "reasons_candidate": {
+      "type": "object",
+      "description": "6.5: the same",
+      "additionalProperties": true
     },
     "decision": {
       "type": "string",
@@ -93,7 +103,7 @@
     },
     "calibration": {
       "type": "string",
-      "description": "JSON: pooled map for 6.4 on this read, from the strength it stated to how often such calls were right. Applied to strength only; never changes a call"
+      "description": "JSON: pooled map for 6.5 on this read, from the strength it stated to how often such calls were right. Applied to strength only; never changes a call"
     },
     "calibration_steps": {
       "type": "number",
@@ -102,7 +112,7 @@
     "promoted_at": {
       "type": "string",
       "format": "date-time",
-      "description": "When 6.4 was last promoted for this read"
+      "description": "When 6.5 was last promoted for this read"
     },
     "engine_version": {
       "type": "string",
