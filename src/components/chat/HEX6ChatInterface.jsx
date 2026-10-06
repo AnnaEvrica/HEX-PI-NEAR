@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { CLAUDE_MODEL } from '@/lib/models';
 import { Send, Menu, Plus, Mic, Image } from 'lucide-react';
@@ -53,14 +53,19 @@ export default function HEX6ChatInterface() {
   const dictatedRef = useRef(false);
   // Hard lock to prevent double-firing the send (rapid Enter / double-tap).
   const sendingRef = useRef(false);
+  // Ref mirror of speakingId so handleSpeak can be a stable useCallback.
+  // Without this, the function gets a new reference every render and breaks
+  // ChatMessage's React.memo — every keystroke re-renders all messages.
+  const speakingIdRef = useRef(null);
+  speakingIdRef.current = speakingId;
 
-  const handleCopy = (message) => {
+  const handleCopy = useCallback((message) => {
     navigator.clipboard.writeText(message.content);
     setCopiedId(message.id);
     setTimeout(() => setCopiedId(null), 2000);
-  };
+  }, []);
 
-  const handleSpeak = (message) => {
+  const handleSpeak = useCallback((message) => {
     if (typeof window === 'undefined' || !window.speechSynthesis) {
       alert('Audio playback is not supported in this browser. Try Chrome, Safari, or Edge.');
       return;
@@ -69,7 +74,7 @@ export default function HEX6ChatInterface() {
     const synth = window.speechSynthesis;
 
     // Toggle off if already speaking this message
-    if (speakingId === message.id) {
+    if (speakingIdRef.current === message.id) {
       synth.cancel();
       setSpeakingId(null);
       return;
@@ -108,7 +113,7 @@ export default function HEX6ChatInterface() {
     setSpeakingId(message.id);
     // Direct speak() call within the click handler — preserves the user gesture for mobile.
     synth.speak(u);
-  };
+  }, []);
 
   // Track whether the initial load from localStorage has completed.
   // Without this guard, the save effect fires on mount BEFORE the load
