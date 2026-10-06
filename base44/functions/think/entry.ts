@@ -158,7 +158,7 @@ Deno.serve(async (req) => {
       // primes exactly the language the DOMAIN lock forbids.
       const delivery = (casual || !pipelineResult)
         ? ''
-        : `READ FORMAT: On a market turn, lead with the probability read in one line — each number beside its usual odds, exactly as supplied. Then the levels of record that would confirm or break it, taken only from the CHART STRUCTURE block. ${ALWAYS_GIVE_TRADE_LEVELS
+        : `READ FORMAT: On a market turn, lead with the probability read in one short sentence — each number beside its usual odds, exactly as supplied. Then give the levels of record that would confirm or break it, each in its own separate sentence, taken only from the CHART STRUCTURE block. Never pack more than one number into a single sentence — if you have three numbers to state, write three sentences. ${ALWAYS_GIVE_TRADE_LEVELS
             ? 'Then give Entry, Stop, T1 and T2, each on its own line and each anchored to a level of record.'
             : 'Give entries, stops or targets only when they explicitly ask for them, and anchor each one to a level of record.'} Never ask which timeframe they meant before answering — give the daily read and note the assumption in half a sentence.`;
       let analyticalSignal = '';
