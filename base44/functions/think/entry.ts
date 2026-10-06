@@ -519,12 +519,12 @@ Return JSON with:
     voice = `${voice}; sustain the register across the whole reply, let the structure carry, don't restate`;
     const synthPayload: Record<string, unknown> = {
       prompt: composePrompt(stateBlock, dataBlock, isCasual),
-      // Live browsing: gemini_3_1_pro supports add_context_from_internet, so
-      // Hex can search the web while writing its reply. Claude doesn't support
-      // web context, so the synthesis model moves to Gemini. The persona
-      // prompt carries the voice.
-      model: 'gemini_3_1_pro',
-      add_context_from_internet: true,
+      // Synthesis: Claude follows the persona far better than Gemini. The
+      // web search already happened in the retrieval step above, so the
+      // synthesis call doesn't need add_context_from_internet — it has the
+      // retrieved data in its prompt. Claude gets the persona; Gemini does
+      // retrieval only.
+      model: CLAUDE_MODEL,
       response_json_schema: {
         type: 'object',
         properties: {
