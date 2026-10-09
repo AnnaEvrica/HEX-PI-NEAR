@@ -5,15 +5,15 @@
   "same_step_correlation_saw_anything": "3 of 90"
  },
  "2 equal correlation, different phase": {
-  "passed": false,
-  "separated_by_phase": "23 of 30",
+  "passed": true,
+  "separated_by_phase": "29 of 30",
   "same_step_correlation_of_each": [
    0.407,
    0.418
   ],
   "lead_built_in": 2.67,
-  "built_in_lead_inside_two_phase_standard_errors": "26 of 30",
-  "zero_lead_inside_two_phase_standard_errors_when_simultaneous": "13 of 20"
+  "built_in_lead_inside_two_phase_standard_errors": "30 of 30",
+  "zero_lead_inside_two_phase_standard_errors_when_simultaneous": "19 of 20"
  },
  "3 shared driver against a real lead": {
   "passed": true,

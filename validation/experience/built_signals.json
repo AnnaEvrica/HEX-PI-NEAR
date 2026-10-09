@@ -1,0 +1,89 @@
+{
+ "E1 determinism": {
+  "passed": true,
+  "moments": 25,
+  "digest": "c524eccb4533ed6df5bb18014d325967"
+ },
+ "E2 causality": {
+  "passed": true,
+  "moments_compared": 11,
+  "later_observations_appended": 299
+ },
+ "E3 calibration under noise": {
+  "passed": true,
+  "white_disjoint": 0.9677840465113687,
+  "white_consecutive": 0.9824216662513803,
+  "autocorrelated_disjoint": 0.9678788807480322,
+  "autocorrelated_consecutive": 0.8000166578886012,
+  "components_white": {
+   "state": 0.97,
+   "harmony": 0.93,
+   "leadership": 0.96,
+   "persistence": 0.87,
+   "rhythm": 1.03,
+   "phase": 1.26
+  },
+  "components_autocorrelated": {
+   "state": 0.96,
+   "harmony": 1.01,
+   "leadership": 0.89,
+   "persistence": 0.92,
+   "rhythm": 1.01,
+   "phase": 1.06
+  }
+ },
+ "E4 structural distinction": {
+  "passed": true,
+  "across_the_change": 4.97503291873952,
+  "within_each_regime": [
+   1.13,
+   0.93
+  ],
+  "components_across": {
+   "state": 0.6,
+   "harmony": 14.9,
+   "leadership": 4.5,
+   "persistence": 1.2,
+   "rhythm": 0.6,
+   "phase": 3.2
+  },
+  "noise_tail_across": 1.4319131902485086e-114
+ },
+ "E5 circular phase": {
+  "passed": true,
+  "difference_in_radians": 0.08318530717958629,
+  "linear_difference_would_be": 6.2,
+  "phase_term_without_coherence": false
+ },
+ "E6 missing data": {
+  "passed": true,
+  "terms_with_both_channels": 24,
+  "terms_with_one": 16,
+  "persistence_unchanged": true,
+  "too_little_in_common": {
+   "comparable": false,
+   "d": null
+  }
+ },
+ "E7 recurrence without labels": {
+  "passed": true,
+  "returning_moments": 45,
+  "nearest_earlier_moment_in_the_same_configuration": 1.0,
+  "of_which_in_its_first_appearance": 0.28888888888888886,
+  "median_nearest_affinity": 0.8253509677603795,
+  "classes_created": 0
+ },
+ "E8 individuality does not shrink with the library": {
+  "passed": true,
+  "moments": 1240,
+  "median_first_half": 0.6762143548895505,
+  "median_second_half": 0.7384320176947994,
+  "ratio": 1.092008787384307,
+  "library_size_at_the_end": 1239,
+  "median_while_the_reference_was_still_filling": 0.7517343272932728,
+  "noise_tail_of_the_nearest_first_and_second_half": [
+   0.984044629164106,
+   0.9542699506674892
+  ]
+ }
+}

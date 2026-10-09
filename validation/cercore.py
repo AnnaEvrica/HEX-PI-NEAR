@@ -21,7 +21,7 @@
 # ===========================================================================
 import numpy as np, pandas as pd, math, hashlib
 import hex7core as h7
-VERSION='cer-0.4'
+VERSION='cer-0.4.1'
 NC=2*h7.NZ                       # coordinates per channel: 7 for the level, 7 for the size of the change
 STALE=7                          # a neighbour's observation older than this many calendar days is absent
 WINDOW=750; MINOBS=200           # descriptive graph: trailing aligned observations, and the fewest it will read
@@ -301,7 +301,8 @@ def moment(target, neighbours, upto, lag=0, read='MOVE', previous=None, full=Fal
     # ---- rhythm: coherence by band with the target, phase only where coherent
     def band(e):
         o=dict(band=e['band'],status=e['status'],coherence=e.get('coherence'),coherent=e.get('coherent',False),phase=e.get('phase','not supported'),neighbour_leads_by=e.get('neighbour_leads_by','not supported'))
-        if o['coherent']: sp=math.sqrt((1-e['coherence'])/(2*0.947*e['segments']*e['coherence'])); o.update(phase_standard_error=sp,lead_standard_error=sp*e['period']/(2*math.pi),period=e['period'])   # a phase is only as sure as the coherence behind it
+        if o['coherent']:                                       # a phase is only as sure as the coherence behind it, and coherence at the threshold is no evidence of a phase at all
+            cx=(e['coherence']-e['threshold'])/(1-e['threshold']); sp=math.sqrt((1-cx)/(2*0.947*e['segments']*cx)); o.update(phase_standard_error=sp,lead_standard_error=sp*e['period']/(2*math.pi),period=e['period'])
         return o
     S['rhythm']={ids[j]:[band(e) for e in coherence(u,V[:,j])] for j in J}
     # ---- predictive eligibility: what each neighbour adds, given the target's own past, the calendar and every other neighbour

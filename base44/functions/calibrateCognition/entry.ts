@@ -18,6 +18,12 @@
 //      version rule and the verified-edge test to the whole record
 //   6. store one EngineStatus row per read. Every function reads that row
 //      before it shows a number.
+// Last, and apart from all of the above:
+//   EXPERIENTIAL INTEGRATION  perceive tonight's moment of every series,
+//      compare it with the moments already met, and append it to the Memory
+//      Library (shared/memory.ts). It reads what the night already fetched,
+//      predicts nothing and changes nothing above: a failure in it is
+//      reported and leaves the calibration as it was.
 // The response carries timings, for watching how the job scales.
 
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
@@ -26,6 +32,7 @@ import { runEngines, READS, ENGINES, CANDIDATE_ENGINE, CONTROL_ENGINE } from '..
 import { loadLive, logCalls, rowsFor, scoreOpenCalls, foldDays, decide, pooledCalibration, EMPTY_TALLY, SETTLE_DAYS } from '../../shared/ledger.ts';
 import { UNIVERSE, MAX_EXTRA_SERIES, HISTORY_DAYS } from '../../shared/universe.ts';
 import { ENGINE_VERSION } from '../../shared/version.ts';
+import { integrateExperience } from '../../shared/memory.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -49,11 +56,13 @@ Deno.serve(async (req) => {
     const pooled = Object.fromEntries(ENGINES.map((e) => [e, { MOVE: [], RANGE: [] }]));
     const failed: string[] = [];
     const timings: Record<string, number> = {};
+    const fetched: { ticker: string; returns: number[]; timestamps: number[] }[] = [];
     for (const ticker of tickers) {
       const t0 = Date.now();
       let md = null;
       try { md = await fetchYahooReturns(ticker, HISTORY_DAYS); } catch { failed.push(ticker); continue; }
       const bars = { closes: md.completedCloses, timestamps: md.timestamps.slice(0, md.completedBars) };
+      fetched.push({ ticker, returns: md.returns, timestamps: bars.timestamps });
       scored += await scoreOpenCalls(base44, ticker, bars);
       const run = runEngines(md.returns, live);
       if (!run) { failed.push(ticker); continue; }
@@ -95,7 +104,12 @@ Deno.serve(async (req) => {
         hit_control: st.hit_control, hit_candidate: st.hit_candidate, hit_baseline: st.hit_baseline, calibration_steps: row.calibration_steps };
     }
 
-    return Response.json({ ok: true, engine_version: ENGINE_VERSION, series: tickers.length, failed, newly_scored: scored, newly_logged: logged, status, elapsed_ms: Date.now() - started, per_series_ms: timings });
+    const calibrated_ms = Date.now() - started;
+    let experiential: Record<string, unknown>;
+    try { experiential = await integrateExperience(base44, fetched, { engine_version: ENGINE_VERSION, status, failed }); }
+    catch (error) { console.error('experiential integration error:', error); experiential = { ok: false, error: String(error?.message ?? error) }; }
+
+    return Response.json({ ok: true, engine_version: ENGINE_VERSION, series: tickers.length, failed, newly_scored: scored, newly_logged: logged, status, elapsed_ms: calibrated_ms, per_series_ms: timings, experiential });
   } catch (error) {
     console.error('calibrateCognition error:', error);
     return Response.json({ error: error.message }, { status: 500 });

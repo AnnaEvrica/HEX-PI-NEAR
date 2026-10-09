@@ -8,7 +8,7 @@
 // tests/cer.mjs). Mathematics: docs/CER.md.
 // ===========================================================================
 
-export const CER_VERSION = 'cer-0.4';
+export const CER_VERSION = 'cer-0.4.1';
 
 /** One measurement as it arrives from a source, before anything is done to it. */
 export interface SignalObservation {

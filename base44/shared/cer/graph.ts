@@ -270,7 +270,9 @@ export function moment(target: Channel, neighbours: Channel[], upto: number, lag
   const U = Array.from(u); S.rhythm = {};
   for (const j of J) S.rhythm[ids[j]] = coherence(U, Array.from(V[j])).map((e) => {
     const o: RhythmBand = { band: e.band!, status: e.status, coherence: e.coherence, coherent: e.coherent ?? false, phase: e.phase ?? 'not supported', neighbour_leads_by: e.neighbour_leads_by ?? 'not supported' };
-    if (o.coherent) { const sp = Math.sqrt((1 - e.coherence!) / (2 * 0.947 * e.segments! * e.coherence!)); o.phase_standard_error = sp; o.lead_standard_error = sp * e.period! / (2 * Math.PI); o.period = e.period; }
+    if (o.coherent) {   // a phase is only as sure as the coherence behind it, and coherence at the threshold is no evidence of a phase at all
+      const cx = (e.coherence! - e.threshold!) / (1 - e.threshold!), sp = Math.sqrt((1 - cx) / (2 * 0.947 * e.segments! * cx)); o.phase_standard_error = sp; o.lead_standard_error = sp * e.period! / (2 * Math.PI); o.period = e.period;
+    }
     return o;
   });
   // predictive eligibility: what each neighbour adds, given the target's own past, the calendar and every other neighbour

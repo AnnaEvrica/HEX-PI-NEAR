@@ -1,0 +1,35 @@
+{
+  "name": "NightlyCalibration",
+  "type": "object",
+  "description": "One row per nightly run, appended and never changed: how the night's moments stood against the Memory Library, with references to the governance decision. Numbers only. Holds no personal data.",
+  "properties": {
+    "run_id": { "type": "string", "description": "Unique per night. A second run on the same date writes nothing" },
+    "date": { "type": "string", "description": "Calibration date, YYYY-MM-DD" },
+    "timezone": { "type": "string", "description": "Timezone of the date" },
+    "engine_version": { "type": "string", "description": "HEX version" },
+    "cer_version": { "type": "string", "description": "CER version that perceived the moments" },
+    "moment_count": { "type": "number", "description": "Moments recorded tonight" },
+    "hex_precision": { "type": "string", "description": "JSON: per read, the information gain and share right already in EngineStatus. A reference, not a second score" },
+    "individuality": { "type": "string", "description": "JSON: median, p90, max, count, unavailable" },
+    "transitions": { "type": "string", "description": "JSON: median, p90, max, count, unavailable, median rate, median days" },
+    "dispersion": { "type": "string", "description": "JSON: median pairwise distance among recent moments, pairs evaluated, sampling rule" },
+    "affinities": { "type": "string", "description": "JSON: continuous affinity statistics" },
+    "continuity": { "type": "string", "description": "JSON: how often the nearest earlier moment is the previous night" },
+    "experience_reference": { "type": "string", "description": "JSON: signature hashes recorded tonight, and the hash chaining tonight to the night before" },
+    "replay_integrity": { "type": "string", "description": "JSON: versions, and whether recomputing a moment reproduced it" },
+    "measurement_coverage": { "type": "string", "description": "JSON: moments, series without a moment, incomparable comparisons, channels" },
+    "metric_version": { "type": "string", "description": "Definition of the experiential measurements" },
+    "distance_version": { "type": "string", "description": "Definition of the distance" },
+    "bandwidth_version": { "type": "string", "description": "Affinity bandwidth" },
+    "signature_version": { "type": "string", "description": "Definition of the signature" },
+    "governance_reference": { "type": "string", "description": "JSON: per read, the version shown, the decision and the verified flag from EngineStatus" },
+    "elapsed_ms": { "type": "number", "description": "Time the stage took" }
+  },
+  "required": ["run_id", "date"],
+  "rls": {
+    "create": { "user_condition": { "role": "admin" } },
+    "read": { "user_condition": { "role": "admin" } },
+    "update": { "user_condition": { "role": "admin" } },
+    "delete": { "user_condition": { "role": "admin" } }
+  }
+}

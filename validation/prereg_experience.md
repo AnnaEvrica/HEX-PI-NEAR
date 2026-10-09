@@ -155,3 +155,53 @@ E12. **On the real market series** (replayed night by night over the last
     400 nights): the mean consecutive-night transition is above 1, because
     markets move by more than measurement noise; the state component is the
     largest; fewer than 5% of comparisons are incomparable.
+
+## Amendments made before the run on real series
+
+Written 9 October 2026 after the built-signal tests (E1 to E8) and before
+any real series was run. Each changes the specification above; the reason
+and the measurement behind it are given.
+
+1. **Precision of a phase.** The precision above, `2 K C / (1 - C)`, claims
+   too much just above the coherence threshold: a band that is only barely
+   coherent was given a phase as if it were well measured (CER perception
+   test 2: the built-in lead inside two standard errors in 23 of 30). The
+   coherence in excess of the threshold is used instead,
+   `C' = (C - thr) / (1 - thr)`, precision `2 K C' / (1 - C')`. This is a
+   change to CER's measurement, so CER becomes `cer-0.4.1`. Perception test 2
+   then passes (29 of 30). Nothing in CER's forecast uses this number.
+2. **Rhythm and phase are compared only between windows that share no
+   observation.** A spectral estimate moves with where its segments fall, so
+   between overlapping windows these terms were far from calibrated (measured
+   at a gap of 25 observations: 19 times too large). Harmony, leadership,
+   persistence and state are compared at every gap, with `w` as above.
+3. **The reference.** "The 250 most recent" cannot recognise a configuration
+   that returns after more than 250 moments. The reference is 250 moments
+   spread evenly over all of the series' past. Each moment carries its
+   ordinal `seq` in its series and `tier`, the number of times `seq` divides
+   by two. With `n` earlier moments and `j` the largest tier for which
+   `floor(n / 2^j) >= 250`, the reference is 250 moments taken evenly from
+   those of tier `j` and above (all of them while there are fewer than 250).
+   The size stays fixed, the whole past stays covered, and the library never
+   has to be read whole: at most 499 rows.
+4. **Stored precision.** The signature's numbers are kept to six decimals,
+   far finer than any of them can be resolved.
+5. **Step.** A moment's `step` is counted on from the previous moment of the
+   series by the observations in between, so it stays the same coordinate
+   when the history fetched at night rolls forward.
+6. **E8 as measured.** With the reference of point 3 taken from every earlier
+   moment, the second-half median individuality was 10.5% above the first
+   half's: not met, by half a point, and in the upward direction (the
+   prediction guarded against shrinking). Drawn by tiers it is 9.2% above:
+   met, narrowly. The rule was changed for the reason in point 3, not for
+   this number, and the result is reported as marginal either way. The cause
+   is known: as a series ages, more of its reference lies in windows that
+   share nothing with tonight's, those comparisons carry the spectral terms
+   of point 2, and a minimum over comparisons with more terms is a little
+   higher.
+7. **E12, made exact.** The run uses the product code (`integrateExperience`
+   on an in-memory database), night by night over the last 400 calendar
+   nights of the 27 market series of the replication universe, since of the
+   seven series tracked in production only one is in the repository. "Largest
+   component" means the largest mean among the transition's components.
+   Sampled moments are recomputed with the reference implementation.
