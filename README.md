@@ -65,6 +65,9 @@ and `docs/HEX-PI-7.0-replay-and-operations.pdf`.
 
 ## How it fits together
 
+The structure of the whole system, layer by layer, with its practices for
+scaling, testing, privacy, recovery and versioning: [`ARCHITECTURE.md`](ARCHITECTURE.md).
+
 A Base44 app: a React front end (`src/`) and Deno backend functions
 (`base44/`). This repository is synced with Base44: a change pushed to `main`
 appears in the Base44 Builder, and the live app changes when **Publish** is

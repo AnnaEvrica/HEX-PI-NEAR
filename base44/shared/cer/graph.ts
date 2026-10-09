@@ -7,9 +7,10 @@
 // questions and are kept as separate edges. None of them is a claim of cause.
 // ===========================================================================
 import { asof, pair } from './align.ts';
-import { bartlett, residual, surrogate, zrank } from './coupling.ts';
+import { channel } from './normalize.ts';
+import { bartlett, lagcorr, MAXLAG, NSUR, residual, surrogate, zrank } from './coupling.ts';
 import { coherence } from './spectrum.ts';
-import { CER_VERSION, Channel, Edge, Graph } from './types.ts';
+import { CER_VERSION, Channel, Edge, EdgeWeight, Graph } from './types.ts';
 
 /** Trailing aligned observations an edge is measured on, and the fewest it will read. */
 export const WINDOW = 750, MINOBS = 200;
@@ -61,4 +62,75 @@ export function graph(channels: Channel[], upto: number, window = WINDOW): Graph
     method: CER_VERSION, as_of: upto, edges: E,
     nodes: channels.map((c) => ({ id: c.id, environment: c.env, unit: c.unit, source: c.source, observations: c.days.filter((x) => x <= upto).length })),
   };
+}
+
+// ---------------------------------------------------------------------------
+// Edge weight from present measurement (cer-0.2):  w = A . L . C . Q
+//
+// How much an edge is heard in the forecast is measured from the current
+// observation window. No outcome and no past forecasting success enters it,
+// so a relationship can be detected the day it appears and dropped the day
+// it goes, whatever its record. A relation that is only simultaneous has
+// L = 0: it stays in the descriptive graph above and is not promoted.
+// ---------------------------------------------------------------------------
+
+/** Edge weights are measured again every this many calls. */
+export const RECOMPUTE = 25;
+
+/** The control: a channel with its record displaced by `shift` ticks, circularly within its own span (the same displacement asof() applies). */
+export function displaced(ch: Channel, shift: number): Channel {
+  const lo = ch.days[0], span = ch.days[ch.days.length - 1] - lo + 1;
+  const nd = ch.days.map((d) => lo + ((((d - lo - shift) % span) + span) % span));
+  const o = nd.map((_, i) => i).sort((p, q) => nd[p] - nd[q] || p - q);
+  return channel(ch.id, ch.env, o.map((i) => nd[i]), o.map((i) => ch.changes[i]), ch.unit, ch.source);
+}
+
+/**
+ * w = A . L . C . Q for the edge target <- neighbour, from the window ending at `upto`.
+ * @param lead  the fewest steps by which the neighbour must lead for a call to be able to use it
+ * @param read  'RANGE' measures the sizes of the changes instead of the changes
+ */
+export function edgeWeight(target: Channel, neighbour: Channel, others: Channel[], upto: number, lead = 1, read: 'MOVE' | 'RANGE' = 'MOVE', window = WINDOW): EdgeWeight {
+  const p = pair(target, neighbour, upto, window), d = p.d;
+  const e: EdgeWeight = { status: 'ok', A: 0, L: 0, C: 0, Q: 0, w: 0, evidence: 0, samples: p.a.length };
+  if (p.a.length < MINOBS) return { ...e, status: 'insufficient data' };
+  const a = read === 'RANGE' ? p.a.map(Math.abs) : p.a, b = read === 'RANGE' ? p.b.map(Math.abs) : p.b;
+  if (distinct(a) < 3 || distinct(b) < 3) return { ...e, status: 'insufficient variation' };
+  const u = zrank(a), v = zrank(b), n = u.length, rho = lagcorr(u, v);
+  const A = rho.reduce((m, x) => Math.max(m, Math.abs(x)), 0);
+  let l = lead; for (let k = lead; k <= MAXLAG; k++) if (Math.abs(rho[k]) > Math.abs(rho[l])) l = k;
+  const stat = Math.abs(rho[l]), sur: number[] = [];
+  for (let k = 0; k < NSUR; k++) { const r = lagcorr(u, v, MAXLAG, Math.floor(n * (0.1 + 0.8 * k / (NSUR - 1)) + 0.5)); let m = 0; for (let j = lead; j <= MAXLAG; j++) m = Math.max(m, Math.abs(r[j])); sur.push(m); }
+  sur.sort((x, y) => x - y);
+  const thr = sur[Math.ceil(0.95 * NSUR) - 1];
+  let nt = 0; for (const x of target.days) if (x >= d[0] && x <= d[d.length - 1]) nt++;
+  const Q = (d.length / nt) * Math.min(1, n / window);
+  e.A = A; e.Q = Q; e.lag = l; e.threshold = thr; e.lead_strength = rho[l];
+  if (!(stat > thr && A > 0)) return e;
+  const g = driver(d, others);
+  e.L = stat / A;
+  e.C = g ? Math.min(1, Math.abs(lagcorr(residual(u, g), residual(v, g))[l]) / stat) : 1;
+  e.w = e.A * e.L * e.C * e.Q;
+  const se = bartlett(u, v);
+  e.evidence = Q * Math.max(0, (e.C * stat / se) ** 2 - (thr / se) ** 2) / 2;
+  return e;
+}
+
+/**
+ * W[t][j] and E[t][j]: the measured weight and the measured evidence of each
+ * edge at each call, from observations dated no later than (call tick - lag),
+ * held between measurements. `parts` is the mean of A, L, C, Q and w per edge.
+ */
+export function edgeWeights(tdays: number[], target: Channel, neighbours: Channel[], lag = 0, read: 'MOVE' | 'RANGE' = 'MOVE', shift = 0, every = RECOMPUTE): { W: number[][]; E: number[][]; parts: number[][] } {
+  const N = shift ? neighbours.map((c) => displaced(c, shift)) : neighbours;
+  const W = tdays.map(() => N.map(() => 0)), E = tdays.map(() => N.map(() => 0)), parts = N.map(() => [0, 0, 0, 0, 0]); let cnt = 0;
+  for (let t0 = 0; t0 < tdays.length; t0 += every) {
+    N.forEach((nb, j) => {
+      const e = edgeWeight(target, nb, N.filter((c) => c !== nb), tdays[t0] - lag, 1 + lag, read);
+      for (let t = t0; t < Math.min(t0 + every, tdays.length); t++) { W[t][j] = e.w; E[t][j] = e.evidence; }
+      [e.A, e.L, e.C, e.Q, e.w].forEach((x, k) => { parts[j][k] += x; });
+    });
+    cnt++;
+  }
+  return { W, E, parts: parts.map((r) => r.map((x) => x / Math.max(cnt, 1))) };
 }

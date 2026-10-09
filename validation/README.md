@@ -69,31 +69,29 @@ in HEX and no call shown to a user. Mathematics and interface: `docs/CER.md`.
 
 | File | What it is |
 |---|---|
-| `prereg_cer.md` | The frozen specification, controls and predictions, written before the run, with one amendment made before the run |
+| `prereg_cer.md` | The frozen specification, controls and predictions of all three experiments, each written before its run |
 | `cer_results.md` | What came out, prediction by prediction |
 | `cercore.py` | Reference implementation. `base44/shared/cer/*.ts` must match it to rounding (`tests/cer.mjs`) |
-| `cer_synthetic.py` | Ten tests on signals whose relationships are built in; writes `tests/cer_reference.json` |
-| `cer_replay.py` | The one-pass replay with CER beside every call of 7.0: standalone and fusion candidate, same-date and strict, real record and three records displaced in time |
+| `cer_synthetic.py` | Twelve tests on signals whose relationships are built in; writes `tests/cer_reference.json` |
+| `cer_replay.py` | The one-pass replay with CER beside every call of 7.0: standalone and fusion candidate, same-date and strict, real record and three records displaced in time, and all three ways of hearing an edge (past success, measured weight, maximum entropy) from the same experts in the same pass |
 | `cer_report.py` | Every number and chart, computed from the ledger |
 | `cer_diagnostic.py` | After the run: what the displaced temperature neighbours carry (the calendar) |
-| `cer/cer_ledger.parquet` | Every call: 303,462 rows. The null, 7.0, and CER's four arms on the real record |
+| `cer/cer_ledger.parquet` | Every call: 303,722 rows. The null, 7.0, and CER's four arms on the real record under every mode (`cer_*` by past success; `d_cerq_*`, `d_cere_*`, `d_cert_*` the other modes as departures from their offset) |
 | `cer/cer_controls.parquet` | The controls, as sums over 20-day blocks |
-| `cer/cer_edges.json` | Every edge's own expert scored alone, and its share of the call |
+| `cer/cer_edges.json` | Every edge's own expert scored alone, its share of the call, and its measured A, L, C, Q and weight |
 | `cer/cer_graph_*.json` | The descriptive graph of each universe on its last day |
 | `cer/report.json`, `cer/chart_*.png`, `cer/cer_meta.json` | The results, and the no-future check |
 
 ```
 python3 cer_synthetic.py && node ../tests/cer.mjs
-python3 cer_replay.py         # about 12 minutes on two cores
+python3 cer_replay.py         # about 45 minutes on two cores
 python3 cer_diagnostic.py
 python3 cer_report.py
 ```
 
-Bitcoin: the replay's original price file is not in the repository. This run
-uses the Coin Metrics community series (`github.com/coinmetrics/data`,
-`csv/btc.csv`, column `PriceUSD`) saved as `data/BTC_daily.csv` with columns
-`date, close`. The other 42 series reproduce the committed 7.0 ledger exactly
-from the sources listed below. Chicago temperature:
+Bitcoin: copy `tests/backend-smoke/BTC_daily.csv` to `data/BTC_daily.csv`.
+With it and the sources listed below, all 43 series reproduce the committed
+7.0 ledger exactly. Chicago temperature:
 `github.com/zonination/weather-us`; racing:
 `github.com/constancedongg/Horse-Racing`.
 

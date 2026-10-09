@@ -7,7 +7,9 @@
 # displaced in time (the controls). Nothing here feeds back into HEX.
 #   python3 cer_replay.py   -> cer/cer_ledger.parquet   every call, real record, four arms
 #                              cer/cer_controls.parquet the controls, as sums over 20-day blocks
-#                              cer/cer_edges.json       every edge's own expert, scored alone, and its share
+#                              (cer_*: voices combined by past reliability, cer-0.1; cerq_*: by measured weight w = A.L.C.Q, cer-0.2;
+#                               cere_*, cert_*: by maximum entropy over interpretations at T = 1 and at the validated temperature, cer-0.3)
+#                              cer/cer_edges.json       every edge's own expert, scored alone, its share, and its measured weight
 #                              cer/cer_graph_*.json     the descriptive graph of each universe
 #                              cer/cer_meta.json        counts, the no-future check, state hashes
 # ===========================================================================
@@ -58,26 +60,32 @@ def task(a):
     D=pd.DataFrame({'universe':uname,'series_id':tid,'read':read,'step':R.i.values,'day':td,'outcome':y,'null_probability':off['null'],'hex_probability':off['hex']}); ctl=[]; edges=[]; hashes={}; checks=[]
     for lag in LAGS:
         for var,shift in SHIFTS.items():
-            F,M=cer.features(td,N,lag,shift); pres=M.any(1)
+            F,M=cer.features(td,N,lag,shift); pres=M.any(1); measured=var=='real' or lag==u['lag']                      # the measured weighting: both arms on the real record, the arm that counts on the controls
+            Wq,Ev,parts=cer.edge_weights(td,c,N,lag,read,shift) if measured else (None,None,None); rx=(Ev,cer.temperatures(Ev,M)) if measured else None
+            if var=='real': D[f'temperature_lag{lag}']=rx[1].astype(np.float32); D[f'eligible_lag{lag}']=((Ev>0)&M).sum(1).astype(np.int16)
             if var=='real': D[f'present_lag{lag}']=M.sum(1).astype(np.int16)
             for on in OFFSETS:
                 if var=='real':
-                    p,I,W,hsh=cer.walk(off[on],y,F,M,detail=True); D[f'cer_{on}_lag{lag}']=p; hashes[f'{on}|lag{lag}']=hsh; lo=ll(off[on])
+                    p,I,W,hsh,pq,pe,pt=cer.walk(off[on],y,F,M,detail=True,weights=Wq,relax=rx); D[f'cer_{on}_lag{lag}']=p; D[f'cerq_{on}_lag{lag}']=pq; D[f'cere_{on}_lag{lag}']=pe; D[f'cert_{on}_lag{lag}']=pt; hashes[f'{on}|lag{lag}']=hsh; lo=ll(off[on])
                     for k,name in enumerate(['(pool)']+[n['id'] for n in N]):
                         m=pres if k==0 else M[:,k-1]
                         if m.sum()<50: edges.append(dict(universe=uname,target=tid,read=read,offset=on,lag=lag,source=name,calls=int(m.sum()),status='insufficient data')); continue
                         iv=interval(td[m],(ll(W[:,k+1])-lo)[m],rng)
-                        edges.append(dict(universe=uname,target=tid,read=read,offset=on,lag=lag,source=name,calls=int(m.sum()),status='ok',bits_per_call=iv[0],low=iv[1],high=iv[2],predictive=bool(iv[1]>0),share_at_the_end=float(I[-1,k+1]),mean_share=float(I[m,k+1].mean()),starting_share=1.0/(len(N)+2)))
+                        edges.append(dict(universe=uname,target=tid,read=read,offset=on,lag=lag,source=name,calls=int(m.sum()),status='ok',bits_per_call=iv[0],low=iv[1],high=iv[2],predictive=bool(iv[1]>0),share_at_the_end=float(I[-1,k+1]),mean_share=float(I[m,k+1].mean()),starting_share=1.0/(len(N)+2),
+                                          **({} if k==0 else dict(mean_A=float(parts[k-1,0]),mean_L=float(parts[k-1,1]),mean_C=float(parts[k-1,2]),mean_Q=float(parts[k-1,3]),mean_weight=float(parts[k-1,4]),calls_with_weight=float(((Wq[:,k-1]>0)&M[:,k-1]).mean())))))
                     if lag==u['lag'] and on=='null':                               # no call saw its own future: rebuild every channel from its truncated record and rerun
                         for t_ in rng.choice(np.arange(len(td)//3,len(td)),size=2,replace=False):
                             cut=td[t_]; Nt=[]
                             for n in N:
                                 k=int((n['days']<=cut).sum()); nn=cer.channel(n['id'],n['env'],n['days'][:k],n['r'][:k]) if k else cer.channel(n['id'],n['env'],[10**7],[0.0]); nn['Z']=cer.coordinates(nn); Nt.append(nn)
+                            kt=R.i.values[t_]+1; ct=cer.channel(c['id'],c['env'],c['days'][:kt],c['r'][:kt])
                             Rt=pd.DataFrame(h7.walk(c['r'][:R.i.values[t_]+2],read)[0]); Ft,Mt=cer.features(c['days'][Rt.i.values],Nt,lag,0)
-                            checks.append(float(abs(cer.walk(Rt.null.values,Rt.y.values,Ft,Mt)[-1]-p[t_])))
+                            Wt_,Et_,_=cer.edge_weights(c['days'][Rt.i.values],ct,Nt,lag,read); o_=cer.walk(Rt.null.values,Rt.y.values,Ft,Mt,weights=Wt_,relax=(Et_,cer.temperatures(Et_,Mt))); checks.append(float(max(abs(a_[-1]-b_[t_]) for a_,b_ in zip(o_,(p,pq,pe,pt)))))
                 else:
-                    p=cer.walk(off[on],y,F,M); b,s,n=blocksum(td[pres],(ll(p)-ll(off[on]))[pres]) if pres.any() else (np.zeros(0,int),np.zeros(0),np.zeros(0,int))
-                    ctl.append(pd.DataFrame({'universe':uname,'series_id':tid,'read':read,'offset':on,'lag':lag,'variant':var,'block':b,'calls':n,'gain_bits':s}))
+                    out=cer.walk(off[on],y,F,M,weights=Wq,relax=rx); out=out if measured else (out,None,None,None)
+                    for wname,p in zip(('reliability','measurement','relaxation','relaxation, tempered'),out):
+                        if p is None or not pres.any(): continue
+                        b,s,n=blocksum(td[pres],(ll(p)-ll(off[on]))[pres]); ctl.append(pd.DataFrame({'universe':uname,'series_id':tid,'read':read,'offset':on,'lag':lag,'variant':var,'weighting':wname,'block':b,'calls':n,'gain_bits':s}))
     return D,pd.concat(ctl,ignore_index=True),edges,{f'{uname}|{tid}|{read}|{k}':v for k,v in hashes.items()},checks
 
 if __name__=='__main__':
@@ -98,10 +106,12 @@ if __name__=='__main__':
     keep=(L.universe!='energy x temperature')|(L.present_lag0>0)|(L.present_lag1>0)        # temperature targets of the third universe: only the years the energy series exist
     L=L[keep].sort_values(['universe','series_id','read','step']).reset_index(drop=True); L['engine_version']='7.0'; L['cer_version']=cer.VERSION; L['code_hash']=CODE_HASH
     for c in ('universe','series_id','read','class','role','engine_version','cer_version','code_hash'): L[c]=L[c].astype('category')
-    for c in [x for x in L.columns if x.startswith(('cer_null','cer_hex'))]: L[c]=L[c].astype(np.float32)
+    for c in [x for x in L.columns if x.startswith(('cer_null','cer_hex'))]: L[c]=np.round(L[c],6).astype(np.float32)       # CER's probabilities are kept to six decimals
+    for c in [x for x in L.columns if x.startswith(('cerq_','cere_','cert_'))]:        # the measurement-based modes equal their offset on most calls: kept as the departure from it
+        L['d_'+c]=np.round(L[c]-L['null_probability' if '_null_' in c else 'hex_probability'],6).astype(np.float32); L=L.drop(columns=c)
     L.drop(columns=['day']).to_parquet(os.path.join(OUT,'cer_ledger.parquet'),index=False,compression='zstd',compression_level=19)
     C=pd.concat(ctl,ignore_index=True)
-    for c in ('universe','series_id','read','offset','variant'): C[c]=C[c].astype('category')
+    for c in ('universe','series_id','read','offset','variant','weighting'): C[c]=C[c].astype('category')
     C.to_parquet(os.path.join(OUT,'cer_controls.parquet'),index=False,compression='zstd',compression_level=19)
     json.dump(edges,open(os.path.join(OUT,'cer_edges.json'),'w'))
     for un,u in U.items():                                                         # the descriptive graph, as of the last day of the universe

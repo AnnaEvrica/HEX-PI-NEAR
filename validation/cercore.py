@@ -21,11 +21,13 @@
 # ===========================================================================
 import numpy as np, pandas as pd, math, hashlib
 import hex7core as h7
-VERSION='cer-0.1'
+VERSION='cer-0.3'
 NC=2*h7.NZ                       # coordinates per channel: 7 for the level, 7 for the size of the change
 STALE=7                          # a neighbour's observation older than this many calendar days is absent
 WINDOW=750; MINOBS=200           # descriptive graph: trailing aligned observations, and the fewest it will read
 MAXLAG=5; NSUR=200; ACF=20       # lags tested; circular-shift surrogates; lags in the Bartlett standard error
+RECOMPUTE=25                     # edge weights are measured again every this many calls
+TEMPERATURES=(1.0,2.0,4.0,8.0,16.0,32.0); HORIZON=30; SMOOTH=0.01   # relaxation: the temperatures tried; measurements between a forecast of the graph and its check (30 x 25 calls = one window); smoothing
 SEG=128; BANDS=((2,5),(5,20),(20,64)); ALPHA=0.05    # Welch segment; bands as periods in observations
 rnd=lambda x: int(math.floor(x+0.5))
 
@@ -51,19 +53,47 @@ def features(tdays, neighbours, lag=0, shift=0):
     return F,M
 
 # ---- inference --------------------------------------------------------------
-def walk(offset, y, F, M, detail=False):
+def walk(offset, y, F, M, detail=False, weights=None, relax=None):
     """One target, one read, one pass over its calls.
     offset[t]: the probability CER starts from (the null, or HEX's call). y[t]: what happened. F, M: from features().
-    Returns p[t]; with detail also what each expert said on its own, V[t] = [offset, pool, edge 1..K], the share of each call each held,
-    and a hash of the learned state."""
+    Every edge's expert learns from outcomes in every mode. The modes differ only in how the experts are combined into the call:
+      by reliability (cer-0.1)   each voice's share is its past predictive success (reversible influence). Always computed: p
+      by measurement (cer-0.2)   weights = W[t, j] from edge_weights(): each edge's share is its measured weight w = A.L.C.Q:
+                                 pq = (1 - sum e) offset + sum_j e_j p_j,  e_j = w_j / max(1, sum w)
+      by relaxation  (cer-0.3)   relax = (E[t, j], T[t]) from edge_weights() and temperatures(): the maximum-entropy distribution over
+                                 interpretations "nothing here relates to the target" and "edge j does", given the measured evidence:
+                                 P(z_j) ~ exp(E_j / T) for each edge with evidence, P(nothing) ~ K (one unit of prior mass per neighbour).
+                                 pe uses T = 1; pt uses the temperature T[t].
+    Returns p; (p, pq) with weights; (p, pq, pe, pt) with relax. With detail: p, the share each of [offset, pool, edge 1..K] held, what
+    each said alone, a hash of the learned state, then pq, pe, pt (None where not asked for)."""
     n,K,_=F.shape; R=h7.Residual(K+1,NC); A=h7.Share(K+2); X=np.zeros((K+1,NC)); p=np.zeros(n); I=np.zeros((n,K+2)) if detail else None; W=np.zeros((n,K+2)) if detail else None
+    pq=np.zeros(n) if weights is not None else None; pe=np.zeros(n) if relax is not None else None; pt=np.zeros(n) if relax is not None else None
     for t in range(n):
         m=M[t]; X[0]=F[t][m].mean(0) if m.any() else 0.0; X[1:]=F[t]
         V=np.r_[offset[t],R.predict(X,h7.lg(offset[t]))]; p[t]=A.predict(V)
+        if pq is not None: e=weights[t]*m; e=e/max(1.0,float(e.sum())); pq[t]=(1-e.sum())*offset[t]+float(e@V[2:])
+        if pe is not None: pe[t]=gibbs(relax[0][t],m,1.0,offset[t],V[2:]); pt[t]=gibbs(relax[0][t],m,relax[1][t],offset[t],V[2:])
         if detail: I[t]=A.influence(); W[t]=V
         R.update(int(y[t])); A.update(V,int(y[t]))
-    if not detail: return p
-    return p,I,W,hashlib.sha256(b''.join(np.ascontiguousarray(v).tobytes() for v in (R.th,R.ll,A.w,A.ll))).hexdigest()[:16]
+    if not detail: return p if pq is None else (p,pq) if pe is None else (p,pq,pe,pt)
+    return p,I,W,hashlib.sha256(b''.join(np.ascontiguousarray(v).tobytes() for v in (R.th,R.ll,A.w,A.ll))).hexdigest()[:16],pq,pe,pt
+def interpretations(ev, present, T):
+    """The maximum-entropy distribution over interpretations given the measured evidence: [nothing relates, edge 1..K].
+    Mass K (the number of neighbours present) on "nothing", exp(evidence / T) on each present edge with evidence, none on the rest."""
+    k=int(present.sum()); g=np.where(present&(ev>0),np.exp(np.minimum(ev/T,700.0)),0.0); z=max(k,1)+g.sum(); return np.r_[max(k,1)/z,g/z]
+def gibbs(ev, present, T, offset, voices):
+    P=interpretations(ev,present,T); return float(P[0]*offset+P[1:]@voices)
+def temperatures(Ev, present, every=RECOMPUTE):
+    """T at every call, chosen without the prediction target: the temperature whose distribution, formed HORIZON measurements earlier (one
+    full window, so the two windows do not overlap), has best forecast which interpretation the present measurement supports most
+    (log score, summed over all past checks). T = 1 until there is a past to check against."""
+    idx=np.arange(0,len(Ev),every); S=np.zeros(len(TEMPERATURES)); T=np.ones(len(Ev)); K=Ev.shape[1]
+    for a,t0 in enumerate(idx):
+        if a>=HORIZON:
+            now=np.where(present[t0],Ev[t0],0.0); o=0 if now.max()<=0 else 1+int(now.argmax()); t1=idx[a-HORIZON]
+            for k,tau in enumerate(TEMPERATURES): S[k]+=math.log((1-SMOOTH)*interpretations(Ev[t1],present[t1],tau)[o]+SMOOTH/(K+1))
+            T[t0:t0+every]=TEMPERATURES[int(S.argmax())]
+    return T
 
 # ---- measurement ------------------------------------------------------------
 def zrank(v):
@@ -145,3 +175,43 @@ def graph(channels, upto, window=WINDOW):
             if ti is nj: continue
             E+=edges(ti,nj,[c for c in channels if c is not ti and c is not nj],upto,window)
     return dict(method=VERSION,as_of=int(upto),nodes=[dict(id=c['id'],environment=c['env'],unit=c['unit'],source=c['source'],observations=int((c['days']<=upto).sum())) for c in channels],edges=E)
+
+# ---- edge weight from present measurement (cer-0.2) ---------------------------
+def displaced(ch, shift):
+    """The control: a channel with its record displaced by `shift` days, circularly within its own span (the same displacement asof() applies)."""
+    lo=int(ch['days'][0]); span=int(ch['days'][-1])-lo+1; nd=lo+np.mod(ch['days']-lo-shift,span); o=np.argsort(nd,kind='stable'); return channel(ch['id'],ch['env'],nd[o],ch['r'][o],ch['unit'],ch['source'])
+_IDX={}
+def _shift_index(n):
+    if n not in _IDX: _IDX[n]=np.mod(np.arange(n)[None,:]-np.array([rnd(n*(0.1+0.8*k/(NSUR-1))) for k in range(NSUR)])[:,None],n)
+    return _IDX[n]
+def edge_weight(target, neighbour, others, upto, lead=1, read='MOVE', window=WINDOW):
+    """w = A.L.C.Q for the edge target <- neighbour, from the observation window ending at `upto`. No outcome and no past success enters.
+      A  associative coherence: the largest |rank correlation| over lags 0..5
+      L  usable lead: the share of A that sits at lags >= lead (what a call can use), and 0 unless that part clears its own surrogate threshold
+      C  compatibility with the configuration: the share of the correlation at the chosen lag that survives removing the shared driver
+      Q  measurement quality: the share of the target's ticks in the window on which the neighbour was also observed, times how full the window is
+    evidence (cer-0.3): how far the lead, with the shared driver removed, stands above what no relationship produces, in nats:
+      Q . max(0, z^2 - z0^2) / 2,  z = C |rho| / se,  z0 = threshold / se,  se the Bartlett standard error. Zero unless the edge is detected.
+    read = 'RANGE' measures the sizes of the changes instead of the changes."""
+    d,a,b=pair(target,neighbour,upto,window); e=dict(A=0.0,L=0.0,C=0.0,Q=0.0,w=0.0,evidence=0.0,samples=int(len(a)))
+    if len(a)<MINOBS: return dict(e,status='insufficient data')
+    if read=='RANGE': a=np.abs(a); b=np.abs(b)
+    if len(set(np.round(a,12)))<3 or len(set(np.round(b,12)))<3: return dict(e,status='insufficient variation')
+    u=zrank(a); v=zrank(b); n=len(u); rho=lagcorr(u,v); A=float(np.abs(rho).max()); l=lead+int(np.abs(rho[lead:]).argmax()); stat=float(abs(rho[l]))
+    S=v[_shift_index(n)]; sur=np.zeros(NSUR)                                                              # the same statistic with the neighbour shifted in time
+    for lg in range(lead,MAXLAG+1):
+        x=u[lg:]-u[lg:].mean(); Y=S[:,:n-lg]; Y=Y-Y.mean(1,keepdims=True); den=np.sqrt((x*x).sum()*(Y*Y).sum(1)); sur=np.maximum(sur,np.abs(np.where(den>0,(Y@x)/np.where(den>0,den,1),0.0)))
+    thr=float(np.sort(sur)[int(math.ceil((1-ALPHA)*NSUR))-1]); nt=int(((target['days']>=d[0])&(target['days']<=d[-1])).sum()); Q=(len(d)/nt)*min(1.0,n/window)
+    e.update(status='ok',A=A,Q=float(Q),lag=l,threshold=thr,lead_strength=float(rho[l]),evidence=0.0)
+    if not (stat>thr and A>0): return e
+    L=stat/A; g=driver(d,others); C=1.0 if g is None else min(1.0,abs(float(lagcorr(residual(u,g),residual(v,g))[l]))/stat)
+    se=bartlett(u,v); e.update(L=float(L),C=float(C),w=float(A*L*C*Q),evidence=float(Q*max(0.0,(C*stat/se)**2-(thr/se)**2)/2)); return e
+def edge_weights(tdays, target, neighbours, lag=0, read='MOVE', shift=0, every=RECOMPUTE):
+    """W[t, j] and E[t, j]: the measured weight and the measured evidence of each edge at each call, from observations dated no later than
+    (call day - lag); held between measurements. Also the mean of A, L, C, Q and w per edge."""
+    N=[displaced(c,shift) for c in neighbours] if shift else neighbours; W=np.zeros((len(tdays),len(N))); E=np.zeros((len(tdays),len(N))); parts=np.zeros((len(N),5)); cnt=0
+    for t0 in range(0,len(tdays),every):
+        for j,nb in enumerate(N):
+            e=edge_weight(target,nb,[c for c in N if c is not nb],int(tdays[t0])-lag,1+lag,read); W[t0:t0+every,j]=e['w']; E[t0:t0+every,j]=e['evidence']; parts[j]+=[e['A'],e['L'],e['C'],e['Q'],e['w']]
+        cnt+=1
+    return W,E,parts/max(cnt,1)

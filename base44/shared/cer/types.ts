@@ -8,7 +8,7 @@
 // tests/cer.mjs). Mathematics: docs/CER.md.
 // ===========================================================================
 
-export const CER_VERSION = 'cer-0.1';
+export const CER_VERSION = 'cer-0.3';
 
 /** One measurement as it arrives from a source, before anything is done to it. */
 export interface SignalObservation {
@@ -97,6 +97,34 @@ export interface Edge {
   phase?: number | NotSupported;
   neighbour_leads_by?: number | NotSupported;
 }
+
+/**
+ * The measured weight of one edge at one moment: w = A . L . C . Q, from the
+ * current observation window only. No outcome and no past forecasting
+ * success enters it.
+ */
+export interface EdgeWeight {
+  status: EdgeStatus;
+  samples: number;
+  /** Associative coherence: the largest |rank correlation| over lags 0..5. */
+  A: number;
+  /** Usable lead: the share of A at lags a call can use; 0 unless that part clears its own surrogate threshold. */
+  L: number;
+  /** Compatibility with the configuration: the share of the correlation at the chosen lag that survives removing the shared driver. */
+  C: number;
+  /** Measurement quality: the share of the target's ticks on which the neighbour was also observed, times how full the window is. */
+  Q: number;
+  /** A . L . C . Q. Zero means the relation is not promoted into the forecast; it may still be in the descriptive graph. */
+  w: number;
+  /** How far the usable lead, with the shared driver removed, stands above what no relationship produces, in nats. Zero unless detected. */
+  evidence: number;
+  lag?: number;
+  threshold?: number;
+  lead_strength?: number;
+}
+
+/** How the edges' experts are combined into CER's call. */
+export type Weighting = 'reliability' | 'measurement' | 'relaxation' | 'relaxation-tempered';
 
 export interface Graph {
   method: string;

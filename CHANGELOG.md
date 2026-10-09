@@ -7,15 +7,22 @@
   may see, three descriptive relations per pair of channels, and prediction
   from neighbours as one voice per edge. Nothing imports it; no engine file,
   function, entity or shown call changed. `docs/CER.md`.
+- **Three ways of hearing an edge, compared on identical causal data**
+  (`cer-0.3`): by past predictive success; by present measurement,
+  `w = A.L.C.Q`, with no outcome in it; and by maximum entropy over
+  interpretations, with a temperature validated without the prediction
+  target. Descriptive association is kept apart from predictive influence: a
+  relation with no measured lead is recorded and not put into the forecast.
 - **Tested the way 7.0 was**: predictions written first
   (`validation/prereg_cer.md`), one pass, controls displaced in time, results
   beside them (`validation/cer_results.md`). Where one environment physically
-  leads another it adds to 7.0 (New York temperature direction +0.070 bits
-  per call over 7.0, 64.5% to 67.6% right); it reports no relationship where
+  leads another it adds to 7.0 (New York temperature direction +0.073 bits
+  per call over 7.0 under maximum entropy, 64.5% to 67.8% right); it reports no relationship where
   there is none; on markets the relations are real and simultaneous and do
   not forecast.
 - **Checks**: `tests/cer.mjs` (TypeScript against the reference),
-  `validation/cer_synthetic.py` (ten tests).
+  `validation/cer_synthetic.py` (twelve tests).
+- `ARCHITECTURE.md`: the structure of the whole system in one file.
 
 ## 7.0 — 5 October 2026: HEX as a residual on the null
 

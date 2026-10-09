@@ -1,6 +1,6 @@
 # CER: Cross-Environment Resonance
 
-Anna Maria Sarkisyan · Evrica Technologies Inc. · experimental module `cer-0.1`, beside HEX [PI] 7.0
+Anna Maria Sarkisyan · Evrica Technologies Inc. · experimental module `cer-0.3`, beside HEX [PI] 7.0
 
 HEX reads one series. CER reads across series. It measures how the channels of
 different environments move together, and tests whether those relations say
@@ -22,10 +22,11 @@ exactly, with the file and function that computes it.
 | Align | Which value of a neighbour a call is allowed to see | `cer/align.ts: asof, features, pair` |
 | Measure | Three ways two channels can be related, kept apart | `cer/coupling.ts`, `cer/spectrum.ts`, `cer/graph.ts` |
 | Infer | Do the neighbours say anything about the next step? | `cer/inference.ts: walkCer` |
+| Weigh | How much each edge is heard, from present measurement | `cer/graph.ts: edgeWeight`, `cer/inference.ts: interpretations, temperatures` |
 | Replay | HEX's calls and CER's beside them, scored on the same outcome | `cer/replay.ts: shadowReplay` |
 
 Reference implementation: `validation/cercore.py`. The TypeScript must match
-it to rounding (`tests/cer.mjs`; largest difference 7 × 10⁻¹⁵).
+it to rounding (`tests/cer.mjs`).
 
 ---
 
@@ -168,7 +169,71 @@ This is predictive dependence in Granger's sense (1969): the neighbour's past
 improves the forecast. It is not a causal claim. A causal claim needs an
 intervention, which is what the `intervention` field of an observation is for.
 
-## 6. Scoring
+## 6. How much an edge is heard: three ways, compared
+
+Section 5 says how each edge's voice forms its own probability. That part
+is the same in every mode, and it is the only part that learns from
+outcomes. What differs is how the voices are combined into CER's call.
+
+**In plain words.**
+
+- *By past success* (`cer-0.1`, `'reliability'`). An edge is heard in
+  proportion to how well its voice has predicted. It has to earn its place
+  over many calls, and a relationship that appears today is heard late.
+- *By present measurement* (`cer-0.2`, `'measurement'`). An edge is heard in
+  proportion to what the current window measures: how strongly the two
+  channels move together (A), how much of that is the neighbour moving first
+  (L), how much survives once what everything shares is removed (C), and how
+  well the pair was observed (Q). Its past forecasting record is not
+  consulted. A relation that is only simultaneous has L = 0: it is recorded in
+  the descriptive graph and is not put into the forecast.
+- *By relaxation* (`cer-0.3`, `'relaxation'`). CER holds a distribution over
+  interpretations, "nothing here relates to the target" and "this edge does",
+  and commits no further than the measured evidence supports. A temperature
+  sets how much is committed; it is chosen by checking past measurements
+  against later measurements, never against the target's outcomes.
+
+**Exactly.** On the latest 750 shared observations dated no later than the
+call's day minus the lag, on the read's own observable (changes for
+direction, sizes of changes for move size), remeasured every 25 calls
+(`graph.ts: edgeWeight, edgeWeights`):
+
+    w_ij = A . L . C . Q
+    A = max over lags 0..5 of |rho(l)|
+    L = max over usable lags of |rho(l)| / A,   and 0 unless that maximum clears its own time-shift surrogate threshold
+    C = min(1, |rho after removing the shared driver, at the chosen lag| / |rho at that lag|)
+    Q = (shared ticks / the target's ticks in the window) . min(1, samples / 750),   and 0 when the neighbour is absent at the call
+
+A lag is usable when the neighbour leads by at least one step more than the
+arm's lag. By measurement:
+
+    p = (1 - sum_j e_j) . offset + sum_j e_j . p_j,     e_j = w_j / max(1, sum_j w_j)
+
+By relaxation, with evidence in nats and `se` the Bartlett standard error:
+
+    E_j = Q . max(0, z^2 - z0^2) / 2,    z = C |rho| / se,    z0 = threshold / se
+    P(z_j | G_t) ~ exp(E_j / T)   for each edge with E_j > 0
+    P(nothing | G_t) ~ K          one unit of prior mass per neighbour present
+    p = P(nothing) . offset + sum_j P(z_j) . p_j
+
+This is the maximum-entropy distribution over interpretations subject to the
+expected evidence (Jaynes, 1957), a Gibbs distribution. `T = 1` is the plain
+answer; larger `T` keeps more interpretations alive. The temperature at a
+call is the one, among 1, 2, 4, 8, 16, 32, whose distribution formed 30
+measurements earlier (one full window, so the two windows share no
+observation) has best forecast which interpretation the present measurement
+supports most, by log score over all past checks
+(`inference.ts: temperatures`).
+
+Two limits to keep in view. A weight is a measured association, not a
+probability that the edge's voice is right, so mixing by `w` can under-commit
+to a strong edge. And a lagged correlation does not condition on the
+target's own past: a neighbour that only echoes the target can show a small
+"lead" through the target's own persistence (synthetic test 11 reports it).
+
+What each mode did on real data is in `validation/cer_results.md`.
+
+## 7. Scoring
 
 Exactly as HEX is scored (`MODEL.md`, section 7). Information gain of a call
 in bits, `g = log₂ p(y) − log₂ q(y)`, against the null and against HEX, on the
@@ -176,7 +241,7 @@ same targets, timestamps and outcomes. Uncertainty by block bootstrap over
 20-day blocks. CER is scored only on calls where at least one neighbour was
 present; on the others it equals its offset exactly.
 
-## 7. Using it
+## 8. Using it
 
 ```ts
 import { toChannel, shadowReplay, graph } from './base44/shared/cer/index.ts';
@@ -186,20 +251,20 @@ const room    = toChannel(roomSamples,    { tick_ms: 60_000 });
 const heat    = toChannel(heatSamples,    { tick_ms: 60_000 });
 
 const g = graph([voltage, room, heat], lastTick);          // the descriptive graph
-const r = shadowReplay(heat, [voltage, room], 'MOVE', 1);  // HEX's calls on heat, CER's beside them
+const r = shadowReplay(heat, [voltage, room], 'MOVE', 1, 'relaxation');  // HEX's calls on heat, CER's beside them
 r.gain.fusion_over_hex;                                    // bits per call the neighbours added to HEX
 ```
 
 Run the tests and the replay:
 
 ```
-python3 validation/cer_synthetic.py    # ten tests on signals with known relationships; writes tests/cer_reference.json
+python3 validation/cer_synthetic.py    # twelve tests on signals with known relationships; writes tests/cer_reference.json
 node tests/cer.mjs                     # the TypeScript against the reference
-python3 validation/cer_replay.py       # the one-pass replay with CER in shadow, about 12 minutes
+python3 validation/cer_replay.py       # the one-pass replay with CER in shadow, every mode in one pass
 python3 validation/cer_report.py       # validation/cer/report.json and the charts
 ```
 
-## 8. What is not built yet
+## 9. What is not built yet
 
 - `collectSignals`, `evaluateResonance` and the entities `SignalObservation`,
   `ResonanceSnapshot`, `ResonanceCall`. They are deployed code and database
@@ -212,6 +277,7 @@ python3 validation/cer_report.py       # validation/cer/report.json and the char
 
 - M. S. Bartlett (1946). On the theoretical specification and sampling properties of autocorrelated time-series. *Supplement to the Journal of the Royal Statistical Society* 8, 27–41.
 - G. C. Carter, C. H. Knapp, A. H. Nuttall (1973). Estimation of the magnitude-squared coherence function via overlapped fast Fourier transform processing. *IEEE Transactions on Audio and Electroacoustics* 21, 337–344.
+- E. T. Jaynes (1957). Information theory and statistical mechanics. *Physical Review* 106, 620–630.
 - C. W. J. Granger (1969). Investigating causal relations by econometric models and cross-spectral methods. *Econometrica* 37, 424–438.
 - M. Herbster, M. K. Warmuth (1998). Tracking the best expert. *Machine Learning* 32, 151–178.
 - A. W. Lo, A. C. MacKinlay (1990). An econometric analysis of nonsynchronous trading. *Journal of Econometrics* 45, 181–211.
