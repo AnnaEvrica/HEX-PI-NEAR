@@ -1,0 +1,1846 @@
+{
+ "by_class_and_read": {
+  "markets MOVE": {
+   "calls": 73018,
+   "series": 27,
+   "g_CONV": [
+    -5e-05,
+    -0.00033,
+    0.00021
+   ],
+   "g_CUBE": [
+    -6e-05,
+    -0.00023,
+    0.0001
+   ],
+   "g_MEL": [
+    -6e-05,
+    -0.00048,
+    0.00038
+   ],
+   "g_CHORD": [
+    -0.00031,
+    -0.00048,
+    -0.00015
+   ],
+   "g_FULL": [
+    -0.00016,
+    -0.00058,
+    0.00031
+   ],
+   "g_CONTROL250": [
+    -0.00045,
+    -0.00088,
+    1e-05
+   ],
+   "g_CONTROL211": [
+    -0.00039,
+    -0.00076,
+    -1e-05
+   ],
+   "g_CONTROL293": [
+    -0.00046,
+    -0.00079,
+    -0.00015
+   ],
+   "g_CONTROLS": [
+    -0.00043,
+    -0.00072,
+    -0.00013
+   ],
+   "g_FULL_minus_controls": [
+    0.00027,
+    -0.00019,
+    0.00072
+   ],
+   "g_FULL_minus_CONV": [
+    -0.00011,
+    -0.00054,
+    0.00032
+   ],
+   "n_HEX": [
+    0.00041,
+    -0.00029,
+    0.00108
+   ],
+   "n_ALONE": [
+    0.0004,
+    -0.00014,
+    0.00093
+   ],
+   "n_65": [
+    0.0004,
+    -0.0,
+    0.00077
+   ]
+  },
+  "markets RANGE": {
+   "calls": 73018,
+   "series": 27,
+   "g_CONV": [
+    0.0007,
+    0.0002,
+    0.0012
+   ],
+   "g_CUBE": [
+    0.00042,
+    3e-05,
+    0.00085
+   ],
+   "g_MEL": [
+    0.00075,
+    0.00014,
+    0.00137
+   ],
+   "g_CHORD": [
+    -0.00015,
+    -0.0004,
+    0.00011
+   ],
+   "g_FULL": [
+    0.00066,
+    3e-05,
+    0.00134
+   ],
+   "g_CONTROL250": [
+    -0.00018,
+    -0.00068,
+    0.00032
+   ],
+   "g_CONTROL211": [
+    -0.00021,
+    -0.00065,
+    0.00027
+   ],
+   "g_CONTROL293": [
+    0.0001,
+    -0.00038,
+    0.00057
+   ],
+   "g_CONTROLS": [
+    -0.0001,
+    -0.00053,
+    0.0003
+   ],
+   "g_FULL_minus_controls": [
+    0.00075,
+    0.00023,
+    0.00126
+   ],
+   "g_FULL_minus_CONV": [
+    -5e-05,
+    -0.00054,
+    0.00042
+   ],
+   "n_HEX": [
+    0.00572,
+    0.00438,
+    0.00698
+   ],
+   "n_ALONE": [
+    0.00356,
+    0.00249,
+    0.00468
+   ],
+   "n_65": [
+    0.00207,
+    0.00137,
+    0.00281
+   ]
+  },
+  "racing MOVE": {
+   "calls": 13022,
+   "series": 12,
+   "g_CONV": [
+    -0.0005,
+    -0.00087,
+    -0.00011
+   ],
+   "g_CUBE": [
+    -0.00024,
+    -0.00063,
+    0.00019
+   ],
+   "g_MEL": [
+    -0.00088,
+    -0.00153,
+    -0.00021
+   ],
+   "g_CHORD": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "g_FULL": [
+    -0.00076,
+    -0.00142,
+    -7e-05
+   ],
+   "g_CONTROL250": [
+    -0.00059,
+    -0.00121,
+    6e-05
+   ],
+   "g_CONTROL211": [
+    -0.0006,
+    -0.00137,
+    0.00015
+   ],
+   "g_CONTROL293": [
+    -0.00078,
+    -0.0013,
+    -0.0003
+   ],
+   "g_CONTROLS": [
+    -0.00066,
+    -0.0011,
+    -0.00022
+   ],
+   "g_FULL_minus_controls": [
+    -0.0001,
+    -0.00079,
+    0.00054
+   ],
+   "g_FULL_minus_CONV": [
+    -0.00026,
+    -0.00081,
+    0.00036
+   ],
+   "n_HEX": [
+    -0.00167,
+    -0.00293,
+    -0.00043
+   ],
+   "n_ALONE": [
+    -0.00077,
+    -0.00144,
+    -0.00013
+   ],
+   "n_65": [
+    -0.00082,
+    -0.0013,
+    -0.00029
+   ]
+  },
+  "racing RANGE": {
+   "calls": 13022,
+   "series": 12,
+   "g_CONV": [
+    -0.00018,
+    -0.00066,
+    0.00034
+   ],
+   "g_CUBE": [
+    -0.00049,
+    -0.00087,
+    -0.00014
+   ],
+   "g_MEL": [
+    -0.00042,
+    -0.00142,
+    0.00072
+   ],
+   "g_CHORD": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "g_FULL": [
+    -0.00053,
+    -0.00142,
+    0.00052
+   ],
+   "g_CONTROL250": [
+    -0.00067,
+    -0.0013,
+    -7e-05
+   ],
+   "g_CONTROL211": [
+    -0.00072,
+    -0.0012,
+    -0.00029
+   ],
+   "g_CONTROL293": [
+    -0.0005,
+    -0.00103,
+    -6e-05
+   ],
+   "g_CONTROLS": [
+    -0.00063,
+    -0.00098,
+    -0.00027
+   ],
+   "g_FULL_minus_controls": [
+    0.00011,
+    -0.00089,
+    0.00114
+   ],
+   "g_FULL_minus_CONV": [
+    -0.00034,
+    -0.00123,
+    0.00061
+   ],
+   "n_HEX": [
+    0.01225,
+    0.00903,
+    0.01582
+   ],
+   "n_ALONE": [
+    0.00303,
+    0.00115,
+    0.00506
+   ],
+   "n_65": [
+    0.00549,
+    0.00368,
+    0.00731
+   ]
+  },
+  "weather MOVE": {
+   "calls": 54086,
+   "series": 4,
+   "g_CONV": [
+    0.00028,
+    6e-05,
+    0.00052
+   ],
+   "g_CUBE": [
+    0.00119,
+    0.00069,
+    0.00171
+   ],
+   "g_MEL": [
+    0.00031,
+    4e-05,
+    0.00058
+   ],
+   "g_CHORD": [
+    0.00244,
+    0.00164,
+    0.00322
+   ],
+   "g_FULL": [
+    0.00342,
+    0.00247,
+    0.00436
+   ],
+   "g_CONTROL250": [
+    -1e-05,
+    -0.00021,
+    0.00018
+   ],
+   "g_CONTROL211": [
+    0.00072,
+    0.00025,
+    0.0012
+   ],
+   "g_CONTROL293": [
+    -0.0,
+    -0.00018,
+    0.00018
+   ],
+   "g_CONTROLS": [
+    0.00024,
+    5e-05,
+    0.00043
+   ],
+   "g_FULL_minus_controls": [
+    0.00318,
+    0.00233,
+    0.00405
+   ],
+   "g_FULL_minus_CONV": [
+    0.00314,
+    0.00228,
+    0.00393
+   ],
+   "n_HEX": [
+    0.05471,
+    0.0518,
+    0.05767
+   ],
+   "n_ALONE": [
+    0.04089,
+    0.03793,
+    0.04379
+   ],
+   "n_65": [
+    0.01883,
+    0.01724,
+    0.02058
+   ]
+  },
+  "weather RANGE": {
+   "calls": 54086,
+   "series": 4,
+   "g_CONV": [
+    -4e-05,
+    -0.00012,
+    4e-05
+   ],
+   "g_CUBE": [
+    0.00076,
+    0.00043,
+    0.00105
+   ],
+   "g_MEL": [
+    8e-05,
+    -0.00015,
+    0.00034
+   ],
+   "g_CHORD": [
+    9e-05,
+    -0.00013,
+    0.0003
+   ],
+   "g_FULL": [
+    0.00071,
+    0.00034,
+    0.00108
+   ],
+   "g_CONTROL250": [
+    0.00056,
+    0.0002,
+    0.00092
+   ],
+   "g_CONTROL211": [
+    0.00038,
+    0.0,
+    0.00074
+   ],
+   "g_CONTROL293": [
+    0.0006,
+    0.00021,
+    0.00097
+   ],
+   "g_CONTROLS": [
+    0.00051,
+    0.0002,
+    0.00083
+   ],
+   "g_FULL_minus_controls": [
+    0.0002,
+    -0.00017,
+    0.00058
+   ],
+   "g_FULL_minus_CONV": [
+    0.00076,
+    0.00041,
+    0.00112
+   ],
+   "n_HEX": [
+    0.01226,
+    0.01071,
+    0.0139
+   ],
+   "n_ALONE": [
+    0.00373,
+    0.00297,
+    0.00448
+   ],
+   "n_65": [
+    0.00345,
+    0.00278,
+    0.00421
+   ]
+  }
+ },
+ "by_series_FULL": {
+  "BRENT MOVE": {
+   "calls": 2698,
+   "FULL": [
+    -0.00015,
+    -0.00167,
+    0.00141
+   ],
+   "controls": -0.00079,
+   "CHORD": -0.00012,
+   "MEL": -0.00037,
+   "CUBE": 0.00012,
+   "CONV": -0.00022
+  },
+  "BRENT RANGE": {
+   "calls": 2698,
+   "FULL": [
+    0.00087,
+    -0.00225,
+    0.00413
+   ],
+   "controls": -6e-05,
+   "CHORD": -0.00021,
+   "MEL": -0.00043,
+   "CUBE": 0.00188,
+   "CONV": -0.00036
+  },
+  "BTC-USD MOVE": {
+   "calls": 3898,
+   "FULL": [
+    0.00039,
+    -0.00094,
+    0.00178
+   ],
+   "controls": -0.00051,
+   "CHORD": -0.00018,
+   "MEL": 0.00049,
+   "CUBE": -5e-05,
+   "CONV": 0.0001
+  },
+  "BTC-USD RANGE": {
+   "calls": 3898,
+   "FULL": [
+    0.00054,
+    -0.0015,
+    0.00251
+   ],
+   "controls": -0.00038,
+   "CHORD": -6e-05,
+   "MEL": 0.00069,
+   "CUBE": -0.00019,
+   "CONV": 0.00062
+  },
+  "Chicago MOVE": {
+   "calls": 24678,
+   "FULL": [
+    0.00291,
+    0.00167,
+    0.00408
+   ],
+   "controls": 0.00029,
+   "CHORD": 0.00291,
+   "MEL": 0.00042,
+   "CUBE": 0.00028,
+   "CONV": 0.00042
+  },
+  "Chicago RANGE": {
+   "calls": 24678,
+   "FULL": [
+    0.00079,
+    0.00027,
+    0.00135
+   ],
+   "controls": 0.00023,
+   "CHORD": 0.00012,
+   "MEL": 0.00013,
+   "CUBE": 0.00083,
+   "CONV": 4e-05
+  },
+  "FX-Australia MOVE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00086,
+    -0.00185,
+    0.00019
+   ],
+   "controls": -0.00083,
+   "CHORD": -0.00043,
+   "MEL": -0.00058,
+   "CUBE": -0.00026,
+   "CONV": -0.00016
+  },
+  "FX-Australia RANGE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00094,
+    -0.00192,
+    -0.0
+   ],
+   "controls": -0.00085,
+   "CHORD": -0.0003,
+   "MEL": -0.00079,
+   "CUBE": -0.00026,
+   "CONV": 0.00046
+  },
+  "FX-Brazil MOVE": {
+   "calls": 2654,
+   "FULL": [
+    0.00019,
+    -0.00158,
+    0.00209
+   ],
+   "controls": -0.00045,
+   "CHORD": -7e-05,
+   "MEL": 5e-05,
+   "CUBE": 1e-05,
+   "CONV": -0.0003
+  },
+  "FX-Brazil RANGE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00099,
+    -0.00246,
+    0.00041
+   ],
+   "controls": -0.00058,
+   "CHORD": -0.00036,
+   "MEL": -0.00065,
+   "CUBE": -0.00033,
+   "CONV": -2e-05
+  },
+  "FX-Canada MOVE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00068,
+    -0.00172,
+    0.0005
+   ],
+   "controls": -0.00042,
+   "CHORD": -0.00039,
+   "MEL": -0.00066,
+   "CUBE": 5e-05,
+   "CONV": -0.00021
+  },
+  "FX-Canada RANGE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00113,
+    -0.00179,
+    -0.00053
+   ],
+   "controls": -0.0007,
+   "CHORD": -0.00055,
+   "MEL": -0.00074,
+   "CUBE": -0.00037,
+   "CONV": -0.00034
+  },
+  "FX-China MOVE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00018,
+    -0.00164,
+    0.00138
+   ],
+   "controls": 6e-05,
+   "CHORD": -8e-05,
+   "MEL": -0.00019,
+   "CUBE": -0.00026,
+   "CONV": -0.00033
+  },
+  "FX-China RANGE": {
+   "calls": 2654,
+   "FULL": [
+    0.00088,
+    -0.00234,
+    0.00457
+   ],
+   "controls": -0.00075,
+   "CHORD": 0.00045,
+   "MEL": 0.00091,
+   "CUBE": 0.00024,
+   "CONV": 0.00123
+  },
+  "FX-Denmark MOVE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00049,
+    -0.0014,
+    0.0004
+   ],
+   "controls": -0.00076,
+   "CHORD": -0.00038,
+   "MEL": -0.00026,
+   "CUBE": -0.00027,
+   "CONV": -0.00034
+  },
+  "FX-Denmark RANGE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00075,
+    -0.00231,
+    0.00103
+   ],
+   "controls": -0.00088,
+   "CHORD": -0.00027,
+   "MEL": -0.00077,
+   "CUBE": 4e-05,
+   "CONV": -0.00026
+  },
+  "FX-Euro MOVE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00048,
+    -0.0013,
+    0.00049
+   ],
+   "controls": -0.00071,
+   "CHORD": -0.00034,
+   "MEL": -0.00022,
+   "CUBE": -0.00027,
+   "CONV": -0.00034
+  },
+  "FX-Euro RANGE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00087,
+    -0.00191,
+    0.00041
+   ],
+   "controls": -0.00082,
+   "CHORD": -0.00037,
+   "MEL": -0.00073,
+   "CUBE": -9e-05,
+   "CONV": -0.00035
+  },
+  "FX-HongKong MOVE": {
+   "calls": 2654,
+   "FULL": [
+    0.00026,
+    -0.00136,
+    0.00188
+   ],
+   "controls": -0.00062,
+   "CHORD": -0.00043,
+   "MEL": 0.00066,
+   "CUBE": -0.00028,
+   "CONV": -0.00016
+  },
+  "FX-HongKong RANGE": {
+   "calls": 2654,
+   "FULL": [
+    0.01132,
+    0.00376,
+    0.01927
+   ],
+   "controls": 0.00766,
+   "CHORD": 0.00154,
+   "MEL": 0.01154,
+   "CUBE": 0.00722,
+   "CONV": 0.0096
+  },
+  "FX-India MOVE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00087,
+    -0.00167,
+    7e-05
+   ],
+   "controls": -0.00069,
+   "CHORD": -0.00049,
+   "MEL": -0.00075,
+   "CUBE": -2e-05,
+   "CONV": -0.00034
+  },
+  "FX-India RANGE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00061,
+    -0.00195,
+    0.00078
+   ],
+   "controls": -0.00061,
+   "CHORD": -0.00039,
+   "MEL": -0.00023,
+   "CUBE": -0.00043,
+   "CONV": -0.00015
+  },
+  "FX-Japan MOVE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00049,
+    -0.00179,
+    0.00084
+   ],
+   "controls": -0.00076,
+   "CHORD": -0.0003,
+   "MEL": -0.00031,
+   "CUBE": -0.00025,
+   "CONV": -7e-05
+  },
+  "FX-Japan RANGE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00065,
+    -0.00244,
+    0.00112
+   ],
+   "controls": -0.00067,
+   "CHORD": -0.00031,
+   "MEL": -0.00057,
+   "CUBE": -0.0002,
+   "CONV": -0.00034
+  },
+  "FX-Malaysia MOVE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00033,
+    -0.00247,
+    0.00176
+   ],
+   "controls": -0.00042,
+   "CHORD": 0.00028,
+   "MEL": -0.00051,
+   "CUBE": -0.0004,
+   "CONV": -0.00036
+  },
+  "FX-Malaysia RANGE": {
+   "calls": 2654,
+   "FULL": [
+    0.00335,
+    -0.00102,
+    0.00866
+   ],
+   "controls": -0.00029,
+   "CHORD": -0.00019,
+   "MEL": 0.00374,
+   "CUBE": 0.00043,
+   "CONV": -0.0002
+  },
+  "FX-Mexico MOVE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00035,
+    -0.00182,
+    0.00122
+   ],
+   "controls": -0.00067,
+   "CHORD": -0.00039,
+   "MEL": -0.00053,
+   "CUBE": 0.00036,
+   "CONV": -0.00033
+  },
+  "FX-Mexico RANGE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00069,
+    -0.00288,
+    0.00138
+   ],
+   "controls": -0.00026,
+   "CHORD": -0.00035,
+   "MEL": -0.00044,
+   "CUBE": -2e-05,
+   "CONV": -0.00023
+  },
+  "FX-NewZealand MOVE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00085,
+    -0.00225,
+    0.00044
+   ],
+   "controls": -0.00046,
+   "CHORD": -0.00052,
+   "MEL": -0.00062,
+   "CUBE": -6e-05,
+   "CONV": -0.00032
+  },
+  "FX-NewZealand RANGE": {
+   "calls": 2654,
+   "FULL": [
+    0.00027,
+    -0.00237,
+    0.00299
+   ],
+   "controls": -0.00066,
+   "CHORD": -0.00039,
+   "MEL": 0.0004,
+   "CUBE": -0.00017,
+   "CONV": -0.00034
+  },
+  "FX-Norway MOVE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00085,
+    -0.00164,
+    -0.00011
+   ],
+   "controls": -0.0008,
+   "CHORD": -0.00042,
+   "MEL": -0.00076,
+   "CUBE": -3e-05,
+   "CONV": 0.0
+  },
+  "FX-Norway RANGE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00022,
+    -0.00216,
+    0.0016
+   ],
+   "controls": -0.00073,
+   "CHORD": -0.00044,
+   "MEL": 0.0003,
+   "CUBE": -0.00034,
+   "CONV": -0.00016
+  },
+  "FX-Singapore MOVE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00109,
+    -0.00184,
+    -0.00033
+   ],
+   "controls": -0.00034,
+   "CHORD": -0.00045,
+   "MEL": -0.00084,
+   "CUBE": -0.00028,
+   "CONV": -0.00026
+  },
+  "FX-Singapore RANGE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00048,
+    -0.00198,
+    0.00123
+   ],
+   "controls": -2e-05,
+   "CHORD": -0.0004,
+   "MEL": -0.00061,
+   "CUBE": 0.00029,
+   "CONV": 0.00011
+  },
+  "FX-SouthAfrica MOVE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00028,
+    -0.00152,
+    0.00096
+   ],
+   "controls": -0.00056,
+   "CHORD": -0.00041,
+   "MEL": -9e-05,
+   "CUBE": -3e-05,
+   "CONV": -0.00028
+  },
+  "FX-SouthAfrica RANGE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00023,
+    -0.00215,
+    0.00177
+   ],
+   "controls": -0.00041,
+   "CHORD": 0.00076,
+   "MEL": -0.00077,
+   "CUBE": -0.00038,
+   "CONV": -0.00028
+  },
+  "FX-SouthKorea MOVE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00081,
+    -0.00205,
+    0.00034
+   ],
+   "controls": -0.00012,
+   "CHORD": -0.00034,
+   "MEL": -0.00056,
+   "CUBE": -0.00028,
+   "CONV": -0.00033
+  },
+  "FX-SouthKorea RANGE": {
+   "calls": 2654,
+   "FULL": [
+    0.00126,
+    -0.00092,
+    0.00392
+   ],
+   "controls": 0.00038,
+   "CHORD": 0.00047,
+   "MEL": 0.00097,
+   "CUBE": -7e-05,
+   "CONV": -0.00022
+  },
+  "FX-Sweden MOVE": {
+   "calls": 2654,
+   "FULL": [
+    -7e-05,
+    -0.00284,
+    0.00265
+   ],
+   "controls": -0.00039,
+   "CHORD": -6e-05,
+   "MEL": -0.00025,
+   "CUBE": -0.00016,
+   "CONV": -0.00013
+  },
+  "FX-Sweden RANGE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00048,
+    -0.00213,
+    0.00096
+   ],
+   "controls": -0.00079,
+   "CHORD": -5e-05,
+   "MEL": -0.00047,
+   "CUBE": -0.00027,
+   "CONV": -0.00031
+  },
+  "FX-Switzerland MOVE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00085,
+    -0.00228,
+    0.00057
+   ],
+   "controls": -0.00032,
+   "CHORD": -0.00039,
+   "MEL": -0.00056,
+   "CUBE": -0.0003,
+   "CONV": 4e-05
+  },
+  "FX-Switzerland RANGE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00109,
+    -0.00192,
+    -0.00034
+   ],
+   "controls": -0.00064,
+   "CHORD": -0.00051,
+   "MEL": -0.00078,
+   "CUBE": -0.00027,
+   "CONV": -0.00035
+  },
+  "FX-Taiwan MOVE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00063,
+    -0.00219,
+    0.00089
+   ],
+   "controls": -0.00037,
+   "CHORD": -0.00046,
+   "MEL": -0.00031,
+   "CUBE": -0.0002,
+   "CONV": -0.0001
+  },
+  "FX-Taiwan RANGE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00018,
+    -0.00262,
+    0.00231
+   ],
+   "controls": -0.00059,
+   "CHORD": -0.00042,
+   "MEL": -0.00018,
+   "CUBE": 5e-05,
+   "CONV": -0.00011
+  },
+  "FX-Thailand MOVE": {
+   "calls": 2654,
+   "FULL": [
+    0.00084,
+    -0.00156,
+    0.00306
+   ],
+   "controls": -0.00071,
+   "CHORD": -1e-05,
+   "MEL": -0.00034,
+   "CUBE": 0.00151,
+   "CONV": -0.00027
+  },
+  "FX-Thailand RANGE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00044,
+    -0.00271,
+    0.00174
+   ],
+   "controls": -0.00067,
+   "CHORD": -0.00038,
+   "MEL": -0.0004,
+   "CUBE": -2e-05,
+   "CONV": -2e-05
+  },
+  "FX-UnitedKingdom MOVE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00057,
+    -0.0014,
+    0.0003
+   ],
+   "controls": -0.00048,
+   "CHORD": -8e-05,
+   "MEL": -0.00058,
+   "CUBE": -0.00022,
+   "CONV": -0.00031
+  },
+  "FX-UnitedKingdom RANGE": {
+   "calls": 2654,
+   "FULL": [
+    -0.00075,
+    -0.00163,
+    0.00015
+   ],
+   "controls": -0.00093,
+   "CHORD": -0.00045,
+   "MEL": -0.0006,
+   "CUBE": -6e-05,
+   "CONV": -0.00031
+  },
+  "FX-Venezuela MOVE": {
+   "calls": 2654,
+   "FULL": [
+    0.00734,
+    -0.00014,
+    0.01582
+   ],
+   "controls": 0.00278,
+   "CHORD": -0.00052,
+   "MEL": 0.00836,
+   "CUBE": 0.0005,
+   "CONV": 0.00424
+  },
+  "FX-Venezuela RANGE": {
+   "calls": 2654,
+   "FULL": [
+    0.0107,
+    0.00118,
+    0.02078
+   ],
+   "controls": 0.0036,
+   "CHORD": -0.00014,
+   "MEL": 0.0116,
+   "CUBE": 0.00482,
+   "CONV": 0.01099
+  },
+  "Melbourne MOVE": {
+   "calls": 3622,
+   "FULL": [
+    0.00049,
+    -0.00154,
+    0.00267
+   ],
+   "controls": -0.00052,
+   "CHORD": 0.00081,
+   "MEL": 3e-05,
+   "CUBE": -0.00025,
+   "CONV": 0.00016
+  },
+  "Melbourne RANGE": {
+   "calls": 3622,
+   "FULL": [
+    -0.00019,
+    -0.00166,
+    0.00125
+   ],
+   "controls": 0.00016,
+   "CHORD": -0.00047,
+   "MEL": -0.00019,
+   "CUBE": 0.00024,
+   "CONV": -0.00029
+  },
+  "NATGAS MOVE": {
+   "calls": 2676,
+   "FULL": [
+    -0.00089,
+    -0.00168,
+    -0.00014
+   ],
+   "controls": -0.00077,
+   "CHORD": -0.00043,
+   "MEL": -0.00058,
+   "CUBE": -0.00031,
+   "CONV": -0.00025
+  },
+  "NATGAS RANGE": {
+   "calls": 2676,
+   "FULL": [
+    -0.00071,
+    -0.00266,
+    0.00096
+   ],
+   "controls": -0.00053,
+   "CHORD": -0.00042,
+   "MEL": -0.00076,
+   "CUBE": 0.00018,
+   "CONV": -0.00034
+  },
+  "NewYork MOVE": {
+   "calls": 1433,
+   "FULL": [
+    0.03359,
+    0.01717,
+    0.05211
+   ],
+   "controls": -0.00093,
+   "CHORD": 0.03469,
+   "MEL": -0.00041,
+   "CUBE": -0.00035,
+   "CONV": -0.00051
+  },
+  "NewYork RANGE": {
+   "calls": 1433,
+   "FULL": [
+    0.00278,
+    -0.00175,
+    0.00733
+   ],
+   "controls": 0.00029,
+   "CHORD": 0.00342,
+   "MEL": -0.00077,
+   "CUBE": 0.00153,
+   "CONV": -0.00059
+  },
+  "Seattle MOVE": {
+   "calls": 24353,
+   "FULL": [
+    0.0026,
+    0.0016,
+    0.00359
+   ],
+   "controls": 0.00036,
+   "CHORD": 0.00031,
+   "MEL": 0.00028,
+   "CUBE": 0.00241,
+   "CONV": 0.00021
+  },
+  "Seattle RANGE": {
+   "calls": 24353,
+   "FULL": [
+    0.00065,
+    0.0002,
+    0.00113
+   ],
+   "controls": 0.00086,
+   "CHORD": -6e-05,
+   "MEL": 0.00012,
+   "CUBE": 0.00071,
+   "CONV": -6e-05
+  },
+  "VIX MOVE": {
+   "calls": 2700,
+   "FULL": [
+    -0.0007,
+    -0.00201,
+    0.00073
+   ],
+   "controls": -0.00071,
+   "CHORD": -0.00045,
+   "MEL": -0.00058,
+   "CUBE": -5e-05,
+   "CONV": -0.00024
+  },
+  "VIX RANGE": {
+   "calls": 2700,
+   "FULL": [
+    -0.00019,
+    -0.00168,
+    0.00141
+   ],
+   "controls": -0.00082,
+   "CHORD": 2e-05,
+   "MEL": -0.00025,
+   "CUBE": -0.00028,
+   "CONV": -0.00017
+  },
+  "WTI MOVE": {
+   "calls": 2658,
+   "FULL": [
+    -0.00108,
+    -0.00209,
+    -0.00013
+   ],
+   "controls": -0.0008,
+   "CHORD": -0.00045,
+   "MEL": -0.00083,
+   "CUBE": -0.00027,
+   "CONV": -0.0002
+  },
+  "WTI RANGE": {
+   "calls": 2658,
+   "FULL": [
+    5e-05,
+    -0.00196,
+    0.00223
+   ],
+   "controls": -0.00044,
+   "CHORD": -0.00044,
+   "MEL": 0.00034,
+   "CUBE": 0.0001,
+   "CONV": 0.00093
+  },
+  "jockey B Prebble MOVE": {
+   "calls": 1320,
+   "FULL": [
+    -0.0002,
+    -0.00255,
+    0.00244
+   ],
+   "controls": 0.00045,
+   "CHORD": 0.0,
+   "MEL": -0.00023,
+   "CUBE": -8e-05,
+   "CONV": -0.00018
+  },
+  "jockey B Prebble RANGE": {
+   "calls": 1320,
+   "FULL": [
+    -0.00057,
+    -0.00259,
+    0.00137
+   ],
+   "controls": -0.0003,
+   "CHORD": 0.0,
+   "MEL": -0.00055,
+   "CUBE": -0.0004,
+   "CONV": -9e-05
+  },
+  "jockey C K Tong MOVE": {
+   "calls": 523,
+   "FULL": [
+    -0.00081,
+    -0.00411,
+    0.00256
+   ],
+   "controls": -0.00069,
+   "CHORD": 0.0,
+   "MEL": -0.00131,
+   "CUBE": 0.00043,
+   "CONV": -0.00092
+  },
+  "jockey C K Tong RANGE": {
+   "calls": 523,
+   "FULL": [
+    -0.00215,
+    -0.00356,
+    -0.0008
+   ],
+   "controls": -0.00065,
+   "CHORD": 0.0,
+   "MEL": -0.00212,
+   "CUBE": -0.00098,
+   "CONV": -0.00083
+  },
+  "jockey C Schofield MOVE": {
+   "calls": 847,
+   "FULL": [
+    -0.00116,
+    -0.00265,
+    0.00025
+   ],
+   "controls": -0.00079,
+   "CHORD": 0.0,
+   "MEL": -0.00107,
+   "CUBE": -0.0007,
+   "CONV": -0.00079
+  },
+  "jockey C Schofield RANGE": {
+   "calls": 847,
+   "FULL": [
+    -0.00105,
+    -0.00239,
+    0.00043
+   ],
+   "controls": -0.00125,
+   "CHORD": 0.0,
+   "MEL": -0.00104,
+   "CUBE": -0.00051,
+   "CONV": -0.00054
+  },
+  "jockey J Moreira MOVE": {
+   "calls": 1920,
+   "FULL": [
+    -0.00019,
+    -0.00189,
+    0.00174
+   ],
+   "controls": -0.00096,
+   "CHORD": 0.0,
+   "MEL": -0.00062,
+   "CUBE": 0.00029,
+   "CONV": -0.00038
+  },
+  "jockey J Moreira RANGE": {
+   "calls": 1920,
+   "FULL": [
+    -0.00038,
+    -0.00573,
+    0.00546
+   ],
+   "controls": -0.00057,
+   "CHORD": 0.0,
+   "MEL": -0.00019,
+   "CUBE": -0.00051,
+   "CONV": -0.00046
+  },
+  "jockey K C Leung MOVE": {
+   "calls": 1386,
+   "FULL": [
+    -0.0006,
+    -0.00393,
+    0.00279
+   ],
+   "controls": -0.00069,
+   "CHORD": 0.0,
+   "MEL": -0.00055,
+   "CUBE": -0.00054,
+   "CONV": -0.00055
+  },
+  "jockey K C Leung RANGE": {
+   "calls": 1386,
+   "FULL": [
+    1e-05,
+    -0.00193,
+    0.00162
+   ],
+   "controls": -0.00084,
+   "CHORD": 0.0,
+   "MEL": 0.00021,
+   "CUBE": -0.00039,
+   "CONV": -0.00017
+  },
+  "jockey M Chadwick MOVE": {
+   "calls": 936,
+   "FULL": [
+    -0.00075,
+    -0.00229,
+    0.00079
+   ],
+   "controls": -0.0008,
+   "CHORD": 0.0,
+   "MEL": -0.0009,
+   "CUBE": -0.00026,
+   "CONV": -0.00058
+  },
+  "jockey M Chadwick RANGE": {
+   "calls": 936,
+   "FULL": [
+    0.00041,
+    -0.00208,
+    0.00305
+   ],
+   "controls": -0.00037,
+   "CHORD": 0.0,
+   "MEL": 0.00084,
+   "CUBE": -0.00064,
+   "CONV": -0.00066
+  },
+  "jockey N Callan MOVE": {
+   "calls": 1535,
+   "FULL": [
+    -0.00081,
+    -0.00238,
+    0.00099
+   ],
+   "controls": -0.00093,
+   "CHORD": 0.0,
+   "MEL": -0.00096,
+   "CUBE": -0.00018,
+   "CONV": -0.00061
+  },
+  "jockey N Callan RANGE": {
+   "calls": 1535,
+   "FULL": [
+    -0.001,
+    -0.00184,
+    -0.0001
+   ],
+   "controls": -0.00057,
+   "CHORD": 0.0,
+   "MEL": -0.00095,
+   "CUBE": -0.00053,
+   "CONV": -0.00029
+  },
+  "jockey N Rawiller MOVE": {
+   "calls": 1044,
+   "FULL": [
+    -0.00078,
+    -0.00186,
+    0.00035
+   ],
+   "controls": -0.00125,
+   "CHORD": 0.0,
+   "MEL": -0.0009,
+   "CUBE": -0.00021,
+   "CONV": -0.0002
+  },
+  "jockey N Rawiller RANGE": {
+   "calls": 1044,
+   "FULL": [
+    -0.00109,
+    -0.00263,
+    0.00053
+   ],
+   "controls": -0.0009,
+   "CHORD": 0.0,
+   "MEL": -0.00116,
+   "CUBE": -0.00044,
+   "CONV": -0.0001
+  },
+  "jockey O Doleuze MOVE": {
+   "calls": 798,
+   "FULL": [
+    -0.00081,
+    -0.00253,
+    0.00086
+   ],
+   "controls": -0.00068,
+   "CHORD": 0.0,
+   "MEL": -0.00078,
+   "CUBE": -0.00043,
+   "CONV": -0.00091
+  },
+  "jockey O Doleuze RANGE": {
+   "calls": 798,
+   "FULL": [
+    -0.00123,
+    -0.00282,
+    0.00036
+   ],
+   "controls": -0.0006,
+   "CHORD": 0.0,
+   "MEL": -0.00151,
+   "CUBE": -0.00019,
+   "CONV": -0.00052
+  },
+  "jockey S Clipperton MOVE": {
+   "calls": 462,
+   "FULL": [
+    -0.00182,
+    -0.00476,
+    0.00142
+   ],
+   "controls": -0.00028,
+   "CHORD": 0.0,
+   "MEL": -0.00163,
+   "CUBE": -0.00111,
+   "CONV": 0.00013
+  },
+  "jockey S Clipperton RANGE": {
+   "calls": 462,
+   "FULL": [
+    -0.00099,
+    -0.00447,
+    0.0024
+   ],
+   "controls": -1e-05,
+   "CHORD": 0.0,
+   "MEL": -0.00078,
+   "CUBE": -0.00079,
+   "CONV": -0.00023
+  },
+  "jockey Y T Cheng MOVE": {
+   "calls": 668,
+   "FULL": [
+    -0.002,
+    -0.00327,
+    -0.00083
+   ],
+   "controls": -0.00071,
+   "CHORD": 0.0,
+   "MEL": -0.00196,
+   "CUBE": -0.00086,
+   "CONV": -0.00096
+  },
+  "jockey Y T Cheng RANGE": {
+   "calls": 668,
+   "FULL": [
+    -0.00143,
+    -0.00439,
+    0.00079
+   ],
+   "controls": -0.00083,
+   "CHORD": 0.0,
+   "MEL": -0.00124,
+   "CUBE": -0.00085,
+   "CONV": -0.00059
+  },
+  "jockey Z Purton MOVE": {
+   "calls": 1583,
+   "FULL": [
+    -0.00091,
+    -0.00204,
+    0.00047
+   ],
+   "controls": -0.00044,
+   "CHORD": 0.0,
+   "MEL": -0.00108,
+   "CUBE": -0.00019,
+   "CONV": -0.0004
+  },
+  "jockey Z Purton RANGE": {
+   "calls": 1583,
+   "FULL": [
+    0.00082,
+    -0.00161,
+    0.00347
+   ],
+   "controls": -0.00062,
+   "CHORD": 0.0,
+   "MEL": 0.00102,
+   "CUBE": -0.0003,
+   "CONV": 0.00116
+  }
+ },
+ "learning_by_third": {
+  "markets MOVE": [
+   -0.00068,
+   0.00012,
+   8e-05
+  ],
+  "markets RANGE": [
+   0.00081,
+   0.00075,
+   0.00041
+  ],
+  "racing MOVE": [
+   -0.00145,
+   -0.00081,
+   -1e-05
+  ],
+  "racing RANGE": [
+   -0.0009,
+   -0.00062,
+   -6e-05
+  ],
+  "weather MOVE": [
+   0.00252,
+   0.00421,
+   0.00353
+  ],
+  "weather RANGE": [
+   -2e-05,
+   0.00094,
+   0.00121
+  ]
+ },
+ "voice_correlation_with_what_HEX_missed": {
+  "markets MOVE": {
+   "cube0": 0.0034,
+   "cube0odd": 0.0049,
+   "cube1": -0.0068,
+   "cube1odd": -0.0029,
+   "cube2": -0.0137,
+   "cube2odd": -0.0125,
+   "melody6": 0.0107,
+   "inversion6": 0.0046,
+   "melody36": -0.0011,
+   "inversion36": 0.0035,
+   "augmentation6": 0.0116,
+   "chord": 0.0033,
+   "progression6": 0.0035,
+   "silence": -0.003
+  },
+  "markets RANGE": {
+   "cube0": 0.0027,
+   "cube0odd": 0.0007,
+   "cube1": 0.0078,
+   "cube1odd": 0.0118,
+   "cube2": 0.0103,
+   "cube2odd": 0.0116,
+   "melody6": 0.0244,
+   "inversion6": 0.0187,
+   "melody36": 0.0122,
+   "inversion36": 0.0165,
+   "augmentation6": null,
+   "chord": 0.0081,
+   "progression6": 0.0092,
+   "silence": 0.0097
+  },
+  "racing MOVE": {
+   "cube0": -0.0006,
+   "cube0odd": -0.0062,
+   "cube1": -0.0053,
+   "cube1odd": -0.0056,
+   "cube2": 0.0094,
+   "cube2odd": 0.0033,
+   "melody6": -0.0073,
+   "inversion6": -0.0135,
+   "melody36": -0.0121,
+   "inversion36": -0.0075,
+   "augmentation6": -0.0108,
+   "chord": null,
+   "progression6": null,
+   "silence": -0.0155
+  },
+  "racing RANGE": {
+   "cube0": -0.0068,
+   "cube0odd": -0.0111,
+   "cube1": -0.0206,
+   "cube1odd": -0.0159,
+   "cube2": -0.0037,
+   "cube2odd": -0.0031,
+   "melody6": 0.0173,
+   "inversion6": 0.0088,
+   "melody36": 0.0038,
+   "inversion36": 0.0253,
+   "augmentation6": null,
+   "chord": null,
+   "progression6": null,
+   "silence": 0.0094
+  },
+  "weather MOVE": {
+   "cube0": 0.0135,
+   "cube0odd": 0.0119,
+   "cube1": 0.0016,
+   "cube1odd": 0.0021,
+   "cube2": 0.0428,
+   "cube2odd": 0.0415,
+   "melody6": 0.0276,
+   "inversion6": 0.0139,
+   "melody36": 0.009,
+   "inversion36": 0.0097,
+   "augmentation6": 0.0052,
+   "chord": 0.022,
+   "progression6": 0.0485,
+   "silence": 0.0086
+  },
+  "weather RANGE": {
+   "cube0": -0.0062,
+   "cube0odd": -0.0057,
+   "cube1": 0.0113,
+   "cube1odd": 0.0152,
+   "cube2": 0.0312,
+   "cube2odd": 0.0283,
+   "melody6": 0.0114,
+   "inversion6": -0.0034,
+   "melody36": -0.0064,
+   "inversion36": -0.0116,
+   "augmentation6": null,
+   "chord": 0.0074,
+   "progression6": 0.0033,
+   "silence": -0.004
+  }
+ },
+ "transformation_profile_6_notes": {
+  "markets": {
+   "calls": 69535,
+   "median_distance": {
+    "identity": 0.0539,
+    "inversion": 0.0561,
+    "augmentation": 0.0559
+   },
+   "inverted_is_nearer": 0.473,
+   "half_speed_is_nearer": 0.473
+  },
+  "racing": {
+   "calls": 11474,
+   "median_distance": {
+    "identity": 0.0547,
+    "inversion": 0.0604,
+    "augmentation": 0.0554
+   },
+   "inverted_is_nearer": 0.4411,
+   "half_speed_is_nearer": 0.4808
+  },
+  "weather": {
+   "calls": 53570,
+   "median_distance": {
+    "identity": 0.0286,
+    "inversion": 0.0294,
+    "augmentation": 0.0297
+   },
+   "inverted_is_nearer": 0.4723,
+   "half_speed_is_nearer": 0.4693
+  }
+ },
+ "M8_self_similarity": {
+  "markets, direction states": {
+   "scale 1 against scale 0": {
+    "samples": 12158,
+    "total_variation": 0.0475,
+    "sampling_noise_95th_percentile": 0.0348,
+    "within_sampling_noise": false
+   },
+   "scale 2 against scale 0": {
+    "samples": 1901,
+    "total_variation": 0.1352,
+    "sampling_noise_95th_percentile": 0.0899,
+    "within_sampling_noise": false
+   }
+  },
+  "markets, size states": {
+   "scale 1 against scale 0": {
+    "samples": 12158,
+    "total_variation": 0.2526,
+    "sampling_noise_95th_percentile": 0.0363,
+    "within_sampling_noise": false
+   },
+   "scale 2 against scale 0": {
+    "samples": 1901,
+    "total_variation": 0.4766,
+    "sampling_noise_95th_percentile": 0.0928,
+    "within_sampling_noise": false
+   }
+  },
+  "weather, direction states": {
+   "scale 1 against scale 0": {
+    "samples": 9011,
+    "total_variation": 0.2354,
+    "sampling_noise_95th_percentile": 0.04,
+    "within_sampling_noise": false
+   },
+   "scale 2 against scale 0": {
+    "samples": 1484,
+    "total_variation": 0.2514,
+    "sampling_noise_95th_percentile": 0.0974,
+    "within_sampling_noise": false
+   }
+  },
+  "weather, size states": {
+   "scale 1 against scale 0": {
+    "samples": 9011,
+    "total_variation": 0.3081,
+    "sampling_noise_95th_percentile": 0.0406,
+    "within_sampling_noise": false
+   },
+   "scale 2 against scale 0": {
+    "samples": 1484,
+    "total_variation": 0.6076,
+    "sampling_noise_95th_percentile": 0.1023,
+    "within_sampling_noise": false
+   }
+  },
+  "racing, direction states": {
+   "scale 1 against scale 0": {
+    "samples": 2158,
+    "total_variation": 0.0724,
+    "sampling_noise_95th_percentile": 0.0759,
+    "within_sampling_noise": true
+   },
+   "scale 2 against scale 0": {
+    "samples": 305,
+    "total_variation": 0.1555,
+    "sampling_noise_95th_percentile": 0.2019,
+    "within_sampling_noise": true
+   }
+  },
+  "racing, size states": {
+   "scale 1 against scale 0": {
+    "samples": 2158,
+    "total_variation": 0.2912,
+    "sampling_noise_95th_percentile": 0.0815,
+    "within_sampling_noise": false
+   },
+   "scale 2 against scale 0": {
+    "samples": 305,
+    "total_variation": 0.6896,
+    "sampling_noise_95th_percentile": 0.2211,
+    "within_sampling_noise": false
+   }
+  }
+ },
+ "M1": {
+  "BTC-USD MOVE": 0.0,
+  "BTC-USD RANGE": 0.0,
+  "Chicago MOVE": 0.0,
+  "Chicago RANGE": 0.0
+ },
+ "M2": {
+  "FX-Euro MOVE": {
+   "calls": 1583,
+   "largest_difference": 0.0,
+   "calls_that_differ": 0
+  },
+  "NewYork MOVE": {
+   "calls": 849,
+   "largest_difference": 0.0,
+   "calls_that_differ": 0
+  },
+  "FX-Euro RANGE": {
+   "calls": 1583,
+   "largest_difference": 0.0,
+   "calls_that_differ": 0
+  }
+ },
+ "calls": 280252,
+ "seconds": 2227,
+ "cost": {
+  "seconds_total": 2227,
+  "slowest_series_read_seconds": 1014.8,
+  "ledger_megabytes": 62.1
+ }
+}
