@@ -82,7 +82,7 @@ export default async function(req: Request): Promise<Response> {
       const out = { bars: md.dataPoints, hex_7_0: {}, state_6_5: {}, first_250_steps: {} };
       for (const read of ['MOVE', 'RANGE'] as const) {
         const baseline = observeBaseline(md.returns, read);
-        const s7 = walkHex7(md.returns, read, baseline).steps, s65 = walkHex(md.returns, read, baseline).steps;
+        const s7 = walkHex7(md.returns, read, baseline, false, md.returnDays).steps, s65 = walkHex(md.returns, read, baseline).steps;
         const name = read === 'MOVE' ? 'direction' : 'move_size';
         const later = (steps) => steps.slice(WARMUP);
         out.hex_7_0[name] = score(later(s7)); out.state_6_5[name] = score(later(s65));

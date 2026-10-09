@@ -32,11 +32,25 @@ for (let end = N - NIGHTS; end <= N; end++) {
   const bars = { closes: closes.slice(0, end), timestamps: ts.slice(0, end) };
   const returns = []; for (let i = 1; i < end; i++) returns.push(Math.log(bars.closes[i] / bars.closes[i - 1]));
   await M.scoreOpenCalls(base44, 'BTC', bars);
-  lastRun = M.runEngines(returns, live);
+  lastRun = M.runEngines(returns, live, ts.slice(1, end).map((t) => Math.floor(t / 86400))); // dated, as the nightly job runs it: the clock takes part
   await M.logCalls(base44, M.rowsFor('BTC', bars, returns, lastRun, 'nightly'));
 }
 const L = db.CallLedger.rows;
 check('four calls a night: two reads, two engines', L.length === (NIGHTS + 1) * 4);
+// ---- the clock: a dated series has four voices, an undated one three, and the undated call is the engine's call without the clock
+{
+  const returns = []; for (let i = 1; i < N; i++) returns.push(Math.log(closes[i] / closes[i - 1]));
+  const t0 = Date.now(), plain = M.runEngines(returns, live), t1 = Date.now(), dated = lastRun, again = M.runEngines(returns, live, ts.slice(1).map((t) => Math.floor(t / 86400))), t2 = Date.now();
+  const v = (run, read) => run.calls['hex-7.0'][read].views;
+  check('clock: a dated series is read with the clock, an undated one without', dated.clock === true && plain.clock === false);
+  check('clock: four voices with dates, three without', ['MOVE', 'RANGE'].every((r) => dated.learned[r].influence.length === 4 && plain.learned[r].influence.length === 3 && v(dated, r).readings.length === 3 && v(dated, r).readings[2].label === 'clock' && v(plain, r).readings.length === 2));
+  check('clock: influences sum to one', ['MOVE', 'RANGE'].every((r) => Math.abs(dated.learned[r].influence.reduce((a, b) => a + b, 0) - 1) < 1e-9));
+  check('clock: the null, and the 6.5 engine, are the same with and without dates', ['MOVE', 'RANGE'].every((r) => v(dated, r).baseline === v(plain, r).baseline && dated.calls['state-6.5'][r].p === plain.calls['state-6.5'][r].p));
+  check('clock: the same dated series gives the same call twice', ['MOVE', 'RANGE'].every((r) => again.calls['hex-7.0'][r].p === dated.calls['hex-7.0'][r].p));
+  check('clock: dates of the wrong count are not used', M.runEngines(returns, live, [1, 2, 3]).clock === false);
+  console.log(`  ${N - 1} changes, both engines, both reads: ${t1 - t0} ms without dates, ${t2 - t1} ms with`);
+  check('clock: a dated series of 5,387 bars is read in under 5 seconds', t2 - t1 < 5000);
+}
 check('logging the same night twice adds nothing', (await M.logCalls(base44, M.rowsFor('BTC', { closes, timestamps: ts }, [0.01], lastRun, 'nightly'))) === 0);
 check('every call but the last night is scored', L.filter((r) => r.scored).length === NIGHTS * 4);
 // a call is scored only from the bar after it, with the threshold fixed at call time
@@ -101,7 +115,7 @@ check('rule: shown and still ahead -> stays', M.summarise('RANGE', mk(400, 80, 0
 {
   const done = L.filter((r) => r.scored), missed = done.filter((r) => (r.probability >= 0.5 ? 1 : 0) !== r.outcome);
   check('cycle 1: every call carries its views, written before the outcome', L.every((r) => typeof r.raw === 'number' && typeof r.views === 'string') && L.filter((r) => !r.scored).length === 4);
-  check('cycle 1: 7.0 records what each memory and each of its models said, and what it had learned', L.filter((r) => r.engine === 'hex-7.0').every((r) => { const v = JSON.parse(r.views), k = JSON.parse(r.learned); return v.memories.length >= 7 && v.readings.length === 2 && Math.abs(v.memories.reduce((s, m) => s + m.w, 0) - 1) < 1e-3 && k.beta.length === 14 && Math.abs(k.influence.reduce((a, b) => a + b, 0) - 1) < 1e-3; }));
+  check('cycle 1: 7.0 records what each memory, each of its models and the clock said, and what it had learned', L.filter((r) => r.engine === 'hex-7.0').every((r) => { const v = JSON.parse(r.views), k = JSON.parse(r.learned); return v.memories.length >= 7 && v.readings.length === 3 && v.readings[2].label === 'clock' && k.influence.length === 4 && Math.abs(v.memories.reduce((s, m) => s + m.w, 0) - 1) < 1e-3 && k.beta.length === 14 && Math.abs(k.influence.reduce((a, b) => a + b, 0) - 1) < 1e-3; }));
   check('cycle 1: 6.5 records what each memory and each reading of the state said', L.filter((r) => r.engine === 'state-6.5').every((r) => { const v = JSON.parse(r.views); return v.memories.length >= 7 && v.readings.length === 16; }));
   check('cycle 1: calibration left the side where the engine put it', L.every((r) => (r.probability >= 0.5) === (r.raw >= 0.5)));
   check('cycle 3: closeness = 0.75 + baseline part + structure part + strength part, on every call', done.every((r) => Math.abs(0.75 + r.part_baseline + r.part_structure + r.part_strength - r.closeness) < 5e-6));

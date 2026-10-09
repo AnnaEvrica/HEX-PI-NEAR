@@ -110,10 +110,12 @@ export interface ProbabilityRead {
 
 const ENOUGH_RECORD = 200;
 
-export function readProbability(returns: number[], live: LiveEngines = DEFAULT_LIVE): ProbabilityRead | null {
-  const r = (returns || []).filter((x) => Number.isFinite(x));
+/** `days`: the date each change was completed (whole days since 1 January 1970), one per change. A series without dates is read without the clock. */
+export function readProbability(returns: number[], live: LiveEngines = DEFAULT_LIVE, days?: number[] | null): ProbabilityRead | null {
+  const all = returns || [], keep = all.map((x) => Number.isFinite(x));
+  const r = all.filter((_, i) => keep[i]);
   if (r.length < MIN_RETURNS) return null;
-  const run = runEngines(r, live);
+  const run = runEngines(r, live, days && days.length === all.length ? days.filter((_, i) => keep[i]) : null);
   if (!run || run.history < MIN_SCORED_STEPS) return null;
   const move = run.calls[run.live.MOVE].MOVE, range = run.calls[run.live.RANGE].RANGE;
   const prob: ReadNumbers = {

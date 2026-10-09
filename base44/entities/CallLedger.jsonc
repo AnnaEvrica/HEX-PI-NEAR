@@ -57,7 +57,7 @@
     },
     "learned": {
       "type": "string",
-      "description": "7.0 only. JSON, written before the outcome: the coefficients it had learned on this series and the share of the call held by the null and by each of its models"
+      "description": "7.0 only. JSON, written before the outcome: the coefficients it had learned on this series and the share of the call held by the null and by each of its models (three shares; four when the series carried dates and the clock took part)"
     },
     "shown": {
       "type": "boolean",

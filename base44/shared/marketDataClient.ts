@@ -69,9 +69,11 @@ export async function fetchYahooReturns(rawTicker: string, lookbackDays = 730) {
     : nowSec >= lastTs + 86400;
   const completedBars = lastBarFinished ? closes.length : Math.max(0, closes.length - 1);
   const completedCloses = closes.slice(0, completedBars);
-  const returns: number[] = [];
+  // returnDays[k] is the date returns[k] was completed, in whole days since
+  // 1 January 1970: what the engine's clock reads.
+  const returns: number[] = [], returnDays: number[] = [];
   for (let i = 1; i < completedCloses.length; i++) {
-    if (completedCloses[i] && completedCloses[i - 1]) returns.push(Math.log(completedCloses[i] / completedCloses[i - 1]));
+    if (completedCloses[i] && completedCloses[i - 1]) { returns.push(Math.log(completedCloses[i] / completedCloses[i - 1])); returnDays.push(Math.floor(timestamps[i] / 86400)); }
   }
   return {
     ticker,
@@ -83,6 +85,7 @@ export async function fetchYahooReturns(rawTicker: string, lookbackDays = 730) {
     volumes,
     timestamps,
     returns,
+    returnDays,
     latestPrice: closes[closes.length - 1] ?? null,
     dataPoints: closes.length,
   };

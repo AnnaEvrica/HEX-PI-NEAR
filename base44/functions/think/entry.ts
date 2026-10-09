@@ -464,7 +464,7 @@ Return JSON with:
             const md = item.data;
             // The read is computed on finished bars only; chart levels and
             // the latest price use the live bar as well.
-            const basePipeline = runPipeline(md.completedCloses, item.requestedTicker, historyTexts, false, await getLive());
+            const basePipeline = runPipeline(md.completedCloses, item.requestedTicker, historyTexts, false, await getLive(), md.returnDays);
             // Both engines' calls go into the ledger before the outcome exists.
             if (basePipeline.read) {
               const bars = { closes: md.completedCloses, timestamps: md.timestamps.slice(0, md.completedBars) };

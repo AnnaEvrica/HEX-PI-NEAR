@@ -38,5 +38,19 @@ for (const [name, e] of Object.entries(ref7)) for (const read of ['MOVE', 'RANGE
   d = Math.max(d, Math.abs(final.p - q.final[0]), Math.abs(final.b - q.final[1]), Math.abs(final.rank - q.final[2]), Math.abs(final.cross - q.final[3]), ...final.beta.map((v, i) => Math.abs(v - q.beta[i])), ...final.influence.map((v, i) => Math.abs(v - q.influence[i])));
   report(`hex-7.0 ${name} ${read}`, d, `${steps.length} steps, 14 coefficients,`);
 }
+// ---- 7.0 with the clock: a dated series. Every call, the null, the clock's own probability, 14 + 23 coefficients, four influences
+const refc = JSON.parse(fs.readFileSync(path.join(here, 'parity_hex7_clock_reference.json'), 'utf8'));
+for (const [name, e] of Object.entries(refc)) for (const read of ['MOVE', 'RANGE']) {
+  const q = e[read], base = observeBaseline(e.returns, read), { steps, final } = walkHex7(e.returns, read, base, false, e.days); let d = steps.length === q.i.length && final.influence.length === 4 ? 0 : 1;
+  for (let k = 0; k < Math.min(steps.length, q.i.length); k++) { if (steps[k].i !== q.i[k] || steps[k].y !== q.y[k]) d = 1; d = Math.max(d, Math.abs(steps[k].p - q.p[k]), Math.abs(steps[k].b - q.null[k])); }
+  d = Math.max(d, Math.abs(final.p - q.final[0]), Math.abs(final.b - q.final[1]), Math.abs(final.rank - q.final[2]), Math.abs(final.cross - q.final[3]), Math.abs(final.clock - q.final[4]),
+    ...final.beta.map((v, i) => Math.abs(v - q.beta[i])), ...final.beta_clock.map((v, i) => Math.abs(v - q.beta_clock[i])), ...final.influence.map((v, i) => Math.abs(v - q.influence[i])));
+  report(`hex-7.0 with clock ${name} ${read}`, d, `${steps.length} steps, 14 + 23 coefficients,`);
+  // dates that cannot be used (wrong count, or going backwards) leave the three-voice walk exactly
+  const plain = walkHex7(e.returns, read, base), short = walkHex7(e.returns, read, base, false, e.days.slice(1)), back = walkHex7(e.returns, read, base, false, e.days.slice().reverse());
+  let u = plain.final.influence.length === 3 && plain.final.clock === undefined ? 0 : 1;
+  for (const w of [short, back]) { u = Math.max(u, Math.abs(w.final.p - plain.final.p)); for (let k = 0; k < plain.steps.length; k++) u = Math.max(u, Math.abs(w.steps[k].p - plain.steps[k].p)); }
+  report(`hex-7.0 unusable dates ${name} ${read}`, u, 'no clock,');
+}
 console.log(bad ? `${bad} FAILED` : `ALL PASSED (largest difference ${worst.toExponential(2)})`);
 process.exit(bad ? 1 : 0);

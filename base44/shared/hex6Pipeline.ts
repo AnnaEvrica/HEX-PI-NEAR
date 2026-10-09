@@ -44,15 +44,20 @@ export interface Hex6PipelineResult {
 // asReturns: true if `values` are already changes, false if levels, undefined
 //            to decide from the data (strictly positive = levels).
 // live:      which engine is shown for each read (shared/ledger.ts loadLive).
+// days:      the date each change was completed, for the engine's clock
+//            (market bars carry them; a pasted series does not).
 export function runPipeline(
   values: number[],
   label: string | null = null,
   messageHistory: string[] = [],
   asReturns?: boolean,
   live: LiveEngines = DEFAULT_LIVE,
+  days?: number[] | null,
 ): Hex6PipelineResult {
   const clean = (values || []).filter((v) => Number.isFinite(v));
-  const read = readProbability(seriesToReturns(clean, asReturns), live);
+  const changes = seriesToReturns(clean, asReturns);
+  // The clock is used only when there is exactly one date per change; a pasted series has none.
+  const read = readProbability(changes, live, days && days.length === changes.length ? days : null);
   const resonance = messageHistory.length >= 2
     ? resonanceSignature(messageHistory)
     : { status: 'insufficient_data' as const, n_tokens: 0 };

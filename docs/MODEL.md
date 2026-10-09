@@ -160,6 +160,34 @@ log loss. The call is
 
 $$p=\sum_\alpha o_\alpha\sum_kw_{\alpha,k}V_k .$$
 
+### The clock: a fourth voice where the series carries dates
+
+**In plain words.** Some series keep a calendar: Bitcoin is quieter at the
+weekend, a temperature series has a season. Where a series carries dates,
+one more voice joins the three. It reads everything the second model reads,
+and also the day of the week and the time of year of the latest finished
+step. It learns the same way, starts at the null the same way, and earns or
+loses influence the same way. A series with no dates has no clock and is
+read exactly as described above.
+
+**Exactly** (`hex7.ts: calendar`, `walkHex7`). For a date $d$ in whole
+days since 1 January 1970,
+
+$$C(d)=\big(\mathbf 1[\text{weekday}(d)=k]_{k=1..7},\ \sin(2\pi d/365.25),\ \cos(2\pi d/365.25)\big)\in\mathbb R^{9},$$
+
+$$m_3=\text{the residual model of section 4 on }(Z_{14},C)\in\mathbb R^{23},\qquad V=(q_0,m_1,m_2,m_3),$$
+
+and the redistribution in the fixed-share step is $\alpha/4$. Dates are
+used only when there is one whole day per step and none goes backwards.
+
+Measured on the replay's 43 series (`validation/clock_engine_results.md`),
+net of the same engine with dates dealt out in a random order: temperature
+direction +0.0195 bits per call, volatility index direction +0.0120,
+Bitcoin move size +0.0089 (in the later half of its record; the earlier
+half's interval includes zero), all markets about +0.001 on each read,
+racing (no dates) exactly unchanged. The figures in section 9 are for the
+engine without the clock.
+
 ## 6. Strength: restated from the record, never changing the call
 
 **In plain words.** A call has a side (yes or no) and a strength (how far

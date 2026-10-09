@@ -1,5 +1,33 @@
 # Changelog
 
+## 9 October 2026: the clock, inside HEX 7.0 (live on the next Publish)
+
+- **Time enters the existing engine as coordinates.** Where a series
+  carries dates, 7.0's mixture has a fourth voice: the second model's
+  coordinates plus the day of the week and the time of year of the latest
+  finished step. Same regression, same mixture, same version number.
+- **No dates, no clock.** A pasted series, racing, and the weekly horizon
+  are read exactly as before; the committed ledger is reproduced with a
+  difference of 0.
+- **Where the dates come from.** `marketDataClient.ts` returns
+  `returnDays`; the nightly calibration, the chat, the two scheduled posts
+  and `walkForwardAccuracy` pass them through `runEngines` /
+  `readProbability` / `runPipeline`.
+- **Measured** (`validation/clock_engine_results.md`, predictions in
+  `validation/prereg_clock_engine.md`): temperature direction +0.0195 bits
+  per call, volatility index direction +0.0120, Bitcoin move size +0.0089,
+  all markets about +0.001 on each read, net of a shuffled-date control.
+  One prediction failed in part: Bitcoin's gain sits in the later half of
+  its record.
+- **Tests.** `tests/parity.mjs` now also checks the dated walk against the
+  reference on Bitcoin bars (5 × 10⁻¹⁴) and that unusable dates leave the
+  call unchanged; `tests/loop.mjs` runs the nightly loop with dates.
+- **Record.** `CallLedger.learned` holds four influences and `views` a
+  `clock` reading on rows made with the clock.
+- Not changed: the null, 6.5, the strength map's rule, the version rule,
+  the Learning Module, CER. The PDFs in `docs/` describe 7.0 without the
+  clock.
+
 ## 9 October 2026: research record, memory that HEX reads from (no change to the product)
 
 - Four experiments and two checks on whether memory, as a voice in HEX's

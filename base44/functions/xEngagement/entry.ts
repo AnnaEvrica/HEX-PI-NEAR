@@ -123,7 +123,7 @@ async function readTicker(ticker, live = DEFAULT_LIVE) {
   try {
     const md = await fetchYahooReturns(ticker, HISTORY_DAYS);
     if (!md?.returns || md.returns.length < 250) return null;
-    const read = readProbability(md.returns, live);
+    const read = readProbability(md.returns, live, md.returnDays);
     if (!read) return null;
     return { read, latestPrice: md.latestPrice, bars: md.dataPoints };
   } catch {

@@ -71,16 +71,21 @@ export interface EngineRun {
   verified: { MOVE?: boolean; RANGE?: boolean };
   /** Forward-scored steps behind the numbers. */
   history: number;
+  /** True when the series carried dates and 7.0's clock took part in its calls. */
+  clock: boolean;
   /** What 7.0 has learned on this series: coefficients and present influence, per read. */
   learned: { MOVE: { beta: number[]; influence: number[] }; RANGE: { beta: number[]; influence: number[] } };
   /** Each engine's scored steps on this series, for the nightly pooled strength maps. */
   steps: Record<EngineId, { MOVE: ScoredStep[]; RANGE: ScoredStep[] }>;
 }
 
-/** Run both versions on a series of step-to-step changes. Null when it is too short for either. */
-export function runEngines(returns: number[], live: LiveEngines = DEFAULT_LIVE): EngineRun | null {
+/**
+ * Run both versions on a series of step-to-step changes. Null when it is too short for either.
+ * `days`: the date each change was completed (whole days since 1 January 1970), one per change; with it 7.0's clock joins. 6.5 does not use it.
+ */
+export function runEngines(returns: number[], live: LiveEngines = DEFAULT_LIVE, days?: number[] | null): EngineRun | null {
   const k = hexProbability(returns, live.calibration?.[CONTROL_ENGINE]);
-  const h = hex7Probability(returns, live.calibration?.[CANDIDATE_ENGINE]);
+  const h = hex7Probability(returns, live.calibration?.[CANDIDATE_ENGINE], days);
   if (!k || !h) return null;
   return {
     calls: {
@@ -90,6 +95,7 @@ export function runEngines(returns: number[], live: LiveEngines = DEFAULT_LIVE):
     live: { MOVE: live.MOVE, RANGE: live.RANGE },
     verified: { ...(live.verified || {}) },
     history: h.history,
+    clock: h.clock,
     learned: h.learned,
     steps: { 'state-6.5': k.steps, 'hex-7.0': h.steps },
   };

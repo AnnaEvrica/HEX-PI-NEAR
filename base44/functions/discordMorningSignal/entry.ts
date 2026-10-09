@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
         // own earlier calls and needs 200+ scored steps, on the weekly horizon too.
         const data = await fetchYahooReturns(u.ticker, HISTORY_DAYS);
         if (!data?.returns || data.returns.length < 30) return null;
-        return { ...u, returns: data.returns, latestPrice: data.latestPrice, bars: { closes: data.completedCloses, timestamps: data.timestamps.slice(0, data.completedBars) } };
+        return { ...u, returns: data.returns, returnDays: data.returnDays, latestPrice: data.latestPrice, bars: { closes: data.completedCloses, timestamps: data.timestamps.slice(0, data.completedBars) } };
       }),
     );
     const assets = fetchResults.flatMap((r) => (r.status === 'fulfilled' && r.value ? [r.value] : []));
@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
         const step = tf.period === 1 ? 1 : (asset.kind === 'crypto' ? 7 : 5);
         const returns = aggregateReturns(asset.returns, step);
         // The stored calibration is fitted on daily steps, so it applies to the daily horizon only.
-        const read = readProbability(returns, step === 1 ? live : withoutCalibration(live));
+        const read = readProbability(returns, step === 1 ? live : withoutCalibration(live), step === 1 ? asset.returnDays : null);
         if (!read) continue;
         if (step === 1 && !dryRun) logCalls(base44, rowsFor(asset.ticker, asset.bars, asset.returns, read.run, 'signal'));
         candidates.push({

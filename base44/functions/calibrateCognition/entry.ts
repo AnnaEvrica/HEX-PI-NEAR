@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
       const bars = { closes: md.completedCloses, timestamps: md.timestamps.slice(0, md.completedBars) };
       fetched.push({ ticker, returns: md.returns, timestamps: bars.timestamps });
       scored += await scoreOpenCalls(base44, ticker, bars);
-      const run = runEngines(md.returns, live);
+      const run = runEngines(md.returns, live, md.returnDays);
       if (!run) { failed.push(ticker); continue; }
       logged += await logCalls(base44, rowsFor(ticker, bars, md.returns, run, 'nightly'));
       // Each version's own scored steps on this series. Every outcome in them

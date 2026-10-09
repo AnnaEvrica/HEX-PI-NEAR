@@ -26,6 +26,14 @@
 //          rates run side by side (0 is the plain Bayesian mixture) and are
 //          themselves mixed by likelihood.
 //
+//   clock  where the series carries dates, a fourth voice joins the mixture:
+//          the second model's 14 coordinates and 9 for the date of the
+//          latest finished step (day of the week as seven indicators, sine
+//          and cosine of the time of year). It is one more residual model
+//          of the same kind, with 23 coefficients, and the mixture is then
+//          over four voices. A series with no dates has no clock, and its
+//          call is the three-voice call exactly.
+//
 // Order at every step: predict, then the outcome arrives, then learn. Nothing
 // computed at step i uses anything after i.
 // HEX makes the call. The null never does.
@@ -39,6 +47,8 @@ export const WINDOWS = [2, 4, 8, 16, 32, 64];
 /** Coordinates per observable: one per window, and one for all history. */
 export const NZ = WINDOWS.length + 1;
 const D = 2 * NZ;
+/** Calendar coordinates of the clock: seven for the day of the week, two for the time of year. */
+export const NC = 9;
 /** Prior scales of the residual models: 1/16 ... 16. */
 export const PRIOR_SCALES = [-4, -3, -2, -1, 0, 1, 2, 3, 4].map((k) => 2 ** k);
 /** Share of influence redistributed after each outcome. 0 is the plain Bayesian mixture. */
@@ -107,19 +117,20 @@ class Share {
 
 /** One online logistic regression at nine prior scales, mixed by likelihood. */
 class Residual {
-  P: Float64Array[]; th: Float64Array[]; ll: Float64Array = new Float64Array(T); q: Float64Array = new Float64Array(T); x: Float64Array = new Float64Array(D);
-  constructor() {
+  P: Float64Array[]; th: Float64Array[]; ll: Float64Array = new Float64Array(T); q: Float64Array = new Float64Array(T); x: Float64Array;
+  constructor(private D: number = 2 * NZ) {
+    this.x = new Float64Array(D);
     this.P = PRIOR_SCALES.map((t) => { const m = new Float64Array(D * D); for (let i = 0; i < D; i++) m[i * D + i] = t; return m; });
     this.th = PRIOR_SCALES.map(() => new Float64Array(D));
   }
   mix(): Float64Array { let m = -Infinity; for (const v of this.ll) if (v > m) m = v; const w = new Float64Array(T); let z = 0; for (let t = 0; t < T; t++) { w[t] = Math.exp(this.ll[t] - m); z += w[t]; } for (let t = 0; t < T; t++) w[t] /= z; return w; }
   predict(x: Float64Array, offset: number): number {
-    this.x = x; const w = this.mix(); let p = 0;
+    this.x = x; const w = this.mix(), D = this.D; let p = 0;
     for (let t = 0; t < T; t++) { let s = offset; const th = this.th[t]; for (let d = 0; d < D; d++) s += th[d] * x[d]; this.q[t] = clip(1 / (1 + Math.exp(-s))); p += w[t] * this.q[t]; }
     return p;
   }
   update(y: number) {
-    const x = this.x, Px = new Float64Array(D);
+    const x = this.x, D = this.D, Px = new Float64Array(D);
     for (let t = 0; t < T; t++) {
       const q = this.q[t], P = this.P[t], th = this.th[t];
       this.ll[t] += Math.log(y ? q : 1 - q);
@@ -132,18 +143,38 @@ class Residual {
     }
   }
   /** The coefficients in force: the prior scales' coefficients averaged by their weights. */
-  beta(): number[] { const w = this.mix(); return Array.from({ length: D }, (_, d) => this.th.reduce((s, th, t) => s + w[t] * th[d], 0)); }
+  beta(): number[] { const w = this.mix(); return Array.from({ length: this.D }, (_, d) => this.th.reduce((s, th, t) => s + w[t] * th[d], 0)); }
 }
 
-export interface Hex7Step { i: number; p: number; b: number; y: number; rank?: number; cross?: number; beta?: number[]; influence?: number[] }
+/**
+ * C: the nine calendar coordinates of a date given as whole days since
+ * 1 January 1970: the day of the week as seven indicators (Monday first),
+ * then the sine and cosine of the time of year.
+ */
+export function calendar(day: number): Float64Array {
+  const c = new Float64Array(NC), ang = 2 * Math.PI * day / 365.25;
+  c[(((day + 3) % 7) + 7) % 7] = 1; c[7] = Math.sin(ang); c[8] = Math.cos(ang);
+  return c;
+}
+
+/** Dates the clock can use: one whole day per step, none going backwards. */
+export function usableDays(days: number[] | null | undefined, n: number): number[] | null {
+  if (!days || days.length !== n) return null;
+  for (let i = 0; i < n; i++) if (!Number.isInteger(days[i]) || (i > 0 && days[i] < days[i - 1])) return null;
+  return days;
+}
+
+export interface Hex7Step { i: number; p: number; b: number; y: number; rank?: number; cross?: number; clock?: number; beta?: number[]; influence?: number[] }
 export interface Hex7Final {
   p: number; b: number;
   /** The two residual models on their own. */
   rank: number; cross: number;
   /** beta of the second model: 7 own coefficients, then 7 for the other observable. */
   beta: number[];
-  /** Present share of the call held by the null, the rank model and the rank + other model. */
+  /** Present share of the call held by the null, the rank model and the rank + other model; and, with dates, by the clock. */
   influence: number[];
+  /** With dates only: the clock's own probability, and its 23 coefficients (14 as in beta, then 9 for the calendar). */
+  clock?: number; beta_clock?: number[];
 }
 
 /**
@@ -152,8 +183,11 @@ export interface Hex7Final {
  * final: the call for the step that has not happened. `detail = true` keeps,
  * on every step, what the final call carries (the two models, the
  * coefficients, the influences), for replaying the cycle through time.
+ * `days[i]` is the date step i was completed, in whole days since 1 January
+ * 1970. Given, the clock joins the mixture; left out, the walk is the
+ * three-voice walk exactly.
  */
-export function walkHex7(returns: number[], read: ReadName, baseline: Float64Array, detail = false): { steps: Hex7Step[]; final: Hex7Final | null } {
+export function walkHex7(returns: number[], read: ReadName, baseline: Float64Array, detail = false, days?: number[] | null): { steps: Hex7Step[]; final: Hex7Final | null } {
   const n = returns.length, a = returns.map(Math.abs);
   const level: number[] = []; let acc = 0; for (let i = 0; i < n; i++) { acc += returns[i]; level.push(acc); }
   const med = new Float64Array(n).fill(NaN); const sorted: number[] = [];
@@ -163,8 +197,10 @@ export function walkHex7(returns: number[], read: ReadName, baseline: Float64Arr
     if (sorted.length >= MIN_MEDIAN) { const m = sorted.length; med[j] = m % 2 ? sorted[(m - 1) / 2] : (sorted[m / 2 - 1] + sorted[m / 2]) / 2; }
   }
   const Zown = ranks(read === 'MOVE' ? level : a), Zother = ranks(read === 'MOVE' ? a : level);
-  const R = [new Residual(), new Residual()], A = new Share(3);
-  const x0 = new Float64Array(D), x1 = new Float64Array(D);
+  const dates = usableDays(days, n);
+  const R = [new Residual(), new Residual()], A = new Share(dates ? 4 : 3);
+  const Rc = dates ? new Residual(D + NC) : null;
+  const x0 = new Float64Array(D), x1 = new Float64Array(D), xc = new Float64Array(D + NC);
   const steps: Hex7Step[] = []; let final: Hex7Final | null = null;
   for (let i = FIRST; i < n; i++) {
     if (read === 'RANGE' && Number.isNaN(med[i])) continue;
@@ -172,12 +208,15 @@ export function walkHex7(returns: number[], read: ReadName, baseline: Float64Arr
     if (!Number.isFinite(q0)) continue;
     // predict
     for (let d = 0; d < NZ; d++) { x0[d] = Zown[i][d]; x1[d] = Zown[i][d]; x1[NZ + d] = Zother[i][d]; }
-    const off = logit(q0), m0 = R[0].predict(x0, off), m1 = R[1].predict(x1, off), V = [q0, m0, m1], p = A.predict(V);
-    if (i === n - 1) { final = { p, b: q0, rank: m0, cross: m1, beta: R[1].beta(), influence: A.influence() }; break; }
+    const off = logit(q0), m0 = R[0].predict(x0, off), m1 = R[1].predict(x1, off), V = [q0, m0, m1];
+    let mc: number | undefined;
+    if (Rc && dates) { xc.set(x1); xc.set(calendar(dates[i]), D); mc = Rc.predict(xc, off); V.push(mc); }
+    const p = A.predict(V);
+    if (i === n - 1) { final = { p, b: q0, rank: m0, cross: m1, beta: R[1].beta(), influence: A.influence(), ...(Rc ? { clock: mc, beta_clock: Rc.beta() } : {}) }; break; }
     // the outcome arrives; learn only now
     const y = read === 'MOVE' ? (returns[i + 1] > 0 ? 1 : 0) : (a[i + 1] > med[i] ? 1 : 0);
-    steps.push(detail ? { i, p, b: q0, y, rank: m0, cross: m1, beta: R[1].beta(), influence: A.influence() } : { i, p, b: q0, y });
-    R[0].update(y); R[1].update(y); A.update(V, y);
+    steps.push(detail ? { i, p, b: q0, y, rank: m0, cross: m1, ...(Rc ? { clock: mc } : {}), beta: R[1].beta(), influence: A.influence() } : { i, p, b: q0, y });
+    R[0].update(y); R[1].update(y); Rc?.update(y); A.update(V, y);
   }
   return { steps, final };
 }
@@ -193,24 +232,32 @@ export interface Hex7Probability {
   history: number;
   /** HEX's own probability before its strength is restated, and what each part of memory said. */
   views: { MOVE: Views; RANGE: Views };
+  /** True when the series carried dates and the clock took part in the call. */
+  clock: boolean;
   /** What was learned on this series: coefficients and present influence, per read. */
   learned: { MOVE: { beta: number[]; influence: number[] }; RANGE: { beta: number[]; influence: number[] } };
   /** Every scored step, for the nightly pooled strength map. */
   steps: { MOVE: ScoredStep[]; RANGE: ScoredStep[] };
 }
 
-/** Both reads for the next step. `calibration` is the strength map the nightly job fits across the tracked series (ledger.ts). */
-export function hex7Probability(returns: number[], calibration?: { MOVE?: Knots | null; RANGE?: Knots | null }): Hex7Probability | null {
-  const r = returns.filter((v) => Number.isFinite(v));
+/**
+ * Both reads for the next step. `calibration` is the strength map the nightly job fits across the tracked series (ledger.ts).
+ * `days`: the date each change was completed (whole days since 1 January 1970), one per entry of `returns`; with it the clock joins.
+ */
+export function hex7Probability(returns: number[], calibration?: { MOVE?: Knots | null; RANGE?: Knots | null }, days?: number[] | null): Hex7Probability | null {
+  const keep = returns.map((v) => Number.isFinite(v));
+  const r = returns.filter((_, i) => keep[i]);
   if (r.length < 28) return null;
+  const d = days && days.length === returns.length ? usableDays(days.filter((_, i) => keep[i]), r.length) : null;
   const om = observe(r, 'MOVE'), og = observe(r, 'RANGE');
-  const mv = walkHex7(r, 'MOVE', om.baseline), rg = walkHex7(r, 'RANGE', og.baseline);
+  const mv = walkHex7(r, 'MOVE', om.baseline, false, d), rg = walkHex7(r, 'RANGE', og.baseline, false, d);
   if (!mv.final || !rg.final) return null;
-  const readings = (f: Hex7Final): View[] => [{ label: 'ranks', p: f.rank, w: f.influence[1] }, { label: 'ranks+other', p: f.cross, w: f.influence[2] }];
+  const readings = (f: Hex7Final): View[] => [{ label: 'ranks', p: f.rank, w: f.influence[1] }, { label: 'ranks+other', p: f.cross, w: f.influence[2] }, ...(f.clock === undefined ? [] : [{ label: 'clock', p: f.clock, w: f.influence[3] }])];
   return {
     p_up: stated(mv.final.p, calibration?.MOVE), base_up: Number(mv.final.b.toFixed(4)),
     p_big_move: stated(rg.final.p, calibration?.RANGE), base_big: Number(rg.final.b.toFixed(4)),
     history: mv.steps.length,
+    clock: !!d,
     views: {
       MOVE: { baseline: mv.final.b, raw: mv.final.p, memories: om.memories, readings: readings(mv.final) },
       RANGE: { baseline: rg.final.b, raw: rg.final.p, memories: og.memories, readings: readings(rg.final) },

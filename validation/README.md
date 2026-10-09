@@ -9,6 +9,7 @@ results beside it.
 | File | What it is |
 |---|---|
 | `hex7core.py` | Reference implementation of 7.0. `base44/shared/hex7.ts` must match it to rounding (`parity_hex7.py` writes the reference, `tests/parity.mjs` checks it) |
+| `prereg_clock_engine.md`, `clock_engine.py`, `clock_engine_results.md`, `clock_engine/report.json` | The clock inside 7.0 (`walk(..., days=)`): predictions before the change, the replay of all 43 series with a shuffled-date control, results. `parity_hex7_clock.py` writes `tests/parity_hex7_clock_reference.json` |
 | `prereg_replay.md` | The frozen specification, the data rules and the predictions, written before the replay; and one amendment made after the first run |
 | `replay.py` | The one-pass replay: reveal, score, learn, predict, commit, for every series from its first value |
 | `replay_report.py` | Every number and chart, computed from the ledger |

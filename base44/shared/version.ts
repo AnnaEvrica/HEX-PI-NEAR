@@ -17,6 +17,8 @@
 //       continuous ranks for Z, learned online, influence reversible
 //       (hex7.ts, docs/MODEL.md). Information gain over the null is the
 //       measure every decision rests on.
+//       Within 7.0: where a series carries dates, a fourth voice reads the
+//       day of the week and the time of year (the clock). No dates, no clock.
 export const ENGINE_VERSION = '7.0';
 /** The software people use. */
 export const PRODUCT_NAME = 'HEX [PI]';

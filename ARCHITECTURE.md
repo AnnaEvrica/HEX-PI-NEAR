@@ -129,7 +129,7 @@ Why this matters for everything below:
 | File | Role | Guarantee |
 |---|---|---|
 | `observer.ts` | The null `q0`: the series' usual odds | Never makes a call |
-| `hex7.ts` | HEX 7.0: `logit p = logit q0 + beta . Z` | Starts at the null; learns online with no learning rate; order per step is predict, outcome, learn |
+| `hex7.ts` | HEX 7.0: `logit p = logit q0 + beta . Z`; where the series carries dates, a fourth voice reads the day of the week and the time of year (the clock) | Starts at the null; learns online with no learning rate; order per step is predict, outcome, learn; a series with no dates is read exactly as without the clock |
 | `hex.ts` | 6.5, frozen | Runs beside 7.0 on every call as the comparator; not edited |
 | `engines.ts` | The one place the versions meet | The only source of any probability shown |
 | `cycle.ts` | Score and reason for every call | One measure: information gain over the null |
@@ -138,6 +138,13 @@ Why this matters for everything below:
 The engine stores nothing between runs. Each time it is asked it walks the
 series from its first bar. What it knows is a deterministic function of the
 series alone (`docs/OPERATIONS.md`, section 2).
+
+**Time.** Time enters the engine as coordinates, in the version already
+there. `marketDataClient.ts` returns the date of every change
+(`returnDays`); `engines.ts: runEngines(returns, live, days)` passes them
+to 7.0; 6.5 does not use them. A pasted series and the weekly horizon carry
+no dates and are read without the clock. Place is metadata and is not a
+coordinate. Measured: `validation/clock_engine_results.md`.
 
 ## 4. The Learning Module: the loop around the engine
 
@@ -303,7 +310,7 @@ not been timed; that measurement belongs to gate 2.
 |---|---|---|---|
 | Types | Every backend file | `npx tsc -p tests/tsconfig.check.json` | Interfaces between modules |
 | Lint, build | Front end | `npm run lint`, `npx vite build` | The app builds |
-| Unit, by parity | Null, 6.5, 7.0 against their Python references, step by step on real series | `node tests/parity.mjs` | The deployed mathematics is the tested mathematics (10⁻¹³) |
+| Unit, by parity | Null, 6.5, 7.0 (without dates, and with dates on Bitcoin bars) against their Python references, step by step on real series | `node tests/parity.mjs` | The deployed mathematics is the tested mathematics (10⁻¹³) |
 | Unit, by parity | CER against its Python reference on signals with built-in relationships, every mode; ingestion | `node tests/cer.mjs` | Same, for CER (4 × 10⁻¹³) |
 | Perception, by construction | Eight built configurations, scored on perception only: timing with identical marginals, phase with equal correlation, shared driver against a real lead, a jointly informative pair, a novel combination, a relational transition, noise, a change of sampling | `python3 validation/cer_perception.py` | CER sees what is there before anything is forecast; false novelty stays at its nominal rate |
 | Unit, by construction | Twelve CER tests: independence, locked oscillators, phase offset, known delay, shared driver, a relationship that stops, missing and asynchronous samples, spikes and a stuck sensor, no future data, exact repeatability, the measured edge weight, relaxation and its temperature | `python3 validation/cer_synthetic.py` | CER finds what was built in and nothing that was not |
@@ -439,8 +446,9 @@ Listed so nobody assumes otherwise.
     resolvable step under measurement noise, but its spread under noise is
     wider than a chi-square's, so no probability is attached to a single
     distance yet (`validation/experience_results.md`).
-11. **Time as a coordinate of the engine.** Deferred until the Learning
-    Module is in place.
+11. **More of the calendar.** The clock reads the day of the week and the
+    time of year (section 3). Holidays, month ends, expiry days and hours
+    are not in it. CER's shadow replay still runs 7.0 without the clock.
 12. **Memory that HEX reads from.** Researched, not built (section 14).
 
 ## 13. Adding a module: the checklist
