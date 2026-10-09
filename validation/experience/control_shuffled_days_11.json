@@ -1,0 +1,60 @@
+{
+ "control": "days in a random order, the same for every series",
+ "seed": 11,
+ "nights": 400,
+ "moments": 7514,
+ "series": 27,
+ "from": "2025-08-27",
+ "to": "2026-09-30",
+ "E12": {
+  "mean_transition": 0.9952,
+  "transition_above_one": false,
+  "component_means": {
+   "state": 0.9892,
+   "harmony": 0.9801,
+   "leadership": 0.9623,
+   "persistence": 0.9256
+  },
+  "largest_component": "state",
+  "state_is_largest": true,
+  "incomparable_share": 0,
+  "incomparable_below_5pct": true
+ },
+ "transition": {
+  "mean": 0.9952,
+  "median": 0.9757,
+  "p90": 1.3537,
+  "p99": 1.7106,
+  "max": 4.135,
+  "unavailable": 27,
+  "components_p90": {
+   "state": 1.3745,
+   "harmony": 1.5404,
+   "leadership": 1.3787,
+   "persistence": 1.4819
+  }
+ },
+ "individuality": {
+  "mean": 0.7727,
+  "median": 0.7776,
+  "p90": 0.9133,
+  "p99": 1.0521,
+  "max": 1.3238,
+  "unavailable": 27,
+  "median_first_100_nights": 0.8309911453480804,
+  "median_last_100_nights": 0.7582027100932816,
+  "reference_full_at_the_end": 27
+ },
+ "nearest_is_previous_share": 0.21584079070388673,
+ "dispersion_median_of_nights": 0.9948561545617955,
+ "integrity": {
+  "nights_checked": 400,
+  "reproduced": 400
+ },
+ "cost": {
+  "median_ms_per_night": 2702,
+  "max_ms_per_night": 3592,
+  "largest_moment_bytes": 7829,
+  "total_ms": 895215
+ }
+}

@@ -37,7 +37,7 @@ def digest(o): return hashlib.sha256(canonical(o).encode()).hexdigest()[:32]
 def wrap(a): return math.atan2(math.sin(a),math.cos(a))
 def distance(si, sj):
     """How many resolvable steps apart two moments of one series are, by component and in all. None-valued where they cannot be compared."""
-    out=dict(version=DISTANCE_VERSION,comparable=False,d=None,terms=0,shared=0,overlap=None,components={},tail=None)
+    out=dict(version=DISTANCE_VERSION,comparable=False,d=None,terms=0,shared=0,overlap=None,components={})
     if si is None or sj is None or si['target']!=sj['target'] or si['v']!=sj['v']: return out
     shared=[c for c in si['channels'] if c in sj['harmony']]; n=min(si['samples'],sj['samples']); o=max(0.0,n-abs(si['step']-sj['step']))/n; w=max(1-o,1.0/n); out.update(shared=len(shared),overlap=o)
     if len(shared)*2<min(len(si['channels']),len(sj['channels'])): return out
@@ -53,7 +53,7 @@ def distance(si, sj):
             if a[1] is not None and b[1] is not None: T['phase'].append(wrap(a[1]-b[1])**2/((a[2]**2+b[2]**2)*w))
     tot=sum(sum(v) for v in T.values()); m=sum(len(v) for v in T.values())
     if m<MIN_TERMS: return out
-    out.update(comparable=True,terms=m,d=math.sqrt(tot/m),components={k:[math.sqrt(sum(v)/len(v)),len(v)] for k,v in T.items() if v},tail=cer.chi2_sf(tot,m)); return out
+    out.update(comparable=True,terms=m,d=math.sqrt(tot/m),components={k:[math.sqrt(sum(v)/len(v)),len(v)] for k,v in T.items() if v}); return out
 def affinity(d): return math.exp(-d*d/2)
 def quantile(v, q):
     v=sorted(v); k=(len(v)-1)*q; lo=int(math.floor(k)); hi=min(lo+1,len(v)-1); return v[lo]+(v[hi]-v[lo])*(k-lo)
@@ -65,8 +65,8 @@ def experience(sig, history):
     the moments of tier >= j, j the largest for which at least REFERENCE of them exist, so the library never has to be read whole: the
     result is the same whether `history` holds every earlier moment or only those tiers and the previous one.
     Transition is to the previous moment. Each is None where no comparison supports it."""
-    E=dict(metric=METRIC_VERSION,distance=DISTANCE_VERSION,bandwidth=BANDWIDTH_VERSION,individuality=None,individuality_tail=None,nearest_prior=None,nearest_components=None,reference_count=0,reference_full=False,incomparable=0,
-           affinity_nearest=None,affinity_median=None,affinity_quartiles=None,transition=None,transition_tail=None,transition_components=None,transition_days=None,transition_rate=None,previous=None)
+    E=dict(metric=METRIC_VERSION,distance=DISTANCE_VERSION,bandwidth=BANDWIDTH_VERSION,individuality=None,nearest_prior=None,nearest_components=None,reference_count=0,reference_full=False,incomparable=0,
+           affinity_nearest=None,affinity_median=None,affinity_quartiles=None,transition=None,transition_components=None,transition_days=None,transition_rate=None,previous=None)
     ref=[]; seqs=[h.get('seq',len(history)-i) for i,h in enumerate(history)]; n=seqs[0] if history else 0; j=0
     while (n>>(j+1))>=REFERENCE: j+=1
     cand=[h for h,q in zip(history,seqs) if tier(q)>=j]; c=len(cand); pick=cand if c<=REFERENCE else [cand[int(math.floor(k*(c-1)/(REFERENCE-1)+0.5))] for k in range(REFERENCE)]
@@ -76,11 +76,11 @@ def experience(sig, history):
         else: E['incomparable']+=1
     if ref:
         D,h=min(ref,key=lambda x: x[0]['d']); aff=[affinity(x[0]['d']) for x in ref]
-        E.update(individuality=D['d'],individuality_tail=D['tail'],nearest_prior=h['id'],nearest_components=D['components'],reference_count=len(ref),reference_full=n>=REFERENCE,
+        E.update(individuality=D['d'],nearest_prior=h['id'],nearest_components=D['components'],reference_count=len(ref),reference_full=n>=REFERENCE,
                  affinity_nearest=affinity(D['d']),affinity_median=quantile(aff,0.5),affinity_quartiles=[quantile(aff,0.25),quantile(aff,0.75)])
     if history:
         D=distance(sig,history[0]['signature']); days=sig['as_of']-history[0]['as_of']; E.update(previous=history[0]['id'],transition_days=int(days))
-        if D['comparable']: E.update(transition=D['d'],transition_tail=D['tail'],transition_components=D['components'],transition_rate=D['d']/days if days>0 else None)
+        if D['comparable']: E.update(transition=D['d'],transition_components=D['components'],transition_rate=D['d']/days if days>0 else None)
     return E
 def nightly(rows, recent):
     """The night's summary. rows: tonight's moments, each dict(series, experience E, channels). recent: per series, its last moments' signatures

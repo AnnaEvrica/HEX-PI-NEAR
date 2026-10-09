@@ -1,0 +1,9 @@
+{
+ "moments_recomputed": 40,
+ "largest_difference": {
+  "signature": 0.0,
+  "novelty": 1.199040866595169e-14,
+  "transition": 4.440892098500626e-16
+ },
+ "passed": true
+}

@@ -205,3 +205,25 @@ and the measurement behind it are given.
    seven series tracked in production only one is in the repository. "Largest
    component" means the largest mean among the transition's components.
    Sampled moments are recomputed with the reference implementation.
+
+## Corrections and additions made after the run on real series
+
+Written 9 October 2026 after the E12 run. These were not planned before it
+and are marked as such wherever their numbers appear.
+
+8. **The noise tail is withdrawn.** The specification above attached to
+   every distance the chance of one that large from measurement noise,
+   `P(chi2_m >= m d^2)`. E3 had tested only that the distance averages 1.
+   Checking the tail itself on built noise: with independent channels, 21.5%
+   of consecutive-night distances and 29% of distances between separate
+   windows had a tail below 5%, where 5% is expected. The mean is right and
+   the spread is not a chi-square's: a moment's terms share the same
+   observations, and consecutive nights differ through one observation
+   common to every term. The field was removed from the distance, the
+   moment and the entity before anything was deployed. The distance and
+   everything else are unchanged. A calibrated tail is future work.
+9. **A control for E12**: the same 27 series with their days in a random
+   order, the same order for every series (`SURROGATE=11`). Each day's
+   cross-section is kept whole; whatever unfolds in time is destroyed.
+10. **Across years** (`experience_span.mjs`): for each series, three moments
+    whose windows share no observation, and the same in the control.

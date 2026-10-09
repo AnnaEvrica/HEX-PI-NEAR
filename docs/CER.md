@@ -1,6 +1,6 @@
 # CER: Cross-Environment Resonance
 
-Anna Maria Sarkisyan · Evrica Technologies Inc. · experimental module `cer-0.4`, beside HEX [PI] 7.0
+Anna Maria Sarkisyan · Evrica Technologies Inc. · experimental module `cer-0.4.1`, beside HEX [PI] 7.0
 
 HEX reads one series. CER reads across series. Its first job is to perceive
 each moment: what is observable now, how the channels relate, how that is
@@ -227,9 +227,13 @@ multiplied by the number of pairs tried.
 
 *Rhythm.* The target's autocorrelation at lags 1 to 5. Welch coherence by
 band with each neighbour (section 4). Where a band is coherent, the phase,
-its standard error `sqrt((1 - C) / (2 K C))` radians, and the lead and lead
-error they imply. This standard error is optimistic for a band that only
-just clears the threshold (`validation/cer_results.md`).
+its standard error `sqrt((1 - C') / (2 K C'))` radians with
+`C' = (C - thr) / (1 - thr)` the coherence in excess of the band's
+threshold, and the lead and lead error they imply. Until `cer-0.4.1` the
+standard error used `C` itself and was optimistic for a band that only just
+cleared the threshold; with the excess, the built-in lead lies inside two
+standard errors in 30 of 30 trials (`validation/cer_results.md`). No
+forecast uses this number.
 
 *Intrinsic novelty.* For channel `j`, `p_j = 1 -` the midrank of the size of
 its latest change among all its own history. For the moment,

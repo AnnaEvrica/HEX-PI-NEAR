@@ -109,7 +109,7 @@ trials each). Nothing here is scored on a forecast.
 | Built in | What the signature has to show | Result | What a same-step correlation alone shows |
 |---|---|---|---|
 | 1. Identical marginals; the neighbour one step before, three steps before, or one step after the target | Which, and by how much | Named correctly 90 of 90 | Anything at all in 3 of 90 |
-| 2. The same correlation (0.41 and 0.42): moving together at once, or sharing a rhythm a sixth of a period apart | The phase lead of 2.67 steps | Lead measured at 2.67 on average; separated 23 of 30 | The same number for both |
+| 2. The same correlation (0.41 and 0.42): moving together at once, or sharing a rhythm a sixth of a period apart | The phase lead of 2.67 steps | Lead measured at 2.67 on average; separated 23 of 30 at `cer-0.4`, 29 of 30 at `cer-0.4.1` | The same number for both |
 | 3. One neighbour sharing a driver at the same step, one really moving first | The leader eligible; the other perceived and kept out of the forecast | 30 of 30, 30 of 30, 30 of 30 | Both related |
 | 4. Two independent signals whose product, one step earlier, drives the target | The pair, from the counterpoint | Found 30 of 30; in pure noise 0 of 30; either signal alone looked informative in 1 of 30 | Nothing |
 | 5. Two channels that move together, moving apart on 20 days, each by an ordinary amount | Relational surprisal on those days | Flagged on 100% of those days where the move exceeded one standard deviation (23% for half to one), on 0.0% of other days. Intrinsic novelty flagged 3% of them | Nothing: each value is ordinary |
@@ -183,7 +183,7 @@ channels with a Bonferroni count, which is conservative.
 | X4 | Markets within 0.0003 of HEX; under 3% eligible | Held: 0.0000 and −0.0002; 1.9% and 1.0% |
 | X5 | Controls within 0.0005 of zero in every group | Held by group. One station on one control is outside: Melbourne, +0.0008 |
 | X6 | Seattle, Melbourne, energy x temperature within 0.0005 | Held |
-| X7 | Every built configuration separated; noise rates 2% to 8%, temporal at most 10% | Seven of eight; the phase test is 23 of 30. Noise rates 4.8%, 5.1%, 4.3% |
+| X7 | Every built configuration separated; noise rates 2% to 8%, temporal at most 10% | Seven of eight at `cer-0.4`; the phase test was 23 of 30. At `cer-0.4.1` (phase precision from the coherence in excess of its threshold, 9 October 2026) it is 29 of 30 and all eight pass. Noise rates 4.8%, 5.1%, 4.3% |
 | X8 | Joint tail below 1% on 2% to 6% of market calls, 0.5% to 3% on temperature | Held: 3.2% and 1.1% |
 
 ### What is not shown

@@ -17,7 +17,7 @@
 // and nothing here feeds HEX's parameters, CER's weights or governance.
 // ===========================================================================
 import { asof, countUpTo } from './cer/align.ts';
-import { chi2sf, moment, novelty } from './cer/graph.ts';
+import { moment, novelty } from './cer/graph.ts';
 import { SEG } from './cer/spectrum.ts';
 import type { Channel, MomentSignature } from './cer/types.ts';
 
@@ -37,15 +37,15 @@ export interface Signature {
   /** Per neighbour and band: [coherence, phase or null, phase standard error or null]. */
   rhythm: Record<string, ([number, number | null, number | null] | null)[]>;
 }
-export interface Distance { version: string; comparable: boolean; d: number | null; terms: number; shared: number; overlap: number | null; components: Record<string, [number, number]>; tail: number | null }
+export interface Distance { version: string; comparable: boolean; d: number | null; terms: number; shared: number; overlap: number | null; components: Record<string, [number, number]> }
 /** An earlier moment. seq: its ordinal in its series (1 for the first); defaults to its place in the list. */
 export interface Remembered { id: string; as_of: number; signature: Signature; seq?: number }
 export interface Experience {
   metric: string; distance: string; bandwidth: string;
-  individuality: number | null; individuality_tail: number | null; nearest_prior: string | null; nearest_components: Record<string, [number, number]> | null;
+  individuality: number | null; nearest_prior: string | null; nearest_components: Record<string, [number, number]> | null;
   reference_count: number; reference_full: boolean; incomparable: number;
   affinity_nearest: number | null; affinity_median: number | null; affinity_quartiles: [number, number] | null;
-  transition: number | null; transition_tail: number | null; transition_components: Record<string, [number, number]> | null; transition_days: number | null; transition_rate: number | null; previous: string | null;
+  transition: number | null; transition_components: Record<string, [number, number]> | null; transition_days: number | null; transition_rate: number | null; previous: string | null;
 }
 
 const fz = (r: number) => Math.atanh(Math.min(0.999, Math.max(-0.999, r)));
@@ -86,10 +86,13 @@ export async function sha256hex(text: string): Promise<string> {
  * and in all. Compared on the channels they share; a channel missing from one
  * contributes nothing. Not comparable (and no number) when they share fewer
  * than half of the smaller one's channels or fewer than MIN_TERMS terms.
- * `tail` is the chance of a distance this large from measurement noise alone.
+ * Under "the same configuration seen twice through measurement noise" the
+ * distance averages 1. Its spread under noise is wider than a chi-square's,
+ * because a moment's terms share the same observations, so no tail
+ * probability is attached to it (validation/experience_results.md).
  */
 export function distance(si: Signature | null, sj: Signature | null): Distance {
-  const out: Distance = { version: DISTANCE_VERSION, comparable: false, d: null, terms: 0, shared: 0, overlap: null, components: {}, tail: null };
+  const out: Distance = { version: DISTANCE_VERSION, comparable: false, d: null, terms: 0, shared: 0, overlap: null, components: {} };
   if (!si || !sj || si.target !== sj.target || si.v !== sj.v) return out;
   const shared = si.channels.filter((c) => c in sj.harmony), n = Math.min(si.samples, sj.samples), o = Math.max(0, n - Math.abs(si.step - sj.step)) / n, w = Math.max(1 - o, 1 / n);
   out.shared = shared.length; out.overlap = o;
@@ -117,7 +120,7 @@ export function distance(si: Signature | null, sj: Signature | null): Distance {
   for (const v of Object.values(T)) { for (const x of v) tot += x; m += v.length; }
   if (m < MIN_TERMS) return out;
   for (const [k, v] of Object.entries(T)) if (v.length) out.components[k] = [Math.sqrt(v.reduce((s, x) => s + x, 0) / v.length), v.length];
-  out.comparable = true; out.terms = m; out.d = Math.sqrt(tot / m); out.tail = chi2sf(tot, m);
+  out.comparable = true; out.terms = m; out.d = Math.sqrt(tot / m);
   return out;
 }
 
@@ -143,9 +146,9 @@ export function quantile(values: number[], q: number): number {
  */
 export function experience(sig: Signature, history: Remembered[]): Experience {
   const E: Experience = {
-    metric: METRIC_VERSION, distance: DISTANCE_VERSION, bandwidth: BANDWIDTH_VERSION, individuality: null, individuality_tail: null, nearest_prior: null, nearest_components: null,
+    metric: METRIC_VERSION, distance: DISTANCE_VERSION, bandwidth: BANDWIDTH_VERSION, individuality: null, nearest_prior: null, nearest_components: null,
     reference_count: 0, reference_full: false, incomparable: 0, affinity_nearest: null, affinity_median: null, affinity_quartiles: null,
-    transition: null, transition_tail: null, transition_components: null, transition_days: null, transition_rate: null, previous: null,
+    transition: null, transition_components: null, transition_days: null, transition_rate: null, previous: null,
   };
   const seqs = history.map((h, i) => h.seq ?? history.length - i), n = history.length ? seqs[0] : 0, j = referenceTier(n);
   const cand = history.filter((_, i) => tier(seqs[i]) >= j), c = cand.length, pick = c <= REFERENCE ? cand : Array.from({ length: REFERENCE }, (_, k) => cand[Math.floor(k * (c - 1) / (REFERENCE - 1) + 0.5)]);
@@ -154,13 +157,13 @@ export function experience(sig: Signature, history: Remembered[]): Experience {
   if (ref.length) {
     let best = ref[0]; for (const r of ref) if (r.D.d! < best.D.d!) best = r;
     const aff = ref.map((r) => affinity(r.D.d!));
-    Object.assign(E, { individuality: best.D.d, individuality_tail: best.D.tail, nearest_prior: best.h.id, nearest_components: best.D.components, reference_count: ref.length, reference_full: n >= REFERENCE,
+    Object.assign(E, { individuality: best.D.d, nearest_prior: best.h.id, nearest_components: best.D.components, reference_count: ref.length, reference_full: n >= REFERENCE,
       affinity_nearest: affinity(best.D.d!), affinity_median: quantile(aff, 0.5), affinity_quartiles: [quantile(aff, 0.25), quantile(aff, 0.75)] });
   }
   if (history.length) {
     const D = distance(sig, history[0].signature), days = sig.as_of - history[0].as_of;
     E.previous = history[0].id; E.transition_days = days;
-    if (D.comparable) Object.assign(E, { transition: D.d, transition_tail: D.tail, transition_components: D.components, transition_rate: days > 0 ? D.d! / days : null });
+    if (D.comparable) Object.assign(E, { transition: D.d, transition_components: D.components, transition_rate: days > 0 ? D.d! / days : null });
   }
   return E;
 }

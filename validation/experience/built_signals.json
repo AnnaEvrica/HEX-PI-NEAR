@@ -2,7 +2,7 @@
  "E1 determinism": {
   "passed": true,
   "moments": 25,
-  "digest": "c524eccb4533ed6df5bb18014d325967"
+  "digest": "9a7710229ebda826cb847cb51a316d83"
  },
  "E2 causality": {
   "passed": true,
@@ -46,8 +46,7 @@
    "persistence": 1.2,
    "rhythm": 0.6,
    "phase": 3.2
-  },
-  "noise_tail_across": 1.4319131902485086e-114
+  }
  },
  "E5 circular phase": {
   "passed": true,
@@ -80,10 +79,6 @@
   "median_second_half": 0.7384320176947994,
   "ratio": 1.092008787384307,
   "library_size_at_the_end": 1239,
-  "median_while_the_reference_was_still_filling": 0.7517343272932728,
-  "noise_tail_of_the_nearest_first_and_second_half": [
-   0.984044629164106,
-   0.9542699506674892
-  ]
+  "median_while_the_reference_was_still_filling": 0.7517343272932728
  }
 }

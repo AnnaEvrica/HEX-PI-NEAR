@@ -1,6 +1,6 @@
 # HEX [PI]: architecture
 
-Anna Maria Sarkisyan · Evrica Technologies Inc. · engine 7.0 on HEX6-BLE, with CER `cer-0.4` in shadow
+Anna Maria Sarkisyan · Evrica Technologies Inc. · engine 7.0 on HEX6-BLE, with the Learning Module and CER `cer-0.4.1`
 
 One page for anyone who has to change, run, test or review this system: what
 the parts are, what each may depend on, where state lives, and the practices
@@ -48,9 +48,14 @@ flowchart TB
     CI["inference (experts; interpretations)"]
     CR["replay"]
   end
+  subgraph Learn["Learning Module, stage 5 (base44/shared/)"]
+    EX["experience.ts: signature, distance, affinity (pure)"]
+    ME["memory.ts: the Memory Library"]
+  end
   subgraph Store["Stored state (Base44 entities)"]
     CL[("CallLedger")]
     ES[("EngineStatus")]
+    MM[("MomentMemory, NightlyCalibration")]
     UM[("UserConversationMemory, Subscription, VerdictSpine, ...")]
   end
   EXT["Outside services: market data, language model, Stripe, Discord, X"]
@@ -66,6 +71,10 @@ flowchart TB
   EN --> H6 --> OB
   EN --> CY
   CC --> LE
+  CC --> ME
+  ME --> EX
+  ME --> MM
+  EX -. "perception only" .-> CM
   TH --> LE
   LE --> IS
   LE --> CL
@@ -80,8 +89,11 @@ flowchart TB
 ```
 
 Solid arrows are calls made in production. Dotted arrows are the only links
-between CER and the engine: CER imports the engine's functions and changes
-nothing in them. Nothing in production imports CER.
+into and out of CER: CER imports the engine's functions and changes nothing
+in them, and the Learning Module's last stage uses CER's perception of a
+moment (`moment`, `novelty`) and nothing else of it. CER's forecast is in
+shadow: no function, entity or screen uses a call it makes. This is on the
+branch `learning-module` and is not in `main` or published.
 
 ## 2. Layers and the dependency rule
 
@@ -93,9 +105,11 @@ never from layers above.
 | 5 | Clients | `src/` | Screens. Send messages, show answers. No mathematics, no secrets | the Base44 SDK |
 | 4 | Functions | `base44/functions/*/entry.ts` | One entry point per job. All I/O happens here: database, market data, language model, payments, posts | 1, 2, 3 |
 | 3 | Governance | `base44/shared/ledger.ts`, `universe.ts` | What is written down, how calls are scored through time, which version is shown, which reads are verified | 1, 2 |
+| 3m | Memory Library | `base44/shared/memory.ts` | Reads and appends the moments HEX has met. Reads nothing of governance and is read by nothing | 1m, 1s |
 | 2 | Presentation | `probabilityRead.ts`, `hex6Pipeline.ts`, `chartContext.ts`, `marketStory.ts`, `persona.ts`, `piusEngine.ts`, `piusResonance.ts`, `novelty.ts`, `triage.ts`, `stakes.ts`, `tickers.ts` | Turning a probability into a read and a prompt. Never changes a probability | 1 |
 | 1 | Engine core | `observer.ts`, `hex7.ts`, `hex.ts`, `engines.ts`, `cycle.ts`, `isotonic.ts` | The mathematics. Pure functions of a series: no network, no database, no clock, no randomness | each other |
-| 1s | CER (shadow) | `base44/shared/cer/` | Reading across channels. Pure, like the core | layer 1, read only |
+| 1s | CER | `base44/shared/cer/` | Reading across channels. Pure, like the core. Its perception is used by 1m; its forecast is in shadow | layer 1, read only |
+| 1m | Experience | `base44/shared/experience.ts` | The signature of a moment, the distance between two, affinity, individuality, transition, the night's summary. Pure | 1s, perception only |
 | 0 | Single sources | `version.ts`, `modelRouter.ts`, `tickers.ts`, `universe.ts` | One place each for the version string, model IDs, symbols, the tracked list | nothing |
 
 Why this matters for everything below:
@@ -124,29 +138,61 @@ The engine stores nothing between runs. Each time it is asked it walks the
 series from its first bar. What it knows is a deterministic function of the
 series alone (`docs/OPERATIONS.md`, section 2).
 
-## 4. Governance: the loop around the engine
+## 4. The Learning Module: the loop around the engine
+
+The Learning Module is HEX's whole feedback loop. It has two parts: the
+**Nightly Calibration** (`calibrateCognition`, five stages) and the **Memory
+Library** (the moments HEX has met). Mathematics: `docs/LEARNING.md`.
 
 `calibrateCognition` runs nightly and is the only job that learns across
-series (`ledger.ts`):
+series:
 
 1. **Reveal and score** yesterday's open calls of both versions.
 2. **Learn and predict**: each version walks each tracked series.
 3. **Commit** tonight's calls to `CallLedger` before their outcomes exist.
-4. **Decide**: refit the strength maps, apply the version rule, set the
+4. **Govern**: refit the strength maps, apply the version rule, set the
    verified flag. One `EngineStatus` row per read.
+5. **Experiential Integration** (`memory.ts`, `experience.ts`): perceive
+   tonight's moment of every series, with every other series as a
+   neighbour; compare it with the moments already met; append it to
+   `MomentMemory`; append the night's summary to `NightlyCalibration`.
 
-Governance never writes into the engine. It changes what is shown (version,
-strength, verified), not what the engine knows.
+Stages 1 to 4 are governance (`ledger.ts`) and are unchanged. Governance
+never writes into the engine. It changes what is shown (version, strength,
+verified), not what the engine knows.
+
+Stage 5 is apart from the other four, and that is checked
+(`tests/experience.mjs`):
+
+- it runs after the status rows are stored, inside its own guard. If it
+  fails, the night's calibration has already completed and is returned as it
+  was, with the failure reported in `experiential`;
+- it reads only what the night already fetched and the Memory Library. It
+  writes only to the Memory Library, and only by appending;
+- nothing reads the Memory Library: not the engine, not CER's weights, not
+  governance, not `think`, not a screen. It predicts nothing;
+- with the stage on, every read and write to `CallLedger` and
+  `EngineStatus` and the function's response are the same as before it
+  existed.
+
+| What is measured for a moment | Meaning |
+|---|---|
+| Signature `(X, G, Phi, U)` | State, harmony and leadership, persistence and rhythm, and the precision of each. Novelty is stored beside it, never inside |
+| Distance `d` | How many resolvable steps apart two moments of a series are. About 1 for the same configuration seen twice through measurement noise. Never an error |
+| Affinity `exp(-d^2/2)` | Continuous. No classes, no labels |
+| Individuality | Distance to the nearest of 250 earlier moments spread evenly over the series' whole past |
+| Transition | Distance from the previous moment, with the days elapsed |
 
 ## 5. CER: the cross-environment module
 
-**Status.** In `main`, in shadow. It makes its own calls on the same targets
-and outcomes as HEX and is scored the same way. It is not wired to any
-function, entity or screen.
+**Status.** In `main`. Its forecast is in shadow: it makes its own calls on
+the same targets and outcomes as HEX, is scored the same way, and no
+function, entity or screen uses them. Its perception of a moment is used by
+stage 5 of the Learning Module (section 4), on the branch `learning-module`.
 
 | File | Role |
 |---|---|
-| `cer/types.ts` | `SignalObservation` (the input record: source, environment, channel, time, acquisition time, unit, quality, condition, intervention), `Channel`, `Edge`, `Graph`, `MomentSignature`, `EdgeWeight`, `Weighting`, and the version `cer-0.4` |
+| `cer/types.ts` | `SignalObservation` (the input record: source, environment, channel, time, acquisition time, unit, quality, condition, intervention), `Channel`, `Edge`, `Graph`, `MomentSignature`, `EdgeWeight`, `Weighting`, and the version `cer-0.4.1` |
 | `cer/normalize.ts` | Raw samples to a channel. Units kept; what is dropped is counted |
 | `cer/align.ts` | Which value of a neighbour a call may see (`asof`); two channels on the ticks they share (`pair`); coordinates (HEX's own `ranks`) |
 | `cer/coupling.ts` | Rank cross-correlation by lag, Bartlett standard error, time-shift surrogate threshold, shared-driver removal |
@@ -206,6 +252,8 @@ with its own pre-registration:
 |---|---|---|---|
 | `CallLedger` | Every call before its outcome, then its score | `ledger.ts` | none |
 | `EngineStatus` | One row per read: version shown, verified flag, running tally, strength maps | `calibrateCognition` | none |
+| `MomentMemory` | The Memory Library: one row per series per finished bar. The moment's signature and hash, its novelty, its individuality, affinity and transition. Appended, never changed | `memory.ts` (stage 5) | none |
+| `NightlyCalibration` | One row per night: the summary of that night's moments, references to the governance decision, a hash chained to the night before. Appended, never changed | `memory.ts` (stage 5) | none |
 | `UserConversationMemory` | Rolling summary of a user's conversations, topics, style, boundary warnings | `think` | yes, keyed by email |
 | `CognitiveState` | A read given in chat | `think` | user email |
 | `VerdictSpine` | Hash chain of reads: content hash, prior hash, validators | `asiSpine.ts` | producer (email or engine); hashes, not content |
@@ -233,6 +281,7 @@ the 7 tracked series is about 1.5 s of engine time; at the cap of 27, about
 | Engine | length of series × number of series, linearly | `universe.ts`: `HISTORY_DAYS` 5,475; `UNIVERSE` 7 + `MAX_EXTRA_SERIES` 20 | Persist each series' state after its last bar and resume; needs its own parity test against the full walk |
 | Nightly job | number of series, one after another | one function invocation | Fan out one invocation per series; the core is pure, so this needs no locking |
 | Ledger | 4 rows per series per night | 5,000 most recent scored rows read per night | `EngineStatus.tally` already keeps running sums, so the nightly decision does not reread history |
+| Memory Library | 1 row (about 2 kB at 7 series, 8 kB at 27) per series per finished bar; each night reads at most 499 rows per series however old the library is | `experience.ts`: `REFERENCE` 250, `DISPERSION_WINDOW` 30 | The reference is drawn by tier, so the read does not grow. At 27 series the stage takes about 2.5 s |
 | CER inference | calls × (neighbours + 1) × 9 scales × 14² | neighbours passed by the caller | Hear edges by measured evidence: by past success, 26 neighbours cost about 0.0015 bits per call in accuracy; by measurement, 0.0000 to 0.0003 |
 | CER moments | (calls / 25) × (neighbours² for counterpoint + one regression) on a 750-tick window; novelty per call is one small matrix solve | `graph.ts`: `RECOMPUTE`, `WINDOW` | About 25 minutes for the full replay. The frozen `A.L.C.Q` comparator is the expensive one (200 surrogates per edge) and is not on the primary path |
 | CER graph | pairs² × 200 surrogates on a 750-tick window | `graph.ts`: `WINDOW`, `coupling.ts`: `NSUR` | Compute on a schedule, not per call; restrict to pairs within or adjacent to an environment |
@@ -243,7 +292,9 @@ writes (a rerun on the same day logs nothing twice). Every limit is a named
 constant in one file. Timings are returned by the nightly job
 (`elapsed_ms`, `per_series_ms`), so growth is visible before it hurts.
 
-CER's TypeScript has not been timed yet. That measurement belongs to gate 2.
+CER's perception in TypeScript is timed inside stage 5: 27 series of 3,900
+bars, prepared and perceived, in about 2 s. CER's forecast in TypeScript has
+not been timed; that measurement belongs to gate 2.
 
 ## 8. Testing
 
@@ -256,6 +307,8 @@ CER's TypeScript has not been timed yet. That measurement belongs to gate 2.
 | Perception, by construction | Eight built configurations, scored on perception only: timing with identical marginals, phase with equal correlation, shared driver against a real lead, a jointly informative pair, a novel combination, a relational transition, noise, a change of sampling | `python3 validation/cer_perception.py` | CER sees what is there before anything is forecast; false novelty stays at its nominal rate |
 | Unit, by construction | Twelve CER tests: independence, locked oscillators, phase offset, known delay, shared driver, a relationship that stops, missing and asynchronous samples, spikes and a stuck sensor, no future data, exact repeatability, the measured edge weight, relaxation and its temperature | `python3 validation/cer_synthetic.py` | CER finds what was built in and nothing that was not |
 | Integration | The loop, night by night, on real BTC bars with an in-memory database | `node tests/loop.mjs` | Scoring, logging, strength map, version rule |
+| Unit, by construction | Eight tests of the experiential measurements on built signals: determinism, no future data, one resolvable step under noise, structural distinction, circular phase, missing channels, recurrence without labels, no shrinkage with the size of the library | `python3 validation/experience_tests.py` | A distance means what it says |
+| Unit, by parity; integration | `experience.ts` against its Python reference; the stage night after night on an in-memory database (append-only, one write per night, a rolling history, the read by tiers, the hash chain, a run that stops half way); the nightly function with the stage working and failing; cost at 27 series | `node tests/experience.mjs` | The Memory Library, and that stage 5 cannot touch stages 1 to 4 |
 | Smoke | Every backend function locally, with Base44, the language model and outside services stubbed | `node tests/backend-smoke/build.mjs && node tests/backend-smoke/run.mjs` | Every entry point runs; `docs/PROMPT.md` matches the code |
 | Replay | One pass over every series; no call sees its own future | `python3 validation/replay.py`, `python3 validation/cer_replay.py` | The numbers in the documents |
 
@@ -302,6 +355,15 @@ committed as a content hash linked to the one before, so a later change to a
 past read is detectable (`asiSpine.ts`). The ledger is written before
 outcomes exist and is never back-filled.
 
+**For the Memory Library.** `MomentMemory` and `NightlyCalibration` hold
+measurements of market series and nothing about a person: no email, no
+message, no user identifier. Both are admin-only for every operation. Each
+moment carries a hash of its signature, and each night a hash chained to the
+night before, so a later change to a stored moment is detectable. The rule
+that they are append-only is kept by the code (the stage calls `create` and
+never `update` or `delete`, which a test checks); Base44 itself would let an
+admin edit a row.
+
 **For CER, by design.** A `SignalObservation` describes a sensor, not a
 person. If a deployment ever puts sensors in an occupied building, occupancy
 can be inferred from heat and power, and those channels then need the same
@@ -318,6 +380,8 @@ per-owner read rule as `UserConversationMemory`. That rule is part of gate 1.
 | A night the job did not run | The next run | Open calls are scored when their bars arrive; nothing is double counted |
 | Market data for one ticker | The next run | It is listed in `failed` and skipped for that night |
 | Replay results | Public data and the scripts | `validation/README.md`; the 7.0 ledger reproduces call for call |
+| `MomentMemory`, `NightlyCalibration` | In part | A moment is a function of the bars up to its date, so any moment can be perceived again from market data and checked against its stored hash. Individuality and affinity depend on the library as it stood that night, so they are rebuilt only by replaying the nights in order. A lost night is not back-filled by the job: the next run records the next moment and the transition spans the gap, with its days |
+| A night stage 5 failed or stopped half way | The next run on the same date | Moments already written are not written again; the night's summary is completed |
 | `CallLedger` itself | **Not recoverable from the repository** | See section 12 |
 
 Every replay ledger row carries a hash of the engine state, the code and the
@@ -331,7 +395,11 @@ data seen so far, so two runs can be compared row by row.
   their results are written.
 - **One version string**: `base44/shared/version.ts`. The ledger records
   which engine made each call (`state-6.5`, `hex-7.0`). CER records its own
-  version (`cer-0.4`) on every edge and every ledger row. Superseded
+  version (`cer-0.4.1`) on every edge and every ledger row. Every moment in
+  the Memory Library records the versions of its signature, distance,
+  bandwidth and metrics (`sig-1`, `dist-1`, `bw-1`, `exp-1`); a changed
+  definition gets a new version and starts its own sequence, and old rows
+  keep theirs. Superseded
   inference is not deleted: it is frozen with a manifest and kept selectable.
 - **A frozen comparator.** A new engine version is added beside the previous
   one, which is frozen and kept running. Promotion is decided by the ledger,
@@ -365,6 +433,13 @@ Listed so nobody assumes otherwise.
 7. **Mediation address.** `think` sends escalation mail to an address on the
    earlier domain (`MEDIATION_EMAIL`).
 8. **CER in production.** Gates 1 to 3 of section 5.
+9. **Memory Library backup.** Like the ledger, it lives only in Base44.
+10. **A calibrated noise tail for a distance.** A distance averages one
+    resolvable step under measurement noise, but its spread under noise is
+    wider than a chi-square's, so no probability is attached to a single
+    distance yet (`validation/experience_results.md`).
+11. **Time as a coordinate of the engine.** Deferred until the Learning
+    Module is in place.
 
 ## 13. Adding a module: the checklist
 

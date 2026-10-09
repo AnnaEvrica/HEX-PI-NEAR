@@ -1,0 +1,2343 @@
+[
+ {
+  "moment_id": "BTC-USD|2025-08-28|sig-1",
+  "run_id": "2025-08-28",
+  "series_id": "BTC-USD",
+  "as_of": "2025-08-28",
+  "as_of_day": 20328,
+  "seq": 2,
+  "tier": 1,
+  "bar_time": 1756339200,
+  "step": 3526,
+  "samples": 750,
+  "environment": "market",
+  "provenance": "yahoo-finance daily bars",
+  "channels": "WTI,BRENT,NATGAS,VIX,FX-Australia,FX-Canada,FX-Switzerland,FX-Japan,FX-UnitedKingdom,FX-NewZealand,FX-Sweden,FX-Norway,FX-Euro,FX-Mexico,FX-India,FX-SouthAfrica,FX-Brazil,FX-China,FX-Denmark,FX-HongKong,FX-Malaysia,FX-Singapore,FX-SouthKorea,FX-Taiwan,FX-Thailand,FX-Venezuela",
+  "signature": {
+   "v": "sig-1",
+   "cer": "cer-0.4.1",
+   "target": "BTC-USD",
+   "as_of": 20328,
+   "step": 3526,
+   "samples": 750,
+   "lag": 0,
+   "segments": 10,
+   "channels": [
+    "WTI",
+    "BRENT",
+    "NATGAS",
+    "VIX",
+    "FX-Australia",
+    "FX-Canada",
+    "FX-Switzerland",
+    "FX-Japan",
+    "FX-UnitedKingdom",
+    "FX-NewZealand",
+    "FX-Sweden",
+    "FX-Norway",
+    "FX-Euro",
+    "FX-Mexico",
+    "FX-India",
+    "FX-SouthAfrica",
+    "FX-Brazil",
+    "FX-China",
+    "FX-Denmark",
+    "FX-HongKong",
+    "FX-Malaysia",
+    "FX-Singapore",
+    "FX-SouthKorea",
+    "FX-Taiwan",
+    "FX-Thailand",
+    "FX-Venezuela"
+   ],
+   "x": {
+    "BTC-USD": 0.486125,
+    "WTI": 0.320961,
+    "BRENT": 0.647756,
+    "NATGAS": 0.290737,
+    "VIX": -0.43054,
+    "FX-Australia": -0.959981,
+    "FX-Canada": -1.355139,
+    "FX-Switzerland": -0.649262,
+    "FX-Japan": -1.128471,
+    "FX-UnitedKingdom": -0.718868,
+    "FX-NewZealand": -1.078793,
+    "FX-Sweden": -1.253018,
+    "FX-Norway": -0.647979,
+    "FX-Euro": -1.210848,
+    "FX-Mexico": -0.270879,
+    "FX-India": -0.60873,
+    "FX-SouthAfrica": -0.046262,
+    "FX-Brazil": -0.588838,
+    "FX-China": -1.443644,
+    "FX-Denmark": -1.257588,
+    "FX-HongKong": 2.336102,
+    "FX-Malaysia": -1.349952,
+    "FX-Singapore": -1.406356,
+    "FX-SouthKorea": -1.370926,
+    "FX-Taiwan": -0.520946,
+    "FX-Thailand": -1.322047,
+    "FX-Venezuela": 0.99859
+   },
+   "harmony": {
+    "WTI": -0.023203,
+    "BRENT": -0.030401,
+    "NATGAS": 0.041929,
+    "VIX": -0.218724,
+    "FX-Australia": -0.12587,
+    "FX-Canada": -0.117001,
+    "FX-Switzerland": -0.048875,
+    "FX-Japan": -0.033636,
+    "FX-UnitedKingdom": -0.089212,
+    "FX-NewZealand": -0.083389,
+    "FX-Sweden": -0.098738,
+    "FX-Norway": -0.11473,
+    "FX-Euro": -0.100063,
+    "FX-Mexico": -0.104591,
+    "FX-India": -0.026988,
+    "FX-SouthAfrica": -0.143742,
+    "FX-Brazil": -0.100195,
+    "FX-China": -0.03224,
+    "FX-Denmark": -0.078509,
+    "FX-HongKong": -0.042494,
+    "FX-Malaysia": -0.009568,
+    "FX-Singapore": -0.113084,
+    "FX-SouthKorea": -0.040034,
+    "FX-Taiwan": -0.005044,
+    "FX-Thailand": -0.100649,
+    "FX-Venezuela": -0.000859
+   },
+   "se": {
+    "WTI": 0.036524,
+    "BRENT": 0.036449,
+    "NATGAS": 0.036463,
+    "VIX": 0.036585,
+    "FX-Australia": 0.03659,
+    "FX-Canada": 0.036396,
+    "FX-Switzerland": 0.036269,
+    "FX-Japan": 0.036587,
+    "FX-UnitedKingdom": 0.036281,
+    "FX-NewZealand": 0.036281,
+    "FX-Sweden": 0.036266,
+    "FX-Norway": 0.036249,
+    "FX-Euro": 0.036296,
+    "FX-Mexico": 0.036776,
+    "FX-India": 0.036862,
+    "FX-SouthAfrica": 0.036729,
+    "FX-Brazil": 0.036463,
+    "FX-China": 0.036503,
+    "FX-Denmark": 0.036283,
+    "FX-HongKong": 0.036341,
+    "FX-Malaysia": 0.036077,
+    "FX-Singapore": 0.036291,
+    "FX-SouthKorea": 0.03682,
+    "FX-Taiwan": 0.036504,
+    "FX-Thailand": 0.03628,
+    "FX-Venezuela": 0.035958
+   },
+   "lead": {
+    "WTI": [
+     0.020472,
+     0.042578,
+     -0.018377
+    ],
+    "BRENT": [
+     0.002771,
+     0.009131,
+     0.007616
+    ],
+    "NATGAS": [
+     0.049064,
+     -0.035034,
+     -0.029878
+    ],
+    "VIX": [
+     0.033687,
+     0.026863,
+     0.00629
+    ],
+    "FX-Australia": [
+     -0.026919,
+     0.008592,
+     -0.001888
+    ],
+    "FX-Canada": [
+     0.000276,
+     0.015397,
+     -0.054849
+    ],
+    "FX-Switzerland": [
+     0.00592,
+     -0.023365,
+     -0.039963
+    ],
+    "FX-Japan": [
+     -0.003623,
+     -0.00694,
+     -0.012574
+    ],
+    "FX-UnitedKingdom": [
+     0.014553,
+     0.018649,
+     -0.01499
+    ],
+    "FX-NewZealand": [
+     -0.008343,
+     0.019368,
+     0.030251
+    ],
+    "FX-Sweden": [
+     0.007145,
+     -0.027462,
+     0.038197
+    ],
+    "FX-Norway": [
+     -0.004039,
+     -0.033771,
+     0.057492
+    ],
+    "FX-Euro": [
+     -0.007617,
+     0.014767,
+     0.001337
+    ],
+    "FX-Mexico": [
+     0.026145,
+     0.000399,
+     -0.011029
+    ],
+    "FX-India": [
+     -0.040782,
+     0.000392,
+     -0.028847
+    ],
+    "FX-SouthAfrica": [
+     -0.014161,
+     0.022709,
+     0.049269
+    ],
+    "FX-Brazil": [
+     -0.002924,
+     0.041246,
+     -0.014403
+    ],
+    "FX-China": [
+     -0.011427,
+     0.03709,
+     -0.065904
+    ],
+    "FX-Denmark": [
+     -0.025997,
+     0.022698,
+     0.006878
+    ],
+    "FX-HongKong": [
+     0.016856,
+     -0.022896,
+     0.034969
+    ],
+    "FX-Malaysia": [
+     0.033049,
+     0.019452,
+     -0.036628
+    ],
+    "FX-Singapore": [
+     0.007849,
+     -0.015186,
+     -0.015413
+    ],
+    "FX-SouthKorea": [
+     0.0038,
+     -0.001574,
+     0.015334
+    ],
+    "FX-Taiwan": [
+     -0.002999,
+     -0.015288,
+     -0.057261
+    ],
+    "FX-Thailand": [
+     0.009868,
+     0.020343,
+     0.017383
+    ],
+    "FX-Venezuela": [
+     0.003596,
+     -0.016627,
+     -0.041506
+    ]
+   },
+   "own": [
+    -0.062056,
+    0.01807,
+    -0.01951,
+    -0.003157,
+    -0.03682
+   ],
+   "rhythm": {
+    "WTI": [
+     [
+      0.262422,
+      null,
+      null
+     ],
+     [
+      0.226391,
+      null,
+      null
+     ],
+     [
+      0.068087,
+      null,
+      null
+     ]
+    ],
+    "BRENT": [
+     [
+      0.357052,
+      null,
+      null
+     ],
+     [
+      0.302857,
+      null,
+      null
+     ],
+     [
+      0.065069,
+      null,
+      null
+     ]
+    ],
+    "NATGAS": [
+     [
+      0.371069,
+      null,
+      null
+     ],
+     [
+      0.386111,
+      null,
+      null
+     ],
+     [
+      0.209697,
+      null,
+      null
+     ]
+    ],
+    "VIX": [
+     [
+      0.579964,
+      3.001519,
+      0.790086
+     ],
+     [
+      0.537463,
+      -2.001737,
+      0.855166
+     ],
+     [
+      0.219738,
+      null,
+      null
+     ]
+    ],
+    "FX-Australia": [
+     [
+      0.519025,
+      null,
+      null
+     ],
+     [
+      0.596137,
+      -2.32201,
+      0.481252
+     ],
+     [
+      0.217316,
+      null,
+      null
+     ]
+    ],
+    "FX-Canada": [
+     [
+      0.36273,
+      null,
+      null
+     ],
+     [
+      0.589527,
+      -2.257367,
+      0.503591
+     ],
+     [
+      0.078396,
+      null,
+      null
+     ]
+    ],
+    "FX-Switzerland": [
+     [
+      0.323867,
+      null,
+      null
+     ],
+     [
+      0.409855,
+      null,
+      null
+     ],
+     [
+      0.152496,
+      null,
+      null
+     ]
+    ],
+    "FX-Japan": [
+     [
+      0.216861,
+      null,
+      null
+     ],
+     [
+      0.225653,
+      null,
+      null
+     ],
+     [
+      0.303539,
+      null,
+      null
+     ]
+    ],
+    "FX-UnitedKingdom": [
+     [
+      0.449009,
+      null,
+      null
+     ],
+     [
+      0.481424,
+      null,
+      null
+     ],
+     [
+      0.164244,
+      null,
+      null
+     ]
+    ],
+    "FX-NewZealand": [
+     [
+      0.561759,
+      3.141593,
+      1.155758
+     ],
+     [
+      0.507932,
+      -2.293279,
+      2.593524
+     ],
+     [
+      0.210035,
+      null,
+      null
+     ]
+    ],
+    "FX-Sweden": [
+     [
+      0.512171,
+      null,
+      null
+     ],
+     [
+      0.424507,
+      null,
+      null
+     ],
+     [
+      0.097827,
+      null,
+      null
+     ]
+    ],
+    "FX-Norway": [
+     [
+      0.37605,
+      null,
+      null
+     ],
+     [
+      0.342447,
+      null,
+      null
+     ],
+     [
+      0.240733,
+      null,
+      null
+     ]
+    ],
+    "FX-Euro": [
+     [
+      0.341657,
+      null,
+      null
+     ],
+     [
+      0.456624,
+      null,
+      null
+     ],
+     [
+      0.184154,
+      null,
+      null
+     ]
+    ],
+    "FX-Mexico": [
+     [
+      0.36487,
+      null,
+      null
+     ],
+     [
+      0.334398,
+      null,
+      null
+     ],
+     [
+      0.385539,
+      null,
+      null
+     ]
+    ],
+    "FX-India": [
+     [
+      0.43118,
+      null,
+      null
+     ],
+     [
+      0.308218,
+      null,
+      null
+     ],
+     [
+      0.362831,
+      null,
+      null
+     ]
+    ],
+    "FX-SouthAfrica": [
+     [
+      0.439586,
+      null,
+      null
+     ],
+     [
+      0.215369,
+      null,
+      null
+     ],
+     [
+      0.315194,
+      null,
+      null
+     ]
+    ],
+    "FX-Brazil": [
+     [
+      0.328929,
+      null,
+      null
+     ],
+     [
+      0.337784,
+      null,
+      null
+     ],
+     [
+      0.382414,
+      null,
+      null
+     ]
+    ],
+    "FX-China": [
+     [
+      0.564007,
+      3.141593,
+      1.084553
+     ],
+     [
+      0.539065,
+      -1.597969,
+      0.833916
+     ],
+     [
+      0.077668,
+      null,
+      null
+     ]
+    ],
+    "FX-Denmark": [
+     [
+      0.287528,
+      null,
+      null
+     ],
+     [
+      0.470433,
+      null,
+      null
+     ],
+     [
+      0.16381,
+      null,
+      null
+     ]
+    ],
+    "FX-HongKong": [
+     [
+      0.313227,
+      null,
+      null
+     ],
+     [
+      0.397361,
+      null,
+      null
+     ],
+     [
+      0.261488,
+      null,
+      null
+     ]
+    ],
+    "FX-Malaysia": [
+     [
+      0.493835,
+      null,
+      null
+     ],
+     [
+      0.250231,
+      null,
+      null
+     ],
+     [
+      0.056376,
+      null,
+      null
+     ]
+    ],
+    "FX-Singapore": [
+     [
+      0.309803,
+      null,
+      null
+     ],
+     [
+      0.441577,
+      null,
+      null
+     ],
+     [
+      0.232211,
+      null,
+      null
+     ]
+    ],
+    "FX-SouthKorea": [
+     [
+      0.261097,
+      null,
+      null
+     ],
+     [
+      0.59132,
+      0.65821,
+      0.497297
+     ],
+     [
+      0.243673,
+      null,
+      null
+     ]
+    ],
+    "FX-Taiwan": [
+     [
+      0.387076,
+      null,
+      null
+     ],
+     [
+      0.393675,
+      null,
+      null
+     ],
+     [
+      0.294721,
+      null,
+      null
+     ]
+    ],
+    "FX-Thailand": [
+     [
+      0.366699,
+      null,
+      null
+     ],
+     [
+      0.497301,
+      null,
+      null
+     ],
+     [
+      0.136436,
+      null,
+      null
+     ]
+    ],
+    "FX-Venezuela": [
+     [
+      0.369836,
+      null,
+      null
+     ],
+     [
+      0.362279,
+      null,
+      null
+     ],
+     [
+      0.153714,
+      null,
+      null
+     ]
+    ]
+   }
+  },
+  "signature_hash": "c928248c466c4d2636daf48849d72f69",
+  "intrinsic_tail": 0.7444029850746261,
+  "joint_tail": 0.9558028096379632,
+  "relational_surprisal": 0,
+  "individuality": 0.8425707470981518,
+  "nearest_prior": "BTC-USD|2025-08-27|sig-1",
+  "reference_count": 1,
+  "reference_full": false,
+  "incomparable": 0,
+  "affinity_nearest": 0.7011995750745337,
+  "affinity_median": 0.7011995750745337,
+  "affinity_q25": 0.7011995750745337,
+  "affinity_q75": 0.7011995750745337,
+  "transition": 0.8425707470981518,
+  "transition_days": 1,
+  "transition_rate": 0.8425707470981518,
+  "previous": "BTC-USD|2025-08-27|sig-1",
+  "components": {
+   "nearest": {
+    "state": [
+     1.1144482186556368,
+     27
+    ],
+    "harmony": [
+     1.1191019070867683,
+     26
+    ],
+    "leadership": [
+     0.6053940361612983,
+     78
+    ],
+    "persistence": [
+     0.6110213313551851,
+     5
+    ]
+   },
+   "transition": {
+    "state": [
+     1.1144482186556368,
+     27
+    ],
+    "harmony": [
+     1.1191019070867683,
+     26
+    ],
+    "leadership": [
+     0.6053940361612983,
+     78
+    ],
+    "persistence": [
+     0.6110213313551851,
+     5
+    ]
+   }
+  },
+  "cer_version": "cer-0.4.1",
+  "signature_version": "sig-1",
+  "distance_version": "dist-1",
+  "bandwidth_version": "bw-1",
+  "metric_version": "exp-1"
+ },
+ {
+  "moment_id": "FX-Euro|2026-09-30|sig-1",
+  "run_id": "2026-09-30",
+  "series_id": "FX-Euro",
+  "as_of": "2026-09-30",
+  "as_of_day": 20726,
+  "seq": 274,
+  "tier": 1,
+  "bar_time": 1790726400,
+  "step": 2683,
+  "samples": 750,
+  "environment": "market",
+  "provenance": "yahoo-finance daily bars",
+  "channels": "BTC-USD,WTI,BRENT,NATGAS,VIX,FX-Australia,FX-Canada,FX-Switzerland,FX-Japan,FX-UnitedKingdom,FX-NewZealand,FX-Sweden,FX-Norway,FX-Mexico,FX-India,FX-SouthAfrica,FX-Brazil,FX-China,FX-Denmark,FX-HongKong,FX-Malaysia,FX-Singapore,FX-SouthKorea,FX-Taiwan,FX-Thailand,FX-Venezuela",
+  "signature": {
+   "v": "sig-1",
+   "cer": "cer-0.4.1",
+   "target": "FX-Euro",
+   "as_of": 20726,
+   "step": 2683,
+   "samples": 750,
+   "lag": 0,
+   "segments": 10,
+   "channels": [
+    "BTC-USD",
+    "WTI",
+    "BRENT",
+    "NATGAS",
+    "VIX",
+    "FX-Australia",
+    "FX-Canada",
+    "FX-Switzerland",
+    "FX-Japan",
+    "FX-UnitedKingdom",
+    "FX-NewZealand",
+    "FX-Sweden",
+    "FX-Norway",
+    "FX-Mexico",
+    "FX-India",
+    "FX-SouthAfrica",
+    "FX-Brazil",
+    "FX-China",
+    "FX-Denmark",
+    "FX-HongKong",
+    "FX-Malaysia",
+    "FX-Singapore",
+    "FX-SouthKorea",
+    "FX-Taiwan",
+    "FX-Thailand",
+    "FX-Venezuela"
+   ],
+   "x": {
+    "FX-Euro": -0.219349,
+    "BTC-USD": -0.104286,
+    "WTI": 0.483394,
+    "BRENT": 0.820451,
+    "NATGAS": -1.171261,
+    "FX-Australia": 0.723983,
+    "FX-Canada": 0.389246,
+    "FX-Switzerland": 0.000467,
+    "FX-Japan": -0.449419,
+    "FX-UnitedKingdom": -0.895134,
+    "FX-NewZealand": -0.171273,
+    "FX-Sweden": -0.267937,
+    "FX-Norway": -0.035029,
+    "FX-Mexico": 0.157074,
+    "FX-India": -0.743542,
+    "FX-SouthAfrica": 0.000467,
+    "FX-Brazil": -1.172346,
+    "FX-China": 0.21409,
+    "FX-Denmark": -0.210269,
+    "FX-HongKong": 0.217914,
+    "FX-Malaysia": -0.375181,
+    "FX-Singapore": -0.433974,
+    "FX-SouthKorea": 0.038767,
+    "FX-Taiwan": -0.746007,
+    "FX-Thailand": 0.30736,
+    "FX-Venezuela": 0.211224
+   },
+   "harmony": {
+    "BTC-USD": -0.116165,
+    "WTI": 0.115972,
+    "BRENT": 0.113691,
+    "NATGAS": -0.023767,
+    "VIX": 0.129474,
+    "FX-Australia": 0.659355,
+    "FX-Canada": 0.594142,
+    "FX-Switzerland": 0.767757,
+    "FX-Japan": 0.529428,
+    "FX-UnitedKingdom": 0.803416,
+    "FX-NewZealand": 0.683423,
+    "FX-Sweden": 0.811592,
+    "FX-Norway": 0.654369,
+    "FX-Mexico": 0.43193,
+    "FX-India": 0.179496,
+    "FX-SouthAfrica": 0.520734,
+    "FX-Brazil": 0.380269,
+    "FX-China": 0.419348,
+    "FX-Denmark": 0.984074,
+    "FX-HongKong": 0.17874,
+    "FX-Malaysia": 0.314958,
+    "FX-Singapore": 0.844565,
+    "FX-SouthKorea": 0.452241,
+    "FX-Taiwan": 0.340647,
+    "FX-Thailand": 0.584872,
+    "FX-Venezuela": 0.033886
+   },
+   "se": {
+    "BTC-USD": 0.036548,
+    "WTI": 0.036665,
+    "BRENT": 0.03664,
+    "NATGAS": 0.036868,
+    "VIX": 0.036827,
+    "FX-Australia": 0.036919,
+    "FX-Canada": 0.036652,
+    "FX-Switzerland": 0.037074,
+    "FX-Japan": 0.037122,
+    "FX-UnitedKingdom": 0.03746,
+    "FX-NewZealand": 0.037195,
+    "FX-Sweden": 0.037217,
+    "FX-Norway": 0.036649,
+    "FX-Mexico": 0.036722,
+    "FX-India": 0.036816,
+    "FX-SouthAfrica": 0.036692,
+    "FX-Brazil": 0.036525,
+    "FX-China": 0.036843,
+    "FX-Denmark": 0.037598,
+    "FX-HongKong": 0.036448,
+    "FX-Malaysia": 0.036937,
+    "FX-Singapore": 0.037505,
+    "FX-SouthKorea": 0.037289,
+    "FX-Taiwan": 0.036666,
+    "FX-Thailand": 0.036873,
+    "FX-Venezuela": 0.033186
+   },
+   "lead": {
+    "BTC-USD": [
+     0.001449,
+     -0.016632,
+     0.024419
+    ],
+    "WTI": [
+     -0.021912,
+     0.026347,
+     -0.03425
+    ],
+    "BRENT": [
+     -0.022381,
+     0.008864,
+     -0.00085
+    ],
+    "NATGAS": [
+     0.068745,
+     0.001781,
+     -0.04413
+    ],
+    "VIX": [
+     0.07595,
+     -0.00296,
+     -0.003051
+    ],
+    "FX-Australia": [
+     -0.030765,
+     -0.023394,
+     -0.050677
+    ],
+    "FX-Canada": [
+     -0.028039,
+     -0.0231,
+     -0.043395
+    ],
+    "FX-Switzerland": [
+     -0.04826,
+     -0.067642,
+     -0.072192
+    ],
+    "FX-Japan": [
+     -0.052605,
+     -0.037699,
+     -0.004893
+    ],
+    "FX-UnitedKingdom": [
+     -0.01421,
+     -0.040604,
+     -0.063232
+    ],
+    "FX-NewZealand": [
+     -0.017996,
+     -0.047543,
+     -0.091437
+    ],
+    "FX-Sweden": [
+     -0.00673,
+     -0.009381,
+     -0.065502
+    ],
+    "FX-Norway": [
+     -0.032831,
+     -0.034592,
+     -0.044353
+    ],
+    "FX-Mexico": [
+     0.014012,
+     0.02433,
+     -0.041007
+    ],
+    "FX-India": [
+     -0.038234,
+     0.031887,
+     0.031653
+    ],
+    "FX-SouthAfrica": [
+     -0.055456,
+     -0.036418,
+     -0.047967
+    ],
+    "FX-Brazil": [
+     -0.004787,
+     -0.054892,
+     -0.063955
+    ],
+    "FX-China": [
+     -0.019515,
+     -0.060405,
+     -0.047691
+    ],
+    "FX-Denmark": [
+     0.004111,
+     -0.030165,
+     -0.065877
+    ],
+    "FX-HongKong": [
+     0.02031,
+     -0.013605,
+     -0.028177
+    ],
+    "FX-Malaysia": [
+     -0.065393,
+     -0.022039,
+     0.007167
+    ],
+    "FX-Singapore": [
+     -0.028488,
+     -0.048088,
+     -0.078022
+    ],
+    "FX-SouthKorea": [
+     -0.002417,
+     -0.035438,
+     -0.050215
+    ],
+    "FX-Taiwan": [
+     -0.036479,
+     -0.037881,
+     -0.018756
+    ],
+    "FX-Thailand": [
+     -0.049298,
+     0.008671,
+     -0.073966
+    ],
+    "FX-Venezuela": [
+     0.062421,
+     0.008962,
+     0.013791
+    ]
+   },
+   "own": [
+    0.00035,
+    -0.034545,
+    -0.062575,
+    -0.021363,
+    0.00077
+   ],
+   "rhythm": {
+    "BTC-USD": [
+     [
+      0.337475,
+      null,
+      null
+     ],
+     [
+      0.403808,
+      null,
+      null
+     ],
+     [
+      0.174303,
+      null,
+      null
+     ]
+    ],
+    "WTI": [
+     [
+      0.38585,
+      null,
+      null
+     ],
+     [
+      0.347958,
+      null,
+      null
+     ],
+     [
+      0.151909,
+      null,
+      null
+     ]
+    ],
+    "BRENT": [
+     [
+      0.357309,
+      null,
+      null
+     ],
+     [
+      0.424961,
+      null,
+      null
+     ],
+     [
+      0.324836,
+      null,
+      null
+     ]
+    ],
+    "NATGAS": [
+     [
+      0.337244,
+      null,
+      null
+     ],
+     [
+      0.378021,
+      null,
+      null
+     ],
+     [
+      0.16465,
+      null,
+      null
+     ]
+    ],
+    "VIX": [
+     [
+      0.380217,
+      null,
+      null
+     ],
+     [
+      0.318282,
+      null,
+      null
+     ],
+     [
+      0.028322,
+      null,
+      null
+     ]
+    ],
+    "FX-Australia": [
+     [
+      0.732103,
+      -0.090444,
+      0.274538
+     ],
+     [
+      0.83397,
+      -0.04317,
+      0.163009
+     ],
+     [
+      0.644961,
+      0.094537,
+      0.278863
+     ]
+    ],
+    "FX-Canada": [
+     [
+      0.701402,
+      -0.144902,
+      0.316922
+     ],
+     [
+      0.62062,
+      0.317175,
+      0.414563
+     ],
+     [
+      0.554751,
+      0.356606,
+      0.394772
+     ]
+    ],
+    "FX-Switzerland": [
+     [
+      0.834069,
+      0.010026,
+      0.17392
+     ],
+     [
+      0.88803,
+      0.191591,
+      0.124085
+     ],
+     [
+      0.681545,
+      0.454096,
+      0.24609
+     ]
+    ],
+    "FX-Japan": [
+     [
+      0.555971,
+      -0.24314,
+      1.425699
+     ],
+     [
+      0.6719,
+      0.599273,
+      0.321275
+     ],
+     [
+      0.276941,
+      null,
+      null
+     ]
+    ],
+    "FX-UnitedKingdom": [
+     [
+      0.815189,
+      0.024765,
+      0.18984
+     ],
+     [
+      0.910885,
+      0.152414,
+      0.107544
+     ],
+     [
+      0.767062,
+      0.275908,
+      0.184028
+     ]
+    ],
+    "FX-NewZealand": [
+     [
+      0.750022,
+      -0.330502,
+      0.253375
+     ],
+     [
+      0.862151,
+      0.273088,
+      0.142568
+     ],
+     [
+      0.722346,
+      0.1556,
+      0.21456
+     ]
+    ],
+    "FX-Sweden": [
+     [
+      0.867703,
+      -0.075161,
+      0.146996
+     ],
+     [
+      0.900865,
+      0.162173,
+      0.114853
+     ],
+     [
+      0.657213,
+      -0.133922,
+      0.2673
+     ]
+    ],
+    "FX-Norway": [
+     [
+      0.763109,
+      -0.03089,
+      0.23916
+     ],
+     [
+      0.822794,
+      0.068384,
+      0.171333
+     ],
+     [
+      0.532811,
+      0.178442,
+      0.437444
+     ]
+    ],
+    "FX-Mexico": [
+     [
+      0.517017,
+      null,
+      null
+     ],
+     [
+      0.445673,
+      null,
+      null
+     ],
+     [
+      0.483041,
+      -0.114848,
+      0.587295
+     ]
+    ],
+    "FX-India": [
+     [
+      0.457671,
+      null,
+      null
+     ],
+     [
+      0.367326,
+      null,
+      null
+     ],
+     [
+      0.138051,
+      null,
+      null
+     ]
+    ],
+    "FX-SouthAfrica": [
+     [
+      0.637892,
+      0.090939,
+      0.452302
+     ],
+     [
+      0.609077,
+      0.369148,
+      0.443349
+     ],
+     [
+      0.439165,
+      0.287731,
+      0.916433
+     ]
+    ],
+    "FX-Brazil": [
+     [
+      0.58872,
+      0.204689,
+      0.700265
+     ],
+     [
+      0.419475,
+      null,
+      null
+     ],
+     [
+      0.28269,
+      null,
+      null
+     ]
+    ],
+    "FX-China": [
+     [
+      0.621015,
+      -0.927393,
+      0.511175
+     ],
+     [
+      0.709967,
+      0.383384,
+      0.272714
+     ],
+     [
+      0.48646,
+      0.505128,
+      0.573102
+     ]
+    ],
+    "FX-Denmark": [
+     [
+      0.988734,
+      0.006227,
+      0.036589
+     ],
+     [
+      0.997627,
+      -0.001406,
+      0.015932
+     ],
+     [
+      0.997649,
+      0.007176,
+      0.014458
+     ]
+    ],
+    "FX-HongKong": [
+     [
+      0.42141,
+      null,
+      null
+     ],
+     [
+      0.401119,
+      null,
+      null
+     ],
+     [
+      0.372553,
+      null,
+      null
+     ]
+    ],
+    "FX-Malaysia": [
+     [
+      0.450353,
+      null,
+      null
+     ],
+     [
+      0.550875,
+      0.477393,
+      0.711779
+     ],
+     [
+      0.456226,
+      0.566929,
+      0.740779
+     ]
+    ],
+    "FX-Singapore": [
+     [
+      0.888636,
+      0.117383,
+      0.130701
+     ],
+     [
+      0.896072,
+      -0.025732,
+      0.118313
+     ],
+     [
+      0.868213,
+      0.024956,
+      0.122418
+     ]
+    ],
+    "FX-SouthKorea": [
+     [
+      0.602207,
+      -0.039981,
+      0.602957
+     ],
+     [
+      0.773923,
+      0.471154,
+      0.210317
+     ],
+     [
+      0.523649,
+      0.39665,
+      0.458302
+     ]
+    ],
+    "FX-Taiwan": [
+     [
+      0.516052,
+      null,
+      null
+     ],
+     [
+      0.795536,
+      0.439926,
+      0.192453
+     ],
+     [
+      0.437461,
+      -0.076989,
+      0.940834
+     ]
+    ],
+    "FX-Thailand": [
+     [
+      0.647997,
+      -0.242903,
+      0.423632
+     ],
+     [
+      0.640868,
+      -0.015637,
+      0.372302
+     ],
+     [
+      0.480652,
+      0.378843,
+      0.597741
+     ]
+    ],
+    "FX-Venezuela": [
+     [
+      0.439929,
+      null,
+      null
+     ],
+     [
+      0.193562,
+      null,
+      null
+     ],
+     [
+      0.047919,
+      null,
+      null
+     ]
+    ]
+   }
+  },
+  "signature_hash": "5af85c44b2c77195465a02db41195a9f",
+  "intrinsic_tail": 1,
+  "joint_tail": 0.9918380276532835,
+  "relational_surprisal": 0.00809065992558118,
+  "individuality": 0.7434950670363768,
+  "nearest_prior": "FX-Euro|2026-09-29|sig-1",
+  "reference_count": 250,
+  "reference_full": true,
+  "incomparable": 0,
+  "affinity_nearest": 0.7585151874760641,
+  "affinity_median": 0.5189756805761216,
+  "affinity_q25": 0.47329581889789635,
+  "affinity_q75": 0.6097704790886318,
+  "transition": 0.7434950670363768,
+  "transition_days": 1,
+  "transition_rate": 0.7434950670363768,
+  "previous": "FX-Euro|2026-09-29|sig-1",
+  "components": {
+   "nearest": {
+    "state": [
+     0.8090706371560378,
+     26
+    ],
+    "harmony": [
+     0.27064962798739817,
+     26
+    ],
+    "leadership": [
+     0.8427174462131383,
+     78
+    ],
+    "persistence": [
+     0.24838836472927814,
+     5
+    ]
+   },
+   "transition": {
+    "state": [
+     0.8090706371560378,
+     26
+    ],
+    "harmony": [
+     0.27064962798739817,
+     26
+    ],
+    "leadership": [
+     0.8427174462131383,
+     78
+    ],
+    "persistence": [
+     0.24838836472927814,
+     5
+    ]
+   }
+  },
+  "cer_version": "cer-0.4.1",
+  "signature_version": "sig-1",
+  "distance_version": "dist-1",
+  "bandwidth_version": "bw-1",
+  "metric_version": "exp-1"
+ },
+ {
+  "moment_id": "WTI|2026-09-30|sig-1",
+  "run_id": "2026-09-30",
+  "series_id": "WTI",
+  "as_of": "2026-09-30",
+  "as_of_day": 20726,
+  "seq": 273,
+  "tier": 0,
+  "bar_time": 1790726400,
+  "step": 2685,
+  "samples": 750,
+  "environment": "market",
+  "provenance": "yahoo-finance daily bars",
+  "channels": "BTC-USD,BRENT,NATGAS,VIX,FX-Australia,FX-Canada,FX-Switzerland,FX-Japan,FX-UnitedKingdom,FX-NewZealand,FX-Sweden,FX-Norway,FX-Euro,FX-Mexico,FX-India,FX-SouthAfrica,FX-Brazil,FX-China,FX-Denmark,FX-HongKong,FX-Malaysia,FX-Singapore,FX-SouthKorea,FX-Taiwan,FX-Thailand,FX-Venezuela",
+  "signature": {
+   "v": "sig-1",
+   "cer": "cer-0.4.1",
+   "target": "WTI",
+   "as_of": 20726,
+   "step": 2685,
+   "samples": 750,
+   "lag": 0,
+   "segments": 10,
+   "channels": [
+    "BTC-USD",
+    "BRENT",
+    "NATGAS",
+    "VIX",
+    "FX-Australia",
+    "FX-Canada",
+    "FX-Switzerland",
+    "FX-Japan",
+    "FX-UnitedKingdom",
+    "FX-NewZealand",
+    "FX-Sweden",
+    "FX-Norway",
+    "FX-Euro",
+    "FX-Mexico",
+    "FX-India",
+    "FX-SouthAfrica",
+    "FX-Brazil",
+    "FX-China",
+    "FX-Denmark",
+    "FX-HongKong",
+    "FX-Malaysia",
+    "FX-Singapore",
+    "FX-SouthKorea",
+    "FX-Taiwan",
+    "FX-Thailand",
+    "FX-Venezuela"
+   ],
+   "x": {
+    "WTI": 0.483394,
+    "BTC-USD": -0.104286,
+    "BRENT": 0.820451,
+    "NATGAS": -1.171261,
+    "FX-Australia": 0.723983,
+    "FX-Canada": 0.389246,
+    "FX-Switzerland": 0.000467,
+    "FX-Japan": -0.449419,
+    "FX-UnitedKingdom": -0.895134,
+    "FX-NewZealand": -0.171273,
+    "FX-Sweden": -0.267937,
+    "FX-Norway": -0.035029,
+    "FX-Euro": -0.219349,
+    "FX-Mexico": 0.157074,
+    "FX-India": -0.743542,
+    "FX-SouthAfrica": 0.000467,
+    "FX-Brazil": -1.172346,
+    "FX-China": 0.21409,
+    "FX-Denmark": -0.210269,
+    "FX-HongKong": 0.217914,
+    "FX-Malaysia": -0.375181,
+    "FX-Singapore": -0.433974,
+    "FX-SouthKorea": 0.038767,
+    "FX-Taiwan": -0.746007,
+    "FX-Thailand": 0.30736,
+    "FX-Venezuela": 0.211224
+   },
+   "harmony": {
+    "BTC-USD": -0.046895,
+    "BRENT": 0.793429,
+    "NATGAS": 0.010491,
+    "VIX": 0.124302,
+    "FX-Australia": 0.046121,
+    "FX-Canada": -0.049143,
+    "FX-Switzerland": 0.17766,
+    "FX-Japan": 0.162037,
+    "FX-UnitedKingdom": 0.103433,
+    "FX-NewZealand": 0.098571,
+    "FX-Sweden": 0.101889,
+    "FX-Norway": -0.155118,
+    "FX-Euro": 0.122605,
+    "FX-Mexico": 0.069598,
+    "FX-India": 0.127401,
+    "FX-SouthAfrica": 0.122223,
+    "FX-Brazil": 0.000918,
+    "FX-China": 0.070546,
+    "FX-Denmark": 0.12541,
+    "FX-HongKong": 0.039365,
+    "FX-Malaysia": 0.144609,
+    "FX-Singapore": 0.169655,
+    "FX-SouthKorea": 0.111399,
+    "FX-Taiwan": 0.050911,
+    "FX-Thailand": 0.157345,
+    "FX-Venezuela": -0.039612
+   },
+   "se": {
+    "BTC-USD": 0.037146,
+    "BRENT": 0.037597,
+    "NATGAS": 0.036303,
+    "VIX": 0.036792,
+    "FX-Australia": 0.036547,
+    "FX-Canada": 0.036399,
+    "FX-Switzerland": 0.036773,
+    "FX-Japan": 0.036828,
+    "FX-UnitedKingdom": 0.036739,
+    "FX-NewZealand": 0.036849,
+    "FX-Sweden": 0.036947,
+    "FX-Norway": 0.036792,
+    "FX-Euro": 0.03668,
+    "FX-Mexico": 0.036859,
+    "FX-India": 0.036444,
+    "FX-SouthAfrica": 0.037063,
+    "FX-Brazil": 0.036296,
+    "FX-China": 0.03637,
+    "FX-Denmark": 0.036695,
+    "FX-HongKong": 0.036594,
+    "FX-Malaysia": 0.036961,
+    "FX-Singapore": 0.036929,
+    "FX-SouthKorea": 0.03681,
+    "FX-Taiwan": 0.036623,
+    "FX-Thailand": 0.036979,
+    "FX-Venezuela": 0.037129
+   },
+   "lead": {
+    "BTC-USD": [
+     -0.036458,
+     0.011967,
+     0.043218
+    ],
+    "BRENT": [
+     0.005243,
+     0.037392,
+     -0.051749
+    ],
+    "NATGAS": [
+     0.010345,
+     -0.055759,
+     0.038687
+    ],
+    "VIX": [
+     0.030191,
+     -0.038999,
+     -0.020425
+    ],
+    "FX-Australia": [
+     -0.029875,
+     -0.006105,
+     -0.037039
+    ],
+    "FX-Canada": [
+     -0.021783,
+     0.011525,
+     -0.052498
+    ],
+    "FX-Switzerland": [
+     0.008398,
+     0.037091,
+     -0.060973
+    ],
+    "FX-Japan": [
+     -0.004033,
+     0.054139,
+     -0.0424
+    ],
+    "FX-UnitedKingdom": [
+     0.014881,
+     0.042445,
+     -0.000064
+    ],
+    "FX-NewZealand": [
+     -0.005643,
+     -0.004064,
+     -0.038256
+    ],
+    "FX-Sweden": [
+     -0.002641,
+     0.033146,
+     -0.047325
+    ],
+    "FX-Norway": [
+     -0.026937,
+     0.050705,
+     -0.034823
+    ],
+    "FX-Euro": [
+     0.015216,
+     0.010359,
+     -0.045302
+    ],
+    "FX-Mexico": [
+     -0.057445,
+     0.002414,
+     -0.017477
+    ],
+    "FX-India": [
+     -0.022592,
+     0.025474,
+     -0.021417
+    ],
+    "FX-SouthAfrica": [
+     0.000458,
+     0.041309,
+     -0.038428
+    ],
+    "FX-Brazil": [
+     -0.006887,
+     -0.010201,
+     -0.009706
+    ],
+    "FX-China": [
+     0.00977,
+     0.033444,
+     -0.007385
+    ],
+    "FX-Denmark": [
+     0.007887,
+     0.009503,
+     -0.040377
+    ],
+    "FX-HongKong": [
+     0.071676,
+     -0.001248,
+     -0.022867
+    ],
+    "FX-Malaysia": [
+     -0.017954,
+     0.044684,
+     -0.01707
+    ],
+    "FX-Singapore": [
+     0.014189,
+     0.028565,
+     -0.044163
+    ],
+    "FX-SouthKorea": [
+     0.007359,
+     -0.008571,
+     -0.07254
+    ],
+    "FX-Taiwan": [
+     0.003384,
+     -0.02041,
+     -0.067211
+    ],
+    "FX-Thailand": [
+     0.051201,
+     0.011922,
+     -0.048085
+    ],
+    "FX-Venezuela": [
+     0.043103,
+     0.014906,
+     0.020648
+    ]
+   },
+   "own": [
+    -0.022516,
+    0.016365,
+    -0.0059,
+    -0.004352,
+    -0.02084
+   ],
+   "rhythm": {
+    "BTC-USD": [
+     [
+      0.407906,
+      null,
+      null
+     ],
+     [
+      0.326048,
+      null,
+      null
+     ],
+     [
+      0.145953,
+      null,
+      null
+     ]
+    ],
+    "BRENT": [
+     [
+      0.861269,
+      -0.005539,
+      0.152048
+     ],
+     [
+      0.908728,
+      0.142481,
+      0.109127
+     ],
+     [
+      0.851968,
+      0.005176,
+      0.132075
+     ]
+    ],
+    "NATGAS": [
+     [
+      0.29022,
+      null,
+      null
+     ],
+     [
+      0.216877,
+      null,
+      null
+     ],
+     [
+      0.495067,
+      0.009972,
+      0.540784
+     ]
+    ],
+    "VIX": [
+     [
+      0.387885,
+      null,
+      null
+     ],
+     [
+      0.277349,
+      null,
+      null
+     ],
+     [
+      0.292543,
+      null,
+      null
+     ]
+    ],
+    "FX-Australia": [
+     [
+      0.465682,
+      null,
+      null
+     ],
+     [
+      0.26422,
+      null,
+      null
+     ],
+     [
+      0.170451,
+      null,
+      null
+     ]
+    ],
+    "FX-Canada": [
+     [
+      0.492482,
+      null,
+      null
+     ],
+     [
+      0.410989,
+      null,
+      null
+     ],
+     [
+      0.421983,
+      2.921055,
+      1.299372
+     ]
+    ],
+    "FX-Switzerland": [
+     [
+      0.598689,
+      0.006401,
+      0.624948
+     ],
+     [
+      0.374045,
+      null,
+      null
+     ],
+     [
+      0.25165,
+      null,
+      null
+     ]
+    ],
+    "FX-Japan": [
+     [
+      0.582901,
+      -0.19138,
+      0.75666
+     ],
+     [
+      0.689848,
+      0.913617,
+      0.296893
+     ],
+     [
+      0.437511,
+      0.067983,
+      0.940093
+     ]
+    ],
+    "FX-UnitedKingdom": [
+     [
+      0.356169,
+      null,
+      null
+     ],
+     [
+      0.285274,
+      null,
+      null
+     ],
+     [
+      0.220568,
+      null,
+      null
+     ]
+    ],
+    "FX-NewZealand": [
+     [
+      0.469709,
+      null,
+      null
+     ],
+     [
+      0.318602,
+      null,
+      null
+     ],
+     [
+      0.098724,
+      null,
+      null
+     ]
+    ],
+    "FX-Sweden": [
+     [
+      0.479537,
+      null,
+      null
+     ],
+     [
+      0.403765,
+      null,
+      null
+     ],
+     [
+      0.093694,
+      null,
+      null
+     ]
+    ],
+    "FX-Norway": [
+     [
+      0.620595,
+      -2.824844,
+      0.512866
+     ],
+     [
+      0.331391,
+      null,
+      null
+     ],
+     [
+      0.107344,
+      null,
+      null
+     ]
+    ],
+    "FX-Euro": [
+     [
+      0.351519,
+      null,
+      null
+     ],
+     [
+      0.36334,
+      null,
+      null
+     ],
+     [
+      0.16769,
+      null,
+      null
+     ]
+    ],
+    "FX-Mexico": [
+     [
+      0.493523,
+      null,
+      null
+     ],
+     [
+      0.355156,
+      null,
+      null
+     ],
+     [
+      0.151325,
+      null,
+      null
+     ]
+    ],
+    "FX-India": [
+     [
+      0.380159,
+      null,
+      null
+     ],
+     [
+      0.219376,
+      null,
+      null
+     ],
+     [
+      0.182959,
+      null,
+      null
+     ]
+    ],
+    "FX-SouthAfrica": [
+     [
+      0.430111,
+      null,
+      null
+     ],
+     [
+      0.539283,
+      -1.358848,
+      0.831135
+     ],
+     [
+      0.07424,
+      null,
+      null
+     ]
+    ],
+    "FX-Brazil": [
+     [
+      0.32204,
+      null,
+      null
+     ],
+     [
+      0.142636,
+      null,
+      null
+     ],
+     [
+      0.229338,
+      null,
+      null
+     ]
+    ],
+    "FX-China": [
+     [
+      0.266351,
+      null,
+      null
+     ],
+     [
+      0.359399,
+      null,
+      null
+     ],
+     [
+      0.155574,
+      null,
+      null
+     ]
+    ],
+    "FX-Denmark": [
+     [
+      0.360705,
+      null,
+      null
+     ],
+     [
+      0.35983,
+      null,
+      null
+     ],
+     [
+      0.153267,
+      null,
+      null
+     ]
+    ],
+    "FX-HongKong": [
+     [
+      0.469074,
+      null,
+      null
+     ],
+     [
+      0.438327,
+      null,
+      null
+     ],
+     [
+      0.302762,
+      null,
+      null
+     ]
+    ],
+    "FX-Malaysia": [
+     [
+      0.5413,
+      null,
+      null
+     ],
+     [
+      0.453859,
+      null,
+      null
+     ],
+     [
+      0.352878,
+      null,
+      null
+     ]
+    ],
+    "FX-Singapore": [
+     [
+      0.367091,
+      null,
+      null
+     ],
+     [
+      0.475841,
+      null,
+      null
+     ],
+     [
+      0.273546,
+      null,
+      null
+     ]
+    ],
+    "FX-SouthKorea": [
+     [
+      0.473086,
+      null,
+      null
+     ],
+     [
+      0.328298,
+      null,
+      null
+     ],
+     [
+      0.28202,
+      null,
+      null
+     ]
+    ],
+    "FX-Taiwan": [
+     [
+      0.572462,
+      0,
+      0.897471
+     ],
+     [
+      0.304716,
+      null,
+      null
+     ],
+     [
+      0.16101,
+      null,
+      null
+     ]
+    ],
+    "FX-Thailand": [
+     [
+      0.47964,
+      null,
+      null
+     ],
+     [
+      0.436146,
+      null,
+      null
+     ],
+     [
+      0.265413,
+      null,
+      null
+     ]
+    ],
+    "FX-Venezuela": [
+     [
+      0.258211,
+      null,
+      null
+     ],
+     [
+      0.25265,
+      null,
+      null
+     ],
+     [
+      0.233734,
+      null,
+      null
+     ]
+    ]
+   }
+  },
+  "signature_hash": "71f3a1b01686235a47f7d30e13c73c52",
+  "intrinsic_tail": 1,
+  "joint_tail": 0.9918628942427332,
+  "relational_surprisal": 0.008065589019804514,
+  "individuality": 0.7149029228235301,
+  "nearest_prior": "WTI|2026-09-29|sig-1",
+  "reference_count": 250,
+  "reference_full": true,
+  "incomparable": 0,
+  "affinity_nearest": 0.774495759309973,
+  "affinity_median": 0.23412521870182568,
+  "affinity_q25": 0.16269615333309206,
+  "affinity_q75": 0.6071590836728822,
+  "transition": 0.7149029228235301,
+  "transition_days": 1,
+  "transition_rate": 0.7149029228235301,
+  "previous": "WTI|2026-09-29|sig-1",
+  "components": {
+   "nearest": {
+    "state": [
+     0.8090706371560378,
+     26
+    ],
+    "harmony": [
+     0.3652545073875901,
+     26
+    ],
+    "leadership": [
+     0.7608816132648824,
+     78
+    ],
+    "persistence": [
+     0.8186685412072823,
+     5
+    ]
+   },
+   "transition": {
+    "state": [
+     0.8090706371560378,
+     26
+    ],
+    "harmony": [
+     0.3652545073875901,
+     26
+    ],
+    "leadership": [
+     0.7608816132648824,
+     78
+    ],
+    "persistence": [
+     0.8186685412072823,
+     5
+    ]
+   }
+  },
+  "cer_version": "cer-0.4.1",
+  "signature_version": "sig-1",
+  "distance_version": "dist-1",
+  "bandwidth_version": "bw-1",
+  "metric_version": "exp-1"
+ }
+]

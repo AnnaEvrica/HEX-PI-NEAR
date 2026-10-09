@@ -41,10 +41,10 @@ export function nightChannels(series: NightSeries[]): { channels: Channel[]; las
 
 const remembered = (r: any): Remembered | null => { try { return { id: r.moment_id, as_of: r.as_of_day, signature: JSON.parse(r.signature), seq: r.seq }; } catch { return null; } };
 const storedExperience = (r: any): Experience => ({
-  metric: r.metric_version, distance: r.distance_version, bandwidth: r.bandwidth_version, individuality: r.individuality ?? null, individuality_tail: r.individuality_tail ?? null, nearest_prior: r.nearest_prior ?? null, nearest_components: null,
+  metric: r.metric_version, distance: r.distance_version, bandwidth: r.bandwidth_version, individuality: r.individuality ?? null, nearest_prior: r.nearest_prior ?? null, nearest_components: null,
   reference_count: r.reference_count ?? 0, reference_full: !!r.reference_full, incomparable: r.incomparable ?? 0, affinity_nearest: r.affinity_nearest ?? null, affinity_median: r.affinity_median ?? null,
   affinity_quartiles: r.affinity_q25 === undefined || r.affinity_q25 === null ? null : [r.affinity_q25, r.affinity_q75],
-  transition: r.transition ?? null, transition_tail: r.transition_tail ?? null, transition_components: null, transition_days: r.transition_days ?? null, transition_rate: r.transition_rate ?? null, previous: r.previous ?? null,
+  transition: r.transition ?? null, transition_components: null, transition_days: r.transition_days ?? null, transition_rate: r.transition_rate ?? null, previous: r.previous ?? null,
 });
 
 /**
@@ -77,9 +77,7 @@ export async function integrateExperience(base44: any, series: NightSeries[], ct
   const { channels, last, left_out } = nightChannels(series);
   const rows: { E: Experience; channels: string[] }[] = [], recent: Record<string, Signature[]> = {}, hashes: Record<string, string> = {}, without: string[] = [...left_out], unchanged: string[] = [];
   for (const target of channels) {
-    const others = channels.filter((c) => c !== target), upto = target.days[target.days.length - 1], got = momentOf(target, others, upto);
-    if (!got) { without.push(target.id); continue; }
-    const sig = got.signature, moment_id = `${target.id}|${iso(upto)}|${SIGNATURE_VERSION}`;
+    const others = channels.filter((c) => c !== target), upto = target.days[target.days.length - 1], moment_id = `${target.id}|${iso(upto)}|${SIGNATURE_VERSION}`;
     const stored = ((await M.filter({ moment_id })) || [])[0];
     if (stored) {       // this bar was met before: nothing is written. If it was tonight (a run that stopped half way), it still counts in tonight's summary
       if (stored.run_id === run_id) { const h = remembered(stored); if (h) { rows.push({ E: storedExperience(stored), channels: h.signature.channels }); hashes[target.id] = stored.signature_hash; recent[target.id] = [h.signature]; } }
@@ -89,6 +87,9 @@ export async function integrateExperience(base44: any, series: NightSeries[], ct
     const latest = ((await M.filter({ series_id: target.id, signature_version: SIGNATURE_VERSION }, '-as_of_day', DISPERSION_WINDOW)) || []) as any[];
     const prev = latest[0];
     if (prev && prev.as_of_day >= upto) { unchanged.push(target.id); continue; }
+    const got = momentOf(target, others, upto);
+    if (!got) { without.push(target.id); continue; }
+    const sig = got.signature;
     // the step is counted on from the previous moment, so it stays the same coordinate when the fetched history rolls forward
     if (prev) sig.step = prev.step + (countUpTo(target.days, upto) - countUpTo(target.days, prev.as_of_day));
     const seq = prev ? (prev.seq ?? latest.length) + 1 : 1, history = await loadHistory(M, target.id, latest), E = experience(sig, history), signature_hash = await sha256hex(canonical(sig));
@@ -96,9 +97,9 @@ export async function integrateExperience(base44: any, series: NightSeries[], ct
       moment_id, run_id, series_id: target.id, as_of: iso(upto), as_of_day: upto, seq, tier: tier(seq), bar_time: last[target.id], step: sig.step, samples: sig.samples,
       environment: ENVIRONMENT, provenance: PROVENANCE, channels: sig.channels.join(','), signature: JSON.stringify(sig), signature_hash,
       intrinsic_tail: got.novelty.intrinsic_tail, joint_tail: got.novelty.joint_tail, relational_surprisal: got.novelty.relational_surprisal,
-      individuality: E.individuality, individuality_tail: E.individuality_tail, nearest_prior: E.nearest_prior, reference_count: E.reference_count, reference_full: E.reference_full, incomparable: E.incomparable,
+      individuality: E.individuality, nearest_prior: E.nearest_prior, reference_count: E.reference_count, reference_full: E.reference_full, incomparable: E.incomparable,
       affinity_nearest: E.affinity_nearest, affinity_median: E.affinity_median, affinity_q25: E.affinity_quartiles?.[0], affinity_q75: E.affinity_quartiles?.[1],
-      transition: E.transition, transition_tail: E.transition_tail, transition_days: E.transition_days, transition_rate: E.transition_rate, previous: E.previous,
+      transition: E.transition, transition_days: E.transition_days, transition_rate: E.transition_rate, previous: E.previous,
       components: JSON.stringify({ nearest: E.nearest_components, transition: E.transition_components }),
       cer_version: CER_VERSION, signature_version: SIGNATURE_VERSION, distance_version: DISTANCE_VERSION, bandwidth_version: BANDWIDTH_VERSION, metric_version: METRIC_VERSION,
     }));

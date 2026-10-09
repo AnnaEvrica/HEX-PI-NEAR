@@ -53,7 +53,7 @@ check('E3 calibration under noise',ok,white_disjoint=res[0.0]['disjoint'],white_
 # E4 structure: the relation reverses, both marginals stay what they were
 rng=np.random.default_rng(304); n=4000; b=rng.standard_normal(n); a=np.where(np.arange(n)<2000,0.6,-0.6)*b+0.8*rng.standard_normal(n); c2=rng.standard_normal(n); lead=np.where(np.arange(n)<2000,0.6*np.r_[0,c2[:-1]],0.6*np.r_[c2[1:],0]); a=a+lead
 C=chans({'a':a,'b':b,'c':c2}); s={d:ex.moment_of(C[0],C[1:],d)[0] for d in (900,1900,2900,3900)}; within=[ex.distance(s[1900],s[900])['d'],ex.distance(s[3900],s[2900])['d']]; across=ex.distance(s[2900],s[1900])
-check('E4 structural distinction',across['d']>3 and max(within)<1.6,across_the_change=across['d'],within_each_regime=[round(v,2) for v in within],components_across={k:round(v[0],1) for k,v in across['components'].items()},noise_tail_across=across['tail'])
+check('E4 structural distinction',across['d']>3 and max(within)<1.6,across_the_change=across['d'],within_each_regime=[round(v,2) for v in within],components_across={k:round(v[0],1) for k,v in across['components'].items()})
 
 # E5 phase is circular; no phase without coherence
 base=copy.deepcopy(s[900]); base['rhythm']={k:[[0.2,None,None] for _ in v] for k,v in base['rhythm'].items()}                 # no band coherent anywhere, then exactly one
@@ -79,8 +79,8 @@ check('E7 recurrence without labels',np.mean(hit)==1.0 and np.median([r['E']['af
 
 # E8 individuality does not shrink because the library grows
 rng=np.random.default_rng(308); n=7000; R=library(chans({f'c{k}':rng.standard_normal(n) for k in range(4)}),list(range(800,n,5))); full_=[r['E']['individuality'] for r in R if r['E']['reference_full']]; h=len(full_)//2; m1,m2=float(np.median(full_[:h])),float(np.median(full_[h:]))
-early=[r['E']['individuality'] for r in R[20:120]]; tl=[r['E']['individuality_tail'] for r in R if r['E']['reference_full']]
-check('E8 individuality does not shrink with the library',abs(m2/m1-1)<0.10,moments=len(R),median_first_half=m1,median_second_half=m2,ratio=m2/m1,library_size_at_the_end=len(R)-1,median_while_the_reference_was_still_filling=float(np.median(early)),noise_tail_of_the_nearest_first_and_second_half=[float(np.median(tl[:h])),float(np.median(tl[h:]))])
+early=[r['E']['individuality'] for r in R[20:120]]
+check('E8 individuality does not shrink with the library',abs(m2/m1-1)<0.10,moments=len(R),median_first_half=m1,median_second_half=m2,ratio=m2/m1,library_size_at_the_end=len(R)-1,median_while_the_reference_was_still_filling=float(np.median(early)))
 
 REF['nightly']=ex.nightly([dict(series='c0',E=r['E'],channels=r['signature']['channels']) for r in R1[-3:]],{'c0':[r['signature'] for r in R1[::-1]]})
 REF['nightly_rows']=[dict(E=r['E'],channels=r['signature']['channels']) for r in R1[-3:]]

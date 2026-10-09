@@ -1,0 +1,88 @@
+{
+ "what": "distance between moments of one series whose windows share no observation (about three years apart)",
+ "real": {
+  "pairs": 81,
+  "mean": 1.329,
+  "median": 1.273,
+  "p10": 0.937,
+  "p90": 1.803,
+  "max": 2.289,
+  "components_median": {
+   "state": 0.577,
+   "harmony": 2.494,
+   "leadership": 1.04,
+   "persistence": 1.077,
+   "rhythm": 0.892,
+   "phase": 0.756
+  },
+  "share_above": {
+   "2": 0.037,
+   "1.5": 0.235
+  }
+ },
+ "control_days_in_random_order": [
+  {
+   "seed": 11,
+   "pairs": 81,
+   "mean": 0.987,
+   "median": 0.968,
+   "p10": 0.879,
+   "p90": 1.115,
+   "max": 1.347,
+   "components_median": {
+    "state": 1.164,
+    "harmony": 1.083,
+    "leadership": 0.949,
+    "persistence": 0.9,
+    "rhythm": 0.794,
+    "phase": 0.737
+   },
+   "share_above": {
+    "2": 0,
+    "1.5": 0
+   }
+  },
+  {
+   "seed": 12,
+   "pairs": 81,
+   "mean": 0.932,
+   "median": 0.922,
+   "p10": 0.845,
+   "p90": 1.039,
+   "max": 1.2,
+   "components_median": {
+    "state": 1.015,
+    "harmony": 0.96,
+    "leadership": 0.947,
+    "persistence": 0.974,
+    "rhythm": 0.796,
+    "phase": 0.682
+   },
+   "share_above": {
+    "2": 0,
+    "1.5": 0
+   }
+  },
+  {
+   "seed": 13,
+   "pairs": 81,
+   "mean": 1.059,
+   "median": 1.06,
+   "p10": 0.924,
+   "p90": 1.183,
+   "max": 1.438,
+   "components_median": {
+    "state": 1.273,
+    "harmony": 1.03,
+    "leadership": 0.998,
+    "persistence": 0.93,
+    "rhythm": 0.786,
+    "phase": 0.721
+   },
+   "share_above": {
+    "2": 0,
+    "1.5": 0
+   }
+  }
+ ]
+}

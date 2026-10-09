@@ -99,6 +99,32 @@ With it and the sources listed below, all 43 series reproduce the committed
 `github.com/zonination/weather-us`; racing:
 `github.com/constancedongg/Horse-Racing`.
 
+## The Learning Module: Experiential Integration and the Memory Library
+
+Stage 5 of the nightly calibration. Mathematics: `docs/LEARNING.md`.
+
+| File | What it is |
+|---|---|
+| `prereg_experience.md` | Names, specification and predictions E1 to E12, written before any run; the amendments made before the run on real series; the correction made after it |
+| `experience_results.md` | What came out, prediction by prediction |
+| `experience.py` | Reference implementation. `base44/shared/experience.ts` must match it to rounding (`tests/experience.mjs`) |
+| `experience_tests.py` | Eight tests on built signals (E1 to E8); writes `tests/experience_reference.json` and `experience/built_signals.json` |
+| `experience_replay.mjs` | The nightly stage itself (`base44/shared/memory.ts`) run night by night over 400 nights of the 27 market series on an in-memory database; `SURROGATE=11` runs the control with the days in a random order |
+| `experience_check.py` | Sampled real moments from that run, perceived again by the reference |
+| `experience/nightly.json` | Every nightly record of the run: real computed values |
+| `experience/moments.csv` | Every moment of the run, without its signature |
+| `experience/moment_samples.json` | Three whole `MomentMemory` rows |
+| `experience/real_series.json`, `experience/control_shuffled_days_11.json` | What E12 is judged on, and the same numbers for the control |
+
+```
+python3 experience_tests.py && node ../tests/backend-smoke/build.mjs && node ../tests/experience.mjs
+node experience_replay.mjs && SURROGATE=11 node experience_replay.mjs     # about 20 minutes each
+python3 experience_check.py
+```
+
+`experience_replay.mjs` reads `data/markets_channels.json`: the 27 market
+series of `cer_replay.py` (`series_list`), as days and log changes.
+
 ## Earlier engines
 
 | Script | What it tests |

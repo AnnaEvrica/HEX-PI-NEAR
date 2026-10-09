@@ -1,5 +1,28 @@
 # Changelog
 
+## 9 October 2026: the Learning Module, with Experiential Integration and the Memory Library (branch `learning-module`, not in `main`)
+
+- **Names.** HEX's feedback loop is the **Learning Module**: the **Nightly
+  Calibration** (`calibrateCognition`) and the **Memory Library**.
+- **One new stage in the nightly calibration, the fifth: Experiential
+  Integration.** After the status rows are stored it perceives tonight's
+  moment of every tracked series (CER's perception, no forecast), compares
+  it with the moments already met, and appends it. Stages 1 to 4 read,
+  write and return exactly what they did before (`tests/experience.mjs`).
+- **The Memory Library**: `MomentMemory`, one row per series per finished
+  bar, and `NightlyCalibration`, one row per night. Appended, never changed,
+  hashed and chained, admin only, no personal data.
+- **Measurements** (`base44/shared/experience.ts`, `docs/LEARNING.md`): the
+  signature `(X, G, Phi, U)`; a distance in resolvable steps, by component;
+  continuous affinity; individuality against a fixed-size reference spread
+  over the series' whole past; transition from the previous moment; the
+  night's dispersion and continuity. No classes, no labels, no prose.
+- **CER 0.4.1.** The precision of a phase now comes from the coherence in
+  excess of its threshold. Perception test 2 passes (29 of 30, from 23).
+  No forecast uses this number; CER's replay calls are unchanged.
+- **Nothing reads the Memory Library.** No prediction, strength map,
+  version rule, verified flag or shown read changes. Not published.
+
 ## 9 October 2026: unused entities removed
 
 - Removed fourteen entities that no function, shared module, workflow or

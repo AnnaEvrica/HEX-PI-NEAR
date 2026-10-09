@@ -7,7 +7,7 @@ For whoever runs and monitors the system. The mathematics is in
 
 | Job | Trigger (Base44 workflow) | Function | What it does |
 |---|---|---|---|
-| Nightly update | `Nightly Cognition Calibration`, daily 10:00 UTC | `calibrateCognition` | The learning loop: score, learn, predict, commit, then status |
+| Nightly update | `Nightly Cognition Calibration`, daily 10:00 UTC | `calibrateCognition` | The Learning Module's nightly calibration: score, learn and predict, commit, govern, then Experiential Integration into the Memory Library |
 | Signal post | `HEX6-BLE Kalshi Signal (3x daily)` | `discordMorningSignal` | Reads the tracked list and posts to Discord |
 | X engagement | `X Engagement — Crypto & Markets`, every 30 minutes | `xEngagement` | Replies and notes |
 | Drift alert | `ASI Spine — drift alert`, on a flagged read | `spineAlert` | Discord alert |
@@ -30,12 +30,14 @@ deliberate choice:
   lets `tests/parity.mjs` hold them to the same numbers;
 - a code change takes effect for every series on the next run.
 
-What *is* stored, in two entities:
+What *is* stored by the nightly update, in four entities:
 
 | Entity | Rows | Written by | Purpose |
 |---|---|---|---|
 | `CallLedger` | one per series, read, version and day (4 per series per night), plus calls made in chat | `logCalls`, then `scoreOpenCalls` | Every call before its outcome, with what each part of memory said; then its score, reason and information gain |
 | `EngineStatus` | one per read (2) | `calibrateCognition` | Version shown, verified flag, the running tally, both versions' strength maps, the precision metrics |
+| `MomentMemory` | one per series per finished bar | stage 5 (`memory.ts`) | The Memory Library: each moment as perceived, with its individuality, affinity and transition. Appended, never changed. Read by nothing but stage 5 |
+| `NightlyCalibration` | one per night | stage 5 | The night's summary and its references. Appended, never changed |
 
 `EngineStatus.tally` holds running sums over every settled day, so each
 night's decision uses the whole record without rereading the ledger.
@@ -85,7 +87,10 @@ parity test against the full walk. Nothing today requires it.
 ```
 { ok, engine_version, series, failed: [...], newly_scored, newly_logged,
   elapsed_ms, per_series_ms: { BTC: 310, ... },
-  status: { MOVE: {...}, RANGE: {...} } }
+  status: { MOVE: {...}, RANGE: {...} },
+  experiential: { ok, run_id, recorded, moments, without_a_moment: [...],
+                  no_new_bar: [...], integrity: { checked, series, reproduced },
+                  elapsed_ms } }
 ```
 
 | Watch | Healthy | If not |
@@ -99,6 +104,11 @@ parity test against the full walk. Nothing today requires it.
 | `status.*.verified` | RANGE `true`, MOVE `false` at release | A change means the live record became decisive: read the bits and interval |
 | `status.*.bits_candidate`, `_low`, `_high` | positive for RANGE over time | The live measure of whether the edge is alive |
 | `status.*.hit_candidate` beside `hit_baseline` | at or above | Share right against what the null alone gets |
+| `experiential.ok` | `true` | Stage 5 threw. Stages 1 to 4 had already completed and are unaffected; the error is in `experiential.error`. Run the job again the same day: moments already written are not written twice |
+| `experiential.recorded` | `true` once a day | `false` means this date already has its row: a rerun, nothing written |
+| `experiential.moments` | the series that had a new bar | A series with a history too short to perceive, or a bad bar, is in `without_a_moment`; one whose last bar was already recorded (stocks at a weekend) is in `no_new_bar` |
+| `experiential.integrity.reproduced` | `true` | `false` means a moment perceived twice from the same bars gave two different hashes: stop and investigate before trusting the night's row |
+| `experiential.elapsed_ms` | about 1 s at 7 series, 2.5 s at 27 | Growth here means the library read is growing, which it should not |
 
 The same numbers are in the two `EngineStatus` rows at any time, with
 `stated_*` (to set beside the share right), `closeness_*`, `progress_*`,
@@ -115,6 +125,11 @@ Two limits to know:
 
 ## 5. Before pressing Publish on Base44
 
+0. For the Learning Module's stage 5 (branch `learning-module`): the two new
+   entities `MomentMemory` and `NightlyCalibration` exist with the fields in
+   `base44/entities/`. Nothing needs migrating; the library starts empty and
+   the first night records each series' first moment with no individuality
+   and no transition.
 1. `CallLedger` and `EngineStatus` exist with the fields in
    `base44/entities/`. New or renamed in 7.0:
    - `CallLedger`: `log_score`, `info_gain`, `learned`, `part_structure`
