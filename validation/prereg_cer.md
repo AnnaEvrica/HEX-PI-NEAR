@@ -181,3 +181,25 @@ reported without bitcoin.
 
 Whatever comes out is written beside this file in `cer_results.md`, including
 every prediction that fails.
+
+## Amendment before the run (9 October 2026)
+
+Made after the synthetic tests (`cer_synthetic.py`) and before any CER run on
+real series. No prediction about a real series had been scored.
+
+1. **What counts as a predictive edge.** The share an edge holds does not by
+   itself say the edge carries anything: on signals built to be independent,
+   every expert stays near its offset and the shares stay near equal (test 1).
+   So an edge is called *predictive* when its own expert, scored alone, gains
+   over the offset with an interval clear of zero (bits per call on the calls
+   where the neighbour is present, same block bootstrap). Shares are still
+   recorded. Predictions 5 and 8 are judged on this: "ends above its starting
+   share" is read as "is predictive", and "holds the largest share" as "has
+   the largest gain scored alone". Both readings are reported.
+2. **Coherence threshold.** A band holds several frequencies, and a narrow
+   oscillation fills one of them, so averaging over the band hides it (test
+   2). The band's statistic is its highest coherence, and the level is
+   divided by the number of frequencies in the band:
+   `1 - (0.05/m)^(1/(K-1))`, with `K` the effective number of independent
+   segments (0.947 per half-overlapped Hann segment). On independent
+   autocorrelated signals this passes 3% to 6.5% of bands.
