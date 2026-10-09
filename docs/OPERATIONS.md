@@ -40,8 +40,8 @@ What *is* stored, in two entities:
 `EngineStatus.tally` holds running sums over every settled day, so each
 night's decision uses the whole record without rereading the ledger.
 
-Fourteen other entities in `base44/entities/` are not used by the backend
-code. They are left in place; removing them is a separate decision.
+Fourteen entities that no code used were removed on 9 October 2026
+(`CHANGELOG.md`). Every entity now in `base44/entities/` is used.
 
 ## 3. Cost and how it scales
 

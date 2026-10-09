@@ -1,5 +1,13 @@
 # Changelog
 
+## 9 October 2026: unused entities removed
+
+- Removed fourteen entities that no function, shared module, workflow or
+  screen used: `ArchetypeLedger`, `Asset`, `Brain`, `CalibrationScore`,
+  `CoreNode`, `CoreRelationship`, `HEX6Memory`, `Manager`,
+  `MarkovTickerMemory`, `Output`, `PredictionJournal`, `Routing`, `Series`,
+  `SyncState`. Their rows go with them when Base44 syncs.
+
 ## 9 October 2026: CER 0.4, the moment as the primary object (branch `cer-moment`, not in `main`)
 
 - **CER's governing inference is replaced.** The primary object is the

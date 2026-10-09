@@ -213,8 +213,8 @@ with its own pre-registration:
 | `Inquiry` | Contact form: name, email, message | `contactInquiry` | yes |
 | `XEngagement` | X posts the system has handled | `xEngagement` | public posts only |
 
-Fourteen further entities in `base44/entities/` are not used by the backend.
-They are listed in section 12.
+Every entity in `base44/entities/` is used. Fourteen that were not were
+removed on 9 October 2026 (`CHANGELOG.md`).
 
 Not stored: engine state, model coefficients, market data. All three are
 recomputed.
@@ -352,25 +352,19 @@ Listed so nobody assumes otherwise.
 2. **Ledger backup.** `CallLedger` and `EngineStatus` live only in Base44. A
    scheduled export to storage outside it, and a script that rebuilds
    `EngineStatus.tally` from the whole ledger, are the missing recovery steps.
-3. **Read rules left open.** Thirteen entities have no read rule set,
-   among them `VerdictSpine` (which holds a producer email beside its
-   hashes). What Base44 does with an unset rule should be confirmed and the
+3. **Read rule left open.** `VerdictSpine`, which holds a producer email
+   beside its hashes, has no read rule set. What Base44 does with an unset rule should be confirmed and the
    rule made explicit.
-4. **Unused entities.** Fourteen entities are not used by the backend
-   (`ArchetypeLedger`, `Asset`, `Brain`, `CalibrationScore`, `CoreNode`,
-   `CoreRelationship`, `HEX6Memory`, `Manager`, `MarkovTickerMemory`,
-   `Output`, `PredictionJournal`, `Routing`, `Series`, `SyncState`). Removing
-   them is a separate decision.
-5. **Retention and deletion.** There is no stated period for keeping
+4. **Retention and deletion.** There is no stated period for keeping
    `UserConversationMemory` or `Inquiry`, and no function that deletes a
    user's rows on request.
-6. **Release tags and licence.** No tags mark what was published, and the
+5. **Release tags and licence.** No tags mark what was published, and the
    repository has no licence file.
-7. **One market-data source.** A second source would turn an outage into a
+6. **One market-data source.** A second source would turn an outage into a
    fallback.
-8. **Mediation address.** `think` sends escalation mail to an address on the
+7. **Mediation address.** `think` sends escalation mail to an address on the
    earlier domain (`MEDIATION_EMAIL`).
-9. **CER in production.** Gates 1 to 3 of section 5.
+8. **CER in production.** Gates 1 to 3 of section 5.
 
 ## 13. Adding a module: the checklist
 
