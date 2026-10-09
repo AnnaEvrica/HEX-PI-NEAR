@@ -1,0 +1,57 @@
+{
+ "frozen at": "2026-10-09",
+ "commit": "2ed533b0b74a9676d531ec8e96830ec82db4ef5b",
+ "cer_version": "cer-0.3",
+ "what is frozen": "The three weightings of experiments 1 to 3 (reliability, measurement w = A.L.C.Q, relaxation at T = 1 and tempered), their replay outputs, their controls and their predictions. Later work is compared against these and must reproduce them.",
+ "source": {
+  "validation/cercore.py": "a1cab57964c70513b2655996a55d3e79015d3362d46c235e39e6c61784810d11",
+  "validation/hex7core.py": "0e39fd5d3e17793c6973c1eb9eca5a4331e68a387b76baa350a7b5fb8092ae1f",
+  "validation/cer_replay.py": "658660ecd2fba797e4507e5158a9d20dd3f7f5aad110bc5ee5537104dba89374",
+  "validation/cer_report.py": "f2e4323a0ba347637687b1b3ffa9a92ba059c4ae996049d50bcd6698118b3d22",
+  "validation/cer_synthetic.py": "5893e3a89070d2b93b466ac49fbbf8123fff36dc1eeae87422fc58019f55d35e",
+  "validation/prereg_cer.md": "397b05048181c31fbece5574f881c75d685b6e672b7b06e779103bdcb87075a4",
+  "base44/shared/hex7.ts": "79ba493552db0e2ad5cecc2311f32bcc0c2994e9021bed04ffa61e8ee1dfd92f",
+  "base44/shared/observer.ts": "0724dea33da28007aec0d67abc68ff2cc7fd560cb78f55d4d45aa835c788e427",
+  "base44/shared/cer/graph.ts": "dc7b709e4c6e14d538ee62b3c917ca4fdff9dc460231a14a60a29f4befdd39f2",
+  "base44/shared/cer/inference.ts": "36d0981aa90cad04c5c647c691bfc6a7d550213a1153b108cf03d349a2ba0948"
+ },
+ "outputs": {
+  "cer_ledger.parquet": "15a0b7b2b2b1eda00a4a8c62e5c289cae229568b2ce437ee6a0986648253a70b",
+  "cer_controls.parquet": "2f23d5b5a5280c558b663e05909d7cd7d3bb40d1b1eca6350cd034ffcc89e22c",
+  "cer_edges.json": "829499e1ebc0036c4fb4f0232321e2832995a9fa60fcdbed1f5f03d9f3708b9b",
+  "report.json": "32830fcc4fb9ea2f5a57afd1f1071497f3d2c3a02c9f2981f59e0aeeeb1e40dc",
+  "cer_meta.json": "ce4ef9e6b76024c57c39ed8f09414a849de9b64f1ec4cd6a46dc065e4c29fb36"
+ },
+ "hex 7.0 ledger": "21a3e73f5983ca42246da028742d73b08b971c5edcfe00fb66961adf3b7ac8e2",
+ "data (not in the repository; sources in validation/README.md)": {
+  "data/BTC_daily.csv": "718e0f6f8f1388dce1041b39db8fd7d52ceb2e287f64dd2514515922798e6c13",
+  "data/chicago.csv": "691bb55b7a6c72cc3d1611ab4a96e7153409eb052cc1615aa51e13ffb035aba0",
+  "data/exchange-rates-daily.csv": "60178da035ddb8e7bedd365c21ff18544a92854203b6a8010633cba0acbe44ad",
+  "data/finance-vix-vix-daily.csv": "570e05630c9a5e7350d0c3dbe3acc58e793cb5248181ab0e949c121cc082fb83",
+  "data/horse_races.csv": "3aac3bc85fe136c519215a38b3bd045998dd12f4392ed7f89d594f20ace220bb",
+  "data/horse_results.csv": "83d1d0125b2532057def92c2c1c1e4e7b40ac5ae31bbdea45acd7d89c52d21c8",
+  "data/natural-gas-daily.csv": "ef606b397e88d42d89b84090863b05c55ed5e6eeffe17d813c6bc32473a2c291",
+  "data/oil-prices-brent-daily.csv": "565088f31a7cac1e037c6d58659ebddb7f7e7dc3dff198f3014635791242df5b",
+  "data/oil-prices-wti-daily.csv": "1f2f5b7ed1956086886e6ba5f693c1e11941e094e36c9b8e6cff108e12f7ede7",
+  "data_replication/2016-weather-data-seattle.csv": "2837c01b75e4dd0f8bd6810dca805a8ac42a4743bf019128366924ef3f857fdf",
+  "data_replication/daily-max-temperatures.csv": "4f4ab4d6134d9c0f8efb3d6af6edc30a0ad3c56573d0f20f45db010055d0371c",
+  "data_replication/weather.csv": "27219f1ca8dbd94c9b6f4b9f4f52ab2f1eb33dfdcf719cd9fc6481ed50b74549"
+ },
+ "headline results": {
+  "New York temperature direction, fusion over HEX 7.0, bits per call": {
+   "reliability": 0.0701,
+   "measurement": 0.0357,
+   "relaxation": 0.0727
+  },
+  "Chicago": {
+   "reliability": 0.0078,
+   "measurement": 0.0012,
+   "relaxation": 0.0047
+  },
+  "17 markets direction, strict": {
+   "reliability": -0.0015,
+   "measurement": -0.0,
+   "relaxation": -0.0001
+  }
+ }
+}
