@@ -10,7 +10,7 @@ for c in ('universe','series_id','read','offset','variant','weighting'): C[c]=C[
 CALL=C; C=C[C.weighting=='reliability']                      # the controls of each weighting
 L['block']=(L.date.values.astype('datetime64[D]').astype(np.int64))//BLOCK; y=L.outcome.values.astype(int)
 ls=lambda c: np.log(np.where(y==1,L[c].values.astype(float),1-L[c].values.astype(float)))/LN2          # log score in bits: log2 of the probability given to what happened
-for c in ['null_probability','hex_probability']+[f'{w}_{o}_lag{l}' for w in ('cer','cerq','cere','cert') for o in ('null','hex') for l in (0,1)]: L['s_'+c]=ls(c)
+for c in ['null_probability','hex_probability']+[f'{w}_{o}_lag{l}' for w in ('cer','cerq','cere','cert','cerm') for o in ('null','hex') for l in (0,1)]: L['s_'+c]=ls(c)
 r5=lambda v: round(float(v),5)
 def gain(T):
     """T: rows of (block, series_id, s = summed gain in bits, n = calls). Bits per call, 95% interval from a bootstrap over 20-day blocks, call-weighted and as a macro-average over series."""
@@ -33,7 +33,7 @@ def product_rule(D,a,b):
     """base44/shared/ledger.ts: the per-call mean with days as clusters and a normal 95% interval."""
     g=(D['s_'+a]-D['s_'+b]); d=g.groupby(D.outcome_date.values).agg(['sum','size']); N=d['size'].sum(); nd=len(d); m=d['sum'].sum()/N; se=math.sqrt(max(0,((d['sum']-m*d['size'])**2).sum())*nd/(nd-1))/N
     return {'bits per call':r5(m),'95% interval':[r5(m-1.96*se),r5(m+1.96*se)],'clear of zero':bool(m-1.96*se>0 or m+1.96*se<0)}
-MODES=(('measured weight (cer-0.2)','cerq','measurement'),('maximum entropy, T = 1 (cer-0.3)','cere','relaxation'),('maximum entropy, validated temperature (cer-0.3)','cert','relaxation, tempered'))
+MODES=(('the moment (cer-0.4)','cerm','moment'),('measured weight (cer-0.2)','cerq','measurement'),('maximum entropy, T = 1 (cer-0.3)','cere','relaxation'),('maximum entropy, validated temperature (cer-0.3)','cert','relaxation, tempered'))
 def block(D,uni,sids,read,lag):
     D=D[D[f'present_lag{lag}']>0]; cn,cf=f'cer_null_lag{lag}',f'cer_hex_lag{lag}'
     if not len(D): return None
@@ -59,6 +59,7 @@ def block(D,uni,sids,read,lag):
             'by series, fusion over HEX':{sid:r5((G['s_'+qf]-G.s_hex_probability).mean()) for sid,G in D.groupby('series_id')}}
     tv=D[f'temperature_lag{lag}'].round(0).astype(int).value_counts(normalize=True).sort_index(); e['relaxation: share of calls at each temperature %']={int(k):round(float(v)*100,1) for k,v in tv.items()}
     e['relaxation: edges eligible per call, mean; share of calls with none %']=[round(float(D[f'eligible_lag{lag}'].mean()),3),round(float((D[f'eligible_lag{lag}']==0).mean())*100,1)]
+    e['the moment: interpretations eligible per call, mean; share of calls with none %']=[round(float(D[f'moment_eligible_lag{lag}'].mean()),3),round(float((D[f'moment_eligible_lag{lag}']==0).mean())*100,1)]
     e['by series']={sid:{'calls':int(len(G)),'HEX over the null':r5((G.s_hex_probability-G.s_null_probability).mean()),'CER standalone over the null':r5((G['s_'+cn]-G.s_null_probability).mean()),'fusion over HEX':r5((G['s_'+cf]-G.s_hex_probability).mean()),
                          'right %: null, HEX, CER, fusion':[round(float(((G[c]>=.5).astype(int)==G.outcome).mean())*100,1) for c in ('null_probability','hex_probability',cn,cf)]} for sid,G in D.groupby('series_id')}
     return e
@@ -80,6 +81,16 @@ first=MK2[MK2.experience==501].set_index(['series_id','read']).block
 R['after the run: development markets, strict, calls after the first 500 on each series']={NAME[read]:{'fusion candidate over HEX 7.0':calls(A[A['read']==read],'cer_hex_lag1','hex_probability'),
     'controls (20-day blocks after the 500th call)':{v:gain(K5[(K5['read']==read)&(K5.variant==v)&(K5.block>K5.series_id.map(lambda s_: first.get((s_,read),10**9)))].rename(columns={'gain_bits':'s','calls':'n'}))['bits per call'] for v in ('C1','C2','C3')}} for read in ('RANGE','MOVE')}
 if os.path.exists(os.path.join(OUT,'diagnostic.json')): R['after the run: what the displaced temperature neighbours carry']=json.load(open(os.path.join(OUT,'diagnostic.json')))
+# ---- perception on real series: novelty at every call (measured on each target's changes, the arm that counts), and what was eligible
+MO=pd.DataFrame(json.load(open(os.path.join(OUT,'cer_moment_edges.json')))); R['perception on real series']={}
+for uni,G in GROUPS.items():
+    lag=PRIMARY[uni]; D=L[(L.universe==uni)&(L['read']=='MOVE')&(L[f'present_lag{lag}']>0)]; it=D[f'intrinsic_tail_lag{lag}'].astype(float); jt=D[f'joint_tail_lag{lag}'].astype(float); rs=D[f'relational_surprisal_lag{lag}'].astype(float); tt=D[f'temporal_tail_lag{lag}'].astype(float); ok=it.notna()
+    R['perception on real series'][uni]={'calls perceived':int(ok.sum()),'intrinsic tail below 1% and 5%, share of calls %':[round(float((it[ok]<0.01).mean())*100,2),round(float((it[ok]<0.05).mean())*100,2)],
+        'joint tail below 1% and 5%, share of calls %':[round(float((jt[ok]<0.01).mean())*100,2),round(float((jt[ok]<0.05).mean())*100,2)],'relational surprisal above 3 nats, share of calls %':round(float((rs[ok]>3).mean())*100,2),
+        'temporal tail below 1% and 5%, share of calls with a window to compare %':[round(float((tt.dropna()<0.01).mean())*100,2),round(float((tt.dropna()<0.05).mean())*100,2)],
+        'by series: joint tail below 1%, relational surprisal above 3 nats, temporal tail below 1% (%)':{sid:[round(float((g[f'joint_tail_lag{lag}']<0.01).mean())*100,2),round(float((g[f'relational_surprisal_lag{lag}']>3).mean())*100,2),round(float((g[f'temporal_tail_lag{lag}'].dropna()<0.01).mean())*100,2) if g[f'temporal_tail_lag{lag}'].notna().any() else None] for sid,g in D[ok.values].groupby('series_id')},
+        'eligibility by read':{NAME[read]:(lambda X: {'interpretations':int(len(X)),'ever eligible':int((X.share_of_measurements_eligible>0).sum()),'mean share of measurements eligible %':round(float(X.share_of_measurements_eligible.mean())*100,2),
+            'most often eligible':[{'edge':f"{r.target} <- {r.source}",'share of measurements %':round(r.share_of_measurements_eligible*100,1),'mean evidence, nats':round(r.mean_evidence,2)} for r in X.sort_values('share_of_measurements_eligible',ascending=False).head(6).itertuples()]})(MO[(MO.universe==uni)&(MO['read']==read)&(MO.lag==lag)]) for read in ('RANGE','MOVE')}}
 # ---- edges: each edge's own expert, scored alone against the offset
 ok=E[E.status=='ok'].copy(); R['edges']={}
 for uni in GROUPS:
@@ -126,8 +137,8 @@ def chart(uni,sids,lag,title,fn):
         for v in ('C1','C2','C3'):
             k=K[K.variant==v].groupby('block').gain_bits.sum().sort_index(); ax.plot(pd.to_datetime(k.index.values*BLOCK,unit='D'),k.cumsum().values,color='#a5a49e',lw=1.0,label='cer-0.1 on records displaced in time' if v=='C1' else None)
         ends=[]
-        for pre,lab,col,ls_ in (('cer','by past success (cer-0.1)',COL[read],'-'),('cerq','by measured weight (cer-0.2)','#7a7974',(0,(4,2))),('cere','maximum entropy, T = 1 (cer-0.3)',INK,'-')):
-            gg=(D[f's_{pre}_hex_lag{lag}']-D.s_hex_probability).groupby(D.block).sum().sort_index().cumsum(); ax.plot(x,gg.values,color=col,lw=1.7 if pre!='cerq' else 1.3,ls=ls_,label=lab); ends.append((gg.iloc[-1],col))
+        for pre,lab,col,ls_ in (('cer','by past success (cer-0.1)',COL[read],'-'),('cerq','by measured weight (cer-0.2)','#7a7974',(0,(4,2))),('cere','maximum entropy on edge evidence (cer-0.3)','#7a7974','-'),('cerm','the moment (cer-0.4)',INK,'-')):
+            gg=(D[f's_{pre}_hex_lag{lag}']-D.s_hex_probability).groupby(D.block).sum().sort_index().cumsum(); ax.plot(x,gg.values,color=col,lw=1.9 if pre in ('cer','cerm') else 1.1,ls=ls_,label=lab); ends.append((gg.iloc[-1],col))
         span=max(1e-9,ax.get_ylim()[1]-ax.get_ylim()[0]); placed=[]
         for v,col in sorted(ends):
             yv=v if not placed or v-placed[-1]>0.06*span else placed[-1]+0.06*span; placed.append(yv); ax.annotate(f"{v:+.0f} bits",(x[-1],yv),xytext=(5,0),textcoords='offset points',va='center',fontsize=8,color=col)
@@ -158,6 +169,7 @@ for k,v in R['edges'].items():
     if isinstance(v,dict) and 'markets' not in k and 'every edge' in k: print(k,json.dumps(v))
     elif not 'every edge' in k:
         for kk,vv in v.items(): print(k,'|',kk,'|',{a:b for a,b in vv.items() if a!='largest'},'\n      ',[(t['edge'],t['bits per call'],t['interval']) for t in vv['largest'][:4]])
+print(json.dumps(R['perception on real series'],indent=0)[:6000])
 for k,v in R['measured edge weights (cer-0.2)'].items(): print('W',k,{a:b for a,b in v.items() if a!='heaviest'},[(h['edge'],h['mean weight'],h['share of calls with weight'],h['its expert alone, bits per call']) for h in v['heaviest'][:4]])
 print(json.dumps(R['after the run: development markets, strict, calls after the first 500 on each series']))
 print(json.dumps(R['currency series, direction, fusion candidate over HEX 7.0: same date against strict']))

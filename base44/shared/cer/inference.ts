@@ -83,8 +83,9 @@ export const TEMPERATURES = [1, 2, 4, 8, 16, 32], HORIZON = 30, SMOOTH = 0.01;
  * "nothing", exp(evidence / T) on each present edge with evidence, none on
  * the rest. Higher T keeps more interpretations alive.
  */
-export function interpretations(ev: number[], present: boolean[], T: number): number[] {
+export function interpretations(ev: number[], present: boolean[], T: number, mass?: number): number[] {
   let k = 0; for (const m of present) if (m) k++;
+  if (mass !== undefined) k = mass;
   const g = ev.map((e, j) => (present[j] && e > 0 ? Math.exp(Math.min(e / T, 700)) : 0));
   const z = Math.max(k, 1) + g.reduce((s, x) => s + x, 0);
   return [Math.max(k, 1) / z, ...g.map((x) => x / z)];
@@ -112,7 +113,9 @@ export function temperatures(E: number[][], M: boolean[][], every = 25): number[
 export interface CerStep {
   /** CER's call with the voices combined by past reliability (cer-0.1). Always computed, for comparison. */
   p: number;
-  /** CER's call with each edge heard at its measured weight w = A.L.C.Q (cer-0.2). Present when weights are given. */
+  /** CER's call from the moment (cer-0.4, the primary path): maximum entropy at T = 1 over [nothing, the pool, each edge] under the controlled evidence. Present when moments are given. */
+  pm?: number;
+  /** CER's call with each edge heard at its measured weight w = A.L.C.Q (cer-0.2, a comparator). Present when weights are given. */
   pq?: number;
   /** CER's call under the maximum-entropy distribution over interpretations at T = 1, and at the validated temperature (cer-0.3). Present when relax is given. */
   pe?: number;
@@ -133,8 +136,9 @@ export interface CerStep {
  *                pq = (1 - sum e) offset + sum_j e_j p_j,  e_j = w_j / max(1, sum w)
  * @param relax   { E, T } from edgeWeights() and temperatures(): the measured evidence of each edge and the temperature at each call.
  *                pe and pt are the mixtures under interpretations(E[t], M[t], 1) and interpretations(E[t], M[t], T[t])
+ * @param moments E[t][0..K] from moments() in graph.ts: the controlled evidence for the pool and each edge. pm is the primary call.
  */
-export function walkCer(offset: number[], y: number[], F: Float64Array[][], M: boolean[][], detail = false, weights?: number[][], relax?: { E: number[][]; T: number[] }): { steps: CerStep[]; share: number[] } {
+export function walkCer(offset: number[], y: number[], F: Float64Array[][], M: boolean[][], detail = false, weights?: number[][], relax?: { E: number[][]; T: number[] }, moments?: number[][]): { steps: CerStep[]; share: number[] } {
   const n = offset.length, K = n ? F[0].length : 0, R = Array.from({ length: K + 1 }, () => new Residual(NC)), A = new Share(K + 2), steps: CerStep[] = [], pool = new Float64Array(NC);
   for (let t = 0; t < n; t++) {
     pool.fill(0); let present = 0;
@@ -148,6 +152,10 @@ export function walkCer(offset: number[], y: number[], F: Float64Array[][], M: b
       const scale = Math.max(1, sum); let pq = 0, used = 0;
       for (let j = 0; j < K; j++) if (M[t][j]) { const e = weights[t][j] / scale; pq += e * V[j + 2]; used += e; }
       step.pq = (1 - used) * offset[t] + pq;
+    }
+    if (moments) {
+      const P = interpretations(moments[t], [present > 0, ...M[t]], 1, present); let s = P[0] * offset[t]; for (let k = 0; k <= K; k++) s += P[k + 1] * V[k + 1];
+      step.pm = s;
     }
     if (relax) {
       const mix = (T: number) => { const P = interpretations(relax.E[t], M[t], T); let s = P[0] * offset[t]; for (let j = 0; j < K; j++) s += P[j + 1] * V[j + 2]; return s; };

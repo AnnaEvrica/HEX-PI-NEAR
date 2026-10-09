@@ -6,12 +6,14 @@
  },
  "2 equal correlation, different phase": {
   "passed": false,
-  "separated_by_phase": "20 of 30",
+  "separated_by_phase": "23 of 30",
   "same_step_correlation_of_each": [
    0.407,
    0.418
   ],
-  "lead_built_in": 2.67
+  "lead_built_in": 2.67,
+  "built_in_lead_inside_two_phase_standard_errors": "26 of 30",
+  "zero_lead_inside_two_phase_standard_errors_when_simultaneous": "13 of 20"
  },
  "3 shared driver against a real lead": {
   "passed": true,

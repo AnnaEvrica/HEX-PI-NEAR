@@ -69,22 +69,26 @@ in HEX and no call shown to a user. Mathematics and interface: `docs/CER.md`.
 
 | File | What it is |
 |---|---|
-| `prereg_cer.md` | The frozen specification, controls and predictions of all three experiments, each written before its run |
+| `prereg_cer.md` | The frozen specification, controls and predictions of all four experiments, each written before its run |
 | `cer_results.md` | What came out, prediction by prediction |
 | `cercore.py` | Reference implementation. `base44/shared/cer/*.ts` must match it to rounding (`tests/cer.mjs`) |
 | `cer_synthetic.py` | Twelve tests on signals whose relationships are built in; writes `tests/cer_reference.json` |
 | `cer_replay.py` | The one-pass replay with CER beside every call of 7.0: standalone and fusion candidate, same-date and strict, real record and three records displaced in time, and all three ways of hearing an edge (past success, measured weight, maximum entropy) from the same experts in the same pass |
 | `cer_report.py` | Every number and chart, computed from the ledger |
+| `cer_perception.py` | Eight tests of perception on built configurations, kept apart from forecasting; writes `cer/perception.json` |
 | `cer_diagnostic.py` | After the run: what the displaced temperature neighbours carry (the calendar) |
-| `cer/cer_ledger.parquet` | Every call: 303,722 rows. The null, 7.0, and CER's four arms on the real record under every mode (`cer_*` by past success; `d_cerq_*`, `d_cere_*`, `d_cert_*` the other modes as departures from their offset) |
+| `cer/cer_ledger.parquet` | Every call: 303,722 rows. The null, 7.0, and CER's four arms on the real record under every mode (`cer_*` by past success; `d_cerm_*` the moment, `d_cerq_*`, `d_cere_*`, `d_cert_*` the frozen comparators, as departures from their offset), and novelty at every call |
 | `cer/cer_controls.parquet` | The controls, as sums over 20-day blocks |
+| `cer/frozen_manifest.json` | What was frozen at `cer-0.3` before the moment-centric refactor: commit, source hashes, data checksums, outputs |
+| `cer/cer_moment_*.json`, `cer/cer_moment_edges.json` | The signature of the last moment each target met; mean evidence and eligibility of every interpretation |
 | `cer/cer_edges.json` | Every edge's own expert scored alone, its share of the call, and its measured A, L, C, Q and weight |
 | `cer/cer_graph_*.json` | The descriptive graph of each universe on its last day |
 | `cer/report.json`, `cer/chart_*.png`, `cer/cer_meta.json` | The results, and the no-future check |
 
 ```
 python3 cer_synthetic.py && node ../tests/cer.mjs
-python3 cer_replay.py         # about 45 minutes on two cores
+python3 cer_perception.py
+python3 cer_replay.py         # about 25 minutes on two cores; CER_FROZEN=all also recomputes the three frozen comparators (70 minutes)
 python3 cer_diagnostic.py
 python3 cer_report.py
 ```

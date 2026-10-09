@@ -11,7 +11,8 @@ from HEX's call, so its gain over HEX is what the other channels added.
 "Net of controls" is the real record minus the mean of the same run on the
 three records displaced in time.
 
-Three experiments are reported:
+Four experiments are reported. The fourth is the current design; the first
+three are frozen (`cer/frozen_manifest.json`) and kept as comparators.
 
 1. CER as first built: an edge is heard according to its past predictive
    success (`cer-0.1`).
@@ -19,9 +20,14 @@ Three experiments are reported:
    (`cer-0.2`).
 3. Maximum entropy over interpretations, at `T = 1` and at a temperature
    validated without the prediction target (`cer-0.3`).
+4. The relational moment as CER's primary object (`cer-0.4`): the whole
+   configuration is perceived first, with its novelty; what may enter a
+   forecast is decided separately, under controls; the call is maximum
+   entropy at `T = 1` over that controlled evidence.
 
-All three are computed in the same pass from the same edge experts, on
-identical causal data. HEX 7.0 is unchanged throughout.
+All four use the same edge experts on identical causal data. HEX 7.0 is
+unchanged throughout, and reproduces its ledger on all 43 series
+(280,252 calls, largest difference 0).
 
 ---
 
@@ -29,20 +35,20 @@ identical causal data. HEX 7.0 is unchanged throughout.
 
 Fusion over HEX 7.0, on the arm that counts in each universe.
 
-| Where | Calls | By past success (0.1) | By measured weight (0.2) | Maximum entropy, T = 1 (0.3) | Maximum entropy, validated T (0.3) |
-|---|---|---|---|---|---|
-| New York temperature, direction | 1,433 | +0.0701 | +0.0357 | **+0.0727** | +0.0727 |
-| Chicago temperature, direction | 24,320 | **+0.0078** (net +0.0063) | +0.0012 | +0.0047 | +0.0038 |
-| Seattle temperature, direction | 24,344 | +0.0031 (net +0.0005) | +0.0001 | +0.0002 | +0.0002 |
-| Melbourne temperature, direction | 3,622 | +0.0010 | +0.0001 | +0.0002 | +0.0002 |
-| Four stations, direction | 53,719 | +0.0069 (net +0.0049) | +0.0015 | +0.0042 | +0.0038 |
-| 17 markets, move size, strict | 46,517 | −0.0003 | **0.0000** | −0.0003 | −0.0001 |
-| 17 markets, direction, strict | 46,517 | −0.0015 | **0.0000** | −0.0001 | −0.0001 |
-| 10 unused currencies, move size, strict | 26,570 | +0.0002 | +0.0001 | −0.0001 | −0.0001 |
-| 10 unused currencies, direction, strict | 26,570 | −0.0006 | −0.0001 | −0.0001 | 0.0000 |
-| Energy from temperature, direction | 11,363 | +0.0001 | 0.0000 | −0.0003 | −0.0002 |
-| Temperature from energy, direction | 13,319 | −0.0006 | 0.0000 | −0.0001 | −0.0001 |
-| **All calls, total bits over HEX** | 302,976 | +288 | +82 | +213 | +200 |
+| Where | Calls | The moment (0.4) | By past success (0.1) | By measured weight (0.2) | Maximum entropy on edge evidence, T = 1 (0.3) | The same, validated T (0.3) |
+|---|---|---|---|---|---|---|
+| New York temperature, direction | 1,433 | **+0.0728** | +0.0701 | +0.0357 | +0.0727 | +0.0727 |
+| Chicago temperature, direction | 24,320 | +0.0040 | **+0.0078** (net +0.0063) | +0.0012 | +0.0047 | +0.0038 |
+| Seattle temperature, direction | 24,344 | 0.0000 | +0.0031 (net +0.0005) | +0.0001 | +0.0002 | +0.0002 |
+| Melbourne temperature, direction | 3,622 | +0.0003 | +0.0010 | +0.0001 | +0.0002 | +0.0002 |
+| Four stations, direction | 53,719 | +0.0038 | +0.0069 (net +0.0049) | +0.0015 | +0.0042 | +0.0038 |
+| 17 markets, move size, strict | 46,517 | 0.0000 | −0.0003 | 0.0000 | −0.0003 | −0.0001 |
+| 17 markets, direction, strict | 46,517 | −0.0002 | −0.0015 | 0.0000 | −0.0001 | −0.0001 |
+| 10 unused currencies, move size, strict | 26,570 | −0.0001 | +0.0002 | +0.0001 | −0.0001 | −0.0001 |
+| 10 unused currencies, direction, strict | 26,570 | 0.0000 | −0.0006 | −0.0001 | −0.0001 | 0.0000 |
+| Energy from temperature, direction | 11,363 | −0.0001 | +0.0001 | 0.0000 | −0.0003 | −0.0002 |
+| Temperature from energy, direction | 13,319 | 0.0000 | −0.0006 | 0.0000 | −0.0001 | −0.0001 |
+| **All calls, total bits over HEX** | 302,976 | +197 | +288 | +82 | +213 | +200 |
 
 "Net" is shown for the original where its controls were not zero. The
 measurement-based modes' controls are zero to the fourth decimal in every
@@ -78,10 +84,121 @@ universe (largest for any group: 0.0003).
   and simultaneous. `L` measures exactly that: across the 702 market edges
   the mean `A` on direction is 0.26 and the mean usable lead `L` is 0.03.
 
-**Which to use.** On this evidence, maximum entropy at T = 1
-(`'relaxation'`). The module's default is the measured weight
-(`'measurement'`), as specified for the second experiment; the others are
-selected by one argument of `shadowReplay`.
+**The moment (`cer-0.4`) is now the primary path.** As a forecaster it is
+level with `cer-0.3`: the same on New York (+0.0728; 64.5% right under HEX,
+67.9% with it), a little lower on Chicago (+0.0040 against +0.0047), a
+little cheaper on markets. It was not built to forecast better. What it adds
+is in experiment 4 below: every relation stays perceived whether or not it
+forecasts, novelty is measured at every call, and a neighbour that merely
+echoes the target no longer passes as leading it. `A.L.C.Q`, the original
+weighting and `cer-0.3` are selected by one argument of `shadowReplay` and
+give exactly what they gave before.
+
+---
+
+## Experiment 4: the moment as the primary object
+
+Method and the map from the earlier code: `prereg_cer.md`, fourth
+experiment. Mathematics: `docs/CER.md`, sections 6 and 7.
+
+### Perception, tested on its own
+
+Built configurations whose structure is known (`cer_perception.py`, 30
+trials each). Nothing here is scored on a forecast.
+
+| Built in | What the signature has to show | Result | What a same-step correlation alone shows |
+|---|---|---|---|
+| 1. Identical marginals; the neighbour one step before, three steps before, or one step after the target | Which, and by how much | Named correctly 90 of 90 | Anything at all in 3 of 90 |
+| 2. The same correlation (0.41 and 0.42): moving together at once, or sharing a rhythm a sixth of a period apart | The phase lead of 2.67 steps | Lead measured at 2.67 on average; separated 23 of 30 | The same number for both |
+| 3. One neighbour sharing a driver at the same step, one really moving first | The leader eligible; the other perceived and kept out of the forecast | 30 of 30, 30 of 30, 30 of 30 | Both related |
+| 4. Two independent signals whose product, one step earlier, drives the target | The pair, from the counterpoint | Found 30 of 30; in pure noise 0 of 30; either signal alone looked informative in 1 of 30 | Nothing |
+| 5. Two channels that move together, moving apart on 20 days, each by an ordinary amount | Relational surprisal on those days | Flagged on 100% of those days where the move exceeded one standard deviation (23% for half to one), on 0.0% of other days. Intrinsic novelty flagged 3% of them | Nothing: each value is ordinary |
+| 6. The relation reverses at one point; both marginals unchanged | Temporal novelty after the point, not before | Detected 30 of 30, a median 76 observations later; flagged before any change on 1.0% of measurements | Detects only once a whole window has turned over |
+| 7. Independent noise, white and autocorrelated | No false novelty | Tail below 5% on 4.8% of calls (intrinsic), 5.1% (joint), 4.3% of measurements (temporal); joint tail flat across tenths; 1.2% of edge-calls eligible | n/a |
+| 8. Test 3's leader observed on every other step | Still found | 28 of 30 | n/a |
+
+Seven of eight pass. Test 2 does not, for a reason worth keeping: when a
+band is only just coherent, the phase read from its strongest frequency is
+less certain than its stated standard error (the true lead lay inside two
+standard errors in 26 of 30 rhythm cases, and zero lay inside them in 13 of
+20 simultaneous cases that were flagged coherent). Phase is reported with
+that standard error and should be read as optimistic near the threshold.
+
+### Perception on the real series
+
+Novelty at every call, on each target's changes, the arm that counts.
+
+| | Markets (68,337 calls) | Temperature (53,019) | Energy x temperature (24,157) |
+|---|---|---|---|
+| Intrinsic tail below 1% (nominal 1%) | 0.5% | 1.0% | 0.4% |
+| Joint tail below 1% (nominal 1%) | 3.2% | 1.1% | 1.1% |
+| Relational surprisal above 3 nats | 1.2% | 0.03% | 0.2% |
+| Temporal tail below 1% (nominal 1%) | 4.4% | 0.8% | 0.9% |
+
+Temperature behaves as its references say it should. Markets do not: joint
+configurations are unusual three times as often as a Gaussian copula with
+the window's harmony allows, and the relational structure itself changes
+more than four times as often as "unchanged" allows. Both are measurements
+of markets, not defects of the instrument: changes there are heavier-tailed,
+and relations move. The structure around the Korean won changed in 44% of
+the windows compared; around 16 of the 27 series in none. The intrinsic figure is
+below nominal on markets because the tail is taken over 27 dependent
+channels with a Bonferroni count, which is conservative.
+
+### Predictive contribution, controlled
+
+| | The moment (0.4) | Its three controls | Right %: HEX → with CER | Strongest tenth right %: HEX → with CER |
+|---|---|---|---|---|
+| New York, direction | **+0.0728** [+0.0510, +0.0957] | −0.0010, 0.0000, 0.0000 | 64.5 → 67.9 | 76.4 → 88.9 |
+| Chicago, direction | **+0.0040** [+0.0027, +0.0053] | 0.0000, +0.0001, +0.0001 | 62.9 → 63.2 | 75.3 → 76.9 |
+| Seattle, direction | 0.0000 [−0.0001, +0.0001] | −0.0001, −0.0001, +0.0001 | 60.5 → 60.6 | 76.8 → 76.7 |
+| Melbourne, direction | +0.0003 [0.0000, +0.0006] | −0.0001, +0.0008, +0.0002 | 63.1 → 63.1 | 76.0 → 76.0 |
+| 17 markets, move size, strict | 0.0000 [−0.0002, +0.0003] | −0.0001 each | 57.9 → 57.9 | 69.6 → 69.9 |
+| 17 markets, direction, strict | −0.0002 [−0.0003, −0.0001] | −0.0001 each | 51.4 → 51.4 | 56.0 → 56.1 |
+
+- **What was eligible.** On temperature direction, `New York <- Chicago` in
+  88% of measurements (mean evidence 36 nats) and `Chicago <- Seattle` in
+  39%. On markets, under 2% of interpretations per measurement on move size
+  and 1% on direction; the most frequent on move size is the pool (the
+  common movement of the other markets), which is perceived and adds nothing
+  measurable to HEX.
+- **The echo is gone.** Under `A.L.C.Q` a neighbour that only echoed the
+  target could carry weight through the target's own persistence
+  (`BRENT <- WTI` on move size). With the target's own past in the
+  conditioning set it carries none, and it is still in the signature.
+- **The same-date arm still shows the fixing-time artefact**, larger than
+  before (unused currencies, direction: +0.0038; Malaysian ringgit +0.0314).
+  A lead in the published numbers is a lead; only timestamps can say it is
+  not usable. That arm remains a diagnostic.
+- **Markets, direction: −0.0002 is clear of zero.** Small, and it is the
+  cost of the occasional interpretation that passed the test by chance.
+
+### Predictions of experiment 4
+
+| # | Prediction | Outcome |
+|---|---|---|
+| X1 | HEX reproduces all 43 series; the frozen modes reproduce their committed calls | Held. HEX: 280,252 calls, difference 0. Reliability: every call, to the six decimals stored; its control sums, computed before rounding, identical over 254,202 blocks. Measurement and relaxation: 18,654 calls of 7 targets recomputed, identical to six decimals |
+| X2 | New York within 15% of +0.0727, clear of zero | Held: +0.0728 |
+| X3 | Chicago positive, clear of zero, between +0.002 and +0.006 | Held: +0.0040 |
+| X4 | Markets within 0.0003 of HEX; under 3% eligible | Held: 0.0000 and −0.0002; 1.9% and 1.0% |
+| X5 | Controls within 0.0005 of zero in every group | Held by group. One station on one control is outside: Melbourne, +0.0008 |
+| X6 | Seattle, Melbourne, energy x temperature within 0.0005 | Held |
+| X7 | Every built configuration separated; noise rates 2% to 8%, temporal at most 10% | Seven of eight; the phase test is 23 of 30. Noise rates 4.8%, 5.1%, 4.3% |
+| X8 | Joint tail below 1% on 2% to 6% of market calls, 0.5% to 3% on temperature | Held: 3.2% and 1.1% |
+
+### What is not shown
+
+- **No untouched evaluation period.** Every series here was used in the
+  earlier experiments. The moment's forecast figures are a comparison on
+  seen data and cannot be read as out-of-sample.
+- **Novelty does not enter any weight.** It is measured and reported.
+  Whether it carries predictive information is a separate experiment.
+- **Window statistics are remeasured every 25 calls** and held between.
+  Intrinsic and relational novelty are computed at every call.
+- **The maximum-entropy rule is stated with its conditions** in
+  `docs/CER.md`: it is the Bayes posterior over "one of these, or none" only
+  when the evidence terms are log Bayes factors, which the Schwarz
+  approximation gives only roughly.
 
 ---
 
@@ -261,17 +378,20 @@ check to exist).
 
 ## Checks
 
-- **No call saw its own future.** 144 reruns on truncated histories, every
-  channel, weight and temperature rebuilt from its truncated record, all four
-  calls compared: largest difference 0.
+- **No call saw its own future.** 288 checks on truncated histories, every
+  channel, moment and novelty rebuilt from its truncated record: largest
+  difference 0. (Experiments 2 and 3: 144 reruns, every weight and
+  temperature rebuilt, largest difference 0.)
 - **HEX is unchanged.** `git diff` on `observer.ts`, `hex7.ts`, `cycle.ts`,
   `ledger.ts`, `isotonic.ts` and `functions/` is empty; `tests/parity.mjs`
   passes; all 43 replay series reproduce the committed 7.0 ledger call for
   call (largest difference 0).
 - **The module is the tested code.** `tests/cer.mjs`: the TypeScript against
   the Python reference on the synthetic signals, every mode, largest
-  difference 4 × 10⁻¹³.
-- **Twelve synthetic tests** (`cer_synthetic.py`), all pass.
+  difference 4 × 10⁻¹³; the moment, whose matrix inverses are computed
+  differently in the two languages, to a relative 10⁻¹³.
+- **Twelve synthetic tests** (`cer_synthetic.py`), all pass. **Eight
+  perception tests** (`cer_perception.py`), seven pass.
 - **Headline figures of experiment 1 recomputed** from the ledger with
   separate code: equal.
 
@@ -294,14 +414,14 @@ check to exist).
 2. **Start where there is a physical path.** The result that held is the one
    with a mechanism. Server heat, room temperature, power draw and a
    mycelium sample on one bench are that kind of system.
-3. **Hear an edge by its measured evidence.** Maximum entropy at T = 1 kept
-   the real gain, removed the calendar artefact, and removed the cost of
-   carrying voices that say nothing. A relationship is heard from the first
-   full window instead of after it has earned a record.
-4. **Two limits of the measured lead to fix next.** It does not condition on
-   the target's own past, so persistence in the target can look like a lead
-   (`BRENT <- WTI` on move size); and it inherits fixing-time artefacts in
-   the same-date arm. Sensor data with acquisition times removes the second.
+3. **Perceive first, then ask what it predicts.** The moment keeps every
+   relation and its novelty in view, and lets into the forecast only what
+   adds to the target's own past, the calendar and the other neighbours. It
+   kept the real gain, at no cost where nothing is there.
+4. **Open limits.** Phase near the coherence threshold is over-confident;
+   the same-date arm inherits fixing-time artefacts, which sensor data with
+   acquisition times removes; and there is no untouched period to confirm
+   the forecast figures.
 5. **A calendar coordinate for HEX** is worth its own pre-registered test:
    +0.003 to +0.006 bits per call on temperature direction from a bare
    annual sine.

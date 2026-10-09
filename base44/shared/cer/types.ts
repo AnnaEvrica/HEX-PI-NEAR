@@ -8,7 +8,7 @@
 // tests/cer.mjs). Mathematics: docs/CER.md.
 // ===========================================================================
 
-export const CER_VERSION = 'cer-0.3';
+export const CER_VERSION = 'cer-0.4';
 
 /** One measurement as it arrives from a source, before anything is done to it. */
 export interface SignalObservation {
@@ -54,6 +54,9 @@ export interface Channel {
   level: number[];
   /** HEX's coordinates of this channel at each tick: 7 for the level, 7 for the size of the change. Filled by coordinates(). */
   Z?: Float64Array[];
+  /** Each observation against the channel's own past: the normal score of its change, and the tail probability of its size. Filled by prepare(). */
+  ns?: number[];
+  tail?: number[];
   quality?: { observations: number; dropped_missing: number; dropped_flagged: number; duplicates: number };
 }
 
@@ -124,7 +127,40 @@ export interface EdgeWeight {
 }
 
 /** How the edges' experts are combined into CER's call. */
-export type Weighting = 'reliability' | 'measurement' | 'relaxation' | 'relaxation-tempered';
+export type Weighting = 'moment' | 'reliability' | 'measurement' | 'relaxation' | 'relaxation-tempered';
+
+/** One band of the rhythm between the target and a neighbour. Phase, with its own uncertainty, only where the band is coherent. */
+export interface RhythmBand {
+  band: [number, number]; status: EdgeStatus; coherence?: number; coherent: boolean;
+  phase: number | NotSupported; neighbour_leads_by: number | NotSupported;
+  phase_standard_error?: number; lead_standard_error?: number; period?: number;
+}
+/** Two neighbours together against the target. */
+export interface Counterpoint { pair: [string, string]; strength: number; standard_error: number; z: number; pairs_tried: number; tail: number }
+
+/**
+ * The signature of one relational moment M_t = (X_t, G_t, Phi_t) as a target
+ * meets it: what relates to what now (harmony), what moves before what
+ * (leadership, following), what two channels carry together (counterpoint),
+ * how it is organised in time (persistence, rhythm), what limits the
+ * measurement (samples, coverage, standard errors) and what is new
+ * (temporal_novelty here; intrinsic and relational novelty per call from
+ * novelty()). `evidence` is kept apart: it is the controlled evidence that
+ * the pool [0] or neighbour j [j + 1] bears on the target's next step.
+ */
+export interface MomentSignature {
+  method: string; target: string; as_of: number; lag: number; read: 'MOVE' | 'RANGE'; samples: number; status: EdgeStatus;
+  coverage: number[]; measurable: boolean[]; evidence: number[];
+  /** Correlation matrix of the panel at the same step, target first. */
+  H?: number[][];
+  harmony?: number[]; leadership?: number[][]; following?: number[][]; persistence?: number[];
+  standard_error?: number; edge_standard_error?: number[];
+  counterpoint?: { same_step: Counterpoint | null; one_step_earlier: Counterpoint | null };
+  rhythm?: Record<string, RhythmBand[]>;
+  partial_leadership?: number[][]; chosen_lag?: number[]; log_likelihood_ratio?: number[]; pool_partial?: number;
+  eligible?: string[];
+  temporal_novelty?: { largest_change_z: number; edge: string; kind: 'harmony' | 'leadership'; tail: number; became_eligible: number; ceased_to_be_eligible: number; compared_with: number };
+}
 
 export interface Graph {
   method: string;

@@ -1,6 +1,6 @@
 # HEX [PI]: architecture
 
-Anna Maria Sarkisyan · Evrica Technologies Inc. · engine 7.0 on HEX6-BLE, with CER `cer-0.3` in shadow
+Anna Maria Sarkisyan · Evrica Technologies Inc. · engine 7.0 on HEX6-BLE, with CER `cer-0.4` in shadow
 
 One page for anyone who has to change, run, test or review this system: what
 the parts are, what each may depend on, where state lives, and the practices
@@ -44,7 +44,7 @@ flowchart TB
   end
   subgraph CER["CER (base44/shared/cer/): pure, in shadow"]
     CN["normalize, align"]
-    CM["coupling, spectrum, graph (edge weight w = A.L.C.Q)"]
+    CM["coupling, spectrum, graph (the moment: signature, novelty, controlled evidence)"]
     CI["inference (experts; interpretations)"]
     CR["replay"]
   end
@@ -146,13 +146,13 @@ function, entity or screen.
 
 | File | Role |
 |---|---|
-| `cer/types.ts` | `SignalObservation` (the input record: source, environment, channel, time, acquisition time, unit, quality, condition, intervention), `Channel`, `Edge`, `Graph`, `EdgeWeight`, `Weighting`, and the version `cer-0.3` |
+| `cer/types.ts` | `SignalObservation` (the input record: source, environment, channel, time, acquisition time, unit, quality, condition, intervention), `Channel`, `Edge`, `Graph`, `MomentSignature`, `EdgeWeight`, `Weighting`, and the version `cer-0.4` |
 | `cer/normalize.ts` | Raw samples to a channel. Units kept; what is dropped is counted |
 | `cer/align.ts` | Which value of a neighbour a call may see (`asof`); two channels on the ticks they share (`pair`); coordinates (HEX's own `ranks`) |
 | `cer/coupling.ts` | Rank cross-correlation by lag, Bartlett standard error, time-shift surrogate threshold, shared-driver removal |
 | `cer/spectrum.ts` | Welch coherence by band; phase only where coherent |
-| `cer/graph.ts` | The descriptive graph: every ordered pair, each relation its own edge. The measured edge weight `w = A.L.C.Q` and its evidence, from the current window, with no outcome in them |
-| `cer/inference.ts` | One expert per edge, learning from outcomes. Three ways to combine them into a call: by past success, by measured weight, by maximum entropy over interpretations (with its temperature rule) |
+| `cer/graph.ts` | The moment `M_t = (X_t, G_t, Phi_t)`: the panel on the target's clock, its signature (harmony, leadership, counterpoint, rhythm, uncertainty), novelty at every call, and the controlled evidence for what may enter a forecast. Also the last-day descriptive graph and the frozen edge weight `w = A.L.C.Q` |
+| `cer/inference.ts` | One expert per edge, learning from outcomes. The primary call: maximum entropy at T = 1 over the moment's controlled evidence. Three frozen comparators: by past success, by measured weight, by maximum entropy on edge evidence (with its temperature rule) |
 | `cer/replay.ts` | `shadowReplay`: HEX's calls and CER's beside them, scored on the same outcome |
 | `cer/index.ts` | The module's public surface. Import from here only |
 
@@ -161,26 +161,31 @@ function, entity or screen.
 nothing the engine imports. A change set that touches `observer.ts`,
 `hex7.ts`, `cycle.ts`, `ledger.ts` or `isotonic.ts` is not a CER change.
 
-**Two things kept apart inside CER.** *Descriptive association* (what moves
-with what) lives in the graph. *Predictive influence* (what is put into a
-forecast) requires a measured lead that a call can use. A relation without
-one is recorded and not promoted. The edge experts learn from outcomes; how
-much an edge is heard does not depend on its record under the two
-measurement-based modes.
+**Two stages kept apart inside CER.** *Perception* builds the moment's
+signature at every call: every relation, its timing, its uncertainty and its
+novelty, with no outcome and no forecasting record in it. *Prediction* is a
+separate calculation on the same panel: a neighbour may enter the forecast
+only for what it adds given the target's own past, the calendar, the other
+neighbours and timestamp availability. A relation that fails stays
+perceived and is not asked.
 
-| Mode (`Weighting`) | An edge is heard according to | Version |
+| Mode (`Weighting`) | The call is formed from | Status |
 |---|---|---|
-| `'reliability'` | its expert's past predictive success | `cer-0.1` |
-| `'measurement'` (default) | `w = A.L.C.Q`: association, usable lead, compatibility after the shared driver, measurement quality | `cer-0.2` |
-| `'relaxation'` | the maximum-entropy distribution over interpretations given the measured evidence, T = 1 | `cer-0.3` |
-| `'relaxation-tempered'` | the same at a temperature validated without the prediction target | `cer-0.3` |
+| `'moment'` (default) | maximum entropy at T = 1 over the moment's controlled evidence for the pool and each edge | `cer-0.4`, primary |
+| `'relaxation'`, `'relaxation-tempered'` | maximum entropy on per-edge evidence, at T = 1 or a validated temperature | `cer-0.3`, frozen comparator |
+| `'measurement'` | `w = A.L.C.Q` | `cer-0.2`, frozen comparator |
+| `'reliability'` | each expert's past predictive success | `cer-0.1`, frozen comparator |
+
+The comparators are frozen in `validation/cer/frozen_manifest.json` and the
+replay checks that they still reproduce their committed calls.
 
 **What has been measured** (`validation/cer_results.md`): where one
 environment physically leads another, CER adds to HEX (New York temperature
-direction, +0.073 bits per call over 7.0 under `'relaxation'`); where there
-is no relationship it reports none; on markets the relations are real and
-simultaneous and do not forecast the next day. Of the four modes,
-`'relaxation'` kept the real gain at almost no cost elsewhere.
+direction, +0.073 bits per call over 7.0); where there is no relationship it
+reports none; on markets the relations are real, mostly simultaneous, and do
+not forecast the next day. Perception is validated on its own: seven of
+eight built configurations are resolved, and the eighth (phase near the
+coherence threshold) is a stated limit.
 
 **Gates before CER touches production**, in order. Each is a separate change
 with its own pre-registration:
@@ -229,7 +234,7 @@ the 7 tracked series is about 1.5 s of engine time; at the cap of 27, about
 | Nightly job | number of series, one after another | one function invocation | Fan out one invocation per series; the core is pure, so this needs no locking |
 | Ledger | 4 rows per series per night | 5,000 most recent scored rows read per night | `EngineStatus.tally` already keeps running sums, so the nightly decision does not reread history |
 | CER inference | calls × (neighbours + 1) × 9 scales × 14² | neighbours passed by the caller | Hear edges by measured evidence: by past success, 26 neighbours cost about 0.0015 bits per call in accuracy; by measurement, 0.0000 to 0.0003 |
-| CER edge weights | (calls / 25) × neighbours × 200 surrogates on a 750-tick window | `graph.ts`: `RECOMPUTE`, `WINDOW` | This is now the larger cost (the full replay went from 12 to 46 minutes). Cache the ranked windows per pair; measure less often for slow channels |
+| CER moments | (calls / 25) × (neighbours² for counterpoint + one regression) on a 750-tick window; novelty per call is one small matrix solve | `graph.ts`: `RECOMPUTE`, `WINDOW` | About 25 minutes for the full replay. The frozen `A.L.C.Q` comparator is the expensive one (200 surrogates per edge) and is not on the primary path |
 | CER graph | pairs² × 200 surrogates on a 750-tick window | `graph.ts`: `WINDOW`, `coupling.ts`: `NSUR` | Compute on a schedule, not per call; restrict to pairs within or adjacent to an environment |
 | Sensor data | sample rate | not built | Feature extraction at the edge; a feature store and checkpoints separate from the application database |
 
@@ -248,6 +253,7 @@ CER's TypeScript has not been timed yet. That measurement belongs to gate 2.
 | Lint, build | Front end | `npm run lint`, `npx vite build` | The app builds |
 | Unit, by parity | Null, 6.5, 7.0 against their Python references, step by step on real series | `node tests/parity.mjs` | The deployed mathematics is the tested mathematics (10⁻¹³) |
 | Unit, by parity | CER against its Python reference on signals with built-in relationships, every mode; ingestion | `node tests/cer.mjs` | Same, for CER (4 × 10⁻¹³) |
+| Perception, by construction | Eight built configurations, scored on perception only: timing with identical marginals, phase with equal correlation, shared driver against a real lead, a jointly informative pair, a novel combination, a relational transition, noise, a change of sampling | `python3 validation/cer_perception.py` | CER sees what is there before anything is forecast; false novelty stays at its nominal rate |
 | Unit, by construction | Twelve CER tests: independence, locked oscillators, phase offset, known delay, shared driver, a relationship that stops, missing and asynchronous samples, spikes and a stuck sensor, no future data, exact repeatability, the measured edge weight, relaxation and its temperature | `python3 validation/cer_synthetic.py` | CER finds what was built in and nothing that was not |
 | Integration | The loop, night by night, on real BTC bars with an in-memory database | `node tests/loop.mjs` | Scoring, logging, strength map, version rule |
 | Smoke | Every backend function locally, with Base44, the language model and outside services stubbed | `node tests/backend-smoke/build.mjs && node tests/backend-smoke/run.mjs` | Every entry point runs; `docs/PROMPT.md` matches the code |
@@ -325,7 +331,8 @@ data seen so far, so two runs can be compared row by row.
   their results are written.
 - **One version string**: `base44/shared/version.ts`. The ledger records
   which engine made each call (`state-6.5`, `hex-7.0`). CER records its own
-  version (`cer-0.3`) on every edge and every ledger row.
+  version (`cer-0.4`) on every edge and every ledger row. Superseded
+  inference is not deleted: it is frozen with a manifest and kept selectable.
 - **A frozen comparator.** A new engine version is added beside the previous
   one, which is frozen and kept running. Promotion is decided by the ledger,
   not by the commit.

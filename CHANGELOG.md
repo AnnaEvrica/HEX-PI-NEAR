@@ -1,5 +1,22 @@
 # Changelog
 
+## 9 October 2026: CER 0.4, the moment as the primary object (branch `cer-moment`, not in `main`)
+
+- **CER's governing inference is replaced.** The primary object is the
+  relational moment `M_t = (X_t, G_t, Phi_t)` with its signature
+  `(X, G, Phi, U, N)`: harmony, leadership, counterpoint, rhythm with phase
+  and its uncertainty, and intrinsic, relational and temporal novelty at
+  every call. Perception uses no outcome and no past forecasting success.
+- **Predictive eligibility is a separate, controlled calculation**: what a
+  neighbour adds given the target's own past, the calendar, every other
+  neighbour and the arm's timestamp availability. The call is maximum
+  entropy at T = 1 over that evidence.
+- **`A.L.C.Q`, the original weighting and `cer-0.3` are frozen comparators**
+  (`validation/cer/frozen_manifest.json`) and reproduce their committed
+  calls. HEX 7.0 reproduces its ledger on all 43 series.
+- **Perception is tested on its own** (`validation/cer_perception.py`).
+- No function, entity, screen or shown call uses CER. Nothing is merged.
+
 ## 9 October 2026: CER, an experimental module in shadow
 
 - **New, separate module** `base44/shared/cer/` (Cross-Environment

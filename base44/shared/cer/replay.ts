@@ -8,7 +8,7 @@
 import { observeBaseline, ReadName } from '../observer.ts';
 import { walkHex7 } from '../hex7.ts';
 import { coordinates, features } from './align.ts';
-import { edgeWeights } from './graph.ts';
+import { edgeWeights, moments } from './graph.ts';
 import { temperatures, walkCer } from './inference.ts';
 import { CER_VERSION, Channel, Weighting } from './types.ts';
 
@@ -38,18 +38,20 @@ export interface ShadowReplay {
 /**
  * Walk one target forward with CER in shadow.
  * @param lag        0: a neighbour's value of the same tick may be used. 1: only earlier ticks. Use 1 unless every channel is known to be complete before the target's call is made.
- * @param weighting  'measurement' (the default): each edge is heard at its measured weight w = A.L.C.Q.
+ * @param weighting  'moment' (the default, cer-0.4): maximum entropy at T = 1 over the pool and the edges under the controlled evidence of the moment.
+ *                   'measurement': each edge is heard at its measured weight w = A.L.C.Q. Kept unchanged for comparison.
  *                   'relaxation', 'relaxation-tempered': the maximum-entropy distribution over interpretations at T = 1, or at the validated temperature.
  *                   'reliability': the voices are combined by past predictive success. Kept for comparison.
  */
-export function shadowReplay(target: Channel, neighbours: Channel[], read: ReadName, lag = 1, weighting: Weighting = 'measurement'): ShadowReplay {
+export function shadowReplay(target: Channel, neighbours: Channel[], read: ReadName, lag = 1, weighting: Weighting = 'moment'): ShadowReplay {
   for (const n of neighbours) if (!n.Z) coordinates(n);
   const r = target.changes, { steps, final } = walkHex7(r, read, observeBaseline(r, read));
   const all = final ? [...steps.map((s) => ({ i: s.i, p: s.p, b: s.b, y: s.y as number | undefined })), { i: r.length - 1, p: final.p, b: final.b, y: undefined }] : steps.map((s) => ({ i: s.i, p: s.p, b: s.b, y: s.y as number | undefined }));
   const tdays = all.map((s) => target.days[s.i]), y = steps.map((s) => s.y), { F, M } = features(tdays, neighbours, lag);
-  const ew = weighting === 'reliability' ? undefined : edgeWeights(tdays, target, neighbours, lag, read), relax = ew ? { E: ew.E, T: temperatures(ew.E, M) } : undefined;
-  const alone = walkCer(all.map((s) => s.b), y, F, M, false, ew?.W, relax), fused = walkCer(all.map((s) => s.p), y, F, M, false, ew?.W, relax);
-  const pick = (s: { p: number; pq?: number; pe?: number; pt?: number }) => (weighting === 'measurement' ? s.pq! : weighting === 'relaxation' ? s.pe! : weighting === 'relaxation-tempered' ? s.pt! : s.p);
+  const Em = weighting === 'moment' ? moments(tdays, target, neighbours, lag, read).E : undefined;
+  const ew = weighting === 'reliability' || weighting === 'moment' ? undefined : edgeWeights(tdays, target, neighbours, lag, read), relax = ew ? { E: ew.E, T: temperatures(ew.E, M) } : undefined;
+  const alone = walkCer(all.map((s) => s.b), y, F, M, false, ew?.W, relax, Em), fused = walkCer(all.map((s) => s.p), y, F, M, false, ew?.W, relax, Em);
+  const pick = (s: { p: number; pq?: number; pe?: number; pt?: number; pm?: number }) => (weighting === 'moment' ? s.pm! : weighting === 'measurement' ? s.pq! : weighting === 'relaxation' ? s.pe! : weighting === 'relaxation-tempered' ? s.pt! : s.p);
   const calls: ShadowCall[] = all.map((s, t) => ({ i: s.i, day: tdays[t], y: s.y, null_probability: s.b, hex_probability: s.p, cer_probability: pick(alone.steps[t]), fusion_probability: pick(fused.steps[t]), present: M[t].filter(Boolean).length }));
   const scored = calls.filter((c) => c.y !== undefined && c.present > 0), mean = (f: (c: ShadowCall) => number) => (scored.length ? scored.reduce((s, c) => s + f(c), 0) / scored.length : 0);
   return {

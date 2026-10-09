@@ -121,7 +121,23 @@ REF['relax']=dict(E=[[float(v) for v in r_] for r_ in E_[::25]],M=[[bool(v) for 
 # the shadow walk-forward (base44/shared/cer/replay.ts): HEX's own calls, then CER beside them, strict arm
 import pandas as pd
 for read in ('MOVE','RANGE'):
-    tgt=tgt4; R=pd.DataFrame(h7.walk(tgt,read)[0]); NS=N; F,M=cer.features(R.i.values,NS,1); Wsh,Esh,_=cer.edge_weights(R.i.values,T4,NS,1,read); rsh=(Esh,cer.temperatures(Esh,M))
+    tgt=tgt4; R=pd.DataFrame(h7.walk(tgt,read)[0]); NS=N; F,M=cer.features(R.i.values,NS,1); Wsh,Esh,_=cer.edge_weights(R.i.values,T4,NS,1,read); rsh=(Esh,cer.temperatures(Esh,M)); Msh=cer.moments(R.i.values,T4,NS,1,read)[0]
     REF.setdefault('shadow',[]).append(dict(read=read,lag=1,target=[float(v) for v in tgt],neighbours=[dict(id=c['id'],days=[int(d) for d in c['days']],changes=[float(v) for v in c['r']]) for c in N],
-        i=[int(v) for v in R.i],null=[float(v) for v in R.null],hex=[float(v) for v in R.p],**dict(zip(('cer','cerq','cere','cert'),([float(v) for v in a_] for a_ in cer.walk(R.null.values,R.y.values,F,M,weights=Wsh,relax=rsh)))),**dict(zip(('fusion','fusionq','fusione','fusiont'),([float(v) for v in a_] for a_ in cer.walk(R.p.values,R.y.values,F,M,weights=Wsh,relax=rsh))))))
+        i=[int(v) for v in R.i],null=[float(v) for v in R.null],hex=[float(v) for v in R.p],**dict(zip(('cer','cerq','cere','cert','cerm'),([float(v) for v in a_] for a_ in cer.walk(R.null.values,R.y.values,F,M,weights=Wsh,relax=rsh,moments=Msh)))),**dict(zip(('fusion','fusionq','fusione','fusiont','fusionm'),([float(v) for v in a_] for a_ in cer.walk(R.p.values,R.y.values,F,M,weights=Wsh,relax=rsh,moments=Msh))))))
+# the moment (cer-0.4): the signature at two moments a window apart, novelty and controlled evidence through time, and the primary call
+def clean(o):
+    if isinstance(o,dict): return {k:clean(v) for k,v in o.items()}
+    if isinstance(o,(list,tuple)): return [clean(v) for v in o]
+    if isinstance(o,np.ndarray): return clean(o.tolist())
+    if isinstance(o,(np.bool_,bool)): return bool(o)
+    if isinstance(o,(np.integer,)): return int(o)
+    if isinstance(o,(float,np.floating)): return None if o!=o else float(o)
+    return o
+rngm=np.random.default_rng(113); nm=1600; ldm=ar(rngm,nm); tgm=0.8*np.r_[0,ldm[:-1]]+0.6*rngm.standard_normal(nm)
+NM=[ch('lead',ldm),ch('echo',0.8*tgm+0.6*rngm.standard_normal(nm)),ch('decoy',ar(rngm,nm)),ch('half',np.add.reduceat(ar(rngm,nm),np.arange(0,nm,2)),days=np.arange(nm)[::2])]; TM=ch('target',tgm)
+for c_ in NM+[TM]: cer.prepare(c_)
+S0=cer.moment(TM,NM,800); S1=cer.moment(TM,NM,1599,previous=S0); tdm=np.arange(26,nm-1); Emm,novm,_s,_m=cer.moments(tdm,TM,NM,0,'MOVE',perceive=True); F,M=cer.features(tdm,NM,0); ym=(tgm[27:]>0).astype(int); prm,pmm=cer.walk(np.full(len(tdm),0.5),ym,F,M,moments=Emm)
+REF['moment']=dict(target=js(TM),neighbours=[js(c_) for c_ in NM],first=clean(S0),second=clean(S1),days=[int(v) for v in tdm],y=[int(v) for v in ym],E=clean(Emm[::25]),novelty=clean(novm[::25]),pm=[float(v) for v in pmm])
+print('the moment, for parity:',S1['eligible'],{k:round(float(v),2) for k,v in zip(['(pool)']+[c_['id'] for c_ in NM],S1['evidence'])},'echo harmony',round(float(S1['harmony'][1]),2),'gain',round(float(((np.log(np.where(ym==1,pmm,1-pmm))-math.log(0.5))/LN2).mean()),4))
+
 json.dump(REF,open(os.path.join(HERE,'..','tests','cer_reference.json'),'w')); print(f"{bad} FAILED" if bad else 'ALL PASSED'); raise SystemExit(1 if bad else 0)

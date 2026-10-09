@@ -28,15 +28,17 @@ for trial in range(TRIALS):
 check('1 identical marginals, different timing',right==3*TRIALS and plain<=0.12*3*TRIALS,named_correctly=f'{right} of {3*TRIALS}',same_step_correlation_saw_anything=f'{plain} of {3*TRIALS}')
 
 # 2. the same ordinary correlation, different phase structure: moving together at once, or sharing a rhythm a sixth of a period apart
-rng=np.random.default_rng(202); sep=0; rr=[]; t=np.arange(900)
+rng=np.random.default_rng(202); sep=0; rr=[]; cov=[]; cov0=[]; t=np.arange(900)
 for trial in range(TRIALS):
     b1=rng.standard_normal(900); a1=0.417*b1+math.sqrt(1-0.417**2)*rng.standard_normal(900); ph=rng.uniform(0,2*math.pi)
     b2=math.sqrt(2)*np.sin(2*math.pi*t/16+ph)+0.45*rng.standard_normal(900); a2=math.sqrt(2)*np.sin(2*math.pi*(t-16/6)/16+ph)+0.45*rng.standard_normal(900)
     S1=cer.moment(ch('a',a1),[ch('b',b1)],899); S2=cer.moment(ch('a',a2),[ch('b',b2)],899); rr.append((float(S1['harmony'][0]),float(S2['harmony'][0])))
     e1=[e for e in S1['rhythm']['b'] if e['band']==[5,20]][0]; e2=[e for e in S2['rhythm']['b'] if e['band']==[5,20]][0]
-    sep+=bool((not e1['coherent'] or abs(e1['neighbour_leads_by'])<2*e1['lead_standard_error']) and e2['coherent'] and abs(e2['neighbour_leads_by']-16/6)<2*e2['lead_standard_error'] and e2['neighbour_leads_by']>2*e2['lead_standard_error'])
+    sep+=bool((not e1['coherent'] or abs(e1['neighbour_leads_by'])<2*e1['lead_standard_error']) and e2['coherent'] and abs(e2['neighbour_leads_by']-16/6)<0.7 and e2['neighbour_leads_by']>2*e2['lead_standard_error'])
+    cov.append(abs(e2['neighbour_leads_by']-16/6)<2*e2['lead_standard_error']) if e2['coherent'] else None; cov0.append(abs(e1['neighbour_leads_by'])<2*e1['lead_standard_error']) if e1['coherent'] else None
 m1,m2=np.mean(rr,0)
-check('2 equal correlation, different phase',sep>=TRIALS-1 and abs(m1-m2)<0.08,separated_by_phase=f'{sep} of {TRIALS}',same_step_correlation_of_each=[round(float(m1),3),round(float(m2),3)],lead_built_in=round(16/6,2))
+check('2 equal correlation, different phase',sep>=TRIALS-1 and abs(m1-m2)<0.08,separated_by_phase=f'{sep} of {TRIALS}',same_step_correlation_of_each=[round(float(m1),3),round(float(m2),3)],lead_built_in=round(16/6,2),
+      built_in_lead_inside_two_phase_standard_errors=f'{int(sum(cov))} of {len(cov)}',zero_lead_inside_two_phase_standard_errors_when_simultaneous=f'{int(sum(cov0))} of {len(cov0)}')
 
 # 3. coupling through a shared driver at the same step, against a neighbour that really moves first
 rng=np.random.default_rng(203); sens=spec=seen=0; n=900

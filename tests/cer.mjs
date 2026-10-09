@@ -47,12 +47,28 @@ for (const c of ref.infer) {
   const T = cer.temperatures(E, M).filter((_, i) => i % 25 === 0);
   report('relaxation: interpretations and temperatures', Math.max(diff(cer.interpretations([3.0, 0.0, 1.0, 7.5], [true, true, false, true], 2.0), r.interp), diff(T, r.T)), `${T.length} measurements,`);
 }
+// ---- the moment (cer-0.4): the signature at two moments, novelty and controlled evidence through time, the primary call.
+// Matrix inverses are computed differently in the two languages, so this block is held to a relative 1e-7.
+{
+  const r = ref.moment, T = cer.prepare(mk(r.target)), N = r.neighbours.map((c) => cer.prepare(mk(c)));
+  const rel = (a, b) => {
+    if (a === null || b === null || a === undefined || b === undefined) return (a ?? null) === (b ?? null) ? 0 : 1;
+    if (typeof a === 'number' && typeof b === 'number') return Math.abs(a - b) / (1 + Math.abs(b));
+    if (Array.isArray(a) && Array.isArray(b)) return a.length === b.length ? a.reduce((m, x, i) => Math.max(m, rel(x, b[i])), 0) : 1;
+    if (typeof a === 'object' && typeof b === 'object') { const ka = Object.keys(a).sort(), kb = Object.keys(b).sort(); return ka.join() === kb.join() ? ka.reduce((m, k) => Math.max(m, rel(a[k], b[k])), 0) : 1; }
+    return a === b ? 0 : 1;
+  };
+  const plain = (o) => JSON.parse(JSON.stringify(o)), S0 = cer.moment(T, N, 800), S1 = cer.moment(T, N, 1599, 0, 'MOVE', S0);
+  const m = cer.moments(r.days, T, N, 0, 'MOVE', 0, 25, true), { F, M } = cer.features(r.days, N, 0), w = cer.walkCer(r.days.map(() => 0.5), r.y, F, M, false, undefined, undefined, m.E);
+  const d = Math.max(rel(plain(S0), r.first), rel(plain(S1), r.second), rel(plain(m.E.filter((_, i) => i % 25 === 0)), r.E), rel(plain(m.novelty.filter((_, i) => i % 25 === 0)), r.novelty), rel(w.steps.map((s) => s.pm), r.pm));
+  const ok = d < 1e-7; if (!ok) bad++; console.log(ok ? 'PASS' : 'FAIL', 'moment: two signatures, novelty, evidence and the primary call', `${r.pm.length} calls, eligible now: ${S1.eligible.join(', ')}; largest relative difference ${d.toExponential(2)}`);
+}
 // ---- the shadow walk-forward: HEX's calls and CER's beside them
 for (const c of ref.shadow) {
   const t = cer.channel('target', 'lab', c.target.map((_, i) => i), c.target), r = cer.shadowReplay(t, c.neighbours.map(mk), c.read, c.lag, 'reliability'), s = r.calls.filter((x) => x.y !== undefined);
-  const q = cer.shadowReplay(t, c.neighbours.map(mk), c.read, c.lag).calls.filter((x) => x.y !== undefined);
+  const q = cer.shadowReplay(t, c.neighbours.map(mk), c.read, c.lag, 'measurement').calls.filter((x) => x.y !== undefined), pm = cer.shadowReplay(t, c.neighbours.map(mk), c.read, c.lag).calls.filter((x) => x.y !== undefined);
   const sc = (mode) => cer.shadowReplay(t, c.neighbours.map(mk), c.read, c.lag, mode).calls.filter((x) => x.y !== undefined), e1 = sc('relaxation'), e2 = sc('relaxation-tempered');
-  const d = Math.max(diff(e1.map((x) => x.cer_probability), c.cere), diff(e1.map((x) => x.fusion_probability), c.fusione), diff(e2.map((x) => x.cer_probability), c.cert), diff(e2.map((x) => x.fusion_probability), c.fusiont), diff(q.map((x) => x.cer_probability), c.cerq), diff(q.map((x) => x.fusion_probability), c.fusionq), diff(s.map((x) => x.i), c.i), diff(s.map((x) => x.null_probability), c.null), diff(s.map((x) => x.hex_probability), c.hex), diff(s.map((x) => x.cer_probability), c.cer), diff(s.map((x) => x.fusion_probability), c.fusion));
+  const d = Math.max(diff(pm.map((x) => x.cer_probability), c.cerm), diff(pm.map((x) => x.fusion_probability), c.fusionm), diff(e1.map((x) => x.cer_probability), c.cere), diff(e1.map((x) => x.fusion_probability), c.fusione), diff(e2.map((x) => x.cer_probability), c.cert), diff(e2.map((x) => x.fusion_probability), c.fusiont), diff(q.map((x) => x.cer_probability), c.cerq), diff(q.map((x) => x.fusion_probability), c.fusionq), diff(s.map((x) => x.i), c.i), diff(s.map((x) => x.null_probability), c.null), diff(s.map((x) => x.hex_probability), c.hex), diff(s.map((x) => x.cer_probability), c.cer), diff(s.map((x) => x.fusion_probability), c.fusion));
   report(`shadow replay: ${c.read}`, d, `${s.length} scored calls, one open call, fusion over HEX ${r.gain.fusion_over_hex.toFixed(4)} bits per call,`);
 }
 // ---- ingestion: out of order, a duplicate tick, a missing sample, a flagged sample; units carried through

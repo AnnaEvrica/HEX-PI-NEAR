@@ -1,11 +1,13 @@
 # CER: Cross-Environment Resonance
 
-Anna Maria Sarkisyan · Evrica Technologies Inc. · experimental module `cer-0.3`, beside HEX [PI] 7.0
+Anna Maria Sarkisyan · Evrica Technologies Inc. · experimental module `cer-0.4`, beside HEX [PI] 7.0
 
-HEX reads one series. CER reads across series. It measures how the channels of
-different environments move together, and tests whether those relations say
-anything about a series' next step that the series' own record, and HEX, do
-not already say.
+HEX reads one series. CER reads across series. Its first job is to perceive
+each moment: what is observable now, how the channels relate, how that is
+organised in time, and what about it is new. Its second job, kept separate,
+is to test whether anything in that moment says something about a series'
+next step that the series' own record, and HEX, do not already say.
+Prediction never decides whether a relation is perceived.
 
 CER is in shadow. It is not imported by `observer.ts`, `hex7.ts`, `cycle.ts`,
 `ledger.ts`, `isotonic.ts` or any function, it writes to no production
@@ -22,7 +24,9 @@ exactly, with the file and function that computes it.
 | Align | Which value of a neighbour a call is allowed to see | `cer/align.ts: asof, features, pair` |
 | Measure | Three ways two channels can be related, kept apart | `cer/coupling.ts`, `cer/spectrum.ts`, `cer/graph.ts` |
 | Infer | Do the neighbours say anything about the next step? | `cer/inference.ts: walkCer` |
-| Weigh | How much each edge is heard, from present measurement | `cer/graph.ts: edgeWeight`, `cer/inference.ts: interpretations, temperatures` |
+| Perceive | The moment: its signature and its novelty, at every call | `cer/graph.ts: panel, moment, novelty, moments` |
+| Decide | What in the moment may enter a forecast, under controls, and with what weight | `cer/graph.ts: moment` (evidence), `cer/inference.ts: interpretations` |
+| Compare | Three earlier ways of hearing an edge, frozen | `cer/graph.ts: edgeWeight`, `cer/inference.ts: temperatures` |
 | Replay | HEX's calls and CER's beside them, scored on the same outcome | `cer/replay.ts: shadowReplay` |
 
 Reference implementation: `validation/cercore.py`. The TypeScript must match
@@ -169,11 +173,152 @@ This is predictive dependence in Granger's sense (1969): the neighbour's past
 improves the forecast. It is not a causal claim. A causal claim needs an
 intervention, which is what the `intervention` field of an observation is for.
 
-## 6. How much an edge is heard: three ways, compared
+## 6. The moment: perception
 
-Section 5 says how each edge's voice forms its own probability. That part
-is the same in every mode, and it is the only part that learns from
-outcomes. What differs is how the voices are combined into CER's call.
+**In plain words.** At every call CER builds one picture of the moment as the
+target meets it. It has five parts, and none of them is reduced to a single
+score.
+
+- *What is observable now* (X). Each channel's latest change, placed against
+  that channel's own history.
+- *How the channels relate* (G). Three kinds, in musical terms used as an
+  analogy and nothing more: **harmony**, which channels move together at the
+  same step; **leadership**, which moves before which, and by how many steps;
+  **counterpoint**, what two neighbours carry together that neither carries
+  alone.
+- *How it is organised in time* (Phi). The target's own persistence, and
+  rhythm: whether the target and a neighbour share an oscillation, and at
+  what phase. Phase is given only where the rhythm is real, and with its own
+  uncertainty. No frequency is assumed.
+- *What limits the measurement* (U). How many observations, how much of the
+  window each neighbour was actually seen in, and a standard error for every
+  relation that allows for each series' own persistence.
+- *What is new* (N). Three separate things. **Intrinsic**: is any channel's
+  move unusual for that channel? **Relational**: is the combination unusual
+  given how the channels normally move together, even if every part is
+  ordinary? **Temporal**: has the relational structure itself changed since
+  a window ago?
+
+Every relation is in the picture whether it is strong, weak, new,
+contradictory or ordinary, and whether or not it has ever helped a forecast.
+Novelty is measured against a stated reference. It is never rewarded, and a
+moment with nothing new is recorded as exactly that.
+
+**Exactly** (`graph.ts: panel, moment, novelty`; window statistics remeasured
+every 25 calls and held; intrinsic and relational novelty at every call).
+
+*Panel.* On the target's last 750 steps: the target's change at each step,
+and beside it each neighbour's change between the values available at
+consecutive target steps, as of the step's tick minus the arm's lag. Every
+column is replaced by its centred, unit-variance midranks. A neighbour seen
+on fewer than 200 steps, or without variation, is "not measurable" and its
+column is zero. Coverage is the share of steps on which it was seen.
+
+*Harmony.* `H = P'P / n`, the correlation matrix of the panel at the same
+step, target first.
+
+*Leadership.* `rho_j(l) = corr(target_t, v_{j,t-l})` and the reverse,
+`l = 1..5`. Standard error of each target-edge: Bartlett (1946).
+
+*Counterpoint.* For every pair of measurable neighbours,
+`corr(target_t, v_j v_k)` at the same step and one step earlier; the largest
+is reported with its Bartlett standard error and a tail probability
+multiplied by the number of pairs tried.
+
+*Rhythm.* The target's autocorrelation at lags 1 to 5. Welch coherence by
+band with each neighbour (section 4). Where a band is coherent, the phase,
+its standard error `sqrt((1 - C) / (2 K C))` radians, and the lead and lead
+error they imply. This standard error is optimistic for a band that only
+just clears the threshold (`validation/cer_results.md`).
+
+*Intrinsic novelty.* For channel `j`, `p_j = 1 -` the midrank of the size of
+its latest change among all its own history. For the moment,
+`min(1, k min_j p_j)` over the `k` channels present. Reference: each channel
+exchangeable with its own past.
+
+*Relational novelty.* With `z` the normal scores of the channels' latest
+changes (each against its own history) and `H_s = 0.9 H + 0.1 I`:
+
+    joint tail        P(chi2_k >= z' H_s^-1 z)
+    relational        max(0, ln P(chi2_k >= z'z) - ln P(chi2_k >= z' H_s^-1 z))   nats
+
+Reference: a Gaussian copula with the window's harmony. It is an
+approximation. On markets it understates how often configurations are
+unusual, and that understatement is itself reported.
+
+*Temporal novelty.* Against the signature 30 measurements earlier (one full
+window, no shared observation): for each target-edge, the change in Fisher-z
+of harmony and of lag-1 leadership divided by the combined Bartlett error;
+the largest in absolute value, with a tail probability multiplied by the
+number compared; and how many interpretations became or ceased to be
+eligible. Reference: the relational structure has not changed.
+
+## 7. From the moment to a call
+
+**In plain words.** Perceiving a relation and letting it move a forecast are
+different decisions. A neighbour may enter the forecast only if it adds
+something once four ordinary explanations are accounted for: the target's
+own recent past, the time of year, what the other neighbours already say,
+and whether its value was actually available when the call was made. A
+neighbour that fails this is still in the picture. It is simply not asked.
+
+Then CER holds a distribution over interpretations, "nothing here bears on
+the target", "the common movement of the neighbours does", "this neighbour
+does", and commits to each exactly as far as its evidence goes.
+
+**Exactly** (`graph.ts: moment`, `inference.ts: interpretations, walkCer`).
+On the panel, with `y_t` the target at step `t`:
+
+1. Controls `C_t`: a constant, `y_{t-1} ... y_{t-5}`, and
+   `sin(2 pi d / 365.2425)`, `cos(2 pi d / 365.2425)` of the date. Every
+   series below is replaced by its residual on `C` (ridge 1e-9 n).
+2. Each neighbour's candidate is `v_{j, t-l_j}` with `l_j` the lag in 1..3 of
+   largest absolute partial correlation with `y`.
+3. One regression of `y` on all candidates together. For edge `j`, with
+   `t_j` its t-statistic, `m` rows and `q` regressors in all:
+
+       LR_j = (m / 2) ln(1 + t_j^2 / (m - q))
+       E_j  = coverage_j . max(0, LR_j - (1/2) ln m - ln 3)
+
+   `LR_j` is the log-likelihood ratio for adding `j` to everything else.
+   `(1/2) ln m` is the Schwarz (1978) penalty for one parameter; `ln 3` is
+   for the three lags tried.
+4. The pool, the mean of the measurable neighbours one step earlier:
+   `E_pool = max(0, -(m/2) ln(1 - r^2) - (1/2) ln m)`, `r` its partial
+   correlation with `y` given `C`.
+5. With `K` neighbours present, the weights are
+
+       P(nothing) = K / Z,   P(pool) = exp(E_pool) / Z,   P(edge j) = exp(E_j) / Z   where E > 0,   else 0
+       Z = K + sum of the exponentials
+
+   and the call is `P(nothing) . offset + P(pool) . p_pool + sum_j P(edge j) . p_j`,
+   with `p_pool` and `p_j` the experts of section 5.
+
+Timestamp availability is the arm's lag, already inside the panel.
+
+**What this is, and when it is maximum entropy.** Maximising
+the relative entropy `-sum_z P(z) ln(P(z) / m(z))` against the
+base measure `m = (K, 1, ..., 1)` subject to one constraint
+`E_P[E] = e` gives `P(z) ~ m(z) exp(lambda E_z)` (Jaynes, 1957). CER uses
+this form with `lambda = 1 / T = 1` fixed. Two conditions are needed before
+calling the result "the" maximum-entropy answer: the constraint level `e`
+has to be the one that `lambda = 1` implies, which is not measured
+separately here; and the base measure has to be accepted. Under a different
+reading it is exact: if each `E_z` is the log Bayes factor of interpretation
+`z` against "nothing", and exactly one interpretation or none is true with
+prior odds `m`, then `P` is the Bayes posterior. The Schwarz term makes
+`E_z` an approximation to that log Bayes factor, not the thing itself. So
+the weights are a Gibbs distribution at temperature 1, exactly Bayesian only
+in that limit. Temperature is not tuned, and novelty does not enter the
+weights.
+
+## 8. Comparators, frozen: three earlier ways of hearing an edge
+
+These were CER's inference before `cer-0.4`. They are kept unchanged
+(`validation/cer/frozen_manifest.json`), selected by one argument, and
+reproduce their committed calls. Section 5 says how each edge's voice forms
+its own probability; that part is the same in every mode. What differs is
+how the voices are combined into CER's call.
 
 **In plain words.**
 
@@ -233,7 +378,7 @@ target's own past: a neighbour that only echoes the target can show a small
 
 What each mode did on real data is in `validation/cer_results.md`.
 
-## 7. Scoring
+## 9. Scoring
 
 Exactly as HEX is scored (`MODEL.md`, section 7). Information gain of a call
 in bits, `g = log₂ p(y) − log₂ q(y)`, against the null and against HEX, on the
@@ -241,30 +386,32 @@ same targets, timestamps and outcomes. Uncertainty by block bootstrap over
 20-day blocks. CER is scored only on calls where at least one neighbour was
 present; on the others it equals its offset exactly.
 
-## 8. Using it
+## 10. Using it
 
 ```ts
-import { toChannel, shadowReplay, graph } from './base44/shared/cer/index.ts';
+import { toChannel, shadowReplay, graph, moments } from './base44/shared/cer/index.ts';
 
 const voltage = toChannel(voltageSamples, { tick_ms: 60_000, excluded: ['saturated'] });
 const room    = toChannel(roomSamples,    { tick_ms: 60_000 });
 const heat    = toChannel(heatSamples,    { tick_ms: 60_000 });
 
 const g = graph([voltage, room, heat], lastTick);          // the descriptive graph
-const r = shadowReplay(heat, [voltage, room], 'MOVE', 1, 'relaxation');  // HEX's calls on heat, CER's beside them
+const s = moments(ticks, heat, [voltage, room], 1, 'MOVE', 0, 25, true);   // perception: s.last is the signature, s.novelty the novelty at every call
+const r = shadowReplay(heat, [voltage, room], 'MOVE', 1);  // HEX's calls on heat, CER's beside them (the moment is the default)
 r.gain.fusion_over_hex;                                    // bits per call the neighbours added to HEX
 ```
 
 Run the tests and the replay:
 
 ```
+python3 validation/cer_perception.py   # eight tests of perception on built configurations, kept apart from forecasting
 python3 validation/cer_synthetic.py    # twelve tests on signals with known relationships; writes tests/cer_reference.json
 node tests/cer.mjs                     # the TypeScript against the reference
 python3 validation/cer_replay.py       # the one-pass replay with CER in shadow, every mode in one pass
 python3 validation/cer_report.py       # validation/cer/report.json and the charts
 ```
 
-## 9. What is not built yet
+## 11. What is not built yet
 
 - `collectSignals`, `evaluateResonance` and the entities `SignalObservation`,
   `ResonanceSnapshot`, `ResonanceCall`. They are deployed code and database
@@ -277,6 +424,7 @@ python3 validation/cer_report.py       # validation/cer/report.json and the char
 
 - M. S. Bartlett (1946). On the theoretical specification and sampling properties of autocorrelated time-series. *Supplement to the Journal of the Royal Statistical Society* 8, 27–41.
 - G. C. Carter, C. H. Knapp, A. H. Nuttall (1973). Estimation of the magnitude-squared coherence function via overlapped fast Fourier transform processing. *IEEE Transactions on Audio and Electroacoustics* 21, 337–344.
+- G. Schwarz (1978). Estimating the dimension of a model. *Annals of Statistics* 6, 461–464.
 - E. T. Jaynes (1957). Information theory and statistical mechanics. *Physical Review* 106, 620–630.
 - C. W. J. Granger (1969). Investigating causal relations by econometric models and cross-spectral methods. *Econometrica* 37, 424–438.
 - M. Herbster, M. K. Warmuth (1998). Tracking the best expert. *Machine Learning* 32, 151–178.
