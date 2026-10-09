@@ -272,3 +272,63 @@ R5. The fixing-time artefact stays in the same-date arm (it is a real lead in
 R6. Energy x temperature: within 0.0005 of zero.
 R7. Overall: the revised weighting gives up gain where a relationship is
     real and saves cost where there is none.
+
+## Third experiment: maximum entropy over interpretations
+
+Written 9 October 2026, before the full run. Two targets had been run to time
+the code (one currency for the second experiment, New York temperature for
+this one); nothing was changed after seeing them.
+
+**The idea being tested.** CER should not commit to an explanation before the
+measurements support it. For a call on target `i`, an *interpretation* `z` is
+either "nothing here relates to the target" or "edge `j` does". Given the
+current graph `G_t`, CER holds the maximum-entropy distribution over
+interpretations subject to the measured evidence, which is the Gibbs
+distribution
+
+    P(z_j | G_t) ~ exp( E_j / T )       for each edge with evidence
+    P(nothing | G_t) ~ K                one unit of prior mass per neighbour present
+
+and the call is the mixture of the offset and the edges' own experts under
+`P`. No outcome enters `P`.
+
+- **Evidence** `E_j`, in nats, from the same window as `w`: how far the usable
+  lead, with the shared driver removed, stands above what no relationship
+  produces: `E = Q . max(0, z^2 - z0^2) / 2`, with `z = C |rho| / se`,
+  `z0 = threshold / se`, and `se` the Bartlett standard error. An edge that is
+  not detected has no evidence and is not an interpretation: it stays in the
+  descriptive graph only.
+- **Temperature** `T` sets how much is committed. `T = 1` is the plain
+  maximum-entropy answer. Higher `T` keeps more interpretations alive.
+
+**Three modes, same experts, same pass, identical causal data.**
+
+1. Current CER, unchanged (`cer-0.1`, share by past predictive success), with
+   the measured weight of the second experiment (`cer-0.2`) beside it.
+2. Maximum entropy at `T = 1`.
+3. Maximum entropy with a temperature chosen by a rule that never sees the
+   prediction target: among `T` in {1, 2, 4, 8, 16, 32}, the one whose
+   distribution, formed 30 measurements earlier (750 calls, one full window,
+   so the two windows share no observation), has best forecast which
+   interpretation the present measurement supports most. Log score, summed
+   over all past checks, smoothed by 0.01. `T = 1` until a first check exists.
+
+Scored as everything else: information gain over the null and over HEX 7.0,
+right %, calibration error, strongest tenth, controls on the arm that counts,
+and on the synthetic signals whether the built-in associations are recovered.
+
+**Predictions.**
+
+M1. Where a relationship is real and steady (New York, Chicago, direction),
+    mode 2 is within 10% of the original's gain, and above the measured
+    weight of the second experiment, because strong evidence commits almost
+    fully.
+M2. Markets, strict: mode 2 lies between the measured weight and the
+    original, within 0.0005 bits per call of HEX on both reads.
+M3. Controls under modes 2 and 3 lie within 0.0005 of zero in every universe.
+M4. Mode 3 chooses `T = 1` on more than half of calls, and differs from mode
+    2 by less than 0.0005 bits per call everywhere. Honest expectation: the
+    temperature rule changes little, because the evidence is either large or
+    absent.
+M5. Calibration error under modes 2 and 3 is no worse than the original's.
+M6. None of the three modes beats the others everywhere.
