@@ -40,3 +40,4 @@ validation/data/
 validation/data_replication/
 validation/replay/hex7_ledger_full.parquet
 __pycache__/
+validation/memory/*.parquet

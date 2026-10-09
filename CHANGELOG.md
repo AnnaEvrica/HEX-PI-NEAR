@@ -1,5 +1,15 @@
 # Changelog
 
+## 9 October 2026: research record, memory that HEX reads from (no change to the product)
+
+- Four experiments and two checks on whether memory, as a voice in HEX's
+  learner, adds information: `ARCHITECTURE.md` section 14,
+  `validation/memory*_results.md`. Predictions committed before each run.
+- Result: nothing on markets in any asset class; about +0.001 bits per
+  call on temperature direction under the strict availability rule.
+- Research code in Python under `validation/` only. No engine, function,
+  entity, stage or shown call changed.
+
 ## 9 October 2026: the Learning Module, with Experiential Integration and the Memory Library (merged to `main`; live on the next Publish)
 
 - **Names.** HEX's feedback loop is the **Learning Module**: the **Nightly

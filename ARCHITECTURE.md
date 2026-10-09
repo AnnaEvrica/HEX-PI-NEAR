@@ -441,6 +441,7 @@ Listed so nobody assumes otherwise.
     distance yet (`validation/experience_results.md`).
 11. **Time as a coordinate of the engine.** Deferred until the Learning
     Module is in place.
+12. **Memory that HEX reads from.** Researched, not built (section 14).
 
 ## 13. Adding a module: the checklist
 
@@ -458,3 +459,86 @@ Listed so nobody assumes otherwise.
    `CHANGELOG.md`.
 9. It reaches users only as a new version in `engines.ts`, judged by the
    existing rule.
+
+## 14. Research record: memory that HEX reads from
+
+**Status.** Research only, in `validation/`. None of it is product code,
+and nothing below changes a call, a stage, an entity or governance. It is
+recorded here so the architecture shows what has been tried and what the
+evidence was.
+
+**The question.** Stage 5 records moments and nothing reads them
+(section 4). These experiments asked: had memory been one of the voices
+HEX learns from, would its calls have carried more information? All were
+run on the 280,252 calls of the 7.0 replay, one pass, with predictions
+committed first and controls beside every result.
+
+**The shared foundation.**
+
+| Term | Definition |
+|---|---|
+| Note | The normal score of today's value against the series' own past: `z_t = Phi^-1(rank of x_t among x_1..x_t)`, `x` the change (direction) or its size (size) |
+| Line | One binary observation: did it rise; or was the move larger than its running median |
+| State | Six lines: one of 64 addresses. `d(s, j)` = number of lines that differ |
+| How memory enters a call | HEX's own learner, unchanged: `logit p = logit p_HEX + beta . v`, then the fixed-share mixture between that and HEX alone. If the voices hold nothing, the call is HEX's |
+| Score | `log2` loss of HEX minus `log2` loss of HEX with memory, bits per call |
+
+**mem-0.1, recall by comparison** (`memory_core.py`). Distance between the
+present phrase or chord and an earlier one,
+`D^2 = mean((z - z')^2 / 2)`. The 64 nearest earlier moments whose outcome
+was already known give a voice `logit((k + 1) / 66) - logit(base rate)`.
+Voices: melody (6 and 36 notes), inversion, augmentation, chord (all
+subjects at one moment), chord progression, silence, and the six-line
+state at three scales with the 6.5 estimator
+`delta = sum_j rho^d D_j / (sum_j rho^d N_j + K)`, `rho = 1/4`, `K = 64`.
+
+**mem-0.2, memory by address** (`memory2.py`). The same six lines read
+along different axes: through time (`T0`, `T1`, `T2`: lines of 1, 6 and 36
+steps), across the six nearest kin subjects at one moment (`S`), and both
+(`T0+S`). Kinship is the running mean product of two subjects' notes.
+Tallies at three levels that float, `kappa = 64`:
+
+    world    d_w = num_w / (den_w + kappa)
+    forest   d_f = (num_f + kappa d_w) / (den_f + kappa)
+    tree     d_t = (num_t + kappa d_f) / (den_t + kappa)
+
+with `num = sum_j rho^d D_j`, `den = sum_j rho^d N_j`. The voice is
+`logit(null + d_t) - logit(null)`.
+
+**One form.** HEX's equation, CER's primary call and the tally are the
+same operation: start from a reference `q` and move only as far as the
+evidence `E` requires, `p*(w) proportional to q(w) exp(lambda . E(w))`.
+
+**What was found** (bits per call, net of controls):
+
+| | mem-0.1 | mem-0.2 |
+|---|---|---|
+| Markets, direction | +0.0003 | 0.0000 |
+| Markets, size | +0.0008 | +0.0002 |
+| Temperature, direction (same-day readings) | +0.0032 | +0.0017 |
+| Temperature, direction (previous day only) | +0.0008 | +0.0010 |
+| Temperature, direction (previous day, on top of HEX plus CER) | +0.0008 | +0.0010 |
+| Temperature, size; racing | within their intervals of zero | within their intervals of zero |
+| One pass over all calls | 15 to 20 minutes | 33 seconds, flat per call |
+
+- On markets, in every asset class, memory adds nothing to HEX, with or
+  without CER.
+- On temperature direction it adds about +0.001 under the strict rule,
+  from one cross-station relation (Chicago) and the season (Seattle).
+- New York's large gain depended on other cities' same-day readings.
+- Sharing evidence across trees, forests or the world did not help.
+- **mem-0.3** (`memory3.py`): eight fixed alignments whose reading is
+  learned. Memory taught itself that the inverted pattern means the
+  opposite outcome. It did not improve calls, and added to HEX without a
+  gate it made temperature direction worse (-0.0020): the same evidence
+  counted twice.
+- **mem-0.4** (`memory4.py`): written, not run.
+
+**What it would take to enter the product.** Section 13, unchanged: a
+product-code port with a parity test, then a shadow candidate in
+`engines.ts`, judged on the live record by the existing rule. On the
+series tracked live today the measured effect is zero, so this has not
+been started.
+
+Predictions and results: `validation/prereg_memory*.md`,
+`validation/memory*_results.md`, `validation/memory_checks_results.md`.

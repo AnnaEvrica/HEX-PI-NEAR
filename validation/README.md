@@ -125,6 +125,35 @@ python3 experience_check.py
 `experience_replay.mjs` reads `data/markets_channels.json`: the 27 market
 series of `cer_replay.py` (`series_list`), as days and log changes.
 
+## Memory that HEX reads from (research; not in the product)
+
+Would HEX's calls carry more information had memory been one of the voices
+it learns from? `ARCHITECTURE.md`, section 14.
+
+| File | What it is |
+|---|---|
+| `prereg_memory.md`, `memory_results.md` | mem-0.1, recall by comparison: predictions, then results |
+| `prereg_memory2.md`, `memory2_results.md` | mem-0.2, memory by address with floating pooling |
+| `prereg_memory_checks.md`, `memory_checks_results.md` | Same-day against previous-day readings; memory on top of HEX plus CER; by asset class and station |
+| `prereg_memory3.md`, `memory3_results.md` | mem-0.3, alignments whose reading is learned |
+| `prereg_memory4.md` | mem-0.4, residual, counterpoint, composition: predictions only; the run was stopped before any result |
+| `memory_core.py`, `memory_replay.py`, `memory_report.py`, `memory_calendar.py` | mem-0.1 |
+| `memory2.py`, `memory2_report.py` | mem-0.2 |
+| `memory_checks.py`, `memory_checks_report.py` | The two checks |
+| `memory3.py`, `memory3_report.py`, `memory4.py` | mem-0.3, mem-0.4 |
+| `memory/*.json` | Every reported number |
+
+```
+python3 memory_replay.py && python3 memory_report.py && python3 memory_calendar.py   # about 40 minutes on two cores
+python3 memory2.py && python3 memory2_report.py                                      # about 8 minutes
+python3 memory_checks.py && python3 memory_checks_report.py                          # about 22 minutes
+python3 memory3.py && python3 memory3_report.py                                      # about 6 minutes
+```
+
+The per-call ledgers (`memory/*.parquet`, about 200 MB) are not kept in the
+repository; the commands above regenerate them. Each step reads the one
+before it.
+
 ## Earlier engines
 
 | Script | What it tests |
