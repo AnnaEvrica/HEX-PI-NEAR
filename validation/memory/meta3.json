@@ -1,0 +1,20 @@
+{
+ "H1": {
+  "FX-Euro MOVE": {
+   "calls": 1583,
+   "largest_difference": 0.0
+  },
+  "NewYork MOVE": {
+   "calls": 849,
+   "largest_difference": 0.0
+  },
+  "Chicago RANGE": {
+   "calls": 14796,
+   "largest_difference": 0.0
+  }
+ },
+ "seconds": 340,
+ "cpu_seconds_all_passes": 357,
+ "cpu_seconds_one_pass": 89,
+ "calls": 280252
+}

@@ -1,0 +1,2747 @@
+{
+ "by_class": {
+  "markets MOVE": {
+   "calls": 73018,
+   "tuned_direct_hex": [
+    -4e-05,
+    -0.00014,
+    7e-05
+   ],
+   "tuned_direct_hex_ctl": [
+    -2e-05,
+    -0.00016,
+    0.00011
+   ],
+   "tuned_direct_hex_net": [
+    -2e-05,
+    -0.00013,
+    0.0001
+   ],
+   "tuned_gated_hex": [
+    -1e-05,
+    -3e-05,
+    1e-05
+   ],
+   "tuned_gated_hex_ctl": [
+    -0.0,
+    -3e-05,
+    3e-05
+   ],
+   "tuned_gated_hex_net": [
+    -1e-05,
+    -3e-05,
+    2e-05
+   ],
+   "plain_direct_hex": [
+    -0.0004,
+    -0.00067,
+    -0.00013
+   ],
+   "tuned_direct_cer": [
+    -4e-05,
+    -0.00015,
+    6e-05
+   ],
+   "tuned_direct_cer_ctl": [
+    -3e-05,
+    -0.00017,
+    0.00011
+   ],
+   "tuned_direct_cer_net": [
+    -1e-05,
+    -0.00013,
+    0.0001
+   ],
+   "tuned_gated_cer": [
+    -1e-05,
+    -3e-05,
+    1e-05
+   ],
+   "tuned_gated_cer_ctl": [
+    -0.0,
+    -4e-05,
+    3e-05
+   ],
+   "tuned_gated_cer_net": [
+    -1e-05,
+    -3e-05,
+    2e-05
+   ],
+   "plain_direct_cer": [
+    -0.00041,
+    -0.0007,
+    -0.00012
+   ],
+   "mem02_strict": [
+    -0.00016,
+    -0.00034,
+    1e-05
+   ],
+   "mem01_full": [
+    -0.00016,
+    -0.00061,
+    0.0003
+   ],
+   "tuned_minus_plain": [
+    0.00036,
+    0.00012,
+    0.00061
+   ],
+   "direct_minus_gated": [
+    -3e-05,
+    -0.00012,
+    6e-05
+   ],
+   "tuned_minus_mem02": [
+    0.00013,
+    -5e-05,
+    0.00031
+   ],
+   "memory_alone_over_null": [
+    0.00012,
+    1e-05,
+    0.00022
+   ],
+   "hex_over_null": [
+    0.00041,
+    -0.00034,
+    0.00109
+   ],
+   "precision": {
+    "share_right_null": 0.5222,
+    "share_right_HEX": 0.524,
+    "share_right_tuned": 0.5249,
+    "side_changed": 916,
+    "side_changed_share": 0.0125,
+    "changed_right_with_memory": 0.5349,
+    "probability_moved_mean": 0.0015,
+    "probability_moved_p90": 0.0031
+   }
+  },
+  "weather MOVE": {
+   "calls": 54086,
+   "tuned_direct_hex": [
+    -0.00206,
+    -0.00289,
+    -0.00126
+   ],
+   "tuned_direct_hex_ctl": [
+    -3e-05,
+    -9e-05,
+    3e-05
+   ],
+   "tuned_direct_hex_net": [
+    -0.00203,
+    -0.00286,
+    -0.00123
+   ],
+   "tuned_gated_hex": [
+    1e-05,
+    -9e-05,
+    0.00011
+   ],
+   "tuned_gated_hex_ctl": [
+    -1e-05,
+    -2e-05,
+    1e-05
+   ],
+   "tuned_gated_hex_net": [
+    1e-05,
+    -8e-05,
+    0.0001
+   ],
+   "plain_direct_hex": [
+    -0.0004,
+    -0.00092,
+    0.00015
+   ],
+   "tuned_direct_cer": [
+    -0.00201,
+    -0.00288,
+    -0.00116
+   ],
+   "tuned_direct_cer_ctl": [
+    -3e-05,
+    -9e-05,
+    3e-05
+   ],
+   "tuned_direct_cer_net": [
+    -0.00198,
+    -0.0028,
+    -0.00116
+   ],
+   "tuned_gated_cer": [
+    2e-05,
+    -8e-05,
+    0.00012
+   ],
+   "tuned_gated_cer_ctl": [
+    -1e-05,
+    -2e-05,
+    1e-05
+   ],
+   "tuned_gated_cer_net": [
+    2e-05,
+    -8e-05,
+    0.00013
+   ],
+   "plain_direct_cer": [
+    -0.00043,
+    -0.00097,
+    9e-05
+   ],
+   "mem02_strict": [
+    0.00121,
+    0.00073,
+    0.00168
+   ],
+   "mem01_full": [
+    0.00342,
+    0.00263,
+    0.00429
+   ],
+   "tuned_minus_plain": [
+    -0.00166,
+    -0.00202,
+    -0.00127
+   ],
+   "direct_minus_gated": [
+    -0.00207,
+    -0.0028,
+    -0.00121
+   ],
+   "tuned_minus_mem02": [
+    -0.00327,
+    -0.00415,
+    -0.00248
+   ],
+   "memory_alone_over_null": [
+    0.01028,
+    0.00959,
+    0.01109
+   ],
+   "hex_over_null": [
+    0.05471,
+    0.05167,
+    0.05785
+   ],
+   "precision": {
+    "share_right_null": 0.5281,
+    "share_right_HEX": 0.6191,
+    "share_right_tuned": 0.6167,
+    "side_changed": 2652,
+    "side_changed_share": 0.049,
+    "changed_right_with_memory": 0.4759,
+    "probability_moved_mean": 0.0254,
+    "probability_moved_p90": 0.0526
+   }
+  },
+  "racing MOVE": {
+   "calls": 13022,
+   "tuned_direct_hex": [
+    -0.00027,
+    -0.00036,
+    -0.00018
+   ],
+   "tuned_direct_hex_ctl": [
+    -0.00055,
+    -0.00073,
+    -0.00039
+   ],
+   "tuned_direct_hex_net": [
+    0.00028,
+    0.00012,
+    0.00047
+   ],
+   "tuned_gated_hex": [
+    0.0,
+    -1e-05,
+    2e-05
+   ],
+   "tuned_gated_hex_ctl": [
+    -1e-05,
+    -5e-05,
+    3e-05
+   ],
+   "tuned_gated_hex_net": [
+    1e-05,
+    -3e-05,
+    5e-05
+   ],
+   "plain_direct_hex": [
+    -0.00191,
+    -0.00301,
+    -0.00081
+   ],
+   "tuned_direct_cer": [
+    -0.00027,
+    -0.00036,
+    -0.00018
+   ],
+   "tuned_direct_cer_ctl": [
+    -0.00055,
+    -0.00072,
+    -0.00037
+   ],
+   "tuned_direct_cer_net": [
+    0.00028,
+    0.0001,
+    0.00045
+   ],
+   "tuned_gated_cer": [
+    0.0,
+    -1e-05,
+    2e-05
+   ],
+   "tuned_gated_cer_ctl": [
+    -1e-05,
+    -5e-05,
+    3e-05
+   ],
+   "tuned_gated_cer_net": [
+    1e-05,
+    -3e-05,
+    6e-05
+   ],
+   "plain_direct_cer": [
+    -0.00191,
+    -0.00306,
+    -0.00088
+   ],
+   "mem02_strict": [
+    -0.0001,
+    -0.00053,
+    0.00033
+   ],
+   "mem01_full": [
+    -0.00076,
+    -0.00135,
+    -0.00014
+   ],
+   "tuned_minus_plain": [
+    0.00164,
+    0.00059,
+    0.00277
+   ],
+   "direct_minus_gated": [
+    -0.00028,
+    -0.00037,
+    -0.00019
+   ],
+   "tuned_minus_mem02": [
+    -0.00017,
+    -0.00063,
+    0.00018
+   ],
+   "memory_alone_over_null": [
+    -0.00026,
+    -0.00035,
+    -0.00016
+   ],
+   "hex_over_null": [
+    -0.00167,
+    -0.00295,
+    -0.00046
+   ],
+   "precision": {
+    "share_right_null": 0.7496,
+    "share_right_HEX": 0.7479,
+    "share_right_tuned": 0.7479,
+    "side_changed": 10,
+    "side_changed_share": 0.0008,
+    "changed_right_with_memory": 0.5,
+    "probability_moved_mean": 0.0009,
+    "probability_moved_p90": 0.0023
+   }
+  },
+  "markets RANGE": {
+   "calls": 73018,
+   "tuned_direct_hex": [
+    0.0001,
+    -0.00017,
+    0.00038
+   ],
+   "tuned_direct_hex_ctl": [
+    0.00015,
+    -0.0003,
+    0.0006
+   ],
+   "tuned_direct_hex_net": [
+    -4e-05,
+    -0.00031,
+    0.00021
+   ],
+   "tuned_gated_hex": [
+    0.00024,
+    3e-05,
+    0.00046
+   ],
+   "tuned_gated_hex_ctl": [
+    0.00029,
+    1e-05,
+    0.00056
+   ],
+   "tuned_gated_hex_net": [
+    -5e-05,
+    -0.00019,
+    0.0001
+   ],
+   "plain_direct_hex": [
+    -0.00037,
+    -0.0007,
+    -6e-05
+   ],
+   "tuned_direct_cer": [
+    9e-05,
+    -0.0002,
+    0.00036
+   ],
+   "tuned_direct_cer_ctl": [
+    0.00013,
+    -0.00031,
+    0.00057
+   ],
+   "tuned_direct_cer_net": [
+    -5e-05,
+    -0.00032,
+    0.00021
+   ],
+   "tuned_gated_cer": [
+    0.00024,
+    3e-05,
+    0.00046
+   ],
+   "tuned_gated_cer_ctl": [
+    0.00029,
+    1e-05,
+    0.00058
+   ],
+   "tuned_gated_cer_net": [
+    -5e-05,
+    -0.0002,
+    9e-05
+   ],
+   "plain_direct_cer": [
+    -0.00044,
+    -0.00077,
+    -0.00011
+   ],
+   "mem02_strict": [
+    0.00038,
+    4e-05,
+    0.00074
+   ],
+   "mem01_full": [
+    0.00066,
+    4e-05,
+    0.00129
+   ],
+   "tuned_minus_plain": [
+    0.00047,
+    0.00018,
+    0.00075
+   ],
+   "direct_minus_gated": [
+    -0.00014,
+    -0.00027,
+    -2e-05
+   ],
+   "tuned_minus_mem02": [
+    -0.00028,
+    -0.00057,
+    2e-05
+   ],
+   "memory_alone_over_null": [
+    0.00106,
+    0.00068,
+    0.00143
+   ],
+   "hex_over_null": [
+    0.00572,
+    0.00448,
+    0.00708
+   ],
+   "precision": {
+    "share_right_null": 0.5864,
+    "share_right_HEX": 0.594,
+    "share_right_tuned": 0.5942,
+    "side_changed": 286,
+    "side_changed_share": 0.0039,
+    "changed_right_with_memory": 0.5245,
+    "probability_moved_mean": 0.0027,
+    "probability_moved_p90": 0.0046
+   }
+  },
+  "weather RANGE": {
+   "calls": 54086,
+   "tuned_direct_hex": [
+    -0.00017,
+    -0.00032,
+    -3e-05
+   ],
+   "tuned_direct_hex_ctl": [
+    -0.00016,
+    -0.00027,
+    -4e-05
+   ],
+   "tuned_direct_hex_net": [
+    -1e-05,
+    -0.00014,
+    0.00011
+   ],
+   "tuned_gated_hex": [
+    -1e-05,
+    -4e-05,
+    2e-05
+   ],
+   "tuned_gated_hex_ctl": [
+    0.0,
+    -2e-05,
+    3e-05
+   ],
+   "tuned_gated_hex_net": [
+    -1e-05,
+    -5e-05,
+    2e-05
+   ],
+   "plain_direct_hex": [
+    -0.00061,
+    -0.00093,
+    -0.00028
+   ],
+   "tuned_direct_cer": [
+    -0.00017,
+    -0.00031,
+    -3e-05
+   ],
+   "tuned_direct_cer_ctl": [
+    -0.00016,
+    -0.00028,
+    -4e-05
+   ],
+   "tuned_direct_cer_net": [
+    -1e-05,
+    -0.00014,
+    0.00011
+   ],
+   "tuned_gated_cer": [
+    -1e-05,
+    -4e-05,
+    2e-05
+   ],
+   "tuned_gated_cer_ctl": [
+    0.0,
+    -2e-05,
+    2e-05
+   ],
+   "tuned_gated_cer_net": [
+    -1e-05,
+    -4e-05,
+    2e-05
+   ],
+   "plain_direct_cer": [
+    -0.00061,
+    -0.00093,
+    -0.0003
+   ],
+   "mem02_strict": [
+    0.00071,
+    0.00041,
+    0.001
+   ],
+   "mem01_full": [
+    0.00071,
+    0.00034,
+    0.00107
+   ],
+   "tuned_minus_plain": [
+    0.00044,
+    0.0002,
+    0.00069
+   ],
+   "direct_minus_gated": [
+    -0.00016,
+    -0.00031,
+    -1e-05
+   ],
+   "tuned_minus_mem02": [
+    -0.00088,
+    -0.0012,
+    -0.00057
+   ],
+   "memory_alone_over_null": [
+    0.00036,
+    0.0002,
+    0.0005
+   ],
+   "hex_over_null": [
+    0.01226,
+    0.01056,
+    0.01389
+   ],
+   "precision": {
+    "share_right_null": 0.582,
+    "share_right_HEX": 0.5946,
+    "share_right_tuned": 0.5939,
+    "side_changed": 593,
+    "side_changed_share": 0.011,
+    "changed_right_with_memory": 0.4671,
+    "probability_moved_mean": 0.0038,
+    "probability_moved_p90": 0.0093
+   }
+  },
+  "racing RANGE": {
+   "calls": 13022,
+   "tuned_direct_hex": [
+    -0.00034,
+    -0.00068,
+    -0.0
+   ],
+   "tuned_direct_hex_ctl": [
+    -2e-05,
+    -4e-05,
+    1e-05
+   ],
+   "tuned_direct_hex_net": [
+    -0.00032,
+    -0.00063,
+    -2e-05
+   ],
+   "tuned_gated_hex": [
+    -2e-05,
+    -9e-05,
+    5e-05
+   ],
+   "tuned_gated_hex_ctl": [
+    -0.0,
+    -0.0,
+    0.0
+   ],
+   "tuned_gated_hex_net": [
+    -2e-05,
+    -9e-05,
+    5e-05
+   ],
+   "plain_direct_hex": [
+    -0.00144,
+    -0.00232,
+    -0.00043
+   ],
+   "tuned_direct_cer": [
+    -0.00034,
+    -0.00066,
+    -1e-05
+   ],
+   "tuned_direct_cer_ctl": [
+    -2e-05,
+    -4e-05,
+    1e-05
+   ],
+   "tuned_direct_cer_net": [
+    -0.00032,
+    -0.00066,
+    -0.0
+   ],
+   "tuned_gated_cer": [
+    -2e-05,
+    -9e-05,
+    5e-05
+   ],
+   "tuned_gated_cer_ctl": [
+    -0.0,
+    -0.0,
+    0.0
+   ],
+   "tuned_gated_cer_net": [
+    -2e-05,
+    -9e-05,
+    5e-05
+   ],
+   "plain_direct_cer": [
+    -0.00144,
+    -0.00239,
+    -0.00051
+   ],
+   "mem02_strict": [
+    -0.00036,
+    -0.0006,
+    -0.00013
+   ],
+   "mem01_full": [
+    -0.00053,
+    -0.00145,
+    0.0005
+   ],
+   "tuned_minus_plain": [
+    0.0011,
+    0.00028,
+    0.00191
+   ],
+   "direct_minus_gated": [
+    -0.00032,
+    -0.00076,
+    7e-05
+   ],
+   "tuned_minus_mem02": [
+    2e-05,
+    -0.00037,
+    0.00043
+   ],
+   "memory_alone_over_null": [
+    0.00081,
+    0.00043,
+    0.00121
+   ],
+   "hex_over_null": [
+    0.01225,
+    0.00884,
+    0.01571
+   ],
+   "precision": {
+    "share_right_null": 0.4969,
+    "share_right_HEX": 0.529,
+    "share_right_tuned": 0.5294,
+    "side_changed": 118,
+    "side_changed_share": 0.0091,
+    "changed_right_with_memory": 0.5254,
+    "probability_moved_mean": 0.0024,
+    "probability_moved_p90": 0.0052
+   }
+  }
+ },
+ "markets_by_asset_class": {
+  "currency MOVE": {
+   "calls": 58388,
+   "tuned_direct_hex": [
+    -4e-05,
+    -0.00016,
+    8e-05
+   ],
+   "tuned_direct_hex_ctl": [
+    -2e-05,
+    -0.00019,
+    0.00015
+   ],
+   "tuned_direct_hex_net": [
+    -2e-05,
+    -0.00015,
+    0.00013
+   ],
+   "tuned_gated_hex": [
+    -1e-05,
+    -3e-05,
+    1e-05
+   ],
+   "tuned_gated_hex_ctl": [
+    -0.0,
+    -4e-05,
+    4e-05
+   ],
+   "tuned_gated_hex_net": [
+    -1e-05,
+    -4e-05,
+    2e-05
+   ],
+   "plain_direct_hex": [
+    -0.00046,
+    -0.00077,
+    -0.00017
+   ],
+   "tuned_direct_cer": [
+    -4e-05,
+    -0.00017,
+    9e-05
+   ],
+   "tuned_direct_cer_ctl": [
+    -3e-05,
+    -0.0002,
+    0.00014
+   ],
+   "tuned_direct_cer_net": [
+    -1e-05,
+    -0.00014,
+    0.00012
+   ],
+   "tuned_gated_cer": [
+    -1e-05,
+    -3e-05,
+    1e-05
+   ],
+   "tuned_gated_cer_ctl": [
+    -1e-05,
+    -4e-05,
+    3e-05
+   ],
+   "tuned_gated_cer_net": [
+    -1e-05,
+    -4e-05,
+    3e-05
+   ],
+   "plain_direct_cer": [
+    -0.00047,
+    -0.00078,
+    -0.00016
+   ],
+   "mem02_strict": [
+    -0.0002,
+    -0.00038,
+    -0.0
+   ],
+   "mem01_full": [
+    -0.0001,
+    -0.00058,
+    0.00044
+   ],
+   "tuned_minus_plain": [
+    0.00042,
+    0.00015,
+    0.00072
+   ],
+   "direct_minus_gated": [
+    -3e-05,
+    -0.00013,
+    7e-05
+   ],
+   "tuned_minus_mem02": [
+    0.00016,
+    -5e-05,
+    0.00039
+   ],
+   "memory_alone_over_null": [
+    0.00011,
+    -2e-05,
+    0.00024
+   ],
+   "hex_over_null": [
+    -2e-05,
+    -0.00081,
+    0.00074
+   ],
+   "precision": {
+    "share_right_null": 0.5199,
+    "share_right_HEX": 0.5205,
+    "share_right_tuned": 0.5213,
+    "side_changed": 774,
+    "side_changed_share": 0.0133,
+    "changed_right_with_memory": 0.5297,
+    "probability_moved_mean": 0.0014,
+    "probability_moved_p90": 0.0028
+   }
+  },
+  "energy MOVE": {
+   "calls": 8032,
+   "tuned_direct_hex": [
+    1e-05,
+    -0.0001,
+    0.00013
+   ],
+   "tuned_direct_hex_ctl": [
+    -1e-05,
+    -6e-05,
+    3e-05
+   ],
+   "tuned_direct_hex_net": [
+    2e-05,
+    -9e-05,
+    0.00014
+   ],
+   "tuned_gated_hex": [
+    -1e-05,
+    -3e-05,
+    2e-05
+   ],
+   "tuned_gated_hex_ctl": [
+    -0.0,
+    -1e-05,
+    1e-05
+   ],
+   "tuned_gated_hex_net": [
+    -1e-05,
+    -3e-05,
+    2e-05
+   ],
+   "plain_direct_hex": [
+    -0.00012,
+    -0.00077,
+    0.00055
+   ],
+   "tuned_direct_cer": [
+    1e-05,
+    -0.0001,
+    0.00013
+   ],
+   "tuned_direct_cer_ctl": [
+    -1e-05,
+    -6e-05,
+    4e-05
+   ],
+   "tuned_direct_cer_net": [
+    2e-05,
+    -9e-05,
+    0.00014
+   ],
+   "tuned_gated_cer": [
+    -1e-05,
+    -3e-05,
+    2e-05
+   ],
+   "tuned_gated_cer_ctl": [
+    -0.0,
+    -1e-05,
+    1e-05
+   ],
+   "tuned_gated_cer_net": [
+    -1e-05,
+    -3e-05,
+    2e-05
+   ],
+   "plain_direct_cer": [
+    -0.00012,
+    -0.00078,
+    0.00052
+   ],
+   "mem02_strict": [
+    -0.00012,
+    -0.00051,
+    0.00029
+   ],
+   "mem01_full": [
+    -0.00071,
+    -0.00139,
+    -9e-05
+   ],
+   "tuned_minus_plain": [
+    0.00013,
+    -0.00052,
+    0.00076
+   ],
+   "direct_minus_gated": [
+    2e-05,
+    -8e-05,
+    0.00012
+   ],
+   "tuned_minus_mem02": [
+    0.00013,
+    -0.00025,
+    0.00051
+   ],
+   "memory_alone_over_null": [
+    3e-05,
+    -8e-05,
+    0.00014
+   ],
+   "hex_over_null": [
+    -0.00031,
+    -0.0017,
+    0.00111
+   ],
+   "precision": {
+    "share_right_null": 0.5356,
+    "share_right_HEX": 0.5327,
+    "share_right_tuned": 0.5337,
+    "side_changed": 32,
+    "side_changed_share": 0.004,
+    "changed_right_with_memory": 0.625,
+    "probability_moved_mean": 0.001,
+    "probability_moved_p90": 0.0021
+   }
+  },
+  "crypto MOVE": {
+   "calls": 3898,
+   "tuned_direct_hex": [
+    -0.00019,
+    -0.00039,
+    2e-05
+   ],
+   "tuned_direct_hex_ctl": [
+    2e-05,
+    -0.00011,
+    0.00015
+   ],
+   "tuned_direct_hex_net": [
+    -0.00021,
+    -0.00045,
+    1e-05
+   ],
+   "tuned_gated_hex": [
+    2e-05,
+    -2e-05,
+    5e-05
+   ],
+   "tuned_gated_hex_ctl": [
+    1e-05,
+    -0.0001,
+    0.00012
+   ],
+   "tuned_gated_hex_net": [
+    1e-05,
+    -0.00011,
+    0.00013
+   ],
+   "plain_direct_hex": [
+    -0.00028,
+    -0.00116,
+    0.00064
+   ],
+   "tuned_direct_cer": [
+    -0.00019,
+    -0.0004,
+    2e-05
+   ],
+   "tuned_direct_cer_ctl": [
+    2e-05,
+    -0.00013,
+    0.00015
+   ],
+   "tuned_direct_cer_net": [
+    -0.00021,
+    -0.00042,
+    0.0
+   ],
+   "tuned_gated_cer": [
+    2e-05,
+    -2e-05,
+    5e-05
+   ],
+   "tuned_gated_cer_ctl": [
+    1e-05,
+    -0.0001,
+    0.00011
+   ],
+   "tuned_gated_cer_net": [
+    1e-05,
+    -0.00012,
+    0.00013
+   ],
+   "plain_direct_cer": [
+    -0.00028,
+    -0.00116,
+    0.00062
+   ],
+   "mem02_strict": [
+    -0.0002,
+    -0.0006,
+    0.00018
+   ],
+   "mem01_full": [
+    0.00039,
+    -0.00107,
+    0.00175
+   ],
+   "tuned_minus_plain": [
+    8e-05,
+    -0.00078,
+    0.00089
+   ],
+   "direct_minus_gated": [
+    -0.00021,
+    -0.00045,
+    2e-05
+   ],
+   "tuned_minus_mem02": [
+    1e-05,
+    -0.00037,
+    0.0004
+   ],
+   "memory_alone_over_null": [
+    5e-05,
+    -0.00017,
+    0.00027
+   ],
+   "hex_over_null": [
+    0.00105,
+    -0.00135,
+    0.00303
+   ],
+   "precision": {
+    "share_right_null": 0.5105,
+    "share_right_HEX": 0.5292,
+    "share_right_tuned": 0.528,
+    "side_changed": 49,
+    "side_changed_share": 0.0126,
+    "changed_right_with_memory": 0.449,
+    "probability_moved_mean": 0.0018,
+    "probability_moved_p90": 0.0043
+   }
+  },
+  "volatility MOVE": {
+   "calls": 2700,
+   "tuned_direct_hex": [
+    8e-05,
+    -0.0006,
+    0.00073
+   ],
+   "tuned_direct_hex_ctl": [
+    -5e-05,
+    -0.00011,
+    1e-05
+   ],
+   "tuned_direct_hex_net": [
+    0.00012,
+    -0.00048,
+    0.00072
+   ],
+   "tuned_gated_hex": [
+    -5e-05,
+    -0.0002,
+    0.0001
+   ],
+   "tuned_gated_hex_ctl": [
+    0.0,
+    -0.0,
+    0.0
+   ],
+   "tuned_gated_hex_net": [
+    -5e-05,
+    -0.0002,
+    8e-05
+   ],
+   "plain_direct_hex": [
+    -0.00013,
+    -0.00117,
+    0.00089
+   ],
+   "tuned_direct_cer": [
+    8e-05,
+    -0.00057,
+    0.00074
+   ],
+   "tuned_direct_cer_ctl": [
+    -5e-05,
+    -0.00011,
+    2e-05
+   ],
+   "tuned_direct_cer_net": [
+    0.00013,
+    -0.0005,
+    0.00071
+   ],
+   "tuned_gated_cer": [
+    -5e-05,
+    -0.0002,
+    9e-05
+   ],
+   "tuned_gated_cer_ctl": [
+    0.0,
+    -0.0,
+    0.0
+   ],
+   "tuned_gated_cer_net": [
+    -5e-05,
+    -0.00019,
+    8e-05
+   ],
+   "plain_direct_cer": [
+    -0.00012,
+    -0.00114,
+    0.0009
+   ],
+   "mem02_strict": [
+    0.00045,
+    -0.00091,
+    0.0018
+   ],
+   "mem01_full": [
+    -0.0007,
+    -0.00213,
+    0.00073
+   ],
+   "tuned_minus_plain": [
+    0.0002,
+    -0.00058,
+    0.00098
+   ],
+   "direct_minus_gated": [
+    0.00013,
+    -0.00043,
+    0.0006
+   ],
+   "tuned_minus_mem02": [
+    -0.00037,
+    -0.00146,
+    0.00079
+   ],
+   "memory_alone_over_null": [
+    0.00066,
+    6e-05,
+    0.00128
+   ],
+   "hex_over_null": [
+    0.01077,
+    0.00541,
+    0.01582
+   ],
+   "precision": {
+    "share_right_null": 0.5478,
+    "share_right_HEX": 0.5648,
+    "share_right_tuned": 0.5704,
+    "side_changed": 61,
+    "side_changed_share": 0.0226,
+    "changed_right_with_memory": 0.623,
+    "probability_moved_mean": 0.0038,
+    "probability_moved_p90": 0.0093
+   }
+  },
+  "currency RANGE": {
+   "calls": 58388,
+   "tuned_direct_hex": [
+    0.00018,
+    -0.00013,
+    0.00051
+   ],
+   "tuned_direct_hex_ctl": [
+    0.00028,
+    -0.00024,
+    0.00078
+   ],
+   "tuned_direct_hex_net": [
+    -9e-05,
+    -0.00038,
+    0.00021
+   ],
+   "tuned_gated_hex": [
+    0.00031,
+    3e-05,
+    0.00059
+   ],
+   "tuned_gated_hex_ctl": [
+    0.00038,
+    2e-05,
+    0.00069
+   ],
+   "tuned_gated_hex_net": [
+    -6e-05,
+    -0.00027,
+    0.00012
+   ],
+   "plain_direct_hex": [
+    -0.00028,
+    -0.00066,
+    9e-05
+   ],
+   "tuned_direct_cer": [
+    0.00017,
+    -0.00015,
+    0.00051
+   ],
+   "tuned_direct_cer_ctl": [
+    0.00027,
+    -0.00022,
+    0.00082
+   ],
+   "tuned_direct_cer_net": [
+    -9e-05,
+    -0.00039,
+    0.0002
+   ],
+   "tuned_gated_cer": [
+    0.00031,
+    2e-05,
+    0.0006
+   ],
+   "tuned_gated_cer_ctl": [
+    0.00037,
+    2e-05,
+    0.00073
+   ],
+   "tuned_gated_cer_net": [
+    -7e-05,
+    -0.00026,
+    0.00011
+   ],
+   "plain_direct_cer": [
+    -0.00033,
+    -0.0007,
+    8e-05
+   ],
+   "mem02_strict": [
+    0.0004,
+    0.0,
+    0.00077
+   ],
+   "mem01_full": [
+    0.00078,
+    9e-05,
+    0.00141
+   ],
+   "tuned_minus_plain": [
+    0.00046,
+    0.00014,
+    0.00078
+   ],
+   "direct_minus_gated": [
+    -0.00013,
+    -0.00028,
+    4e-05
+   ],
+   "tuned_minus_mem02": [
+    -0.00022,
+    -0.0005,
+    6e-05
+   ],
+   "memory_alone_over_null": [
+    0.00127,
+    0.00078,
+    0.00178
+   ],
+   "hex_over_null": [
+    0.00466,
+    0.00334,
+    0.00608
+   ],
+   "precision": {
+    "share_right_null": 0.5886,
+    "share_right_HEX": 0.5938,
+    "share_right_tuned": 0.5941,
+    "side_changed": 212,
+    "side_changed_share": 0.0036,
+    "changed_right_with_memory": 0.533,
+    "probability_moved_mean": 0.0028,
+    "probability_moved_p90": 0.0044
+   }
+  },
+  "energy RANGE": {
+   "calls": 8032,
+   "tuned_direct_hex": [
+    -6e-05,
+    -0.00026,
+    0.00014
+   ],
+   "tuned_direct_hex_ctl": [
+    -0.00023,
+    -0.00044,
+    -3e-05
+   ],
+   "tuned_direct_hex_net": [
+    0.00017,
+    2e-05,
+    0.00031
+   ],
+   "tuned_gated_hex": [
+    -1e-05,
+    -7e-05,
+    4e-05
+   ],
+   "tuned_gated_hex_ctl": [
+    -2e-05,
+    -7e-05,
+    3e-05
+   ],
+   "tuned_gated_hex_net": [
+    1e-05,
+    -2e-05,
+    4e-05
+   ],
+   "plain_direct_hex": [
+    -0.00037,
+    -0.00124,
+    0.00063
+   ],
+   "tuned_direct_cer": [
+    -9e-05,
+    -0.00029,
+    0.0001
+   ],
+   "tuned_direct_cer_ctl": [
+    -0.00026,
+    -0.00047,
+    -5e-05
+   ],
+   "tuned_direct_cer_net": [
+    0.00018,
+    2e-05,
+    0.00033
+   ],
+   "tuned_gated_cer": [
+    -1e-05,
+    -5e-05,
+    3e-05
+   ],
+   "tuned_gated_cer_ctl": [
+    -1e-05,
+    -7e-05,
+    4e-05
+   ],
+   "tuned_gated_cer_net": [
+    0.0,
+    -3e-05,
+    4e-05
+   ],
+   "plain_direct_cer": [
+    -0.00058,
+    -0.00154,
+    0.00035
+   ],
+   "mem02_strict": [
+    0.00061,
+    -0.00076,
+    0.00202
+   ],
+   "mem01_full": [
+    7e-05,
+    -0.0017,
+    0.00185
+   ],
+   "tuned_minus_plain": [
+    0.00031,
+    -0.00056,
+    0.00118
+   ],
+   "direct_minus_gated": [
+    -5e-05,
+    -0.00018,
+    9e-05
+   ],
+   "tuned_minus_mem02": [
+    -0.00067,
+    -0.00198,
+    0.00057
+   ],
+   "memory_alone_over_null": [
+    0.0,
+    -0.00022,
+    0.00021
+   ],
+   "hex_over_null": [
+    0.00446,
+    0.00168,
+    0.00743
+   ],
+   "precision": {
+    "share_right_null": 0.5797,
+    "share_right_HEX": 0.593,
+    "share_right_tuned": 0.5924,
+    "side_changed": 23,
+    "side_changed_share": 0.0029,
+    "changed_right_with_memory": 0.3913,
+    "probability_moved_mean": 0.0011,
+    "probability_moved_p90": 0.0024
+   }
+  },
+  "crypto RANGE": {
+   "calls": 3898,
+   "tuned_direct_hex": [
+    -0.00054,
+    -0.00141,
+    0.0004
+   ],
+   "tuned_direct_hex_ctl": [
+    -0.00072,
+    -0.00175,
+    0.00038
+   ],
+   "tuned_direct_hex_net": [
+    0.00018,
+    -0.0006,
+    0.00094
+   ],
+   "tuned_gated_hex": [
+    -8e-05,
+    -0.00017,
+    -1e-05
+   ],
+   "tuned_gated_hex_ctl": [
+    -0.00011,
+    -0.00023,
+    1e-05
+   ],
+   "tuned_gated_hex_net": [
+    3e-05,
+    -8e-05,
+    0.00012
+   ],
+   "plain_direct_hex": [
+    -0.00158,
+    -0.00298,
+    -0.00025
+   ],
+   "tuned_direct_cer": [
+    -0.00059,
+    -0.00138,
+    0.00031
+   ],
+   "tuned_direct_cer_ctl": [
+    -0.00073,
+    -0.00172,
+    0.00044
+   ],
+   "tuned_direct_cer_net": [
+    0.00014,
+    -0.00067,
+    0.00091
+   ],
+   "tuned_gated_cer": [
+    -8e-05,
+    -0.00016,
+    -2e-05
+   ],
+   "tuned_gated_cer_ctl": [
+    -0.00011,
+    -0.00023,
+    0.0
+   ],
+   "tuned_gated_cer_net": [
+    3e-05,
+    -7e-05,
+    0.00012
+   ],
+   "plain_direct_cer": [
+    -0.00172,
+    -0.00304,
+    -0.0004
+   ],
+   "mem02_strict": [
+    2e-05,
+    -0.00055,
+    0.00057
+   ],
+   "mem01_full": [
+    0.00054,
+    -0.00137,
+    0.00266
+   ],
+   "tuned_minus_plain": [
+    0.00104,
+    3e-05,
+    0.00214
+   ],
+   "direct_minus_gated": [
+    -0.00046,
+    -0.0013,
+    0.00044
+   ],
+   "tuned_minus_mem02": [
+    -0.00056,
+    -0.00141,
+    0.00028
+   ],
+   "memory_alone_over_null": [
+    0.00052,
+    -0.00044,
+    0.00156
+   ],
+   "hex_over_null": [
+    0.00618,
+    0.0009,
+    0.01212
+   ],
+   "precision": {
+    "share_right_null": 0.5977,
+    "share_right_HEX": 0.6039,
+    "share_right_tuned": 0.6065,
+    "side_changed": 34,
+    "side_changed_share": 0.0087,
+    "changed_right_with_memory": 0.6471,
+    "probability_moved_mean": 0.0045,
+    "probability_moved_p90": 0.0135
+   }
+  },
+  "volatility RANGE": {
+   "calls": 2700,
+   "tuned_direct_hex": [
+    -0.00021,
+    -0.00057,
+    0.00021
+   ],
+   "tuned_direct_hex_ctl": [
+    -0.00029,
+    -0.00063,
+    1e-05
+   ],
+   "tuned_direct_hex_net": [
+    8e-05,
+    -0.00021,
+    0.0004
+   ],
+   "tuned_gated_hex": [
+    -2e-05,
+    -0.00014,
+    0.0001
+   ],
+   "tuned_gated_hex_ctl": [
+    1e-05,
+    -6e-05,
+    6e-05
+   ],
+   "tuned_gated_hex_net": [
+    -2e-05,
+    -0.00013,
+    8e-05
+   ],
+   "plain_direct_hex": [
+    -0.00055,
+    -0.0017,
+    0.00082
+   ],
+   "tuned_direct_cer": [
+    -0.00022,
+    -0.00058,
+    0.00017
+   ],
+   "tuned_direct_cer_ctl": [
+    -0.0003,
+    -0.00061,
+    1e-05
+   ],
+   "tuned_direct_cer_net": [
+    8e-05,
+    -0.00021,
+    0.0004
+   ],
+   "tuned_gated_cer": [
+    -2e-05,
+    -0.00014,
+    9e-05
+   ],
+   "tuned_gated_cer_ctl": [
+    1e-05,
+    -6e-05,
+    7e-05
+   ],
+   "tuned_gated_cer_net": [
+    -3e-05,
+    -0.00014,
+    7e-05
+   ],
+   "plain_direct_cer": [
+    -0.00056,
+    -0.00186,
+    0.00085
+   ],
+   "mem02_strict": [
+    -0.00024,
+    -0.00108,
+    0.00062
+   ],
+   "mem01_full": [
+    -0.00019,
+    -0.00161,
+    0.00124
+   ],
+   "tuned_minus_plain": [
+    0.00034,
+    -0.00085,
+    0.00138
+   ],
+   "direct_minus_gated": [
+    -0.00019,
+    -0.00062,
+    0.00029
+   ],
+   "tuned_minus_mem02": [
+    3e-05,
+    -0.00086,
+    0.00084
+   ],
+   "memory_alone_over_null": [
+    0.00032,
+    -9e-05,
+    0.00077
+   ],
+   "hex_over_null": [
+    0.03177,
+    0.02094,
+    0.04222
+   ],
+   "precision": {
+    "share_right_null": 0.5422,
+    "share_right_HEX": 0.5859,
+    "share_right_tuned": 0.5841,
+    "side_changed": 17,
+    "side_changed_share": 0.0063,
+    "changed_right_with_memory": 0.3529,
+    "probability_moved_mean": 0.0022,
+    "probability_moved_p90": 0.0056
+   }
+  }
+ },
+ "temperature_by_station": {
+  "NewYork MOVE": {
+   "calls": 1433,
+   "tuned_direct_hex": [
+    0.00038,
+    -0.00147,
+    0.0021
+   ],
+   "tuned_direct_hex_ctl": [
+    5e-05,
+    -5e-05,
+    0.00015
+   ],
+   "tuned_direct_hex_net": [
+    0.00033,
+    -0.00134,
+    0.0021
+   ],
+   "tuned_gated_hex": [
+    -0.00011,
+    -0.00056,
+    0.00037
+   ],
+   "tuned_gated_hex_ctl": [
+    2e-05,
+    -1e-05,
+    5e-05
+   ],
+   "tuned_gated_hex_net": [
+    -0.00013,
+    -0.00057,
+    0.00031
+   ],
+   "plain_direct_hex": [
+    0.00096,
+    -0.00116,
+    0.003
+   ],
+   "tuned_direct_cer": [
+    0.0009,
+    -0.00108,
+    0.0027
+   ],
+   "tuned_direct_cer_ctl": [
+    -6e-05,
+    -0.00014,
+    5e-05
+   ],
+   "tuned_direct_cer_net": [
+    0.00096,
+    -0.00086,
+    0.00268
+   ],
+   "tuned_gated_cer": [
+    4e-05,
+    -0.0006,
+    0.00077
+   ],
+   "tuned_gated_cer_ctl": [
+    -0.0,
+    -1e-05,
+    0.0
+   ],
+   "tuned_gated_cer_net": [
+    4e-05,
+    -0.00061,
+    0.00072
+   ],
+   "plain_direct_cer": [
+    -0.00028,
+    -0.00226,
+    0.00197
+   ],
+   "mem02_strict": [
+    0.00098,
+    -0.00191,
+    0.00419
+   ],
+   "mem01_full": [
+    0.03359,
+    0.01533,
+    0.05177
+   ],
+   "tuned_minus_plain": [
+    -0.00058,
+    -0.00205,
+    0.00093
+   ],
+   "direct_minus_gated": [
+    0.00049,
+    -0.00087,
+    0.00192
+   ],
+   "tuned_minus_mem02": [
+    -0.00061,
+    -0.00325,
+    0.00197
+   ],
+   "memory_alone_over_null": [
+    0.00445,
+    0.00251,
+    0.00651
+   ],
+   "hex_over_null": [
+    0.07486,
+    0.05805,
+    0.09157
+   ],
+   "precision": {
+    "share_right_null": 0.4536,
+    "share_right_HEX": 0.6448,
+    "share_right_tuned": 0.6455,
+    "side_changed": 25,
+    "side_changed_share": 0.0174,
+    "changed_right_with_memory": 0.52,
+    "probability_moved_mean": 0.0079,
+    "probability_moved_p90": 0.0228
+   }
+  },
+  "Chicago MOVE": {
+   "calls": 24678,
+   "tuned_direct_hex": [
+    -0.00257,
+    -0.00388,
+    -0.00117
+   ],
+   "tuned_direct_hex_ctl": [
+    1e-05,
+    -0.0001,
+    0.00012
+   ],
+   "tuned_direct_hex_net": [
+    -0.00258,
+    -0.00402,
+    -0.00111
+   ],
+   "tuned_gated_hex": [
+    6e-05,
+    -0.00012,
+    0.00026
+   ],
+   "tuned_gated_hex_ctl": [
+    -1e-05,
+    -3e-05,
+    1e-05
+   ],
+   "tuned_gated_hex_net": [
+    7e-05,
+    -0.00011,
+    0.00026
+   ],
+   "plain_direct_hex": [
+    -0.00032,
+    -0.00125,
+    0.00064
+   ],
+   "tuned_direct_cer": [
+    -0.00252,
+    -0.00388,
+    -0.00107
+   ],
+   "tuned_direct_cer_ctl": [
+    1e-05,
+    -9e-05,
+    0.00011
+   ],
+   "tuned_direct_cer_net": [
+    -0.00253,
+    -0.00384,
+    -0.00118
+   ],
+   "tuned_gated_cer": [
+    7e-05,
+    -0.00013,
+    0.00028
+   ],
+   "tuned_gated_cer_ctl": [
+    -1e-05,
+    -3e-05,
+    1e-05
+   ],
+   "tuned_gated_cer_net": [
+    8e-05,
+    -0.00012,
+    0.00027
+   ],
+   "plain_direct_cer": [
+    -0.00033,
+    -0.00125,
+    0.00054
+   ],
+   "mem02_strict": [
+    0.00038,
+    0.0001,
+    0.00068
+   ],
+   "mem01_full": [
+    0.00291,
+    0.00164,
+    0.0042
+   ],
+   "tuned_minus_plain": [
+    -0.00225,
+    -0.00286,
+    -0.00162
+   ],
+   "direct_minus_gated": [
+    -0.00263,
+    -0.00394,
+    -0.00138
+   ],
+   "tuned_minus_mem02": [
+    -0.00295,
+    -0.00416,
+    -0.00164
+   ],
+   "memory_alone_over_null": [
+    0.01328,
+    0.01204,
+    0.01464
+   ],
+   "hex_over_null": [
+    0.06444,
+    0.05965,
+    0.06922
+   ],
+   "precision": {
+    "share_right_null": 0.5067,
+    "share_right_HEX": 0.6293,
+    "share_right_tuned": 0.6251,
+    "side_changed": 1287,
+    "side_changed_share": 0.0522,
+    "changed_right_with_memory": 0.4592,
+    "probability_moved_mean": 0.03,
+    "probability_moved_p90": 0.0568
+   }
+  },
+  "Seattle MOVE": {
+   "calls": 24353,
+   "tuned_direct_hex": [
+    -0.00197,
+    -0.00302,
+    -0.00096
+   ],
+   "tuned_direct_hex_ctl": [
+    -8e-05,
+    -0.00017,
+    2e-05
+   ],
+   "tuned_direct_hex_net": [
+    -0.00189,
+    -0.00292,
+    -0.00088
+   ],
+   "tuned_gated_hex": [
+    -3e-05,
+    -7e-05,
+    0.0
+   ],
+   "tuned_gated_hex_ctl": [
+    -0.0,
+    -3e-05,
+    2e-05
+   ],
+   "tuned_gated_hex_net": [
+    -3e-05,
+    -7e-05,
+    1e-05
+   ],
+   "plain_direct_hex": [
+    -0.00064,
+    -0.00138,
+    8e-05
+   ],
+   "tuned_direct_cer": [
+    -0.00194,
+    -0.00311,
+    -0.0009
+   ],
+   "tuned_direct_cer_ctl": [
+    -8e-05,
+    -0.00018,
+    1e-05
+   ],
+   "tuned_direct_cer_net": [
+    -0.00186,
+    -0.00301,
+    -0.00078
+   ],
+   "tuned_gated_cer": [
+    -3e-05,
+    -7e-05,
+    0.0
+   ],
+   "tuned_gated_cer_ctl": [
+    -0.0,
+    -3e-05,
+    3e-05
+   ],
+   "tuned_gated_cer_net": [
+    -3e-05,
+    -7e-05,
+    2e-05
+   ],
+   "plain_direct_cer": [
+    -0.00062,
+    -0.00132,
+    6e-05
+   ],
+   "mem02_strict": [
+    0.00227,
+    0.00141,
+    0.00318
+   ],
+   "mem01_full": [
+    0.0026,
+    0.00161,
+    0.00361
+   ],
+   "tuned_minus_plain": [
+    -0.00134,
+    -0.00187,
+    -0.0008
+   ],
+   "direct_minus_gated": [
+    -0.00194,
+    -0.0031,
+    -0.00087
+   ],
+   "tuned_minus_mem02": [
+    -0.00424,
+    -0.00564,
+    -0.00269
+   ],
+   "memory_alone_over_null": [
+    0.00794,
+    0.00692,
+    0.00897
+   ],
+   "hex_over_null": [
+    0.04213,
+    0.03823,
+    0.04602
+   ],
+   "precision": {
+    "share_right_null": 0.5524,
+    "share_right_HEX": 0.6054,
+    "share_right_tuned": 0.6044,
+    "side_changed": 1235,
+    "side_changed_share": 0.0507,
+    "changed_right_with_memory": 0.4899,
+    "probability_moved_mean": 0.0233,
+    "probability_moved_p90": 0.0474
+   }
+  },
+  "Melbourne MOVE": {
+   "calls": 3622,
+   "tuned_direct_hex": [
+    -0.00016,
+    -0.0026,
+    0.00218
+   ],
+   "tuned_direct_hex_ctl": [
+    -2e-05,
+    -0.00013,
+    8e-05
+   ],
+   "tuned_direct_hex_net": [
+    -0.00014,
+    -0.00276,
+    0.00201
+   ],
+   "tuned_gated_hex": [
+    -3e-05,
+    -0.00062,
+    0.00051
+   ],
+   "tuned_gated_hex_ctl": [
+    -1e-05,
+    -2e-05,
+    -0.0
+   ],
+   "tuned_gated_hex_net": [
+    -2e-05,
+    -0.0006,
+    0.00051
+   ],
+   "plain_direct_hex": [
+    6e-05,
+    -0.00176,
+    0.002
+   ],
+   "tuned_direct_cer": [
+    -0.00015,
+    -0.00235,
+    0.00212
+   ],
+   "tuned_direct_cer_ctl": [
+    -2e-05,
+    -0.00013,
+    9e-05
+   ],
+   "tuned_direct_cer_net": [
+    -0.00013,
+    -0.00242,
+    0.00203
+   ],
+   "tuned_gated_cer": [
+    -3e-05,
+    -0.00059,
+    0.00055
+   ],
+   "tuned_gated_cer_ctl": [
+    -1e-05,
+    -2e-05,
+    -0.0
+   ],
+   "tuned_gated_cer_net": [
+    -2e-05,
+    -0.00063,
+    0.00055
+   ],
+   "plain_direct_cer": [
+    5e-05,
+    -0.00175,
+    0.00194
+   ],
+   "mem02_strict": [
+    -0.00019,
+    -0.00099,
+    0.00057
+   ],
+   "mem01_full": [
+    0.00049,
+    -0.00152,
+    0.00265
+   ],
+   "tuned_minus_plain": [
+    -0.00021,
+    -0.00152,
+    0.00105
+   ],
+   "direct_minus_gated": [
+    -0.00012,
+    -0.00184,
+    0.00166
+   ],
+   "tuned_minus_mem02": [
+    4e-05,
+    -0.00184,
+    0.00195
+   ],
+   "memory_alone_over_null": [
+    0.00778,
+    0.00562,
+    0.00988
+   ],
+   "hex_over_null": [
+    0.0651,
+    0.05414,
+    0.07641
+   ],
+   "precision": {
+    "share_right_null": 0.54,
+    "share_right_HEX": 0.6306,
+    "share_right_tuned": 0.6309,
+    "side_changed": 105,
+    "side_changed_share": 0.029,
+    "changed_right_with_memory": 0.5048,
+    "probability_moved_mean": 0.0152,
+    "probability_moved_p90": 0.0379
+   }
+  },
+  "NewYork RANGE": {
+   "calls": 1433,
+   "tuned_direct_hex": [
+    0.00017,
+    -0.00088,
+    0.00109
+   ],
+   "tuned_direct_hex_ctl": [
+    -7e-05,
+    -0.0007,
+    0.00058
+   ],
+   "tuned_direct_hex_net": [
+    0.00024,
+    -0.00092,
+    0.00144
+   ],
+   "tuned_gated_hex": [
+    -9e-05,
+    -0.00048,
+    0.0003
+   ],
+   "tuned_gated_hex_ctl": [
+    -8e-05,
+    -0.00014,
+    -2e-05
+   ],
+   "tuned_gated_hex_net": [
+    -1e-05,
+    -0.00045,
+    0.00039
+   ],
+   "plain_direct_hex": [
+    0.00024,
+    -0.00252,
+    0.00312
+   ],
+   "tuned_direct_cer": [
+    0.00017,
+    -0.00095,
+    0.00128
+   ],
+   "tuned_direct_cer_ctl": [
+    -7e-05,
+    -0.00071,
+    0.00061
+   ],
+   "tuned_direct_cer_net": [
+    0.00024,
+    -0.0009,
+    0.00142
+   ],
+   "tuned_gated_cer": [
+    -9e-05,
+    -0.0005,
+    0.00028
+   ],
+   "tuned_gated_cer_ctl": [
+    -8e-05,
+    -0.00014,
+    -2e-05
+   ],
+   "tuned_gated_cer_net": [
+    -1e-05,
+    -0.00041,
+    0.0004
+   ],
+   "plain_direct_cer": [
+    0.00024,
+    -0.00231,
+    0.00297
+   ],
+   "mem02_strict": [
+    0.00132,
+    -0.00135,
+    0.00413
+   ],
+   "mem01_full": [
+    0.00278,
+    -0.00175,
+    0.00794
+   ],
+   "tuned_minus_plain": [
+    -7e-05,
+    -0.00221,
+    0.00208
+   ],
+   "direct_minus_gated": [
+    0.00026,
+    -0.00049,
+    0.00098
+   ],
+   "tuned_minus_mem02": [
+    -0.00115,
+    -0.00321,
+    0.001
+   ],
+   "memory_alone_over_null": [
+    0.00135,
+    0.00012,
+    0.00249
+   ],
+   "hex_over_null": [
+    0.00882,
+    0.00051,
+    0.01737
+   ],
+   "precision": {
+    "share_right_null": 0.5855,
+    "share_right_HEX": 0.5799,
+    "share_right_tuned": 0.5792,
+    "side_changed": 19,
+    "side_changed_share": 0.0133,
+    "changed_right_with_memory": 0.4737,
+    "probability_moved_mean": 0.0045,
+    "probability_moved_p90": 0.0131
+   }
+  },
+  "Chicago RANGE": {
+   "calls": 24678,
+   "tuned_direct_hex": [
+    -0.00018,
+    -0.00046,
+    8e-05
+   ],
+   "tuned_direct_hex_ctl": [
+    -0.00014,
+    -0.00033,
+    4e-05
+   ],
+   "tuned_direct_hex_net": [
+    -4e-05,
+    -0.00025,
+    0.00016
+   ],
+   "tuned_gated_hex": [
+    -2e-05,
+    -5e-05,
+    0.0
+   ],
+   "tuned_gated_hex_ctl": [
+    -1e-05,
+    -4e-05,
+    1e-05
+   ],
+   "tuned_gated_hex_net": [
+    -1e-05,
+    -4e-05,
+    2e-05
+   ],
+   "plain_direct_hex": [
+    -0.00023,
+    -0.00066,
+    0.00017
+   ],
+   "tuned_direct_cer": [
+    -0.00019,
+    -0.00043,
+    9e-05
+   ],
+   "tuned_direct_cer_ctl": [
+    -0.00015,
+    -0.00032,
+    6e-05
+   ],
+   "tuned_direct_cer_net": [
+    -4e-05,
+    -0.00025,
+    0.00017
+   ],
+   "tuned_gated_cer": [
+    -2e-05,
+    -5e-05,
+    0.0
+   ],
+   "tuned_gated_cer_ctl": [
+    -1e-05,
+    -4e-05,
+    1e-05
+   ],
+   "tuned_gated_cer_net": [
+    -1e-05,
+    -4e-05,
+    2e-05
+   ],
+   "plain_direct_cer": [
+    -0.00024,
+    -0.00064,
+    0.00017
+   ],
+   "mem02_strict": [
+    0.00073,
+    0.00041,
+    0.00106
+   ],
+   "mem01_full": [
+    0.00079,
+    0.00028,
+    0.0013
+   ],
+   "tuned_minus_plain": [
+    4e-05,
+    -0.00023,
+    0.00031
+   ],
+   "direct_minus_gated": [
+    -0.00016,
+    -0.00041,
+    0.00011
+   ],
+   "tuned_minus_mem02": [
+    -0.00091,
+    -0.00128,
+    -0.00054
+   ],
+   "memory_alone_over_null": [
+    0.00047,
+    0.00018,
+    0.00074
+   ],
+   "hex_over_null": [
+    0.00476,
+    0.00348,
+    0.00598
+   ],
+   "precision": {
+    "share_right_null": 0.541,
+    "share_right_HEX": 0.5512,
+    "share_right_tuned": 0.5501,
+    "side_changed": 431,
+    "side_changed_share": 0.0175,
+    "changed_right_with_memory": 0.4687,
+    "probability_moved_mean": 0.0049,
+    "probability_moved_p90": 0.0123
+   }
+  },
+  "Seattle RANGE": {
+   "calls": 24353,
+   "tuned_direct_hex": [
+    -0.00016,
+    -0.00031,
+    -1e-05
+   ],
+   "tuned_direct_hex_ctl": [
+    -0.00022,
+    -0.00034,
+    -0.0001
+   ],
+   "tuned_direct_hex_net": [
+    6e-05,
+    -8e-05,
+    0.0002
+   ],
+   "tuned_gated_hex": [
+    0.0,
+    -6e-05,
+    6e-05
+   ],
+   "tuned_gated_hex_ctl": [
+    3e-05,
+    -0.0,
+    7e-05
+   ],
+   "tuned_gated_hex_net": [
+    -3e-05,
+    -8e-05,
+    3e-05
+   ],
+   "plain_direct_hex": [
+    -0.00085,
+    -0.00132,
+    -0.00038
+   ],
+   "tuned_direct_cer": [
+    -0.00016,
+    -0.00032,
+    -1e-05
+   ],
+   "tuned_direct_cer_ctl": [
+    -0.00022,
+    -0.00035,
+    -7e-05
+   ],
+   "tuned_direct_cer_net": [
+    6e-05,
+    -0.0001,
+    0.0002
+   ],
+   "tuned_gated_cer": [
+    0.0,
+    -5e-05,
+    6e-05
+   ],
+   "tuned_gated_cer_ctl": [
+    3e-05,
+    -1e-05,
+    7e-05
+   ],
+   "tuned_gated_cer_net": [
+    -3e-05,
+    -9e-05,
+    3e-05
+   ],
+   "plain_direct_cer": [
+    -0.00085,
+    -0.00132,
+    -0.00041
+   ],
+   "mem02_strict": [
+    0.00071,
+    0.00025,
+    0.00115
+   ],
+   "mem01_full": [
+    0.00065,
+    0.00015,
+    0.00114
+   ],
+   "tuned_minus_plain": [
+    0.00069,
+    0.0003,
+    0.00105
+   ],
+   "direct_minus_gated": [
+    -0.00016,
+    -0.00038,
+    3e-05
+   ],
+   "tuned_minus_mem02": [
+    -0.00087,
+    -0.00133,
+    -0.00036
+   ],
+   "memory_alone_over_null": [
+    0.00023,
+    6e-05,
+    0.00039
+   ],
+   "hex_over_null": [
+    0.01441,
+    0.01186,
+    0.01695
+   ],
+   "precision": {
+    "share_right_null": 0.6221,
+    "share_right_HEX": 0.6315,
+    "share_right_tuned": 0.6312,
+    "side_changed": 135,
+    "side_changed_share": 0.0055,
+    "changed_right_with_memory": 0.4667,
+    "probability_moved_mean": 0.003,
+    "probability_moved_p90": 0.0066
+   }
+  },
+  "Melbourne RANGE": {
+   "calls": 3622,
+   "tuned_direct_hex": [
+    -0.00027,
+    -0.00051,
+    -5e-05
+   ],
+   "tuned_direct_hex_ctl": [
+    0.0001,
+    -0.00072,
+    0.00093
+   ],
+   "tuned_direct_hex_net": [
+    -0.00037,
+    -0.00112,
+    0.00041
+   ],
+   "tuned_gated_hex": [
+    3e-05,
+    -4e-05,
+    0.0001
+   ],
+   "tuned_gated_hex_ctl": [
+    -5e-05,
+    -0.00017,
+    7e-05
+   ],
+   "tuned_gated_hex_net": [
+    8e-05,
+    -6e-05,
+    0.00023
+   ],
+   "plain_direct_hex": [
+    -0.00192,
+    -0.00347,
+    -0.00047
+   ],
+   "tuned_direct_cer": [
+    -0.00027,
+    -0.00049,
+    -3e-05
+   ],
+   "tuned_direct_cer_ctl": [
+    0.0001,
+    -0.00078,
+    0.00093
+   ],
+   "tuned_direct_cer_net": [
+    -0.00037,
+    -0.00114,
+    0.00039
+   ],
+   "tuned_gated_cer": [
+    3e-05,
+    -4e-05,
+    0.0001
+   ],
+   "tuned_gated_cer_ctl": [
+    -5e-05,
+    -0.00018,
+    6e-05
+   ],
+   "tuned_gated_cer_net": [
+    8e-05,
+    -6e-05,
+    0.00023
+   ],
+   "plain_direct_cer": [
+    -0.00192,
+    -0.00349,
+    -0.00033
+   ],
+   "mem02_strict": [
+    0.00029,
+    -0.00085,
+    0.00135
+   ],
+   "mem01_full": [
+    -0.00019,
+    -0.00162,
+    0.00136
+   ],
+   "tuned_minus_plain": [
+    0.00164,
+    0.00031,
+    0.00298
+   ],
+   "direct_minus_gated": [
+    -0.00031,
+    -0.00061,
+    -2e-05
+   ],
+   "tuned_minus_mem02": [
+    -0.00056,
+    -0.00177,
+    0.00055
+   ],
+   "memory_alone_over_null": [
+    0.00012,
+    -0.00013,
+    0.0004
+   ],
+   "hex_over_null": [
+    0.05028,
+    0.03914,
+    0.0609
+   ],
+   "precision": {
+    "share_right_null": 0.5903,
+    "share_right_HEX": 0.648,
+    "share_right_tuned": 0.6474,
+    "side_changed": 8,
+    "side_changed_share": 0.0022,
+    "changed_right_with_memory": 0.375,
+    "probability_moved_mean": 0.0016,
+    "probability_moved_p90": 0.004
+   }
+  }
+ },
+ "mappings": {
+  "markets MOVE": {
+   "unison": 0.075,
+   "inversion": -0.054,
+   "retrograde": 0.031,
+   "delay": 0.039,
+   "dilation": 0.045,
+   "kin_unison": -0.046,
+   "kin_inversion": -0.041,
+   "modulation": 0.035
+  },
+  "weather MOVE": {
+   "unison": 0.932,
+   "inversion": -0.929,
+   "retrograde": 0.635,
+   "delay": 0.918,
+   "dilation": 0.901,
+   "kin_unison": -0.009,
+   "kin_inversion": -0.152,
+   "modulation": 0.902
+  },
+  "racing MOVE": {
+   "unison": 0.03,
+   "inversion": 0.018,
+   "retrograde": 0.052,
+   "delay": -0.003,
+   "dilation": 0.063,
+   "kin_unison": 0.0,
+   "kin_inversion": 0.0,
+   "modulation": 0.0
+  },
+  "markets RANGE": {
+   "unison": 0.052,
+   "inversion": -0.063,
+   "retrograde": 0.037,
+   "delay": 0.04,
+   "dilation": 0.075,
+   "kin_unison": 0.035,
+   "kin_inversion": -0.029,
+   "modulation": 0.057
+  },
+  "weather RANGE": {
+   "unison": 0.349,
+   "inversion": -0.46,
+   "retrograde": 0.011,
+   "delay": 0.005,
+   "dilation": 0.394,
+   "kin_unison": -0.134,
+   "kin_inversion": -0.052,
+   "modulation": 0.281
+  },
+  "racing RANGE": {
+   "unison": 0.101,
+   "inversion": -0.099,
+   "retrograde": -0.062,
+   "delay": -0.022,
+   "dilation": 0.054,
+   "kin_unison": 0.0,
+   "kin_inversion": 0.0,
+   "modulation": 0.0
+  }
+ },
+ "ensemble": {
+  "markets MOVE": {
+   "unison": 0.127,
+   "inversion": 0.127,
+   "retrograde": 0.128,
+   "delay": 0.125,
+   "dilation": 0.123,
+   "kin_unison": 0.123,
+   "kin_inversion": 0.124,
+   "modulation": 0.123
+  },
+  "weather MOVE": {
+   "unison": 0.721,
+   "inversion": 0.15,
+   "retrograde": 0.016,
+   "delay": 0.028,
+   "dilation": 0.027,
+   "kin_unison": 0.015,
+   "kin_inversion": 0.015,
+   "modulation": 0.027
+  },
+  "racing MOVE": {
+   "unison": 0.121,
+   "inversion": 0.118,
+   "retrograde": 0.119,
+   "delay": 0.121,
+   "dilation": 0.122,
+   "kin_unison": 0.133,
+   "kin_inversion": 0.133,
+   "modulation": 0.133
+  },
+  "markets RANGE": {
+   "unison": 0.148,
+   "inversion": 0.123,
+   "retrograde": 0.123,
+   "delay": 0.123,
+   "dilation": 0.128,
+   "kin_unison": 0.118,
+   "kin_inversion": 0.119,
+   "modulation": 0.118
+  },
+  "weather RANGE": {
+   "unison": 0.151,
+   "inversion": 0.131,
+   "retrograde": 0.096,
+   "delay": 0.094,
+   "dilation": 0.223,
+   "kin_unison": 0.094,
+   "kin_inversion": 0.094,
+   "modulation": 0.117
+  },
+  "racing RANGE": {
+   "unison": 0.157,
+   "inversion": 0.134,
+   "retrograde": 0.117,
+   "delay": 0.115,
+   "dilation": 0.126,
+   "kin_unison": 0.117,
+   "kin_inversion": 0.117,
+   "modulation": 0.117
+  }
+ },
+ "H1": {
+  "FX-Euro MOVE": {
+   "calls": 1583,
+   "largest_difference": 0.0
+  },
+  "NewYork MOVE": {
+   "calls": 849,
+   "largest_difference": 0.0
+  },
+  "Chicago RANGE": {
+   "calls": 14796,
+   "largest_difference": 0.0
+  }
+ },
+ "cost": {
+  "seconds": 340,
+  "cpu_seconds_one_pass": 89,
+  "calls": 280252
+ }
+}
