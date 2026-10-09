@@ -203,3 +203,72 @@ real series. No prediction about a real series had been scored.
    `1 - (0.05/m)^(1/(K-1))`, with `K` the effective number of independent
    segments (0.947 per half-overlapped Hann segment). On independent
    autocorrelated signals this passes 3% to 6.5% of bands.
+
+## Correction after the first run (9 October 2026): bitcoin
+
+The statement above that bitcoin's original price file is not in the
+repository was wrong. It is `tests/backend-smoke/BTC_daily.csv`, and with it
+the frozen engine reproduces all 43 series of the 7.0 ledger call for call
+(largest difference 0). The first run, on the substitute series, stands in
+git history (commit `1bdf0ff`). Everything was rerun on the original file
+with no other change; `cer_results.md` gives the rerun's figures. No
+conclusion changed; market figures moved in the fourth decimal.
+
+## Second experiment: edge weight from present measurement, not past success
+
+Written 9 October 2026, before the revised weighting was run on any real
+series.
+
+**What changes.** In `cer-0.1` an edge's share of the call is its expert's
+past predictive success (reversible influence). In `cer-0.2` the share is
+measured from the current observation window, with no outcome in it:
+
+    w_ij(t) = A_ij(t) . L_ij(t) . C_ij(t) . Q_ij(t)
+
+on the latest 750 shared observations dated no later than the call's day
+minus the arm's lag, recomputed every 25 calls, on the read's own observable
+(signed changes for direction, sizes of changes for move size):
+
+- **A, associative coherence**: the largest absolute rank correlation over
+  lags 0 to 5.
+- **L, usable lead**: of that, the part that sits at lags the call can use
+  (the neighbour leading by at least one step more than the arm's lag):
+  `max over usable lags / max over all lags`, and zero unless the usable-lag
+  statistic clears its own time-shift surrogate threshold. A relation that
+  is only simultaneous has L = 0: it stays in the descriptive graph and is
+  not promoted into the forecast.
+- **C, compatibility with the configuration**: the share of the correlation
+  at the chosen lag that survives removing the shared driver (the mean of the
+  target's other neighbours), capped at 1.
+- **Q, measurement quality**: the share of the target's ticks in the window
+  on which the neighbour was also observed, times the fraction of the window
+  that is filled, and zero when the neighbour is absent at the call.
+
+The call is `p = (1 - sum_j e_j) . offset + sum_j e_j . p_j`, with
+`e_j = w_j / max(1, sum_j w_j)`. The pool voice has no edge and takes no part.
+Each edge's own expert still learns from outcomes exactly as before (the
+coefficients `gamma_j`); what no longer depends on outcomes is whether, and
+how much, an edge is heard. HEX 7.0, the governance and the scoring are
+unchanged. Both weightings are computed in the same pass from the same
+experts, so the comparison is on identical causal data.
+
+Controls for the revised weighting are run on the arm that counts in each
+universe.
+
+**Predictions.**
+
+R1. Markets, strict: the revised fusion candidate is nearer zero than the
+    original on both reads and lies within 0.0005 bits per call of HEX. Under
+    5% of edge-calls carry any weight.
+R2. New York, direction, same date: revised positive and clear of zero, and
+    smaller than the original, because the weight is the size of the
+    association (about 0.4) and not near 1.
+R3. Chicago, direction: revised smaller than the original; it may not be
+    clear of zero.
+R4. The calendar artefact goes: the revised controls on temperature lie
+    within 0.0005 of zero.
+R5. The fixing-time artefact stays in the same-date arm (it is a real lead in
+    the published numbers): revised positive on the Malaysian ringgit.
+R6. Energy x temperature: within 0.0005 of zero.
+R7. Overall: the revised weighting gives up gain where a relationship is
+    real and saves cost where there is none.
