@@ -1,0 +1,67 @@
+{
+ "1 identical marginals, different timing": {
+  "passed": true,
+  "named_correctly": "90 of 90",
+  "same_step_correlation_saw_anything": "3 of 90"
+ },
+ "2 equal correlation, different phase": {
+  "passed": false,
+  "separated_by_phase": "20 of 30",
+  "same_step_correlation_of_each": [
+   0.407,
+   0.418
+  ],
+  "lead_built_in": 2.67
+ },
+ "3 shared driver against a real lead": {
+  "passed": true,
+  "leader_eligible": "30 of 30",
+  "driver_sharer_kept_out_of_the_forecast": "30 of 30",
+  "driver_sharer_still_perceived": "30 of 30"
+ },
+ "4 jointly informative configuration": {
+  "passed": true,
+  "pair_found": "30 of 30",
+  "either_signal_alone_looked_informative": "1 of 30",
+  "found_in_pure_noise": "0 of 30"
+ },
+ "5 novel combination of familiar features": {
+  "passed": true,
+  "flagged_when_built_in_moves_above_one_sd": 1.0,
+  "moves_of_half_to_one_sd": 0.22527777777777777,
+  "flagged_otherwise": 4.901960784313725e-05,
+  "the_same_days_by_intrinsic_novelty_alone": 0.030000000000000002,
+  "threshold": "relational surprisal above 3 nats"
+ },
+ "6 relational transition": {
+  "passed": true,
+  "transition_detected": "30 of 30",
+  "observations_until_detected_median": 76.0,
+  "flagged_before_any_change": 0.010256410256410256
+ },
+ "7 noise and an unchanged configuration": {
+  "passed": true,
+  "share_of_calls_with_intrinsic_tail_below_5pct": 0.047841566533155314,
+  "with_joint_tail_below_5pct": 0.051112594570538496,
+  "share_of_measurements_with_temporal_tail_below_5pct": 0.043333333333333335,
+  "share_of_edge_calls_eligible": 0.012069137278342298,
+  "counterpoint_tail_below_5pct": 0.06666666666666667,
+  "harmony_within_two_standard_errors": 0.975,
+  "joint_tail_by_tenths": [
+   0.102,
+   0.1,
+   0.101,
+   0.099,
+   0.097,
+   0.103,
+   0.097,
+   0.1,
+   0.1,
+   0.102
+  ]
+ },
+ "8 half the sampling rate": {
+  "passed": true,
+  "leader_eligible_and_decoy_not": "28 of 30"
+ }
+}

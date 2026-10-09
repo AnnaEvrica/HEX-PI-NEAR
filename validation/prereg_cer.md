@@ -450,3 +450,23 @@ X7. Perception on built signals: every one of the seven configurations is
 X8. Perception on real series: the joint tail probability is not calibrated
     on markets, where changes are heavier-tailed and cluster: below 0.01 on
     2% to 6% of calls, against a nominal 1%. On temperature, 0.5% to 3%.
+
+### Amendment before the run (9 October 2026), from the perception tests
+
+Made after `cer_perception.py` was first run on built signals and before the
+moment was run on any real series.
+
+1. **Standard errors.** Temporal novelty and counterpoint first used
+   `1/sqrt(n)`. On autocorrelated noise that flagged change on 12% of
+   measurements against a nominal 5%. They now use the Bartlett standard
+   error of each edge, as the rest of CER does. After the change: 4%.
+2. **Phase carries its own uncertainty.** A band that is only just coherent
+   gave a phase, and so a lead, with no statement of how sure it was. Each
+   coherent band now reports `sqrt((1 - C) / (2 K C))` radians for its phase
+   and the lead that implies; a lead is read as different from zero only
+   beyond two of them.
+3. **Test criteria corrected** in two places where the criterion, not the
+   module, was wrong: a pair related at the same step is allowed to be
+   incoherent in a band; a novel combination is expected to be flagged when
+   the moves are larger than one standard deviation (smaller ones are
+   reported separately, and are flagged less often, as they should be).

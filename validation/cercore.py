@@ -21,7 +21,7 @@
 # ===========================================================================
 import numpy as np, pandas as pd, math, hashlib
 import hex7core as h7
-VERSION='cer-0.3'
+VERSION='cer-0.4'
 NC=2*h7.NZ                       # coordinates per channel: 7 for the level, 7 for the size of the change
 STALE=7                          # a neighbour's observation older than this many calendar days is absent
 WINDOW=750; MINOBS=200           # descriptive graph: trailing aligned observations, and the fewest it will read
@@ -30,6 +30,8 @@ RECOMPUTE=25                     # edge weights are measured again every this ma
 TEMPERATURES=(1.0,2.0,4.0,8.0,16.0,32.0); HORIZON=30; SMOOTH=0.01   # relaxation: the temperatures tried; measurements between a forecast of the graph and its check (30 x 25 calls = one window); smoothing
 SEG=128; BANDS=((2,5),(5,20),(20,64)); ALPHA=0.05    # Welch segment; bands as periods in observations
 rnd=lambda x: int(math.floor(x+0.5))
+
+PERSIST=5; LEADS=3; SHRINK=0.1; YEAR=365.2425                       # the moment: the target's own past steps controlled for; lags tried per neighbour; shrinkage of the harmony matrix; days in a year
 
 # ---- channels and alignment -------------------------------------------------
 def channel(cid, env, days, changes, unit='', source=''):
@@ -53,7 +55,7 @@ def features(tdays, neighbours, lag=0, shift=0):
     return F,M
 
 # ---- inference --------------------------------------------------------------
-def walk(offset, y, F, M, detail=False, weights=None, relax=None):
+def walk(offset, y, F, M, detail=False, weights=None, relax=None, moments=None):
     """One target, one read, one pass over its calls.
     offset[t]: the probability CER starts from (the null, or HEX's call). y[t]: what happened. F, M: from features().
     Every edge's expert learns from outcomes in every mode. The modes differ only in how the experts are combined into the call:
@@ -64,23 +66,27 @@ def walk(offset, y, F, M, detail=False, weights=None, relax=None):
                                  interpretations "nothing here relates to the target" and "edge j does", given the measured evidence:
                                  P(z_j) ~ exp(E_j / T) for each edge with evidence, P(nothing) ~ K (one unit of prior mass per neighbour).
                                  pe uses T = 1; pt uses the temperature T[t].
-    Returns p; (p, pq) with weights; (p, pq, pe, pt) with relax. With detail: p, the share each of [offset, pool, edge 1..K] held, what
-    each said alone, a hash of the learned state, then pq, pe, pt (None where not asked for)."""
+      by the moment  (cer-0.4)   moments = E[t, 0..K] from moments(): the controlled evidence for the pool and for each edge at call t.
+                                 The same maximum-entropy rule at T = 1 over [nothing, the pool, edge 1..K]: pm. This is the primary path;
+                                 the three above are kept unchanged as comparators.
+    Returns p, or the tuple (p, pq, pe, pt, pm) without the ones not asked for. With detail: p, the share each of [offset, pool,
+    edge 1..K] held, what each said alone, a hash of the learned state, then pq, pe, pt, pm (None where not asked for)."""
     n,K,_=F.shape; R=h7.Residual(K+1,NC); A=h7.Share(K+2); X=np.zeros((K+1,NC)); p=np.zeros(n); I=np.zeros((n,K+2)) if detail else None; W=np.zeros((n,K+2)) if detail else None
-    pq=np.zeros(n) if weights is not None else None; pe=np.zeros(n) if relax is not None else None; pt=np.zeros(n) if relax is not None else None
+    pq=np.zeros(n) if weights is not None else None; pe=np.zeros(n) if relax is not None else None; pt=np.zeros(n) if relax is not None else None; pm=np.zeros(n) if moments is not None else None
     for t in range(n):
         m=M[t]; X[0]=F[t][m].mean(0) if m.any() else 0.0; X[1:]=F[t]
         V=np.r_[offset[t],R.predict(X,h7.lg(offset[t]))]; p[t]=A.predict(V)
         if pq is not None: e=weights[t]*m; e=e/max(1.0,float(e.sum())); pq[t]=(1-e.sum())*offset[t]+float(e@V[2:])
         if pe is not None: pe[t]=gibbs(relax[0][t],m,1.0,offset[t],V[2:]); pt[t]=gibbs(relax[0][t],m,relax[1][t],offset[t],V[2:])
+        if pm is not None: P=interpretations(moments[t],np.r_[m.any(),m],1.0,mass=int(m.sum())); pm[t]=float(P[0]*offset[t]+P[1:]@V[1:])
         if detail: I[t]=A.influence(); W[t]=V
         R.update(int(y[t])); A.update(V,int(y[t]))
-    if not detail: return p if pq is None else (p,pq) if pe is None else (p,pq,pe,pt)
-    return p,I,W,hashlib.sha256(b''.join(np.ascontiguousarray(v).tobytes() for v in (R.th,R.ll,A.w,A.ll))).hexdigest()[:16],pq,pe,pt
-def interpretations(ev, present, T):
+    if not detail: out=tuple(v for v in (p,pq,pe,pt,pm) if v is not None); return out[0] if len(out)==1 else out
+    return p,I,W,hashlib.sha256(b''.join(np.ascontiguousarray(v).tobytes() for v in (R.th,R.ll,A.w,A.ll))).hexdigest()[:16],pq,pe,pt,pm
+def interpretations(ev, present, T, mass=None):
     """The maximum-entropy distribution over interpretations given the measured evidence: [nothing relates, edge 1..K].
     Mass K (the number of neighbours present) on "nothing", exp(evidence / T) on each present edge with evidence, none on the rest."""
-    k=int(present.sum()); g=np.where(present&(ev>0),np.exp(np.minimum(ev/T,700.0)),0.0); z=max(k,1)+g.sum(); return np.r_[max(k,1)/z,g/z]
+    k=int(present.sum()) if mass is None else mass; g=np.where(present&(ev>0),np.exp(np.minimum(ev/T,700.0)),0.0); z=max(k,1)+g.sum(); return np.r_[max(k,1)/z,g/z]
 def gibbs(ev, present, T, offset, voices):
     P=interpretations(ev,present,T); return float(P[0]*offset+P[1:]@voices)
 def temperatures(Ev, present, every=RECOMPUTE):
@@ -215,3 +221,126 @@ def edge_weights(tdays, target, neighbours, lag=0, read='MOVE', shift=0, every=R
             e=edge_weight(target,nb,[c for c in N if c is not nb],int(tdays[t0])-lag,1+lag,read); W[t0:t0+every,j]=e['w']; E[t0:t0+every,j]=e['evidence']; parts[j]+=[e['A'],e['L'],e['C'],e['Q'],e['w']]
         cnt+=1
     return W,E,parts/max(cnt,1)
+
+# ===========================================================================
+# The moment (cer-0.4). CER's primary object is the relational moment
+#     M_t = (X_t, G_t, Phi_t)   with its signature   (X, G, Phi, U, N):
+#   X    what is observable now, each channel against its own past
+#   G    how the channels relate at this moment: at the same step (harmony), one before another (leadership),
+#        and two together against the target (counterpoint)
+#   Phi  how it is organised in time: the target's own persistence, lag profiles, coherence and phase where coherent
+#   U    what limits the measurement: samples, coverage, standard errors
+#   N    what is new: intrinsic, relational and temporal novelty, each as a tail probability under a named reference
+# Perception is complete before prediction is considered, and no outcome and no past forecasting success enters it.
+# Predictive eligibility is a separate calculation on the same panel, controlled for the target's own past, the
+# calendar, the other neighbours and the arm's timestamp availability.
+# ===========================================================================
+def ndtri(p):
+    """Inverse of the standard normal distribution function (Acklam's rational approximation, relative error under 1.2e-9)."""
+    a=(-3.969683028665376e+01,2.209460984245205e+02,-2.759285104469687e+02,1.383577518672690e+02,-3.066479806614716e+01,2.506628277459239e+00)
+    b=(-5.447609879822406e+01,1.615858368580409e+02,-1.556989798598866e+02,6.680131188771972e+01,-1.328068155288572e+01)
+    c=(-7.784894002430293e-03,-3.223964580411365e-01,-2.400758277161838e+00,-2.549732539343734e+00,4.374664141464968e+00,2.938163982698783e+00)
+    d=(7.784695709041462e-03,3.224671290700398e-01,2.445134137142996e+00,3.754408661907416e+00)
+    if p<0.02425: q=math.sqrt(-2*math.log(p)); return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1)
+    if p>1-0.02425: q=math.sqrt(-2*math.log(1-p)); return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1)
+    q=p-0.5; r=q*q; return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1)
+def gammq(a, x):
+    """The regularised upper incomplete gamma function Q(a, x): series below a + 1, continued fraction above."""
+    if x<=0: return 1.0
+    if x<a+1:
+        ap=a; term=1.0/a; tot=term
+        for _ in range(500):
+            ap+=1; term*=x/ap; tot+=term
+            if abs(term)<abs(tot)*1e-15: break
+        return max(0.0,1.0-tot*math.exp(-x+a*math.log(x)-math.lgamma(a)))
+    b=x+1-a; c=1e300; d=1.0/b; h=d
+    for i in range(1,500):
+        an=-i*(i-a); b+=2; d=an*d+b; d=1e-300 if abs(d)<1e-300 else d; c=b+an/c; c=1e-300 if abs(c)<1e-300 else c; d=1.0/d; de=d*c; h*=de
+        if abs(de-1)<1e-15: break
+    return math.exp(-x+a*math.log(x)-math.lgamma(a))*h
+chi2_sf=lambda x,k: gammq(k/2.0,x/2.0)                      # P(chi-square with k degrees of freedom >= x)
+norm_sf2=lambda z: chi2_sf(z*z,1)                           # P(|standard normal| >= |z|)
+def prepare(ch):
+    """What each observation of a channel is against the channel's own past: the normal score of its change, and the tail probability of its size."""
+    if 'Z' not in ch: ch['Z']=coordinates(ch)
+    u=np.clip((h7.ranks(ch['r'])[:,-1]+1)/2,1e-6,1-1e-6); ch['ns']=np.array([ndtri(float(x)) for x in u]); ch['tail']=1-(ch['Z'][:,NC-1]+1)/2; return ch
+def panel(target, neighbours, upto, lag=0, read='MOVE', window=WINDOW):
+    """The moment's observations on the target's own clock: the target's last `window` changes up to `upto`, and beside each the change in
+    every neighbour between the values available at consecutive target steps (as of the step's day minus lag). Each column is ranked.
+    Returns the days, the target column, the neighbour columns (zero where a neighbour cannot be measured) and each neighbour's coverage."""
+    td=target['days']; hi=int(np.searchsorted(td,upto,side='right')); lo=max(0,hi-(window+1)); d=td[lo:hi]; K=len(neighbours); f=np.abs if read=='RANGE' else (lambda c: c)
+    if len(d)<2: return d,np.zeros(0),np.zeros((0,K)),np.zeros(K)
+    a=f(np.diff(target['level'][lo:hi])); n=len(a); V=np.zeros((n,K)); cover=np.zeros(K)
+    for j,nb in enumerate(neighbours):
+        k=asof(d,nb['days'],lag); lv=np.where(k>=0,nb['level'][np.maximum(k,0)],np.nan); c=f(np.diff(lv)); ok=~np.isnan(c); cover[j]=float(ok.mean())
+        if ok.sum()>=MINOBS and len(set(np.round(c[ok],12)))>=3: V[ok,j]=zrank(c[ok])
+    return d,(zrank(a) if len(set(np.round(a,12)))>=3 else a*0),V,cover
+def _cols(x, Y):
+    """Correlation of the vector x with every column of Y (zero for a column without variation)."""
+    xc=x-x.mean(); Yc=Y-Y.mean(0); den=np.sqrt(float((xc*xc).sum())*(Yc*Yc).sum(0)); return np.where(den>0,(Yc.T@xc)/np.where(den>0,den,1.0),0.0)
+def moment(target, neighbours, upto, lag=0, read='MOVE', previous=None, full=False, window=WINDOW):
+    """The signature of the moment at `upto` as the target meets it, and, separately, the controlled evidence that anything in it bears on
+    the target's next step. `previous` is the signature one full window earlier, for temporal novelty. full=True adds the whole matrices."""
+    d,u,V,cover=panel(target,neighbours,upto,lag,read,window); n=len(u); K=len(neighbours); ids=[c['id'] for c in neighbours]
+    S=dict(method=VERSION,target=target['id'],as_of=int(upto),lag=lag,read=read,samples=int(n),status='ok',evidence=np.zeros(K+1),coverage=cover,measurable=np.zeros(K,bool))
+    if n<MINOBS or not u.any(): S['status']='insufficient data'; return S
+    meas=(V!=0).any(0); J=np.where(meas)[0]; S['measurable']=meas; P=np.column_stack([u,V]); H=P.T@P/n; S['H']=H
+    lead=np.zeros((K,MAXLAG)); follow=np.zeros((K,MAXLAG)); own=np.zeros(MAXLAG)
+    for l in range(1,MAXLAG+1): lead[:,l-1]=_cols(u[l:],V[:n-l]); follow[:,l-1]=_cols(u[:n-l],V[l:]); own[l-1]=float(_cols(u[l:],u[:n-l,None])[0])
+    se=np.array([bartlett(u,V[:,j]) if meas[j] else np.nan for j in range(K)])                    # a correlation between two autocorrelated series is less certain than 1/sqrt(n)
+    S.update(harmony=H[0,1:].copy(),leadership=lead,following=follow,persistence=own,standard_error=1/math.sqrt(n),edge_standard_error=se)
+    # ---- counterpoint: two neighbours together against the target, at the same step and one step earlier
+    tri=dict(same_step=None,one_step_earlier=None)
+    if len(J)>=2:
+        a_,b_=np.triu_indices(len(J),1); Pr=V[:,J[a_]]*V[:,J[b_]]; r0=_cols(u,Pr); r1=_cols(u[1:],Pr[:-1])
+        for key,r in (('same_step',r0),('one_step_earlier',r1)):
+            k=int(np.abs(r).argmax()); sb=bartlett(u,Pr[:,k]) if key=='same_step' else bartlett(u[1:],Pr[:-1,k]); z=float(r[k])/sb if sb==sb and sb>0 else 0.0
+            tri[key]=dict(pair=[ids[J[a_[k]]],ids[J[b_[k]]]],strength=float(r[k]),standard_error=float(sb),z=z,pairs_tried=int(len(r)),tail=float(min(1.0,len(r)*norm_sf2(z))))
+        if full: S['counterpoint_all']=dict(pairs=[[ids[J[x]],ids[J[y]]] for x,y in zip(a_,b_)],same_step=r0,one_step_earlier=r1)
+    S['counterpoint']=tri
+    # ---- rhythm: coherence by band with the target, phase only where coherent
+    def band(e):
+        o=dict(band=e['band'],status=e['status'],coherence=e.get('coherence'),coherent=e.get('coherent',False),phase=e.get('phase','not supported'),neighbour_leads_by=e.get('neighbour_leads_by','not supported'))
+        if o['coherent']: sp=math.sqrt((1-e['coherence'])/(2*0.947*e['segments']*e['coherence'])); o.update(phase_standard_error=sp,lead_standard_error=sp*e['period']/(2*math.pi),period=e['period'])   # a phase is only as sure as the coherence behind it
+        return o
+    S['rhythm']={ids[j]:[band(e) for e in coherence(u,V[:,j])] for j in J}
+    # ---- predictive eligibility: what each neighbour adds, given the target's own past, the calendar and every other neighbour
+    p=PERSIST; y=u[p:]; m=len(y); t=d[1:][p:].astype(float); B=np.column_stack([np.ones(m)]+[u[p-1-k:n-1-k] for k in range(p)]+[np.sin(2*math.pi*t/YEAR),np.cos(2*math.pi*t/YEAR)])
+    G=np.linalg.inv(B.T@B+1e-9*m*np.eye(B.shape[1])); res=lambda x: x-B@(G@(B.T@x)); ry=res(y); pc=np.zeros((K,LEADS))
+    for l in range(1,LEADS+1): pc[:,l-1]=_cols(ry,res(V[p-l:n-l]))
+    best=1+np.abs(pc).argmax(1); S.update(partial_leadership=pc,chosen_lag=best); E=np.zeros(K+1)
+    if len(J):
+        X=np.column_stack([res(V[p-best[j]:n-best[j],j]) for j in J]); Ai=np.linalg.inv(X.T@X+1e-9*m*np.eye(len(J))); b=Ai@(X.T@ry); q=B.shape[1]+len(J); rss=float(((ry-X@b)**2).sum())
+        LR=(m/2)*np.log1p(b*b/(rss/(m-q)*np.diag(Ai))/(m-q)); E[1+J]=cover[J]*np.maximum(0.0,LR-0.5*math.log(m)-math.log(LEADS))
+        r=float(_cols(ry,res(V[p-1:n-1][:,J].mean(1))[:,None])[0]); E[0]=max(0.0,-(m/2)*math.log(max(1e-12,1-r*r))-0.5*math.log(m)); S.update(log_likelihood_ratio=LR,pool_partial=r)
+    S['evidence']=E; S['eligible']=[('(pool)' if k==0 else ids[k-1]) for k in np.where(E>0)[0]]
+    # ---- temporal novelty: against the signature one full window earlier
+    if previous is not None and previous.get('status')=='ok':
+        both=meas&previous['measurable']; fz=lambda r: np.arctanh(np.clip(r,-0.999,0.999)); sd=np.sqrt(np.where(both,se,1.0)**2+np.where(both,previous['edge_standard_error'],1.0)**2)
+        zh=(fz(S['harmony'])-fz(previous['harmony']))/sd; zl=(fz(lead[:,0])-fz(previous['leadership'][:,0]))/sd; zz=np.r_[zh[both],zl[both]]
+        if len(zz):
+            k=int(np.abs(zz).argmax()); nb=np.where(both)[0][k%int(both.sum())]
+            S['temporal_novelty']=dict(largest_change_z=float(zz[k]),edge=ids[nb],kind='harmony' if k<both.sum() else 'leadership',tail=float(min(1.0,len(zz)*norm_sf2(float(zz[k])))),
+                                       became_eligible=int(((E>0)&(previous['evidence']<=0)).sum()),ceased_to_be_eligible=int(((E<=0)&(previous['evidence']>0)).sum()),compared_with=int(previous['as_of']))
+    return S
+def novelty(S, z, tails, present):
+    """Intrinsic and relational novelty of one call against the moment S. z, tails, present: the target first, then each neighbour.
+    Returns the intrinsic tail probability, the joint tail probability under a Gaussian copula with the window's harmony, and the
+    relational surprisal in nats: how much more surprising the configuration is than its parts taken separately."""
+    use=present&np.r_[True,S['measurable']]; k=int(use.sum()); zz=z[use]; Hs=(1-SHRINK)*S['H'][np.ix_(use,use)]+SHRINK*np.eye(k)
+    pj=chi2_sf(float(zz@np.linalg.solve(Hs,zz)),k); pi_=chi2_sf(float(zz@zz),k); return float(min(1.0,k*tails[use].min())),float(pj),float(max(0.0,math.log(max(pi_,1e-300))-math.log(max(pj,1e-300))))
+def moments(tdays, target, neighbours, lag=0, read='MOVE', shift=0, every=RECOMPUTE, perceive=False):
+    """E[t, 0..K]: the controlled evidence for the pool and for each edge at every call (remeasured every `every` calls and held).
+    perceive=True also returns novelty at every call: [intrinsic tail, joint tail, relational surprisal, temporal tail] (the last held
+    between measurements, NaN until a window earlier exists). Also the last signature and a summary per interpretation."""
+    N=[displaced(c,shift) for c in neighbours] if shift else neighbours; n=len(tdays); K=len(N); E=np.zeros((n,K+1)); nov=np.full((n,4),np.nan) if perceive else None; hist=[]; tot=np.zeros(K+1); hits=np.zeros(K+1); S=None
+    if perceive: ti=np.searchsorted(target['days'],tdays); kid=[asof(tdays,c['days'],lag) for c in N]
+    for a,t0 in enumerate(range(0,n,every)):
+        S=moment(target,N,int(tdays[t0]),lag,read,previous=hist[a-HORIZON] if a>=HORIZON else None); hist.append({k:S[k] for k in ('status','measurable','samples','evidence','as_of','harmony','leadership','edge_standard_error') if k in S})
+        E[t0:t0+every]=S['evidence']; tot+=S['evidence']; hits+=S['evidence']>0
+        if perceive and S['status']=='ok':
+            tn=S.get('temporal_novelty',{}).get('tail',np.nan)
+            for t in range(t0,min(t0+every,n)):
+                pr=np.r_[True,[kid[j][t]>=0 for j in range(K)]]; z=np.r_[target['ns'][ti[t]],[N[j]['ns'][kid[j][t]] if pr[j+1] else 0.0 for j in range(K)]]; tl=np.r_[target['tail'][ti[t]],[N[j]['tail'][kid[j][t]] if pr[j+1] else 1.0 for j in range(K)]]
+                nov[t,:3]=novelty(S,z,tl,pr); nov[t,3]=tn
+    return E,nov,S,dict(mean_evidence=tot/max(len(hist),1),share_of_measurements_eligible=hits/max(len(hist),1))
