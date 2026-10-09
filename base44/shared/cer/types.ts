@@ -1,0 +1,106 @@
+// ===========================================================================
+// CER — Cross-Environment Resonance. Types.
+//
+// CER is a separate module beside HEX. It reads across channels; HEX reads
+// one series. Nothing in this directory is imported by observer.ts, hex7.ts,
+// cycle.ts, ledger.ts, isotonic.ts or any function, and nothing here changes
+// a call shown to a user. Reference: validation/cercore.py (parity test:
+// tests/cer.mjs). Mathematics: docs/CER.md.
+// ===========================================================================
+
+export const CER_VERSION = 'cer-0.1';
+
+/** One measurement as it arrives from a source, before anything is done to it. */
+export interface SignalObservation {
+  /** The device or feed. */
+  source_id: string;
+  /** Where it was measured: 'server A', 'room', 'markets'. */
+  environment_id: string;
+  /** What was measured there: 'mycelium_voltage', 'cpu_load'. A channel is one (source, environment, channel). */
+  channel_id: string;
+  /** When the quantity had this value (ms since 1970, UTC). */
+  timestamp: number;
+  /** When the value became available to us. A call may only use what had been acquired when it was made. */
+  acquired_at?: number;
+  /** 'voltage', 'temperature', 'price'. */
+  measurement: string;
+  /** Physical unit as measured. Kept as metadata: the engine ranks values and never mixes units. */
+  unit: string;
+  /** One number, or a vector (a spectrum, several electrodes). Vectors are split into channels before use. */
+  value: number | number[] | null;
+  sample_rate_hz?: number;
+  calibration?: { applied: boolean; reference?: string; date?: string };
+  /** Anything the sensor or the collector said about this sample: 'saturated', 'interpolated', 'drift suspected'. */
+  quality?: string[];
+  /** Experimental condition: 'live mycelium', 'dehydrated', 'control'. */
+  condition?: string;
+  /** A deliberate change made by the experimenter at this time: 'load step +50%'. */
+  intervention?: string;
+  provenance?: string;
+  missing?: boolean;
+}
+
+/** One channel, ready to be read: a clock in whole ticks (days, for daily series) and the change at each tick. */
+export interface Channel {
+  id: string;
+  env: string;
+  unit: string;
+  source: string;
+  /** Tick of each observation, increasing. For daily series, days since 1970-01-01. */
+  days: number[];
+  /** The change that arrived at each tick. */
+  changes: number[];
+  /** Running sum of the changes. */
+  level: number[];
+  /** HEX's coordinates of this channel at each tick: 7 for the level, 7 for the size of the change. Filled by coordinates(). */
+  Z?: Float64Array[];
+  quality?: { observations: number; dropped_missing: number; dropped_flagged: number; duplicates: number };
+}
+
+export type EdgeStatus = 'ok' | 'insufficient data' | 'insufficient variation' | 'no other channel';
+export type NotSupported = 'not supported';
+
+/** One measured relation of an ordered pair, target <- source. Each kind is its own edge: they are never added into one score. */
+export interface Edge {
+  target: string;
+  source: string;
+  type: 'rank-xcorr' | 'partial-rank-xcorr' | 'coherence' | 'predictive';
+  status: EdgeStatus;
+  /** Analysis-method version. */
+  method: string;
+  /** Aligned observations the estimate rests on. */
+  samples: number;
+  /** First and last tick of the window the edge is valid for. */
+  window: [number, number] | null;
+  /** Share of ticks in the window on which both channels were observed. */
+  coverage?: number;
+  /** rank-xcorr: the correlation at the lag where it is largest. coherence: the band's highest coherence. predictive: bits per call of the edge's expert alone. */
+  strength?: number;
+  /** Steps by which the source leads the target. */
+  lag?: number;
+  by_lag?: number[];
+  standard_error?: number;
+  /** What the statistic has to exceed to be told from no relationship. */
+  threshold?: number;
+  p_value?: number;
+  /** True when the measured association is told from no relationship. Association, never cause. */
+  related?: boolean;
+  /** partial-rank-xcorr: the channels whose shared movement was removed first. */
+  controls?: string[];
+  band?: [number, number];
+  coherence?: number;
+  mean_coherence?: number;
+  segments?: number;
+  frequencies?: number;
+  period?: number;
+  coherent?: boolean;
+  phase?: number | NotSupported;
+  neighbour_leads_by?: number | NotSupported;
+}
+
+export interface Graph {
+  method: string;
+  as_of: number;
+  nodes: { id: string; environment: string; unit: string; source: string; observations: number }[];
+  edges: Edge[];
+}

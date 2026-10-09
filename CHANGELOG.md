@@ -1,5 +1,22 @@
 # Changelog
 
+## 9 October 2026: CER, an experimental module in shadow
+
+- **New, separate module** `base44/shared/cer/` (Cross-Environment
+  Resonance): ingestion with units and quality kept, alignment by what a call
+  may see, three descriptive relations per pair of channels, and prediction
+  from neighbours as one voice per edge. Nothing imports it; no engine file,
+  function, entity or shown call changed. `docs/CER.md`.
+- **Tested the way 7.0 was**: predictions written first
+  (`validation/prereg_cer.md`), one pass, controls displaced in time, results
+  beside them (`validation/cer_results.md`). Where one environment physically
+  leads another it adds to 7.0 (New York temperature direction +0.070 bits
+  per call over 7.0, 64.5% to 67.6% right); it reports no relationship where
+  there is none; on markets the relations are real and simultaneous and do
+  not forecast.
+- **Checks**: `tests/cer.mjs` (TypeScript against the reference),
+  `validation/cer_synthetic.py` (ten tests).
+
 ## 7.0 — 5 October 2026: HEX as a residual on the null
 
 ### What changed

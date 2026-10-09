@@ -46,7 +46,7 @@ check('3 phase offset',c['coherent'] and abs(c['neighbour_leads_by']-4)<0.7 and 
 
 # 4. a known delay; and prediction from a neighbour that leads
 rng=np.random.default_rng(104); bb=ar(rng,810); a=ch('a',0.8*np.r_[np.zeros(3),bb[:-3]][10:]+0.6*rng.standard_normal(800)); b=ch('b',bb[10:]); x=get(cer.edges(a,b,[],799),'rank-xcorr'); keep('delay of 3',a,b,[],799)
-lead=ar(rng,1500); tgt=0.8*np.r_[0,lead[:-1]]+0.6*rng.standard_normal(1500); decoy=ar(rng,1500); N=[ch('lead',lead),ch('decoy',decoy)]; g,I,p,y,F,M,eg,hsh=infer(tgt,N)
+lead=ar(rng,1500); tgt4=tgt=0.8*np.r_[0,lead[:-1]]+0.6*rng.standard_normal(1500); decoy=ar(rng,1500); N=[ch('lead',lead),ch('decoy',decoy)]; g,I,p,y,F,M,eg,hsh=infer(tgt,N)
 check('4 lagged signals',x['related'] and x['lag']==3 and g>0.05 and eg[2]>0.05 and eg[3]<0.002 and I[-1,2]>0.5 and I[-1,3]<0.25,delay_found=x['lag'],strength=x['strength'],gain_bits_per_call=g,leading_edge_alone=eg[2],decoy_edge_alone=eg[3],share_leading_edge=float(I[-1,2]),share_decoy_edge=float(I[-1,3]))
 REF['infer'].append(dict(label='leading neighbour and a decoy',days=list(range(1499)),y=[int(v) for v in y],offset=[0.5]*1499,lag=0,neighbours=[dict(id=c['id'],days=[int(d) for d in c['days']],changes=[float(v) for v in c['r']]) for c in N],p=[float(v) for v in p],share=[float(v) for v in I[-1]],state_hash=hsh))
 
@@ -87,4 +87,10 @@ rng=np.random.default_rng(110); C=[ch(k,ar(rng,500)) for k in 'abc']; h=lambda: 
 s1=infer(tgt,[nb])[-1]; s2=infer(tgt,[nb])[-1]
 check('10 deterministic replay',h1==h2 and s1==s2,graph_hash=h1,state_hash=s1)
 
+# the shadow walk-forward (base44/shared/cer/replay.ts): HEX's own calls, then CER beside them, strict arm
+import pandas as pd
+for read in ('MOVE','RANGE'):
+    tgt=tgt4; R=pd.DataFrame(h7.walk(tgt,read)[0]); F,M=cer.features(R.i.values,N[:1]+[ch('decoy',decoy)],1)
+    REF.setdefault('shadow',[]).append(dict(read=read,lag=1,target=[float(v) for v in tgt],neighbours=[dict(id=c['id'],days=[int(d) for d in c['days']],changes=[float(v) for v in c['r']]) for c in (N[0],ch('decoy',decoy))],
+        i=[int(v) for v in R.i],null=[float(v) for v in R.null],hex=[float(v) for v in R.p],cer=[float(v) for v in cer.walk(R.null.values,R.y.values,F,M)],fusion=[float(v) for v in cer.walk(R.p.values,R.y.values,F,M)]))
 json.dump(REF,open(os.path.join(HERE,'..','tests','cer_reference.json'),'w')); print(f"{bad} FAILED" if bad else 'ALL PASSED'); raise SystemExit(1 if bad else 0)
