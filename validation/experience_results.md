@@ -3,7 +3,7 @@
 Anna Maria Sarkisyan · Evrica Technologies Inc. · 9 October 2026
 
 Predictions: `prereg_experience.md`, committed before the code and amended
-before the run on real series. Branch `learning-module`. Nothing here is
+before the run on real series. Merged to `main` on 9 October 2026. Nothing here is
 published and nothing reads what the stage writes.
 
 ## In one paragraph

@@ -1,6 +1,6 @@
 # Changelog
 
-## 9 October 2026: the Learning Module, with Experiential Integration and the Memory Library (branch `learning-module`, not in `main`)
+## 9 October 2026: the Learning Module, with Experiential Integration and the Memory Library (merged to `main`; live on the next Publish)
 
 - **Names.** HEX's feedback loop is the **Learning Module**: the **Nightly
   Calibration** (`calibrateCognition`) and the **Memory Library**.
@@ -21,7 +21,8 @@
   excess of its threshold. Perception test 2 passes (29 of 30, from 23).
   No forecast uses this number; CER's replay calls are unchanged.
 - **Nothing reads the Memory Library.** No prediction, strength map,
-  version rule, verified flag or shown read changes. Not published.
+  version rule, verified flag or shown read changes. In `main`; it runs
+  live from the next Publish in Base44.
 
 ## 9 October 2026: unused entities removed
 
@@ -31,7 +32,7 @@
   `MarkovTickerMemory`, `Output`, `PredictionJournal`, `Routing`, `Series`,
   `SyncState`. Their rows go with them when Base44 syncs.
 
-## 9 October 2026: CER 0.4, the moment as the primary object (branch `cer-moment`, not in `main`)
+## 9 October 2026: CER 0.4, the moment as the primary object (merged to `main`)
 
 - **CER's governing inference is replaced.** The primary object is the
   relational moment `M_t = (X_t, G_t, Phi_t)` with its signature

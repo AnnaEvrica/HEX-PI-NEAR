@@ -125,7 +125,7 @@ Two limits to know:
 
 ## 5. Before pressing Publish on Base44
 
-0. For the Learning Module's stage 5 (branch `learning-module`): the two new
+0. For the Learning Module's stage 5: the two new
    entities `MomentMemory` and `NightlyCalibration` exist with the fields in
    `base44/entities/`. Nothing needs migrating; the library starts empty and
    the first night records each series' first moment with no individuality

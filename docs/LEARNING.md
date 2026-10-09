@@ -11,7 +11,8 @@ Stages 1 to 4 are where the engine is scored, learns to predict, and is
 governed. They are described in [`MODEL.md`](MODEL.md) and
 [`OPERATIONS.md`](OPERATIONS.md) and are not changed by anything here. This
 document is stage 5, **Experiential Integration**, and the Memory Library it
-writes. It is on the branch `learning-module` and is not published.
+writes. It is in `main` since 9 October 2026 and reaches the live app when
+Publish is pressed in Base44.
 
 | Stage | What it does | Code |
 |---|---|---|

@@ -92,8 +92,9 @@ Solid arrows are calls made in production. Dotted arrows are the only links
 into and out of CER: CER imports the engine's functions and changes nothing
 in them, and the Learning Module's last stage uses CER's perception of a
 moment (`moment`, `novelty`) and nothing else of it. CER's forecast is in
-shadow: no function, entity or screen uses a call it makes. This is on the
-branch `learning-module` and is not in `main` or published.
+shadow: no function, entity or screen uses a call it makes. All of this is
+in `main` since 9 October 2026. It reaches the live app when Publish is
+pressed in Base44 (`docs/OPERATIONS.md`, section 5).
 
 ## 2. Layers and the dependency rule
 
@@ -188,7 +189,7 @@ Stage 5 is apart from the other four, and that is checked
 **Status.** In `main`. Its forecast is in shadow: it makes its own calls on
 the same targets and outcomes as HEX, is scored the same way, and no
 function, entity or screen uses them. Its perception of a moment is used by
-stage 5 of the Learning Module (section 4), on the branch `learning-module`.
+stage 5 of the Learning Module (section 4).
 
 | File | Role |
 |---|---|
