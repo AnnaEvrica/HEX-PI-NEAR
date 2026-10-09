@@ -332,3 +332,121 @@ M4. Mode 3 chooses `T = 1` on more than half of calls, and differs from mode
     absent.
 M5. Calibration error under modes 2 and 3 is no worse than the original's.
 M6. None of the three modes beats the others everywhere.
+
+## Fourth experiment: the moment as CER's primary object
+
+Written 9 October 2026, before any of the code below was run on a real
+series. `cer-0.3` was frozen first (`cer/frozen_manifest.json`: commit,
+source hashes, data checksums, outputs).
+
+**The change.** CER's governing object becomes the relational moment
+`M_t = (X_t, G_t, Phi_t)` with its signature `(X, G, Phi, U, N)`, measured
+for every call. Perception is complete before prediction is considered, and
+nothing in perception depends on any outcome or on any past forecasting
+success. `w = A.L.C.Q` leaves the primary path and stays, unchanged, as a
+comparator, beside the original weighting by past success and `cer-0.3`'s
+maximum entropy.
+
+**Where the present code stands against this.**
+
+| Part of the moment | In `cer-0.3` | Gap closed in `cer-0.4` |
+|---|---|---|
+| `X_t`: what is observable now | `features()`: each channel's rank coordinates as known at the call | Each channel's own tail probability and normal score, so that "how unusual is this" has a stated reference |
+| `G_t`: relations at this moment | Measured per target-edge every 25 calls for weighting; whole graph only on the last day | One panel per call window on the target's clock: every channel against every other at the same step (harmony), each neighbour before and after the target at lags 1 to 5 (leadership), and pairs of neighbours jointly against the target (counterpoint) |
+| `Phi_t`: organisation in time | Lag profile and coherence by band inside separate edge records | The target's own persistence, lag profiles both ways, coherence and phase where coherent, in the same signature |
+| `U_t`: uncertainty | Standard errors, thresholds, coverage per edge | Carried into the signature; novelty reported as tail probabilities under named references |
+| `N_t`: novelty | None | Intrinsic, relational and temporal, at every call |
+| Perception kept apart from prediction | An edge without a detected lead had weight 0 and was visible only in the last-day graph | Every relation stays in the signature. Predictive eligibility is a separate, controlled calculation |
+| Controls on predictive eligibility | Shared driver (`C`); time-shift threshold | The target's own past, the calendar, the other neighbours (redundancy), and timestamp availability, all inside one conditional test |
+
+**Perception, exactly.** For a call on target `i` dated `d`, under the arm's
+lag, on the latest 750 steps of the target's own clock (window statistics
+remeasured every 25 calls and held; per-call quantities at every call):
+
+- *Panel.* The target's changes, and each neighbour's change between the
+  values available at consecutive target steps (as of `d - lag`). Each column
+  is rank-transformed. A neighbour's coverage is the share of steps on which
+  it was observed.
+- *Harmony* `H`: the correlation matrix of the panel at the same step.
+- *Leadership*: `rho_j(l) = corr(target_t, neighbour_{j, t-l})`, `l = 1..5`,
+  and the reverse.
+- *Counterpoint*: `corr(target_t, v_j v_k)` for every pair of neighbours, at
+  the same step and one step earlier: structure carried by a configuration
+  of two channels and by neither alone.
+- *Rhythm*: the target's autocorrelation at lags 1 to 5; Welch coherence by
+  band for each target-edge, with phase only where the band is coherent.
+- *Intrinsic novelty*: each channel's latest change has tail probability
+  `p_j = 1 - (midrank of its size among all its own history)`. The moment's
+  intrinsic surprisal is `-ln min(1, k min_j p_j)`. Reference: each channel
+  exchangeable with its own past.
+- *Relational novelty*: with `z` the normal scores of the channels' latest
+  changes and `H_s = 0.9 H + 0.1 I`, `D2 = z' H_s^-1 z`, joint tail
+  probability `P(chi2_k >= D2)`; relational surprisal is the joint surprisal
+  minus the surprisal of the same `z` with the relations ignored
+  (`P(chi2_k >= z'z)`), floored at zero. Reference: a Gaussian copula with
+  the window's harmony. It is an approximation and is reported as one.
+- *Temporal novelty*: against the signature 30 measurements earlier (one full
+  window, no shared observation): for each target-edge the Fisher-z change in
+  harmony and in lag-1 leadership, the largest in absolute value with a
+  Bonferroni tail probability, and the counts of edges that became or ceased
+  to be eligible. Reference: the relational structure has not changed.
+
+**Prediction, exactly.** On the same panel, with `y` the target at step `t`:
+
+1. Controls `C`: the target's own five previous steps, and an annual sine and
+   cosine of the date.
+2. Each neighbour's candidate is its value at the lag in 1..3 with the
+   largest partial correlation with `y` given `C`.
+3. One joint regression of `y` on `C` and every neighbour's candidate. The
+   evidence for edge `j` is what it adds given everything else:
+   `LR_j = (m/2) ln(1 + t_j^2 / (m - q))`, then
+   `E_j = coverage_j . max(0, LR_j - (1/2) ln m - ln 3)`: the Schwarz
+   approximation to the log Bayes factor for one added parameter, less the
+   three lags tried.
+4. The pool (the mean of the neighbours one step earlier) is an
+   interpretation too: `E_pool = max(0, LR_pool - (1/2) ln m)`, given `C`.
+5. `P(z | M_t) ~ exp(E_z)` over the pool and the edges, mass `K` on
+   "nothing", temperature 1. The call is the mixture of the offset, the
+   pool's expert and the edges' experts under `P`.
+
+This is maximum relative entropy with respect to the base measure
+`(K, 1, ..., 1)` under one constraint on the expected evidence, with the
+multiplier fixed at 1 rather than solved from an observed constraint level.
+It coincides with the Bayes posterior over "exactly one of these explains
+the target, or none" when each `E` is a log Bayes factor against "none".
+Outside those conditions it is a Gibbs distribution and no more.
+Novelty does not enter the weights: nothing justifies it yet.
+
+Timestamp availability is the arm's lag, built into the panel. In the
+same-date arm a neighbour fixed later in the day than the target still
+appears to lead; that arm stays a diagnostic.
+
+**Evaluation.** Perception is tested first and on its own
+(`cer_perception.py`, seven built configurations; sensitivity, specificity,
+false discovery, calibration of the tail probabilities, a change of sampling
+rate, and whether the signature separates cases that same-step correlation
+alone does not). Then all 43 series are replayed: HEX 7.0 must reproduce its
+ledger, the frozen modes must reproduce their committed calls, and the new
+mode is scored beside them with its own time-displaced controls. No series
+here is untouched by the earlier experiments, so there is no fresh
+evaluation period. That test has to wait for new data.
+
+**Predictions.**
+
+X1. HEX 7.0 reproduces all 43 series exactly; the reliability mode
+    reproduces every committed call to six decimals; the measurement and
+    relaxation modes do so on a sample of targets.
+X2. New York, direction: within 15% of `cer-0.3`'s +0.0727, clear of zero.
+X3. Chicago, direction: positive, clear of zero, between +0.002 and +0.006.
+X4. Markets, strict: within 0.0003 of HEX on both reads, and under 3% of
+    edge-calls eligible (against 6.9% and 14.4% under `A.L.C.Q`), because
+    the target's own persistence and redundancy no longer pass as a lead.
+X5. Controls within 0.0005 of zero in every group.
+X6. Seattle, Melbourne and energy x temperature: within 0.0005 of zero.
+X7. Perception on built signals: every one of the seven configurations is
+    separated; on noise the intrinsic and joint tail probabilities fall below
+    0.05 on 2% to 8% of calls, and temporal novelty on at most 10% of
+    measurements.
+X8. Perception on real series: the joint tail probability is not calibrated
+    on markets, where changes are heavier-tailed and cluster: below 0.01 on
+    2% to 6% of calls, against a nominal 1%. On temperature, 0.5% to 3%.
