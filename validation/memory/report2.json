@@ -1,0 +1,1152 @@
+{
+ "by_class_and_read": {
+  "markets MOVE": {
+   "calls": 73018,
+   "g_TREE": [
+    -9e-05,
+    -0.00024,
+    9e-05
+   ],
+   "g_FOREST": [
+    -0.00015,
+    -0.00029,
+    -0.0
+   ],
+   "g_WORLD": [
+    -0.00016,
+    -0.00035,
+    1e-05
+   ],
+   "g_BOTH": [
+    -0.00022,
+    -0.00063,
+    0.00021
+   ],
+   "g_FULL": [
+    -0.00016,
+    -0.00058,
+    0.00031
+   ],
+   "g_CHORD": [
+    -0.00031,
+    -0.00047,
+    -0.00014
+   ],
+   "g_CONV": [
+    -5e-05,
+    -0.0003,
+    0.00018
+   ],
+   "g_only_T0": [
+    -7e-05,
+    -0.00022,
+    6e-05
+   ],
+   "g_only_T1": [
+    -0.0001,
+    -0.00029,
+    7e-05
+   ],
+   "g_only_T2": [
+    -3e-05,
+    -0.00014,
+    8e-05
+   ],
+   "g_only_S": [
+    -6e-05,
+    -0.00017,
+    3e-05
+   ],
+   "g_only_T0S": [
+    -0.00013,
+    -0.00019,
+    -7e-05
+   ],
+   "g_CONTROLS": [
+    -0.00016,
+    -0.00029,
+    -5e-05
+   ],
+   "g_WORLD_net": [
+    -0.0,
+    -0.00023,
+    0.00019
+   ],
+   "g_WORLD_minus_TREE": [
+    -8e-05,
+    -0.00026,
+    8e-05
+   ],
+   "g_WORLD_minus_FOREST": [
+    -2e-05,
+    -0.0001,
+    6e-05
+   ],
+   "g_FOREST_minus_TREE": [
+    -6e-05,
+    -0.0002,
+    8e-05
+   ],
+   "g_BOTH_minus_FULL": [
+    -6e-05,
+    -0.00015,
+    2e-05
+   ],
+   "n_HEX": [
+    0.00041,
+    -0.00032,
+    0.00105
+   ],
+   "n_WORLD": [
+    0.00024,
+    -0.00052,
+    0.00101
+   ]
+  },
+  "markets RANGE": {
+   "calls": 73018,
+   "g_TREE": [
+    0.00039,
+    6e-05,
+    0.00076
+   ],
+   "g_FOREST": [
+    0.0004,
+    3e-05,
+    0.00074
+   ],
+   "g_WORLD": [
+    0.00038,
+    1e-05,
+    0.00075
+   ],
+   "g_BOTH": [
+    0.00061,
+    -5e-05,
+    0.00127
+   ],
+   "g_FULL": [
+    0.00066,
+    2e-05,
+    0.00126
+   ],
+   "g_CHORD": [
+    -0.00015,
+    -0.0004,
+    0.00011
+   ],
+   "g_CONV": [
+    0.0007,
+    0.00023,
+    0.0012
+   ],
+   "g_only_T0": [
+    0.00013,
+    -0.00011,
+    0.00037
+   ],
+   "g_only_T1": [
+    0.00018,
+    -5e-05,
+    0.00042
+   ],
+   "g_only_T2": [
+    0.00031,
+    2e-05,
+    0.00059
+   ],
+   "g_only_S": [
+    -4e-05,
+    -0.00017,
+    7e-05
+   ],
+   "g_only_T0S": [
+    3e-05,
+    -0.00019,
+    0.00025
+   ],
+   "g_CONTROLS": [
+    0.0002,
+    -0.00015,
+    0.0006
+   ],
+   "g_WORLD_net": [
+    0.00018,
+    -0.00013,
+    0.00048
+   ],
+   "g_WORLD_minus_TREE": [
+    -1e-05,
+    -0.00019,
+    0.00015
+   ],
+   "g_WORLD_minus_FOREST": [
+    -2e-05,
+    -0.0001,
+    6e-05
+   ],
+   "g_FOREST_minus_TREE": [
+    0.0,
+    -0.00014,
+    0.00015
+   ],
+   "g_BOTH_minus_FULL": [
+    -5e-05,
+    -0.00015,
+    5e-05
+   ],
+   "n_HEX": [
+    0.00572,
+    0.00455,
+    0.00701
+   ],
+   "n_WORLD": [
+    0.0061,
+    0.0047,
+    0.00758
+   ]
+  },
+  "racing MOVE": {
+   "calls": 13022,
+   "g_TREE": [
+    -0.0001,
+    -0.00053,
+    0.00038
+   ],
+   "g_FOREST": [
+    -0.0001,
+    -0.00051,
+    0.00033
+   ],
+   "g_WORLD": [
+    -0.0001,
+    -0.00053,
+    0.00031
+   ],
+   "g_BOTH": [
+    -0.00086,
+    -0.00157,
+    -0.00016
+   ],
+   "g_FULL": [
+    -0.00076,
+    -0.00137,
+    -0.00011
+   ],
+   "g_CHORD": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "g_CONV": [
+    -0.0005,
+    -0.00088,
+    -0.00012
+   ],
+   "g_only_T0": [
+    3e-05,
+    -0.00033,
+    0.00043
+   ],
+   "g_only_T1": [
+    -1e-05,
+    -0.00039,
+    0.00043
+   ],
+   "g_only_T2": [
+    -9e-05,
+    -0.00026,
+    8e-05
+   ],
+   "g_only_S": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "g_only_T0S": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "g_CONTROLS": [
+    -0.0006,
+    -0.00092,
+    -0.0003
+   ],
+   "g_WORLD_net": [
+    0.0005,
+    -3e-05,
+    0.00104
+   ],
+   "g_WORLD_minus_TREE": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "g_WORLD_minus_FOREST": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "g_FOREST_minus_TREE": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "g_BOTH_minus_FULL": [
+    -0.0001,
+    -0.00024,
+    5e-05
+   ],
+   "n_HEX": [
+    -0.00167,
+    -0.00298,
+    -0.00049
+   ],
+   "n_WORLD": [
+    -0.00177,
+    -0.00306,
+    -0.00047
+   ]
+  },
+  "racing RANGE": {
+   "calls": 13022,
+   "g_TREE": [
+    -0.00036,
+    -0.00057,
+    -0.00012
+   ],
+   "g_FOREST": [
+    -0.00036,
+    -0.00061,
+    -0.00015
+   ],
+   "g_WORLD": [
+    -0.00036,
+    -0.00061,
+    -0.0001
+   ],
+   "g_BOTH": [
+    -0.00068,
+    -0.00164,
+    0.0004
+   ],
+   "g_FULL": [
+    -0.00053,
+    -0.00146,
+    0.00042
+   ],
+   "g_CHORD": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "g_CONV": [
+    -0.00018,
+    -0.00071,
+    0.00033
+   ],
+   "g_only_T0": [
+    -0.0002,
+    -0.00036,
+    -3e-05
+   ],
+   "g_only_T1": [
+    -0.00014,
+    -0.00033,
+    6e-05
+   ],
+   "g_only_T2": [
+    -0.00016,
+    -0.00033,
+    1e-05
+   ],
+   "g_only_S": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "g_only_T0S": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "g_CONTROLS": [
+    -0.0002,
+    -0.00045,
+    2e-05
+   ],
+   "g_WORLD_net": [
+    -0.00016,
+    -0.00045,
+    0.00016
+   ],
+   "g_WORLD_minus_TREE": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "g_WORLD_minus_FOREST": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "g_FOREST_minus_TREE": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "g_BOTH_minus_FULL": [
+    -0.00015,
+    -0.00023,
+    -7e-05
+   ],
+   "n_HEX": [
+    0.01225,
+    0.00887,
+    0.01627
+   ],
+   "n_WORLD": [
+    0.01189,
+    0.00842,
+    0.0152
+   ]
+  },
+  "weather MOVE": {
+   "calls": 54086,
+   "g_TREE": [
+    0.00213,
+    0.00148,
+    0.00281
+   ],
+   "g_FOREST": [
+    0.00206,
+    0.00137,
+    0.00269
+   ],
+   "g_WORLD": [
+    0.00202,
+    0.00143,
+    0.0027
+   ],
+   "g_BOTH": [
+    0.00353,
+    0.00261,
+    0.00444
+   ],
+   "g_FULL": [
+    0.00342,
+    0.00253,
+    0.00427
+   ],
+   "g_CHORD": [
+    0.00244,
+    0.00163,
+    0.00326
+   ],
+   "g_CONV": [
+    0.00028,
+    7e-05,
+    0.0005
+   ],
+   "g_only_T0": [
+    9e-05,
+    -7e-05,
+    0.00024
+   ],
+   "g_only_T1": [
+    -4e-05,
+    -0.00014,
+    7e-05
+   ],
+   "g_only_T2": [
+    0.00119,
+    0.00078,
+    0.00166
+   ],
+   "g_only_S": [
+    0.00093,
+    0.00053,
+    0.0014
+   ],
+   "g_only_T0S": [
+    0.00031,
+    8e-05,
+    0.00055
+   ],
+   "g_CONTROLS": [
+    0.00034,
+    0.00018,
+    0.00051
+   ],
+   "g_WORLD_net": [
+    0.00168,
+    0.00111,
+    0.00228
+   ],
+   "g_WORLD_minus_TREE": [
+    -0.00011,
+    -0.00027,
+    5e-05
+   ],
+   "g_WORLD_minus_FOREST": [
+    -4e-05,
+    -7e-05,
+    -0.0
+   ],
+   "g_FOREST_minus_TREE": [
+    -7e-05,
+    -0.00021,
+    8e-05
+   ],
+   "g_BOTH_minus_FULL": [
+    0.00011,
+    1e-05,
+    0.00023
+   ],
+   "n_HEX": [
+    0.05471,
+    0.05148,
+    0.05776
+   ],
+   "n_WORLD": [
+    0.05673,
+    0.05367,
+    0.0598
+   ]
+  },
+  "weather RANGE": {
+   "calls": 54086,
+   "g_TREE": [
+    0.00076,
+    0.00046,
+    0.00107
+   ],
+   "g_FOREST": [
+    0.00072,
+    0.00045,
+    0.00101
+   ],
+   "g_WORLD": [
+    0.00069,
+    0.00042,
+    0.00098
+   ],
+   "g_BOTH": [
+    0.00076,
+    0.00037,
+    0.00113
+   ],
+   "g_FULL": [
+    0.00071,
+    0.00034,
+    0.00107
+   ],
+   "g_CHORD": [
+    9e-05,
+    -0.00013,
+    0.00029
+   ],
+   "g_CONV": [
+    -4e-05,
+    -0.00013,
+    3e-05
+   ],
+   "g_only_T0": [
+    -1e-05,
+    -7e-05,
+    7e-05
+   ],
+   "g_only_T1": [
+    7e-05,
+    -2e-05,
+    0.00017
+   ],
+   "g_only_T2": [
+    0.0006,
+    0.00036,
+    0.00088
+   ],
+   "g_only_S": [
+    2e-05,
+    -4e-05,
+    7e-05
+   ],
+   "g_only_T0S": [
+    -1e-05,
+    -0.0001,
+    7e-05
+   ],
+   "g_CONTROLS": [
+    0.00055,
+    0.00029,
+    0.00079
+   ],
+   "g_WORLD_net": [
+    0.00015,
+    -0.00019,
+    0.00045
+   ],
+   "g_WORLD_minus_TREE": [
+    -7e-05,
+    -0.00015,
+    1e-05
+   ],
+   "g_WORLD_minus_FOREST": [
+    -3e-05,
+    -6e-05,
+    -0.0
+   ],
+   "g_FOREST_minus_TREE": [
+    -4e-05,
+    -0.0001,
+    2e-05
+   ],
+   "g_BOTH_minus_FULL": [
+    5e-05,
+    -1e-05,
+    0.00012
+   ],
+   "n_HEX": [
+    0.01226,
+    0.0105,
+    0.01387
+   ],
+   "n_WORLD": [
+    0.01296,
+    0.01127,
+    0.01473
+   ]
+  }
+ },
+ "precision": {
+  "markets MOVE": {
+   "calls": 73018,
+   "bits_over_null_HEX": 0.00041,
+   "bits_over_null_HEX_with_memory": 0.00024,
+   "share_right_null": 0.5222,
+   "share_right_HEX": 0.524,
+   "share_right_with_memory": 0.5258,
+   "calls_whose_side_changed": 3103,
+   "share_of_calls_changed": 0.0425,
+   "changed_calls_right_with_memory": 0.5211,
+   "changed_calls_right_before": 0.4789,
+   "probability_moved_mean": 0.0041,
+   "probability_moved_p90": 0.0091,
+   "probability_moved_max": 0.2072
+  },
+  "markets RANGE": {
+   "calls": 73018,
+   "bits_over_null_HEX": 0.00572,
+   "bits_over_null_HEX_with_memory": 0.0061,
+   "share_right_null": 0.5864,
+   "share_right_HEX": 0.594,
+   "share_right_with_memory": 0.5958,
+   "calls_whose_side_changed": 1189,
+   "share_of_calls_changed": 0.0163,
+   "changed_calls_right_with_memory": 0.5542,
+   "changed_calls_right_before": 0.4458,
+   "probability_moved_mean": 0.0061,
+   "probability_moved_p90": 0.0134,
+   "probability_moved_max": 0.1908
+  },
+  "racing MOVE": {
+   "calls": 13022,
+   "bits_over_null_HEX": -0.00167,
+   "bits_over_null_HEX_with_memory": -0.00177,
+   "share_right_null": 0.7496,
+   "share_right_HEX": 0.7479,
+   "share_right_with_memory": 0.7481,
+   "calls_whose_side_changed": 37,
+   "share_of_calls_changed": 0.0028,
+   "changed_calls_right_with_memory": 0.5405,
+   "changed_calls_right_before": 0.4595,
+   "probability_moved_mean": 0.0034,
+   "probability_moved_p90": 0.0082,
+   "probability_moved_max": 0.1222
+  },
+  "racing RANGE": {
+   "calls": 13022,
+   "bits_over_null_HEX": 0.01225,
+   "bits_over_null_HEX_with_memory": 0.01189,
+   "share_right_null": 0.4969,
+   "share_right_HEX": 0.529,
+   "share_right_with_memory": 0.529,
+   "calls_whose_side_changed": 500,
+   "share_of_calls_changed": 0.0384,
+   "changed_calls_right_with_memory": 0.5,
+   "changed_calls_right_before": 0.5,
+   "probability_moved_mean": 0.0031,
+   "probability_moved_p90": 0.0073,
+   "probability_moved_max": 0.0657
+  },
+  "weather MOVE": {
+   "calls": 54086,
+   "bits_over_null_HEX": 0.05471,
+   "bits_over_null_HEX_with_memory": 0.05673,
+   "share_right_null": 0.5281,
+   "share_right_HEX": 0.6191,
+   "share_right_with_memory": 0.62,
+   "calls_whose_side_changed": 1881,
+   "share_of_calls_changed": 0.0348,
+   "changed_calls_right_with_memory": 0.5136,
+   "changed_calls_right_before": 0.4864,
+   "probability_moved_mean": 0.0149,
+   "probability_moved_p90": 0.036,
+   "probability_moved_max": 0.2651
+  },
+  "weather RANGE": {
+   "calls": 54086,
+   "bits_over_null_HEX": 0.01226,
+   "bits_over_null_HEX_with_memory": 0.01296,
+   "share_right_null": 0.582,
+   "share_right_HEX": 0.5946,
+   "share_right_with_memory": 0.5951,
+   "calls_whose_side_changed": 1125,
+   "share_of_calls_changed": 0.0208,
+   "changed_calls_right_with_memory": 0.512,
+   "changed_calls_right_before": 0.488,
+   "probability_moved_mean": 0.0075,
+   "probability_moved_p90": 0.0178,
+   "probability_moved_max": 0.1531
+  }
+ },
+ "by_how_far_HEX_leaned": {
+  "markets MOVE": {
+   "under 2 points": {
+    "calls": 33122,
+    "gain": -3e-05,
+    "share_right_HEX": 0.504,
+    "share_right_with_memory": 0.5079,
+    "side_changed": 0.09
+   },
+   "2 to 5": {
+    "calls": 24623,
+    "gain": -0.0003,
+    "share_right_HEX": 0.5129,
+    "share_right_with_memory": 0.5129,
+    "side_changed": 0.0044
+   },
+   "5 to 10": {
+    "calls": 9995,
+    "gain": 0.00023,
+    "share_right_HEX": 0.5381,
+    "share_right_with_memory": 0.5381,
+    "side_changed": 0.0014
+   },
+   "over 10": {
+    "calls": 5278,
+    "gain": -0.00115,
+    "share_right_HEX": 0.6745,
+    "share_right_with_memory": 0.6745,
+    "side_changed": 0.0
+   }
+  },
+  "markets RANGE": {
+   "under 2 points": {
+    "calls": 9255,
+    "gain": 0.00077,
+    "share_right_HEX": 0.5049,
+    "share_right_with_memory": 0.5171,
+    "side_changed": 0.1127
+   },
+   "2 to 5": {
+    "calls": 13459,
+    "gain": 0.00074,
+    "share_right_HEX": 0.5327,
+    "share_right_with_memory": 0.5341,
+    "side_changed": 0.0103
+   },
+   "5 to 10": {
+    "calls": 19564,
+    "gain": -0.00015,
+    "share_right_HEX": 0.5666,
+    "share_right_with_memory": 0.5665,
+    "side_changed": 0.0004
+   },
+   "over 10": {
+    "calls": 30740,
+    "gain": 0.00043,
+    "share_right_HEX": 0.6651,
+    "share_right_with_memory": 0.6651,
+    "side_changed": 0.0
+   }
+  },
+  "racing MOVE": {
+   "under 2 points": {
+    "calls": 466,
+    "gain": 3e-05,
+    "share_right_HEX": 0.5086,
+    "share_right_with_memory": 0.5129,
+    "side_changed": 0.0773
+   },
+   "2 to 5": {
+    "calls": 821,
+    "gain": -0.00013,
+    "share_right_HEX": 0.5152,
+    "share_right_with_memory": 0.5164,
+    "side_changed": 0.0012
+   },
+   "5 to 10": {
+    "calls": 1327,
+    "gain": 8e-05,
+    "share_right_HEX": 0.5637,
+    "share_right_with_memory": 0.5637,
+    "side_changed": 0.0
+   },
+   "over 10": {
+    "calls": 10408,
+    "gain": -0.00013,
+    "share_right_HEX": 0.8004,
+    "share_right_with_memory": 0.8004,
+    "side_changed": 0.0
+   }
+  },
+  "racing RANGE": {
+   "under 2 points": {
+    "calls": 4959,
+    "gain": -0.00039,
+    "share_right_HEX": 0.5023,
+    "share_right_with_memory": 0.5019,
+    "side_changed": 0.1
+   },
+   "2 to 5": {
+    "calls": 4075,
+    "gain": -0.00016,
+    "share_right_HEX": 0.5043,
+    "share_right_with_memory": 0.5048,
+    "side_changed": 0.001
+   },
+   "5 to 10": {
+    "calls": 2212,
+    "gain": -0.00063,
+    "share_right_HEX": 0.5524,
+    "share_right_with_memory": 0.5524,
+    "side_changed": 0.0
+   },
+   "over 10": {
+    "calls": 1776,
+    "gain": -0.0004,
+    "share_right_HEX": 0.6306,
+    "share_right_with_memory": 0.6306,
+    "side_changed": 0.0
+   }
+  },
+  "weather MOVE": {
+   "under 2 points": {
+    "calls": 4760,
+    "gain": 0.00242,
+    "share_right_HEX": 0.5158,
+    "share_right_with_memory": 0.5267,
+    "side_changed": 0.271
+   },
+   "2 to 5": {
+    "calls": 6845,
+    "gain": 0.00147,
+    "share_right_HEX": 0.5473,
+    "share_right_with_memory": 0.5473,
+    "side_changed": 0.0695
+   },
+   "5 to 10": {
+    "calls": 12009,
+    "gain": 0.00149,
+    "share_right_HEX": 0.5671,
+    "share_right_with_memory": 0.5671,
+    "side_changed": 0.0083
+   },
+   "over 10": {
+    "calls": 30472,
+    "gain": 0.00229,
+    "share_right_HEX": 0.6718,
+    "share_right_with_memory": 0.6718,
+    "side_changed": 0.0005
+   }
+  },
+  "weather RANGE": {
+   "under 2 points": {
+    "calls": 7086,
+    "gain": 0.00012,
+    "share_right_HEX": 0.5155,
+    "share_right_with_memory": 0.5196,
+    "side_changed": 0.1458
+   },
+   "2 to 5": {
+    "calls": 10006,
+    "gain": 0.00019,
+    "share_right_HEX": 0.522,
+    "share_right_with_memory": 0.5217,
+    "side_changed": 0.0091
+   },
+   "5 to 10": {
+    "calls": 13320,
+    "gain": 0.00093,
+    "share_right_HEX": 0.5649,
+    "share_right_with_memory": 0.565,
+    "side_changed": 0.0001
+   },
+   "over 10": {
+    "calls": 23674,
+    "gain": 0.00094,
+    "share_right_HEX": 0.6657,
+    "share_right_with_memory": 0.6657,
+    "side_changed": 0.0
+   }
+  }
+ },
+ "first_250_calls_of_each_tree": {
+  "markets MOVE": {
+   "calls": 6750,
+   "WORLD_minus_TREE": [
+    -0.00069,
+    -0.00193,
+    0.00052
+   ],
+   "WORLD": -0.00089,
+   "TREE": -0.00021
+  },
+  "markets RANGE": {
+   "calls": 6750,
+   "WORLD_minus_TREE": [
+    -0.00076,
+    -0.00205,
+    0.00043
+   ],
+   "WORLD": -0.00047,
+   "TREE": 0.00029
+  },
+  "weather MOVE": {
+   "calls": 1000,
+   "WORLD_minus_TREE": [
+    -0.00047,
+    -0.00304,
+    0.00207
+   ],
+   "WORLD": -0.00138,
+   "TREE": -0.00091
+  },
+  "weather RANGE": {
+   "calls": 1000,
+   "WORLD_minus_TREE": [
+    -0.00054,
+    -0.00208,
+    0.00096
+   ],
+   "WORLD": -0.00163,
+   "TREE": -0.00109
+  }
+ },
+ "by_series_weather": {
+  "Chicago MOVE": {
+   "calls": 24678,
+   "TREE": 0.00132,
+   "FOREST": 0.00125,
+   "WORLD": [
+    0.0012,
+    0.0007,
+    0.00172
+   ],
+   "controls": 0.00035,
+   "mem01_FULL": 0.00291,
+   "lines_across_subjects_mean": 1.19,
+   "T0": 0.00014,
+   "T1": -2e-05,
+   "T2": 0.00039,
+   "S": 0.00101,
+   "T0S": 0.00035
+  },
+  "Chicago RANGE": {
+   "calls": 24678,
+   "TREE": 0.00087,
+   "FOREST": 0.00075,
+   "WORLD": [
+    0.00067,
+    0.00035,
+    0.00096
+   ],
+   "controls": 0.00027,
+   "mem01_FULL": 0.00079,
+   "lines_across_subjects_mean": 1.19,
+   "T0": -3e-05,
+   "T1": 0.00021,
+   "T2": 0.0006,
+   "S": 1e-05,
+   "T0S": -4e-05
+  },
+  "Melbourne MOVE": {
+   "calls": 3622,
+   "TREE": -0.00018,
+   "FOREST": -0.00017,
+   "WORLD": [
+    -0.00018,
+    -0.00092,
+    0.00052
+   ],
+   "controls": -1e-05,
+   "mem01_FULL": 0.00049,
+   "lines_across_subjects_mean": 1.99,
+   "T0": 0.00024,
+   "T1": -0.00024,
+   "T2": -3e-05,
+   "S": -0.00016,
+   "T0S": -0.00018
+  },
+  "Melbourne RANGE": {
+   "calls": 3622,
+   "TREE": 0.00037,
+   "FOREST": 0.00052,
+   "WORLD": [
+    0.00054,
+    -0.00074,
+    0.00173
+   ],
+   "controls": 0.00052,
+   "mem01_FULL": -0.00019,
+   "lines_across_subjects_mean": 1.99,
+   "T0": 4e-05,
+   "T1": -0.00017,
+   "T2": 0.00019,
+   "S": 0.00042,
+   "T0S": 0.0003
+  },
+  "NewYork MOVE": {
+   "calls": 1433,
+   "TREE": 0.01788,
+   "FOREST": 0.01757,
+   "WORLD": [
+    0.01777,
+    0.00465,
+    0.03308
+   ],
+   "controls": 0.00136,
+   "mem01_FULL": 0.03359,
+   "lines_across_subjects_mean": 1.97,
+   "T0": 0.00077,
+   "T1": -0.00031,
+   "T2": -0.00012,
+   "S": 0.01806,
+   "T0S": 0.00652
+  },
+  "NewYork RANGE": {
+   "calls": 1433,
+   "TREE": 0.00172,
+   "FOREST": 0.00143,
+   "WORLD": [
+    0.00139,
+    -0.00108,
+    0.00394
+   ],
+   "controls": -0.00026,
+   "mem01_FULL": 0.00278,
+   "lines_across_subjects_mean": 1.97,
+   "T0": 0.00021,
+   "T1": -0.0003,
+   "T2": 0.00185,
+   "S": -0.0002,
+   "T0S": 0.00017
+  },
+  "Seattle MOVE": {
+   "calls": 24353,
+   "TREE": 0.00236,
+   "FOREST": 0.0023,
+   "WORLD": [
+    0.00225,
+    0.00128,
+    0.00314
+   ],
+   "controls": 0.00032,
+   "mem01_FULL": 0.0026,
+   "lines_across_subjects_mean": 1.2,
+   "T0": -3e-05,
+   "T1": -2e-05,
+   "T2": 0.00226,
+   "S": -0.0,
+   "T0S": -2e-05
+  },
+  "Seattle RANGE": {
+   "calls": 24353,
+   "TREE": 0.00066,
+   "FOREST": 0.00069,
+   "WORLD": [
+    0.0007,
+    0.00027,
+    0.00112
+   ],
+   "controls": 0.00088,
+   "mem01_FULL": 0.00065,
+   "lines_across_subjects_mean": 1.2,
+   "T0": 0.0,
+   "T1": -1e-05,
+   "T2": 0.0006,
+   "S": -3e-05,
+   "T0S": -3e-05
+  }
+ },
+ "learning_by_third_WORLD": {
+  "markets MOVE": [
+   -0.00048,
+   -9e-05,
+   7e-05
+  ],
+  "markets RANGE": [
+   0.00019,
+   0.00069,
+   0.00025
+  ],
+  "racing MOVE": [
+   -0.00041,
+   -9e-05,
+   0.0002
+  ],
+  "racing RANGE": [
+   -0.00048,
+   -0.00034,
+   -0.00027
+  ],
+  "weather MOVE": [
+   0.00117,
+   0.00189,
+   0.003
+  ],
+  "weather RANGE": [
+   0.00015,
+   0.0007,
+   0.00123
+  ]
+ },
+ "cost": {
+  "seconds_per_pass": [
+   33.3,
+   33.3,
+   32.3,
+   31.8,
+   31.5,
+   31.8,
+   31.6,
+   31.6
+  ],
+  "last_three_tenths_over_first_three_tenths": [
+   0.54,
+   0.5,
+   0.55,
+   0.54,
+   0.52,
+   0.53,
+   0.52,
+   0.52
+  ],
+  "microseconds_per_call": 229,
+  "total_seconds": 458
+ },
+ "N1": {
+  "cut at day 11000": {
+   "calls": 54626,
+   "dated_calls": 41604,
+   "largest_difference": 0.0
+  },
+  "cut at day 17500": {
+   "calls": 79569,
+   "dated_calls": 66547,
+   "largest_difference": 0.0
+  }
+ }
+}
