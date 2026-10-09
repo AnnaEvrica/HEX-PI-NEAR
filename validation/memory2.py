@@ -18,12 +18,12 @@ from memory_replay import ll, SHIFTS
 HERE=os.path.dirname(os.path.abspath(__file__)); OUT=os.path.join(HERE,'memory'); RHO=0.25; KAPPA=64.0; KIN=6; MINKIN=50
 POP=np.array([bin(i).count('1') for i in range(4096)]); RP=RHO**np.arange(13); AR={m:np.arange(1<<m) for m in range(13)}
 TYPES=('T0','T1','T2','S','T0S'); LEVELS=('tree','forest','world')
-def addresses(S, sid, read):
+def addresses(S, sid, read, lag_override=None):
     """Every address of every step of one series. Returns dict of arrays over steps: T0, T1, T2 (0..63, -1 unknown), S (bits), Sm (number of lines), and outcome day."""
     cls,dt,r=next((c,d,x) for c,_,s,d,x in S if s==sid); r=np.asarray(r,float); n=len(r); a=np.abs(r); med=pd.Series(a).expanding(mc.MINMED).median().values
     out={f'T{k}':mc.states(r,a,med,read,k) for k in mc.SCALES}; Sb=np.zeros(n,int); Sm=np.zeros(n,int)
     if dt is not None:
-        days=R.days(dt); lag=1 if cls=='markets' else 0; z=mc.nscore(r if read=='MOVE' else a); nb=[(R.days(d2),np.asarray(r2,float)) for c2,_,s2,d2,r2 in S if c2==cls and s2!=sid]; J=len(nb); X=np.full((n,J),np.nan); B=np.full((n,J),np.nan)
+        days=R.days(dt); lag=(1 if cls=='markets' else 0) if lag_override is None else lag_override; z=mc.nscore(r if read=='MOVE' else a); nb=[(R.days(d2),np.asarray(r2,float)) for c2,_,s2,d2,r2 in S if c2==cls and s2!=sid]; J=len(nb); X=np.full((n,J),np.nan); B=np.full((n,J),np.nan)
         for j,(jd,jr) in enumerate(nb):
             ja=np.abs(jr); jz=mc.nscore(jr if read=='MOVE' else ja); jm=pd.Series(ja).expanding(mc.MINMED).median().values; kk=cer.asof(days,jd,lag); ok=kk>=0; X[ok,j]=jz[kk[ok]]
             B[ok,j]=(jr[kk[ok]]>0) if read=='MOVE' else np.where(np.isnan(jm[kk[ok]]),np.nan,ja[kk[ok]]>jm[kk[ok]])
@@ -37,11 +37,11 @@ def addresses(S, sid, read):
         oday=np.r_[days[1:],days[-1]+1]; day=days
     else: day=np.arange(n); oday=day+1
     out.update(S=Sb,Sm=Sm,day=day,oday=oday); return out
-def events(S, H, read, until=None):
+def events(S, H, read, until=None, lag_override=None):
     """Every call of a read, in the order the world met them."""
     rows=[]; forests={'markets':0,'weather':1}
     for t,(cls,_,sid,dt,r) in enumerate(S):
-        h=H[(H.series_id==sid)&(H['read']==read)].sort_values('step'); A=addresses(S,sid,read); st=h.step.values
+        h=H[(H.series_id==sid)&(H['read']==read)].sort_values('step'); A=addresses(S,sid,read,lag_override); st=h.step.values
         d=pd.DataFrame(dict(tree=t,forest=forests.get(cls,-1),series_id=sid,step=st,day=A['day'][st],oday=A['oday'][st],y=h.outcome.values.astype(float),q0=h.null_probability.values,T0=A['T0'][st],T1=A['T1'][st],T2=A['T2'][st],S=A['S'][st],Sm=A['Sm'][st]))
         rows.append(d)
     E=pd.concat(rows,ignore_index=True)
