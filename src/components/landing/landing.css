@@ -89,14 +89,15 @@
 }
 .lp-hero-enter-btn {
   display: inline-block; padding: 16px 32px;
-  font-size: 0.85rem; font-weight: 600; letter-spacing: 0.08em;
-  background: var(--lp-text); color: var(--lp-black);
+  font-size: 0.85rem; font-weight: 500; letter-spacing: 0.08em;
+  background: transparent; color: var(--lp-text);
   text-decoration: none; text-transform: uppercase;
   border: 1px solid var(--lp-text);
-  transition: opacity .2s;
+  transition: background .2s, color .2s;
 }
-.lp-hero-enter-btn:hover { opacity: 0.85; border-color: #1e6dc4; color: #1e6dc4; background: transparent; }
-.lp-hero-enter-btn:active { border-color: #0d55a1; color: #0d55a1; background: transparent; }
+.lp-hero-enter-btn:hover { background: var(--lp-text); color: var(--lp-black); }
+.lp-hero-enter-btn:active { background: var(--lp-text); color: var(--lp-black); }
+.lp-hero-enter-btn strong { font-weight: 800; }
 .lp-hero-caption {
   font-size: 0.7rem; color: var(--lp-muted); margin-top: 14px;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
