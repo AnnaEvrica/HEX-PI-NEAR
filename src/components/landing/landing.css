@@ -123,6 +123,22 @@
   color: var(--lp-muted); max-width: 52ch; margin: 0;
 }
 
+/* ── About: heading + paragraph side by side, images below ── */
+.lp-about-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start;
+}
+.lp-about-body { margin-top: 4px; }
+.lp-about-images {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 64px;
+}
+.lp-about-fig { margin: 0; }
+.lp-about-fig img { width: 100%; display: block; filter: grayscale(15%); }
+.lp-about-fig figcaption {
+  margin-top: 12px; font-size: 0.68rem; color: var(--lp-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.12em; text-transform: uppercase;
+}
+
 /* ── App card ── */
 .lp-app-card {
   margin-top: 48px; border: 1px solid var(--lp-line); padding: 36px; max-width: 460px;
@@ -223,4 +239,6 @@
   .lp-compare-col:first-child { border-right: none; border-bottom: 1px solid var(--lp-line); }
   .lp-app-card { padding: 28px; }
   .lp-hero-image { max-width: 100%; }
+  .lp-about-grid { grid-template-columns: 1fr; gap: 24px; }
+  .lp-about-images { grid-template-columns: 1fr; gap: 16px; }
 }
