@@ -8,17 +8,35 @@ const RAVEN_IMAGES = {
   finale: 'https://media.base44.com/images/public/69eef3d514386627566a9bf6/dedf5bbd6_r3.png',
 };
 
+// SVG filter: turns near-white pixels transparent so the raven sits directly
+// on the dark landing background instead of inside a white box.
+const WHITE_REMOVAL_FILTER = (
+  <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">
+    <defs>
+      <filter id="raven-kill-white">
+        <feColorMatrix
+          type="matrix"
+          values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  -0.9 -0.9 -0.9 1 0.15"
+        />
+      </filter>
+    </defs>
+  </svg>
+);
+
 const RavenArt = forwardRef(function RavenArt({ variant, className, id }, ref) {
   return (
-    <img
-      ref={ref}
-      id={id}
-      src={RAVEN_IMAGES[variant]}
-      alt=""
-      aria-hidden="true"
-      className={`lp-raven-art ${className || ''}`}
-      decoding="async"
-    />
+    <>
+      {WHITE_REMOVAL_FILTER}
+      <img
+        ref={ref}
+        id={id}
+        src={RAVEN_IMAGES[variant]}
+        alt=""
+        aria-hidden="true"
+        className={`lp-raven-art ${className || ''}`}
+        decoding="async"
+      />
+    </>
   );
 });
 

@@ -77,6 +77,16 @@
 .lp-hero-image {
   max-width: 680px; width: 100%; margin: 56px auto 0; display: block;
 }
+
+/* Raven artwork: white background keyed out via SVG filter, blue halo
+   outline shadow in its place. */
+.lp-raven-art {
+  filter:
+    url(#raven-kill-white)
+    drop-shadow(0 0 6px rgba(30, 109, 196, 0.90))
+    drop-shadow(0 0 18px rgba(30, 109, 196, 0.55))
+    drop-shadow(0 0 36px rgba(30, 109, 196, 0.30));
+}
 .lp-hero-enter-btn {
   display: inline-block; padding: 16px 32px;
   font-size: 0.85rem; font-weight: 600; letter-spacing: 0.08em;
