@@ -1,3 +1,5 @@
+import EchoChamberSpiral from './EchoChamberSpiral';
+
 export default function AboutSection() {
   return (
     <section className="lp-section" id="about">
@@ -11,12 +13,9 @@ export default function AboutSection() {
             in the decay, then calibrating each signal against what actually happens.
           </p>
         </div>
-        <figure className="lp-about-fig">
-          <img
-            src="https://media.base44.com/images/public/69eef3d514386627566a9bf6/be9618fe5_generated_image.png"
-            alt="Bird's-eye view of an echo chamber cave with raven silhouettes"
-          />
-          <figcaption>Looking above the echo chamber</figcaption>
+        <figure className="lp-about-fig lp-echo-fig">
+          <EchoChamberSpiral />
+          <figcaption>The echo chamber — where signals decay into shadows</figcaption>
         </figure>
       </div>
     </section>
