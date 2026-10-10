@@ -13,7 +13,7 @@ export default function AboutSection() {
         </div>
         <figure className="lp-about-fig lp-about-video-fig">
           <video
-            src="https://media.base44.com/videos/public/69eef3d514386627566a9bf6/311020538_Raven_Cave_v5.mp4"
+            src="https://media.base44.com/videos/public/69eef3d514386627566a9bf6/aae69e58e_Raven_Cave_v6.mp4"
             autoPlay
             loop
             muted
