@@ -11,17 +11,12 @@ export default function AboutSection() {
             in the decay, then calibrating each signal against what actually happens.
           </p>
         </div>
-        <figure className="lp-about-fig lp-about-video-fig">
-          <video
-            src="https://media.base44.com/videos/public/69eef3d514386627566a9bf6/aae69e58e_Raven_Cave_v6.mp4"
-            autoPlay
-            loop
-            muted
-            playsInline
-            controls
-            aria-label="Ravens watching their shadows in Plato's cave, then one flies out to a bird's-eye view"
+        <figure className="lp-about-fig">
+          <img
+            src="https://media.base44.com/images/public/69eef3d514386627566a9bf6/be9618fe5_generated_image.png"
+            alt="Bird's-eye view of an echo chamber cave with raven silhouettes"
           />
-          <figcaption>Ravens in the cave — then one sees from above</figcaption>
+          <figcaption>Looking above the echo chamber</figcaption>
         </figure>
       </div>
     </section>
