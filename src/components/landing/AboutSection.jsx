@@ -15,7 +15,7 @@ export default function AboutSection() {
         </div>
         <figure className="lp-about-fig lp-echo-fig">
           <EchoChamberSpiral />
-          <figcaption>Signals ripple out, return, and reinforce — then align into harmony</figcaption>
+          <figcaption>Artificial Intelligence vs Probabilistic Intelligence</figcaption>
         </figure>
       </div>
     </section>
