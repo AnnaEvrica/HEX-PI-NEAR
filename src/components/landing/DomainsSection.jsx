@@ -1,13 +1,22 @@
+import EnvironmentalSignalGraphic from './EnvironmentalSignalGraphic';
+
 export default function DomainsSection() {
   return (
     <section className="lp-section" id="next">
       <div className="lp-section-inner">
         <div className="lp-section-label">04 / What's next</div>
-        <h2 className="lp-section-heading">Reading <em>environmental signals.</em></h2>
-        <p className="lp-section-body">
-          HEX6-BLE (Binaural Linguistic Engine) Server — reading environmental signals, enhancing accuracy
-          further in an organic feedback loop. Different questions, the same discipline.
-        </p>
+        <div className="lp-section-side">
+          <div>
+            <h2 className="lp-section-heading">Reading <em>environmental signals.</em></h2>
+            <p className="lp-section-body">
+              HEX6-BLE (Binaural Linguistic Engine) Server — reading environmental signals, enhancing accuracy
+              further in an organic feedback loop. Different questions, the same discipline.
+            </p>
+          </div>
+          <figure className="lp-section-side-fig">
+            <EnvironmentalSignalGraphic />
+          </figure>
+        </div>
         <div className="lp-compare-grid">
           <div className="lp-compare-col">
             <div className="lp-compare-label">Trading</div>
