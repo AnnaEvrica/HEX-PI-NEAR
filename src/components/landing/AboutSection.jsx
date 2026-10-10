@@ -14,7 +14,7 @@ export default function AboutSection() {
         <div className="lp-about-images">
           <figure className="lp-about-fig">
             <img
-              src="https://media.base44.com/images/public/69eef3d514386627566a9bf6/c2f7b26cf_generated_image.png"
+              src="https://media.base44.com/images/public/69eef3d514386627566a9bf6/74de249be_generated_image.png"
               alt="Plato's cave as an echo chamber"
               decoding="async"
             />
@@ -22,7 +22,7 @@ export default function AboutSection() {
           </figure>
           <figure className="lp-about-fig">
             <img
-              src="https://media.base44.com/images/public/69eef3d514386627566a9bf6/ddbcd0ce1_generated_image.png"
+              src="https://media.base44.com/images/public/69eef3d514386627566a9bf6/9fb7dde81_generated_image.png"
               alt="Bird's eye view of lights, shadows, and forms"
               decoding="async"
             />
