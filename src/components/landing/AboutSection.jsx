@@ -15,7 +15,7 @@ export default function AboutSection() {
         </div>
         <figure className="lp-about-fig lp-echo-fig">
           <EchoChamberSpiral />
-          <figcaption>The echo chamber — where signals decay into shadows</figcaption>
+          <figcaption>Signals ripple out, return, and reinforce — then align into harmony</figcaption>
         </figure>
       </div>
     </section>

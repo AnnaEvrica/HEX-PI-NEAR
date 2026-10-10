@@ -135,7 +135,7 @@
 .lp-about-fig img { width: 100%; display: block; filter: grayscale(15%); }
 .lp-about-video-fig video { width: 100%; display: block; }
 .lp-echo-fig {
-  max-width: 340px; margin: 64px auto 0; display: flex; flex-direction: column; align-items: center;
+  max-width: 560px; margin: 64px auto 0; display: flex; flex-direction: column; align-items: center;
 }
 .lp-echo-fig svg { width: 100%; height: auto; display: block; }
 .lp-echo-fig figcaption { text-align: center; }
