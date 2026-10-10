@@ -85,7 +85,8 @@
   border: 1px solid var(--lp-text);
   transition: opacity .2s;
 }
-.lp-hero-enter-btn:hover { opacity: 0.85; }
+.lp-hero-enter-btn:hover { opacity: 0.85; border-color: #1e6dc4; color: #1e6dc4; background: transparent; }
+.lp-hero-enter-btn:active { border-color: #0d55a1; color: #0d55a1; background: transparent; }
 .lp-hero-caption {
   font-size: 0.7rem; color: var(--lp-muted); margin-top: 14px;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
