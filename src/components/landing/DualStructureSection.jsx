@@ -1,13 +1,22 @@
+import DualDisciplineGraphic from './DualDisciplineGraphic';
+
 export default function DualStructureSection() {
   return (
     <section className="lp-section" id="method">
       <div className="lp-section-inner">
         <div className="lp-section-label">The Method</div>
-        <h2 className="lp-section-heading">One engine. Two <em>disciplines.</em></h2>
-        <p className="lp-section-body">
-          One layer finds precision through structural signals. The other extracts value through contextual
-          resonance. Together: a decision both accurate and useful.
-        </p>
+        <div className="lp-section-side">
+          <div>
+            <h2 className="lp-section-heading">One engine. Two <em>disciplines.</em></h2>
+            <p className="lp-section-body">
+              One layer finds precision through structural signals. The other extracts value through contextual
+              resonance. Together: a decision both accurate and useful.
+            </p>
+          </div>
+          <figure className="lp-section-side-fig">
+            <DualDisciplineGraphic />
+          </figure>
+        </div>
         <div className="lp-compare-grid">
           <div className="lp-compare-col">
             <div className="lp-compare-label">Layer I — Signals</div>

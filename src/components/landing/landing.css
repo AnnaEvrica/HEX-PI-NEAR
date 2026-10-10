@@ -184,6 +184,76 @@
   }
 }
 .lp-echo-fig figcaption { text-align: center; }
+
+/* ── Full-width figure (About section) ── */
+.lp-fullwidth-fig {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  margin-top: 64px;
+}
+.lp-fullwidth-fig svg { width: 100%; height: auto; display: block; }
+
+/* ── Side-by-side section + image layout ── */
+.lp-section-side {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; margin-bottom: 48px;
+}
+.lp-section-side-fig { margin: 0; }
+.lp-section-side-fig svg { width: 100%; height: auto; display: block; }
+
+/* ── Decay dot pulse ── */
+.lp-decay-dot {
+  animation: lp-decay-pulse 3s ease-in-out infinite;
+}
+@keyframes lp-decay-pulse {
+  0%, 100% { opacity: 0.25; }
+  50%      { opacity: 1; }
+}
+
+/* ── Decay scan sweep ── */
+.lp-decay-scan {
+  transform-box: fill-box;
+  animation: lp-scan-sweep 8s linear infinite;
+}
+@keyframes lp-scan-sweep {
+  0%   { transform: translateX(0); opacity: 0; }
+  5%   { opacity: 0.5; }
+  95%  { opacity: 0.5; }
+  100% { transform: translateX(1150px); opacity: 0; }
+}
+
+/* ── Feedback loop orbit ── */
+.lp-loop-particle {
+  transform-box: view-box;
+  transform-origin: 200px 150px;
+  animation: lp-loop-orbit 4s linear infinite;
+}
+@keyframes lp-loop-orbit {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── Stream dot flow ── */
+.lp-stream-dot {
+  animation: lp-stream-flow 2s ease-in-out infinite;
+}
+@keyframes lp-stream-flow {
+  0%, 100% { opacity: 0.1; }
+  50%      { opacity: 0.85; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-decay-dot, .lp-decay-scan, .lp-loop-particle, .lp-stream-dot {
+    animation: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .lp-section-side { grid-template-columns: 1fr; gap: 32px; }
+}
 .lp-about-fig figcaption {
   margin-top: 12px; font-size: 0.68rem; color: var(--lp-muted);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;

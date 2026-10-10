@@ -1,4 +1,4 @@
-import EchoChamberSpiral from './EchoChamberSpiral';
+import DecayPatternGraphic from './DecayPatternGraphic';
 
 export default function AboutSection() {
   return (
@@ -13,10 +13,9 @@ export default function AboutSection() {
             in the decay, then calibrating each signal against what actually happens.
           </p>
         </div>
-        <figure className="lp-about-fig lp-echo-fig">
-          <EchoChamberSpiral />
-          <figcaption>Artificial Intelligence vs Probabilistic Intelligence</figcaption>
-        </figure>
+      </div>
+      <div className="lp-fullwidth-fig">
+        <DecayPatternGraphic />
       </div>
     </section>
   );

@@ -1,13 +1,22 @@
+import NovelFrameworkGraphic from './NovelFrameworkGraphic';
+
 export default function ComparisonSection() {
   return (
     <section className="lp-section" id="science">
       <div className="lp-section-inner">
         <div className="lp-section-label">The Science</div>
-        <h2 className="lp-section-heading">The novel framework for <em>neural engineering.</em></h2>
-        <p className="lp-section-body">
-          Conventional AI recognizes patterns and responds. Hex weighs evidence, balances against history,
-          and adapts through feedback — the way living systems navigate uncertainty.
-        </p>
+        <div className="lp-section-side">
+          <div>
+            <h2 className="lp-section-heading">The novel framework for <em>neural engineering.</em></h2>
+            <p className="lp-section-body">
+              Conventional AI recognizes patterns and responds. Hex weighs evidence, balances against history,
+              and adapts through feedback — the way living systems navigate uncertainty.
+            </p>
+          </div>
+          <figure className="lp-section-side-fig">
+            <NovelFrameworkGraphic />
+          </figure>
+        </div>
         <div className="lp-compare-grid">
           <div className="lp-compare-col">
             <div className="lp-compare-label">Conventional AI</div>
