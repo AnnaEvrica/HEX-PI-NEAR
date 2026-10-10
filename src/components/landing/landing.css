@@ -272,6 +272,15 @@
   50%      { opacity: 0.2; }
 }
 
+/* ── 64-state hyperspace signal dot pulse ── */
+.lp-signal-dot {
+  animation: lp-signal-pulse 2s ease-in-out infinite;
+}
+@keyframes lp-signal-pulse {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 1; }
+}
+
 /* ── Measurement tick fade ── */
 .lp-measure-tick {
   animation: lp-tick-fade 3s ease-in-out infinite;
@@ -282,7 +291,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .lp-emanation-wave, .lp-study-line, .lp-measure-tick {
+  .lp-emanation-wave, .lp-study-line, .lp-measure-tick, .lp-signal-dot {
     animation: none !important;
   }
 }
