@@ -26,8 +26,10 @@
   border-bottom: 1px solid var(--lp-line);
 }
 .lp-logo {
-  font-size: 1rem; font-weight: 700; letter-spacing: -0.04em;
-  color: var(--lp-text); text-decoration: none;
+  display: block; text-decoration: none;
+}
+.lp-logo-img {
+  height: 26px; width: auto; display: block;
 }
 .lp-menu-btn {
   display: flex; flex-direction: column; gap: 5px;
@@ -75,6 +77,15 @@
 .lp-hero-image {
   max-width: 680px; width: 100%; margin: 56px auto 0; display: block;
 }
+.lp-hero-enter-btn {
+  display: inline-block; padding: 16px 32px;
+  font-size: 0.85rem; font-weight: 600; letter-spacing: 0.08em;
+  background: var(--lp-text); color: var(--lp-black);
+  text-decoration: none; text-transform: uppercase;
+  border: 1px solid var(--lp-text);
+  transition: opacity .2s;
+}
+.lp-hero-enter-btn:hover { opacity: 0.85; }
 .lp-hero-caption {
   font-size: 0.7rem; color: var(--lp-muted); margin-top: 14px;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
