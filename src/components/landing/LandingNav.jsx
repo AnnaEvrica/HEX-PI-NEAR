@@ -11,7 +11,7 @@ export default function LandingNav({ onOpenPolicy }) {
   return (
     <>
       <header className="lp-header">
-        <a href="https://evrica.tech" className="lp-logo" target="_blank" rel="noopener noreferrer">
+        <a href="https://hex6-ble.com" className="lp-logo" target="_blank" rel="noopener noreferrer">
           <img src="https://media.base44.com/images/public/69eef3d514386627566a9bf6/700b21227_logo.png" alt="Evrica" className="lp-logo-img" />
         </a>
         <button className="lp-menu-btn" onClick={() => setMenuOpen(true)} aria-label="Open menu">
