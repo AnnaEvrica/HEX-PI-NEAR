@@ -11,24 +11,18 @@ export default function AboutSection() {
             in the decay, then calibrating each signal against what actually happens.
           </p>
         </div>
-        <div className="lp-about-images">
-          <figure className="lp-about-fig">
-            <img
-              src="https://media.base44.com/images/public/69eef3d514386627566a9bf6/b3af427c4_generated_image.png"
-              alt="Plato's cave as an echo chamber"
-              decoding="async"
-            />
-            <figcaption>Plato's Cave — the echo chamber</figcaption>
-          </figure>
-          <figure className="lp-about-fig">
-            <img
-              src="https://media.base44.com/images/public/69eef3d514386627566a9bf6/f34186878_generated_image.png"
-              alt="Bird's eye view of lights, shadows, and forms"
-              decoding="async"
-            />
-            <figcaption>Bird's Eye — lights, shadows, forms</figcaption>
-          </figure>
-        </div>
+        <figure className="lp-about-fig lp-about-video-fig">
+          <video
+            src="https://media.base44.com/videos/public/69eef3d514386627566a9bf6/e2b6f7a16_Raven_Cave_Animation.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            controls
+            aria-label="Ravens watching their shadows in Plato's cave, then one flies out to a bird's-eye view"
+          />
+          <figcaption>Ravens in the cave — then one sees from above</figcaption>
+        </figure>
       </div>
     </section>
   );

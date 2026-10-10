@@ -133,6 +133,7 @@
 }
 .lp-about-fig { margin: 0; }
 .lp-about-fig img { width: 100%; display: block; filter: grayscale(15%); }
+.lp-about-video-fig video { width: 100%; display: block; }
 .lp-about-fig figcaption {
   margin-top: 12px; font-size: 0.68rem; color: var(--lp-muted);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
