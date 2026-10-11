@@ -486,6 +486,13 @@
   display: flex; flex-direction: column; gap: 6px; padding-top: 16px;
   border-top: 1px solid var(--lp-line);
 }
+.lp-ask-sources-toggle {
+  background: none; border: none; cursor: pointer; padding: 0; align-self: flex-start;
+  font-size: 0.7rem; color: var(--lp-muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.15em; text-transform: uppercase; transition: color .2s;
+  min-width: auto; min-height: auto;
+}
+.lp-ask-sources-toggle:hover { color: var(--lp-text); }
 .lp-ask-source-link {
   font-size: 0.7rem; color: var(--lp-muted); text-decoration: none;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;

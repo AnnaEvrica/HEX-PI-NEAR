@@ -1,6 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 
+// Strip the **Sources:** markdown block the pipeline appends to the answer text
+// — the sources are rendered as a collapsible toggle below, not as markdown.
+function stripSources(text) {
+  if (!text) return text;
+  return text.replace(/\n*\*\*Sources:\*\*[\s\S]*$/, '').trim();
+}
+
 const CATEGORIES = [
   'Personal Growth',
   'Relationships',
@@ -20,6 +27,7 @@ export default function TestHex() {
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState(null);
   const [asking, setAsking] = useState(false);
+  const [showSources, setShowSources] = useState(false);
 
   const answerRef = useRef(null);
 
@@ -41,6 +49,7 @@ export default function TestHex() {
     setQuestion(query);
     setAsking(true);
     setAnswer(null);
+    setShowSources(false);
     try {
       const res = await base44.functions.invoke('landingAsk', { question: query });
       setAnswer(res.data);
@@ -130,14 +139,24 @@ export default function TestHex() {
       {/* Answer */}
       {answer && (
         <div className="lp-ask-result" ref={answerRef}>
-          <p className="lp-ask-result-text">{answer.answer}</p>
+          <p className="lp-ask-result-text">{stripSources(answer.answer)}</p>
           {answer.sources && answer.sources.length > 0 && (
             <div className="lp-ask-sources">
-              {answer.sources.map((s, i) => (
-                <a key={i} href={s.url} target="_blank" rel="noopener noreferrer" className="lp-ask-source-link">
-                  {s.name}
-                </a>
-              ))}
+              <button
+                className="lp-ask-sources-toggle"
+                onClick={() => setShowSources(!showSources)}
+              >
+                {showSources ? 'Hide sources' : 'Sources'}
+              </button>
+              {showSources && (
+                <>
+                  {answer.sources.map((s, i) => (
+                    <a key={i} href={s.url} target="_blank" rel="noopener noreferrer" className="lp-ask-source-link">
+                      {s.name}
+                    </a>
+                  ))}
+                </>
+              )}
             </div>
           )}
         </div>
