@@ -1,9 +1,21 @@
 import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 
+const CATEGORIES = [
+  'Personal Growth',
+  'Relationships',
+  'Health & Wellness',
+  'Career',
+  'Technology',
+  'Predictions',
+];
+
+const BOOK_HEIGHTS = [176, 152, 188, 164, 180, 158];
+
 export default function TestHex() {
   const [prompts, setPrompts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState(null);
 
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState(null);
@@ -45,6 +57,10 @@ export default function TestHex() {
     ask(question);
   };
 
+  const selectBook = (prompt) => {
+    setSelected(selected?.category === prompt.category ? null : prompt);
+  };
+
   return (
     <div className="lp-test-hex">
       <div className="lp-test-hex-header">
@@ -55,30 +71,45 @@ export default function TestHex() {
         </p>
       </div>
 
-      {/* Popular prompts of the day — horizontal scroll */}
-      <div className="lp-prompts-scroll">
+      {/* Category books — stacked horizontally, animated */}
+      <div className="lp-books-shelf">
         {loading ? (
-          Array.from({ length: 6 }).map((_, i) => (
-            <div className="lp-prompt-card lp-prompt-skel" key={i}>
-              <div className="lp-prompt-skel-cat" />
-              <div className="lp-prompt-skel-line" />
-              <div className="lp-prompt-skel-line w-3/4" />
-            </div>
+          CATEGORIES.map((cat, i) => (
+            <div
+              key={cat}
+              className="lp-book lp-book-skel"
+              style={{ height: `${BOOK_HEIGHTS[i]}px`, animationDelay: `${i * 0.4}s` }}
+            />
           ))
         ) : (
           prompts.map((p, i) => (
             <button
-              key={i}
-              className="lp-prompt-card"
-              onClick={() => ask(p.prompt)}
+              key={p.category || i}
+              className={`lp-book ${selected?.category === p.category ? 'lp-book-active' : ''}`}
+              style={{ height: `${BOOK_HEIGHTS[i % BOOK_HEIGHTS.length]}px`, animationDelay: `${i * 0.4}s` }}
+              onClick={() => selectBook(p)}
               disabled={asking}
             >
-              <span className="lp-prompt-cat">{p.category}</span>
-              <span className="lp-prompt-text">{p.prompt}</span>
+              <span className="lp-book-label">{p.category}</span>
             </button>
           ))
         )}
       </div>
+
+      {/* Selected trending question */}
+      {selected && (
+        <div className="lp-trending-prompt">
+          <div className="lp-trending-source">{selected.trending_source}</div>
+          <p className="lp-trending-question">{selected.prompt}</p>
+          <button
+            className="lp-trending-ask"
+            onClick={() => ask(selected.prompt)}
+            disabled={asking}
+          >
+            {asking && question === selected.prompt ? 'Thinking...' : 'Ask Hex this question'}
+          </button>
+        </div>
+      )}
 
       {/* Ask your own */}
       <form className="lp-ask-form" onSubmit={handleSubmit}>

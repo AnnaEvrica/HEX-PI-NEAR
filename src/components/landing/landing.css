@@ -323,7 +323,7 @@
 .lp-test-hex {
   margin-top: 64px; padding-top: 48px; border-top: 1px solid var(--lp-line);
 }
-.lp-test-hex-header { margin-bottom: 32px; }
+.lp-test-hex-header { margin-bottom: 40px; }
 .lp-test-hex-title {
   font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 300; margin: 0 0 12px;
   letter-spacing: -0.03em; line-height: 1.1; color: var(--lp-text);
@@ -331,6 +331,62 @@
 .lp-test-hex-sub {
   font-size: 0.85rem; color: var(--lp-muted); line-height: 1.6; margin: 0; max-width: 44ch;
 }
+
+/* ── Category books shelf ── */
+.lp-books-shelf {
+  display: flex; align-items: flex-end; justify-content: center;
+  gap: 6px; margin: 32px 0; min-height: 200px;
+  overflow-x: auto; padding: 8px 0 16px; scrollbar-width: none;
+}
+.lp-books-shelf::-webkit-scrollbar { display: none; }
+.lp-book {
+  flex: 0 0 64px; width: 64px;
+  background: var(--lp-text); color: var(--lp-black);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px 8px; cursor: pointer; border: none;
+  transition: transform .3s ease, background .2s, color .2s;
+  animation: lp-book-bob 4s ease-in-out infinite;
+  min-width: 64px;
+}
+.lp-book:hover { transform: translateY(-14px); background: rgba(255,255,255,0.85); }
+.lp-book-active { transform: translateY(-20px); background: var(--lp-text); box-shadow: 0 0 0 2px var(--lp-text), 0 -4px 24px rgba(255,255,255,0.15); }
+.lp-book:disabled { opacity: 0.6; cursor: default; }
+.lp-book-label {
+  font-size: 0.72rem; font-weight: 800; letter-spacing: 0.02em;
+  text-transform: uppercase; line-height: 1.15; text-align: center;
+  writing-mode: vertical-rl; text-orientation: mixed;
+  word-break: break-word; max-height: 140px;
+}
+.lp-book-skel { background: rgba(255,255,255,0.06); animation: lp-book-bob 4s ease-in-out infinite; }
+
+@keyframes lp-book-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* ── Trending prompt card ── */
+.lp-trending-prompt {
+  margin-top: 8px; padding: 28px; border: 1px solid var(--lp-line);
+  background: rgba(255,255,255,0.02);
+}
+.lp-trending-source {
+  font-size: 0.65rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.15em; text-transform: uppercase; color: var(--lp-muted);
+  margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--lp-line);
+}
+.lp-trending-question {
+  font-size: 1rem; font-weight: 500; line-height: 1.5; color: var(--lp-text);
+  margin: 0 0 24px; letter-spacing: -0.02em;
+}
+.lp-trending-ask {
+  display: inline-block; padding: 12px 24px;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em;
+  background: var(--lp-text); color: var(--lp-black); border: none; cursor: pointer;
+  text-transform: uppercase; font-family: var(--lp-font); transition: opacity .2s;
+  min-width: auto; min-height: auto;
+}
+.lp-trending-ask:hover { opacity: 0.85; }
+.lp-trending-ask:disabled { opacity: 0.4; cursor: default; }
 
 /* ── Prompts horizontal scroll ── */
 .lp-prompts-scroll {
