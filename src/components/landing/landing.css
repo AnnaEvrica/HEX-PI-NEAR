@@ -319,6 +319,16 @@
 }
 .lp-app-link:hover { opacity: 0.7; }
 
+/* ── Science teaser ── */
+.lp-science-teaser {
+  margin-top: 64px; padding-top: 40px; border-top: 1px solid var(--lp-line);
+  max-width: 52ch;
+}
+.lp-science-teaser-body {
+  font-size: clamp(0.95rem, 1.2vw, 1.05rem); line-height: 1.65;
+  color: var(--lp-muted); margin: 0 0 24px;
+}
+
 /* ── Comparison grid (Science + Method) ── */
 .lp-compare-grid {
   display: grid; grid-template-columns: 1fr 1fr; gap: 0;

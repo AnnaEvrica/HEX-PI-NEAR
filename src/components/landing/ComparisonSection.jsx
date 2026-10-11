@@ -39,6 +39,17 @@ export default function ComparisonSection() {
             </ul>
           </div>
         </div>
+        <div className="lp-science-teaser">
+          <div className="lp-section-label">What's coming</div>
+          <p className="lp-science-teaser-body">
+            The HEX6-BLE server: a modular computing system investigating how Probabilistic Intelligence
+            interacts with mycelium biofeedback to predict, coordinate, and optimize energy and resource
+            flows across interconnected environments.
+          </p>
+          <a className="lp-app-link" href="https://evrica.tech" target="_blank" rel="noopener noreferrer">
+            Evrica Technologies Inc. →
+          </a>
+        </div>
       </div>
     </section>
   );
