@@ -70,8 +70,10 @@ export async function runAnswerPipeline(base44: any, opts: {
   userName?: string;
   userMemory?: any;
   logToLedger?: boolean;
+  skipSourceVerification?: boolean;
+  synthModel?: string;
 }): Promise<AnswerPipelineResult> {
-  const { message, clientContext, file_urls, userName = 'friend', userMemory = null, logToLedger = false } = opts;
+  const { message, clientContext, file_urls, userName = 'friend', userMemory = null, logToLedger = false, skipSourceVerification = false, synthModel } = opts;
   const speaker = 'Hex';
 
   const now = new Date();
@@ -289,7 +291,7 @@ Return JSON with:
       const fetchResult = await base44.integrations.Core.InvokeLLM(fetchPayload).catch(() => null);
 
       const verifiedSources = (askedForSources || fetchResult?.warrants_citation === true)
-        ? await verifiedSourcesBlock(fetchResult?.sources)
+        ? await verifiedSourcesBlock(fetchResult?.sources, skipSourceVerification)
         : { block: '', verified: [] };
       sourcesBlock = verifiedSources.block;
       verifiedSourcesArr = verifiedSources.verified || [];
@@ -360,7 +362,7 @@ Return JSON with:
   voice = `${voice}; sustain the register across the whole reply, let the structure carry, don't restate`;
   const synthPayload: Record<string, unknown> = {
     prompt: composePrompt(stateBlock, dataBlock, isCasual),
-    model: CLAUDE_MODEL,
+    model: synthModel || CLAUDE_MODEL,
     response_json_schema: {
       type: 'object',
       properties: {

@@ -66,10 +66,22 @@ async function urlResolves(url) {
 // Async version of filterSourcesBlock: same quality gates, plus a live
 // resolution check on every surviving URL. Use this wherever the sources
 // will be shown to the user.
-export async function verifiedSourcesBlock(sources) {
+export async function verifiedSourcesBlock(sources, skipVerification = false) {
   const block = filterSourcesBlock(sources);
   if (!block) return { block: '', verified: [] };
   const lines = block.split('\n');
+  if (skipVerification) {
+    // Skip live URL checks — still filtered/deduped, but no network round-trips.
+    const kept = lines.map((line) => {
+      const m = line.match(/\]\((https?:\/\/[^)]+)\)$/);
+      if (!m) return null;
+      const meta = (sources || []).find((s) => s?.url === m[1]) || {};
+      const dated = /^\d{4}(-\d{2}){0,2}$/.test(String(meta.published || '').trim());
+      const label = dated ? `${meta.name} — ${meta.published}` : meta.name;
+      return { line: `[${label}](${m[1]})`, meta };
+    }).filter(Boolean);
+    return { block: kept.map((k) => k.line).join('\n'), verified: kept.map((k) => k.meta) };
+  }
   const checks = await Promise.all(lines.map(async (line) => {
     const m = line.match(/\]\((https?:\/\/[^)]+)\)$/);
     if (!m) return null;
