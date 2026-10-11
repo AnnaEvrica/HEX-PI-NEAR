@@ -383,6 +383,17 @@
 .lp-signal-skel-line {
   width: 100%; height: 10px; background: rgba(255,255,255,0.06); margin-bottom: 8px;
 }
+.lp-signal-sources {
+  display: flex; flex-direction: column; gap: 6px; margin-top: auto; padding-top: 12px;
+  border-top: 1px solid var(--lp-line);
+}
+.lp-signal-source-link {
+  font-size: 0.7rem; color: var(--lp-muted); text-decoration: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.05em; line-height: 1.4;
+  transition: color .2s; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.lp-signal-source-link:hover { color: var(--lp-text); }
 
 @media (max-width: 768px) {
   .lp-signals-grid { grid-template-columns: 1fr; }

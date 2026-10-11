@@ -14,11 +14,7 @@ export default function PopularSignals() {
     return () => { cancelled = true; };
   }, []);
 
-  const cols = [
-    ...(data?.questions || []).map((q) => ({ kind: 'question', ...q })),
-    data?.prediction ? { kind: 'prediction', ...data.prediction } : null,
-  ].filter(Boolean);
-
+  const cols = (data?.questions || []).map((q) => ({ kind: 'question', ...q }));
   const skeleton = Array.from({ length: 4 }, (_, i) => ({ kind: 'skeleton', i }));
 
   return (
@@ -35,25 +31,25 @@ export default function PopularSignals() {
           )}
           {col.kind === 'question' && (
             <>
-              <div className="lp-signal-label">{col.topic}</div>
+              <div className="lp-signal-label">{col.category}</div>
               <h4 className="lp-signal-q">{col.question}</h4>
+              {col.probability != null && (
+                <div className="lp-signal-prob">
+                  <span className="lp-signal-prob-num">
+                    {(col.probability * 100).toFixed(0)}%
+                  </span>
+                  <span className="lp-signal-prob-dir">{col.direction || ''}</span>
+                </div>
+              )}
               <p className="lp-signal-a">{col.answer}</p>
-            </>
-          )}
-          {col.kind === 'prediction' && (
-            <>
-              <div className="lp-signal-label">Live prediction</div>
-              <h4 className="lp-signal-q">{(col.question || '').slice(0, 120)}{col.question && col.question.length > 120 ? '…' : ''}</h4>
-              <div className="lp-signal-prob">
-                <span className="lp-signal-prob-num">
-                  {col.probability != null ? `${(col.probability * 100).toFixed(0)}%` : '—'}
-                </span>
-                <span className="lp-signal-prob-dir">{col.direction || ''}</span>
-              </div>
-              {col.base_rate != null && (
-                <p className="lp-signal-a">
-                  Usual odds: {(col.base_rate * 100).toFixed(0)}%.
-                </p>
+              {col.sources && col.sources.length > 0 && (
+                <div className="lp-signal-sources">
+                  {col.sources.map((s, i) => (
+                    <a key={i} href={s.url} target="_blank" rel="noopener noreferrer" className="lp-signal-source-link">
+                      {s.name}
+                    </a>
+                  ))}
+                </div>
               )}
             </>
           )}
