@@ -11,6 +11,7 @@ export async function answerQuestion(base44, question: string): Promise<{ answer
     userName: 'friend',
     logToLedger: false,
     skipSourceVerification: true,
+    forceRetrieval: true,
   });
   return { answer: result.response, sources: result.sources };
 }

@@ -72,8 +72,9 @@ export async function runAnswerPipeline(base44: any, opts: {
   logToLedger?: boolean;
   skipSourceVerification?: boolean;
   synthModel?: string;
+  forceRetrieval?: boolean;
 }): Promise<AnswerPipelineResult> {
-  const { message, clientContext, file_urls, userName = 'friend', userMemory = null, logToLedger = false, skipSourceVerification = false, synthModel } = opts;
+  const { message, clientContext, file_urls, userName = 'friend', userMemory = null, logToLedger = false, skipSourceVerification = false, synthModel, forceRetrieval = false } = opts;
   const speaker = 'Hex';
 
   const now = new Date();
@@ -228,7 +229,7 @@ ${speaker}:`;
     const weighted = stakes.high;
     weightedTurn = weighted;
 
-    if (intent === 'casual' && !weighted) {
+    if (intent === 'casual' && !weighted && !forceRetrieval) {
       isCasual = true;
       const casMessages = history.slice(-12).map(m => m.content).filter(Boolean);
       const casRes = resonanceSignature(casMessages);
