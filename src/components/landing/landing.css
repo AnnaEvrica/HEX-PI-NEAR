@@ -482,6 +482,14 @@
 .lp-ask-result-text {
   font-size: 0.9rem; line-height: 1.65; color: var(--lp-text); margin: 0 0 20px; white-space: pre-wrap;
 }
+.lp-ask-result-close {
+  position: absolute; top: 12px; right: 12px;
+  background: none; border: none; cursor: pointer;
+  font-size: 1.2rem; color: var(--lp-muted); line-height: 1; padding: 4px;
+  transition: color .2s;
+  min-width: auto; min-height: auto;
+}
+.lp-ask-result-close:hover { color: var(--lp-text); }
 .lp-ask-sources {
   display: flex; flex-direction: column; gap: 6px; padding-top: 16px;
   border-top: 1px solid var(--lp-line);

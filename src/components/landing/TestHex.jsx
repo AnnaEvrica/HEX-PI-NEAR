@@ -139,6 +139,11 @@ export default function TestHex() {
       {/* Answer */}
       {answer && (
         <div className="lp-ask-result" ref={answerRef}>
+          <button
+            className="lp-ask-result-close"
+            onClick={() => { setAnswer(null); setShowSources(false); }}
+            aria-label="Close answer"
+          >×</button>
           <p className="lp-ask-result-text">{stripSources(answer.answer)}</p>
           {answer.sources && answer.sources.length > 0 && (
             <div className="lp-ask-sources">
