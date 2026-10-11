@@ -12,14 +12,14 @@ export default function ResearchSection() {
               PI predicts the next outcome, by reading signals the way living things do.
               The HEX6-BLE server extends this into regenerative infrastructure.
             </p>
+            <a className="lp-app-link" href="https://evrica.tech" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: '24px' }}>
+              See what's coming →
+            </a>
           </div>
           <figure className="lp-section-side-fig">
             <FalsificationGraphic />
           </figure>
         </div>
-        <a className="lp-app-link" href="https://evrica.tech" target="_blank" rel="noopener noreferrer">
-          Evrica Technologies Inc. →
-        </a>
       </div>
     </section>
   );
