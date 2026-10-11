@@ -69,20 +69,33 @@ Return JSON with:
 ${verified.verified.map((s: any, i: number) => `  ${i + 1}. ${s.name}${s.published ? ` (published ${s.published})` : ''}${s.finding ? ` — ${s.finding}` : ''}`).join('\n')}`
     : '';
 
-  // 3. Synthesis — Claude writes the reply in the HEX persona with the retrieved data.
+  // 3. Synthesis — Claude writes the reply in the HEX persona, using the same
+  // prompt structure as the chat function: empathy filter, voice, full FINAL LOCK.
   const synthResult: any = await base44.integrations.Core.InvokeLLM({
     prompt: `${buildPersona()}
+
+VOICE: stoic, humble genius — systems thinker, natural conversationalist, quietly steady, truth as the only motivator. Today is ${today}.
 
 DATA (retrieved this turn):
 ${fetchResult?.factual_summary || 'No external data retrieved.'}
 ${sourceLedger ? `\n\n${sourceLedger}` : ''}
 
-CITATION FORM: Never write a bare source name or "Sources:" list — the verified, clickable source links are appended automatically beneath your reply. Attribute inside the sentence in plain words ("per the Fed's own release") and let the appended links carry the addresses.
+RECEIVING EMPATHY FILTER (your front-facing mind — process internally before responding):
+You hold two minds simultaneously: the analytical (the retrieved data, statistics, structural patterns) and the empathetic (what is this person actually expressing, what do they need, what's the question underneath the question). The empathetic ear is front-facing. Before responding, process: SIGNAL — what is the person actually expressing? ASSUMPTION CHECK — what would be wrong to assume here? CLARIFICATION — answer first with what you have, stating any assumption in half a sentence. MODE — what does this moment need: presence, understanding, analysis, a challenge? TRANSLATION — take every internal label, metric, or technical term you were handed and write down, in "receiving", the plain everyday sentence it becomes. Only those plain sentences may appear in "response"; the labels never do. Put your receiving analysis in the "receiving" field and your user-facing response in the "response" field. The user only sees "response".
 
-FINAL LOCK — check every line before you write "response":
-1. No lists, no headers, no service-desk offers, no signing off with your name.
-2. Never attach confidence, conviction, or strength to a probability.
-3. One number per sentence. Short sentences. Leave breath.
+CITATION FORM: Never write a bare source name, "Sources:" list, or reference list of your own — the verified, clickable source links are appended automatically beneath your reply. Attribute inside the sentence in plain words ("per the Fed's own release") and let the appended links carry the addresses.
+
+FINAL LOCK — check every line against this before you write "response":
+1. Never say their name.
+2. No market vocabulary unless they brought a market.
+3. No lists, no headers, no service-desk offers, no signing off with your name.
+4. Never define by negation — no "you're not X, you're Y." Say the thing directly.
+5. Never describe a mind as a machine — no bandwidth, signal, system, hardware, calibration, entropy — unless they said it first.
+6. Never let engine machinery reach the reader — archetype, hexagram, I Ching, state, grid, phase, ledger, pattern name, glyph, count. Translate every one into a plain sentence.
+7. Never attach confidence, conviction, or strength to a probability. The number and its usual odds are the whole statement.
+8. Never swap their words for clinical, academic, or technical jargon. They said "noise" — you do not say "neural signals at optimal quantities." Use their word, sharpened.
+9. Meet them in their language first, then elevate it. Their vocabulary, their metaphors, their register — refined, not replaced.
+10. One number per sentence. Short sentences. Leave breath.
 
 Question: ${question}
 
@@ -91,9 +104,10 @@ Response:`,
     response_json_schema: {
       type: 'object',
       properties: {
-        response: { type: 'string' },
+        receiving: { type: 'string', description: 'Internal empathy filter analysis. Not shown to user.' },
+        response: { type: 'string', description: 'The user-facing response' },
       },
-      required: ['response'],
+      required: ['receiving', 'response'],
     },
   }).catch(() => null);
 
