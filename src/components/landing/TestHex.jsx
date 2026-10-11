@@ -10,7 +10,7 @@ const CATEGORIES = [
   'Predictions',
 ];
 
-const BOOK_HEIGHTS = [176, 152, 188, 164, 180, 158];
+const BOOK_WIDTHS = [90, 84, 94, 86, 92, 82];
 
 export default function TestHex() {
   const [prompts, setPrompts] = useState([]);
@@ -78,7 +78,7 @@ export default function TestHex() {
             <div
               key={cat}
               className="lp-book lp-book-skel"
-              style={{ height: `${BOOK_HEIGHTS[i]}px`, animationDelay: `${i * 0.4}s` }}
+              style={{ width: `${BOOK_WIDTHS[i]}%` }}
             />
           ))
         ) : (
@@ -86,7 +86,7 @@ export default function TestHex() {
             <button
               key={p.category || i}
               className={`lp-book ${selected?.category === p.category ? 'lp-book-active' : ''}`}
-              style={{ height: `${BOOK_HEIGHTS[i % BOOK_HEIGHTS.length]}px`, animationDelay: `${i * 0.4}s` }}
+              style={{ width: `${BOOK_WIDTHS[i % BOOK_WIDTHS.length]}%` }}
               onClick={() => selectBook(p)}
               disabled={asking}
             >
