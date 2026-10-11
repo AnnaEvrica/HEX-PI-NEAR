@@ -4,7 +4,6 @@
 // state, no ledger, no boundary escalation. Just the engine's answer with
 // verified source links.
 import { runAnswerPipeline } from './answerPipeline.ts';
-import { WEB_MODEL } from './modelRouter.ts';
 
 export async function answerQuestion(base44, question: string): Promise<{ answer: string; sources: any[] }> {
   const result = await runAnswerPipeline(base44, {
@@ -12,7 +11,6 @@ export async function answerQuestion(base44, question: string): Promise<{ answer
     userName: 'friend',
     logToLedger: false,
     skipSourceVerification: true,
-    synthModel: WEB_MODEL,
   });
   return { answer: result.response, sources: result.sources };
 }
