@@ -319,6 +319,77 @@
 }
 .lp-app-link:hover { opacity: 0.7; }
 
+/* ── Popular signals 4-column grid ── */
+.lp-signals-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  margin-top: 48px;
+  border-top: 1px solid var(--lp-line);
+  border-bottom: 1px solid var(--lp-line);
+}
+.lp-signal-card {
+  padding: 28px 24px;
+  border-right: 1px solid var(--lp-line);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 200px;
+}
+.lp-signal-card:last-child { border-right: none; }
+.lp-signal-label {
+  font-size: 0.65rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--lp-muted);
+}
+.lp-signal-q {
+  font-size: 0.92rem;
+  font-weight: 500;
+  line-height: 1.4;
+  margin: 0;
+  color: var(--lp-text);
+  letter-spacing: -0.02em;
+}
+.lp-signal-a {
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--lp-muted);
+  margin: 0;
+}
+.lp-signal-prob {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 4px;
+}
+.lp-signal-prob-num {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--lp-text);
+  letter-spacing: -0.03em;
+}
+.lp-signal-prob-dir {
+  font-size: 0.75rem;
+  font-family: ui-monospace, monospace;
+  letter-spacing: 0.1em;
+  color: var(--lp-muted);
+  text-transform: uppercase;
+}
+.lp-signal-skel-label {
+  width: 60px; height: 10px; background: rgba(255,255,255,0.08); margin-bottom: 4px;
+}
+.lp-signal-skel-line {
+  width: 100%; height: 10px; background: rgba(255,255,255,0.06); margin-bottom: 8px;
+}
+
+@media (max-width: 768px) {
+  .lp-signals-grid { grid-template-columns: 1fr; }
+  .lp-signal-card { border-right: none; border-bottom: 1px solid var(--lp-line); min-height: auto; }
+  .lp-signal-card:last-child { border-bottom: none; }
+}
+
 /* ── Science teaser ── */
 .lp-science-teaser {
   margin-top: 64px; padding-top: 40px; border-top: 1px solid var(--lp-line);
