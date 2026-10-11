@@ -1,124 +1,32 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
-import { CLAUDE_MODEL, WEB_MODEL } from '../../shared/modelRouter.ts';
-import { buildPersona } from '../../shared/persona.ts';
-import { verifiedSourcesBlock } from '../../shared/chatHelpers.ts';
+import { CLAUDE_MODEL } from '../../shared/modelRouter.ts';
+import { IDENTITY_LINE, CONFIDENTIALITY_LINE } from '../../shared/persona.ts';
 
-// Public landing-page feed — 4 questions across categories, each answered
-// through the same retrieval + synthesis pipeline the chat function uses:
-// Gemini retrieves live facts + sources, every link is live-checked, then
-// Claude writes the reply in the HEX persona with verified citations appended.
-// One card ("Prediction") also carries the live engine probability read.
-// Cached for 6 hours so a busy landing page costs a handful of model calls a day.
+// Public landing-page feed — popular prompts of the day across diverse life
+// categories (personal growth, relationships, health, career, technology,
+// predictions). Built from recent real engine queries + Claude-generated
+// prompts to fill categories. Cached for 6 hours.
 
 const CACHE_MS = 6 * 60 * 60 * 1000;
 let cached: { at: number; data: any } | null = null;
 
-// Curated questions across categories. The first is the prediction card —
-// its question is replaced by the latest real engine query at runtime.
-const CURATED = [
-  { category: 'Prediction', question: 'What is the engine reading on the market right now?' },
-  { category: 'Markets', question: 'Is now a good time to buy Bitcoin, or should I wait?' },
-  { category: 'Macro', question: 'Are we heading into a recession?' },
-  { category: 'Technology', question: 'Will AI replace human judgement in financial decisions?' },
+const CATEGORIES = [
+  'Personal Growth',
+  'Relationships',
+  'Health & Wellness',
+  'Career',
+  'Technology',
+  'Predictions',
 ];
 
-// Claude sometimes returns the JSON-schema payload as a stringified string.
-function unwrapSynth(value: any): string {
-  if (typeof value !== 'string') {
-    if (value && typeof value === 'object' && value.response) return unwrapSynth(value.response);
-    return value == null ? '' : String(value);
-  }
-  try {
-    const parsed = JSON.parse(value);
-    return unwrapSynth(parsed?.response ?? parsed);
-  } catch {
-    return value;
-  }
-}
-
-async function answerQuestion(base44, question: string): Promise<{ answer: string; sources: any[] }> {
-  const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-
-  // 1. Retrieval — Gemini with web search pulls live facts + primary sources.
-  const fetchResult: any = await base44.integrations.Core.InvokeLLM({
-    prompt: `You are a data retrieval step for HEX [PI]. Search the web and pull the latest from authoritative sources for this question.
-
-SOURCE QUALITY (non-negotiable): Return primary, expert-authored sources in the field the question belongs to. Only what a specialist would cite. NEVER return listicles, SEO wellness/self-help blogs, content farms, Wikipedia, aggregators, or coaching sites. If the only hits are that tier, return an empty sources array.
-
-RECENCY: TODAY IS ${today}. Judge every figure against that date. Daily-published series (rates, prices, yields) must carry the most recent available observation. Date-stamp every time-sensitive figure in factual_summary.
-
-CITATION WARRANT: set warrants_citation=true whenever the answer rests on an empirical claim a reader could check.
-
-Question: ${question}
-
-Return JSON with:
-- factual_summary: the relevant facts you found — neutral, no conclusions
-- sources: array of {name, url, published, finding} — one entry per work you cite, in the order you introduce them. "url" must be the exact page the finding was read from. "published" its date (YYYY-MM or YYYY-MM-DD). "finding" a one-line restatement.
-- warrants_citation: boolean`,
-    model: WEB_MODEL,
-    add_context_from_internet: true,
-    response_json_schema: {
-      type: 'object',
-      properties: {
-        factual_summary: { type: 'string' },
-        sources: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: { name: { type: 'string' }, url: { type: 'string' }, published: { type: 'string' }, finding: { type: 'string' } },
-            required: ['name', 'url'],
-          },
-        },
-        warrants_citation: { type: 'boolean' },
-      },
-      required: ['factual_summary'],
-    },
-  }).catch(() => null);
-
-  // 2. Verify sources — live-check every URL, drop dead/hallucinated links.
-  const verified = (fetchResult?.warrants_citation !== false)
-    ? await verifiedSourcesBlock(fetchResult?.sources)
-    : { block: '', verified: [] };
-
-  const sourceLedger = verified.verified.length
-    ? `VERIFIED SOURCE LEDGER (these links, and ONLY these, will be attached under your reply — every work, date, or finding you name in prose must be one of these rows):
-${verified.verified.map((s: any, i: number) => `  ${i + 1}. ${s.name}${s.published ? ` (published ${s.published})` : ''}${s.finding ? ` — ${s.finding}` : ''}`).join('\n')}`
-    : '';
-
-  // 3. Synthesis — Claude writes the reply in the HEX persona with the retrieved data.
-  const synthResult: any = await base44.integrations.Core.InvokeLLM({
-    prompt: `${buildPersona()}
-
-DATA (retrieved this turn):
-${fetchResult?.factual_summary || 'No external data retrieved.'}
-${sourceLedger ? `\n\n${sourceLedger}` : ''}
-
-CITATION FORM: Never write a bare source name or "Sources:" list — the verified, clickable source links are appended automatically beneath your reply. Attribute inside the sentence in plain words ("per the Fed's own release") and let the appended links carry the addresses.
-
-FINAL LOCK — check every line before you write "response":
-1. No lists, no headers, no service-desk offers, no signing off with your name.
-2. Never attach confidence, conviction, or strength to a probability.
-3. One number per sentence. Short sentences. Leave breath.
-
-Question: ${question}
-
-Response:`,
-    model: CLAUDE_MODEL,
-    response_json_schema: {
-      type: 'object',
-      properties: {
-        response: { type: 'string' },
-      },
-      required: ['response'],
-    },
-  }).catch(() => null);
-
-  const answer = (synthResult && typeof synthResult === 'object' && synthResult.response)
-    ? unwrapSynth(synthResult.response)
-    : (fetchResult?.factual_summary || 'Unable to generate a response at this time.');
-
-  return { answer: answer.trim(), sources: verified.verified };
-}
+const FALLBACK_PROMPTS = [
+  { category: 'Personal Growth', prompt: 'How do I break a pattern of self-sabotage?' },
+  { category: 'Relationships', prompt: 'When is the right time to walk away from a friendship?' },
+  { category: 'Health & Wellness', prompt: 'What actually works for building sustainable habits?' },
+  { category: 'Career', prompt: 'Should I take the stable job or bet on the startup?' },
+  { category: 'Technology', prompt: 'Will AI replace creative work within five years?' },
+  { category: 'Predictions', prompt: 'What is the engine reading on Bitcoin right now?' },
+];
 
 export default async function(req: Request): Promise<Response> {
   try {
@@ -128,47 +36,68 @@ export default async function(req: Request): Promise<Response> {
 
     const base44 = createClientFromRequest(req);
 
-    // --- Pull the latest real engine prediction (CognitiveState) ---
+    // --- Pull recent real queries from the engine ---
+    let realQueries: string[] = [];
     let prediction: any = null;
     try {
       const page = await base44.asServiceRole.entities.CognitiveState.filter(
         {},
-        { sort: '-created_date', limit: 50 }
+        { sort: '-created_date', limit: 100 }
       );
       const items = (page && Array.isArray(page.items)) ? page.items : (Array.isArray(page) ? page : []);
+      realQueries = items.map((r: any) => r.query).filter(Boolean);
       prediction = items.reduce((best: any, r: any) =>
         (!best || (r.edge || 0) > (best.edge || 0)) ? r : best, null);
     } catch { /* non-blocking */ }
 
-    // --- Build the feed: 4 cards across categories ---
-    const questions = [];
+    // --- One Claude call: generate diverse prompts across categories ---
+    let prompts = FALLBACK_PROMPTS;
+    if (realQueries.length > 0 || true) {
+      const realList = realQueries.slice(0, 30).map((q, i) => `${i + 1}. ${q}`).join('\n');
+      const result = await base44.integrations.Core.InvokeLLM({
+        prompt: `${IDENTITY_LINE} ${CONFIDENTIALITY_LINE}
 
-    // 1. Prediction card — real engine query + probability, answered through the pipeline.
-    const predQuestion = prediction?.query || CURATED[0].question;
-    const predAnswer = await answerQuestion(base44, predQuestion);
-    questions.push({
-      category: CURATED[0].category,
-      question: predQuestion,
-      answer: predAnswer.answer,
-      sources: predAnswer.sources,
-      probability: prediction?.probability ?? null,
-      direction: prediction?.predicted_direction ?? null,
-      base_rate: prediction?.base_rate ?? null,
-      edge: prediction?.edge ?? null,
-    });
+You are generating the "popular prompts of the day" for the HEX [PI] landing page. These are questions visitors can click to test the engine.
 
-    // 2–4. Other categories — curated questions through the same pipeline.
-    for (let i = 1; i < CURATED.length; i++) {
-      const result = await answerQuestion(base44, CURATED[i].question);
-      questions.push({
-        category: CURATED[i].category,
-        question: CURATED[i].question,
-        answer: result.answer,
-        sources: result.sources,
+Categories (use exactly these): ${CATEGORIES.join(', ')}.
+
+${realQueries.length > 0 ? `Recent real questions people asked the engine:\n${realList}\n` : ''}
+
+Generate 8 prompts — at least one per category. Make them specific, engaging, and answerable with real data or genuine reasoning. Not generic ("How do I be happy?") but concrete ("What's the probability that the Fed cuts rates before year-end?"). Vary the tone — some direct, some curious, some provocative.
+
+Return JSON with a "prompts" array. Each item: {category (one of the categories above), prompt (the question)}.`,
+        model: CLAUDE_MODEL,
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            prompts: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  category: { type: 'string' },
+                  prompt: { type: 'string' },
+                },
+                required: ['category', 'prompt'],
+              },
+            },
+          },
+          required: ['prompts'],
+        },
       });
+      if (result?.prompts?.length) prompts = result.prompts.slice(0, 8);
     }
 
-    const data = { questions };
+    const data: any = {
+      prompts,
+      prediction: prediction ? {
+        question: prediction.query,
+        probability: prediction.probability,
+        direction: prediction.predicted_direction,
+        base_rate: prediction.base_rate,
+        edge: prediction.edge,
+      } : null,
+    };
     cached = { at: Date.now(), data };
     return Response.json(data);
   } catch (e) {

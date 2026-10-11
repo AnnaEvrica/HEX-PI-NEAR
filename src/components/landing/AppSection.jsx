@@ -1,5 +1,5 @@
 import CalibrationGraphic from './CalibrationGraphic';
-import PopularSignals from './PopularSignals';
+import TestHex from './TestHex';
 
 export default function AppSection() {
   return (
@@ -18,7 +18,7 @@ export default function AppSection() {
             <CalibrationGraphic />
           </figure>
         </div>
-        <PopularSignals />
+        <TestHex />
       </div>
     </section>
   );
