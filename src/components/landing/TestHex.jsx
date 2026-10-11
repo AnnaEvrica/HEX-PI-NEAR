@@ -3,7 +3,6 @@ import { base44 } from '@/api/base44Client';
 
 export default function TestHex() {
   const [prompts, setPrompts] = useState([]);
-  const [prediction, setPrediction] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const [question, setQuestion] = useState('');
@@ -18,7 +17,6 @@ export default function TestHex() {
       .then((res) => {
         if (cancelled) return;
         setPrompts(res.data?.prompts || []);
-        setPrediction(res.data?.prediction || null);
       })
       .catch(() => {})
       .finally(() => { if (!cancelled) setLoading(false); });
@@ -101,14 +99,6 @@ export default function TestHex() {
       {/* Answer */}
       {answer && (
         <div className="lp-ask-result" ref={answerRef}>
-          {prediction && answer?.answer && (
-            <div className="lp-ask-result-pred">
-              <span className="lp-ask-result-prob">
-                {prediction.probability != null ? `${(prediction.probability * 100).toFixed(0)}%` : '—'}
-              </span>
-              <span className="lp-ask-result-dir">{prediction.direction || ''}</span>
-            </div>
-          )}
           <p className="lp-ask-result-text">{answer.answer}</p>
           {answer.sources && answer.sources.length > 0 && (
             <div className="lp-ask-sources">

@@ -1,11 +1,10 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
-import { CLAUDE_MODEL } from '../../shared/modelRouter.ts';
+import { WEB_MODEL } from '../../shared/modelRouter.ts';
 import { IDENTITY_LINE, CONFIDENTIALITY_LINE } from '../../shared/persona.ts';
 
-// Public landing-page feed — popular prompts of the day across diverse life
-// categories (personal growth, relationships, health, career, technology,
-// predictions). Built from recent real engine queries + Claude-generated
-// prompts to fill categories. Cached for 6 hours.
+// Public landing-page feed — popular prompts of the day, generated from
+// what's actually trending on the web right now across diverse life
+// categories. Cached for 6 hours so trends refresh throughout the day.
 
 const CACHE_MS = 6 * 60 * 60 * 1000;
 let cached: { at: number; data: any } | null = null;
@@ -35,73 +34,50 @@ export default async function(req: Request): Promise<Response> {
     }
 
     const base44 = createClientFromRequest(req);
+    const today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-    // --- Pull recent real queries from the engine ---
-    let realQueries: string[] = [];
-    let prediction: any = null;
-    try {
-      const page = await base44.asServiceRole.entities.CognitiveState.filter(
-        {},
-        { sort: '-created_date', limit: 100 }
-      );
-      const items = (page && Array.isArray(page.items)) ? page.items : (Array.isArray(page) ? page : []);
-      realQueries = items.map((r: any) => r.query).filter(Boolean);
-      prediction = items.reduce((best: any, r: any) =>
-        (!best || (r.edge || 0) > (best.edge || 0)) ? r : best, null);
-    } catch { /* non-blocking */ }
+    // --- Single web-search call: find today's trending topics, generate prompts ---
+    const result: any = await base44.integrations.Core.InvokeLLM({
+      prompt: `${IDENTITY_LINE} ${CONFIDENTIALITY_LINE}
 
-    // --- One Claude call: generate diverse prompts across categories ---
-    let prompts = FALLBACK_PROMPTS;
-    if (realQueries.length > 0 || true) {
-      const realList = realQueries.slice(0, 30).map((q, i) => `${i + 1}. ${q}`).join('\n');
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `${IDENTITY_LINE} ${CONFIDENTIALITY_LINE}
+TODAY IS ${today}. Search the web for what is trending right now — the most discussed topics, news, and conversations of the day.
 
-You are generating the "popular prompts of the day" for the HEX [PI] landing page. These are questions visitors can click to test the engine.
+Generate 8 prompts based on today's trending topics. Each prompt must be a real question a visitor could ask Hex. Cover at least one prompt per category: ${CATEGORIES.join(', ')}.
 
-Categories (use exactly these): ${CATEGORIES.join(', ')}.
-
-${realQueries.length > 0 ? `Recent real questions people asked the engine:\n${realList}\n` : ''}
-
-Generate 8 prompts — at least one per category. Make them specific, engaging, and answerable with real data or genuine reasoning. Not generic ("How do I be happy?") but concrete ("What's the probability that the Fed cuts rates before year-end?"). Vary the tone — some direct, some curious, some provocative.
+Rules:
+- Base prompts on actual trending topics you found in your web search — not generic evergreen questions.
+- Make them specific, engaging, and answerable with real data or genuine reasoning.
+- Not generic ("How do I be happy?") but concrete and tied to what's happening today.
+- Vary the tone — some direct, some curious, some provocative.
 
 Return JSON with a "prompts" array. Each item: {category (one of the categories above), prompt (the question)}.`,
-        model: CLAUDE_MODEL,
-        response_json_schema: {
-          type: 'object',
-          properties: {
-            prompts: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  category: { type: 'string' },
-                  prompt: { type: 'string' },
-                },
-                required: ['category', 'prompt'],
+      model: WEB_MODEL,
+      add_context_from_internet: true,
+      response_json_schema: {
+        type: 'object',
+        properties: {
+          prompts: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                category: { type: 'string' },
+                prompt: { type: 'string' },
               },
+              required: ['category', 'prompt'],
             },
           },
-          required: ['prompts'],
         },
-      });
-      if (result?.prompts?.length) prompts = result.prompts.slice(0, 8);
-    }
+        required: ['prompts'],
+      },
+    });
 
-    const data: any = {
-      prompts,
-      prediction: prediction ? {
-        question: prediction.query,
-        probability: prediction.probability,
-        direction: prediction.predicted_direction,
-        base_rate: prediction.base_rate,
-        edge: prediction.edge,
-      } : null,
-    };
+    const prompts = result?.prompts?.length ? result.prompts.slice(0, 8) : FALLBACK_PROMPTS;
+    const data = { prompts };
     cached = { at: Date.now(), data };
     return Response.json(data);
   } catch (e) {
     console.error('landingSignals error:', e);
-    return Response.json({ error: e.message }, { status: 500 });
+    return Response.json({ prompts: FALLBACK_PROMPTS }, { status: 200 });
   }
 }
