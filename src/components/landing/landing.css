@@ -202,7 +202,7 @@
   display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; margin-bottom: 48px;
 }
 .lp-section-side-fig { margin: 0; }
-.lp-section--tight-top { padding-top: 24px; }
+.lp-section--tight-top { padding-top: 0; border-top: none; }
 .lp-section-side-fig svg { width: 100%; height: auto; display: block; }
 
 /* ── Decay dot pulse ── */
