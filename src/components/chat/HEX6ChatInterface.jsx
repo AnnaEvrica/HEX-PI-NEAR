@@ -502,7 +502,7 @@ export default function HEX6ChatInterface() {
     <div className="app-shell flex h-screen bg-background overflow-hidden">
       {/* Sidebar - hidden on mobile */}
       <div
-        className={`fixed inset-y-0 left-0 z-40 w-44 bg-card border-r border-border transition-transform duration-300 ${
+        className={`fixed inset-y-0 left-0 z-40 w-60 bg-card border-r border-border transition-transform duration-300 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } md:relative md:translate-x-0`}
       >

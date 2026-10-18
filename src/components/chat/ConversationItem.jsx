@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { X, Edit2, MessageSquare } from 'lucide-react';
+import { X, Edit2 } from 'lucide-react';
 
 export default function ConversationItem({ conversation, isSelected, onSelect, onRename, onDelete }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -53,12 +53,11 @@ export default function ConversationItem({ conversation, isSelected, onSelect, o
         />
       ) : (
         <>
-          <MessageSquare className="w-3 h-3 shrink-0 opacity-50" />
           <button
             onClick={onSelect}
             className="flex-1 min-w-0 text-left"
           >
-            <span className="text-[11px] leading-tight truncate block">{conversation.title}</span>
+            <span className="text-[12px] leading-tight truncate block">{conversation.title}</span>
           </button>
           <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
             <button
