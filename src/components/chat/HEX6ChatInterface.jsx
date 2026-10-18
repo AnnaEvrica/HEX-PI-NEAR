@@ -508,13 +508,22 @@ export default function HEX6ChatInterface() {
               />
               <h1 className="text-2xl font-bold tracking-tight">HEX [PI]</h1>
             </div>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="md:hidden p-1 hover:bg-muted rounded-sm text-sm flex items-center justify-center"
-              style={{ minWidth: '28px', minHeight: '28px' }}
-            >
-              ×
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={handleNewChat}
+                className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted text-secondary hover:text-foreground transition-colors"
+                title="New chat"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="md:hidden p-1 hover:bg-muted rounded-sm text-sm flex items-center justify-center"
+                style={{ minWidth: '28px', minHeight: '28px' }}
+              >
+                ×
+              </button>
+            </div>
           </div>
 
           <div className="flex-1 overflow-y-auto mb-2.5">
@@ -543,7 +552,7 @@ export default function HEX6ChatInterface() {
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Header */}
         <div className="flex items-center px-3 md:px-4 py-2 md:py-2.5 border-b border-border gap-2">
-          <div className="flex items-center shrink-0 gap-1">
+          <div className="flex items-center shrink-0">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="md:hidden p-1.5 hover:bg-muted rounded-sm flex items-center justify-center"
@@ -551,13 +560,6 @@ export default function HEX6ChatInterface() {
               style={{ minWidth: '32px', minHeight: '32px' }}
             >
               <Menu className="w-4 h-4" />
-            </button>
-            <button
-              onClick={handleNewChat}
-              className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted text-secondary hover:text-foreground transition-colors"
-              title="New chat"
-            >
-              <Plus className="w-4 h-4" />
             </button>
           </div>
           <div className="flex-1 min-w-0 px-2">
