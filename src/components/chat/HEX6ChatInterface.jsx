@@ -556,12 +556,10 @@ export default function HEX6ChatInterface() {
           <div className="flex-1 flex items-center justify-end gap-2">
             <button
               onClick={handleNewChat}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-primary text-primary-foreground text-[11px] font-medium hover:bg-primary/90 transition-colors"
-              style={{ minHeight: '30px' }}
+              className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted text-secondary hover:text-foreground transition-colors"
               title="New chat"
             >
-              <Plus className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">New Chat</span>
+              <Plus className="w-4 h-4" />
             </button>
             {traderEnabled && (
               <span className="text-[9px] md:text-[10px] text-accent px-1.5 py-0.5 rounded bg-accent/10 whitespace-nowrap">
