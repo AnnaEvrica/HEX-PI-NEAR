@@ -587,36 +587,57 @@ export default function HEX6ChatInterface() {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-3 md:px-4 py-3 md:py-5 space-y-3 md:space-y-4">
-          {messages.map((message) => (
-            <ChatMessage
-              key={message.id}
-              message={message}
-              copiedId={copiedId}
-              speakingId={speakingId}
-              onCopy={handleCopy}
-              onSpeak={handleSpeak}
-            />
-          ))}
-          {loading && (
-            <div className="flex justify-start">
-              <div className="ml-2 bg-muted/60 text-foreground border border-foreground/20 px-3 py-2 text-[13px] text-secondary flex flex-col gap-1.5 max-w-xs">
-                <div className="flex gap-1">
-                  <div className="w-1.5 h-1.5 rounded-full bg-secondary" style={{ animation: 'bounce 1.2s infinite', animationDelay: '0s' }} />
-                  <div className="w-1.5 h-1.5 rounded-full bg-secondary" style={{ animation: 'bounce 1.2s infinite', animationDelay: '0.2s' }} />
-                  <div className="w-1.5 h-1.5 rounded-full bg-secondary" style={{ animation: 'bounce 1.2s infinite', animationDelay: '0.4s' }} />
+        <div
+          className="relative flex-1 overflow-y-auto px-3 md:px-4 py-3 md:py-5 space-y-3 md:space-y-4"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, rgba(30, 109, 196, 0.10) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(30, 109, 196, 0.10) 1px, transparent 1px),
+              linear-gradient(to right, rgba(30, 109, 196, 0.05) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(30, 109, 196, 0.05) 1px, transparent 1px)
+            `,
+            backgroundSize: '120px 120px, 120px 120px, 24px 24px, 24px 24px',
+          }}
+        >
+          {/* Raven watermark */}
+          <img
+            src="https://media.base44.com/images/public/69eef3d514386627566a9bf6/a5e96338b_ChatGPTImageSep302026at09_23_15AM.png"
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] max-w-[700px] opacity-10 select-none"
+            style={{ mixBlendMode: 'multiply' }}
+          />
+          <div className="relative z-10">
+            {messages.map((message) => (
+              <ChatMessage
+                key={message.id}
+                message={message}
+                copiedId={copiedId}
+                speakingId={speakingId}
+                onCopy={handleCopy}
+                onSpeak={handleSpeak}
+              />
+            ))}
+            {loading && (
+              <div className="flex justify-start">
+                <div className="ml-2 bg-muted/60 text-foreground border border-foreground/20 px-3 py-2 text-[13px] text-secondary flex flex-col gap-1.5 max-w-xs">
+                  <div className="flex gap-1">
+                    <div className="w-1.5 h-1.5 rounded-full bg-secondary" style={{ animation: 'bounce 1.2s infinite', animationDelay: '0s' }} />
+                    <div className="w-1.5 h-1.5 rounded-full bg-secondary" style={{ animation: 'bounce 1.2s infinite', animationDelay: '0.2s' }} />
+                    <div className="w-1.5 h-1.5 rounded-full bg-secondary" style={{ animation: 'bounce 1.2s infinite', animationDelay: '0.4s' }} />
+                  </div>
+                  <span className="text-[11px] text-secondary/70 transition-all duration-500">{slowStep === null ? 'Thinking...' : SLOW_PATH_STEPS[slowStep]}</span>
                 </div>
-                <span className="text-[11px] text-secondary/70 transition-all duration-500">{slowStep === null ? 'Thinking...' : SLOW_PATH_STEPS[slowStep]}</span>
               </div>
-            </div>
-          )}
-          <style>{`
-            @keyframes bounce {
-              0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-              30% { transform: translateY(-6px); opacity: 1; }
-            }
-          `}</style>
-          <div ref={messagesEndRef} />
+            )}
+            <style>{`
+              @keyframes bounce {
+                0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+                30% { transform: translateY(-6px); opacity: 1; }
+              }
+            `}</style>
+            <div ref={messagesEndRef} />
+          </div>
         </div>
 
         {/* Input */}
