@@ -1,10 +1,9 @@
 import CalibrationGraphic from './CalibrationGraphic';
-import DecayPatternGraphic from './DecayPatternGraphic';
 import TestHex from './TestHex';
 
 export default function AppSection() {
   return (
-    <section className="lp-section" id="app">
+    <section className="lp-section lp-section--tight-top" id="app">
       <div className="lp-section-inner">
         <div className="lp-section-side">
           <div>
@@ -19,9 +18,6 @@ export default function AppSection() {
           </figure>
         </div>
         <TestHex />
-      </div>
-      <div className="lp-fullwidth-fig">
-        <DecayPatternGraphic />
       </div>
     </section>
   );

@@ -1,3 +1,5 @@
+import DecayPatternGraphic from './DecayPatternGraphic';
+
 export default function AboutSection() {
   return (
     <section className="lp-section" id="about">
@@ -10,6 +12,9 @@ export default function AboutSection() {
             in the decay, then calibrating each signal against what actually happens.
           </p>
         </div>
+      </div>
+      <div className="lp-fullwidth-fig">
+        <DecayPatternGraphic />
       </div>
     </section>
   );
