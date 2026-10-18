@@ -500,7 +500,14 @@ export default function HEX6ChatInterface() {
       >
         <div className="flex flex-col h-full p-2.5">
           <div className="flex items-center justify-between mb-3">
-            <h1 className="text-xs font-bold tracking-tight">Hex</h1>
+            <div className="flex items-center gap-2">
+              <img
+                src="https://media.base44.com/images/public/69eef3d514386627566a9bf6/700b21227_logo.png"
+                alt="HEX [PI]"
+                className="w-8 h-8"
+              />
+              <h1 className="text-2xl font-bold tracking-tight">HEX [PI]</h1>
+            </div>
             <button
               onClick={() => setSidebarOpen(false)}
               className="md:hidden p-1 hover:bg-muted rounded-sm text-sm flex items-center justify-center"
