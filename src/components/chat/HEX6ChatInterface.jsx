@@ -543,7 +543,7 @@ export default function HEX6ChatInterface() {
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Header */}
         <div className="flex items-center px-3 md:px-4 py-2 md:py-2.5 border-b border-border gap-2">
-          <div className="flex items-center shrink-0">
+          <div className="flex items-center shrink-0 gap-1">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="md:hidden p-1.5 hover:bg-muted rounded-sm flex items-center justify-center"
@@ -552,8 +552,6 @@ export default function HEX6ChatInterface() {
             >
               <Menu className="w-4 h-4" />
             </button>
-          </div>
-          <div className="flex-1 flex items-center justify-end gap-2">
             <button
               onClick={handleNewChat}
               className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted text-secondary hover:text-foreground transition-colors"
@@ -561,6 +559,13 @@ export default function HEX6ChatInterface() {
             >
               <Plus className="w-4 h-4" />
             </button>
+          </div>
+          <div className="flex-1 min-w-0 px-2">
+            <span className="text-[13px] font-medium text-foreground truncate block">
+              {conversations.find(c => c.id === currentConversationId)?.title || 'New Chat'}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
             {traderEnabled && (
               <span className="text-[9px] md:text-[10px] text-accent px-1.5 py-0.5 rounded bg-accent/10 whitespace-nowrap">
                 Trader: Coming Soon

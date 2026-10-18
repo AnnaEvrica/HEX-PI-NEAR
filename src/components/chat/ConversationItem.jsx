@@ -35,7 +35,7 @@ export default function ConversationItem({ conversation, isSelected, onSelect, o
 
   return (
     <div
-      className={`group flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-colors ${
+      className={`group flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-colors min-w-0 overflow-hidden ${
         isSelected
           ? 'bg-primary text-primary-foreground'
           : 'text-secondary hover:bg-muted'
@@ -49,7 +49,7 @@ export default function ConversationItem({ conversation, isSelected, onSelect, o
           onChange={(e) => setEditTitle(e.target.value)}
           onBlur={handleSaveRename}
           onKeyDown={handleKeyDown}
-          className="flex-1 px-2 py-0.5 text-[11px] bg-background text-foreground border border-border rounded-lg focus:outline-none focus:border-accent"
+          className="flex-1 min-w-0 w-full px-2 py-0.5 text-[11px] bg-background text-foreground border border-border rounded-lg focus:outline-none focus:border-accent"
         />
       ) : (
         <>
