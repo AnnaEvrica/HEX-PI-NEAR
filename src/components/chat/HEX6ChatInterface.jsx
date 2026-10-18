@@ -499,7 +499,7 @@ export default function HEX6ChatInterface() {
         } md:relative md:translate-x-0`}
       >
         <div className="flex flex-col h-full p-2.5">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <img
                 src="https://media.base44.com/images/public/69eef3d514386627566a9bf6/700b21227_logo.png"
@@ -508,35 +508,36 @@ export default function HEX6ChatInterface() {
               />
               <h1 className="text-2xl font-bold tracking-tight">HEX [PI]</h1>
             </div>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={handleNewChat}
-                className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted text-secondary hover:text-foreground transition-colors"
-                title="New chat"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setSidebarOpen(false)}
-                className="md:hidden p-1 hover:bg-muted rounded-sm text-sm flex items-center justify-center"
-                style={{ minWidth: '28px', minHeight: '28px' }}
-              >
-                ×
-              </button>
-            </div>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="md:hidden p-1 hover:bg-muted rounded-sm text-sm flex items-center justify-center"
+              style={{ minWidth: '28px', minHeight: '28px' }}
+            >
+              ×
+            </button>
           </div>
+          <button
+            onClick={handleNewChat}
+            className="flex items-center gap-2 w-full px-2 py-2 mb-2 rounded-lg hover:bg-muted text-secondary hover:text-foreground transition-colors"
+          >
+            <Plus className="w-4 h-4 shrink-0" />
+            <span className="text-[13px] font-medium">New chat</span>
+          </button>
 
           <div className="flex-1 overflow-y-auto mb-2.5">
             {conversations.length === 0 ? (
               <p className="text-[10px] text-secondary text-center py-3">No conversations yet.</p>
             ) : (
-              <ConversationDayList
-                conversations={conversations}
-                currentConversationId={currentConversationId}
-                onSelect={handleSelectConversation}
-                onRename={handleRenameConversation}
-                onDelete={handleDeleteConversation}
-              />
+              <>
+                <p className="px-2 mb-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-secondary/70">Recents</p>
+                <ConversationDayList
+                  conversations={conversations}
+                  currentConversationId={currentConversationId}
+                  onSelect={handleSelectConversation}
+                  onRename={handleRenameConversation}
+                  onDelete={handleDeleteConversation}
+                />
+              </>
             )}
           </div>
 
