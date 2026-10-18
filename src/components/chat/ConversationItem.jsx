@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { X, Edit2 } from 'lucide-react';
+import { X, Edit2, MessageSquare } from 'lucide-react';
 
 export default function ConversationItem({ conversation, isSelected, onSelect, onRename, onDelete }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -13,8 +13,6 @@ export default function ConversationItem({ conversation, isSelected, onSelect, o
     }
   }, [isEditing]);
 
-  // Keep the edit field in sync with the persisted title when not editing,
-  // so an external title change doesn't leave a stale value in the input.
   useEffect(() => {
     if (!isEditing) setEditTitle(conversation.title);
   }, [conversation.title, isEditing]);
@@ -35,12 +33,9 @@ export default function ConversationItem({ conversation, isSelected, onSelect, o
     }
   };
 
-  const stamp = new Date(conversation.updated_at || conversation.created_at || Date.now())
-    .toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
-
   return (
     <div
-      className={`group flex items-center gap-1 px-2 py-1.5 rounded-xl transition-colors ${
+      className={`group flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-colors ${
         isSelected
           ? 'bg-primary text-primary-foreground'
           : 'text-secondary hover:bg-muted'
@@ -54,37 +49,39 @@ export default function ConversationItem({ conversation, isSelected, onSelect, o
           onChange={(e) => setEditTitle(e.target.value)}
           onBlur={handleSaveRename}
           onKeyDown={handleKeyDown}
-          className="flex-1 px-2 py-1 text-xs bg-background text-foreground border border-border rounded-xl focus:outline-none focus:border-accent"
+          className="flex-1 px-2 py-0.5 text-[11px] bg-background text-foreground border border-border rounded-lg focus:outline-none focus:border-accent"
         />
       ) : (
         <>
+          <MessageSquare className="w-3 h-3 shrink-0 opacity-50" />
           <button
             onClick={onSelect}
-            className="flex-1 min-w-0 text-left flex flex-col"
+            className="flex-1 min-w-0 text-left"
           >
-            <span className="text-[11px] leading-tight truncate">{conversation.title}</span>
-            <span className={`text-[9px] tabular-nums ${isSelected ? 'text-primary-foreground/60' : 'text-secondary/60'}`}>{stamp}</span>
+            <span className="text-[11px] leading-tight truncate block">{conversation.title}</span>
           </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsEditing(true);
-            }}
-            className="p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-black/20 transition-opacity"
-            title="Rename conversation"
-          >
-            <Edit2 className="w-3 h-3" />
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }}
-            className="p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-black/20 transition-opacity"
-            title="Delete conversation"
-          >
-            <X className="w-3 h-3" />
-          </button>
+          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsEditing(true);
+              }}
+              className="p-1 rounded hover:bg-black/20"
+              title="Rename conversation"
+            >
+              <Edit2 className="w-3 h-3" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+              className="p-1 rounded hover:bg-black/20"
+              title="Delete conversation"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </div>
         </>
       )}
     </div>

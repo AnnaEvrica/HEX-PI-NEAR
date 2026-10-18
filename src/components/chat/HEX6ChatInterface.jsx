@@ -517,15 +517,6 @@ export default function HEX6ChatInterface() {
             </button>
           </div>
 
-          <button
-            onClick={handleNewChat}
-            className="w-full flex items-center gap-1.5 px-2 py-1.5 rounded-xl bg-primary text-primary-foreground text-[11px] font-medium hover:bg-primary/90 transition-colors mb-2.5"
-            style={{ minHeight: '30px' }}
-          >
-            <Plus className="w-3 h-3" />
-            New Chat
-          </button>
-
           <div className="flex-1 overflow-y-auto mb-2.5">
             {conversations.length === 0 ? (
               <p className="text-[10px] text-secondary text-center py-3">No conversations yet.</p>
@@ -563,6 +554,15 @@ export default function HEX6ChatInterface() {
             </button>
           </div>
           <div className="flex-1 flex items-center justify-end gap-2">
+            <button
+              onClick={handleNewChat}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-primary text-primary-foreground text-[11px] font-medium hover:bg-primary/90 transition-colors"
+              style={{ minHeight: '30px' }}
+              title="New chat"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">New Chat</span>
+            </button>
             {traderEnabled && (
               <span className="text-[9px] md:text-[10px] text-accent px-1.5 py-0.5 rounded bg-accent/10 whitespace-nowrap">
                 Trader: Coming Soon
