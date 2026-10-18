@@ -498,7 +498,7 @@ export default function HEX6ChatInterface() {
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } md:relative md:translate-x-0`}
       >
-        <div className="flex flex-col h-full p-2.5 pb-9 md:pb-10">
+        <div className="flex flex-col h-full p-2.5">
           <div className="flex items-center justify-between mb-3">
             <h1 className="text-xs font-bold tracking-tight">Hex</h1>
             <button
