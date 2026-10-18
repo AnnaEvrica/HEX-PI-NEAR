@@ -571,7 +571,11 @@ export default function HEX6ChatInterface() {
               <Menu className="w-4 h-4" />
             </button>
           </div>
-          <div className="flex-1 min-w-0 px-2" />
+          <div className="flex-1 min-w-0 px-2">
+            <span className="text-[13px] font-medium text-foreground truncate block" style={{ letterSpacing: '-0.01em' }}>
+              Probabilistic Intelligence
+            </span>
+          </div>
           <div className="flex items-center gap-2 shrink-0">
             {traderEnabled && (
               <span className="text-[9px] md:text-[10px] text-accent px-1.5 py-0.5 rounded bg-accent/10 whitespace-nowrap">
