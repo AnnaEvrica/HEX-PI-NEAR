@@ -4,7 +4,6 @@ export default function ResearchSection() {
   return (
     <section className="lp-section" id="research">
       <div className="lp-section-inner">
-        <div className="lp-section-label">05 / R&amp;D</div>
         <div className="lp-section-side">
           <div>
             <h2 className="lp-section-heading">The <em>science</em> behind the signal.</h2>

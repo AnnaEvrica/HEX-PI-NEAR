@@ -6,7 +6,6 @@ import AboutSection from '@/components/landing/AboutSection';
 import AppSection from '@/components/landing/AppSection';
 import ComparisonSection from '@/components/landing/ComparisonSection';
 import DualStructureSection from '@/components/landing/DualStructureSection';
-import DomainsSection from '@/components/landing/DomainsSection';
 import ResearchSection from '@/components/landing/ResearchSection';
 import ClosingCTA from '@/components/landing/ClosingCTA';
 import LegalFooter from '@/components/landing/LegalFooter';
@@ -35,7 +34,6 @@ export default function Landing() {
       <AppSection />
       <ComparisonSection />
       <DualStructureSection />
-      <DomainsSection />
       <ResearchSection />
       <ClosingCTA />
       <LegalFooter onOpenPolicy={setOpenPolicy} />

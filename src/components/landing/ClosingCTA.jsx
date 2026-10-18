@@ -14,7 +14,6 @@ export default function ClosingCTA() {
   return (
     <section className="lp-section" id="enter" style={{ textAlign: 'center' }}>
       <div className="lp-section-inner" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <div className="lp-section-label">03 / Enter</div>
         <h2 className="lp-section-heading" style={{ margin: '0 auto 28px', textAlign: 'center' }}>Be <em>first.</em></h2>
         <p className="lp-section-body" style={{ textAlign: 'center', margin: '0 auto 32px' }}>
           Join the beta. Experience probabilistic intelligence that knows what it knows — and what it does not.

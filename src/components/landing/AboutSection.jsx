@@ -4,7 +4,6 @@ export default function AboutSection() {
   return (
     <section className="lp-section" id="about">
       <div className="lp-section-inner">
-        <div className="lp-section-label">02 / About · Signal enhancement, expanded</div>
         <div className="lp-about-grid">
           <h2 className="lp-section-heading">Time for higher standards in <em>reasoning.</em></h2>
           <p className="lp-section-body lp-about-body">
