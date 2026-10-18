@@ -1,4 +1,5 @@
 import CalibrationGraphic from './CalibrationGraphic';
+import DecayPatternGraphic from './DecayPatternGraphic';
 import TestHex from './TestHex';
 
 export default function AppSection() {
@@ -9,8 +10,8 @@ export default function AppSection() {
           <div>
             <h2 className="lp-section-heading">Precision through <em>signals.</em></h2>
             <p className="lp-section-body">
-              Hex is an experimental probabilistic reasoning system. It quantifies uncertainty, applies explicit
-              risk constraints, and scores every call against realized outcomes — so confidence is earned, not assumed.
+              It quantifies uncertainty, applies explicit risk constraints, and scores every call against
+              realized outcomes — so confidence is earned, not assumed.
             </p>
           </div>
           <figure className="lp-section-side-fig">
@@ -18,6 +19,9 @@ export default function AppSection() {
           </figure>
         </div>
         <TestHex />
+      </div>
+      <div className="lp-fullwidth-fig">
+        <DecayPatternGraphic />
       </div>
     </section>
   );

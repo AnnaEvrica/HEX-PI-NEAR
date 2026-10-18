@@ -6,13 +6,13 @@ export default function ResearchSection() {
       <div className="lp-section-inner">
         <div className="lp-section-side">
           <div>
-            <h2 className="lp-section-heading">The <em>science</em> behind the signal.</h2>
+            <h2 className="lp-section-heading">See what's <em>coming.</em></h2>
             <p className="lp-section-body">
               PI predicts the next outcome, by reading signals the way living things do.
               The HEX6-BLE server extends this into regenerative infrastructure.
             </p>
             <a className="lp-app-link" href="https://evrica.tech" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: '24px' }}>
-              See what's coming →
+              Research &amp; Development →
             </a>
           </div>
           <figure className="lp-section-side-fig">
