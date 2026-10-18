@@ -453,8 +453,16 @@ export default function HEX6ChatInterface() {
   };
 
   const handleNewChat = () => {
+    const newConv = {
+      id: Date.now().toString(),
+      title: 'New chat',
+      messages: [welcomeMessage],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    setConversations((prev) => [newConv, ...prev]);
+    setCurrentConversationId(newConv.id);
     setMessages([welcomeMessage]);
-    setCurrentConversationId(null);
     setSidebarOpen(false);
   };
 
