@@ -565,7 +565,7 @@ export default function HEX6ChatInterface() {
           </div>
           <div className="flex-1 min-w-0 px-2">
             <span className="text-[13px] font-medium text-foreground truncate block">
-              {conversations.find(c => c.id === currentConversationId)?.title || 'New Chat'}
+              Nothing is certain. Anything is possible. Let's talk probability.
             </span>
           </div>
           <div className="flex items-center gap-2 shrink-0">
