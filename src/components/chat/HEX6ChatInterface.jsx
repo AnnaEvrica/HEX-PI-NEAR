@@ -571,9 +571,10 @@ export default function HEX6ChatInterface() {
               <Menu className="w-4 h-4" />
             </button>
           </div>
-          <div className="flex-1 min-w-0 px-2" />
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex-1 min-w-0 px-2">
             <h1 className="text-2xl font-bold tracking-tight">Probabilistic Intelligence</h1>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
             {traderEnabled && (
               <span className="text-[9px] md:text-[10px] text-accent px-1.5 py-0.5 rounded bg-accent/10 whitespace-nowrap">
                 Trader: Coming Soon
