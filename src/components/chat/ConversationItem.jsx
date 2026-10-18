@@ -35,10 +35,10 @@ export default function ConversationItem({ conversation, isSelected, onSelect, o
 
   return (
     <div
-      className={`group flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-colors min-w-0 overflow-hidden ${
+      className={`group flex items-center gap-1.5 px-2 py-1.5 rounded-lg border transition-colors min-w-0 overflow-hidden ${
         isSelected
-          ? 'bg-primary text-primary-foreground'
-          : 'text-secondary hover:bg-muted'
+          ? 'border-foreground/30 text-foreground'
+          : 'border-transparent text-secondary hover:bg-muted hover:border-border'
       }`}
     >
       {isEditing ? (

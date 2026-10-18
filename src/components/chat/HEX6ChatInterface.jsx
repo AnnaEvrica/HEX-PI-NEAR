@@ -526,7 +526,7 @@ export default function HEX6ChatInterface() {
           </div>
           <button
             onClick={handleNewChat}
-            className="flex items-center gap-2 w-full px-2 py-2 mb-2 rounded-lg hover:bg-muted text-secondary hover:text-foreground transition-colors"
+            className="flex items-center gap-2 w-full px-2 py-2 mb-2 rounded-lg border border-border hover:bg-muted text-secondary hover:text-foreground transition-colors"
           >
             <Plus className="w-4 h-4 shrink-0" />
             <span className="text-[13px] font-medium">New chat</span>
@@ -604,7 +604,7 @@ export default function HEX6ChatInterface() {
             src="https://media.base44.com/images/public/69eef3d514386627566a9bf6/a5e96338b_ChatGPTImageSep302026at09_23_15AM.png"
             alt=""
             aria-hidden="true"
-            className="pointer-events-none absolute bottom-0 right-0 w-[26vw] max-w-[200px] opacity-10 select-none"
+            className="pointer-events-none absolute bottom-0 right-0 w-[60vw] max-w-[1200px] opacity-10 select-none"
             style={{ mixBlendMode: 'multiply' }}
           />
           <div className="relative z-10">
