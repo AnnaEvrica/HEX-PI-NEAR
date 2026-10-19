@@ -16,6 +16,7 @@ import { prepare } from './cer/graph.ts';
 import { countUpTo } from './cer/align.ts';
 import { CER_VERSION } from './cer/types.ts';
 import type { Channel } from './cer/types.ts';
+import { deployment } from './deployment.ts';
 import { momentOf, experience, nightly, canonical, sha256hex, referenceTier, tier, REFERENCE, DISPERSION_WINDOW, TIERS, SIGNATURE_VERSION, DISTANCE_VERSION, BANDWIDTH_VERSION, METRIC_VERSION } from './experience.ts';
 import type { Experience, Remembered, Signature } from './experience.ts';
 
@@ -95,7 +96,7 @@ export async function integrateExperience(base44: any, series: NightSeries[], ct
     const seq = prev ? (prev.seq ?? latest.length) + 1 : 1, history = await loadHistory(M, target.id, latest), E = experience(sig, history), signature_hash = await sha256hex(canonical(sig));
     await M.create(put({
       moment_id, run_id, series_id: target.id, as_of: iso(upto), as_of_day: upto, seq, tier: tier(seq), bar_time: last[target.id], step: sig.step, samples: sig.samples,
-      environment: ENVIRONMENT, provenance: PROVENANCE, channels: sig.channels.join(','), signature: JSON.stringify(sig), signature_hash,
+      environment: ENVIRONMENT, deployment: deployment(), provenance: PROVENANCE, channels: sig.channels.join(','), signature: JSON.stringify(sig), signature_hash,
       intrinsic_tail: got.novelty.intrinsic_tail, joint_tail: got.novelty.joint_tail, relational_surprisal: got.novelty.relational_surprisal,
       individuality: E.individuality, nearest_prior: E.nearest_prior, reference_count: E.reference_count, reference_full: E.reference_full, incomparable: E.incomparable,
       affinity_nearest: E.affinity_nearest, affinity_median: E.affinity_median, affinity_q25: E.affinity_quartiles?.[0], affinity_q75: E.affinity_quartiles?.[1],
@@ -120,7 +121,7 @@ export async function integrateExperience(base44: any, series: NightSeries[], ct
   const sum = nightly(rows, recent), st = ctx.status ?? {};
   const pick = (keys: string[]) => Object.fromEntries(Object.entries(st).map(([read, s]) => [read, Object.fromEntries(keys.map((k) => [k, (s as any)?.[k] ?? null]))]));
   await N.create(put({
-    run_id, date, timezone: 'UTC', engine_version: ctx.engine_version, cer_version: CER_VERSION, moment_count: sum.moment_count,
+    run_id, date, timezone: 'UTC', deployment: deployment(), engine_version: ctx.engine_version, cer_version: CER_VERSION, moment_count: sum.moment_count,
     hex_precision: JSON.stringify(pick(['bits_candidate', 'bits_candidate_low', 'bits_candidate_high', 'bits_control', 'gain', 'gain_low', 'gain_high', 'hit_candidate', 'hit_control', 'hit_baseline', 'paired_calls', 'paired_days'])),
     individuality: JSON.stringify(sum.individuality), transitions: JSON.stringify(sum.transitions), dispersion: JSON.stringify(sum.dispersion), affinities: JSON.stringify(sum.affinities), continuity: JSON.stringify(sum.continuity),
     experience_reference: JSON.stringify({ moments: hashes, previous_run: before?.run_id ?? null, chain }),

@@ -15,6 +15,7 @@
     "samples": { "type": "number", "description": "Observations in the window" },
     "environment": { "type": "string", "description": "Where the channels come from" },
     "provenance": { "type": "string", "description": "Source of the observations" },
+    "deployment": { "type": "string", "enum": ["production", "test"], "description": "Which app wrote the row: production (hex6-ble.com) or the test app" },
     "channels": { "type": "string", "description": "Neighbours that could be measured, comma separated" },
     "signature": { "type": "string", "description": "JSON. Sigma = (X, G, Phi, U): state, harmony, leadership, persistence, rhythm, and the precision of each. No novelty inside" },
     "signature_hash": { "type": "string", "description": "SHA-256 of the signature" },

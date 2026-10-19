@@ -9,10 +9,13 @@ is to test whether anything in that moment says something about a series'
 next step that the series' own record, and HEX, do not already say.
 Prediction never decides whether a relation is perceived.
 
-CER is in shadow. It is not imported by `observer.ts`, `hex7.ts`, `cycle.ts`,
-`ledger.ts`, `isotonic.ts` or any function, it writes to no production
-entity, and no call shown to a user depends on it. What it has measured so far
-is in `validation/cer_results.md`.
+CER's forecasting is in shadow. It is not imported by `observer.ts`,
+`hex7.ts`, `cycle.ts`, `ledger.ts` or `isotonic.ts`, and no call shown to a
+user depends on it. Its perception is in production: since 9 October the
+nightly calibration's fifth stage (`memory.ts`) uses `graph.ts: moment` to
+perceive each tracked series' moment and writes it to the Memory Library
+(`docs/LEARNING.md`). Perception predicts nothing. What CER has measured so
+far is in `validation/cer_results.md`.
 
 Every step below is given twice, as in `MODEL.md`: in plain words, then
 exactly, with the file and function that computes it.

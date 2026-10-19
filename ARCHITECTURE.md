@@ -397,10 +397,15 @@ data seen so far, so two runs can be compared row by row.
 
 ## 11. Version control and release
 
-- **One branch is live.** `main` is synced to Base44. A push to `main`
-  appears in the Base44 Builder; the live app changes only when **Publish**
-  is pressed there. Experiments are developed on a branch and merged when
-  their results are written.
+- **One branch is live.** `main` is synced to Base44 and is what users run
+  at hex6-ble.com; the live app changes only when **Publish** is pressed
+  there. The team's test app ("hex-pi copy") is a second Base44 app with the
+  secret `HEX_ENV=test`: it posts nothing in public and tags every row it
+  writes `deployment: test` (`docs/OPERATIONS.md` section 5). A change goes
+  `main` → test app → production. Experiments are developed on a branch and
+  merged when their results are written. The `prod` and `staging` branches
+  are not deployed by either app; `prod` was moved up to `main` on
+  19 October 2026 so that its name no longer points at older code.
 - **One version string**: `base44/shared/version.ts`. The ledger records
   which engine made each call (`state-6.5`, `hex-7.0`). CER records its own
   version (`cer-0.4.1`) on every edge and every ledger row. Every moment in

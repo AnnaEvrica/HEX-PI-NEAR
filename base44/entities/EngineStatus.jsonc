@@ -157,6 +157,14 @@
     "engine_version": {
       "type": "string",
       "description": "Release that wrote this row"
+    },
+    "deployment": {
+      "type": "string",
+      "enum": [
+        "production",
+        "test"
+      ],
+      "description": "Which app wrote the row: production (hex6-ble.com) or the test app"
     }
   },
   "required": [

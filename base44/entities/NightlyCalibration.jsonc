@@ -6,6 +6,7 @@
     "run_id": { "type": "string", "description": "Unique per night. A second run on the same date writes nothing" },
     "date": { "type": "string", "description": "Calibration date, YYYY-MM-DD" },
     "timezone": { "type": "string", "description": "Timezone of the date" },
+    "deployment": { "type": "string", "enum": ["production", "test"], "description": "Which app wrote the row: production (hex6-ble.com) or the test app" },
     "engine_version": { "type": "string", "description": "HEX version" },
     "cer_version": { "type": "string", "description": "CER version that perceived the moments" },
     "moment_count": { "type": "number", "description": "Moments recorded tonight" },

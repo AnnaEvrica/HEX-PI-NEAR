@@ -1,5 +1,26 @@
 # Changelog
 
+## 19 October 2026: production and the test app told apart (live on the next Publish)
+
+- **Which app is which, recorded.** On 19 October the export of hex6-ble.com
+  matched `main` file for file; the test app ("hex-pi copy") matched the
+  6 October `prod` branch, 94 commits behind production.
+- **`base44/shared/deployment.ts`.** The secret `HEX_ENV=test` marks the test
+  app; unset means production, so hex6-ble.com behaves exactly as before.
+  A test app sends no Discord post (`discord.ts`, `spineAlert`) and does not
+  search or reply on X (`xEngagement`).
+- **Every row says where it was written.** `CallLedger`, `EngineStatus`,
+  `MomentMemory` and `NightlyCalibration` gain a `deployment` field
+  (`production` or `test`).
+- **Tests.** `tests/deployment.mjs`: production by default, no posts in test,
+  rows tagged, calls identical in both. All other tests unchanged and passing;
+  `docs/PROMPT.md` regenerated, so the backend smoke test passes in full.
+- **Documents.** `ARCHITECTURE.md` section 11 and `docs/OPERATIONS.md`
+  section 5 describe the two apps; `docs/CER.md` says that CER's perception
+  now runs nightly in production (its forecasting is still shadow only).
+- Not changed: any probability, call, score, the version rule, the verified
+  flag, the strength map, the Learning Module's measurements or CER.
+
 ## 9 October 2026: the clock, inside HEX 7.0 (live on the next Publish)
 
 - **Time enters the existing engine as coordinates.** Where a series

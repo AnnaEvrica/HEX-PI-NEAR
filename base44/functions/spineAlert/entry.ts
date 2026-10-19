@@ -5,12 +5,14 @@
 // not with verdict volume.
 
 import { secrets } from 'base44:runtime';
+import { postsAllowed } from '../../shared/deployment.ts';
 
 export default async function(req) {
   try {
     const body = await req.json();
     const { data } = body;
     if (!data || data.disagreement_flag !== true) return Response.json({ skipped: true });
+    if (!postsAllowed()) return Response.json({ skipped: true, reason: 'test deployment: nothing is posted' });
 
     const webhook = secrets.get('DISCORD_SIGNALS_WEBHOOK_URL');
     if (!webhook) return Response.json({ skipped: true, reason: 'no signals webhook' });

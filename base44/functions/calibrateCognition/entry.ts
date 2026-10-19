@@ -33,6 +33,7 @@ import { loadLive, logCalls, rowsFor, scoreOpenCalls, foldDays, decide, pooledCa
 import { UNIVERSE, MAX_EXTRA_SERIES, HISTORY_DAYS } from '../../shared/universe.ts';
 import { ENGINE_VERSION } from '../../shared/version.ts';
 import { integrateExperience } from '../../shared/memory.ts';
+import { deployment } from '../../shared/deployment.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -96,6 +97,7 @@ Deno.serve(async (req) => {
         calibration_steps: map ? map.n : (prev?.calibration_steps ?? 0),
         promoted_at: st.decision === 'promote' ? new Date().toISOString() : (st.live_engine === CANDIDATE_ENGINE ? prev?.promoted_at ?? null : null),
         engine_version: ENGINE_VERSION,
+        deployment: deployment(),
       };
       if (prev?.id) await S.update(prev.id, row).catch(() => {});
       else await S.create(row).catch(() => {});
@@ -109,7 +111,7 @@ Deno.serve(async (req) => {
     try { experiential = await integrateExperience(base44, fetched, { engine_version: ENGINE_VERSION, status, failed }); }
     catch (error) { console.error('experiential integration error:', error); experiential = { ok: false, error: String(error?.message ?? error) }; }
 
-    return Response.json({ ok: true, engine_version: ENGINE_VERSION, series: tickers.length, failed, newly_scored: scored, newly_logged: logged, status, elapsed_ms: calibrated_ms, per_series_ms: timings, experiential });
+    return Response.json({ ok: true, engine_version: ENGINE_VERSION, deployment: deployment(), series: tickers.length, failed, newly_scored: scored, newly_logged: logged, status, elapsed_ms: calibrated_ms, per_series_ms: timings, experiential });
   } catch (error) {
     console.error('calibrateCognition error:', error);
     return Response.json({ error: error.message }, { status: 500 });

@@ -13,6 +13,7 @@ import { fetchYahooReturns } from '../../shared/marketDataClient.ts';
 import { CLAUDE_MODEL } from '../../shared/modelRouter.ts';
 import { IDENTITY_LINE, CONFIDENTIALITY_LINE } from '../../shared/persona.ts';
 import { postDiscord } from '../../shared/discord.ts';
+import { postsAllowed } from '../../shared/deployment.ts';
 import { loadLive } from '../../shared/ledger.ts';
 import { DEFAULT_LIVE } from '../../shared/engines.ts';
 import { HISTORY_DAYS } from '../../shared/universe.ts';
@@ -150,6 +151,8 @@ Deno.serve(async (req) => {
   const log = (m, x = undefined) => console.log(`[xEngagement ${started.toISOString()}] ${m}`, x ?? '');
 
   try {
+    // A test deployment never searches or replies on X.
+    if (!postsAllowed()) return Response.json({ skipped: true, reason: 'test deployment: nothing is posted' });
     // Secrets guard
     const missing = ['X_BEARER_TOKEN', 'X_API_KEY', 'X_API_SECRET', 'X_ACCESS_TOKEN', 'X_ACCESS_TOKEN_SECRET', 'DISCORD_WEBHOOK_URL']
       .filter((s) => !Deno.env.get(s));

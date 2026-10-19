@@ -82,6 +82,14 @@
       "type": "string",
       "description": "Release that made the call"
     },
+    "deployment": {
+      "type": "string",
+      "enum": [
+        "production",
+        "test"
+      ],
+      "description": "Which app wrote the row: production (hex6-ble.com) or the test app"
+    },
     "scored": {
       "type": "boolean",
       "default": false,

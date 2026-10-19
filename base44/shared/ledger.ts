@@ -33,6 +33,7 @@ import { strengthKnots, Knots } from './isotonic.ts';
 import { scoreCall, addDay, clusteredMean, logScore, Clustered, EMPTY_CLUSTERED, EMPTY_RECORD, Record_, Views } from './cycle.ts';
 import type { ScoredStep } from './hex7.ts';
 import { ENGINE_VERSION } from './version.ts';
+import { deployment } from './deployment.ts';
 
 // ---- the promotion rule, fixed in advance ---------------------------------
 /** Calls scored for both engines on the same series and day, needed before any decision. */
@@ -69,6 +70,8 @@ export interface LedgerRow {
   /** 7.0 only: what it had learned on this series when it made the call (JSON: coefficients and each expert's influence). */
   learned?: string;
   made_at: string; engine_version: string;
+  /** Which app wrote the row: production (hex6-ble.com) or test. */
+  deployment?: string;
   scored?: boolean; outcome?: number; scored_at?: string;
   closeness?: number; closeness_baseline?: number;
   /** Progress against the version's record on this series, when positive; otherwise 0. Never negative. */
@@ -108,7 +111,7 @@ export function rowsFor(seriesId: string, bars: Bars, returns: number[], run: En
     rows.push({
       series_id: seriesId, read, engine, call_date: dateOf(bar_ts), bar_ts, last_close: bars.closes[n - 1],
       threshold: read === 'RANGE' ? threshold : null,
-      baseline: c.baseline, probability: c.p, shown: run.live[read] === engine, source, made_at, engine_version: ENGINE_VERSION,
+      baseline: c.baseline, probability: c.p, shown: run.live[read] === engine, source, made_at, engine_version: ENGINE_VERSION, deployment: deployment(),
       raw: c.views.raw, views: JSON.stringify(compactViews(c.views)),
       ...(engine === CANDIDATE_ENGINE ? { learned: JSON.stringify({ beta: run.learned[read].beta.map(r5), influence: run.learned[read].influence.map(r5) }) } : {}),
     });

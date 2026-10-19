@@ -125,6 +125,19 @@ Two limits to know:
 
 ## 5. Before pressing Publish on Base44
 
+Two Base44 apps run this code:
+
+| App | Role | Syncs | `HEX_ENV` secret |
+|---|---|---|---|
+| hex6-ble.com (hex6-ble-9) | production, what users see | `main` | unset, or `production` |
+| hex-pi copy | where the team tests | `main`, plus the change under test | `test` |
+
+A change goes `main` → test app → production. With `HEX_ENV=test` the test
+app posts nothing to Discord or X, and every `CallLedger`, `EngineStatus`,
+`MomentMemory` and `NightlyCalibration` row it writes says `deployment: test`
+(`base44/shared/deployment.ts`, `tests/deployment.mjs`). Nothing else differs:
+the calls are the same in both apps.
+
 0. For the Learning Module's stage 5: the two new
    entities `MomentMemory` and `NightlyCalibration` exist with the fields in
    `base44/entities/`. Nothing needs migrating; the library starts empty and
