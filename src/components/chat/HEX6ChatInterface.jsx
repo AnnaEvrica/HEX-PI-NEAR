@@ -499,7 +499,7 @@ export default function HEX6ChatInterface() {
   }, []);
 
   return (
-    <div className="app-shell flex h-screen bg-background overflow-hidden">
+    <div className="app-shell dark flex h-screen bg-background overflow-hidden">
       {/* Sidebar - hidden on mobile */}
       <div
         className={`fixed inset-y-0 left-0 z-40 w-60 bg-card border-r border-border transition-transform duration-300 ${
@@ -597,14 +597,6 @@ export default function HEX6ChatInterface() {
             backgroundSize: '120px 120px, 120px 120px, 24px 24px, 24px 24px',
           }}
         >
-          {/* Raven watermark */}
-          <img
-            src="https://media.base44.com/images/public/69eef3d514386627566a9bf6/a5e96338b_ChatGPTImageSep302026at09_23_15AM.png"
-            alt=""
-            aria-hidden="true"
-            className="pointer-events-none absolute bottom-0 right-0 w-[60vw] max-w-[1200px] opacity-10 select-none"
-            style={{ mixBlendMode: 'multiply' }}
-          />
           <div className="relative z-10">
             {messages.map((message) => (
               <ChatMessage
