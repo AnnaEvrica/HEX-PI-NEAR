@@ -6,6 +6,7 @@ import AboutSection from '@/components/landing/AboutSection';
 import AppSection from '@/components/landing/AppSection';
 import ComparisonSection from '@/components/landing/ComparisonSection';
 import DualStructureSection from '@/components/landing/DualStructureSection';
+import AskHexSection from '@/components/landing/AskHexSection';
 import ResearchSection from '@/components/landing/ResearchSection';
 import ClosingCTA from '@/components/landing/ClosingCTA';
 import LegalFooter from '@/components/landing/LegalFooter';
@@ -30,6 +31,7 @@ export default function Landing() {
     <div className="landing-page">
       <LandingNav onOpenPolicy={setOpenPolicy} />
       <NewHero />
+      <AskHexSection />
       <AboutSection />
       <AppSection />
       <ComparisonSection />

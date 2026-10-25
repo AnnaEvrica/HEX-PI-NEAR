@@ -17,7 +17,6 @@ export default function AppSection() {
             <CalibrationGraphic />
           </figure>
         </div>
-        <TestHex />
       </div>
     </section>
   );
