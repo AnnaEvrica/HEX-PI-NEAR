@@ -74,10 +74,7 @@ export default function TestHex() {
     <div className="lp-test-hex">
       <div className="lp-test-hex-header">
         <div className="lp-section-label">Test Hex</div>
-        <h3 className="lp-test-hex-title">Ask a question. Get a real answer.</h3>
-        <p className="lp-test-hex-sub">
-          Hex pulls live data from the web, weighs the evidence, and answers with sources you can verify.
-        </p>
+        <h3 className="lp-test-hex-title">Ask a question. See the Difference.</h3>
       </div>
 
       {/* Category books — stacked horizontally, animated */}

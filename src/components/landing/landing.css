@@ -453,7 +453,7 @@
   padding: 16px 20px; color: var(--lp-text); font-size: 0.9rem; font-family: var(--lp-font);
   letter-spacing: -0.01em; min-width: 0;
 }
-.lp-ask-input::placeholder { color: var(--lp-muted); }
+.lp-ask-input::placeholder { color: var(--lp-text); opacity: 1; font-weight: 500; }
 .lp-ask-input:disabled { opacity: 0.5; }
 .lp-ask-btn {
   background: var(--lp-text); color: var(--lp-black); border: none; cursor: pointer;
