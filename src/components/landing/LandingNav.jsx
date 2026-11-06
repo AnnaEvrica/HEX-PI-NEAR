@@ -25,6 +25,7 @@ export default function LandingNav({ onOpenPolicy }) {
           <a href="#app" onClick={(e) => { e.preventDefault(); scrollTo('app'); }}>The App</a>
           <a href="#science" onClick={(e) => { e.preventDefault(); scrollTo('science'); }}>The Science</a>
           <a href="#research" onClick={(e) => { e.preventDefault(); scrollTo('research'); }}>R&amp;D</a>
+          <a href="#public-intelligence" onClick={(e) => { e.preventDefault(); scrollTo('public-intelligence'); }}>Public Intelligence</a>
           <a href="#enter" onClick={(e) => { e.preventDefault(); scrollTo('enter'); }}>Enter Hex</a>
           <button className="lp-footer-link" onClick={() => { setMenuOpen(false); onOpenPolicy?.('privacy'); }}>Privacy Policy</button>
         </div>
