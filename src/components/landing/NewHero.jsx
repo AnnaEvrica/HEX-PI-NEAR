@@ -15,6 +15,8 @@ export default function NewHero() {
   return (
     <section className="lp-hero" id="top">
       <h1 className="lp-hero-heading">Probabilistic Intelligence</h1>
+      <p className="lp-public-hero-subtitle">Make a prediction. Measure the outcome. Learn from reality.</p>
+      <a className="lp-public-hero-link" href="#public-intelligence">Explore HEX EARTH · Public Intelligence ↗</a>
       <hr className="lp-hero-rule" />
       <a href={authUrl} target="_top" onClick={handleEnter} className="lp-hero-enter-btn">ENTER <strong>HEX [PI]</strong></a>
       <RavenArt variant="hero" className="lp-hero-image" />
