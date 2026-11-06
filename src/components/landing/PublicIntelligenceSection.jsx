@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
+import ContactModal from './ContactModal';
+import './public-intelligence.css';
 
 const pilots = [
   { number: '01', title: 'Air quality', description: 'Investigate the probability of AQI threshold exceedances and changing particulate conditions using public observations and forecast data.', question: 'Will AQI exceed a defined threshold in the next 48 hours?' },
@@ -15,6 +17,7 @@ const steps = [
 ];
 
 export default function PublicIntelligenceSection() {
+  const [contactOpen, setContactOpen] = useState(false);
   return (
     <section className="lp-public-section" id="public-intelligence" aria-labelledby="public-intelligence-heading">
       <div className="lp-public-inner">
@@ -53,10 +56,11 @@ export default function PublicIntelligenceSection() {
             <p>We are interested in conversations with nonprofit teams, citizen scientists, watershed groups, climate-resilience programs and public-interest researchers. A small, well-defined pilot with real feedback is the starting point.</p>
             <p className="lp-public-note">Exploratory, pro bono collaboration. No partnership with public agencies or named organizations is implied.</p>
           </div>
-          <a href="mailto:hello@hex6-ble.com?subject=HEX%20PI%20Public%20Intelligence%20Pilot" className="lp-public-contact">Propose a pilot ↗</a>
+          <button type="button" onClick={() => setContactOpen(true)} className="lp-public-contact">Propose a pilot ↗</button>
         </div>
         <p className="lp-public-disclaimer">Experimental research only. HEX EARTH does not issue official forecasts, emergency warnings, public-health advice or safety-critical instructions. Follow NOAA, NWS, EPA and relevant local authorities for official guidance.</p>
       </div>
+    {contactOpen && <ContactModal onClose={() => setContactOpen(false)} />}
     </section>
   );
 }
