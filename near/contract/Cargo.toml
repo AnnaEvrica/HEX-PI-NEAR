@@ -1,0 +1,25 @@
+[package]
+name = "hex-pi-ledger"
+version = "0.1.0"
+edition = "2021"
+description = "HEX [PI] call ledger on NEAR: commit each call as a hash before its outcome, reveal it after."
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+near-sdk = "5.30"
+
+[dev-dependencies]
+near-sdk = { version = "5.30", features = ["unit-testing"] }
+sha2 = "0.10"
+hex = "0.4"
+
+[profile.release]
+codegen-units = 1
+opt-level = "z"
+lto = true
+debug = false
+panic = "abort"
+overflow-checks = true
