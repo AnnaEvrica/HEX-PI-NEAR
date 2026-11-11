@@ -8,7 +8,7 @@ import Landing from '@/pages/Landing.jsx';
 import Discover from '@/pages/Discover.jsx';
 import OAuthConsent from '@/pages/OAuthConsent.jsx';
 import ConsentFlow from '@/components/onboarding/ConsentFlow';
-import SubscriptionGate from '@/components/SubscriptionGate';
+// SubscriptionGate is not used in the hackathon build (see AuthenticatedApp below).
 import HEX6ChatInterface from '@/components/chat/HEX6ChatInterface';
 import { useState, useEffect } from 'react';
 
@@ -31,11 +31,11 @@ const AppExperience = () => {
   if (!user) {
     return <Navigate to="/" replace />;
   }
+  // Hackathon build: no subscription gate, so judges and testers go straight in
+  // after sign-in. The production app (hex6-ble.com) keeps its gate.
   return consentDone ? (
-    <SubscriptionGate user={user}>
-      <HEX6ChatInterface />
-    </SubscriptionGate>
-  ) : <ConsentFlow onComplete={() => { try { localStorage.setItem('hex6_consent_user', user.email); } catch { /* storage unavailable */ } setConsentCompleted(true); }} />;
+    <HEX6ChatInterface />
+  ) :<ConsentFlow onComplete={() => { try { localStorage.setItem('hex6_consent_user', user.email); } catch { /* storage unavailable */ } setConsentCompleted(true); }} />;
 };
 
 // Logged-in visitors skip the landing page entirely — straight into the app.
