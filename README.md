@@ -1,5 +1,48 @@
 # HEX [PI]
 
+## NEAR HACKATHON submission
+
+**Tracks:** Open Innovation (`open`), Agent Economy (`agents`), AI Security & Defense (`security`).
+
+HEX [PI] is not related to HEX, the cross-chain swap product listed among the
+hackathon partners. They are separate projects with similar names.
+
+**The problem.** Anyone can claim their predictions are accurate, but there is
+no way to check. Track records can be edited or cherry-picked after the
+outcome is known.
+
+**What we built.** HEX [PI] already writes every call to its own ledger before
+the outcome exists. For the hackathon, that ledger is anchored on NEAR: each
+call is committed to a NEAR contract as a hash before its outcome, revealed
+after, and checked against the hash. The track record becomes public and
+cannot be altered, so people and agents can verify it before they trust or
+pay for a call.
+
+**How NEAR fits in.** The contract is the independent witness. HEX [PI] cannot
+rewrite a call once it is on chain, and anyone can read the record without
+asking Evrica.
+
+**Status.** In progress. The commit-reveal contract, the ledger bridge and the
+"try it" steps below are being added on this branch during the hackathon
+window. This section will be updated before submission so that every step
+listed here works as written.
+
+### Try it
+
+*(Added when the contract is deployed to testnet: do X, see Y steps.)*
+
+### What existed before the hackathon
+
+The engine, its ledger, the nightly learning loop and all measurements below
+were built before the hackathon and are disclosed as baseline. The branch
+[`pre-hackathon`](../../tree/pre-hackathon) points at the last commit before
+the NEAR HACKATHON announcement on 2026-10-19. Only the NEAR integration is
+hackathon work: [diff from the baseline](../../compare/pre-hackathon...main).
+
+Libraries used are listed in `package.json`. License: MIT, see [`LICENSE`](LICENSE).
+
+---
+
 HEX [PI] is the software. HEX6-BLE is the engine it runs on. Engine version 7.0.
 
 HEX watches one series of numbers at a time (a price, a temperature, a
@@ -189,5 +232,5 @@ Local development: create `.env.local` with `VITE_BASE44_APP_ID` and
 
 ---
 
-Anna Maria Sarkisyan · Evrica Technologies Inc. · anna@evrica.tech
+Anna Sarkisyan, Evrica Technologies Inc. · anna@evrica.tech
 © 2026 Evrica Technologies Inc.
